@@ -1,0 +1,124 @@
+name: Continuous Integration
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+env:
+  APP_NAME: assistant-declaration
+  NODE_OPTIONS: --max_old_space_size=4096
+  NODE_VERSION: 20.15.0
+  JEST_CACHE_FOLDER_SUFFIX: .cache/jest
+  PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX: .cache/ms-playwright
+concurrency:
+  # Prevent parallel builds of the same branch
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  requirements:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set environment for branch
+        run: |
+          if [[ $GITHUB_REF_NAME == 'main' ]]; then
+              echo "APP_MODE=prod" >> $GITHUB_ENV
+          elif [[ $GITHUB_REF_NAME == 'dev' ]]; then
+              echo "APP_MODE=dev" >> $GITHUB_ENV
+          else
+              echo "APP_MODE=test" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Export npm store directory as an environment variable
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(npm config get cache)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup npm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-npm-store-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-store-
+
+      - uses: actions/cache@v3
+        name: Setup Next.js build cache
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Install dependencies
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
+        run: npm install
+
+      - name: Prepare linting
+        run: npm run lint:prepare
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Prepare tests
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
+        run: npm run test:prepare
+
+      - name: Install `docker-compose` for local CI/CD simulations (https://github.com/nektos/act/issues/112#issuecomment-1387307297)
+        if: ${{ env.ACT }}
+        uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          version: '2.14.2'
+      - name: Install `Xvfb` and others to run browsers for end-to-end testing in local CI/CD simulations (https://github.com/nektos/act/issues/1300#issuecomment-1387344639)
+        if: ${{ env.ACT }}
+        run: sudo apt-get update && sudo apt-get install -y xvfb && npm run playwright install-deps chromium
+
+      - name: Get number of CPU cores for the following test step
+        uses: SimenB/github-actions-cpu-cores@v2
+        id: cpu-cores
+
+      - name: Test unit
+        env:
+          JEST_CACHE_PATH: ${{ env.STORE_PATH }}/${{ env.JEST_CACHE_FOLDER_SUFFIX }}
+        run: npm run test:unit --- --max-workers ${{ steps.cpu-cores.outputs.count }}
+
+      - name: Build
+        env:
+          SENTRY_URL: ${{ secrets.SENTRY_URL }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_RELEASE_UPLOAD: true
+        run: npm run build
+
+      - name: Test end-to-end
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
+          JEST_MAX_WORKERS: ${{ steps.cpu-cores.outputs.count }}
+        run: npm run test:e2e:headless
+
+      - name: Publish to Chromatic
+        if: ${{ !github.event.act }}
+        env:
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+        run: npm run chromatic
+
+      # Since using Scalingo as runtime provider, from here GitHub will trigger a webhook to Scalingo
+      # so the latter will perform a quick local build to deploy the application on the right environment
+      # It's a bit of duplication but Scalingo does not allow bypassing their logic

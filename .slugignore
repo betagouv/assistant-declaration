@@ -1,0 +1,4 @@
+/.cache/
+/.next/
+/node_modules/
+/storybook-static/

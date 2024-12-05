@@ -1,0 +1,45 @@
+{
+  "editor.formatOnSave": true,
+  "eslint.packageManager": "npm",
+  "faker.locale": "fr",
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "i18n-ally.displayLanguage": "fr",
+  "i18n-ally.localesPaths": ["src/i18n"],
+  "i18n-ally.sourceLanguage": "fr",
+  "jest.jestCommandLine": "npm run test:unit --",
+  "jest.autoRun": {
+    "watch": true,
+    "onStartup": []
+  },
+  "prettier.requireConfig": true,
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

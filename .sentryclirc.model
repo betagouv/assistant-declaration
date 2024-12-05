@@ -1,0 +1,10 @@
+[api]
+url=https://de.sentry.io/
+
+[defaults]
+org=
+project=
+
+[auth]
+dsn=
+token=
