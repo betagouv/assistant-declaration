@@ -62,9 +62,8 @@ model UserSecrets {
   userId       String @unique @db.Uuid
   passwordHash String
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -78,10 +77,8 @@ model User {
   profilePicture String?
   lastActivityAt DateTime?  @default(now())
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  deletedAt DateTime?
-  // TODO: https://www.prisma.io/docs/concepts/components/prisma-client/middleware/soft-delete-middleware
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   Secrets          UserSecrets?
   Account          Account?
@@ -96,9 +93,8 @@ model Admin {
   userId        String  @unique @db.Uuid
   canEverything Boolean @default(true)
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -107,9 +103,8 @@ model LiveChatSettings {
   userId       String @id @db.Uuid
   sessionToken String @unique @db.Uuid
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   user User @relation(fields: [userId], references: [id])
 }
@@ -117,7 +112,7 @@ model LiveChatSettings {
 model Organization {
   id         String @id @default(uuid()) @db.Uuid
   name       String
-  officialId String
+  officialId String @unique
 
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @default(now()) @updatedAt
@@ -158,6 +153,8 @@ model Collaborator {
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
 }
 
 model EventSerie {
@@ -221,6 +218,8 @@ model EventCategoryTickets {
 
   event    Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
   category TicketCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, categoryId])
 }
 
 enum EventSerieDeclarationType {
@@ -246,7 +245,7 @@ model EventSerieDeclaration {
 
 model EventSerieSacemDeclaration {
   id                      String @id @default(uuid()) @db.Uuid
-  eventSerieDeclarationId String @db.Uuid
+  eventSerieDeclarationId String @unique @db.Uuid
 
   // Fields from the SACEM form
   clientId      String
