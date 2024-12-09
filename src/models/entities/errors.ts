@@ -55,3 +55,43 @@ export const unexpectedCliMaintenanceCommandError = new BusinessError(
   'unexpectedCliMaintenanceCommand',
   'unexpected command passed for maintenance through cli'
 );
+export const passwordRequiresANumericError = new BusinessError(
+  'passwordRequiresANumeric',
+  t('errors.validation.newPassword.passwordRequiresANumeric')
+);
+export const passwordRequiresHeightCharactersError = new BusinessError(
+  'passwordRequiresHeightCharacters',
+  t('errors.validation.newPassword.passwordRequiresHeightCharacters')
+);
+export const passwordRequiresLowerAndUpperCharactersError = new BusinessError(
+  'passwordRequiresLowerAndUpperCharacters',
+  t('errors.validation.newPassword.passwordRequiresLowerAndUpperCharacters')
+);
+export const passwordRequiresASpecialCharactersError = new BusinessError(
+  'passwordRequiresASpecialCharacters',
+  t('errors.validation.newPassword.passwordRequiresASpecialCharacters')
+);
+
+// Authentication
+export const authCredentialsRequiredError = new BusinessError('authCredentialsRequired', t('errors.custom.authCredentialsRequired'));
+export const authNoCredentialsMatchError = new BusinessError('authNoCredentialsMatch', t('errors.custom.authNoCredentialsMatch'));
+export const authRetriableError = new BusinessError('authRetriable', t('errors.custom.authRetriable'));
+export const authFatalError = new BusinessError('authFatal', t('errors.custom.authFatal'));
+export const unauthorizedError = new BusinessError('unauthorizedError', t('errors.custom.unauthorizedError'));
+
+// Sign up
+export const accountAlreadyWithThisEmailError = new BusinessError('accountAlreadyWithThisEmail', t('errors.custom.accountAlreadyWithThisEmail'));
+
+// Request new password
+export const noAccountWithThisEmailError = new BusinessError('noAccountWithThisEmail', t('errors.custom.noAccountWithThisEmail'));
+
+// Reset password
+export const invalidVerificationTokenError = new BusinessError('invalidVerificationToken', t('errors.custom.invalidVerificationToken'));
+export const expiredVerificationTokenError = new BusinessError('expiredVerificationToken', t('errors.custom.expiredVerificationToken'));
+
+// Change password
+export const invalidCurrentPasswordError = new BusinessError('invalidCurrentPassword', t('errors.custom.invalidCurrentPassword'));
+
+// User
+export const userNotFoundError = new BusinessError('userNotFound', t('errors.custom.userNotFound'));
+export const cannotDeleteUserStillAgentError = new BusinessError('cannotDeleteUserStillAgent', t('errors.custom.cannotDeleteUserStillAgent'));
