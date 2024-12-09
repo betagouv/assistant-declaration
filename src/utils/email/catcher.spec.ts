@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { Mailer } from '@ad/src/emails/mailer';
-import { MailcatcherContainer, setupMailcatcher } from '@ad/src/utils/email';
+import { MailcatcherContainer, setupMailcatcher } from '@ad/src/utils/email/catcher';
 
 describe('email', () => {
   let mailcatcher: MailcatcherContainer;

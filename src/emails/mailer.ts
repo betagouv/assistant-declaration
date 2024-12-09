@@ -4,7 +4,33 @@ import nodemailer, { Transporter } from 'nodemailer';
 import type { Options as MailOptions } from 'nodemailer/lib/mailer/index';
 import { Readable } from 'stream';
 
-import { convertHtmlEmailToText } from '@ad/src/utils/email';
+import {
+  NewPasswordRequestEmail,
+  formatTitle as NewPasswordRequestEmailFormatTitle,
+  NewPasswordRequestEmailProps,
+} from '@ad/src/components/emails/templates/NewPasswordRequest';
+import {
+  PasswordChangedEmail,
+  formatTitle as PasswordChangedEmailFormatTitle,
+  PasswordChangedEmailProps,
+} from '@ad/src/components/emails/templates/PasswordChanged';
+import {
+  PasswordResetEmail,
+  formatTitle as PasswordResetEmailFormatTitle,
+  PasswordResetEmailProps,
+} from '@ad/src/components/emails/templates/PasswordReset';
+import {
+  SignUpConfirmationEmail,
+  formatTitle as SignUpConfirmationEmailFormatTitle,
+  SignUpConfirmationEmailProps,
+} from '@ad/src/components/emails/templates/SignUpConfirmation';
+import { UserDeletedEmail, formatTitle as UserDeletedEmailFormatTitle, UserDeletedEmailProps } from '@ad/src/components/emails/templates/UserDeleted';
+import {
+  WelcomeOrganizationCollaboratorEmail,
+  formatTitle as WelcomeOrganizationCollaboratorEmailFormatTitle,
+  WelcomeOrganizationCollaboratorEmailProps,
+} from '@ad/src/components/emails/templates/WelcomeOrganizationCollaborator';
+import { convertHtmlEmailToText } from '@ad/src/utils/email/helpers';
 
 export interface EmailServerSettings {
   host: string;
@@ -136,6 +162,54 @@ export class Mailer {
         throw err;
       }
     }
+  }
+
+  public async sendSignUpConfirmation(parameters: SignUpConfirmationEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: SignUpConfirmationEmailFormatTitle(),
+      emailComponent: SignUpConfirmationEmail(parameters),
+    });
+  }
+
+  public async sendNewPasswordRequest(parameters: NewPasswordRequestEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: NewPasswordRequestEmailFormatTitle(),
+      emailComponent: NewPasswordRequestEmail(parameters),
+    });
+  }
+
+  public async sendPasswordChanged(parameters: PasswordChangedEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: PasswordChangedEmailFormatTitle(),
+      emailComponent: PasswordChangedEmail(parameters),
+    });
+  }
+
+  public async sendPasswordReset(parameters: PasswordResetEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: PasswordResetEmailFormatTitle(),
+      emailComponent: PasswordResetEmail(parameters),
+    });
+  }
+
+  public async sendUserDeleted(parameters: UserDeletedEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: UserDeletedEmailFormatTitle(),
+      emailComponent: UserDeletedEmail(parameters),
+    });
+  }
+
+  public async sendWelcomeOrganizationCollaborator(parameters: WelcomeOrganizationCollaboratorEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: WelcomeOrganizationCollaboratorEmailFormatTitle(),
+      emailComponent: WelcomeOrganizationCollaboratorEmail(parameters),
+    });
   }
 }
 

@@ -1,8 +1,9 @@
-import { initTRPC } from '@trpc/server';
+import { TRPCError, initTRPC } from '@trpc/server';
 import superjson from 'superjson';
 import { ZodError } from 'zod';
 
-import { CustomError, internalServerErrorError } from '@ad/src/models/entities/errors';
+import { CustomError, internalServerErrorError, unauthorizedError } from '@ad/src/models/entities/errors';
+import { TokenUserSchema } from '@ad/src/models/entities/user';
 import { Context } from '@ad/src/server/context';
 
 const t = initTRPC.context<Context>().create({
@@ -38,3 +39,23 @@ export const publicProcedure = t.procedure;
 export const middleware = t.middleware;
 
 export const mergeRouters = t.mergeRouters;
+
+export const isAuthed = t.middleware(({ next, ctx }) => {
+  // TODO: make sure it checks before entering the mdw, the expiration date of the JWT
+  if (!ctx.user || !TokenUserSchema.parse(ctx.user)) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: unauthorizedError.message,
+      cause: unauthorizedError,
+    });
+  }
+
+  return next({
+    ctx: {
+      // Infers the `user` as non-nullable
+      user: ctx.user,
+    },
+  });
+});
+
+export const privateProcedure = t.procedure.use(isAuthed);

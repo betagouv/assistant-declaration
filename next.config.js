@@ -14,6 +14,7 @@ const tsImportLoadOptions = {
 };
 
 const { getBaseUrl } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/url.ts`), tsImportLoadOptions);
+const { applyRawQueryParserOnNextjsCssModule } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/webpack.ts`), tsImportLoadOptions);
 
 const { withSentryConfig } = require('@sentry/nextjs');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -106,6 +107,9 @@ const moduleExports = async () => {
           ],
         })
       );
+
+      // Inject a style loader when we want to use `foo.scss?raw` for backend processing (like emails)
+      applyRawQueryParserOnNextjsCssModule(config.module.rules);
 
       config.module.rules.push({
         test: /\.woff2$/,

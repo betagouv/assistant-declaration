@@ -10,8 +10,11 @@ import { I18nextProvider } from 'react-i18next';
 import { ClientProvider } from '@ad/src/client/trpcClient';
 import { ModalProvider } from '@ad/src/components/modal/ModalProvider';
 import { dateFnsLocales, i18n } from '@ad/src/i18n';
+import { SessionProvider } from '@ad/src/proxies/next-auth/react';
 
-export const ProvidersContext = createContext({});
+export const ProvidersContext = createContext({
+  ContextualSessionProvider: SessionProvider,
+});
 
 // [IMPORTANT] Some providers rely on hooks so we extracted them from here so this can be reused in Storybook without a burden
 // Consider `Providers` as something common to both Storybook and the runtime application
@@ -21,7 +24,7 @@ export interface ProvidersProps {
 }
 
 export function Providers(props: PropsWithChildren<ProvidersProps>) {
-  const {} = useContext(ProvidersContext);
+  const { ContextualSessionProvider } = useContext(ProvidersContext);
 
   const cache = createCache({
     key: 'assistant-declaration', // To avoid conflicts in the same app (ref: https://emotion.sh/docs/@emotion/cache#key)
@@ -34,7 +37,9 @@ export function Providers(props: PropsWithChildren<ProvidersProps>) {
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateFnsLocales[i18n.language]}>
         <ClientProvider>
           <I18nextProvider i18n={i18n}>
-            <ModalProvider>{props.children}</ModalProvider>
+            <ModalProvider>
+              <ContextualSessionProvider>{props.children}</ContextualSessionProvider>
+            </ModalProvider>
           </I18nextProvider>
         </ClientProvider>
       </LocalizationProvider>

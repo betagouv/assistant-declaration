@@ -12,6 +12,27 @@ export const localizedRoutes = {
       fr: (p) => `/accessibilite`,
     }
   ),
+  accountSettings: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/account/settings`,
+      fr: (p) => `/compte/parametres`,
+    }
+  ),
+  dashboard: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/dashboard`,
+      fr: (p) => `/tableau-de-bord`,
+    }
+  ),
+  forgottenPassword: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/auth/password/retrieve`,
+      fr: (p) => `/authentification/mot-de-passe/recuperer`,
+    }
+  ),
   home: defineLocalizedRoute(
     {},
     {
@@ -38,6 +59,34 @@ export const localizedRoutes = {
     {
       en: (p) => `/privacy-policy`,
       fr: (p) => `/politique-de-confidentialite`,
+    }
+  ),
+  resetPassword: defineLocalizedRoute(
+    {
+      token: param.query.string,
+    },
+    {
+      en: (p) => `/auth/password/reset`,
+      fr: (p) => `/authentification/mot-de-passe/reinitialiser`,
+    }
+  ),
+  signIn: defineLocalizedRoute(
+    {
+      session_end: param.query.optional.boolean,
+      registered: param.query.optional.boolean,
+    },
+    {
+      en: (p) => `/auth/sign-in`,
+      fr: (p) => `/authentification/connexion`,
+    }
+  ),
+  signUp: defineLocalizedRoute(
+    {
+      token: param.query.string,
+    },
+    {
+      en: (p) => `/auth/sign-up`,
+      fr: (p) => `/authentification/inscription`,
     }
   ),
   termsOfUse: defineLocalizedRoute(
@@ -83,18 +132,30 @@ function createLocalizedRouter<RouteDefs extends { [routeName in keyof typeof lo
 export const routes = {
   en: createLocalizedRouter({
     accessibility: defineRoute(localizedRoutes.accessibility.params, localizedRoutes.accessibility.paths.en),
+    accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.en),
+    dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.en),
+    forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.en),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.en),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.en),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.en),
     privacyPolicy: defineRoute(localizedRoutes.privacyPolicy.params, localizedRoutes.privacyPolicy.paths.en),
+    resetPassword: defineRoute(localizedRoutes.resetPassword.params, localizedRoutes.resetPassword.paths.en),
+    signIn: defineRoute(localizedRoutes.signIn.params, localizedRoutes.signIn.paths.en),
+    signUp: defineRoute(localizedRoutes.signUp.params, localizedRoutes.signUp.paths.en),
     termsOfUse: defineRoute(localizedRoutes.termsOfUse.params, localizedRoutes.termsOfUse.paths.en),
   }).routes,
   fr: createLocalizedRouter({
     accessibility: defineRoute(localizedRoutes.accessibility.params, localizedRoutes.accessibility.paths.fr),
+    accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.fr),
+    dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.fr),
+    forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.fr),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.fr),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.fr),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.fr),
     privacyPolicy: defineRoute(localizedRoutes.privacyPolicy.params, localizedRoutes.privacyPolicy.paths.fr),
+    resetPassword: defineRoute(localizedRoutes.resetPassword.params, localizedRoutes.resetPassword.paths.fr),
+    signIn: defineRoute(localizedRoutes.signIn.params, localizedRoutes.signIn.paths.fr),
+    signUp: defineRoute(localizedRoutes.signUp.params, localizedRoutes.signUp.paths.fr),
     termsOfUse: defineRoute(localizedRoutes.termsOfUse.params, localizedRoutes.termsOfUse.paths.fr),
   }).routes,
 };
