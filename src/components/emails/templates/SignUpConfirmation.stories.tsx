@@ -3,20 +3,20 @@ import { Meta, StoryFn } from '@storybook/react';
 import { commonEmailsParameters, withEmailClientOverviewFactory, withEmailRenderer } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
-import { NewPasswordRequestEmail, formatTitle } from '@ad/src/components/emails/templates/new-password-request/email';
+import { SignUpConfirmationEmail, formatTitle } from '@ad/src/components/emails/templates/SignUpConfirmation';
 
-type ComponentType = typeof NewPasswordRequestEmail;
+type ComponentType = typeof SignUpConfirmationEmail;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Emails/Templates/NewPasswordRequest',
-  component: NewPasswordRequestEmail,
+  title: 'Emails/Templates/SignUpConfirmation',
+  component: SignUpConfirmationEmail,
   ...generateMetaDefault({
     parameters: {
       ...commonEmailsParameters,
       docs: {
         description: {
-          component: 'Email sent to users asking for a new password.',
+          component: 'Email sent just after the user has signed up.',
         },
       },
     },
@@ -24,13 +24,13 @@ export default {
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <NewPasswordRequestEmail {...args} />;
+  return <SignUpConfirmationEmail {...args} />;
 };
 
 const NormalStory = Template.bind({});
 NormalStory.args = {
   firstname: 'Thomas',
-  resetPasswordUrlWithToken: '',
+  signInUrl: '',
 };
 NormalStory.decorators = [withEmailRenderer];
 NormalStory.play = async ({ canvasElement }) => {

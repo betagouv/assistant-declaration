@@ -3,23 +3,20 @@ import { Meta, StoryFn } from '@storybook/react';
 import { commonEmailsParameters, withEmailClientOverviewFactory, withEmailRenderer } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
-import sampleAllElement from '@ad/src/components/Editor/sample-all-elements.lexical';
-import { CaseMessageEmail, formatTitle } from '@ad/src/components/emails/templates/case-message/email';
-import { inlineEditorStateToHtml } from '@ad/src/components/utils/lexical';
-import { emailAttachments } from '@ad/src/fixtures/attachment';
+import { UserDeletedEmail, formatTitle } from '@ad/src/components/emails/templates/UserDeleted';
 
-type ComponentType = typeof CaseMessageEmail;
+type ComponentType = typeof UserDeletedEmail;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Emails/Templates/CaseMessage',
-  component: CaseMessageEmail,
+  title: 'Emails/Templates/UserDeleted',
+  component: UserDeletedEmail,
   ...generateMetaDefault({
     parameters: {
       ...commonEmailsParameters,
       docs: {
         description: {
-          component: 'Email sent when an agent send a message to someone.',
+          component: 'Email sent after an admin deleted a user account.',
         },
       },
     },
@@ -27,22 +24,12 @@ export default {
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <CaseMessageEmail {...args} />;
+  return <UserDeletedEmail {...args} />;
 };
 
 const NormalStory = Template.bind({});
 NormalStory.args = {
-  subject: 'Ut sit similique enim est quia consequatur omnis',
-  caseHumanId: '286',
-  htmlMessageContent: inlineEditorStateToHtml(sampleAllElement),
-  attachments: [emailAttachments[0]],
-};
-NormalStory.parameters = {
-  a11y: {
-    // TODO: once solution found, adjust to exclude the email lexical content at the general level
-    // Ref: https://github.com/storybookjs/storybook/issues/20813
-    disable: true,
-  },
+  firstname: 'Thomas',
 };
 NormalStory.decorators = [withEmailRenderer];
 NormalStory.play = async ({ canvasElement }) => {

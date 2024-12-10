@@ -3,20 +3,20 @@ import { Meta, StoryFn } from '@storybook/react';
 import { commonEmailsParameters, withEmailClientOverviewFactory, withEmailRenderer } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
-import { CaseAssignedBySomeoneEmail, formatTitle } from '@ad/src/components/emails/templates/case-assigned-by-someone/email';
+import { NewPasswordRequestEmail, formatTitle } from '@ad/src/components/emails/templates/NewPasswordRequest';
 
-type ComponentType = typeof CaseAssignedBySomeoneEmail;
+type ComponentType = typeof NewPasswordRequestEmail;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Emails/Templates/CaseAssignedBySomeone',
-  component: CaseAssignedBySomeoneEmail,
+  title: 'Emails/Templates/NewPasswordRequest',
+  component: NewPasswordRequestEmail,
   ...generateMetaDefault({
     parameters: {
       ...commonEmailsParameters,
       docs: {
         description: {
-          component: 'Email sent when someone assigned to the agent a case.',
+          component: 'Email sent to users asking for a new password.',
         },
       },
     },
@@ -24,16 +24,13 @@ export default {
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <CaseAssignedBySomeoneEmail {...args} />;
+  return <NewPasswordRequestEmail {...args} />;
 };
 
 const NormalStory = Template.bind({});
 NormalStory.args = {
   firstname: 'Thomas',
-  originatorFirstname: 'Jean',
-  originatorLastname: 'Derrien',
-  caseUrl: '',
-  caseHumanId: '65',
+  resetPasswordUrlWithToken: '',
 };
 NormalStory.decorators = [withEmailRenderer];
 NormalStory.play = async ({ canvasElement }) => {

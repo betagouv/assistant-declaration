@@ -9,11 +9,8 @@ import {
   MjmlGroup,
   MjmlHead,
   MjmlImage,
-  MjmlPreview,
   MjmlRaw,
   MjmlSection,
-  MjmlSocial,
-  MjmlSocialElement,
   MjmlStyle,
   MjmlText,
   MjmlTitle,
@@ -57,7 +54,7 @@ export function StandardLayout(props: PropsWithChildren<StandardLayoutProps>) {
             cssClass="light-button"
             color="#f5f5fe"
             fontSize={16}
-            fontWeight={400}
+            fontWeight="400"
             lineHeight="24px"
             padding="8px 16px"
           ></MjmlButton>
@@ -82,11 +79,11 @@ export function StandardLayout(props: PropsWithChildren<StandardLayoutProps>) {
                 <MjmlImage src={`${getBaseUrl()}/assets/images/logo.png#${quotedReplyMarkerClass}`} alt="logo" paddingRight={0} />
               </MjmlColumn>
               <MjmlColumn verticalAlign="middle" width="76%">
-                <MjmlText fontSize={20} fontWeight={700} paddingBottom={2}>
-                  Médiature
+                <MjmlText fontSize={20} fontWeight="700" paddingBottom={2}>
+                  Assistant déclaration
                 </MjmlText>
                 <MjmlText fontSize={16} paddingTop={2}>
-                  Service public de médiation
+                  À destination des entrepreneurs du spectacle vivant
                 </MjmlText>
               </MjmlColumn>
             </MjmlGroup>
@@ -100,27 +97,8 @@ export function StandardLayout(props: PropsWithChildren<StandardLayoutProps>) {
             <MjmlGroup>
               <MjmlColumn>
                 <MjmlText align="center" color="#666666" fontSize={12} paddingTop={2} paddingBottom={0}>
-                  {currentYear} © Médiature
+                  {currentYear} © Assistant déclaration
                 </MjmlText>
-                <MjmlSocial cssClass="social-network-section" fontSize="15px" iconSize="30px" mode="horizontal" borderRadius={20} paddingTop={2}>
-                  {/* We took images from https://www.mailjet.com/images/theme/v1/icons/ico-social/twitter.png (change `twitter` for others) to host them ourselves since adblockers may block images otherwise */}
-                  <MjmlSocialElement
-                    name="twitter"
-                    href="https://twitter.com/AmctMediation"
-                    src={`${getBaseUrl()}/assets/images/email/social/twitter.png`}
-                    alt="Lien vers Twitter"
-                    iconPadding="5px"
-                    padding="6px 6px"
-                  ></MjmlSocialElement>
-                  <MjmlSocialElement
-                    name="linkedin"
-                    href="https://www.linkedin.com/company/association-des-m%C3%A9diateurs-des-collectivit%C3%A9s-territoriales"
-                    src={`${getBaseUrl()}/assets/images/email/social/linkedin.png`}
-                    alt="Lien vers LinkedIn"
-                    iconPadding="5px"
-                    padding="0px 10px"
-                  ></MjmlSocialElement>
-                </MjmlSocial>
               </MjmlColumn>
             </MjmlGroup>
           </MjmlSection>

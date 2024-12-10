@@ -3,7 +3,7 @@ import { Meta, StoryFn } from '@storybook/react';
 import { commonEmailsParameters, withEmailClientOverviewFactory, withEmailRenderer } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
-import { WelcomeAuthorityAgentEmail, formatTitle } from '@ad/src/components/emails/templates/welcome-authority-agent/email';
+import { WelcomeAuthorityAgentEmail, formatTitle } from '@ad/src/components/emails/templates/WelcomeOrganizationCollaborator';
 
 type ComponentType = typeof WelcomeAuthorityAgentEmail;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();

@@ -3,20 +3,20 @@ import { Meta, StoryFn } from '@storybook/react';
 import { commonEmailsParameters, withEmailClientOverviewFactory, withEmailRenderer } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
-import { SignUpConfirmationEmail, formatTitle } from '@ad/src/components/emails/templates/sign-up-confirmation/email';
+import { PasswordResetEmail, formatTitle } from '@ad/src/components/emails/templates/PasswordReset';
 
-type ComponentType = typeof SignUpConfirmationEmail;
+type ComponentType = typeof PasswordResetEmail;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Emails/Templates/SignUpConfirmation',
-  component: SignUpConfirmationEmail,
+  title: 'Emails/Templates/PasswordReset',
+  component: PasswordResetEmail,
   ...generateMetaDefault({
     parameters: {
       ...commonEmailsParameters,
       docs: {
         description: {
-          component: 'Email sent just after the user has signed up.',
+          component: 'Email sent when the user updated his password after a "forgot my password" request.',
         },
       },
     },
@@ -24,7 +24,7 @@ export default {
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <SignUpConfirmationEmail {...args} />;
+  return <PasswordResetEmail {...args} />;
 };
 
 const NormalStory = Template.bind({});

@@ -3,20 +3,20 @@ import { Meta, StoryFn } from '@storybook/react';
 import { commonEmailsParameters, withEmailClientOverviewFactory, withEmailRenderer } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
-import { SignUpInvitationAsAdminEmail, formatTitle } from '@ad/src/components/emails/templates/sign-up-invitation-as-admin/email';
+import { PasswordChangedEmail, formatTitle } from '@ad/src/components/emails/templates/PasswordChanged';
 
-type ComponentType = typeof SignUpInvitationAsAdminEmail;
+type ComponentType = typeof PasswordChangedEmail;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Emails/Templates/SignUpInvitationAsAdmin',
-  component: SignUpInvitationAsAdminEmail,
+  title: 'Emails/Templates/PasswordChanged',
+  component: PasswordChangedEmail,
   ...generateMetaDefault({
     parameters: {
       ...commonEmailsParameters,
       docs: {
         description: {
-          component: 'Email sent when a non-user is invited to become administrator on the platform.',
+          component: 'Email sent when the user changed his password from the settings.',
         },
       },
     },
@@ -24,16 +24,12 @@ export default {
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <SignUpInvitationAsAdminEmail {...args} />;
+  return <PasswordChangedEmail {...args} />;
 };
 
 const NormalStory = Template.bind({});
 NormalStory.args = {
   firstname: 'Thomas',
-  lastname: 'Lefebvre',
-  originatorFirstname: 'Jean',
-  originatorLastname: 'Derrien',
-  signUpUrlWithToken: '',
 };
 NormalStory.decorators = [withEmailRenderer];
 NormalStory.play = async ({ canvasElement }) => {

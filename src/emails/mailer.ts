@@ -8,32 +8,28 @@ import {
   NewPasswordRequestEmail,
   formatTitle as NewPasswordRequestEmailFormatTitle,
   NewPasswordRequestEmailProps,
-} from '@ad/src/components/emails/templates/new-password-request/email';
+} from '@ad/src/components/emails/templates/NewPasswordRequest';
 import {
   PasswordChangedEmail,
   formatTitle as PasswordChangedEmailFormatTitle,
   PasswordChangedEmailProps,
-} from '@ad/src/components/emails/templates/password-changed/email';
+} from '@ad/src/components/emails/templates/PasswordChanged';
 import {
   PasswordResetEmail,
   formatTitle as PasswordResetEmailFormatTitle,
   PasswordResetEmailProps,
-} from '@ad/src/components/emails/templates/password-reset/email';
+} from '@ad/src/components/emails/templates/PasswordReset';
 import {
   SignUpConfirmationEmail,
   formatTitle as SignUpConfirmationEmailFormatTitle,
   SignUpConfirmationEmailProps,
-} from '@ad/src/components/emails/templates/sign-up-confirmation/email';
-import {
-  UserDeletedEmail,
-  formatTitle as UserDeletedEmailFormatTitle,
-  UserDeletedEmailProps,
-} from '@ad/src/components/emails/templates/user-deleted/email';
+} from '@ad/src/components/emails/templates/SignUpConfirmation';
+import { UserDeletedEmail, formatTitle as UserDeletedEmailFormatTitle, UserDeletedEmailProps } from '@ad/src/components/emails/templates/UserDeleted';
 import {
   WelcomeOrganizationCollaboratorEmail,
   formatTitle as WelcomeOrganizationCollaboratorEmailFormatTitle,
   WelcomeOrganizationCollaboratorEmailProps,
-} from '@ad/src/components/emails/templates/welcome-authority-agent/email';
+} from '@ad/src/components/emails/templates/WelcomeOrganizationCollaborator';
 import { convertHtmlEmailToText } from '@ad/src/utils/email';
 
 export interface EmailServerSettings {
