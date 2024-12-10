@@ -1,6 +1,8 @@
 import * as trpc from '@trpc/server';
 import type { CreateNextContextOptions } from '@trpc/server/adapters/next';
 import type { CreateWSSContextFnOptions } from '@trpc/server/adapters/ws';
+import { IncomingMessage } from 'http';
+import { NextApiRequest } from 'next';
 import { getServerSession } from 'next-auth';
 
 import { nextAuthOptions } from '@ad/src/pages/api/auth/[...nextauth]';
@@ -34,8 +36,18 @@ export async function createContext(
     };
   }
 
+  // [WORKAROUND] Since we upgraded to Next.js v14 it expects cookies property (not available onto IncomingMessage)
+  if (!('cookies' in opts.req)) {
+    (opts.req as any).cookies = {};
+  }
+
   // Not RSC
-  const session = await getServerSession(opts.req, opts.res, nextAuthOptions);
+  const session = await getServerSession(
+    opts.req as NextApiRequest | (IncomingMessage & { cookies: Partial<Record<string, string>> }),
+    opts.res,
+    nextAuthOptions
+  );
+
   return {
     type: opts.type,
     user: session?.user,
