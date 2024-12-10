@@ -1,16 +1,8 @@
 import { LiveChatSettings } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  CancelInvitationSchema,
-  GetInterfaceSessionSchema,
-  GetLiveChatSettingsSchema,
-  GetProfileSchema,
-  GetPublicFacingInvitationSchema,
-  UpdateProfileSchema,
-} from '@ad/src/models/actions/user';
+import { GetInterfaceSessionSchema, GetLiveChatSettingsSchema, GetProfileSchema, UpdateProfileSchema } from '@ad/src/models/actions/user';
 import { userNotFoundError } from '@ad/src/models/entities/errors';
-import { InvitationStatusSchema, PublicFacingInvitationSchema } from '@ad/src/models/entities/invitation';
 import { UserInterfaceSessionSchema } from '@ad/src/models/entities/ui';
 import { LiveChatSettingsSchema, LiveChatSettingsSchemaType } from '@ad/src/models/entities/user';
 import { prisma } from '@ad/src/prisma/client';
@@ -27,11 +19,9 @@ export const userRouter = router({
       data: {
         firstname: input.firstname,
         lastname: input.lastname,
-        profilePicture: input.profilePicture,
       },
     });
 
-    // TODO: exclude hashed password
     return { user: userPrismaToModel(user) };
   }),
   getProfile: privateProcedure.input(GetProfileSchema).query(async ({ ctx, input }) => {
@@ -45,7 +35,6 @@ export const userRouter = router({
       throw userNotFoundError;
     }
 
-    // TODO: exclude hashed password
     return { user: userPrismaToModel(user) };
   }),
   getInterfaceSession: privateProcedure.input(GetInterfaceSessionSchema).query(async ({ ctx, input }) => {

@@ -94,4 +94,3 @@ export const invalidCurrentPasswordError = new BusinessError('invalidCurrentPass
 
 // User
 export const userNotFoundError = new BusinessError('userNotFound', t('errors.custom.userNotFound'));
-export const cannotDeleteUserStillAgentError = new BusinessError('cannotDeleteUserStillAgent', t('errors.custom.cannotDeleteUserStillAgent'));

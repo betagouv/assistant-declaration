@@ -64,7 +64,6 @@ export const nextAuthOptions: NextAuthOptions = {
           firstname: user.firstname,
           lastname: user.lastname,
           email: user.email,
-          profilePicture: user.profilePicture,
         });
 
         if (!tokenUserParse.success) {

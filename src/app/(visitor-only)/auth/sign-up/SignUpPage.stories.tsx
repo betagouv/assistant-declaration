@@ -5,8 +5,6 @@ import { playFindAlert, playFindForm, playFindFormInMain } from '@ad/.storybook/
 import { Normal as VisitorOnlyLayoutNormalStory } from '@ad/src/app/(visitor-only)/VisitorOnlyLayout.stories';
 import { Empty as SignUpFormEmptyStory } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpForm.stories';
 import { SignUpPage, SignUpPageContext } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpPage';
-import { InvitationStatusSchema, PublicFacingInvitationSchema } from '@ad/src/models/entities/invitation';
-import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
 type ComponentType = typeof SignUpPage;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -21,35 +19,14 @@ export default {
 
 const defaultMswParameters = {
   msw: {
-    handlers: [
-      getTRPCMock({
-        type: 'query',
-        path: ['getPublicFacingInvitation'],
-        response: {
-          invitation: PublicFacingInvitationSchema.parse({
-            inviteeEmail: 'jean@france.fr',
-            inviteeFirstname: 'Jean',
-            inviteeLastname: 'Derrien',
-            issuer: {
-              id: 'b79cb3ba-745e-5d9a-8903-4a02327a7e01',
-              email: 'pascale.leclerc@yahoo.fr',
-              firstname: 'Pascale',
-              lastname: 'Leclerc',
-            },
-            status: InvitationStatusSchema.Values.PENDING,
-          }),
-        },
-      }),
-    ],
+    handlers: [],
   },
 };
 
 const tokenProvidedParameters = {
   nextjs: {
     navigation: {
-      query: {
-        token: 'abc',
-      },
+      query: {},
     },
   },
 };

@@ -1,8 +1,8 @@
 import { CustomErrorInterface, CustomErrorProperties } from 'ts-custom-error';
 import z, { IssueData } from 'zod';
 
-import { i18n } from '@mediature/main/src/i18n';
-import { CustomError } from '@mediature/main/src/models/entities/errors';
+import { i18n } from '@ad/src/i18n';
+import { CustomError } from '@ad/src/models/entities/errors';
 
 export interface ZodIssueOptions {
   overridePath?: string[];

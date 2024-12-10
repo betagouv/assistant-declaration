@@ -137,6 +137,54 @@ export class Mailer {
       }
     }
   }
+
+  public async sendSignUpConfirmation(parameters: SignUpConfirmationEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: SignUpConfirmationEmailFormatTitle(),
+      emailComponent: SignUpConfirmationEmail(parameters),
+    });
+  }
+
+  public async sendNewPasswordRequest(parameters: NewPasswordRequestEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: NewPasswordRequestEmailFormatTitle(),
+      emailComponent: NewPasswordRequestEmail(parameters),
+    });
+  }
+
+  public async sendPasswordChanged(parameters: PasswordChangedEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: PasswordChangedEmailFormatTitle(),
+      emailComponent: PasswordChangedEmail(parameters),
+    });
+  }
+
+  public async sendPasswordReset(parameters: PasswordResetEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: PasswordResetEmailFormatTitle(),
+      emailComponent: PasswordResetEmail(parameters),
+    });
+  }
+
+  public async sendUserDeleted(parameters: UserDeletedEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: UserDeletedEmailFormatTitle(),
+      emailComponent: UserDeletedEmail(parameters),
+    });
+  }
+
+  public async sendWelcomeOrganizationCollaborator(parameters: WelcomeOrganizationCollaboratorEmailProps & { recipient: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      subject: WelcomeOrganizationCollaboratorEmailFormatTitle(),
+      emailComponent: WelcomeOrganizationCollaboratorEmail(parameters),
+    });
+  }
 }
 
 export const mailer = new Mailer({

@@ -1,11 +1,10 @@
-import { generateMock } from '@anatine/zod-mock';
 import { Meta, StoryFn } from '@storybook/react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindForm } from '@ad/.storybook/testing';
 import { SignUpForm } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpForm';
+import { users } from '@ad/src/fixtures/user';
 import { SignUpPrefillSchema } from '@ad/src/models/actions/auth';
-import { UserSchema } from '@ad/src/models/entities/user';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
 type ComponentType = typeof SignUpForm;
@@ -26,7 +25,7 @@ const defaultMswParameters = {
         type: 'mutation',
         path: ['signUp'],
         response: {
-          user: generateMock(UserSchema),
+          user: users[0],
         },
       }),
     ],
