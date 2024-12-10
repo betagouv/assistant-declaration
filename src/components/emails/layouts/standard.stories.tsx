@@ -1,10 +1,8 @@
 import { MjmlButton, MjmlText } from '@faire/mjml-react';
 import { Meta, StoryFn } from '@storybook/react';
-import { within } from '@storybook/testing-library';
+import { within } from '@storybook/test';
 
-import { withEmailRenderer } from '@ad/.storybook/email';
-import { commonEmailsParameters } from '@ad/.storybook/email';
-import { StoryHelperFactory } from '@ad/.storybook/helpers';
+import { StoryHelperFactory, commonEmailsParameters, withEmailRenderer } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
 import { StandardLayout } from '@ad/src/components/emails/layouts/standard';
 

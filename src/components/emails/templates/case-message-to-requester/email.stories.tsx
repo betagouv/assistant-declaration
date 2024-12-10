@@ -1,7 +1,6 @@
 import { Meta, StoryFn } from '@storybook/react';
 
-import { withEmailClientOverviewFactory, withEmailRenderer } from '@ad/.storybook/email';
-import { commonEmailsParameters } from '@ad/.storybook/email';
+import { commonEmailsParameters, withEmailClientOverviewFactory, withEmailRenderer } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
 import sampleAllElement from '@ad/src/components/Editor/sample-all-elements.lexical';
