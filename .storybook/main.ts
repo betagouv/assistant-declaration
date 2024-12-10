@@ -4,6 +4,8 @@ import FileManagerPlugin from 'filemanager-webpack-plugin';
 import path from 'path';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
+import { applyRawQueryParserOnCssModule } from '@ad/src/utils/webpack';
+
 const staticBuildFolderPath = path.resolve(__dirname, '../storybook-static/');
 
 const config: StorybookConfig = {
@@ -94,6 +96,8 @@ const config: StorybookConfig = {
         ],
       })
     );
+
+    applyRawQueryParserOnCssModule(config.module!.rules);
 
     config.module!.rules!.push({
       test: /\.(txt|html)$/i,

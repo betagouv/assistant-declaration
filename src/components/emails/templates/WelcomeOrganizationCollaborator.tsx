@@ -1,20 +1,17 @@
 import { MjmlButton, MjmlText } from '@faire/mjml-react';
 
-import { StandardLayout } from '@ad/src/components/emails/layouts/standard';
+import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
 
 export function formatTitle() {
   return `Bienvenue !`;
 }
 
-export interface WelcomeAuthorityAgentEmailProps {
+export interface WelcomeOrganizationCollaboratorEmailProps {
   firstname: string;
-  originatorFirstname: string;
-  originatorLastname: string;
-  authorityName: string;
-  authorityDashboardUrl: string;
+  organizationDashboardUrl: string;
 }
 
-export function WelcomeAuthorityAgentEmail(props: WelcomeAuthorityAgentEmailProps) {
+export function WelcomeOrganizationCollaboratorEmail(props: WelcomeOrganizationCollaboratorEmailProps) {
   const title = formatTitle();
 
   return (
@@ -22,12 +19,9 @@ export function WelcomeAuthorityAgentEmail(props: WelcomeAuthorityAgentEmailProp
       <MjmlText>
         <h1>{title}</h1>
         <p>Bonjour {props.firstname},</p>
-        <p>
-          {props.originatorFirstname} {props.originatorLastname} vient de te nommer médiateur au sein de la collectivité {props.authorityName}.
-        </p>
-        <p>Tu peux dès à présent accéder à la plateforme pour prendre en charge les demandes de médiation.</p>
+        <p>Tu peux dès à présent accéder à la plateforme pour prendre en charge tes déclarations.</p>
       </MjmlText>
-      <MjmlButton href={props.authorityDashboardUrl}>Accéder à la plateforme</MjmlButton>
+      <MjmlButton href={props.organizationDashboardUrl}>Accéder à la plateforme</MjmlButton>
       <MjmlText></MjmlText>
     </StandardLayout>
   );

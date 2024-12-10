@@ -3,20 +3,20 @@ import { Meta, StoryFn } from '@storybook/react';
 import { commonEmailsParameters, withEmailClientOverviewFactory, withEmailRenderer } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
-import { WelcomeAuthorityAgentEmail, formatTitle } from '@ad/src/components/emails/templates/WelcomeOrganizationCollaborator';
+import { WelcomeOrganizationCollaboratorEmail, formatTitle } from '@ad/src/components/emails/templates/WelcomeOrganizationCollaborator';
 
-type ComponentType = typeof WelcomeAuthorityAgentEmail;
+type ComponentType = typeof WelcomeOrganizationCollaboratorEmail;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Emails/Templates/WelcomeAuthorityAgent',
-  component: WelcomeAuthorityAgentEmail,
+  title: 'Emails/Templates/WelcomeOrganizationCollaborator',
+  component: WelcomeOrganizationCollaboratorEmail,
   ...generateMetaDefault({
     parameters: {
       ...commonEmailsParameters,
       docs: {
         description: {
-          component: 'Email sent when a user is being promoted the access to an authority.',
+          component: 'Email sent when a user is being promoted the access to a organization.',
         },
       },
     },
@@ -24,16 +24,13 @@ export default {
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <WelcomeAuthorityAgentEmail {...args} />;
+  return <WelcomeOrganizationCollaboratorEmail {...args} />;
 };
 
 const NormalStory = Template.bind({});
 NormalStory.args = {
   firstname: 'Thomas',
-  originatorFirstname: 'Jean',
-  originatorLastname: 'Derrien',
-  authorityName: 'Bretagne',
-  authorityDashboardUrl: '',
+  organizationDashboardUrl: '',
 };
 NormalStory.decorators = [withEmailRenderer];
 NormalStory.play = async ({ canvasElement }) => {

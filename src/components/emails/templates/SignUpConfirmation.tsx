@@ -1,6 +1,6 @@
 import { MjmlButton, MjmlText } from '@faire/mjml-react';
 
-import { StandardLayout } from '@ad/src/components/emails/layouts/standard';
+import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
 
 export function formatTitle() {
   return `Confirmation d'inscription`;
@@ -24,7 +24,7 @@ export function SignUpConfirmationEmail(props: SignUpConfirmationEmailProps) {
       <MjmlButton href={props.signInUrl}>Se connecter</MjmlButton>
       <MjmlText>
         <p style={{ fontWeight: 'bold' }}>
-          Tes identifiants sont strictement personnels, et en aucun cas l&apos;équipe Médiature ne te demandera de les communiquer.
+          Tes identifiants sont strictement personnels, et en aucun cas notre équipe ne te demandera de les communiquer.
         </p>
         <p>
           Si tu as la moindre question concernant la plateforme, ou une idée d&apos;amélioration, n&apos;hésite pas à contacter le support depuis ton

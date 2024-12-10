@@ -5,7 +5,7 @@ import { within } from '@storybook/test';
 import { commonEmailsParameters, withEmailRenderer } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
-import { StandardLayout } from '@ad/src/components/emails/layouts/standard';
+import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
 
 type ComponentType = typeof StandardLayout;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();

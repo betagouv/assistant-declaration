@@ -24,7 +24,7 @@ export const handler = createNextApiHandler({
     if (error.code === 'INTERNAL_SERVER_ERROR' && !(error.cause instanceof BusinessError)) {
       // Notify Sentry of this unexpected error (since handler wrapper will not see it)
       Sentry.withScope(function (scope) {
-        scope.setUser(null);
+        scope.setUser(ctx?.user ? { id: ctx.user.id } : null);
 
         Sentry.captureException(error);
       });

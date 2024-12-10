@@ -1,6 +1,6 @@
 import { MjmlButton, MjmlText } from '@faire/mjml-react';
 
-import { StandardLayout } from '@ad/src/components/emails/layouts/standard';
+import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
 
 export function formatTitle() {
   return `Renouvellement de mot de passe`;

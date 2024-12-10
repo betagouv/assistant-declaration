@@ -1,6 +1,6 @@
 import { MjmlText } from '@faire/mjml-react';
 
-import { StandardLayout } from '@ad/src/components/emails/layouts/standard';
+import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
 
 export function formatTitle() {
   return `Mot de passe mis à jour`;

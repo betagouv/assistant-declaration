@@ -1,4 +1,4 @@
-import { renderToMjml } from '@faire/mjml-react';
+import { renderToMjml } from '@faire/mjml-react/utils/renderToMjml';
 import mjml2html from 'mjml-browser';
 import { PropsWithChildren } from 'react';
 
