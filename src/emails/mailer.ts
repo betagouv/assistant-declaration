@@ -4,6 +4,36 @@ import nodemailer, { Transporter } from 'nodemailer';
 import type { Options as MailOptions } from 'nodemailer/lib/mailer/index';
 import { Readable } from 'stream';
 
+import {
+  NewPasswordRequestEmail,
+  formatTitle as NewPasswordRequestEmailFormatTitle,
+  NewPasswordRequestEmailProps,
+} from '@ad/src/components/emails/templates/new-password-request/email';
+import {
+  PasswordChangedEmail,
+  formatTitle as PasswordChangedEmailFormatTitle,
+  PasswordChangedEmailProps,
+} from '@ad/src/components/emails/templates/password-changed/email';
+import {
+  PasswordResetEmail,
+  formatTitle as PasswordResetEmailFormatTitle,
+  PasswordResetEmailProps,
+} from '@ad/src/components/emails/templates/password-reset/email';
+import {
+  SignUpConfirmationEmail,
+  formatTitle as SignUpConfirmationEmailFormatTitle,
+  SignUpConfirmationEmailProps,
+} from '@ad/src/components/emails/templates/sign-up-confirmation/email';
+import {
+  UserDeletedEmail,
+  formatTitle as UserDeletedEmailFormatTitle,
+  UserDeletedEmailProps,
+} from '@ad/src/components/emails/templates/user-deleted/email';
+import {
+  WelcomeOrganizationCollaboratorEmail,
+  formatTitle as WelcomeOrganizationCollaboratorEmailFormatTitle,
+  WelcomeOrganizationCollaboratorEmailProps,
+} from '@ad/src/components/emails/templates/welcome-authority-agent/email';
 import { convertHtmlEmailToText } from '@ad/src/utils/email';
 
 export interface EmailServerSettings {
