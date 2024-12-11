@@ -108,6 +108,7 @@
     "async": "^3.2.6",
     "async-mutex": "^0.5.0",
     "axe-playwright": "^2.0.3",
+    "bcrypt": "^5.1.1",
     "chalk": "^5.3.0",
     "crisp-sdk-web": "^1.0.25",
     "cssnano": "^7.0.6",

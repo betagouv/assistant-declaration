@@ -54,11 +54,11 @@ export function SignInPage() {
           }}
         />
         <Typography variant="body1" sx={{ pt: '40px' }}>
-          <Typography sx={{ fontWeight: 'bold', textAlign: 'center' }}>D&apos;autres collectivités utilisent la plateforme !</Typography>
+          <Typography sx={{ fontWeight: 'bold', textAlign: 'center' }}>D&apos;autres salles de spectacle utilisent la plateforme !</Typography>
           <br />
           <p>
             Donc si vous rencontrez des difficultés ou avez des idées d&apos;évolution, n&apos;hésitez pas à les partager avec le support disponible
-            depuis le menu de votre compte. Cela permettra à l&apos;ensemble des collectivités d&apos;en bénéficier.
+            depuis le menu de votre compte. Cela permettra à l&apos;ensemble de la communauté d&apos;en bénéficier.
           </p>
         </Typography>
       </Grid>

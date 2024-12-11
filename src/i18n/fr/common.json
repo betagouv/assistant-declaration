@@ -59,6 +59,9 @@
       },
       "query": {
         "too_big": "la recherche doit faire {{maximum}} caractères maximum"
+      },
+      "termsAccepted": {
+        "invalid_literal": "les conditions générales d'utilisation doivent être acceptées"
       }
     }
   },
