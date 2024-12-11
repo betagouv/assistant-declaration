@@ -13,6 +13,7 @@ const tsImportLoadOptions = {
   },
 };
 
+const { generateRewrites, localizedRoutes } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/routes/list.ts`), tsImportLoadOptions);
 const { getBaseUrl } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/url.ts`), tsImportLoadOptions);
 const { applyRawQueryParserOnNextjsCssModule } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/webpack.ts`), tsImportLoadOptions);
 
@@ -69,6 +70,7 @@ const moduleExports = async () => {
     },
     async rewrites() {
       return [
+        ...generateRewrites('en', localizedRoutes),
         {
           source: '/.well-known/security.txt',
           destination: '/api/security',
