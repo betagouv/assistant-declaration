@@ -97,7 +97,7 @@ const config: StorybookConfig = {
       })
     );
 
-    applyRawQueryParserOnCssModule(config.module!.rules);
+    applyRawQueryParserOnCssModule(config.module!.rules!);
 
     config.module!.rules!.push({
       test: /\.(txt|html)$/i,
