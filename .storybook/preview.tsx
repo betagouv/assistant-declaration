@@ -10,6 +10,7 @@ import { themes } from '@storybook/theming';
 import { passthrough } from 'msw';
 import { initialize, mswDecorator } from 'msw-storybook-addon';
 import React, { PropsWithChildren, useEffect } from 'react';
+import { I18nextProvider } from 'react-i18next';
 
 import { ThemedDocsContainer } from '@ad/.storybook/ThemedDocsContainer';
 // import { DARK_MODE_EVENT_NAME, UPDATE_DARK_MODE_EVENT_NAME } from 'storybook-dark-mode';
@@ -149,22 +150,36 @@ const preview: Preview = {
         i18n.changeLanguage(locale);
       }, [locale]);
 
-      disableGlobalDsfrStyle(false); // Workaround for global style leaking
+      if (context.kind.startsWith('Emails/')) {
+        // We are in the email templating context, they don't need other stuff and they will use a specific decorator per-story
 
-      // We provide the client provider to mock tRPC calls
-      return (
-        <>
-          <StartDsfr />
-          <DsfrHead />
-          <DsfrProvider>
-            <MuiDsfrThemeProvider>
-              <Providers>
-                <Story />
-              </Providers>
-            </MuiDsfrThemeProvider>
-          </DsfrProvider>
-        </>
-      );
+        disableGlobalDsfrStyle(true); // Workaround for global style leaking
+
+        return (
+          <I18nextProvider i18n={i18n}>
+            <Story />
+          </I18nextProvider>
+        );
+      } else {
+        // For now for all other cases we provide the client provider to mock tRPC calls
+
+        disableGlobalDsfrStyle(false); // Workaround for global style leaking
+
+        // We provide the client provider to mock tRPC calls
+        return (
+          <>
+            <StartDsfr />
+            <DsfrHead />
+            <DsfrProvider>
+              <MuiDsfrThemeProvider>
+                <Providers>
+                  <Story />
+                </Providers>
+              </MuiDsfrThemeProvider>
+            </DsfrProvider>
+          </>
+        );
+      }
     },
     withDisablingTestRunner, // This must be the latest to avoid other decorators to be called
   ],
