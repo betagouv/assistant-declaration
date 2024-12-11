@@ -1,4 +1,4 @@
-@import '@ad/src/components/emails/layouts/standard.partial.scss';
+@use '@ad/src/components/emails/layouts/standard.partial.scss';
 
 // Make sure we target the Storybook preview body to not pollute the global style
 body.sb-show-main.dark {

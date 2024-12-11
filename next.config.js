@@ -14,8 +14,8 @@ const tsImportLoadOptions = {
 };
 
 const { getBaseUrl } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/url.ts`), tsImportLoadOptions);
+const { applyRawQueryParserOnCssModule } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/webpack.ts`), tsImportLoadOptions);
 
-const { applyRawQueryParserOnCssModule } = require('@ad/src/utils/webpack');
 const { withSentryConfig } = require('@sentry/nextjs');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const gitRevision = require('git-rev-sync');

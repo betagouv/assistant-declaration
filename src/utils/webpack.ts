@@ -1,10 +1,13 @@
-export function applyRawQueryParserOnCssModule(moduleRules) {
+import cssnano from 'cssnano';
+import { ModuleOptions } from 'webpack';
+
+export function applyRawQueryParserOnCssModule(moduleRules: NonNullable<ModuleOptions['rules']>) {
   let scssRuleFound = false;
-  for (const ruleIndex of moduleRules) {
+  for (const ruleIndex in moduleRules) {
     const originalRule = moduleRules[ruleIndex];
 
     // If for `sass` we add our additional one (they cannot colocate on the same level because they would be played both... resulting in CSS parsing errors)
-    if (originalRule.test && originalRule.test.test('.scss')) {
+    if (originalRule && typeof originalRule === 'object' && originalRule.test instanceof RegExp && originalRule.test.test('.scss')) {
       scssRuleFound = true;
 
       moduleRules[ruleIndex] = {
