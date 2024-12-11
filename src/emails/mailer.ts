@@ -30,7 +30,7 @@ import {
   formatTitle as WelcomeOrganizationCollaboratorEmailFormatTitle,
   WelcomeOrganizationCollaboratorEmailProps,
 } from '@ad/src/components/emails/templates/WelcomeOrganizationCollaborator';
-import { convertHtmlEmailToText } from '@ad/src/utils/email';
+import { convertHtmlEmailToText } from '@ad/src/utils/email/helpers';
 
 export interface EmailServerSettings {
   host: string;

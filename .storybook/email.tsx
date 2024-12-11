@@ -3,7 +3,7 @@ import React from 'react';
 
 import styles from '@ad/.storybook/email.module.scss';
 import { StorybookRendererLayout } from '@ad/src/components/emails/layouts/StorybookRenderer';
-import { convertComponentEmailToText } from '@ad/src/utils/email';
+import { convertComponentEmailToText } from '@ad/src/utils/email/helpers';
 
 export const commonEmailsParameters = {
   layout: 'fullscreen',
