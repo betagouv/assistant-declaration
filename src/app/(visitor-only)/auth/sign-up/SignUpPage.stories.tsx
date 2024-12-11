@@ -51,22 +51,6 @@ export const Normal = prepareStory(NormalStory, {
   },
 });
 
-const MissingInvitationTokenStory = Template.bind({});
-MissingInvitationTokenStory.args = {};
-MissingInvitationTokenStory.parameters = { ...defaultMswParameters };
-MissingInvitationTokenStory.play = async ({ canvasElement }) => {
-  await playFindAlert(canvasElement);
-};
-
-export const MissingInvitationToken = prepareStory(MissingInvitationTokenStory, {
-  childrenContext: {
-    context: SignUpPageContext,
-    value: {
-      ContextualSignUpForm: SignUpFormEmptyStory,
-    },
-  },
-});
-
 const WithLayoutStory = Template.bind({});
 WithLayoutStory.args = {};
 WithLayoutStory.parameters = {

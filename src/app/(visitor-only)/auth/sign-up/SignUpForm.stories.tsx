@@ -37,11 +37,7 @@ const Template: StoryFn<ComponentType> = (args) => {
 };
 
 const EmptyStory = Template.bind({});
-EmptyStory.args = {
-  prefill: SignUpPrefillSchema.parse({
-    invitationToken: 'abc',
-  }),
-};
+EmptyStory.args = {};
 EmptyStory.parameters = { ...defaultMswParameters };
 EmptyStory.play = async ({ canvasElement }) => {
   await playFindForm(canvasElement);
@@ -52,7 +48,6 @@ export const Empty = prepareStory(EmptyStory);
 const FilledStory = Template.bind({});
 FilledStory.args = {
   prefill: SignUpPrefillSchema.parse({
-    invitationToken: 'abc',
     email: 'jean@france.fr',
     password: 'Mypassword@1',
     firstname: 'Jean',
