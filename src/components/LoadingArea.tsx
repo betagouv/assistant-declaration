@@ -1,6 +1,4 @@
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
-import * as React from 'react';
+import { Box, CircularProgress } from '@mui/material';
 
 export interface LoadingAreaProps {
   ariaLabelTarget: string;

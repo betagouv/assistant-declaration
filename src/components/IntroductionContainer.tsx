@@ -1,8 +1,5 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import Box, { BoxProps } from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import * as React from 'react';
+import { Box, BoxProps, Container, Grid } from '@mui/material';
 
 export function IntroductionContainer({
   left,
@@ -11,9 +8,9 @@ export function IntroductionContainer({
   rightSx,
   containerMaxHeight,
 }: {
-  left: React.ReactElement;
-  right: React.ReactElement;
-  rightRef?: React.MutableRefObject<HTMLDivElement | null>;
+  left: any;
+  right: any;
+  rightRef?: any;
   rightSx?: BoxProps['sx'];
   containerMaxHeight?: any; // Tried to type `BoxProps['sx']['maxHeight']` but it's not working
 }) {

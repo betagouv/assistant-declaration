@@ -62,6 +62,7 @@ const moduleExports = async () => {
       silenceDeprecations: ['legacy-js-api'], // Needed until `sass` v2
     },
     experimental: {
+      optimizePackageImports: ['@codegouvfr/react-dsfr'],
       outputFileTracingIncludes: {
         '*': ['./src/prisma/migrations/**/*', './src/prisma/schema.prisma', './start-and-wait-to-init.sh'], // Migration and start files are required when doing automatic migration before starting the application
       },

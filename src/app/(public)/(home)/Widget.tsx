@@ -1,10 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
-import * as React from 'react';
+import { Box, Paper, Typography } from '@mui/material';
 
-export function Widget({ children, title, icon }: { children: React.ReactNode; title: string; icon: React.ReactElement }) {
+export function Widget({ children, title, icon }: { children: any; title: string; icon: any }) {
   return (
     <Paper variant="outlined" sx={{ height: '100%', px: 4, py: 3 }}>
       <Typography component="div" variant="h6" fontWeight="bold" sx={{ mb: 1 }}>

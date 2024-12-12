@@ -1,8 +1,6 @@
-import Button from '@mui/lab/LoadingButton';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import { LoadingButton as Button } from '@mui/lab';
+import { Box, Typography } from '@mui/material';
 import Image from 'next/image';
-import * as React from 'react';
 
 import style from '@ad/src/app/(public)/(home)/Introduction.module.scss';
 import hero from '@ad/src/assets/images/hero.png';
