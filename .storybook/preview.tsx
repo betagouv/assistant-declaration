@@ -8,7 +8,7 @@ import type { Preview } from '@storybook/react';
 import { configure as testingConfigure } from '@storybook/test';
 import { themes } from '@storybook/theming';
 import { passthrough } from 'msw';
-import { initialize, mswDecorator } from 'msw-storybook-addon';
+import { initialize, mswLoader } from 'msw-storybook-addon';
 import React, { PropsWithChildren, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 
@@ -138,9 +138,9 @@ const preview: Preview = {
       },
     },
   },
+  loaders: [mswLoader],
   decorators: [
     withLinks,
-    mswDecorator,
     (Story, context) => {
       // Provide the necessary depending on the context
 
