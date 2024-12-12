@@ -17,6 +17,9 @@ const { generateRewrites, localizedRoutes } = tsImport.loadSync(path.resolve(__d
 const { getBaseUrl } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/url.ts`), tsImportLoadOptions);
 const { applyRawQueryParserOnNextjsCssModule } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/webpack.ts`), tsImportLoadOptions);
 
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
 const { withSentryConfig } = require('@sentry/nextjs');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const gitRevision = require('git-rev-sync');
@@ -158,12 +161,14 @@ const moduleExports = async () => {
     // disableClientWebpackPlugin: true, // TODO
   };
 
-  return withSentryConfig(standardModuleExports, sentryWebpackPluginOptions, {
-    transpileClientSDK: true,
-    // tunnelRoute: '/monitoring', // Helpful to avoid adblockers, but requires Sentry SaaS
-    hideSourceMaps: false,
-    disableLogger: false,
-  });
+  return withBundleAnalyzer(
+    withSentryConfig(standardModuleExports, sentryWebpackPluginOptions, {
+      transpileClientSDK: true,
+      // tunnelRoute: '/monitoring', // Helpful to avoid adblockers, but requires Sentry SaaS
+      hideSourceMaps: false,
+      disableLogger: false,
+    })
+  );
 };
 
 module.exports = moduleExports;
