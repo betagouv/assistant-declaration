@@ -97,6 +97,7 @@
     "@mui/x-data-grid": "^7.23.0",
     "@mui/x-date-pickers": "^7.23.0",
     "@next-auth/prisma-adapter": "^1.0.7",
+    "@next/bundle-analyzer": "^15.1.0",
     "@prisma/client": "5.19.1",
     "@sentry/nextjs": "^8.30.0",
     "@socialgouv/matomo-next": "^1.8.1",
