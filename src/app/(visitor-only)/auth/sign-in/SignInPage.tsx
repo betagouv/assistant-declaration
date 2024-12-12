@@ -45,6 +45,7 @@ export function SignInPage() {
         <Image
           src={locationFrance}
           alt=""
+          priority={true}
           style={{
             backgroundColor: '#f5f5fe', // [WORKAROUND] Simple hack since DSFR does not provide pictograms in dark mode
             width: '90%',
