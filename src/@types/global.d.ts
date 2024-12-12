@@ -33,6 +33,7 @@ interface RuntimeConfig {
   publicRuntimeConfig: PublicRuntimeConfig;
 }
 
+declare module '@tomfreudenberg/next-auth-mock/storybook';
 declare module 'next/config' {
   const value: () => RuntimeConfig;
   export default value;

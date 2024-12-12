@@ -7,6 +7,7 @@ import { Renderer } from '@storybook/core/types';
 import type { Preview } from '@storybook/react';
 import { configure as testingConfigure } from '@storybook/test';
 import { themes } from '@storybook/theming';
+import { withMockAuth } from '@tomfreudenberg/next-auth-mock/storybook';
 import { passthrough } from 'msw';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import React, { PropsWithChildren, useEffect } from 'react';
@@ -141,6 +142,7 @@ const preview: Preview = {
   loaders: [mswLoader],
   decorators: [
     withLinks,
+    withMockAuth,
     (Story, context) => {
       // Provide the necessary depending on the context
 
