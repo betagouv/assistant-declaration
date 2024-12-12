@@ -12,6 +12,7 @@ import { initialize, mswDecorator } from 'msw-storybook-addon';
 import React, { PropsWithChildren, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 
+import { MockProvider } from '@ad/.storybook/MockProvider';
 import { ThemedDocsContainer } from '@ad/.storybook/ThemedDocsContainer';
 // import { DARK_MODE_EVENT_NAME, UPDATE_DARK_MODE_EVENT_NAME } from 'storybook-dark-mode';
 import { disableGlobalDsfrStyle } from '@ad/.storybook/helpers';
@@ -172,9 +173,11 @@ const preview: Preview = {
             <DsfrHead />
             <DsfrProvider>
               <MuiDsfrThemeProvider>
-                <Providers>
-                  <Story />
-                </Providers>
+                <MockProvider>
+                  <Providers>
+                    <Story />
+                  </Providers>
+                </MockProvider>
               </MuiDsfrThemeProvider>
             </DsfrProvider>
           </>
