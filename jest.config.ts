@@ -25,7 +25,6 @@ const customJestConfig: Parameters<typeof createJestConfig>[0] = {
   setupFilesAfterEnv: [],
   moduleDirectories: ['node_modules', '<rootDir>/'],
   moduleNameMapper: {
-    '^.+\\.(scss)\\?raw$': '<rootDir>/src/fixtures/rawStyleMock.ts', // `createJestConfig` mocks all styles with `{}` but not our specific `?raw` so we do (note order over other mappers matters)
     ...(fullTsconfig.config.compilerOptions && fullTsconfig.config.compilerOptions.paths
       ? pathsToModuleNameMapper(fullTsconfig.config.compilerOptions.paths, { prefix: '<rootDir>/' })
       : {}),
@@ -64,6 +63,14 @@ const defaultExport = async () => {
     [...commonPackages, ...additionalJestPackages],
     customJestConfig.transformIgnorePatterns ?? []
   );
+
+  // Since the order over other mappers matters, we cannnot use it directly inside `moduleNameMapper` because it's appended over Next.js default configuration and not preprended
+  // So we make sure it's added as keys before (since JavaScript object keys are not sorted)
+  config.moduleNameMapper = {
+    // '^.+\\.(scss)\\?raw$': '<rootDir>/src/fixtures/rawStyleMock.ts', // `createJestConfig` mocks all styles with `{}` but not our specific `?raw` so we do (note order over other mappers matters)
+    '^.+\\.(email|storybook)\\.scss$': '<rootDir>/src/fixtures/rawStyleMock.ts', // [WORKAROUND] Since using ESM modules (`extensionsToTreatAsEsm`) the paths no longer have their query string, so in the meantime we just force it for our specific case
+    ...config.moduleNameMapper,
+  };
 
   return config;
 };
