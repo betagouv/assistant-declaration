@@ -20,7 +20,6 @@ const config: StorybookConfig = {
     '@storybook/addon-links',
     '@storybook/addon-measure',
     '@storybook/addon-viewport',
-    'storybook-addon-pseudo-states',
     'storybook-dark-mode',
     '@chromatic-com/storybook',
   ],

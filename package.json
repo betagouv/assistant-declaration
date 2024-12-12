@@ -230,7 +230,6 @@
     "serve": "^14.2.4",
     "start-server-and-test": "^2.0.8",
     "storybook": "^8.4.6",
-    "storybook-addon-pseudo-states": "^4.0.2",
     "storybook-dark-mode": "^4.0.2",
     "storybook-mock-date-decorator": "^2.0.6",
     "style-loader": "^3.3.1",
