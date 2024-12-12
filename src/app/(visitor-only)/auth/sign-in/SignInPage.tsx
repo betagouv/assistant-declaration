@@ -54,7 +54,7 @@ export function SignInPage() {
             objectFit: 'contain',
           }}
         />
-        <Typography variant="body1" sx={{ pt: '40px' }}>
+        <Typography component="div" variant="body1" sx={{ pt: '40px' }}>
           <Typography sx={{ fontWeight: 'bold', textAlign: 'center' }}>D&apos;autres salles de spectacle utilisent la plateforme !</Typography>
           <br />
           <p>
