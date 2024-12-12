@@ -31,8 +31,8 @@ const customJestConfig: Parameters<typeof createJestConfig>[0] = {
       : {}),
   },
   testEnvironment: 'jest-environment-jsdom',
-  modulePathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/data/'],
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/data/', '<rootDir>/node_modules/'],
+  modulePathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/data/', '<rootDir>/dist/'],
+  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/data/', '<rootDir>/dist/', '<rootDir>/node_modules/'],
   transformIgnorePatterns: [],
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   transform: {
