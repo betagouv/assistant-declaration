@@ -54,7 +54,7 @@ export function SignUpPage() {
             objectFit: 'contain',
           }}
         />
-        <Typography variant="body1" sx={{ pt: '40px' }}>
+        <Typography component="div" variant="body1" sx={{ pt: '40px' }}>
           <Typography sx={{ fontWeight: 'bold' }}>Les raisons de s&apos;inscrire sur la plateforme :</Typography>
           <ol>
             <li>Un lien direct entre vos données de billetterie et vos déclarations</li>
