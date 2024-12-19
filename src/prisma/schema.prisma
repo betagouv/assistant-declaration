@@ -118,7 +118,6 @@ model Organization {
   updatedAt       DateTime          @default(now()) @updatedAt
   TicketingSystem TicketingSystem[]
   Collaborator    Collaborator[]
-  EventSerie      EventSerie[]
 }
 
 enum TicketingSystemName {
@@ -135,10 +134,12 @@ model TicketingSystem {
   lastProcessingError   String?
   lastProcessingErrorAt DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  deletedAt DateTime?
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  EventSerie   EventSerie[]
 }
 
 model Collaborator {
@@ -159,8 +160,8 @@ model Collaborator {
 
 model EventSerie {
   id                        String   @id @default(uuid()) @db.Uuid
-  internalTicketingSystemId String   @unique
-  organizationId            String   @db.Uuid
+  internalTicketingSystemId String
+  ticketingSystemId         String   @db.Uuid
   name                      String
   startAt                   DateTime
   endAt                     DateTime
@@ -169,14 +170,16 @@ model EventSerie {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  Event          Event[]
-  TicketCategory TicketCategory[]
+  ticketingSystem TicketingSystem  @relation(fields: [ticketingSystemId], references: [id], onDelete: Cascade)
+  Event           Event[]
+  TicketCategory  TicketCategory[]
+
+  @@unique([ticketingSystemId, internalTicketingSystemId])
 }
 
 model Event {
   id                        String   @id @default(uuid()) @db.Uuid
-  internalTicketingSystemId String   @unique
+  internalTicketingSystemId String
   eventSerieId              String   @db.Uuid
   startAt                   DateTime
   endAt                     DateTime
@@ -188,6 +191,8 @@ model Event {
   EventCategoryTickets       EventCategoryTickets[]
   EventSerieDeclaration      EventSerieDeclaration[]
   EventSerieSacemDeclaration EventSerieSacemDeclaration[]
+
+  @@unique([eventSerieId, internalTicketingSystemId])
 }
 
 model TicketCategory {
@@ -203,6 +208,8 @@ model TicketCategory {
 
   eventSerie           EventSerie             @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
   EventCategoryTickets EventCategoryTickets[]
+
+  @@unique([eventSerieId, internalTicketingSystemId])
 }
 
 model EventCategoryTickets {
