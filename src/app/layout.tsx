@@ -2,6 +2,7 @@ import { Display } from '@codegouvfr/react-dsfr/Display';
 import { DsfrHead } from '@codegouvfr/react-dsfr/next-appdir/DsfrHead';
 import { DsfrProvider } from '@codegouvfr/react-dsfr/next-appdir/DsfrProvider';
 import { getHtmlAttributes } from '@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes';
+import { Metadata } from 'next';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { PropsWithChildren } from 'react';
@@ -14,6 +15,10 @@ import '@ad/src/app/layout.scss';
 import { Providers } from '@ad/src/app/providers';
 import { LiveChatProvider } from '@ad/src/components/live-chat/LiveChatProvider';
 import { defaultColorScheme } from '@ad/src/utils/dsfr';
+
+export const metadata: Metadata = {
+  title: 'Assistant déclaration',
+};
 
 export interface RootLayoutProps {
   workaroundForNextJsPages?: boolean;
