@@ -21,6 +21,9 @@
       "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",
       "invalidVerificationToken": "l'opération que vous essayez de réaliser a été refusée",
       "noAccountWithThisEmail": "aucun compte n'existe avec cette adresse email",
+      "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
+      "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
+      "organizationNotFound": "aucune organisation trouvée",
       "userNotFound": "cet utilisateur n'existe pas",
       "unauthorizedError": "vous devez être connecté pour effectuer cette action",
       "unexpectedError": "une erreur inattendue est survenue, veuillez retenter"

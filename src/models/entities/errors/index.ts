@@ -79,6 +79,12 @@ export const authRetriableError = new BusinessError('authRetriable', t('errors.c
 export const authFatalError = new BusinessError('authFatal', t('errors.custom.authFatal'));
 export const unauthorizedError = new BusinessError('unauthorizedError', t('errors.custom.unauthorizedError'));
 
+// Access
+export const organizationCollaboratorRoleRequiredError = new BusinessError(
+  'organizationCollaboratorRoleRequired',
+  t('errors.custom.organizationCollaboratorRoleRequired')
+);
+
 // Sign up
 export const accountAlreadyWithThisEmailError = new BusinessError('accountAlreadyWithThisEmail', t('errors.custom.accountAlreadyWithThisEmail'));
 
@@ -94,3 +100,9 @@ export const invalidCurrentPasswordError = new BusinessError('invalidCurrentPass
 
 // User
 export const userNotFoundError = new BusinessError('userNotFound', t('errors.custom.userNotFound'));
+
+// Organization
+export const organizationNotFoundError = new BusinessError('organizationNotFound', t('errors.custom.organizationNotFound'));
+
+// Ticketing system
+export const noValidTicketingSystemError = new BusinessError('noValidTicketingSystem', t('errors.custom.noValidTicketingSystem'));

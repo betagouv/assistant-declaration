@@ -44,6 +44,9 @@ const customJestConfig: Parameters<typeof createJestConfig>[0] = {
     ],
     '\\.(html|xml|txt)$': '@glen/jest-raw-loader',
   },
+  globals: {
+    fetch,
+  },
 };
 
 // Used to specify the default cache directory in our CI/CD environment

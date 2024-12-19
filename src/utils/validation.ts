@@ -18,9 +18,9 @@ export function safeCoerceToBoolean(initialValidation: z.ZodBoolean) {
   // This is to avoid the situation of `z.coerce.boolean()` that is always true when passing a string (for example, new Boolean('false'))
   return z.preprocess((value) => {
     if (typeof value === 'string') {
-      if (value.toLowerCase() === 'true') {
+      if (value.toLowerCase() === 'true' || value === '1') {
         return true;
-      } else if (value.toLowerCase() === 'false') {
+      } else if (value.toLowerCase() === 'false' || value === '0') {
         return false;
       }
     } else if (typeof value === 'number') {

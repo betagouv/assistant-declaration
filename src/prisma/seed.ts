@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, TicketingSystemName } from '@prisma/client';
 
 import { seedProductionDataIntoDatabase } from '@ad/src/prisma/production-seed';
 
@@ -25,5 +25,68 @@ export async function seedDatabase(prismaClient: PrismaClient) {
   // Add predefined production data as samples too
   await seedProductionDataIntoDatabase(prismaClient);
 
-  // TODO
+  const testUserId = '5c03994c-fc16-47e0-bd02-d218a370a078';
+
+  // Create main user
+  const mainUser = await prismaClient.user.upsert({
+    where: {
+      id: testUserId,
+    },
+    create: {
+      id: testUserId,
+      firstname: 'John',
+      lastname: 'Doe',
+      email: 'john@domain.demo',
+      status: 'CONFIRMED',
+      profilePicture: null,
+      Admin: {
+        create: {
+          canEverything: true,
+        },
+      },
+      Secrets: {
+        create: {
+          passwordHash: '$2a$11$L2SjShQuoJoYqMPmoINuWeRLRWnzNuQf22.VgculPIlpnS8bleLEG', // Value: "test"
+        },
+      },
+    },
+    update: {},
+  });
+
+  // Create organization
+  const coucouOrganization = await prismaClient.organization.create({
+    data: {
+      name: 'Les spectacles de Coucou',
+      officialId: '123456789',
+    },
+  });
+
+  // Add the main user as a collaborator in an organization
+  const coucouCollaborator = await prismaClient.collaborator.create({
+    data: {
+      user: {
+        connect: {
+          id: mainUser.id,
+        },
+      },
+      organization: {
+        connect: {
+          id: coucouOrganization.id,
+        },
+      },
+    },
+  });
+
+  // Add ticketing system
+  const coucouMainTicketingSystem = await prismaClient.ticketingSystem.create({
+    data: {
+      organizationId: coucouOrganization.id,
+      name: TicketingSystemName.BILLETWEB,
+      apiAccessKey: 'failing-one',
+      apiSecretKey: 'failing-one',
+      lastSynchronizationAt: null,
+      lastProcessingError: null,
+      lastProcessingErrorAt: null,
+    },
+  });
 }
