@@ -103,6 +103,14 @@ export const userNotFoundError = new BusinessError('userNotFound', t('errors.cus
 
 // Organization
 export const organizationNotFoundError = new BusinessError('organizationNotFound', t('errors.custom.organizationNotFound'));
+export const collaboratorCanOnlySeeOrganizationEventsSeriesError = new BusinessError(
+  'collaboratorCanOnlySeeOrganizationEventsSeries',
+  t('errors.custom.collaboratorCanOnlySeeOrganizationEventsSeries')
+);
+export const collaboratorCanOnlySeeOrganizationTicketingSystemsError = new BusinessError(
+  'collaboratorCanOnlySeeOrganizationTicketingSystems',
+  t('errors.custom.collaboratorCanOnlySeeOrganizationTicketingSystems')
+);
 
 // Ticketing system
 export const noValidTicketingSystemError = new BusinessError('noValidTicketingSystem', t('errors.custom.noValidTicketingSystem'));

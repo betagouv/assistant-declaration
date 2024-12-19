@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/declaration';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
 export const LiteEventSerieSchema = applyTypedParsers(
@@ -59,3 +60,35 @@ export const LiteEventSerieWrapperSchema = applyTypedParsers(
     .strict()
 );
 export type LiteEventSerieWrapperSchemaType = z.infer<typeof LiteEventSerieWrapperSchema>;
+
+export const EventSerieSchema = applyTypedParsers(
+  z
+    .object({
+      id: z.string().uuid(),
+      internalTicketingSystemId: z.string().min(1),
+      ticketingSystemId: z.string().uuid(),
+      name: z.string().min(1),
+      startAt: z.date(),
+      endAt: z.date(),
+      createdAt: z.date(),
+      updatedAt: z.date(),
+    })
+    .strict()
+);
+export type EventSerieSchemaType = z.infer<typeof EventSerieSchema>;
+
+export const EventSerieWrapperSchema = applyTypedParsers(
+  z
+    .object({
+      serie: EventSerieSchema,
+      partialDeclarations: z.array(
+        // This is partial declarations just to adjust the UI
+        z.object({
+          type: DeclarationTypeSchema,
+          status: DeclarationStatusSchema,
+        })
+      ),
+    })
+    .strict()
+);
+export type EventSerieWrapperSchemaType = z.infer<typeof EventSerieWrapperSchema>;

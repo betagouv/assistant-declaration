@@ -57,7 +57,7 @@ export const organizationRouter = router({
     }
 
     return {
-      organization: await organizationPrismaToModel(organization),
+      organization: organizationPrismaToModel(organization),
     };
   }),
 });

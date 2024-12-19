@@ -16,6 +16,8 @@
       "authFatal": "une erreur inattendue est survenue, merci de contacter le support",
       "authNoCredentialsMatch": "les informations de connexion fournies sont incorrectes",
       "authRetriable": "une erreur est survenue, veuillez retenter",
+      "collaboratorCanOnlySeeOrganizationEventsSeries": "en tant que collaborateur vous ne pouvez que lister les séries de représentation concernant votre organisation",
+      "collaboratorCanOnlySeeOrganizationTicketingSystems": "en tant que collaborateur vous ne pouvez que lister les systèmes de billetterie de votre organisation",
       "expiredVerificationToken": "vous avez dépassé le temps imparti, merci de renouveler votre demande",
       "internalServerError": "une erreur interne est survenue, veuillez retenter",
       "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",

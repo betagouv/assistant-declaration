@@ -1,9 +1,11 @@
 import { subMonths } from 'date-fns';
 
 import { BilletwebTicketingSystemClient, MockTicketingSystemClient, TicketingSystemClient } from '@ad/src/core/ticketing';
-import { SynchronizeDataFromTicketingSystemsSchema } from '@ad/src/models/actions/event';
-import { noValidTicketingSystemError } from '@ad/src/models/entities/errors';
+import { ListEventsSeriesSchema, SynchronizeDataFromTicketingSystemsSchema } from '@ad/src/models/actions/event';
+import { DeclarationStatusSchema } from '@ad/src/models/entities/declaration';
+import { collaboratorCanOnlySeeOrganizationEventsSeriesError, noValidTicketingSystemError } from '@ad/src/models/entities/errors';
 import {
+  EventSerieWrapperSchemaType,
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
   LiteEventSchema,
@@ -14,7 +16,8 @@ import {
   LiteTicketCategorySchemaType,
 } from '@ad/src/models/entities/event';
 import { prisma } from '@ad/src/prisma/client';
-import { assertUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
+import { declarationTypePrismaToModel, eventSeriePrismaToModel } from '@ad/src/server/routers/mappers';
+import { assertUserACollaboratorPartOfOrganization, isUserACollaboratorPartOfOrganizations } from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { getDiff } from '@ad/src/utils/comparaison';
@@ -489,5 +492,51 @@ export const eventRouter = router({
         }
       })
     );
+  }),
+  listEventsSeries: privateProcedure.input(ListEventsSeriesSchema).query(async ({ ctx, input }) => {
+    if (
+      !input.filterBy.organizationIds ||
+      input.filterBy.organizationIds.length !== 1 ||
+      !(await isUserACollaboratorPartOfOrganizations(input.filterBy.organizationIds, ctx.user.id))
+    ) {
+      throw collaboratorCanOnlySeeOrganizationEventsSeriesError;
+    }
+
+    const eventsSeries = await prisma.eventSerie.findMany({
+      where: {
+        ticketingSystem: {
+          organizationId: input.filterBy.organizationIds
+            ? {
+                in: input.filterBy.organizationIds,
+              }
+            : undefined,
+        },
+      },
+      include: {
+        EventSerieDeclaration: {
+          include: {
+            EventSerieSacemDeclaration: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      eventsSeriesWrappers: eventsSeries.map((eventsSerie): EventSerieWrapperSchemaType => {
+        return {
+          serie: eventSeriePrismaToModel(eventsSerie),
+          partialDeclarations: eventsSerie.EventSerieDeclaration.map((declaration) => {
+            return {
+              type: declarationTypePrismaToModel(declaration),
+              status: DeclarationStatusSchema.parse(declaration.status),
+            };
+          }),
+        };
+      }),
+    };
   }),
 });

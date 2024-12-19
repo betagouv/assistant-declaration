@@ -26,6 +26,13 @@ export const localizedRoutes = {
       fr: (p) => `/tableau-de-bord`,
     }
   ),
+  declaration: defineLocalizedRoute(
+    { organizationId: param.path.string, eventSerieId: param.path.string, declarationType: param.path.string },
+    {
+      en: (p) => `/dashboard/organization/${p.organizationId}/serie/${p.eventSerieId}/declaration/${p.declarationType}`,
+      fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}/serie/${p.eventSerieId}/declaration/${p.declarationType}`,
+    }
+  ),
   forgottenPassword: defineLocalizedRoute(
     {},
     {
@@ -134,6 +141,7 @@ export const routes = {
     accessibility: defineRoute(localizedRoutes.accessibility.params, localizedRoutes.accessibility.paths.en),
     accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.en),
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.en),
+    declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.en),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.en),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.en),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.en),
@@ -148,6 +156,7 @@ export const routes = {
     accessibility: defineRoute(localizedRoutes.accessibility.params, localizedRoutes.accessibility.paths.fr),
     accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.fr),
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.fr),
+    declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.fr),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.fr),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.fr),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.fr),

@@ -12,8 +12,8 @@ export type PaginationSizeSchemaType = z.infer<typeof PaginationSizeSchema>;
 
 export const GetterInputSchema = z
   .object({
-    page: z.number().int().positive(),
-    pageSize: PaginationSizeSchema,
+    page: z.number().int().positive().nullish(),
+    pageSize: PaginationSizeSchema.nullish(),
     // The following ones should be extended depending on the action
     orderBy: z.object({}),
     filterBy: z.object({}),
