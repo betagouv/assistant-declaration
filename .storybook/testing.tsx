@@ -64,6 +64,12 @@ export async function playFindMainTitle(parentElement: HTMLElement, name: string
   });
 }
 
+export async function playFindButton(parentElement: HTMLElement, name: string | RegExp): Promise<HTMLElement> {
+  return await within(parentElement).findByRole('button', {
+    name: name,
+  });
+}
+
 export async function playFindProgressBar(parentElement: HTMLElement, name: string | RegExp): Promise<HTMLElement> {
   return await within(parentElement).findByRole('progressbar', {
     name: name,

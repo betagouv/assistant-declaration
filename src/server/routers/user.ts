@@ -55,14 +55,23 @@ export const userRouter = router({
     if (!user) {
       return {
         session: UserInterfaceSessionSchema.parse({
+          collaboratorOf: [],
           isAdmin: false,
-          assignedUnprocessedMessages: 0,
         }),
       };
     }
 
     return {
       session: UserInterfaceSessionSchema.parse({
+        collaboratorOf: await Promise.all(
+          user.Collaborator.map(async (collaborator) => {
+            return {
+              id: collaborator.organization.id,
+              name: collaborator.organization.name,
+              collaboratorId: collaborator.id,
+            };
+          })
+        ),
         isAdmin: !!user.Admin,
       }),
     };
