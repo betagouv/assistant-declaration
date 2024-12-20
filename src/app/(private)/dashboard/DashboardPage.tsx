@@ -55,15 +55,19 @@ export function DashboardPage(props: DashboardPageProps) {
         }}
       >
         <Grid container sx={{ justifyContent: 'center' }}>
-          <Typography component="h1" variant="h4" sx={{ textAlign: 'center', py: 2 }}>
-            Bienvenue sur la plateforme !
-          </Typography>
-          <Typography component="p" variant="body2" sx={{ textAlign: 'center', py: 2 }}>
-            Vous n&apos;avez actuellement aucun accès spécifique à la plateforme. Veuillez nous contacter par la messagerie.
-          </Typography>
-          <Button onClick={showLiveChat} loading={isLiveChatLoading} size="large" variant="contained">
-            Ouvrir la messagerie
-          </Button>
+          <Grid item xs={12}>
+            <Typography component="h1" variant="h4" sx={{ textAlign: 'center', py: 2 }}>
+              Bienvenue sur la plateforme !
+            </Typography>
+            <Typography component="p" variant="body2" sx={{ textAlign: 'center', py: 2 }}>
+              Vous n&apos;avez actuellement aucun accès spécifique à la plateforme. Veuillez nous contacter par la messagerie.
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sx={{ py: 3, textAlign: 'center' }}>
+            <Button onClick={showLiveChat} loading={isLiveChatLoading} size="large" variant="contained">
+              Ouvrir la messagerie
+            </Button>
+          </Grid>
         </Grid>
       </Container>
     );

@@ -102,7 +102,7 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                   {lastSynchronizationTooOld ? (
                     <Grid item xs={12} sx={{ py: 2 }}>
                       <Alert severity="warning">
-                        La dernière synchronisation date d'{t('date.ago', { date: lastSynchronizationAt })}. Il est fortement recommandé de
+                        La dernière synchronisation date d&apos;{t('date.ago', { date: lastSynchronizationAt })}. Il est fortement recommandé de
                         resynchroniser vos données avant de faire une déclaration.
                       </Alert>
                     </Grid>
@@ -153,7 +153,7 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                     </Grid>
                   ) : (
                     <Grid item xs={12} sx={{ py: 2 }}>
-                      Aucune série de représentations n'a été trouvée dans votre billetterie.
+                      Aucune série de représentations n&apos;a été trouvée dans votre billetterie.
                     </Grid>
                   )}
                 </>
@@ -163,7 +163,7 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                     <Alert severity="warning" sx={{ mb: 3 }}>
                       Veuillez synchroniser les données de votre billetterie pour débuter vos déclarations.{' '}
                       <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 600 }}>
-                        À noter que pour la première synchronisation cette opération peut durer jusqu'à 1 minute.
+                        À noter que pour la première synchronisation cette opération peut durer jusqu&apos;à 1 minute.
                       </Typography>
                     </Alert>
                   </Grid>
@@ -187,7 +187,7 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
       ) : (
         <>
           <Alert severity="error">
-            Aucun système de billetterie n'est actuellement connecté à votre organisation.{' '}
+            Aucun système de billetterie n&apos;est actuellement connecté à votre organisation.{' '}
             <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 600 }}>
               Veuillez contacter notre support pour corriger cela et ainsi commencer vos déclarations.
             </Typography>
