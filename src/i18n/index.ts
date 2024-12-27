@@ -61,7 +61,7 @@ i18next.use(LanguageDetector).init(
 
             if (format === 'short') return formatDate(value, 'P', { locale });
             if (format === 'long') return formatDate(value, 'PPPP', { locale });
-            if (format === 'longWithTime') return formatDate(value, 'PPPPpp', { locale });
+            if (format === 'longWithTime') return formatDate(value, 'PPPPp', { locale });
             if (format === 'relative') return formatRelative(value, new Date(), { locale });
             if (format === 'ago') {
               return formatDistance(value, new Date(), {

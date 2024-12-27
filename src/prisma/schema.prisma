@@ -228,10 +228,6 @@ model EventCategoryTickets {
   @@unique([eventId, categoryId])
 }
 
-enum EventSerieDeclarationType {
-  SACEM
-}
-
 enum EventSerieDeclarationStatus {
   PENDING
   PROCESSED

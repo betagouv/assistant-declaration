@@ -1,11 +1,24 @@
 import { subMonths } from 'date-fns';
 
 import { BilletwebTicketingSystemClient, MockTicketingSystemClient, TicketingSystemClient } from '@ad/src/core/ticketing';
-import { ListEventsSeriesSchema, SynchronizeDataFromTicketingSystemsSchema } from '@ad/src/models/actions/event';
+import {
+  GetEventSerieSchema,
+  ListEventsSchema,
+  ListEventsSeriesSchema,
+  SynchronizeDataFromTicketingSystemsSchema,
+  UpdateEventCategoryTicketsSchema,
+} from '@ad/src/models/actions/event';
 import { DeclarationStatusSchema } from '@ad/src/models/entities/declaration';
-import { collaboratorCanOnlySeeOrganizationEventsSeriesError, noValidTicketingSystemError } from '@ad/src/models/entities/errors';
+import {
+  collaboratorCanOnlySeeOrganizationEventsSeriesError,
+  eventCategoryTicketsNotFoundError,
+  eventSerieNotFoundError,
+  noValidTicketingSystemError,
+  organizationCollaboratorRoleRequiredError,
+} from '@ad/src/models/entities/errors';
 import {
   EventSerieWrapperSchemaType,
+  EventWrapperSchemaType,
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
   LiteEventSchema,
@@ -16,8 +29,18 @@ import {
   LiteTicketCategorySchemaType,
 } from '@ad/src/models/entities/event';
 import { prisma } from '@ad/src/prisma/client';
-import { declarationTypePrismaToModel, eventSeriePrismaToModel } from '@ad/src/server/routers/mappers';
-import { assertUserACollaboratorPartOfOrganization, isUserACollaboratorPartOfOrganizations } from '@ad/src/server/routers/organization';
+import {
+  declarationTypePrismaToModel,
+  eventCategoryTicketsPrismaToModel,
+  eventPrismaToModel,
+  eventSeriePrismaToModel,
+  ticketCategoryPrismaToModel,
+} from '@ad/src/server/routers/mappers';
+import {
+  assertUserACollaboratorPartOfOrganization,
+  isUserACollaboratorPartOfOrganization,
+  isUserACollaboratorPartOfOrganizations,
+} from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { getDiff } from '@ad/src/utils/comparaison';
@@ -493,6 +516,42 @@ export const eventRouter = router({
       })
     );
   }),
+  getEventSerie: privateProcedure.input(GetEventSerieSchema).query(async ({ ctx, input }) => {
+    const eventSerie = await prisma.eventSerie.findUnique({
+      where: {
+        id: input.id,
+      },
+      include: {
+        EventSerieDeclaration: {
+          include: {
+            EventSerieSacemDeclaration: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+        ticketingSystem: {
+          select: {
+            organizationId: true,
+          },
+        },
+      },
+    });
+
+    if (!eventSerie) {
+      throw eventSerieNotFoundError;
+    }
+
+    // Before returning, make sure the caller has rights on this authority ;)
+    if (!(await isUserACollaboratorPartOfOrganization(eventSerie.ticketingSystem.organizationId, ctx.user.id))) {
+      throw organizationCollaboratorRoleRequiredError;
+    }
+
+    return {
+      eventSerie: eventSeriePrismaToModel(eventSerie),
+    };
+  }),
   listEventsSeries: privateProcedure.input(ListEventsSeriesSchema).query(async ({ ctx, input }) => {
     if (
       !input.filterBy.organizationIds ||
@@ -523,6 +582,9 @@ export const eventRouter = router({
           },
         },
       },
+      orderBy: {
+        startAt: 'desc',
+      },
     });
 
     return {
@@ -537,6 +599,107 @@ export const eventRouter = router({
           }),
         };
       }),
+    };
+  }),
+  listEvents: privateProcedure.input(ListEventsSchema).query(async ({ ctx, input }) => {
+    const eventSerieId = input.filterBy.eventSeriesIds ? input.filterBy.eventSeriesIds[0] : ''; // For now, requires exactly 1 case
+
+    const targetedSerie = await prisma.eventSerie.findUniqueOrThrow({
+      where: {
+        id: eventSerieId,
+      },
+      select: {
+        id: true,
+        ticketingSystem: {
+          select: {
+            organizationId: true,
+          },
+        },
+      },
+    });
+
+    if (!(await isUserACollaboratorPartOfOrganization(targetedSerie.ticketingSystem.organizationId, ctx.user.id))) {
+      throw organizationCollaboratorRoleRequiredError;
+    }
+
+    const events = await prisma.event.findMany({
+      where: {
+        eventSerieId: targetedSerie.id,
+      },
+      include: {
+        EventCategoryTickets: {
+          include: {
+            category: true,
+          },
+          orderBy: {
+            category: {
+              name: 'asc',
+            },
+          },
+        },
+      },
+      orderBy: {
+        startAt: 'desc',
+      },
+    });
+
+    return {
+      eventsWrappers: events.map((event): EventWrapperSchemaType => {
+        return {
+          event: eventPrismaToModel(event),
+          sales: event.EventCategoryTickets.map((eventCategoryTickets) => {
+            return {
+              ticketCategory: ticketCategoryPrismaToModel(eventCategoryTickets.category),
+              eventCategoryTickets: eventCategoryTicketsPrismaToModel(eventCategoryTickets),
+            };
+          }),
+        };
+      }),
+    };
+  }),
+  updateEventCategoryTickets: privateProcedure.input(UpdateEventCategoryTicketsSchema).mutation(async ({ ctx, input }) => {
+    const eventCategoryTickets = await prisma.eventCategoryTickets.findUnique({
+      where: {
+        id: input.eventCategoryTicketsId,
+      },
+      include: {
+        event: {
+          include: {
+            eventSerie: {
+              include: {
+                ticketingSystem: {
+                  select: {
+                    organizationId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!eventCategoryTickets) {
+      throw eventCategoryTicketsNotFoundError;
+    }
+
+    // Before returning, make sure the caller has rights on this authority ;)
+    if (!(await isUserACollaboratorPartOfOrganization(eventCategoryTickets.event.eventSerie.ticketingSystem.organizationId, ctx.user.id))) {
+      throw organizationCollaboratorRoleRequiredError;
+    }
+
+    const updatedEventCategoryTickets = await prisma.eventCategoryTickets.update({
+      where: {
+        id: eventCategoryTickets.id,
+      },
+      data: {
+        totalOverride: input.totalOverride,
+        priceOverride: input.priceOverride,
+      },
+    });
+
+    return {
+      eventCategoryTickets: eventCategoryTicketsPrismaToModel(updatedEventCategoryTickets),
     };
   }),
 });

@@ -1,7 +1,17 @@
-import { EventSerie, EventSerieDeclaration, EventSerieSacemDeclaration, Organization, TicketingSystem, User } from '@prisma/client';
+import {
+  Event,
+  EventCategoryTickets,
+  EventSerie,
+  EventSerieDeclaration,
+  EventSerieSacemDeclaration,
+  Organization,
+  TicketCategory,
+  TicketingSystem,
+  User,
+} from '@prisma/client';
 
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/declaration';
-import { EventSerieSchemaType } from '@ad/src/models/entities/event';
+import { EventCategoryTicketsSchemaType, EventSchemaType, EventSerieSchemaType, TicketCategorySchemaType } from '@ad/src/models/entities/event';
 import { OrganizationSchemaType } from '@ad/src/models/entities/organization';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
 import { UserSchemaType } from '@ad/src/models/entities/user';
@@ -53,6 +63,44 @@ export function eventSeriePrismaToModel(eventSerie: EventSerie): EventSerieSchem
     endAt: eventSerie.endAt,
     createdAt: eventSerie.createdAt,
     updatedAt: eventSerie.updatedAt,
+  };
+}
+
+export function eventPrismaToModel(event: Event): EventSchemaType {
+  return {
+    id: event.id,
+    internalTicketingSystemId: event.internalTicketingSystemId,
+    eventSerieId: event.eventSerieId,
+    startAt: event.startAt,
+    endAt: event.endAt,
+    createdAt: event.createdAt,
+    updatedAt: event.updatedAt,
+  };
+}
+
+export function ticketCategoryPrismaToModel(ticketCategory: TicketCategory): TicketCategorySchemaType {
+  return {
+    id: ticketCategory.id,
+    internalTicketingSystemId: ticketCategory.internalTicketingSystemId,
+    eventSerieId: ticketCategory.eventSerieId,
+    name: ticketCategory.name,
+    description: ticketCategory.description,
+    price: ticketCategory.price.toNumber(),
+    createdAt: ticketCategory.createdAt,
+    updatedAt: ticketCategory.updatedAt,
+  };
+}
+
+export function eventCategoryTicketsPrismaToModel(eventCategoryTickets: EventCategoryTickets): EventCategoryTicketsSchemaType {
+  return {
+    id: eventCategoryTickets.id,
+    eventId: eventCategoryTickets.eventId,
+    categoryId: eventCategoryTickets.categoryId,
+    total: eventCategoryTickets.total,
+    totalOverride: eventCategoryTickets.totalOverride,
+    priceOverride: eventCategoryTickets.priceOverride !== null ? eventCategoryTickets.priceOverride.toNumber() : null,
+    createdAt: eventCategoryTickets.createdAt,
+    updatedAt: eventCategoryTickets.updatedAt,
   };
 }
 

@@ -14,7 +14,7 @@ import { capitalizeFirstLetter } from '@ad/src/utils/format';
 
 // import { QueryObserverResult, RefetchOptions } from '@tansack/query-core';
 
-export interface ErrorAlertProps extends Pick<AlertProps, 'sx'> {
+export interface ErrorAlertProps extends Pick<AlertProps, 'onClose' | 'sx'> {
   errors: (TRPCClientErrorLike<AppRouter> | Error)[]; // Errors can be from the network (tRPC most of the time) or local
   // TODO: impossible to import types... why?
   // refetchs: (options?: RefetchOptions) => Promise<QueryObserverResult<unknown, unknown>>[];

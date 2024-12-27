@@ -18,6 +18,8 @@
       "authRetriable": "une erreur est survenue, veuillez retenter",
       "collaboratorCanOnlySeeOrganizationEventsSeries": "en tant que collaborateur vous ne pouvez que lister les séries de représentation concernant votre organisation",
       "collaboratorCanOnlySeeOrganizationTicketingSystems": "en tant que collaborateur vous ne pouvez que lister les systèmes de billetterie de votre organisation",
+      "eventCategoryTicketsNotFound": "ces données de catégorie de tickets n'existent pas",
+      "eventSerieNotFound": "cette série de représentations n'existe pas",
       "expiredVerificationToken": "vous avez dépassé le temps imparti, merci de renouveler votre demande",
       "internalServerError": "une erreur interne est survenue, veuillez retenter",
       "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",
@@ -62,8 +64,15 @@
         "passwordRequiresLowerAndUpperCharacters": "le mot de passe doit contenir au moins une majuscule et une minuscule",
         "too_small_one": "le mot de passe est requis"
       },
+      "priceOverride": {
+        "too_small": "le prix doit être supérieur à {{minimum}} euro"
+      },
       "query": {
         "too_big": "la recherche doit faire {{maximum}} caractères maximum"
+      },
+      "totalOverride": {
+        "invalid_type": "le nombre de places doit être un nombre entier",
+        "too_small": "le nombre de places doit être supérieur à {{minimum}}"
       },
       "termsAccepted": {
         "invalid_literal": "les conditions générales d'utilisation doivent être acceptées"
