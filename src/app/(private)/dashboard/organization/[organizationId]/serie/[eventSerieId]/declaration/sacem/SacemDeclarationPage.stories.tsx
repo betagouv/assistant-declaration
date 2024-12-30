@@ -4,6 +4,7 @@ import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindMainTitle } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
 import { SacemDeclarationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacem/SacemDeclarationPage';
+import { sacemDeclarations, sacemDeclarationsWrappers } from '@ad/src/fixtures/declaration';
 import { eventCategoryTickets, eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
@@ -27,10 +28,24 @@ const mswCommonParameters = [
     },
   }),
   getTRPCMock({
+    type: 'query',
+    path: ['getSacemDeclaration'],
+    response: {
+      sacemDeclarationWrapper: sacemDeclarationsWrappers[0],
+    },
+  }),
+  getTRPCMock({
     type: 'mutation',
     path: ['updateEventCategoryTickets'],
     response: {
       eventCategoryTickets: eventCategoryTickets[0],
+    },
+  }),
+  getTRPCMock({
+    type: 'mutation',
+    path: ['fillSacemDeclaration'],
+    response: {
+      sacemDeclaration: sacemDeclarations[0],
     },
   }),
 ];

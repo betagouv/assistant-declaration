@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/declaration';
+import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
 export const LiteEventSerieSchema = applyTypedParsers(

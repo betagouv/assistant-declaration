@@ -1,4 +1,4 @@
-import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/declaration';
+import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import {
   EventCategoryTicketsSchema,
   EventCategoryTicketsSchemaType,

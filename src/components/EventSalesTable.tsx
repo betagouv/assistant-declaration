@@ -165,6 +165,30 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
         disableRowSelectionOnClick
         processRowUpdate={processRowUpdate}
         onProcessRowUpdateError={handleProcessRowUpdateError}
+        onCellEditStart={(params, event) => {
+          // [WORKAROUND] As for number inputs outside the datagrid, there is the native issue of scrolling making the value changing
+          // So doing the same workaround to prevent scrolling when it is focused
+          // Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
+          const editCellElement = event.target as HTMLDivElement;
+
+          // At the time of the callback the input child is not yet created, so we have to wait for it
+          // Note: it appears in a few cases it does not work the first time... maybe we should delay a bit the "observe"?
+          const observer = new MutationObserver(() => {
+            const editCellInputElement = editCellElement.querySelector('input[type="number"]');
+
+            if (editCellInputElement) {
+              observer.disconnect();
+
+              // Note: no need to remove the listener since it will after the focus is released due to the cell input element being deleted by `DataGrid`
+              editCellInputElement.addEventListener('wheel', (event) => {
+                (event.target as HTMLInputElement).blur();
+              });
+            }
+          });
+
+          // Start observing the cell element for child additions
+          observer.observe(editCellElement, { childList: true, subtree: true });
+        }}
         aria-label="tableau des ventes d'une représentation"
         data-sentry-mask
       />

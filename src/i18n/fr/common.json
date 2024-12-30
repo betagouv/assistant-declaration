@@ -33,6 +33,9 @@
       "unexpectedError": "une erreur inattendue est survenue, veuillez retenter"
     },
     "validation": {
+      "clientId": {
+        "too_small_one": "le numéro client est requis"
+      },
       "currentPassword": {
         "too_small_one": "le mot de passe actuel est requis"
       },
@@ -45,6 +48,12 @@
       },
       "lastname": {
         "too_small_one": "le nom de famille est requis"
+      },
+      "managerName": {
+        "too_small_one": "le nom de la personne en charge est requis"
+      },
+      "managerTitle": {
+        "too_small_one": "le rôle de la personne en charge est requis"
       },
       "message": {
         "too_big": "le message doit faire {{maximum}} caractères maximum",
@@ -63,6 +72,13 @@
         "passwordRequiresHeightCharacters": "le mot de passe doit contenir au moins 8 caractères",
         "passwordRequiresLowerAndUpperCharacters": "le mot de passe doit contenir au moins une majuscule et une minuscule",
         "too_small_one": "le mot de passe est requis"
+      },
+      "placeCapacity": {
+        "invalid_type": "la capacité de la salle doit être un nombre entier",
+        "too_small_one": "la capacité de la salle est requise"
+      },
+      "placeName": {
+        "too_small_one": "le nom de la salle est requis"
       },
       "priceOverride": {
         "too_small": "le prix doit être supérieur à {{minimum}} euro"

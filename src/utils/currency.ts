@@ -2,6 +2,15 @@
 export const currencyFormatter = new Intl.NumberFormat(getLocale(), {
   style: 'currency',
   currency: 'EUR',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+export const currencyFormatterWithNoDecimals = new Intl.NumberFormat(getLocale(), {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
 });
 
 // [WORKAROUND] For whatever reason in GitHub Actions `navigator.language` is `en-US@posix` and throws `RangeError: Incorrect locale information provided` (the suffix should not exist?)

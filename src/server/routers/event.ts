@@ -8,7 +8,7 @@ import {
   SynchronizeDataFromTicketingSystemsSchema,
   UpdateEventCategoryTicketsSchema,
 } from '@ad/src/models/actions/event';
-import { DeclarationStatusSchema } from '@ad/src/models/entities/declaration';
+import { DeclarationStatusSchema } from '@ad/src/models/entities/common';
 import {
   collaboratorCanOnlySeeOrganizationEventsSeriesError,
   eventCategoryTicketsNotFoundError,

@@ -135,6 +135,11 @@ const preview: Preview = {
             id: 'duplicate-id-active',
             selector: '*:not([id^="fr-header-quick-access-item"])',
           },
+          {
+            // We use a number input with combobox and it seems non-standard, so silenting seems for our use case it's justified
+            id: 'aria-allowed-role',
+            selector: '*:not([role="combobox"][type="number"])',
+          },
         ],
       },
     },
