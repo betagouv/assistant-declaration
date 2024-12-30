@@ -12,6 +12,8 @@ import { trpc } from '@ad/src/client/trpcClient';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventSalesTable } from '@ad/src/components/EventSalesTable';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
+import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
+import { currencyFormatter } from '@ad/src/utils/currency';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
@@ -41,6 +43,8 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
   const [expandedAccordions, setExpandedAccordions] = useState<string[]>([]);
   const collapseAllAccordions = useCallback(() => setExpandedAccordions([]), []);
   const expandAllAccordions = useCallback(() => setExpandedAccordions(listEvents.data!.eventsWrappers.map((eW) => eW.event.id)), [listEvents.data]);
+
+  const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   if (aggregatedQueries.isLoading) {
     return <LoadingArea ariaLabelTarget="contenu" />;
@@ -128,18 +132,88 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                           <EventSalesTable
                             wrapper={eventsWrapper}
                             onRowUpdate={async (updatedRow) => {
-                              await updateEventCategoryTickets.mutateAsync({
-                                eventCategoryTicketsId: updatedRow.eventCategoryTickets.id,
-                                // If the override equals the original value we remove it for the simplicity of understanding for the user (background colors...)
-                                priceOverride:
-                                  updatedRow.eventCategoryTickets.priceOverride !== updatedRow.ticketCategory.price
-                                    ? updatedRow.eventCategoryTickets.priceOverride
-                                    : null,
-                                totalOverride:
-                                  updatedRow.eventCategoryTickets.totalOverride !== updatedRow.eventCategoryTickets.total
-                                    ? updatedRow.eventCategoryTickets.totalOverride
-                                    : null,
-                              });
+                              // The logic is more complex here to provide a feature to override multiple events at once
+                              const oldSales = eventsWrapper.sales.find((s) => s.ticketCategory.id === updatedRow.ticketCategory.id)!;
+                              const isPriceMutated =
+                                updatedRow.eventCategoryTickets.priceOverride !== null &&
+                                updatedRow.eventCategoryTickets.priceOverride !== oldSales.eventCategoryTickets.priceOverride;
+
+                              const mutationsToPerform = [
+                                updateEventCategoryTickets.mutateAsync({
+                                  eventCategoryTicketsId: updatedRow.eventCategoryTickets.id,
+                                  // If the override equals the original value we remove it for the simplicity of understanding for the user (background colors...)
+                                  priceOverride:
+                                    updatedRow.eventCategoryTickets.priceOverride !== updatedRow.ticketCategory.price
+                                      ? updatedRow.eventCategoryTickets.priceOverride
+                                      : null,
+                                  totalOverride:
+                                    updatedRow.eventCategoryTickets.totalOverride !== updatedRow.eventCategoryTickets.total
+                                      ? updatedRow.eventCategoryTickets.totalOverride
+                                      : null,
+                                }),
+                              ];
+
+                              if (isPriceMutated) {
+                                const otherEventsWrappersWithThisTicketCategory = eventsWrappers.filter((eW) => {
+                                  // Exclude the current one
+                                  return eW !== eventsWrapper && eW.sales.some((s) => s.ticketCategory.id === updatedRow.ticketCategory.id);
+                                });
+
+                                if (otherEventsWrappersWithThisTicketCategory.length > 0) {
+                                  await new Promise<void>((resolve) => {
+                                    showConfirmationDialog({
+                                      description: (
+                                        <>
+                                          Voulez-vous aussi appliquer le tarif{' '}
+                                          <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
+                                            {updatedRow.ticketCategory.name}
+                                          </Typography>{' '}
+                                          de{' '}
+                                          <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
+                                            {currencyFormatter.format(
+                                              updatedRow.eventCategoryTickets.priceOverride ?? updatedRow.ticketCategory.price
+                                            )}
+                                          </Typography>{' '}
+                                          sur les autres représentations de{' '}
+                                          <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
+                                            {eventSerie.name}
+                                          </Typography>{' '}
+                                          ?
+                                        </>
+                                      ),
+                                      onConfirm: async () => {
+                                        otherEventsWrappersWithThisTicketCategory.forEach((otherEventsWrapper) => {
+                                          const otherWrapperSales = otherEventsWrapper.sales.find(
+                                            (s) => s.ticketCategory.id === updatedRow.ticketCategory.id
+                                          )!;
+
+                                          mutationsToPerform.push(
+                                            updateEventCategoryTickets.mutateAsync({
+                                              eventCategoryTicketsId: otherWrapperSales.eventCategoryTickets.id,
+                                              // If the override equals the original value we remove it for the simplicity of understanding for the user (background colors...)
+                                              priceOverride:
+                                                updatedRow.eventCategoryTickets.priceOverride !== otherWrapperSales.ticketCategory.price
+                                                  ? updatedRow.eventCategoryTickets.priceOverride
+                                                  : null,
+                                              totalOverride:
+                                                otherWrapperSales.eventCategoryTickets.totalOverride !== otherWrapperSales.eventCategoryTickets.total
+                                                  ? otherWrapperSales.eventCategoryTickets.totalOverride
+                                                  : null,
+                                            })
+                                          );
+                                        });
+
+                                        resolve();
+                                      },
+                                      onCancel: async () => {
+                                        resolve();
+                                      },
+                                    });
+                                  });
+                                }
+                              }
+
+                              await Promise.all(mutationsToPerform);
                             }}
                           />
                         ) : (
