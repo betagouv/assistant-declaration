@@ -117,8 +117,10 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
     async (newRow: GridRowModel<SalesWrapperSchemaType>, oldRow: GridRowModel<SalesWrapperSchemaType>, params: unknown) => {
       // If no modification while exiting the edit mode, we don't consider having a useless override property (due to people testing clicking without any intent)
       if (
-        newRow.eventCategoryTickets.priceOverride === oldRow.eventCategoryTickets.priceOverride &&
-        newRow.eventCategoryTickets.totalOverride === oldRow.eventCategoryTickets.totalOverride
+        (newRow.eventCategoryTickets.priceOverride === oldRow.eventCategoryTickets.priceOverride &&
+          newRow.eventCategoryTickets.totalOverride === oldRow.eventCategoryTickets.totalOverride) ||
+        (oldRow.eventCategoryTickets.priceOverride === null && newRow.eventCategoryTickets.priceOverride === newRow.ticketCategory.price) ||
+        (oldRow.eventCategoryTickets.totalOverride === null && newRow.eventCategoryTickets.totalOverride === newRow.eventCategoryTickets.total)
       ) {
         return oldRow;
       }
