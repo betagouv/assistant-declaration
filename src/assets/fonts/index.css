@@ -1,3 +1,7 @@
+/* Not using this directly since we put this specific into a custom folder */
+/* @import "~@fontsource/dancing-script/latin.css"; */
+@import '~@fontsource/dancing-script/latin.css';
+
 .protectedFromStyleSwitchWorkaround {
   /* This file will not see its style definition received a `media="not all"` (that was needed due to DSFR style leakage in Storybook) */
   display: none;
@@ -91,4 +95,14 @@
     url('/assets/fonts/Spectral-ExtraBold.woff') format('woff');
   font-weight: 900;
   font-style: normal;
+}
+
+@font-face {
+  font-family: 'Dancing Script';
+  src:
+    url('/assets/fonts/dancing-script-latin-400-normal.woff2') format('woff2'),
+    url('/assets/fonts/dancing-script-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }

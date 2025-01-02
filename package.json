@@ -85,9 +85,11 @@
     "seed": "tsx src/prisma/seed.script.ts"
   },
   "dependencies": {
+    "@ag-media/react-pdf-table": "^2.0.0",
     "@codegouvfr/react-dsfr": "1.15.0",
     "@commander-js/extra-typings": "^12.1.0",
     "@faire/mjml-react": "^3.4.0",
+    "@fontsource/dancing-script": "^5.1.1",
     "@gouvfr/dsfr": "1.12.1",
     "@hookform/resolvers": "^3.9.1",
     "@inquirer/prompts": "^3.3.2",
@@ -99,7 +101,9 @@
     "@next-auth/prisma-adapter": "^1.0.7",
     "@next/bundle-analyzer": "^15.1.0",
     "@prisma/client": "5.19.1",
+    "@react-pdf/renderer": "^4.1.6",
     "@sentry/nextjs": "^8.30.0",
+    "@sindresorhus/slugify": "^2.2.1",
     "@socialgouv/matomo-next": "^1.8.1",
     "@tanstack/query-core": "^4.19.1",
     "@tanstack/react-query": "^4.19.1",

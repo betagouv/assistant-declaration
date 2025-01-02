@@ -10,6 +10,8 @@ import { LoadingButton as Button } from '@mui/lab';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Chip, Link, TextField, Tooltip, Typography } from '@mui/material';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
+import { pdf } from '@react-pdf/renderer';
+import slugify from '@sindresorhus/slugify';
 import NextLink from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -22,8 +24,10 @@ import { EventSalesTable } from '@ad/src/components/EventSalesTable';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
 import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
+import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { FillSacemDeclarationSchema, FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { useSession } from '@ad/src/proxies/next-auth/react';
 import { currencyFormatter, currencyFormatterWithNoDecimals } from '@ad/src/utils/currency';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
@@ -35,6 +39,7 @@ export interface SacemDeclarationPageProps {
 
 export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarationPageProps) {
   const { t } = useTranslation('common');
+  const sessionWrapper = useSession();
 
   const updateEventCategoryTickets = trpc.updateEventCategoryTickets.useMutation();
   const fillSacemDeclaration = trpc.fillSacemDeclaration.useMutation();
@@ -60,6 +65,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
   const [expandedAccordions, setExpandedAccordions] = useState<string[]>([]);
   const collapseAllAccordions = useCallback(() => setExpandedAccordions([]), []);
   const expandAllAccordions = useCallback(() => setExpandedAccordions(listEvents.data!.eventsWrappers.map((eW) => eW.event.id)), [listEvents.data]);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState<boolean>(false);
 
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
@@ -96,6 +102,50 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
     },
     [fillSacemDeclaration, reset, eventSerieId]
   );
+
+  const generatePdf = useCallback(async () => {
+    if (sessionWrapper.data?.user && getSacemDeclaration.data?.sacemDeclarationWrapper.declaration) {
+      setIsGeneratingPdf(true);
+
+      try {
+        const pdfBlob = await pdf(
+          <SacemDeclarationDocument
+            sacemDeclaration={getSacemDeclaration.data.sacemDeclarationWrapper.declaration}
+            signatory={`${sessionWrapper.data.user.firstname} ${sessionWrapper.data.user.lastname}`}
+          />
+        ).toBlob();
+
+        const pdfBlobUrl = URL.createObjectURL(pdfBlob);
+
+        return pdfBlobUrl;
+      } finally {
+        setIsGeneratingPdf(false);
+      }
+    }
+
+    return null;
+  }, [getSacemDeclaration.data, sessionWrapper.data]);
+
+  const downloadPdf = useCallback(async () => {
+    const pdfBlobUrl = await generatePdf();
+
+    if (pdfBlobUrl) {
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pdfBlobUrl;
+      downloadLink.download = `Déclaration SACEM - ${slugify(getEventSerie.data?.eventSerie.name || 'Série de représentations')}`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+  }, [generatePdf, getEventSerie.data]);
+
+  const previewPdf = useCallback(async () => {
+    const pdfBlobUrl = await generatePdf();
+
+    if (pdfBlobUrl) {
+      window.open(pdfBlobUrl, '_blank');
+    }
+  }, [generatePdf]);
 
   useEffect(() => {
     if (!formInitialized && getSacemDeclaration.data) {
@@ -808,8 +858,8 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                     <>
                       <Grid item xs>
                         <Button
-                          // onClick={downloadPdf}
-                          // loading={generatePdfFromDeclaration.isLoading}
+                          onClick={downloadPdf}
+                          loading={isGeneratingPdf}
                           size="large"
                           variant="contained"
                           fullWidth
@@ -820,8 +870,8 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                       </Grid>
                       <Grid item xs>
                         <Button
-                          // onClick={downloadPdf}
-                          // loading={generatePdfFromDeclaration.isLoading}
+                          onClick={previewPdf}
+                          loading={isGeneratingPdf}
                           size="large"
                           variant="contained"
                           fullWidth

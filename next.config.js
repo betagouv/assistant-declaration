@@ -106,6 +106,10 @@ const moduleExports = async () => {
               to: path.resolve(__dirname, './public/assets/fonts/'),
             },
             {
+              from: path.dirname(require.resolve('@fontsource/dancing-script/files/dancing-script-latin-400-normal.woff2')),
+              to: path.resolve(__dirname, './public/assets/fonts/'),
+            },
+            {
               from: require.resolve('./src/assets/fonts/index.css'),
               to: path.resolve(__dirname, './public/assets/fonts/'),
             },
