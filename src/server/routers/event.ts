@@ -77,7 +77,11 @@ export const eventRouter = router({
       ticketingSystems.map(async (ticketingSystem) => {
         let ticketingSystemClient: TicketingSystemClient;
 
-        if (process.env.APP_MODE !== 'prod') {
+        if (
+          process.env.APP_MODE !== 'prod' &&
+          (!process.env.DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS ||
+            !process.env.DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS.split(',').includes(ctx.user.id))
+        ) {
           ticketingSystemClient = new MockTicketingSystemClient();
         } else {
           switch (ticketingSystem.name) {
