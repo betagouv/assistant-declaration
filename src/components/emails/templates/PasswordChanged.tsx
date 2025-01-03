@@ -18,7 +18,7 @@ export function PasswordChangedEmail(props: PasswordChangedEmailProps) {
       <MjmlText>
         <h1>{title}</h1>
         <p>Bonjour {props.firstname},</p>
-        <p>Nous avons bien pris en compte ton changement de mot de passe. Celui-ci est effectif dès maintenant.</p>
+        <p>Nous avons bien pris en compte votre changement de mot de passe. Celui-ci est effectif dès maintenant.</p>
       </MjmlText>
     </StandardLayout>
   );

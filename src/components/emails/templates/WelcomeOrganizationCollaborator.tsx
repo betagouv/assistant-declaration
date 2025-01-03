@@ -19,7 +19,7 @@ export function WelcomeOrganizationCollaboratorEmail(props: WelcomeOrganizationC
       <MjmlText>
         <h1>{title}</h1>
         <p>Bonjour {props.firstname},</p>
-        <p>Tu peux dès à présent accéder à la plateforme pour prendre en charge tes déclarations.</p>
+        <p>Vous pouvez dès à présent accéder à la plateforme pour prendre en charge vos déclarations.</p>
       </MjmlText>
       <MjmlButton href={props.organizationDashboardUrl}>Accéder à la plateforme</MjmlButton>
       <MjmlText></MjmlText>

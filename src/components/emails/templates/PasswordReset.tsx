@@ -19,7 +19,7 @@ export function PasswordResetEmail(props: PasswordResetEmailProps) {
       <MjmlText>
         <h1>{title}</h1>
         <p>Bonjour {props.firstname},</p>
-        <p>La réinitialisation de ton mot de passe est maintenant effective, tu peux dès maintenant utiliser tes nouveaux identifiants.</p>
+        <p>La réinitialisation de votre mot de passe est maintenant effective, vous pouvez dès maintenant utiliser vos nouveaux identifiants.</p>
       </MjmlText>
       <MjmlButton href={props.signInUrl}>Se connecter</MjmlButton>
       <MjmlText></MjmlText>

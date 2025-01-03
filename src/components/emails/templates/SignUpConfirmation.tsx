@@ -19,16 +19,16 @@ export function SignUpConfirmationEmail(props: SignUpConfirmationEmailProps) {
       <MjmlText>
         <h1>{title}</h1>
         <p>Bonjour {props.firstname},</p>
-        <p>Nous sommes ravis de te confirmer que ton compte a été créé.</p>
+        <p>Nous sommes ravis de vous confirmer que votre compte a été créé.</p>
       </MjmlText>
       <MjmlButton href={props.signInUrl}>Se connecter</MjmlButton>
       <MjmlText>
         <p style={{ fontWeight: 'bold' }}>
-          Tes identifiants sont strictement personnels, et en aucun cas notre équipe ne te demandera de les communiquer.
+          Vos identifiants sont strictement personnels, et en aucun cas notre équipe ne vous demandera de les communiquer.
         </p>
         <p>
-          Si tu as la moindre question concernant la plateforme, ou une idée d&apos;amélioration, n&apos;hésite pas à contacter le support depuis ton
-          espace membre.
+          Si vous avez la moindre question concernant la plateforme, ou une idée d&apos;amélioration, n&apos;hésitez pas à contacter le support depuis
+          votre espace membre.
         </p>
       </MjmlText>
     </StandardLayout>
