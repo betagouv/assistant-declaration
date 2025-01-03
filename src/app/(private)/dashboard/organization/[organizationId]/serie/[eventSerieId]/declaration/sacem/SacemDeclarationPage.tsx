@@ -803,7 +803,6 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                         target="_blank"
                         underline="none"
                         sx={{
-                          backgroundImage: 'none !important',
                           '&::after': {
                             display: 'none !important',
                           },
