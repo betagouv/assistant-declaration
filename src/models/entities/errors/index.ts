@@ -114,6 +114,10 @@ export const collaboratorCanOnlySeeOrganizationTicketingSystemsError = new Busin
 
 // Ticketing system
 export const noValidTicketingSystemError = new BusinessError('noValidTicketingSystem', t('errors.custom.noValidTicketingSystem'));
+export const anotherTicketingSystemSynchronizationOngoingError = new BusinessError(
+  'anotherTicketingSystemSynchronizationOngoing',
+  t('errors.custom.anotherTicketingSystemSynchronizationOngoing')
+);
 
 // Event serie
 export const eventSerieNotFoundError = new BusinessError('eventSerieNotFound', t('errors.custom.eventSerieNotFound'));

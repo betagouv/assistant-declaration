@@ -12,6 +12,7 @@
   "errors": {
     "custom": {
       "accountAlreadyWithThisEmail": "un compte est déjà enregistré avec cet email",
+      "anotherTicketingSystemSynchronizationOngoing": "une autre synchronisation des données est déjà en cours",
       "authCredentialsRequired": "vous devez fournir vos informations de connexion pour poursuivre",
       "authFatal": "une erreur inattendue est survenue, merci de contacter le support",
       "authNoCredentialsMatch": "les informations de connexion fournies sont incorrectes",
