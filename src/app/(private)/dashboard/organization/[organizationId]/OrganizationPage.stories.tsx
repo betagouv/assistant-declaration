@@ -1,4 +1,5 @@
 import { Meta, StoryFn } from '@storybook/react';
+import { mockDateDecorator } from 'storybook-mock-date-decorator';
 
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindAlert, playFindButton } from '@ad/.storybook/testing';
@@ -36,6 +37,9 @@ const mswCommonParameters = [
   }),
 ];
 
+// [WORKAROUND] Since using the date mock on `NormalStory`, it leaks over other stories when switching the view, so we have to explicitely set a date for others
+const workaroundDate = new Date('December 31, 2024 18:00:00 UTC');
+
 const commonComponentProps: ComponentProps<ComponentType> = {
   params: {
     organizationId: 'b79cb3ba-745e-5d9a-8903-4a02327a7e01',
@@ -51,42 +55,7 @@ NormalStory.args = {
   ...commonComponentProps,
 };
 NormalStory.parameters = {
-  msw: {
-    handlers: [
-      ...mswCommonParameters,
-      getTRPCMock({
-        type: 'query' as 'query',
-        path: ['listEventsSeries'],
-        response: {
-          eventsSeriesWrappers: [eventsSeriesWrappers[0], eventsSeriesWrappers[1], eventsSeriesWrappers[2]],
-        },
-      }),
-      getTRPCMock({
-        type: 'query' as 'query',
-        path: ['listTicketingSystems'],
-        response: {
-          ticketingSystems: [
-            {
-              ...ticketingSystems[0],
-              lastSynchronizationAt: new Date(), // Set a recent date so the UI is correct
-            },
-          ],
-        },
-      }),
-    ],
-  },
-};
-NormalStory.play = async ({ canvasElement }) => {
-  await playFindButton(canvasElement, /synchroniser/i);
-};
-
-export const Normal = prepareStory(NormalStory);
-
-const DesynchronizedStory = Template.bind({});
-DesynchronizedStory.args = {
-  ...commonComponentProps,
-};
-DesynchronizedStory.parameters = {
+  date: new Date('December 19, 2024 18:00:00 UTC'), // Mock date generation so underlying computed `lastSynchronizationTooOld` returns "false"
   msw: {
     handlers: [
       ...mswCommonParameters,
@@ -107,6 +76,40 @@ DesynchronizedStory.parameters = {
     ],
   },
 };
+NormalStory.decorators = [mockDateDecorator];
+NormalStory.play = async ({ canvasElement }) => {
+  await playFindButton(canvasElement, /synchroniser/i);
+};
+
+export const Normal = prepareStory(NormalStory);
+
+const DesynchronizedStory = Template.bind({});
+DesynchronizedStory.args = {
+  ...commonComponentProps,
+};
+DesynchronizedStory.parameters = {
+  date: workaroundDate,
+  msw: {
+    handlers: [
+      ...mswCommonParameters,
+      getTRPCMock({
+        type: 'query' as 'query',
+        path: ['listEventsSeries'],
+        response: {
+          eventsSeriesWrappers: [eventsSeriesWrappers[0], eventsSeriesWrappers[1], eventsSeriesWrappers[2]],
+        },
+      }),
+      getTRPCMock({
+        type: 'query' as 'query',
+        path: ['listTicketingSystems'],
+        response: {
+          ticketingSystems: [ticketingSystems[0]],
+        },
+      }),
+    ],
+  },
+};
+DesynchronizedStory.decorators = [mockDateDecorator];
 DesynchronizedStory.play = async ({ canvasElement }) => {
   await playFindButton(canvasElement, /synchroniser/i);
 };
@@ -118,6 +121,7 @@ NoTicketingSystemStory.args = {
   ...commonComponentProps,
 };
 NoTicketingSystemStory.parameters = {
+  date: workaroundDate,
   msw: {
     handlers: [
       ...mswCommonParameters,
@@ -138,6 +142,7 @@ NoTicketingSystemStory.parameters = {
     ],
   },
 };
+NoTicketingSystemStory.decorators = [mockDateDecorator];
 NoTicketingSystemStory.play = async ({ canvasElement }) => {
   await playFindAlert(canvasElement);
 };
@@ -149,6 +154,7 @@ NoEventSerieStory.args = {
   ...commonComponentProps,
 };
 NoEventSerieStory.parameters = {
+  date: workaroundDate,
   msw: {
     handlers: [
       ...mswCommonParameters,
@@ -169,6 +175,7 @@ NoEventSerieStory.parameters = {
     ],
   },
 };
+NoEventSerieStory.decorators = [mockDateDecorator];
 NoEventSerieStory.play = async ({ canvasElement }) => {
   await playFindButton(canvasElement, /synchroniser/i);
 };
@@ -183,6 +190,7 @@ WithLayoutStory.parameters = {
   layout: 'fullscreen',
   ...NormalStory.parameters,
 };
+WithLayoutStory.decorators = [mockDateDecorator];
 WithLayoutStory.play = async ({ canvasElement }) => {
   await playFindButton(canvasElement, /synchroniser/i);
 };
