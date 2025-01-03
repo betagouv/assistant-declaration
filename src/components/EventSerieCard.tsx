@@ -22,7 +22,7 @@ export function EventSerieCard(props: EventSerieCardProps) {
       }}
     >
       <CardContent>
-        <Typography component="div" variant="h5">
+        <Typography component="div" variant="h5" data-sentry-mask>
           {props.wrapper.serie.name}
         </Typography>
         <Box sx={{ mt: 1 }}>
@@ -30,6 +30,7 @@ export function EventSerieCard(props: EventSerieCardProps) {
             title={`Du ${t('date.longWithTime', { date: props.wrapper.serie.startAt })} au ${t('date.longWithTime', {
               date: props.wrapper.serie.endAt,
             })}`}
+            data-sentry-mask
           >
             <Chip
               label={`${t('date.long', { date: props.wrapper.serie.startAt })}  →  ${t('date.long', {
@@ -44,6 +45,7 @@ export function EventSerieCard(props: EventSerieCardProps) {
                   wordBreak: 'break-word !important', // Needed in case of word/sentence bigger than parent width
                 },
               }}
+              data-sentry-mask
             />
           </Tooltip>
         </Box>

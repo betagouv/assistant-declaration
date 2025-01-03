@@ -136,7 +136,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
           <Typography component="h1" variant="h5">
             Déclaration SACEM
           </Typography>
-          <Typography component="h2" variant="h6">
+          <Typography component="h2" variant="h6" data-sentry-mask>
             {eventSerie.name}
           </Typography>
         </Grid>
@@ -198,7 +198,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                             },
                           }}
                         >
-                          <Typography sx={{ fontWeight: 600 }}>
+                          <Typography sx={{ fontWeight: 600 }} data-sentry-mask>
                             {capitalizeFirstLetter(t('date.longWithTime', { date: eventsWrapper.event.startAt }))}
                           </Typography>
                           <Box sx={{ display: 'flex', gap: 1, marginLeft: 'auto', pr: 2 }}>
@@ -225,6 +225,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                                   '--icon-size': '1rem !important',
                                 },
                               }}
+                              data-sentry-mask
                             />
                             <Chip
                               label={`${currencyFormatterWithNoDecimals.format(
@@ -244,6 +245,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                                   wordBreak: 'break-word !important', // Needed in case of word/sentence bigger than parent width
                                 },
                               }}
+                              data-sentry-mask
                             />
                           </Box>
                         </AccordionSummary>
@@ -393,6 +395,14 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                             renderInput={(params) => (
                               <TextField {...params} label="N° de client" inputRef={ref} error={!!error} helperText={error?.message} fullWidth />
                             )}
+                            renderOption={(props, option) => {
+                              // Just needed for the Sentry mask
+                              return (
+                                <li {...props} key={option} data-sentry-mask>
+                                  {option}
+                                </li>
+                              );
+                            }}
                           />
                         );
                       }}
@@ -416,6 +426,14 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                             renderInput={(params) => (
                               <TextField {...params} label="Nom de la salle" inputRef={ref} error={!!error} helperText={error?.message} fullWidth />
                             )}
+                            renderOption={(props, option) => {
+                              // Just needed for the Sentry mask
+                              return (
+                                <li {...props} key={option} data-sentry-mask>
+                                  {option}
+                                </li>
+                              );
+                            }}
                           />
                         );
                       }}
@@ -467,6 +485,14 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                                 fullWidth
                               />
                             )}
+                            renderOption={(props, option) => {
+                              // Just needed for the Sentry mask
+                              return (
+                                <li {...props} key={option} data-sentry-mask>
+                                  {option}
+                                </li>
+                              );
+                            }}
                           />
                         );
                       }}
@@ -497,6 +523,14 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                                 fullWidth
                               />
                             )}
+                            renderOption={(props, option) => {
+                              // Just needed for the Sentry mask
+                              return (
+                                <li {...props} key={option} data-sentry-mask>
+                                  {option}
+                                </li>
+                              );
+                            }}
                           />
                         );
                       }}
@@ -520,6 +554,14 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                             renderInput={(params) => (
                               <TextField {...params} label="Qualité" inputRef={ref} error={!!error} helperText={error?.message} fullWidth />
                             )}
+                            renderOption={(props, option) => {
+                              // Just needed for the Sentry mask
+                              return (
+                                <li {...props} key={option} data-sentry-mask>
+                                  {option}
+                                </li>
+                              );
+                            }}
                           />
                         );
                       }}
@@ -551,6 +593,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                           Ces dates sont non modifiables car elles proviennent de votre système de billetterie
                         </>
                       }
+                      data-sentry-mask
                     >
                       <TextField
                         disabled

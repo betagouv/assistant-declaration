@@ -30,8 +30,8 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
       field: `${salesTypedNameof('ticketCategory')}.${ticketCategoryTypedNameof('name')}`,
       headerName: 'Catégorie des tickets',
       flex: 1.5,
-      valueGetter: (_, row) => {
-        return row.ticketCategory.name;
+      renderCell: (params) => {
+        return <span data-sentry-mask>{params.row.ticketCategory.name}</span>;
       },
     },
     {
@@ -59,8 +59,11 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
       renderCell: (params) => {
         if (params.row.eventCategoryTickets.priceOverride !== null) {
           return (
-            <Tooltip title={`Le prix remonté par la billetterie était de ${currencyFormatter.format(params.row.ticketCategory.price)}`}>
-              <span>{currencyFormatter.format(params.row.eventCategoryTickets.priceOverride)}</span>
+            <Tooltip
+              title={`Le prix remonté par la billetterie était de ${currencyFormatter.format(params.row.ticketCategory.price)}`}
+              data-sentry-mask
+            >
+              <span data-sentry-mask>{currencyFormatter.format(params.row.eventCategoryTickets.priceOverride)}</span>
             </Tooltip>
           );
         } else {
@@ -96,8 +99,8 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
       renderCell: (params) => {
         if (params.row.eventCategoryTickets.totalOverride !== null) {
           return (
-            <Tooltip title={`Le nombre de places remonté par la billetterie était de ${params.row.eventCategoryTickets.total}`}>
-              <span>{params.row.eventCategoryTickets.totalOverride}</span>
+            <Tooltip title={`Le nombre de places remonté par la billetterie était de ${params.row.eventCategoryTickets.total}`} data-sentry-mask>
+              <span data-sentry-mask>{params.row.eventCategoryTickets.totalOverride}</span>
             </Tooltip>
           );
         } else {

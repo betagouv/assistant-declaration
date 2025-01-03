@@ -54,6 +54,7 @@ export const Avatar = (props: AvatarProps) => {
       sx={{ width: size, height: size, fontSize: size / 2, bgcolor: stringToColor(props.fullName), ...(props.sx || {}) }}
       src={props.src}
       alt={props.src ? '' : undefined}
+      data-sentry-mask
     >
       {props.src ? null : extractInitials(props.fullName)}
     </MuiAvatar>
