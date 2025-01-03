@@ -8,10 +8,12 @@ import '@ad/src/app/(public)/layout.scss';
 import { ContentWrapper } from '@ad/src/components/ContentWrapper';
 import { FlashMessage } from '@ad/src/components/FlashMessage';
 import { useLiveChat } from '@ad/src/components/live-chat/useLiveChat';
-import { commonFooterAttributes, commonHeaderAttributes } from '@ad/src/utils/dsfr';
+import { useSession } from '@ad/src/proxies/next-auth/react';
+import { commonFooterAttributes, commonHeaderAttributes, userQuickAccessItem } from '@ad/src/utils/dsfr';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export function PublicLayout(props: PropsWithChildren) {
+  const sessionWrapper = useSession();
   const { showLiveChat, isLiveChatLoading } = useLiveChat();
 
   let quickAccessItems: HeaderProps.QuickAccessItem[] = [
@@ -32,6 +34,22 @@ export function PublicLayout(props: PropsWithChildren) {
       text: isLiveChatLoading ? 'Chargement...' : 'Support',
     },
   ];
+
+  if (sessionWrapper.status === 'authenticated') {
+    quickAccessItems.push(
+      userQuickAccessItem(sessionWrapper.data?.user, {
+        showDashboardMenuItem: true,
+      })
+    );
+  } else {
+    quickAccessItems.push({
+      iconId: 'fr-icon-lock-line',
+      linkProps: {
+        href: linkRegistry.get('signIn', undefined),
+      },
+      text: 'Se connecter',
+    });
+  }
 
   return (
     <>
