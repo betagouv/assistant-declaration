@@ -17,7 +17,7 @@ export function FlashMessage(props: FlashMessageProps) {
           ) : (
             <>
               Vous êtes actuellement sur la version de test interne. La version grand public est accessible sur{' '}
-              <Link component={NextLink} href="https://assistant-declaration.beta.gouv.fr" color="inherit">
+              <Link component={NextLink} href="https://assistant-declaration.beta.gouv.fr" color="inherit" underline="none">
                 assistant-declaration.beta.gouv.fr
               </Link>
             </>
