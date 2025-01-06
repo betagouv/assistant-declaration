@@ -8,7 +8,7 @@ import z from 'zod';
 
 import { formatMessageFromIssue } from '@ad/src/i18n';
 import { CustomError, internalServerErrorError, unexpectedErrorError } from '@ad/src/models/entities/errors';
-import { formatMessageFromCustomError } from '@ad/src/models/entities/helpers';
+import { formatMessageFromCustomError } from '@ad/src/models/entities/errors/helpers';
 import { AppRouter } from '@ad/src/server/app-router';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
 

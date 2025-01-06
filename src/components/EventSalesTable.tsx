@@ -1,7 +1,8 @@
 import { Alert, Snackbar, Tooltip } from '@mui/material';
-import type { GridColDef, GridRowModel } from '@mui/x-data-grid';
+import { GridAutosizeOptions, type GridColDef, type GridRowModel, useGridApiRef } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
-import { useCallback, useState } from 'react';
+import debounce from 'lodash.debounce';
+import { useCallback, useEffect, useState } from 'react';
 
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import styles from '@ad/src/components/EventSalesTable.module.scss';
@@ -24,12 +25,38 @@ export interface EventSalesTableProps {
 }
 
 export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) {
+  const apiRef = useGridApiRef();
+
+  const [autosizeOption] = useState<GridAutosizeOptions>({
+    includeOutliers: true,
+    includeHeaders: true,
+    outliersFactor: 1.5,
+    expand: true,
+  });
+
+  useEffect(() => {
+    apiRef.current.autosizeColumns(autosizeOption);
+  }, [apiRef, wrapper.sales, autosizeOption]);
+
+  useEffect(() => {
+    // We also autosize when the frame is changing
+    // Note: using `onResize` is triggered sometimes for internal DataGrid things so it's not relevent for us
+    const update = debounce(() => {
+      apiRef.current.autosizeColumns(autosizeOption);
+    }, 50);
+
+    window.addEventListener('resize', update);
+
+    return () => {
+      window.removeEventListener('resize', update);
+    };
+  }, [apiRef, autosizeOption]);
+
   // To type options functions have a look at https://github.com/mui/mui-x/pull/4064
-  const columns: GridColDef<SalesWrapperSchemaType>[] = [
+  const [columns] = useState<GridColDef<SalesWrapperSchemaType>[]>([
     {
       field: `${salesTypedNameof('ticketCategory')}.${ticketCategoryTypedNameof('name')}`,
       headerName: 'Catégorie des tickets',
-      flex: 1.5,
       renderCell: (params) => {
         return <span data-sentry-mask>{params.row.ticketCategory.name}</span>;
       },
@@ -37,7 +64,6 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
     {
       field: `${salesTypedNameof('eventCategoryTickets')}.${ticketCategoryTypedNameof('price')}`,
       headerName: 'Prix unitaire TTC',
-      flex: 1,
       editable: true,
       type: 'number',
       valueGetter: (_, row) => {
@@ -77,7 +103,6 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
     {
       field: `${salesTypedNameof('eventCategoryTickets')}.${eventCategoryTicketsTypedNameof('total')}`,
       headerName: 'Nombre de billets vendus',
-      flex: 1,
       editable: true,
       type: 'number',
       valueGetter: (_, row) => {
@@ -111,7 +136,7 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
         return params.row.eventCategoryTickets.totalOverride !== null ? styles.overridenCell : '';
       },
     },
-  ];
+  ]);
 
   const [snackbarAlert, setSnackbarAlert] = useState<JSX.Element | null>(null);
   const handleCloseSnackbar = useCallback(() => setSnackbarAlert(null), []);
@@ -159,6 +184,7 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
   return (
     <>
       <DataGrid
+        apiRef={apiRef}
         rows={wrapper.sales}
         getRowId={(row) => row.ticketCategory.id}
         columns={columns}
@@ -192,6 +218,9 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
           // Start observing the cell element for child additions
           observer.observe(editCellElement, { childList: true, subtree: true });
         }}
+        autosizeOnMount={true}
+        autosizeOptions={autosizeOption}
+        disableVirtualization={true}
         aria-label="tableau des ventes d'une représentation"
         data-sentry-mask
       />

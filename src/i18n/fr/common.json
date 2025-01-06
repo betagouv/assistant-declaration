@@ -44,8 +44,14 @@
         "invalid_string": "l'email n'est pas valide",
         "too_small_one": "l'email est requis"
       },
+      "expenses": {
+        "duplicateFluxEntryCategoryLabel": "les libellées des contrats artistiques doivent être uniques"
+      },
       "firstname": {
         "too_small_one": "le prénom est requis"
+      },
+      "accountingEntries": {
+        "duplicateFluxEntryCategoryLabel": "les libellées des flux de comptabilité doivent être uniques"
       },
       "lastname": {
         "too_small_one": "le nom de famille est requis"
@@ -87,6 +93,9 @@
       "query": {
         "too_big": "la recherche doit faire {{maximum}} caractères maximum"
       },
+      "revenues": {
+        "duplicateFluxEntryCategoryLabel": "les libellées des recettes doivent être uniques"
+      },
       "totalOverride": {
         "invalid_type": "le nombre de places doit être un nombre entier",
         "too_small": "le nombre de places doit être supérieur à {{minimum}}"
@@ -117,5 +126,22 @@
     },
     "template": {}
   },
-  "model": {}
+  "model": {
+    "sacemDeclaration": {
+      "accountingCategory": {
+        "enum": {
+          "TICKETING": "Entrées",
+          "CONSUMPTIONS": "Consommations",
+          "CATERING": "Restauration",
+          "PROGRAM_SALES": "Vente de programmes",
+          "OTHER_REVENUES": "Autre recette",
+          "ENGAGEMENT_CONTRACTS": "Contrat d'engagement",
+          "RIGHTS_TRANSFER_CONTRACTS": "Contrat de cession",
+          "COREALIZATION_CONTRACTS": "Contrat de coréalisation",
+          "COPRODUCTION_CONTRACTS": "Contrat de coproduction",
+          "OTHER_ARTISTIC_CONTRACTS": "Autre contrat artistique"
+        }
+      }
+    }
+  }
 }

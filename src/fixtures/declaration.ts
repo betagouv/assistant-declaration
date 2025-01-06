@@ -1,6 +1,8 @@
+import { ensureMinimumSacemExpenseItems, ensureMinimumSacemRevenueItems } from '@ad/src/core/declaration';
 import { eventsSeries } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
 import {
+  AccountingCategorySchema,
   SacemDeclarationSchema,
   SacemDeclarationSchemaType,
   SacemDeclarationWrapperSchema,
@@ -23,8 +25,40 @@ export const sacemDeclarations: SacemDeclarationSchemaType[] = [
     eventsCount: 4,
     paidTickets: 421,
     freeTickets: 53,
-    includingTaxesAmount: 8883.1,
-    excludingTaxesAmount: 8420,
+    revenues: ensureMinimumSacemRevenueItems([
+      {
+        category: AccountingCategorySchema.Values.TICKETING,
+        categoryPrecision: null,
+        taxRate: 0.055,
+        includingTaxesAmount: 8883.1,
+      },
+      {
+        category: AccountingCategorySchema.Values.CONSUMPTIONS,
+        categoryPrecision: null,
+        taxRate: 0.2,
+        includingTaxesAmount: 2368,
+      },
+      {
+        category: AccountingCategorySchema.Values.OTHER_REVENUES,
+        categoryPrecision: 'Tombola',
+        taxRate: 0.2,
+        includingTaxesAmount: 930,
+      },
+    ]),
+    expenses: ensureMinimumSacemExpenseItems([
+      {
+        category: AccountingCategorySchema.Values.RIGHTS_TRANSFER_CONTRACTS,
+        categoryPrecision: null,
+        taxRate: 0.055,
+        includingTaxesAmount: 3200,
+      },
+      {
+        category: AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS,
+        categoryPrecision: 'Contrat tiers',
+        taxRate: 0.2,
+        includingTaxesAmount: 500,
+      },
+    ]),
   }),
   SacemDeclarationSchema.parse({
     id: 'd79cb3ba-745e-5d9a-8903-4a02327a7e02',
@@ -41,8 +75,34 @@ export const sacemDeclarations: SacemDeclarationSchemaType[] = [
     eventsCount: 1,
     paidTickets: 35,
     freeTickets: 5,
-    includingTaxesAmount: 422,
-    excludingTaxesAmount: 400,
+    revenues: ensureMinimumSacemRevenueItems([
+      {
+        category: AccountingCategorySchema.Values.TICKETING,
+        categoryPrecision: null,
+        taxRate: 0.055,
+        includingTaxesAmount: 422,
+      },
+      {
+        category: AccountingCategorySchema.Values.CONSUMPTIONS,
+        categoryPrecision: null,
+        taxRate: 0.2,
+        includingTaxesAmount: 244,
+      },
+      {
+        category: AccountingCategorySchema.Values.OTHER_REVENUES,
+        categoryPrecision: 'Tombola',
+        taxRate: 0.2,
+        includingTaxesAmount: 260,
+      },
+    ]),
+    expenses: ensureMinimumSacemExpenseItems([
+      {
+        category: AccountingCategorySchema.Values.RIGHTS_TRANSFER_CONTRACTS,
+        categoryPrecision: null,
+        taxRate: 0.055,
+        includingTaxesAmount: 1000,
+      },
+    ]),
   }),
   SacemDeclarationSchema.parse({
     id: 'd79cb3ba-745e-5d9a-8903-4a02327a7e03',
@@ -59,8 +119,15 @@ export const sacemDeclarations: SacemDeclarationSchemaType[] = [
     eventsCount: 2,
     paidTickets: 204,
     freeTickets: 35,
-    includingTaxesAmount: 7385,
-    excludingTaxesAmount: 7000,
+    revenues: ensureMinimumSacemRevenueItems([
+      {
+        category: AccountingCategorySchema.Values.TICKETING,
+        categoryPrecision: null,
+        taxRate: 0.055,
+        includingTaxesAmount: 7385,
+      },
+    ]),
+    expenses: ensureMinimumSacemExpenseItems([]),
   }),
 ];
 
@@ -80,8 +147,25 @@ export const sacemDeclarationsWrappers: SacemDeclarationWrapperSchemaType[] = [
       eventsCount: sacemDeclarations[0].eventsCount,
       paidTickets: sacemDeclarations[0].paidTickets,
       freeTickets: sacemDeclarations[0].freeTickets,
-      includingTaxesAmount: sacemDeclarations[0].includingTaxesAmount,
-      excludingTaxesAmount: sacemDeclarations[0].excludingTaxesAmount,
+      revenues: {
+        ticketing: {
+          taxRate: [sacemDeclarations[0].revenues[0].taxRate],
+          amount: [sacemDeclarations[0].revenues[0].includingTaxesAmount],
+        },
+        consumptions: { taxRate: [], amount: [] },
+        catering: { taxRate: [], amount: [] },
+        programSales: { taxRate: [], amount: [] },
+        other: { taxRate: [], amount: [] },
+        otherCategories: [],
+      },
+      expenses: {
+        engagementContracts: { taxRate: [], amount: [] },
+        rightsTransferContracts: { taxRate: [], amount: [] },
+        corealizationContracts: { taxRate: [], amount: [] },
+        coproductionContracts: { taxRate: [], amount: [] },
+        other: { taxRate: [], amount: [] },
+        otherCategories: [],
+      },
     },
   }),
   SacemDeclarationWrapperSchema.parse({
@@ -99,8 +183,25 @@ export const sacemDeclarationsWrappers: SacemDeclarationWrapperSchemaType[] = [
       eventsCount: sacemDeclarations[1].eventsCount,
       paidTickets: sacemDeclarations[1].paidTickets,
       freeTickets: sacemDeclarations[1].freeTickets,
-      includingTaxesAmount: sacemDeclarations[1].includingTaxesAmount,
-      excludingTaxesAmount: sacemDeclarations[1].excludingTaxesAmount,
+      revenues: {
+        ticketing: {
+          taxRate: [sacemDeclarations[1].revenues[0].taxRate],
+          amount: [sacemDeclarations[1].revenues[0].includingTaxesAmount],
+        },
+        consumptions: { taxRate: [], amount: [] },
+        catering: { taxRate: [], amount: [] },
+        programSales: { taxRate: [], amount: [] },
+        other: { taxRate: [], amount: [] },
+        otherCategories: [],
+      },
+      expenses: {
+        engagementContracts: { taxRate: [], amount: [] },
+        rightsTransferContracts: { taxRate: [], amount: [] },
+        corealizationContracts: { taxRate: [], amount: [] },
+        coproductionContracts: { taxRate: [], amount: [] },
+        other: { taxRate: [], amount: [] },
+        otherCategories: [],
+      },
     },
   }),
   SacemDeclarationWrapperSchema.parse({
@@ -118,8 +219,25 @@ export const sacemDeclarationsWrappers: SacemDeclarationWrapperSchemaType[] = [
       eventsCount: sacemDeclarations[2].eventsCount,
       paidTickets: sacemDeclarations[2].paidTickets,
       freeTickets: sacemDeclarations[2].freeTickets,
-      includingTaxesAmount: sacemDeclarations[2].includingTaxesAmount,
-      excludingTaxesAmount: sacemDeclarations[2].excludingTaxesAmount,
+      revenues: {
+        ticketing: {
+          taxRate: [sacemDeclarations[2].revenues[0].taxRate],
+          amount: [sacemDeclarations[2].revenues[0].includingTaxesAmount],
+        },
+        consumptions: { taxRate: [], amount: [] },
+        catering: { taxRate: [], amount: [] },
+        programSales: { taxRate: [], amount: [] },
+        other: { taxRate: [], amount: [] },
+        otherCategories: [],
+      },
+      expenses: {
+        engagementContracts: { taxRate: [], amount: [] },
+        rightsTransferContracts: { taxRate: [], amount: [] },
+        corealizationContracts: { taxRate: [], amount: [] },
+        coproductionContracts: { taxRate: [], amount: [] },
+        other: { taxRate: [], amount: [] },
+        otherCategories: [],
+      },
     },
   }),
 ];

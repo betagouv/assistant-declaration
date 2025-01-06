@@ -124,3 +124,9 @@ export const eventSerieNotFoundError = new BusinessError('eventSerieNotFound', t
 
 // Event category tickets
 export const eventCategoryTicketsNotFoundError = new BusinessError('eventCategoryTicketsNotFound', t('errors.custom.eventCategoryTicketsNotFound'));
+
+// Declaration
+export const duplicateFluxEntryCategoryLabelError = new BusinessError(
+  'duplicateFluxEntryCategoryLabel',
+  t('errors.validation.accountingEntries.duplicateFluxEntryCategoryLabel')
+);

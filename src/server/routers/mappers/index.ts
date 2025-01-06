@@ -5,13 +5,19 @@ import {
   EventSerieDeclaration,
   EventSerieSacemDeclaration,
   Organization,
+  SacemDeclarationAccountingEntry,
   TicketCategory,
   TicketingSystem,
   User,
 } from '@prisma/client';
 
+import { ensureMinimumSacemExpenseItems, ensureMinimumSacemRevenueItems } from '@ad/src/core/declaration';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
-import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration';
+import {
+  AccountingCategorySchema,
+  SacemDeclarationAccountingFluxEntrySchemaType,
+  SacemDeclarationSchemaType,
+} from '@ad/src/models/entities/declaration';
 import { EventCategoryTicketsSchemaType, EventSchemaType, EventSerieSchemaType, TicketCategorySchemaType } from '@ad/src/models/entities/event';
 import { OrganizationSchemaType } from '@ad/src/models/entities/organization';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
@@ -137,13 +143,12 @@ export function sacemPlaceholderDeclarationPrismaToModel(
   | 'eventsCount'
   | 'paidTickets'
   | 'freeTickets'
-  | 'includingTaxesAmount'
-  | 'excludingTaxesAmount'
+  | 'revenues'
+  | 'expenses'
 > {
   let freeTickets: number = 0;
   let paidTickets: number = 0;
   let includingTaxesAmount: number = 0;
-  let excludingTaxesAmount: number = 0;
 
   for (const event of eventSerie.Event) {
     for (const eventCategoryTicket of event.EventCategoryTickets) {
@@ -161,7 +166,6 @@ export function sacemPlaceholderDeclarationPrismaToModel(
 
   // TODO: don't know for know if the taxes are dynamic per ticket category or not so applying a default common rate until we know more
   const taxRate = 0.055;
-  excludingTaxesAmount = includingTaxesAmount / (1 + taxRate);
 
   return {
     organizationName: eventSerie.ticketingSystem.organization.name,
@@ -171,8 +175,17 @@ export function sacemPlaceholderDeclarationPrismaToModel(
     eventsCount: eventSerie.Event.length,
     paidTickets: paidTickets,
     freeTickets: freeTickets,
-    includingTaxesAmount: includingTaxesAmount,
-    excludingTaxesAmount: excludingTaxesAmount,
+    // With placeholder there is no reason to fill data except ticketing we have data for
+    // Note: ensuring minimum items is done at another layer
+    revenues: [
+      {
+        category: AccountingCategorySchema.Values.TICKETING,
+        categoryPrecision: null,
+        taxRate: taxRate,
+        includingTaxesAmount: includingTaxesAmount,
+      },
+    ],
+    expenses: [],
   };
 }
 
@@ -187,8 +200,31 @@ export function sacemDeclarationPrismaToModel(
       })[];
     }[];
   },
-  sacemDeclaration: Pick<EventSerieSacemDeclaration, 'id' | 'clientId' | 'placeName' | 'placeCapacity' | 'managerName' | 'managerTitle'>
+  sacemDeclaration: Pick<EventSerieSacemDeclaration, 'id' | 'clientId' | 'placeName' | 'placeCapacity' | 'managerName' | 'managerTitle'> & {
+    SacemDeclarationAccountingEntry: Pick<SacemDeclarationAccountingEntry, 'flux' | 'category' | 'categoryPrecision' | 'taxRate' | 'amount'>[];
+  }
 ): SacemDeclarationSchemaType {
+  // Reuse data from the placeholder since this one is used until the form is submitted
+  const { revenues, expenses, ...computedPlaceholder } = sacemPlaceholderDeclarationPrismaToModel(eventSerie);
+
+  for (const accountingEntry of sacemDeclaration.SacemDeclarationAccountingEntry) {
+    const taxRate = accountingEntry.taxRate.toNumber();
+    const includingTaxesAmount = accountingEntry.amount.toNumber();
+
+    const categoryFluxEntry: SacemDeclarationAccountingFluxEntrySchemaType = {
+      category: accountingEntry.category,
+      categoryPrecision: accountingEntry.categoryPrecision,
+      taxRate: taxRate,
+      includingTaxesAmount: includingTaxesAmount,
+    };
+
+    if (accountingEntry.flux === 'REVENUE') {
+      revenues.push(categoryFluxEntry);
+    } else if (accountingEntry.flux === 'EXPENSE') {
+      expenses.push(categoryFluxEntry);
+    }
+  }
+
   return {
     id: sacemDeclaration.id,
     eventSerieId: eventSerie.id,
@@ -197,6 +233,8 @@ export function sacemDeclarationPrismaToModel(
     placeCapacity: sacemDeclaration.placeCapacity,
     managerName: sacemDeclaration.managerName,
     managerTitle: sacemDeclaration.managerTitle,
-    ...sacemPlaceholderDeclarationPrismaToModel(eventSerie),
+    revenues: ensureMinimumSacemRevenueItems(revenues),
+    expenses: ensureMinimumSacemExpenseItems(expenses),
+    ...computedPlaceholder,
   };
 }

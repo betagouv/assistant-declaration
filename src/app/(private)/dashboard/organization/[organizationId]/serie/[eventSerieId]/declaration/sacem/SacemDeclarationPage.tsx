@@ -20,6 +20,8 @@ import { BaseForm } from '@ad/src/components/BaseForm';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventSalesTable } from '@ad/src/components/EventSalesTable';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
+import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
+import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { FillSacemDeclarationSchema, FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { currencyFormatter, currencyFormatterWithNoDecimals } from '@ad/src/utils/currency';
@@ -62,11 +64,8 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   const {
-    register,
     handleSubmit,
-    formState: { errors, isDirty },
-    setValue,
-    watch,
+    formState: { isDirty },
     control,
     reset,
   } = useForm<FillSacemDeclarationSchemaType>({
@@ -89,6 +88,8 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
         placeCapacity: result.sacemDeclaration.placeCapacity,
         managerName: result.sacemDeclaration.managerName,
         managerTitle: result.sacemDeclaration.managerTitle,
+        revenues: result.sacemDeclaration.revenues,
+        expenses: result.sacemDeclaration.expenses,
       });
     },
     [fillSacemDeclaration, reset, eventSerieId]
@@ -105,6 +106,8 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
         placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeCapacity,
         managerName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerName,
         managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerTitle,
+        revenues: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.revenues,
+        expenses: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.expenses,
       }); // Update the form with fetched data
     }
   }, [getSacemDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
@@ -664,63 +667,39 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                       />
                     </Tooltip>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Tooltip
-                      title={
-                        'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                      }
+                  <Grid item xs={12}>
+                    <Box
+                      sx={{
+                        bgcolor: fr.colors.decisions.background.alt.greenEmeraude.default,
+                        borderRadius: '8px',
+                        py: { xs: 2, md: 3 },
+                        px: { xs: 1, md: 2 },
+                        mt: 1,
+                      }}
                     >
-                      <TextField
-                        disabled
-                        label="Montant HT des recettes"
-                        value={
-                          sacemDeclarationWrapper.declaration
-                            ? currencyFormatter.format(sacemDeclarationWrapper.declaration.excludingTaxesAmount)
-                            : currencyFormatter.format(sacemDeclarationWrapper.placeholder.excludingTaxesAmount)
-                        }
-                        fullWidth
-                      />
-                    </Tooltip>
+                      <SacemRevenuesTable control={control} />
+                    </Box>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Tooltip
-                      title={
-                        'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                      }
+                </Grid>
+              </Grid>
+              <Grid item xs={12} sx={{ pb: 2 }}>
+                <Typography gutterBottom variant="h6" component="div">
+                  Dépenses artistiques
+                </Typography>
+                <hr />
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Box
+                      sx={{
+                        bgcolor: fr.colors.decisions.background.alt.redMarianne.default,
+                        borderRadius: '8px',
+                        py: { xs: 2, md: 3 },
+                        px: { xs: 1, md: 2 },
+                        mt: 1,
+                      }}
                     >
-                      <TextField
-                        disabled
-                        label="Montant de la TVA"
-                        value={
-                          sacemDeclarationWrapper.declaration
-                            ? currencyFormatter.format(
-                                sacemDeclarationWrapper.declaration.includingTaxesAmount - sacemDeclarationWrapper.declaration.excludingTaxesAmount
-                              )
-                            : currencyFormatter.format(
-                                sacemDeclarationWrapper.placeholder.includingTaxesAmount - sacemDeclarationWrapper.placeholder.excludingTaxesAmount
-                              )
-                        }
-                        fullWidth
-                      />
-                    </Tooltip>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Tooltip
-                      title={
-                        'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                      }
-                    >
-                      <TextField
-                        disabled
-                        label="Montant TTC des recettes"
-                        value={
-                          sacemDeclarationWrapper.declaration
-                            ? currencyFormatter.format(sacemDeclarationWrapper.declaration.includingTaxesAmount)
-                            : currencyFormatter.format(sacemDeclarationWrapper.placeholder.includingTaxesAmount)
-                        }
-                        fullWidth
-                      />
-                    </Tooltip>
+                      <SacemExpensesTable control={control} />
+                    </Box>
                   </Grid>
                 </Grid>
               </Grid>

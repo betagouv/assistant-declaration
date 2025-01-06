@@ -1,12 +1,19 @@
-import { EventSerieDeclarationStatus } from '@prisma/client';
+import { EventSerieDeclarationStatus, Prisma } from '@prisma/client';
 
 import { FillSacemDeclarationSchema, GetSacemDeclarationSchema } from '@ad/src/models/actions/declaration';
-import { SacemDeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration';
+import {
+  AccountingCategorySchema,
+  AccountingFluxSchema,
+  LiteSacemDeclarationAccountingEntrySchemaType,
+  SacemDeclarationWrapperSchemaType,
+} from '@ad/src/models/entities/declaration';
 import { eventSerieNotFoundError, organizationCollaboratorRoleRequiredError } from '@ad/src/models/entities/errors';
 import { prisma } from '@ad/src/prisma/client';
 import { sacemDeclarationPrismaToModel, sacemPlaceholderDeclarationPrismaToModel } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
+import { getDiff } from '@ad/src/utils/comparaison';
 
 export const declarationRouter = router({
   getSacemDeclaration: privateProcedure.input(GetSacemDeclarationSchema).query(async ({ ctx, input }) => {
@@ -40,6 +47,15 @@ export const declarationRouter = router({
                 placeCapacity: true,
                 managerName: true,
                 managerTitle: true,
+                SacemDeclarationAccountingEntry: {
+                  select: {
+                    flux: true,
+                    category: true,
+                    categoryPrecision: true,
+                    taxRate: true,
+                    amount: true,
+                  },
+                },
               },
             },
           },
@@ -84,6 +100,22 @@ export const declarationRouter = router({
           },
         },
       },
+      select: {
+        clientId: true,
+        placeName: true,
+        placeCapacity: true,
+        managerName: true,
+        managerTitle: true,
+        SacemDeclarationAccountingEntry: {
+          select: {
+            flux: true,
+            category: true,
+            categoryPrecision: true,
+            taxRate: true,
+            amount: true,
+          },
+        },
+      },
       distinct: ['clientId', 'placeName', 'placeCapacity', 'managerName', 'managerTitle'], // At least the distinct may remove duplicates for the whole chain
       // Get only a few of the last declarations since it should representative
       orderBy: {
@@ -92,13 +124,31 @@ export const declarationRouter = router({
       take: 10,
     });
 
+    const { revenues, expenses, ...computedPlaceholder } = sacemPlaceholderDeclarationPrismaToModel(eventSerie);
+
     const placeholder: SacemDeclarationWrapperSchemaType['placeholder'] = {
-      ...sacemPlaceholderDeclarationPrismaToModel(eventSerie),
+      ...computedPlaceholder,
       clientId: [],
       placeName: [],
       placeCapacity: [],
       managerName: [],
       managerTitle: [],
+      revenues: {
+        ticketing: { taxRate: [], amount: [] },
+        consumptions: { taxRate: [], amount: [] },
+        catering: { taxRate: [], amount: [] },
+        programSales: { taxRate: [], amount: [] },
+        other: { taxRate: [], amount: [] },
+        otherCategories: [],
+      },
+      expenses: {
+        engagementContracts: { taxRate: [], amount: [] },
+        rightsTransferContracts: { taxRate: [], amount: [] },
+        corealizationContracts: { taxRate: [], amount: [] },
+        coproductionContracts: { taxRate: [], amount: [] },
+        other: { taxRate: [], amount: [] },
+        otherCategories: [],
+      },
     };
 
     // Fill with unique values
@@ -108,6 +158,57 @@ export const declarationRouter = router({
       if (!placeholder.placeCapacity.includes(previousDeclaration.placeCapacity)) placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
       if (!placeholder.managerName.includes(previousDeclaration.managerName)) placeholder.managerName.push(previousDeclaration.managerName);
       if (!placeholder.managerTitle.includes(previousDeclaration.managerTitle)) placeholder.managerTitle.push(previousDeclaration.managerTitle);
+
+      for (const accountingEntry of previousDeclaration.SacemDeclarationAccountingEntry) {
+        // Amounts are specific to each series so there is no need of filling them as placeholders
+        // TODO: we could reuse as placeholder entries for another declaration having the same accounting entry
+        const taxRate = accountingEntry.taxRate.toNumber();
+
+        if (accountingEntry.flux === 'REVENUE') {
+          switch (accountingEntry.category) {
+            case 'TICKETING':
+              if (!placeholder.revenues.ticketing.taxRate.includes(taxRate)) placeholder.revenues.ticketing.taxRate.push(taxRate);
+              break;
+            case 'CONSUMPTIONS':
+              if (!placeholder.revenues.consumptions.taxRate.includes(taxRate)) placeholder.revenues.consumptions.taxRate.push(taxRate);
+              break;
+            case 'CATERING':
+              if (!placeholder.revenues.catering.taxRate.includes(taxRate)) placeholder.revenues.catering.taxRate.push(taxRate);
+              break;
+            case 'PROGRAM_SALES':
+              if (!placeholder.revenues.programSales.taxRate.includes(taxRate)) placeholder.revenues.programSales.taxRate.push(taxRate);
+              break;
+            case 'OTHER_REVENUES':
+              if (accountingEntry.categoryPrecision && !placeholder.revenues.otherCategories.includes(accountingEntry.categoryPrecision))
+                placeholder.revenues.otherCategories.push(accountingEntry.categoryPrecision);
+              if (!placeholder.revenues.other.taxRate.includes(taxRate)) placeholder.revenues.other.taxRate.push(taxRate);
+              break;
+          }
+        } else if (accountingEntry.flux === 'EXPENSE') {
+          switch (accountingEntry.category) {
+            case 'ENGAGEMENT_CONTRACTS':
+              if (!placeholder.expenses.engagementContracts.taxRate.includes(taxRate)) placeholder.expenses.engagementContracts.taxRate.push(taxRate);
+              break;
+            case 'RIGHTS_TRANSFER_CONTRACTS':
+              if (!placeholder.expenses.rightsTransferContracts.taxRate.includes(taxRate))
+                placeholder.expenses.rightsTransferContracts.taxRate.push(taxRate);
+              break;
+            case 'COREALIZATION_CONTRACTS':
+              if (!placeholder.expenses.corealizationContracts.taxRate.includes(taxRate))
+                placeholder.expenses.corealizationContracts.taxRate.push(taxRate);
+              break;
+            case 'COPRODUCTION_CONTRACTS':
+              if (!placeholder.expenses.coproductionContracts.taxRate.includes(taxRate))
+                placeholder.expenses.coproductionContracts.taxRate.push(taxRate);
+              break;
+            case 'OTHER_ARTISTIC_CONTRACTS':
+              if (accountingEntry.categoryPrecision && !placeholder.expenses.otherCategories.includes(accountingEntry.categoryPrecision))
+                placeholder.expenses.otherCategories.push(accountingEntry.categoryPrecision);
+              if (!placeholder.expenses.other.taxRate.includes(taxRate)) placeholder.expenses.other.taxRate.push(taxRate);
+              break;
+          }
+        }
+      }
     }
 
     const existingDeclaration = eventSerie.EventSerieDeclaration.find((eSD) => eSD.EventSerieSacemDeclaration !== null);
@@ -138,6 +239,16 @@ export const declarationRouter = router({
             EventSerieSacemDeclaration: {
               select: {
                 id: true,
+                SacemDeclarationAccountingEntry: {
+                  select: {
+                    id: true,
+                    flux: true,
+                    category: true,
+                    categoryPrecision: true,
+                    taxRate: true,
+                    amount: true,
+                  },
+                },
               },
             },
           },
@@ -156,15 +267,66 @@ export const declarationRouter = router({
 
     const existingDeclaration = eventSerie.EventSerieDeclaration.find((eSD) => eSD.EventSerieSacemDeclaration !== null);
 
+    const submittedLiteAccountingEntries = new Map<
+      string, // It's a mix of multiple fields to make sure we have a unique key
+      LiteSacemDeclarationAccountingEntrySchemaType
+    >();
+
+    for (const revenue of input.revenues) {
+      // [IMPORTANT] Since the ticketing entry is calculated from other tables we avoid the possibility of setting them
+      // Note: it has the same type than other in the backend/frontend to facilitate the display and manipulation
+      if (revenue.category === AccountingCategorySchema.Values.TICKETING) {
+        continue;
+      }
+
+      submittedLiteAccountingEntries.set(`${AccountingFluxSchema.Values.REVENUE}_${revenue.category}_${revenue.categoryPrecision}`, {
+        flux: AccountingFluxSchema.Values.REVENUE,
+        category: revenue.category,
+        categoryPrecision: revenue.categoryPrecision,
+        taxRate: revenue.taxRate,
+        includingTaxesAmount: revenue.includingTaxesAmount,
+      });
+    }
+
+    for (const expense of input.expenses) {
+      submittedLiteAccountingEntries.set(`${AccountingFluxSchema.Values.EXPENSE}_${expense.category}_${expense.categoryPrecision}`, {
+        flux: AccountingFluxSchema.Values.EXPENSE,
+        category: expense.category,
+        categoryPrecision: expense.categoryPrecision,
+        taxRate: expense.taxRate,
+        includingTaxesAmount: expense.includingTaxesAmount,
+      });
+    }
+
     // We have to handle both update and creation since it's implicitely linked to an event serie
     // [WORKAROUND] `upsert` cannot be used to `where` not accepting undefined values (the zero UUID could be a bit at risk so using `create+update`)
     // Ref: https://github.com/prisma/prisma/issues/5233
     let sacemDeclaration;
 
     if (existingDeclaration) {
+      assert(existingDeclaration.EventSerieSacemDeclaration);
+
+      const sacemDeclarationId = existingDeclaration.EventSerieSacemDeclaration.id;
+
+      const storedLiteAccountingEntries: typeof submittedLiteAccountingEntries = new Map();
+
+      for (const accountingEntry of existingDeclaration.EventSerieSacemDeclaration!.SacemDeclarationAccountingEntry) {
+        storedLiteAccountingEntries.set(`${accountingEntry.flux}_${accountingEntry.category}_${accountingEntry.categoryPrecision}`, {
+          flux: accountingEntry.flux,
+          category: accountingEntry.category,
+          categoryPrecision: accountingEntry.categoryPrecision,
+          taxRate: accountingEntry.taxRate.toNumber(),
+          includingTaxesAmount: accountingEntry.amount.toNumber(),
+        });
+      }
+
+      const accountingEntriesDiffResult = getDiff(storedLiteAccountingEntries, submittedLiteAccountingEntries);
+
+      // Nullable field cannot be used as part of the unique compound... so we need to perform association mutations without unique constraints
+      // Ref: https://github.com/prisma/prisma/issues/3197
       sacemDeclaration = await prisma.eventSerieSacemDeclaration.update({
         where: {
-          id: existingDeclaration.EventSerieSacemDeclaration!.id,
+          id: sacemDeclarationId,
         },
         data: {
           clientId: input.clientId,
@@ -172,6 +334,39 @@ export const declarationRouter = router({
           placeCapacity: input.placeCapacity,
           managerName: input.managerName,
           managerTitle: input.managerTitle,
+          SacemDeclarationAccountingEntry: {
+            deleteMany: accountingEntriesDiffResult.removed.map((removedEntry) => {
+              return {
+                sacemDeclarationId: sacemDeclarationId,
+                flux: removedEntry.flux,
+                category: removedEntry.category,
+                categoryPrecision: removedEntry.categoryPrecision,
+              } satisfies Prisma.SacemDeclarationAccountingEntryScalarWhereInput;
+            }),
+            create: accountingEntriesDiffResult.added.map((addedEntry) => {
+              return {
+                flux: addedEntry.flux,
+                category: addedEntry.category,
+                categoryPrecision: addedEntry.categoryPrecision,
+                taxRate: addedEntry.taxRate,
+                amount: addedEntry.includingTaxesAmount,
+              } satisfies Prisma.SacemDeclarationAccountingEntryCreateWithoutSacemDeclarationInput;
+            }),
+            updateMany: accountingEntriesDiffResult.updated.map((updatedEntry) => {
+              return {
+                where: {
+                  sacemDeclarationId: sacemDeclarationId,
+                  flux: updatedEntry.flux,
+                  category: updatedEntry.category,
+                  categoryPrecision: updatedEntry.categoryPrecision,
+                },
+                data: {
+                  taxRate: updatedEntry.taxRate,
+                  amount: updatedEntry.includingTaxesAmount,
+                },
+              } satisfies Prisma.SacemDeclarationAccountingEntryUpdateManyWithWhereWithoutSacemDeclarationInput;
+            }),
+          },
         },
         select: {
           id: true,
@@ -216,6 +411,15 @@ export const declarationRouter = router({
                   },
                 },
               },
+            },
+          },
+          SacemDeclarationAccountingEntry: {
+            select: {
+              flux: true,
+              category: true,
+              categoryPrecision: true,
+              taxRate: true,
+              amount: true,
             },
           },
         },
@@ -234,6 +438,17 @@ export const declarationRouter = router({
               eventSerieId: eventSerie.id,
             },
           },
+          SacemDeclarationAccountingEntry: {
+            create: Array.from(submittedLiteAccountingEntries).map(([_, entry]) => {
+              return {
+                flux: entry.flux,
+                category: entry.category,
+                categoryPrecision: entry.categoryPrecision,
+                taxRate: entry.taxRate,
+                amount: entry.includingTaxesAmount,
+              };
+            }),
+          },
         },
         select: {
           id: true,
@@ -278,6 +493,15 @@ export const declarationRouter = router({
                   },
                 },
               },
+            },
+          },
+          SacemDeclarationAccountingEntry: {
+            select: {
+              flux: true,
+              category: true,
+              categoryPrecision: true,
+              taxRate: true,
+              amount: true,
             },
           },
         },

@@ -260,5 +260,43 @@ model EventSerieSacemDeclaration {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  eventSerieDeclaration EventSerieDeclaration @relation(fields: [eventSerieDeclarationId], references: [id], onDelete: Cascade)
+  eventSerieDeclaration           EventSerieDeclaration             @relation(fields: [eventSerieDeclarationId], references: [id], onDelete: Cascade)
+  SacemDeclarationAccountingEntry SacemDeclarationAccountingEntry[]
+}
+
+enum AccountingFlux {
+  REVENUE
+  EXPENSE
+}
+
+enum AccountingCategory {
+  // Revenues
+  TICKETING // Should be never used as for now it's dynamically computed from ticketing system tables
+  CONSUMPTIONS
+  CATERING
+  PROGRAM_SALES
+  OTHER_REVENUES
+  // Expenses
+  ENGAGEMENT_CONTRACTS
+  RIGHTS_TRANSFER_CONTRACTS
+  COREALIZATION_CONTRACTS
+  COPRODUCTION_CONTRACTS
+  OTHER_ARTISTIC_CONTRACTS
+}
+
+model SacemDeclarationAccountingEntry {
+  id                 String             @id @default(uuid()) @db.Uuid
+  sacemDeclarationId String             @db.Uuid
+  flux               AccountingFlux
+  category           AccountingCategory
+  categoryPrecision  String?
+  taxRate            Decimal            @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
+  amount             Decimal            @db.Decimal(8, 2) // Always including taxes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  sacemDeclaration EventSerieSacemDeclaration @relation(fields: [sacemDeclarationId], references: [id], onDelete: Cascade)
+
+  @@unique([sacemDeclarationId, flux, category, categoryPrecision])
 }

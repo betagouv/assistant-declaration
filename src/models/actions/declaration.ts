@@ -20,6 +20,8 @@ export const FillSacemDeclarationSchema = z
     placeCapacity: SacemDeclarationSchema.shape.placeCapacity,
     managerName: SacemDeclarationSchema.shape.managerName,
     managerTitle: SacemDeclarationSchema.shape.managerTitle,
+    revenues: SacemDeclarationSchema.shape.revenues,
+    expenses: SacemDeclarationSchema.shape.expenses,
   })
   .strict();
 export type FillSacemDeclarationSchemaType = z.infer<typeof FillSacemDeclarationSchema>;
