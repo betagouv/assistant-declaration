@@ -45,7 +45,17 @@
         "too_small_one": "l'email est requis"
       },
       "expenses": {
-        "duplicateFluxEntryCategoryLabel": "les libellées des contrats artistiques doivent être uniques"
+        "categoryPrecision": {
+          "too_small_one": "l'intitulé du type de contrat est requis"
+        },
+        "duplicateFluxEntryCategoryLabel": "les libellées des contrats artistiques doivent être uniques",
+        "includingTaxesAmount": {
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
+        "taxRate": {
+          "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
+        },
+        "too_big": "il ne peut y avoir que {{maximum}} dépenses au maximum"
       },
       "firstname": {
         "too_small_one": "le prénom est requis"
@@ -82,6 +92,7 @@
       },
       "placeCapacity": {
         "invalid_type": "la capacité de la salle doit être un nombre entier",
+        "too_small": "la capacité de la salle doit être supérieure à {{minimum}}",
         "too_small_one": "la capacité de la salle est requise"
       },
       "placeName": {
@@ -94,7 +105,17 @@
         "too_big": "la recherche doit faire {{maximum}} caractères maximum"
       },
       "revenues": {
-        "duplicateFluxEntryCategoryLabel": "les libellées des recettes doivent être uniques"
+        "categoryPrecision": {
+          "too_small_one": "l'intitulé de l'origine de la recette est requis"
+        },
+        "duplicateFluxEntryCategoryLabel": "les libellées des recettes doivent être uniques",
+        "includingTaxesAmount": {
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
+        "taxRate": {
+          "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
+        },
+        "too_big": "il ne peut y avoir que {{maximum}} revenus au maximum"
       },
       "totalOverride": {
         "invalid_type": "le nombre de places doit être un nombre entier",

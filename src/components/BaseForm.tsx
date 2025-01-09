@@ -3,13 +3,14 @@ import Alert from '@mui/material/Alert';
 import Grid from '@mui/material/Grid';
 import * as Sentry from '@sentry/nextjs';
 import { Mutex } from 'locks';
-import { CSSProperties, FormEventHandler, MutableRefObject, PropsWithChildren, useRef, useState } from 'react';
-import { Control, FieldErrorsImpl, FieldValues, UseFormHandleSubmit } from 'react-hook-form';
+import { CSSProperties, FormEventHandler, MutableRefObject, PropsWithChildren, useMemo, useRef, useState } from 'react';
+import { Control, FieldError, FieldErrorsImpl, FieldValues, Merge, UseFormHandleSubmit } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { BusinessError } from '@ad/src/models/entities/errors';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
+import { recursiveCountErrors } from '@ad/src/utils/validation';
 
 export interface BaseFormProps<FormSchemaType extends FieldValues> {
   handleSubmit: UseFormHandleSubmit<FormSchemaType>;
@@ -23,10 +24,17 @@ export interface BaseFormProps<FormSchemaType extends FieldValues> {
 // When you want to debug a form, just uncomment the below line (I did not see the value to manage it through environment variable)
 export function BaseForm<FormSchemaType extends FieldValues>(props: PropsWithChildren<BaseFormProps<FormSchemaType>>) {
   const { t } = useTranslation('common');
-  const [validationErrors, setValidationErrors] = useState<Partial<FieldErrorsImpl<any>>>(props.control._formState.errors);
+  const [validationErrors, setValidationErrors] = useState<FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined>(
+    props.control._formState.errors
+  );
   const [onSubmitError, setOnSubmitError] = useState<Error | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null); // This is used to scroll to the error messages
   const [mutex] = useState<Mutex>(new Mutex());
+
+  const validationErrorsCount = useMemo(() => {
+    // Since it can be nested with objects or arrays we make sure analyzing all cases
+    return recursiveCountErrors(validationErrors);
+  }, [validationErrors]);
 
   const setMultipleRefs = (element: HTMLFormElement) => {
     formRef.current = element;
@@ -99,12 +107,12 @@ export function BaseForm<FormSchemaType extends FieldValues>(props: PropsWithChi
             </Grid>
           )}
 
-          {Object.keys(validationErrors).length > 0 && (
+          {validationErrorsCount > 0 && (
             <Grid item xs={12} sx={{ py: 2 }}>
               <Alert severity="error">
-                {validationErrors[''] !== undefined
+                {validationErrors && '' in validationErrors
                   ? capitalizeFirstLetter(validationErrors['']?.message as string) // Uppercase first letter since our errors are lowercase by default for flexibility
-                  : t('components.BaseForm.form_contains_errors', { count: Object.keys(validationErrors).length })}
+                  : t('components.BaseForm.form_contains_errors', { count: validationErrorsCount })}
               </Alert>
             </Grid>
           )}

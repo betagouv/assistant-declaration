@@ -1,24 +1,29 @@
 import { Delete } from '@mui/icons-material';
-import { Box, Button, IconButton, Tooltip } from '@mui/material';
+import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import { GridAutosizeOptions, type GridColDef, useGridApiRef } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import debounce from 'lodash.debounce';
-import { useCallback, useEffect, useState } from 'react';
-import { Control, useFieldArray } from 'react-hook-form';
+import { useEffect, useMemo, useState } from 'react';
+import { Control, FieldErrors, useFieldArray } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
+import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
 import { FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { AccountingCategorySchema } from '@ad/src/models/entities/declaration';
 import { currencyFormatter } from '@ad/src/utils/currency';
 import { nameof } from '@ad/src/utils/typescript';
+import { RowForForm } from '@ad/src/utils/validation';
 
+const rowTypedNameof = nameof<RowForForm<any, any>>;
 const entryTypedNameof = nameof<FillSacemDeclarationSchemaType['expenses'][0]>;
 
 export interface SacemExpensesTableProps {
   control: Control<FillSacemDeclarationSchemaType, any>;
+  errors: FieldErrors<FillSacemDeclarationSchemaType>['expenses'];
 }
 
-export function SacemExpensesTable({ control }: SacemExpensesTableProps) {
+export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps) {
   const { t } = useTranslation('common');
 
   const { fields, append, update, remove } = useFieldArray({
@@ -35,9 +40,19 @@ export function SacemExpensesTable({ control }: SacemExpensesTableProps) {
     expand: true,
   });
 
+  const rowsWithErrorLogic = useMemo(() => {
+    return fields.map((field, index): RowForForm<typeof field, NonNullable<typeof errors>[0]> => {
+      return {
+        index: index,
+        data: field,
+        errors: Array.isArray(errors) ? errors[index] : undefined,
+      };
+    });
+  }, [fields, errors]);
+
   useEffect(() => {
     apiRef.current.autosizeColumns(autosizeOption);
-  }, [apiRef, fields, autosizeOption]);
+  }, [apiRef, rowsWithErrorLogic, autosizeOption]);
 
   useEffect(() => {
     // We also autosize when the frame is changing
@@ -54,52 +69,58 @@ export function SacemExpensesTable({ control }: SacemExpensesTableProps) {
   }, [apiRef, autosizeOption]);
 
   // To type options functions have a look at https://github.com/mui/mui-x/pull/4064
-  const [columns] = useState<GridColDef<(typeof fields)[0]>[]>([
+  const [columns] = useState<GridColDef<(typeof rowsWithErrorLogic)[0]>[]>([
     {
-      field: `${entryTypedNameof('category')}`,
+      field: `${rowTypedNameof('data')}.${entryTypedNameof('category')}`,
       headerName: 'Type de contrat',
       editable: true,
+      display: 'flex', // Needed to align properly `ErrorCellWrapper`
       valueGetter: (_, row) => {
-        return row.categoryPrecision ?? row.category;
+        return row.data.categoryPrecision ?? row.data.category;
       },
       valueSetter: (value, row) => {
         // Editable category should only be for "other expenses"
         return {
           ...row,
-          categoryPrecision: value,
+          data: {
+            ...row.data,
+            categoryPrecision: value,
+          },
         };
       },
       renderCell: (params) => {
         return (
-          <span data-sentry-mask>{params.row.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${params.row.category}`)}</span>
+          <ErrorCellWrapper errorMessage={params.row.errors?.category?.message ?? params.row.errors?.categoryPrecision?.message} data-sentry-mask>
+            {params.row.data.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${params.row.data.category}`)}
+          </ErrorCellWrapper>
         );
       },
     },
     {
-      field: `${entryTypedNameof('taxRate')}`,
+      field: `${rowTypedNameof('data')}.${entryTypedNameof('taxRate')}`,
       headerName: 'Taux de TVA',
       editable: true,
       type: 'number',
+      display: 'flex', // Needed to align properly `ErrorCellWrapper`
       valueGetter: (_, row) => {
         // Display a percentage tax rate so it's easier for people to understand
-        return row.taxRate * 100;
+        return row.data.taxRate * 100;
       },
       valueSetter: (value, row) => {
         // As we choose to display a percentage, we switch back to the technical format
         return {
           ...row,
-          taxRate: value / 100,
+          data: {
+            ...row.data,
+            taxRate: value / 100,
+          },
         };
       },
       renderCell: (params) => {
         return (
-          <Tooltip
-            title={
-              params.row.category === AccountingCategorySchema.Values.TICKETING ? 'Cette valeur provient initialement de votre billetterie' : null
-            }
-          >
-            <span data-sentry-mask>{params.row.taxRate * 100}%</span>
-          </Tooltip>
+          <ErrorCellWrapper errorMessage={params.row.errors?.taxRate?.message} data-sentry-mask>
+            {params.row.data.taxRate * 100}%
+          </ErrorCellWrapper>
         );
       },
     },
@@ -108,17 +129,7 @@ export function SacemExpensesTable({ control }: SacemExpensesTableProps) {
       headerName: 'Recettes HT',
       type: 'number', // To respect the same alignment than others
       renderCell: (params) => {
-        return (
-          <Tooltip
-            title={
-              params.row.category === AccountingCategorySchema.Values.TICKETING
-                ? 'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                : null
-            }
-          >
-            <span data-sentry-mask>{currencyFormatter.format((1 - params.row.taxRate) * params.row.includingTaxesAmount)}</span>
-          </Tooltip>
-        );
+        return <span data-sentry-mask>{currencyFormatter.format((1 - params.row.data.taxRate) * params.row.data.includingTaxesAmount)}</span>;
       },
     },
     {
@@ -126,35 +137,32 @@ export function SacemExpensesTable({ control }: SacemExpensesTableProps) {
       headerName: 'Montant de la TVA',
       type: 'number', // To respect the same alignment than others
       renderCell: (params) => {
-        return (
-          <Tooltip
-            title={
-              params.row.category === AccountingCategorySchema.Values.TICKETING
-                ? 'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                : null
-            }
-          >
-            <span data-sentry-mask>{currencyFormatter.format(params.row.taxRate * params.row.includingTaxesAmount)}</span>
-          </Tooltip>
-        );
+        return <span data-sentry-mask>{currencyFormatter.format(params.row.data.taxRate * params.row.data.includingTaxesAmount)}</span>;
       },
     },
     {
-      field: `${entryTypedNameof('includingTaxesAmount')}`,
+      field: `${rowTypedNameof('data')}.${entryTypedNameof('includingTaxesAmount')}`,
       headerName: 'Recettes TTC',
       editable: true,
       type: 'number',
+      display: 'flex', // Needed to align properly `ErrorCellWrapper`
+      valueGetter: (_, row) => {
+        return row.data.includingTaxesAmount;
+      },
+      valueSetter: (value, row) => {
+        return {
+          ...row,
+          data: {
+            ...row.data,
+            includingTaxesAmount: value,
+          },
+        };
+      },
       renderCell: (params) => {
         return (
-          <Tooltip
-            title={
-              params.row.category === AccountingCategorySchema.Values.TICKETING
-                ? 'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                : null
-            }
-          >
-            <span data-sentry-mask>{currencyFormatter.format(params.row.includingTaxesAmount)}</span>
-          </Tooltip>
+          <ErrorCellWrapper errorMessage={params.row.errors?.includingTaxesAmount?.message} data-sentry-mask>
+            {currencyFormatter.format(params.row.data.includingTaxesAmount)}
+          </ErrorCellWrapper>
         );
       },
     },
@@ -167,17 +175,10 @@ export function SacemExpensesTable({ control }: SacemExpensesTableProps) {
       renderCell: (params) => {
         return (
           <IconButton
-            disabled={params.row.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS}
+            disabled={params.row.data.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS}
             aria-label="enlever une ligne de dépense"
             onClick={() => {
-              // [WORKAROUND] From here at start we were comparing to `fields` but it was keeping the old array values
-              // We tried using a `useCallback` but it was not working, we ended using a `useMemo` for columns, it was working
-              // but rerendering the whole table so it feeled laggy. Ending with this, since rows cannot be rearranged the indexes are matching with `fields`
-              const itemIndex = params.api.getRowIndexRelativeToVisibleRows(params.id);
-
-              if (itemIndex !== -1) {
-                remove(itemIndex);
-              }
+              remove(params.row.index);
             }}
             size="small"
           >
@@ -192,49 +193,54 @@ export function SacemExpensesTable({ control }: SacemExpensesTableProps) {
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <DataGrid
         apiRef={apiRef}
-        rows={fields}
-        getRowId={(row) => `${row.category}_${row.categoryPrecision || ''}`}
+        rows={rowsWithErrorLogic}
+        getRowId={(row) => `${row.data.category}_${row.data.categoryPrecision || ''}`}
         columns={columns}
         editMode="row"
         isCellEditable={(params) => {
-          if (params.field === entryTypedNameof('category') && params.row.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS) {
+          if (
+            params.field === `${rowTypedNameof('data')}.${entryTypedNameof('category')}` &&
+            params.row.data.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS
+          ) {
             // If not a custom expense the category field cannot be edited
             return false;
           }
 
           return true;
         }}
-        processRowUpdate={(newRow, oldRow, extra) => {
-          const itemIndex = fields.findIndex((item) => {
-            // `extra.rowId` comes from DataGrid whereas `item.id` has been defined by `useFieldArray()`
-            return extra.rowId === `${item.category}_${item.categoryPrecision || ''}`;
-          });
-
+        processRowUpdate={(newRow, oldRow, params) => {
           // If the category has been changed we need to make sure it does not exist already to keep the uniqueness of fields
-          if (newRow.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS && newRow.categoryPrecision !== oldRow.categoryPrecision) {
+          if (
+            newRow.data.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS &&
+            newRow.data.categoryPrecision !== oldRow.data.categoryPrecision
+          ) {
             while (true) {
               const anotherRowWithThisLabel = fields.find((item) => {
-                return item !== fields[itemIndex] && item.category === newRow.category && item.categoryPrecision === newRow.categoryPrecision;
+                return (
+                  item !== fields[newRow.index] && item.category === newRow.data.category && item.categoryPrecision === newRow.data.categoryPrecision
+                );
               });
 
               if (anotherRowWithThisLabel) {
                 // Renaming since that's the easiest solution here...
-                newRow.categoryPrecision = `${newRow.categoryPrecision} bis`;
+                newRow.data.categoryPrecision = `${newRow.data.categoryPrecision} bis`;
               } else {
                 break;
               }
             }
           }
 
-          // We cannot pass `newRow` directly because it contains the `id` field from `useFieldArray()` that would make `isDirty` true no matter the situation
-          const { id, ...newFormItemValue } = newRow;
+          // We cannot pass `newRow.data` directly because it contains the `id` field from `useFieldArray()` that would make `isDirty` true no matter the situation
+          const { id, ...newFormItemValue } = newRow.data;
 
-          if (itemIndex !== -1) {
-            update(itemIndex, newFormItemValue);
-          }
+          update(newRow.index, newFormItemValue);
 
           return newRow;
         }}
+        getRowClassName={(params) => {
+          return params.row.errors ? styles.erroredRow : '';
+        }}
+        className={errors?.message ? styles.erroredTable : ''}
         hideFooter={true}
         disableColumnFilter
         disableColumnMenu
@@ -269,6 +275,11 @@ export function SacemExpensesTable({ control }: SacemExpensesTableProps) {
         aria-label="tableau des dépenses artistiques d'une série de représentations"
         data-sentry-mask
       />
+      {errors?.message && (
+        <Typography color="error" variant="body2" aria-invalid sx={{ mt: 1, ml: 2 }}>
+          {errors.message}
+        </Typography>
+      )}
       <Button
         onClick={async () => {
           // Each row must have a unique key for DataGrid (implicitly a unique category precision for "other expenses")

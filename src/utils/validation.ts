@@ -1,4 +1,36 @@
+import { FieldError, FieldErrorsImpl, Merge } from 'react-hook-form';
 import z from 'zod';
+
+export interface RowForForm<T, E> {
+  index: number;
+  data: T;
+  errors: E;
+}
+
+export function recursiveCountErrors(errors: FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined): number {
+  let count = 0;
+
+  if (!errors) {
+    return count;
+  }
+  if (errors.message) {
+    count += 1;
+  }
+
+  if (typeof errors === 'object') {
+    if (Array.isArray(errors)) {
+      errors.forEach((error) => {
+        count += recursiveCountErrors(error);
+      });
+    } else {
+      Object.values(errors).forEach((error) => {
+        count += recursiveCountErrors(error);
+      });
+    }
+  }
+
+  return count;
+}
 
 export function emptyStringtoNullPreprocessor<T extends z.ZodString | z.ZodDate>(initialValidation: z.ZodNullable<T>) {
   return z.preprocess((value) => {

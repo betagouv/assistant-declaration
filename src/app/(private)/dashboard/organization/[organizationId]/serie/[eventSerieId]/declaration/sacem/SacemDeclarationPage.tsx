@@ -65,7 +65,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
 
   const {
     handleSubmit,
-    formState: { isDirty },
+    formState: { errors, isDirty },
     control,
     reset,
   } = useForm<FillSacemDeclarationSchemaType>({
@@ -686,7 +686,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                         mt: 1,
                       }}
                     >
-                      <SacemRevenuesTable control={control} />
+                      <SacemRevenuesTable control={control} errors={errors.revenues} />
                     </Box>
                   </Grid>
                 </Grid>
@@ -707,7 +707,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                         mt: 1,
                       }}
                     >
-                      <SacemExpensesTable control={control} />
+                      <SacemExpensesTable control={control} errors={errors.expenses} />
                     </Box>
                   </Grid>
                 </Grid>
