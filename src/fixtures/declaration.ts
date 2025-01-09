@@ -147,7 +147,9 @@ export const sacemDeclarationsWrappers: SacemDeclarationWrapperSchemaType[] = [
       eventsCount: sacemDeclarations[0].eventsCount,
       paidTickets: sacemDeclarations[0].paidTickets,
       freeTickets: sacemDeclarations[0].freeTickets,
-      revenues: {
+      revenues: sacemDeclarations[0].revenues,
+      expenses: sacemDeclarations[0].expenses,
+      revenuesOptions: {
         ticketing: {
           taxRate: [sacemDeclarations[0].revenues[0].taxRate],
           amount: [sacemDeclarations[0].revenues[0].includingTaxesAmount],
@@ -158,7 +160,7 @@ export const sacemDeclarationsWrappers: SacemDeclarationWrapperSchemaType[] = [
         other: { taxRate: [], amount: [] },
         otherCategories: [],
       },
-      expenses: {
+      expensesOptions: {
         engagementContracts: { taxRate: [], amount: [] },
         rightsTransferContracts: { taxRate: [], amount: [] },
         corealizationContracts: { taxRate: [], amount: [] },
@@ -183,7 +185,9 @@ export const sacemDeclarationsWrappers: SacemDeclarationWrapperSchemaType[] = [
       eventsCount: sacemDeclarations[1].eventsCount,
       paidTickets: sacemDeclarations[1].paidTickets,
       freeTickets: sacemDeclarations[1].freeTickets,
-      revenues: {
+      revenues: sacemDeclarations[1].revenues,
+      expenses: sacemDeclarations[1].expenses,
+      revenuesOptions: {
         ticketing: {
           taxRate: [sacemDeclarations[1].revenues[0].taxRate],
           amount: [sacemDeclarations[1].revenues[0].includingTaxesAmount],
@@ -194,7 +198,7 @@ export const sacemDeclarationsWrappers: SacemDeclarationWrapperSchemaType[] = [
         other: { taxRate: [], amount: [] },
         otherCategories: [],
       },
-      expenses: {
+      expensesOptions: {
         engagementContracts: { taxRate: [], amount: [] },
         rightsTransferContracts: { taxRate: [], amount: [] },
         corealizationContracts: { taxRate: [], amount: [] },
@@ -219,7 +223,9 @@ export const sacemDeclarationsWrappers: SacemDeclarationWrapperSchemaType[] = [
       eventsCount: sacemDeclarations[2].eventsCount,
       paidTickets: sacemDeclarations[2].paidTickets,
       freeTickets: sacemDeclarations[2].freeTickets,
-      revenues: {
+      revenues: sacemDeclarations[2].revenues,
+      expenses: sacemDeclarations[2].expenses,
+      revenuesOptions: {
         ticketing: {
           taxRate: [sacemDeclarations[2].revenues[0].taxRate],
           amount: [sacemDeclarations[2].revenues[0].includingTaxesAmount],
@@ -230,7 +236,7 @@ export const sacemDeclarationsWrappers: SacemDeclarationWrapperSchemaType[] = [
         other: { taxRate: [], amount: [] },
         otherCategories: [],
       },
-      expenses: {
+      expensesOptions: {
         engagementContracts: { taxRate: [], amount: [] },
         rightsTransferContracts: { taxRate: [], amount: [] },
         corealizationContracts: { taxRate: [], amount: [] },

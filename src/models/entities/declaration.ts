@@ -146,13 +146,15 @@ export const SacemDeclarationWrapperSchema = applyTypedParsers(
         eventsCount: true,
         paidTickets: true,
         freeTickets: true,
+        revenues: true,
+        expenses: true,
       }).extend({
         clientId: z.array(SacemDeclarationSchema.shape.clientId),
         placeName: z.array(SacemDeclarationSchema.shape.placeName),
         placeCapacity: z.array(SacemDeclarationSchema.shape.placeCapacity),
         managerName: z.array(SacemDeclarationSchema.shape.managerName),
         managerTitle: z.array(SacemDeclarationSchema.shape.managerTitle),
-        revenues: z.object({
+        revenuesOptions: z.object({
           ticketing: SacemDeclarationAccountingEntryPlaceholderSchema,
           consumptions: SacemDeclarationAccountingEntryPlaceholderSchema,
           catering: SacemDeclarationAccountingEntryPlaceholderSchema,
@@ -160,7 +162,7 @@ export const SacemDeclarationWrapperSchema = applyTypedParsers(
           other: SacemDeclarationAccountingEntryPlaceholderSchema,
           otherCategories: z.array(SacemDeclarationAccountingOtherEntryCategorySchema),
         }),
-        expenses: z.object({
+        expensesOptions: z.object({
           engagementContracts: SacemDeclarationAccountingEntryPlaceholderSchema,
           rightsTransferContracts: SacemDeclarationAccountingEntryPlaceholderSchema,
           corealizationContracts: SacemDeclarationAccountingEntryPlaceholderSchema,

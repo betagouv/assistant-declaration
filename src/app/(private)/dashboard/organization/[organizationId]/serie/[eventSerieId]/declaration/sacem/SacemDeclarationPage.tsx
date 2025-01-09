@@ -96,19 +96,28 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
   );
 
   useEffect(() => {
-    if (!formInitialized && getSacemDeclaration.data?.sacemDeclarationWrapper.declaration) {
+    if (!formInitialized && getSacemDeclaration.data) {
       setFormInitialized(true); // It's needed otherwise if you blur/focus again the window the new fetch data will override the "dirty form data"
 
-      reset({
-        eventSerieId: eventSerieId,
-        clientId: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.clientId,
-        placeName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeName,
-        placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeCapacity,
-        managerName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerName,
-        managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerTitle,
-        revenues: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.revenues,
-        expenses: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.expenses,
-      }); // Update the form with fetched data
+      // Update the form with fetched data
+      if (getSacemDeclaration.data.sacemDeclarationWrapper.declaration) {
+        reset({
+          eventSerieId: eventSerieId,
+          clientId: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.clientId,
+          placeName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeName,
+          placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeCapacity,
+          managerName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerName,
+          managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerTitle,
+          revenues: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.revenues,
+          expenses: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.expenses,
+        });
+      } else if (getSacemDeclaration.data.sacemDeclarationWrapper.placeholder) {
+        reset({
+          eventSerieId: eventSerieId,
+          revenues: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.revenues,
+          expenses: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.expenses,
+        });
+      }
     }
   }, [getSacemDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
 

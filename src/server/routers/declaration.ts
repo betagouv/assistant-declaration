@@ -1,5 +1,6 @@
 import { EventSerieDeclarationStatus, Prisma } from '@prisma/client';
 
+import { ensureMinimumSacemExpenseItems, ensureMinimumSacemRevenueItems } from '@ad/src/core/declaration';
 import { FillSacemDeclarationSchema, GetSacemDeclarationSchema } from '@ad/src/models/actions/declaration';
 import {
   AccountingCategorySchema,
@@ -134,7 +135,9 @@ export const declarationRouter = router({
       placeCapacity: [],
       managerName: [],
       managerTitle: [],
-      revenues: {
+      revenues: ensureMinimumSacemRevenueItems(revenues),
+      expenses: ensureMinimumSacemExpenseItems(expenses),
+      revenuesOptions: {
         ticketing: { taxRate: [], amount: [] },
         consumptions: { taxRate: [], amount: [] },
         catering: { taxRate: [], amount: [] },
@@ -142,7 +145,7 @@ export const declarationRouter = router({
         other: { taxRate: [], amount: [] },
         otherCategories: [],
       },
-      expenses: {
+      expensesOptions: {
         engagementContracts: { taxRate: [], amount: [] },
         rightsTransferContracts: { taxRate: [], amount: [] },
         corealizationContracts: { taxRate: [], amount: [] },
@@ -168,44 +171,45 @@ export const declarationRouter = router({
         if (accountingEntry.flux === 'REVENUE') {
           switch (accountingEntry.category) {
             case 'TICKETING':
-              if (!placeholder.revenues.ticketing.taxRate.includes(taxRate)) placeholder.revenues.ticketing.taxRate.push(taxRate);
+              if (!placeholder.revenuesOptions.ticketing.taxRate.includes(taxRate)) placeholder.revenuesOptions.ticketing.taxRate.push(taxRate);
               break;
             case 'CONSUMPTIONS':
-              if (!placeholder.revenues.consumptions.taxRate.includes(taxRate)) placeholder.revenues.consumptions.taxRate.push(taxRate);
+              if (!placeholder.revenuesOptions.consumptions.taxRate.includes(taxRate)) placeholder.revenuesOptions.consumptions.taxRate.push(taxRate);
               break;
             case 'CATERING':
-              if (!placeholder.revenues.catering.taxRate.includes(taxRate)) placeholder.revenues.catering.taxRate.push(taxRate);
+              if (!placeholder.revenuesOptions.catering.taxRate.includes(taxRate)) placeholder.revenuesOptions.catering.taxRate.push(taxRate);
               break;
             case 'PROGRAM_SALES':
-              if (!placeholder.revenues.programSales.taxRate.includes(taxRate)) placeholder.revenues.programSales.taxRate.push(taxRate);
+              if (!placeholder.revenuesOptions.programSales.taxRate.includes(taxRate)) placeholder.revenuesOptions.programSales.taxRate.push(taxRate);
               break;
             case 'OTHER_REVENUES':
-              if (accountingEntry.categoryPrecision && !placeholder.revenues.otherCategories.includes(accountingEntry.categoryPrecision))
-                placeholder.revenues.otherCategories.push(accountingEntry.categoryPrecision);
-              if (!placeholder.revenues.other.taxRate.includes(taxRate)) placeholder.revenues.other.taxRate.push(taxRate);
+              if (accountingEntry.categoryPrecision && !placeholder.revenuesOptions.otherCategories.includes(accountingEntry.categoryPrecision))
+                placeholder.revenuesOptions.otherCategories.push(accountingEntry.categoryPrecision);
+              if (!placeholder.revenuesOptions.other.taxRate.includes(taxRate)) placeholder.revenuesOptions.other.taxRate.push(taxRate);
               break;
           }
         } else if (accountingEntry.flux === 'EXPENSE') {
           switch (accountingEntry.category) {
             case 'ENGAGEMENT_CONTRACTS':
-              if (!placeholder.expenses.engagementContracts.taxRate.includes(taxRate)) placeholder.expenses.engagementContracts.taxRate.push(taxRate);
+              if (!placeholder.expensesOptions.engagementContracts.taxRate.includes(taxRate))
+                placeholder.expensesOptions.engagementContracts.taxRate.push(taxRate);
               break;
             case 'RIGHTS_TRANSFER_CONTRACTS':
-              if (!placeholder.expenses.rightsTransferContracts.taxRate.includes(taxRate))
-                placeholder.expenses.rightsTransferContracts.taxRate.push(taxRate);
+              if (!placeholder.expensesOptions.rightsTransferContracts.taxRate.includes(taxRate))
+                placeholder.expensesOptions.rightsTransferContracts.taxRate.push(taxRate);
               break;
             case 'COREALIZATION_CONTRACTS':
-              if (!placeholder.expenses.corealizationContracts.taxRate.includes(taxRate))
-                placeholder.expenses.corealizationContracts.taxRate.push(taxRate);
+              if (!placeholder.expensesOptions.corealizationContracts.taxRate.includes(taxRate))
+                placeholder.expensesOptions.corealizationContracts.taxRate.push(taxRate);
               break;
             case 'COPRODUCTION_CONTRACTS':
-              if (!placeholder.expenses.coproductionContracts.taxRate.includes(taxRate))
-                placeholder.expenses.coproductionContracts.taxRate.push(taxRate);
+              if (!placeholder.expensesOptions.coproductionContracts.taxRate.includes(taxRate))
+                placeholder.expensesOptions.coproductionContracts.taxRate.push(taxRate);
               break;
             case 'OTHER_ARTISTIC_CONTRACTS':
-              if (accountingEntry.categoryPrecision && !placeholder.expenses.otherCategories.includes(accountingEntry.categoryPrecision))
-                placeholder.expenses.otherCategories.push(accountingEntry.categoryPrecision);
-              if (!placeholder.expenses.other.taxRate.includes(taxRate)) placeholder.expenses.other.taxRate.push(taxRate);
+              if (accountingEntry.categoryPrecision && !placeholder.expensesOptions.otherCategories.includes(accountingEntry.categoryPrecision))
+                placeholder.expensesOptions.otherCategories.push(accountingEntry.categoryPrecision);
+              if (!placeholder.expensesOptions.other.taxRate.includes(taxRate)) placeholder.expensesOptions.other.taxRate.push(taxRate);
               break;
           }
         }
