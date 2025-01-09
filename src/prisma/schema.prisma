@@ -165,6 +165,7 @@ model EventSerie {
   name                      String
   startAt                   DateTime
   endAt                     DateTime
+  taxRate                   Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
   // image Attachment
 
   createdAt DateTime @default(now())

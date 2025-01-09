@@ -209,6 +209,7 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
           name: event.name,
           startAt: event.start,
           endAt: event.end,
+          taxRate: event.tax_rate / 100,
         }),
         events: schemaEvents,
         ticketCategories: schemaTicketCategories,
@@ -233,6 +234,7 @@ export class MockTicketingSystemClient implements TicketingSystemClient {
           name: 'Mon premier coucou',
           startAt: set(new Date(0), { year: 2024, month: 11, date: 18 }),
           endAt: set(new Date(0), { year: 2024, month: 11, date: 30 }),
+          taxRate: 0.055,
         },
         events: [
           {
@@ -274,6 +276,7 @@ export class MockTicketingSystemClient implements TicketingSystemClient {
           name: 'Un coucou au soleil',
           startAt: set(new Date(0), { year: 2024, month: 12, date: 1 }),
           endAt: set(new Date(0), { year: 2024, month: 12, date: 20 }),
+          taxRate: 0.055,
         },
         events: [
           {

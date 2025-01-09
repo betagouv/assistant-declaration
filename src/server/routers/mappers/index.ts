@@ -68,6 +68,7 @@ export function eventSeriePrismaToModel(eventSerie: EventSerie): EventSerieSchem
     name: eventSerie.name,
     startAt: eventSerie.startAt,
     endAt: eventSerie.endAt,
+    taxRate: eventSerie.taxRate.toNumber(),
     createdAt: eventSerie.createdAt,
     updatedAt: eventSerie.updatedAt,
   };
@@ -124,7 +125,7 @@ export function declarationTypePrismaToModel(
 }
 
 export function sacemPlaceholderDeclarationPrismaToModel(
-  eventSerie: Pick<EventSerie, 'id' | 'name' | 'startAt' | 'endAt'> & {
+  eventSerie: Pick<EventSerie, 'id' | 'name' | 'startAt' | 'endAt' | 'taxRate'> & {
     ticketingSystem: {
       organization: Pick<Organization, 'name'>;
     };
@@ -164,9 +165,6 @@ export function sacemPlaceholderDeclarationPrismaToModel(
     }
   }
 
-  // TODO: don't know for know if the taxes are dynamic per ticket category or not so applying a default common rate until we know more
-  const taxRate = 0.055;
-
   return {
     organizationName: eventSerie.ticketingSystem.organization.name,
     eventSerieName: eventSerie.name,
@@ -181,7 +179,7 @@ export function sacemPlaceholderDeclarationPrismaToModel(
       {
         category: AccountingCategorySchema.Values.TICKETING,
         categoryPrecision: null,
-        taxRate: taxRate,
+        taxRate: eventSerie.taxRate.toNumber(),
         includingTaxesAmount: includingTaxesAmount,
       },
     ],
@@ -190,7 +188,7 @@ export function sacemPlaceholderDeclarationPrismaToModel(
 }
 
 export function sacemDeclarationPrismaToModel(
-  eventSerie: Pick<EventSerie, 'id' | 'name' | 'startAt' | 'endAt'> & {
+  eventSerie: Pick<EventSerie, 'id' | 'name' | 'startAt' | 'endAt' | 'taxRate'> & {
     ticketingSystem: {
       organization: Pick<Organization, 'name'>;
     };

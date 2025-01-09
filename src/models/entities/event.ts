@@ -10,6 +10,7 @@ export const LiteEventSerieSchema = applyTypedParsers(
       name: z.string().min(1),
       startAt: z.date(),
       endAt: z.date(),
+      taxRate: z.number().nonnegative(),
     })
     .strict()
 );
@@ -70,6 +71,7 @@ export const EventSerieSchema = applyTypedParsers(
       name: z.string().min(1),
       startAt: z.date(),
       endAt: z.date(),
+      taxRate: z.number().nonnegative(),
       createdAt: z.date(),
       updatedAt: z.date(),
     })

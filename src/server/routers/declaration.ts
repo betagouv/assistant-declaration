@@ -26,6 +26,7 @@ export const declarationRouter = router({
         name: true,
         startAt: true,
         endAt: true,
+        taxRate: true,
         ticketingSystem: {
           select: {
             organization: {
@@ -384,6 +385,7 @@ export const declarationRouter = router({
                   name: true,
                   startAt: true,
                   endAt: true,
+                  taxRate: true,
                   ticketingSystem: {
                     select: {
                       organization: {
@@ -466,6 +468,7 @@ export const declarationRouter = router({
                   name: true,
                   startAt: true,
                   endAt: true,
+                  taxRate: true,
                   ticketingSystem: {
                     select: {
                       organization: {

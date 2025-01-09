@@ -139,6 +139,7 @@ export const eventRouter = router({
                   name: true,
                   startAt: true,
                   endAt: true,
+                  taxRate: true,
                   Event: {
                     select: {
                       id: true,
@@ -212,6 +213,7 @@ export const eventRouter = router({
                     name: storedEventsSerie.name,
                     startAt: storedEventsSerie.startAt,
                     endAt: storedEventsSerie.endAt,
+                    taxRate: storedEventsSerie.taxRate.toNumber(),
                   })
                 );
 
@@ -295,6 +297,7 @@ export const eventRouter = router({
                   name: addedEventSerie.name,
                   startAt: addedEventSerie.startAt,
                   endAt: addedEventSerie.endAt,
+                  taxRate: addedEventSerie.taxRate,
                 })),
                 skipDuplicates: true,
                 select: {
@@ -320,6 +323,7 @@ export const eventRouter = router({
                     name: updatedEventSerie.name,
                     startAt: updatedEventSerie.startAt,
                     endAt: updatedEventSerie.endAt,
+                    taxRate: updatedEventSerie.taxRate,
                   },
                 });
               }
