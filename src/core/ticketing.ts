@@ -189,14 +189,18 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
       const ticketCategoriesDataJson = await ticketCategoriesResponse.json();
       const ticketCategories = JsonGetTicketCategoriesResponseSchema.parse(ticketCategoriesDataJson);
 
-      const schemaTicketCategories = ticketCategories.map((ticketCategory) =>
-        LiteTicketCategorySchema.parse({
+      const schemaTicketCategories = ticketCategories.map((ticketCategory) => {
+        // The price includes the commission fee from the ticketing system
+        // We do not need it for users to declare the right amounts
+        const price = ticketCategory.commission !== false ? ticketCategory.price - ticketCategory.commission : ticketCategory.price;
+
+        return LiteTicketCategorySchema.parse({
           internalTicketingSystemId: ticketCategory.id,
           name: ticketCategory.name,
           description: ticketCategory.description,
-          price: ticketCategory.price,
-        })
-      );
+          price: price,
+        });
+      });
 
       // From the workaround we get the appropriate event entity
       const event = events.find((e) => e.id === eventId);
