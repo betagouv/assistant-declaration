@@ -72,29 +72,34 @@ export const SacemDeclarationAccountingFluxEntrySchema = applyTypedParsers(
 );
 export type SacemDeclarationAccountingFluxEntrySchemaType = z.infer<typeof SacemDeclarationAccountingFluxEntrySchema>;
 
-export const SacemDeclarationAccountingFluxEntriesSchema = z.array(SacemDeclarationAccountingFluxEntrySchema).superRefine((data, ctx) => {
-  // We want to avoid duplicated labels
-  const knownFluxEntries = data.filter(
-    (entry) =>
-      entry.category !== AccountingCategorySchema.Values.OTHER_REVENUES && entry.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS
-  );
-  const customFluxEntries = data.filter(
-    (entry) =>
-      entry.category === AccountingCategorySchema.Values.OTHER_REVENUES || entry.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS
-  );
+export const SacemDeclarationAccountingFluxEntriesSchema = z
+  .array(SacemDeclarationAccountingFluxEntrySchema)
+  .max(200)
+  .superRefine((data, ctx) => {
+    // We want to avoid duplicated labels
+    const knownFluxEntries = data.filter(
+      (entry) =>
+        entry.category !== AccountingCategorySchema.Values.OTHER_REVENUES &&
+        entry.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS
+    );
+    const customFluxEntries = data.filter(
+      (entry) =>
+        entry.category === AccountingCategorySchema.Values.OTHER_REVENUES ||
+        entry.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS
+    );
 
-  const knownLabels = knownFluxEntries.map((other) => other.category);
+    const knownLabels = knownFluxEntries.map((other) => other.category);
 
-  if (new Set(knownLabels).size !== knownLabels.length) {
-    ctx.addIssue(customErrorToZodIssue(duplicateFluxEntryCategoryLabelError));
-  }
+    if (new Set(knownLabels).size !== knownLabels.length) {
+      ctx.addIssue(customErrorToZodIssue(duplicateFluxEntryCategoryLabelError));
+    }
 
-  const customLabels = customFluxEntries.map((other) => other.categoryPrecision);
+    const customLabels = customFluxEntries.map((other) => other.categoryPrecision);
 
-  if (new Set(customLabels).size !== customLabels.length) {
-    ctx.addIssue(customErrorToZodIssue(duplicateFluxEntryCategoryLabelError));
-  }
-});
+    if (new Set(customLabels).size !== customLabels.length) {
+      ctx.addIssue(customErrorToZodIssue(duplicateFluxEntryCategoryLabelError));
+    }
+  });
 export type SacemDeclarationAccountingFluxEntriesSchemaType = z.infer<typeof SacemDeclarationAccountingFluxEntriesSchema>;
 
 export const SacemDeclarationSchema = applyTypedParsers(
