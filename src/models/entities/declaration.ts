@@ -113,6 +113,7 @@ export const SacemDeclarationSchema = applyTypedParsers(
       placeCapacity: z.number().int().nonnegative(),
       managerName: z.string().min(1).max(150),
       managerTitle: z.string().min(1).max(150),
+      declarationPlace: z.string().min(1).max(250),
       revenues: SacemDeclarationAccountingFluxEntriesSchema,
       expenses: SacemDeclarationAccountingFluxEntriesSchema,
       // Computed properties
@@ -159,6 +160,7 @@ export const SacemDeclarationWrapperSchema = applyTypedParsers(
         placeCapacity: z.array(SacemDeclarationSchema.shape.placeCapacity),
         managerName: z.array(SacemDeclarationSchema.shape.managerName),
         managerTitle: z.array(SacemDeclarationSchema.shape.managerTitle),
+        declarationPlace: z.array(SacemDeclarationSchema.shape.declarationPlace),
         revenuesOptions: z.object({
           ticketing: SacemDeclarationAccountingEntryPlaceholderSchema,
           consumptions: SacemDeclarationAccountingEntryPlaceholderSchema,

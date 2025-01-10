@@ -252,11 +252,12 @@ model EventSerieSacemDeclaration {
   eventSerieDeclarationId String @unique @db.Uuid
 
   // Fields from the SACEM form
-  clientId      String
-  placeName     String
-  placeCapacity Int
-  managerName   String
-  managerTitle  String
+  clientId         String
+  placeName        String
+  placeCapacity    Int
+  managerName      String
+  managerTitle     String
+  declarationPlace String @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

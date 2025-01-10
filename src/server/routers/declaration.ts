@@ -49,6 +49,7 @@ export const declarationRouter = router({
                 placeCapacity: true,
                 managerName: true,
                 managerTitle: true,
+                declarationPlace: true,
                 SacemDeclarationAccountingEntry: {
                   select: {
                     flux: true,
@@ -108,6 +109,7 @@ export const declarationRouter = router({
         placeCapacity: true,
         managerName: true,
         managerTitle: true,
+        declarationPlace: true,
         SacemDeclarationAccountingEntry: {
           select: {
             flux: true,
@@ -118,7 +120,7 @@ export const declarationRouter = router({
           },
         },
       },
-      distinct: ['clientId', 'placeName', 'placeCapacity', 'managerName', 'managerTitle'], // At least the distinct may remove duplicates for the whole chain
+      distinct: ['clientId', 'placeName', 'placeCapacity', 'managerName', 'managerTitle', 'declarationPlace'], // At least the distinct may remove duplicates for the whole chain
       // Get only a few of the last declarations since it should representative
       orderBy: {
         updatedAt: 'desc',
@@ -135,6 +137,7 @@ export const declarationRouter = router({
       placeCapacity: [],
       managerName: [],
       managerTitle: [],
+      declarationPlace: [],
       revenues: ensureMinimumSacemRevenueItems(revenues),
       expenses: ensureMinimumSacemExpenseItems(expenses),
       revenuesOptions: {
@@ -162,6 +165,8 @@ export const declarationRouter = router({
       if (!placeholder.placeCapacity.includes(previousDeclaration.placeCapacity)) placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
       if (!placeholder.managerName.includes(previousDeclaration.managerName)) placeholder.managerName.push(previousDeclaration.managerName);
       if (!placeholder.managerTitle.includes(previousDeclaration.managerTitle)) placeholder.managerTitle.push(previousDeclaration.managerTitle);
+      if (!placeholder.declarationPlace.includes(previousDeclaration.declarationPlace))
+        placeholder.declarationPlace.push(previousDeclaration.declarationPlace);
 
       for (const accountingEntry of previousDeclaration.SacemDeclarationAccountingEntry) {
         // Amounts are specific to each series so there is no need of filling them as placeholders
@@ -339,6 +344,7 @@ export const declarationRouter = router({
           placeCapacity: input.placeCapacity,
           managerName: input.managerName,
           managerTitle: input.managerTitle,
+          declarationPlace: input.declarationPlace,
           SacemDeclarationAccountingEntry: {
             deleteMany: accountingEntriesDiffResult.removed.map((removedEntry) => {
               return {
@@ -380,6 +386,7 @@ export const declarationRouter = router({
           placeCapacity: true,
           managerName: true,
           managerTitle: true,
+          declarationPlace: true,
           eventSerieDeclaration: {
             select: {
               id: true,
@@ -438,6 +445,7 @@ export const declarationRouter = router({
           placeCapacity: input.placeCapacity,
           managerName: input.managerName,
           managerTitle: input.managerTitle,
+          declarationPlace: input.declarationPlace,
           eventSerieDeclaration: {
             create: {
               status: EventSerieDeclarationStatus.PENDING,
@@ -463,6 +471,7 @@ export const declarationRouter = router({
           placeCapacity: true,
           managerName: true,
           managerTitle: true,
+          declarationPlace: true,
           eventSerieDeclaration: {
             select: {
               id: true,

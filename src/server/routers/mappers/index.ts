@@ -198,7 +198,10 @@ export function sacemDeclarationPrismaToModel(
       })[];
     }[];
   },
-  sacemDeclaration: Pick<EventSerieSacemDeclaration, 'id' | 'clientId' | 'placeName' | 'placeCapacity' | 'managerName' | 'managerTitle'> & {
+  sacemDeclaration: Pick<
+    EventSerieSacemDeclaration,
+    'id' | 'clientId' | 'placeName' | 'placeCapacity' | 'managerName' | 'managerTitle' | 'declarationPlace'
+  > & {
     SacemDeclarationAccountingEntry: Pick<SacemDeclarationAccountingEntry, 'flux' | 'category' | 'categoryPrecision' | 'taxRate' | 'amount'>[];
   }
 ): SacemDeclarationSchemaType {
@@ -231,6 +234,7 @@ export function sacemDeclarationPrismaToModel(
     placeCapacity: sacemDeclaration.placeCapacity,
     managerName: sacemDeclaration.managerName,
     managerTitle: sacemDeclaration.managerTitle,
+    declarationPlace: sacemDeclaration.declarationPlace,
     revenues: ensureMinimumSacemRevenueItems(revenues),
     expenses: ensureMinimumSacemExpenseItems(expenses),
     ...computedPlaceholder,

@@ -20,6 +20,7 @@ export const FillSacemDeclarationSchema = z
     placeCapacity: SacemDeclarationSchema.shape.placeCapacity,
     managerName: SacemDeclarationSchema.shape.managerName,
     managerTitle: SacemDeclarationSchema.shape.managerTitle,
+    declarationPlace: SacemDeclarationSchema.shape.declarationPlace,
     revenues: SacemDeclarationSchema.shape.revenues,
     expenses: SacemDeclarationSchema.shape.expenses,
   })

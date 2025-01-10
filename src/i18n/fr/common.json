@@ -40,6 +40,9 @@
       "currentPassword": {
         "too_small_one": "le mot de passe actuel est requis"
       },
+      "declarationPlace": {
+        "too_small_one": "le lieu de la déclaration est requis"
+      },
       "email": {
         "invalid_string": "l'email n'est pas valide",
         "too_small_one": "l'email est requis"

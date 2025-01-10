@@ -88,6 +88,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
         placeCapacity: result.sacemDeclaration.placeCapacity,
         managerName: result.sacemDeclaration.managerName,
         managerTitle: result.sacemDeclaration.managerTitle,
+        declarationPlace: result.sacemDeclaration.declarationPlace,
         revenues: result.sacemDeclaration.revenues,
         expenses: result.sacemDeclaration.expenses,
       });
@@ -108,6 +109,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
           placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeCapacity,
           managerName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerName,
           managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerTitle,
+          declarationPlace: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.declarationPlace,
           revenues: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.revenues,
           expenses: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.expenses,
         });
@@ -691,7 +693,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid item xs={12} sx={{ pb: 2 }}>
+              <Grid item xs={12}>
                 <Typography gutterBottom variant="h6" component="div">
                   Dépenses artistiques
                 </Typography>
@@ -711,6 +713,37 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                     </Box>
                   </Grid>
                 </Grid>
+              </Grid>
+              <Grid item xs={12} sm={6} sx={{ mt: 2, pb: 2 }}>
+                <Controller
+                  control={control}
+                  name="declarationPlace"
+                  defaultValue={control._defaultValues.declarationPlace || ''}
+                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                    return (
+                      <Autocomplete
+                        options={sacemDeclarationWrapper.placeholder.declarationPlace}
+                        freeSolo
+                        onBlur={onBlur}
+                        value={value}
+                        onInputChange={(event, newValue, reason) => {
+                          onChange(newValue);
+                        }}
+                        renderInput={(params) => (
+                          <TextField {...params} label="Lieu de déclaration" inputRef={ref} error={!!error} helperText={error?.message} fullWidth />
+                        )}
+                        renderOption={(props, option) => {
+                          // Just needed for the Sentry mask
+                          return (
+                            <li {...props} key={option} data-sentry-mask>
+                              {option}
+                            </li>
+                          );
+                        }}
+                      />
+                    );
+                  }}
+                />
               </Grid>
               <Grid
                 item
