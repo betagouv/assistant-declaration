@@ -200,7 +200,7 @@ export function sacemDeclarationPrismaToModel(
   },
   sacemDeclaration: Pick<
     EventSerieSacemDeclaration,
-    'id' | 'clientId' | 'placeName' | 'placeCapacity' | 'managerName' | 'managerTitle' | 'declarationPlace'
+    'id' | 'clientId' | 'placeName' | 'placeCapacity' | 'managerName' | 'managerTitle' | 'performanceType' | 'declarationPlace'
   > & {
     SacemDeclarationAccountingEntry: Pick<SacemDeclarationAccountingEntry, 'flux' | 'category' | 'categoryPrecision' | 'taxRate' | 'amount'>[];
   }
@@ -234,6 +234,7 @@ export function sacemDeclarationPrismaToModel(
     placeCapacity: sacemDeclaration.placeCapacity,
     managerName: sacemDeclaration.managerName,
     managerTitle: sacemDeclaration.managerTitle,
+    performanceType: sacemDeclaration.performanceType,
     declarationPlace: sacemDeclaration.declarationPlace,
     revenues: ensureMinimumSacemRevenueItems(revenues),
     expenses: ensureMinimumSacemExpenseItems(expenses),

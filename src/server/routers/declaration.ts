@@ -49,6 +49,7 @@ export const declarationRouter = router({
                 placeCapacity: true,
                 managerName: true,
                 managerTitle: true,
+                performanceType: true,
                 declarationPlace: true,
                 SacemDeclarationAccountingEntry: {
                   select: {
@@ -109,6 +110,7 @@ export const declarationRouter = router({
         placeCapacity: true,
         managerName: true,
         managerTitle: true,
+        performanceType: true,
         declarationPlace: true,
         SacemDeclarationAccountingEntry: {
           select: {
@@ -120,7 +122,7 @@ export const declarationRouter = router({
           },
         },
       },
-      distinct: ['clientId', 'placeName', 'placeCapacity', 'managerName', 'managerTitle', 'declarationPlace'], // At least the distinct may remove duplicates for the whole chain
+      distinct: ['clientId', 'placeName', 'placeCapacity', 'managerName', 'managerTitle', 'performanceType', 'declarationPlace'], // At least the distinct may remove duplicates for the whole chain
       // Get only a few of the last declarations since it should representative
       orderBy: {
         updatedAt: 'desc',
@@ -137,6 +139,7 @@ export const declarationRouter = router({
       placeCapacity: [],
       managerName: [],
       managerTitle: [],
+      performanceType: [],
       declarationPlace: [],
       revenues: ensureMinimumSacemRevenueItems(revenues),
       expenses: ensureMinimumSacemExpenseItems(expenses),
@@ -165,6 +168,8 @@ export const declarationRouter = router({
       if (!placeholder.placeCapacity.includes(previousDeclaration.placeCapacity)) placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
       if (!placeholder.managerName.includes(previousDeclaration.managerName)) placeholder.managerName.push(previousDeclaration.managerName);
       if (!placeholder.managerTitle.includes(previousDeclaration.managerTitle)) placeholder.managerTitle.push(previousDeclaration.managerTitle);
+      if (!placeholder.performanceType.includes(previousDeclaration.performanceType))
+        placeholder.performanceType.push(previousDeclaration.performanceType);
       if (!placeholder.declarationPlace.includes(previousDeclaration.declarationPlace))
         placeholder.declarationPlace.push(previousDeclaration.declarationPlace);
 
@@ -344,6 +349,7 @@ export const declarationRouter = router({
           placeCapacity: input.placeCapacity,
           managerName: input.managerName,
           managerTitle: input.managerTitle,
+          performanceType: input.performanceType,
           declarationPlace: input.declarationPlace,
           SacemDeclarationAccountingEntry: {
             deleteMany: accountingEntriesDiffResult.removed.map((removedEntry) => {
@@ -386,6 +392,7 @@ export const declarationRouter = router({
           placeCapacity: true,
           managerName: true,
           managerTitle: true,
+          performanceType: true,
           declarationPlace: true,
           eventSerieDeclaration: {
             select: {
@@ -445,6 +452,7 @@ export const declarationRouter = router({
           placeCapacity: input.placeCapacity,
           managerName: input.managerName,
           managerTitle: input.managerTitle,
+          performanceType: input.performanceType,
           declarationPlace: input.declarationPlace,
           eventSerieDeclaration: {
             create: {
@@ -471,6 +479,7 @@ export const declarationRouter = router({
           placeCapacity: true,
           managerName: true,
           managerTitle: true,
+          performanceType: true,
           declarationPlace: true,
           eventSerieDeclaration: {
             select: {

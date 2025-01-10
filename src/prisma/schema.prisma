@@ -257,6 +257,7 @@ model EventSerieSacemDeclaration {
   placeCapacity    Int
   managerName      String
   managerTitle     String
+  performanceType  String @default("")
   declarationPlace String @default("")
 
   createdAt DateTime @default(now())

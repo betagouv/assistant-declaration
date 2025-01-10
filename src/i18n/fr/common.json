@@ -93,6 +93,9 @@
         "passwordRequiresLowerAndUpperCharacters": "le mot de passe doit contenir au moins une majuscule et une minuscule",
         "too_small_one": "le mot de passe est requis"
       },
+      "performanceType": {
+        "too_small_one": "le genre du spectacle est requis"
+      },
       "placeCapacity": {
         "invalid_type": "la capacité de la salle doit être un nombre entier",
         "too_small": "la capacité de la salle doit être supérieure à {{minimum}}",

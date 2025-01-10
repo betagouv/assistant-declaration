@@ -88,6 +88,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
         placeCapacity: result.sacemDeclaration.placeCapacity,
         managerName: result.sacemDeclaration.managerName,
         managerTitle: result.sacemDeclaration.managerTitle,
+        performanceType: result.sacemDeclaration.performanceType,
         declarationPlace: result.sacemDeclaration.declarationPlace,
         revenues: result.sacemDeclaration.revenues,
         expenses: result.sacemDeclaration.expenses,
@@ -109,6 +110,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
           placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeCapacity,
           managerName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerName,
           managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerTitle,
+          performanceType: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.performanceType,
           declarationPlace: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.declarationPlace,
           revenues: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.revenues,
           expenses: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.expenses,
@@ -634,14 +636,44 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                       />
                     </Tooltip>
                   </Grid>
-                  {/* TODO: for now we do not know if it should be an enum for analytics */}
-                  {/* <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Genre du spectacle"
-                      value={sacemDeclaration.xxxx}
-                      fullWidth
+                  <Grid item xs={12} sm={6}>
+                    <Controller
+                      control={control}
+                      name="performanceType"
+                      defaultValue={control._defaultValues.performanceType || ''}
+                      render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                        return (
+                          <Autocomplete
+                            options={sacemDeclarationWrapper.placeholder.performanceType}
+                            freeSolo
+                            onBlur={onBlur}
+                            value={value}
+                            onInputChange={(event, newValue, reason) => {
+                              onChange(newValue);
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Genre du spectacle"
+                                inputRef={ref}
+                                error={!!error}
+                                helperText={error?.message}
+                                fullWidth
+                              />
+                            )}
+                            renderOption={(props, option) => {
+                              // Just needed for the Sentry mask
+                              return (
+                                <li {...props} key={option} data-sentry-mask>
+                                  {option}
+                                </li>
+                              );
+                            }}
+                          />
+                        );
+                      }}
                     />
-                  </Grid> */}
+                  </Grid>
                 </Grid>
               </Grid>
               <Grid item xs={12} sx={{ pb: 2 }}>
