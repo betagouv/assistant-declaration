@@ -35,13 +35,15 @@
     },
     "validation": {
       "clientId": {
-        "too_small_one": "le numéro client est requis"
+        "too_small_one": "le numéro client est requis",
+        "too_big": "le numéro client doit faire moins de {{maximum}} caractères"
       },
       "currentPassword": {
         "too_small_one": "le mot de passe actuel est requis"
       },
       "declarationPlace": {
-        "too_small_one": "le lieu de la déclaration est requis"
+        "too_small_one": "le lieu de la déclaration est requis",
+        "too_big": "le lieu de la déclaration doit faire moins de {{maximum}} caractères"
       },
       "email": {
         "invalid_string": "l'email n'est pas valide",
@@ -70,10 +72,12 @@
         "too_small_one": "le nom de famille est requis"
       },
       "managerName": {
-        "too_small_one": "le nom de la personne en charge est requis"
+        "too_small_one": "le nom de la personne en charge est requis",
+        "too_big": "le nom de la personne en charge doit faire moins de {{maximum}} caractères"
       },
       "managerTitle": {
-        "too_small_one": "le rôle de la personne en charge est requis"
+        "too_small_one": "le rôle de la personne en charge est requis",
+        "too_big": "le rôle de la personne en charge doit faire moins de {{maximum}} caractères"
       },
       "message": {
         "too_big": "le message doit faire {{maximum}} caractères maximum",
@@ -94,7 +98,8 @@
         "too_small_one": "le mot de passe est requis"
       },
       "performanceType": {
-        "too_small_one": "le genre du spectacle est requis"
+        "too_small_one": "le genre du spectacle est requis",
+        "too_big": "le genre du spectacle doit faire moins de {{maximum}} caractères"
       },
       "placeCapacity": {
         "invalid_type": "la capacité de la salle doit être un nombre entier",
@@ -102,7 +107,8 @@
         "too_small_one": "la capacité de la salle est requise"
       },
       "placeName": {
-        "too_small_one": "le nom de la salle est requis"
+        "too_small_one": "le nom de la salle est requis",
+        "too_big": "le nom de la salle doit faire moins de {{maximum}} caractères"
       },
       "priceOverride": {
         "too_small": "le prix doit être supérieur à {{minimum}} euro"
