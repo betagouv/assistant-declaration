@@ -1,11 +1,11 @@
 'use client';
 
 import { LoadingButton as Button } from '@mui/lab';
-import { Alert, Typography } from '@mui/material';
+import { Alert, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import { isBefore, subHours } from 'date-fns';
-import { useMemo } from 'react';
+import { isAfter, isBefore, subHours, subMonths } from 'date-fns';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
@@ -15,6 +15,14 @@ import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
+
+export enum ListFilter {
+  ALL = 1,
+  ARCHIVED_ONLY,
+  ENDED_ONLY,
+  CURRENT_ONLY,
+  FUTURE_ONLY,
+}
 
 export interface OrganizationPageProps {
   params: { organizationId: string };
@@ -44,6 +52,28 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
   const aggregatedQueries = new AggregatedQueries(getOrganization, listTicketingSystems, listEventsSeries);
 
   const synchronizeDataFromTicketingSystems = trpc.synchronizeDataFromTicketingSystems.useMutation();
+
+  const [listFilter, setListFilter] = useState<ListFilter>(ListFilter.ENDED_ONLY);
+
+  const filteredEventsSeriesWrappers = useMemo(() => {
+    const currentDate = new Date();
+    const archivedThreshold = subMonths(currentDate, 3);
+
+    return (listEventsSeries.data?.eventsSeriesWrappers || []).filter((eventSerieWrapper) => {
+      switch (listFilter) {
+        case ListFilter.ARCHIVED_ONLY:
+          return isBefore(eventSerieWrapper.serie.endAt, archivedThreshold);
+        case ListFilter.ENDED_ONLY:
+          return isBefore(eventSerieWrapper.serie.endAt, currentDate);
+        case ListFilter.CURRENT_ONLY:
+          return isBefore(eventSerieWrapper.serie.startAt, currentDate) && isAfter(eventSerieWrapper.serie.endAt, currentDate);
+        case ListFilter.FUTURE_ONLY:
+          return isAfter(eventSerieWrapper.serie.startAt, currentDate);
+        default:
+          return true;
+      }
+    });
+  }, [listFilter, listEventsSeries.data]);
 
   const lastSynchronizationAt: Date | null = useMemo(() => {
     let oldestDate: Date | null = null;
@@ -118,24 +148,47 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                       <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />
                     </Grid>
                   )}
-                  <Grid item xs={12} sx={{ py: 2 }}>
-                    <Button
-                      onClick={async () => {
-                        await synchronizeDataFromTicketingSystems.mutateAsync({
-                          organizationId: organization.id,
-                        });
-                      }}
-                      loading={synchronizeDataFromTicketingSystems.isLoading}
-                      size="large"
-                      variant="contained"
-                    >
-                      Synchroniser les données
-                    </Button>
+                  <Grid item xs={12} sx={{ pt: 1, pb: 2 }}>
+                    <Grid container spacing={1} alignContent="flex-start">
+                      <Grid item>
+                        <ToggleButtonGroup
+                          color="primary"
+                          value={listFilter}
+                          exclusive
+                          onChange={(event, newValue) => {
+                            if (newValue !== null) {
+                              setListFilter(newValue);
+                            }
+                          }}
+                          aria-label="filtre"
+                        >
+                          <ToggleButton value={ListFilter.ALL}>Toutes</ToggleButton>
+                          <ToggleButton value={ListFilter.ARCHIVED_ONLY}>Archivées</ToggleButton>
+                          <ToggleButton value={ListFilter.ENDED_ONLY}>Terminées</ToggleButton>
+                          <ToggleButton value={ListFilter.CURRENT_ONLY}>En cours</ToggleButton>
+                          <ToggleButton value={ListFilter.FUTURE_ONLY}>À venir</ToggleButton>
+                        </ToggleButtonGroup>
+                      </Grid>
+                      <Grid item sx={{ ml: 'auto' }}>
+                        <Button
+                          onClick={async () => {
+                            await synchronizeDataFromTicketingSystems.mutateAsync({
+                              organizationId: organization.id,
+                            });
+                          }}
+                          loading={synchronizeDataFromTicketingSystems.isLoading}
+                          size="large"
+                          variant="contained"
+                        >
+                          Synchroniser les données
+                        </Button>
+                      </Grid>
+                    </Grid>
                   </Grid>
-                  {eventsSeriesWrappers.length > 0 ? (
+                  {filteredEventsSeriesWrappers.length > 0 ? (
                     <Grid item xs={12} sx={{ py: 2 }}>
                       <Grid container spacing={2} justifyContent="center" alignItems="center">
-                        {eventsSeriesWrappers.map((eventsSeriesWrapper) => {
+                        {filteredEventsSeriesWrappers.map((eventsSeriesWrapper) => {
                           return (
                             <Grid key={eventsSeriesWrapper.serie.id} item xs={12} lg={8} sx={{ mx: 'auto' }}>
                               <EventSerieCard
@@ -153,7 +206,9 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                     </Grid>
                   ) : (
                     <Grid item xs={12} sx={{ py: 2 }}>
-                      Aucune série de représentations n&apos;a été trouvée dans votre billetterie.
+                      {eventsSeriesWrappers.length === 0
+                        ? `Aucune série de représentations n'a été trouvée dans votre billetterie.`
+                        : `Aucune série de représentations n'a été trouvée dans votre billetterie avec le filtre choisi.`}
                     </Grid>
                   )}
                 </>
