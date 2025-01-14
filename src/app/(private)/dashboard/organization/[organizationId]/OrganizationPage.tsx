@@ -161,6 +161,9 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                             }
                           }}
                           aria-label="filtre"
+                          sx={{
+                            flexWrap: 'wrap',
+                          }}
                         >
                           <ToggleButton value={ListFilter.ALL}>Toutes</ToggleButton>
                           <ToggleButton value={ListFilter.ARCHIVED_ONLY}>Archivées</ToggleButton>
