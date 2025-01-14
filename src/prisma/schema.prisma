@@ -1,0 +1,305 @@
+generator client {
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+  previewFeatures = ["fullTextSearch", "views"]
+}
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "foreignKeys"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @unique @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum VerificationTokenAction {
+  RESET_PASSWORD
+}
+
+model VerificationToken {
+  token      String                  @id
+  action     VerificationTokenAction
+  identifier String // Email or other user identifier
+  expires    DateTime
+
+  @@unique([token])
+}
+
+enum UserStatus {
+  REGISTERED
+  CONFIRMED
+  DISABLED
+}
+
+model UserSecrets {
+  id           String @id @default(uuid()) @db.Uuid
+  userId       String @unique @db.Uuid
+  passwordHash String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id             String     @id @default(uuid()) @db.Uuid
+  firstname      String
+  lastname       String
+  email          String     @unique
+  status         UserStatus @default(REGISTERED)
+  profilePicture String?
+  lastActivityAt DateTime?  @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  Secrets          UserSecrets?
+  Account          Account?
+  LiveChatSettings LiveChatSettings?
+  Session          Session[]
+  Collaborator     Collaborator[]
+  Admin            Admin?
+}
+
+model Admin {
+  id            String  @id @default(uuid()) @db.Uuid
+  userId        String  @unique @db.Uuid
+  canEverything Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LiveChatSettings {
+  userId       String @id @db.Uuid
+  sessionToken String @unique @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Organization {
+  id         String @id @default(uuid()) @db.Uuid
+  name       String
+  officialId String @unique
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+  TicketingSystem TicketingSystem[]
+  Collaborator    Collaborator[]
+}
+
+enum TicketingSystemName {
+  BILLETWEB
+}
+
+model TicketingSystem {
+  id                    String              @id @default(uuid()) @db.Uuid
+  organizationId        String              @db.Uuid
+  name                  TicketingSystemName
+  apiAccessKey          String?
+  apiSecretKey          String?
+  lastSynchronizationAt DateTime?
+  lastProcessingError   String?
+  lastProcessingErrorAt DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  deletedAt DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  EventSerie   EventSerie[]
+}
+
+model Collaborator {
+  id             String @id @default(uuid()) @db.Uuid
+  userId         String @db.Uuid
+  organizationId String @db.Uuid
+
+  // rights?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+}
+
+model EventSerie {
+  id                        String   @id @default(uuid()) @db.Uuid
+  internalTicketingSystemId String
+  ticketingSystemId         String   @db.Uuid
+  name                      String
+  startAt                   DateTime
+  endAt                     DateTime
+  taxRate                   Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
+  // image Attachment
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  ticketingSystem       TicketingSystem         @relation(fields: [ticketingSystemId], references: [id], onDelete: Cascade)
+  Event                 Event[]
+  TicketCategory        TicketCategory[]
+  EventSerieDeclaration EventSerieDeclaration[]
+
+  @@unique([ticketingSystemId, internalTicketingSystemId])
+}
+
+model Event {
+  id                        String   @id @default(uuid()) @db.Uuid
+  internalTicketingSystemId String
+  eventSerieId              String   @db.Uuid
+  startAt                   DateTime
+  endAt                     DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  eventSerie           EventSerie             @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
+  EventCategoryTickets EventCategoryTickets[]
+
+  @@unique([eventSerieId, internalTicketingSystemId])
+}
+
+model TicketCategory {
+  id                        String  @id @default(uuid()) @db.Uuid
+  internalTicketingSystemId String // Not unique here since a category could evolve a few years later (impacting displayed data)
+  eventSerieId              String  @db.Uuid
+  name                      String
+  description               String?
+  price                     Decimal @db.Decimal(8, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  eventSerie           EventSerie             @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
+  EventCategoryTickets EventCategoryTickets[]
+
+  @@unique([eventSerieId, internalTicketingSystemId])
+}
+
+model EventCategoryTickets {
+  id            String   @id @default(uuid()) @db.Uuid
+  eventId       String   @db.Uuid
+  categoryId    String   @db.Uuid
+  total         Int
+  totalOverride Int?
+  priceOverride Decimal? @db.Decimal(8, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  event    Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category TicketCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, categoryId])
+}
+
+enum EventSerieDeclarationStatus {
+  PENDING
+  PROCESSED
+  CANCELED
+}
+
+model EventSerieDeclaration {
+  id           String                      @id @default(uuid()) @db.Uuid
+  eventSerieId String                      @db.Uuid
+  status       EventSerieDeclarationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  eventSerie                 EventSerie                  @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
+  EventSerieSacemDeclaration EventSerieSacemDeclaration?
+}
+
+model EventSerieSacemDeclaration {
+  id                      String @id @default(uuid()) @db.Uuid
+  eventSerieDeclarationId String @unique @db.Uuid
+
+  // Fields from the SACEM form
+  clientId         String
+  placeName        String
+  placeCapacity    Int
+  managerName      String
+  managerTitle     String
+  performanceType  String @default("")
+  declarationPlace String @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  eventSerieDeclaration           EventSerieDeclaration             @relation(fields: [eventSerieDeclarationId], references: [id], onDelete: Cascade)
+  SacemDeclarationAccountingEntry SacemDeclarationAccountingEntry[]
+}
+
+enum AccountingFlux {
+  REVENUE
+  EXPENSE
+}
+
+enum AccountingCategory {
+  // Revenues
+  TICKETING // Should be never used as for now it's dynamically computed from ticketing system tables
+  CONSUMPTIONS
+  CATERING
+  PROGRAM_SALES
+  OTHER_REVENUES
+  // Expenses
+  ENGAGEMENT_CONTRACTS
+  RIGHTS_TRANSFER_CONTRACTS
+  COREALIZATION_CONTRACTS
+  COPRODUCTION_CONTRACTS
+  OTHER_ARTISTIC_CONTRACTS
+}
+
+model SacemDeclarationAccountingEntry {
+  id                 String             @id @default(uuid()) @db.Uuid
+  sacemDeclarationId String             @db.Uuid
+  flux               AccountingFlux
+  category           AccountingCategory
+  categoryPrecision  String?
+  taxRate            Decimal            @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
+  amount             Decimal            @db.Decimal(8, 2) // Always including taxes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  sacemDeclaration EventSerieSacemDeclaration @relation(fields: [sacemDeclarationId], references: [id], onDelete: Cascade)
+
+  @@unique([sacemDeclarationId, flux, category, categoryPrecision])
+}

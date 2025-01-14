@@ -1,0 +1,17 @@
+/.cache/
+/.lighthouseci/
+/.next/
+/.storybook/.cache/
+/.storybook/coverage/
+/.vscode/i18n-ally-reviews.yml
+/build/
+/dist/
+/storybook-static/
+/public/mockServiceWorker.js
+/src/prisma/migrations/migration_lock.toml
+/src/server/trpc-next-layout/**/*.ts
+/src/server/trpc-next-layout/**/*.tsx
+/src/**/*.docx
+/src/**/*.transformed.html
+/package-lock.json
+/tsconfig.json

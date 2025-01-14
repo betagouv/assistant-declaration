@@ -1,0 +1,54 @@
+#
+# [IMPORTANT] `container_name` properties are prefixed by the project name to avoid conflicting with other project volumes
+#
+
+services:
+  postgres:
+    container_name: ad_postgres_container_${DOCKER_COMPOSE_CONTAINER_NAME_SUFFIX:-default}
+    image: postgres:15.8
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - '${DOCKER_COMPOSE_POSTGRES_PORT_BINDING:-5432:5432}'
+    networks:
+      - ad
+    restart: unless-stopped
+    healthcheck:
+      # Note: at start we tried `pg_isready` but it's not efficient since the postgres container restarts the server at startup (to init some scripts) so we ended with broken connections...
+      # The best is to try a real query to be sure it's up and running as advised in https://github.com/docker-library/postgres/issues/146#issuecomment-872486465
+      test: ['CMD-SHELL', 'psql -h localhost -U $${POSTGRES_USER} -c select 1 -d $${POSTGRES_DB}']
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
+  mailcatcher:
+    container_name: ad_mailcatcher_container_${DOCKER_COMPOSE_CONTAINER_NAME_SUFFIX:-default}
+    image: aerzas/mailcatcher:2.3.0
+    environment:
+      EMAIL_HOST: ${EMAIL_HOST:-127.0.0.1}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_PORT: ${EMAIL_PORT:-1025}
+    networks:
+      - ad
+    ports:
+      - '127.0.0.1:${DOCKER_COMPOSE_HOST_PORTS:-1080:}1080'
+      - '127.0.0.1:${DOCKER_COMPOSE_HOST_PORTS:-11025:}1025' # We set `11025` on the host because we had the case where a local email software had taken this port already and Docker didn't warn us (it was really tricky to find the cause...)
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', '/scripts/docker-healthcheck.sh']
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
+networks:
+  ad:
+    driver: bridge
+
+volumes:
+  postgres:

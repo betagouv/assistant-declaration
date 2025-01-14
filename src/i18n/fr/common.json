@@ -1,0 +1,181 @@
+{
+  "boolean": {
+    "false": "Non",
+    "true": "Oui"
+  },
+  "components": {
+    "BaseForm": {
+      "form_contains_errors_one": "Le formulaire soumis contient une erreur. Le champ invalide a été marqué en rouge.",
+      "form_contains_errors_other": "Le formulaire soumis contient plusieurs erreurs. Les champs invalides ont été marqués en rouge."
+    }
+  },
+  "errors": {
+    "custom": {
+      "accountAlreadyWithThisEmail": "un compte est déjà enregistré avec cet email",
+      "anotherTicketingSystemSynchronizationOngoing": "une autre synchronisation des données est déjà en cours",
+      "authCredentialsRequired": "vous devez fournir vos informations de connexion pour poursuivre",
+      "authFatal": "une erreur inattendue est survenue, merci de contacter le support",
+      "authNoCredentialsMatch": "les informations de connexion fournies sont incorrectes",
+      "authRetriable": "une erreur est survenue, veuillez retenter",
+      "collaboratorCanOnlySeeOrganizationEventsSeries": "en tant que collaborateur vous ne pouvez que lister les séries de représentation concernant votre organisation",
+      "collaboratorCanOnlySeeOrganizationTicketingSystems": "en tant que collaborateur vous ne pouvez que lister les systèmes de billetterie de votre organisation",
+      "eventCategoryTicketsNotFound": "ces données de catégorie de tickets n'existent pas",
+      "eventSerieNotFound": "cette série de représentations n'existe pas",
+      "expiredVerificationToken": "vous avez dépassé le temps imparti, merci de renouveler votre demande",
+      "fileNotFound": "aucun fichier n'a été trouvé",
+      "internalServerError": "une erreur interne est survenue, veuillez retenter",
+      "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",
+      "invalidVerificationToken": "l'opération que vous essayez de réaliser a été refusée",
+      "noAccountWithThisEmail": "aucun compte n'existe avec cette adresse email",
+      "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
+      "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
+      "organizationNotFound": "aucune organisation trouvée",
+      "userNotFound": "cet utilisateur n'existe pas",
+      "unauthorizedError": "vous devez être connecté pour effectuer cette action",
+      "unexpectedError": "une erreur inattendue est survenue, veuillez retenter"
+    },
+    "validation": {
+      "clientId": {
+        "too_small_one": "le numéro client est requis",
+        "too_big": "le numéro client doit faire moins de {{maximum}} caractères"
+      },
+      "currentPassword": {
+        "too_small_one": "le mot de passe actuel est requis"
+      },
+      "declarationPlace": {
+        "too_small_one": "le lieu de la déclaration est requis",
+        "too_big": "le lieu de la déclaration doit faire moins de {{maximum}} caractères"
+      },
+      "email": {
+        "invalid_string": "l'email n'est pas valide",
+        "too_small_one": "l'email est requis"
+      },
+      "expenses": {
+        "categoryPrecision": {
+          "too_small_one": "l'intitulé du type de contrat est requis"
+        },
+        "duplicateFluxEntryCategoryLabel": "les libellées des contrats artistiques doivent être uniques",
+        "includingTaxesAmount": {
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
+        "taxRate": {
+          "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
+        },
+        "too_big": "il ne peut y avoir que {{maximum}} dépenses au maximum"
+      },
+      "firstname": {
+        "too_small_one": "le prénom est requis"
+      },
+      "accountingEntries": {
+        "duplicateFluxEntryCategoryLabel": "les libellées des flux de comptabilité doivent être uniques"
+      },
+      "lastname": {
+        "too_small_one": "le nom de famille est requis"
+      },
+      "managerName": {
+        "too_small_one": "le nom de la personne en charge est requis",
+        "too_big": "le nom de la personne en charge doit faire moins de {{maximum}} caractères"
+      },
+      "managerTitle": {
+        "too_small_one": "le rôle de la personne en charge est requis",
+        "too_big": "le rôle de la personne en charge doit faire moins de {{maximum}} caractères"
+      },
+      "message": {
+        "too_big": "le message doit faire {{maximum}} caractères maximum",
+        "too_small_one": "le message est requis"
+      },
+      "newPassword": {
+        "passwordRequiresANumeric": "le nouveau mot de passe doit contenir au moins un chiffre",
+        "passwordRequiresASpecialCharacters": "le nouveau mot de passe doit contenir au moins un caractère spécial (@,!,?...)",
+        "passwordRequiresHeightCharacters": "le nouveau mot de passe doit contenir au moins 8 caractères",
+        "passwordRequiresLowerAndUpperCharacters": "le nouveau mot de passe doit contenir au moins une majuscule et une minuscule",
+        "too_small_one": "le nouveau mot de passe est requis"
+      },
+      "password": {
+        "passwordRequiresANumeric": "le mot de passe doit contenir au moins un chiffre",
+        "passwordRequiresASpecialCharacters": "le mot de passe doit contenir au moins un caractère spécial (@,!,?...)",
+        "passwordRequiresHeightCharacters": "le mot de passe doit contenir au moins 8 caractères",
+        "passwordRequiresLowerAndUpperCharacters": "le mot de passe doit contenir au moins une majuscule et une minuscule",
+        "too_small_one": "le mot de passe est requis"
+      },
+      "performanceType": {
+        "too_small_one": "le genre du spectacle est requis",
+        "too_big": "le genre du spectacle doit faire moins de {{maximum}} caractères"
+      },
+      "placeCapacity": {
+        "invalid_type": "la capacité de la salle doit être un nombre entier",
+        "too_small": "la capacité de la salle doit être supérieure à {{minimum}}",
+        "too_small_one": "la capacité de la salle est requise"
+      },
+      "placeName": {
+        "too_small_one": "le nom de la salle est requis",
+        "too_big": "le nom de la salle doit faire moins de {{maximum}} caractères"
+      },
+      "priceOverride": {
+        "too_small": "le prix doit être supérieur à {{minimum}} euro"
+      },
+      "query": {
+        "too_big": "la recherche doit faire {{maximum}} caractères maximum"
+      },
+      "revenues": {
+        "categoryPrecision": {
+          "too_small_one": "l'intitulé de l'origine de la recette est requis"
+        },
+        "duplicateFluxEntryCategoryLabel": "les libellées des recettes doivent être uniques",
+        "includingTaxesAmount": {
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
+        "taxRate": {
+          "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
+        },
+        "too_big": "il ne peut y avoir que {{maximum}} revenus au maximum"
+      },
+      "totalOverride": {
+        "invalid_type": "le nombre de places doit être un nombre entier",
+        "too_small": "le nombre de places doit être supérieur à {{minimum}}"
+      },
+      "termsAccepted": {
+        "invalid_literal": "les conditions générales d'utilisation doivent être acceptées"
+      }
+    }
+  },
+  "date": {
+    "ago": "{{ date, ago }}",
+    "default": "{{ date }}",
+    "long": "{{ date, long }}",
+    "longWithTime": "{{ date, longWithTime }}",
+    "relative": "{{ date, relative }}",
+    "short": "{{ date, short }}"
+  },
+  "document": {
+    "csv": {
+      "boolean": {
+        "true": "Oui",
+        "false": "Non"
+      },
+      "date": {
+        "default": "{{ date, spreadsheetDate }}",
+        "withTime": "{{ date, spreadsheetDateTime }}"
+      }
+    },
+    "template": {}
+  },
+  "model": {
+    "sacemDeclaration": {
+      "accountingCategory": {
+        "enum": {
+          "TICKETING": "Entrées",
+          "CONSUMPTIONS": "Consommations",
+          "CATERING": "Restauration",
+          "PROGRAM_SALES": "Vente de programmes",
+          "OTHER_REVENUES": "Autre recette",
+          "ENGAGEMENT_CONTRACTS": "Contrat d'engagement",
+          "RIGHTS_TRANSFER_CONTRACTS": "Contrat de cession",
+          "COREALIZATION_CONTRACTS": "Contrat de coréalisation",
+          "COPRODUCTION_CONTRACTS": "Contrat de coproduction",
+          "OTHER_ARTISTIC_CONTRACTS": "Autre contrat artistique"
+        }
+      }
+    }
+  }
+}

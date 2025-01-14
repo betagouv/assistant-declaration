@@ -1,0 +1,111 @@
+import { headerFooterDisplayItem } from '@codegouvfr/react-dsfr/Display';
+import { HeaderProps } from '@codegouvfr/react-dsfr/Header';
+import type { DefaultColorScheme } from '@codegouvfr/react-dsfr/next-appdir';
+import { EventEmitter } from 'eventemitter3';
+
+import { HeaderOrganizationSwitchItem, HeaderOrganizationSwitchItemProps } from '@ad/src/components/HeaderOrganizationSwitchItem';
+import { HeaderUserItem } from '@ad/src/components/HeaderUserItem';
+import { TokenUserSchemaType } from '@ad/src/models/entities/user';
+
+export const defaultColorScheme: DefaultColorScheme = 'system';
+
+export const brandTop = (
+  <>
+    République
+    <br />
+    Française
+  </>
+);
+
+export const homeLinkProps = {
+  href: '/',
+  title: 'Présentation - Assistant déclaration',
+};
+
+export interface OrganizationSwitchQuickAccessItemOptions extends Omit<HeaderOrganizationSwitchItemProps, 'eventEmitter'> {}
+
+export const organizationSwichQuickAccessItem = (props: OrganizationSwitchQuickAccessItemOptions): HeaderProps.QuickAccessItem => {
+  const eventEmitter = new EventEmitter();
+
+  return {
+    iconId: undefined as any,
+    buttonProps: {
+      onClick: (event) => {
+        eventEmitter.emit('click', event);
+      },
+    },
+    text: <HeaderOrganizationSwitchItem eventEmitter={eventEmitter} {...props} />,
+  };
+};
+
+export interface UserQuickAccessItemOptions {
+  showDashboardMenuItem?: boolean;
+}
+
+export const userQuickAccessItem = (user: TokenUserSchemaType, options?: UserQuickAccessItemOptions): HeaderProps.QuickAccessItem => {
+  const eventEmitter = new EventEmitter();
+
+  // INFORMATION: this won't work on 5xx and 4xx error pages since there is an hydratation error due to Next.js (maybe fixed in the future)
+  // `Warning: validateDOMNesting(...): <body> cannot appear as a child of <div>.`
+  return {
+    iconId: undefined as any,
+    buttonProps: {
+      onClick: (event) => {
+        eventEmitter.emit('click', event);
+      },
+    },
+    text: <HeaderUserItem user={user} eventEmitter={eventEmitter} showDashboardMenuItem={options?.showDashboardMenuItem} />,
+  };
+};
+
+export const commonHeaderAttributes = {
+  brandTop: brandTop,
+  homeLinkProps: homeLinkProps,
+  serviceTitle: 'Assistant déclaration',
+  serviceTagline: 'À destination des entrepreneurs du spectacle vivant',
+};
+
+export const commonFooterAttributes = {
+  accessibility: 'non compliant' as any,
+  accessibilityLinkProps: {
+    // TODO: waiting for the following to be solved https://github.com/zilch/type-route/issues/125
+    // href: linkRegistry.get('accessibility', undefined),
+    href: '/accessibility',
+  },
+  brandTop: brandTop,
+  homeLinkProps: homeLinkProps,
+  termsLinkProps: {
+    // href: linkRegistry.get('legalNotice', undefined),
+    href: '/legal-notice',
+  },
+  // websiteMapLinkProps: {{
+  //   href: '#',
+  // }}
+  bottomItems: [
+    {
+      iconId: undefined as any,
+      linkProps: {
+        // href: linkRegistry.get('privacyPolicy', undefined),
+        href: '/privacy-policy',
+      },
+      text: 'Politique de confidentialité',
+    },
+    {
+      iconId: undefined as any,
+      linkProps: {
+        href: 'https://github.com/betagouv/assistant-declaration',
+        target: '_blank',
+      },
+      text: 'Code source',
+    },
+    headerFooterDisplayItem,
+  ],
+  license: (
+    <>
+      Sauf mention contraire, tous les contenus de ce site sont sous{' '}
+      <a href="https://raw.githubusercontent.com/betagouv/assistant-declaration/main/LICENSE" target="_blank" rel="noreferrer">
+        licence MIT
+      </a>{' '}
+    </>
+  ),
+};
