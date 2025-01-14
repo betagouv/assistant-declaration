@@ -30,6 +30,7 @@ import { capitalizeFirstLetter } from '@ad/src/utils/format';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
+import { getBaseUrl } from '@ad/src/utils/url';
 
 export interface SacemDeclarationPageProps {
   params: { eventSerieId: string };
@@ -874,7 +875,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                       Reporter manuellement les données sur le PDF fourni par la SACEM (
                       <Link
                         component={NextLink}
-                        href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" // TODO: find the real PDF
+                        href={`${getBaseUrl()}/assets/templates/declaration/sacem.pdf`}
                         target="_blank"
                         underline="none"
                         sx={{
