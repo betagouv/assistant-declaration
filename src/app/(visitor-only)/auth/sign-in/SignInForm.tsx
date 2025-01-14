@@ -27,16 +27,18 @@ import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { SignInPrefillSchemaType, SignInSchema, SignInSchemaType } from '@ad/src/models/actions/auth';
 import {
   BusinessError,
+  UnexpectedError,
   authCredentialsRequiredError,
   authFatalError,
   authNoCredentialsMatchError,
   authRetriableError,
+  internalServerErrorError,
 } from '@ad/src/models/entities/errors';
 import { signIn } from '@ad/src/proxies/next-auth/react';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
-function errorCodeToError(errorCode: string): BusinessError | null {
-  let error: BusinessError | null;
+function errorCodeToError(errorCode: string): BusinessError | UnexpectedError {
+  let error: BusinessError | UnexpectedError;
 
   switch (errorCode) {
     case authCredentialsRequiredError.code:
@@ -46,7 +48,8 @@ function errorCodeToError(errorCode: string): BusinessError | null {
       error = authNoCredentialsMatchError;
       break;
     case 'undefined':
-      error = null;
+      // Probably the server has thrown something that is not a basic `Error` object
+      error = internalServerErrorError;
       break;
     default:
       error = authRetriableError;
@@ -70,7 +73,7 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
   const [showSessionEndBlock, setShowSessionEndBlock] = useState<boolean>(sessionEnd);
   const [showRegisteredBlock, setShowRegisteredBlock] = useState<boolean>(registered);
 
-  const [error, setError] = useState<BusinessError | null>(() => {
+  const [error, setError] = useState<BusinessError | UnexpectedError | null>(() => {
     return attemptErrorCode ? errorCodeToError(attemptErrorCode) : null;
   });
   const [mutex] = useState<Mutex>(new Mutex());
