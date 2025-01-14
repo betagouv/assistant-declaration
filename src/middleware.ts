@@ -5,6 +5,7 @@ const connectSrcValues = ["'self'"];
 const fontSrcValues = ["'self'", 'https:', 'data:'];
 const imgSrcValues = ["'self'", 'data:'];
 const styleSrcValues = ["'self'", 'https:'];
+const workerSrcValues: string[] = [];
 
 // Make sure no `http` url are used
 // Note: we scoped this to production some browsers enable it by default, which causes issues with `http://localhost:3000` upgrading links, breaking scripts and tags
@@ -31,6 +32,9 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
   const inferedSentryUrl = `${sentryDsn.protocol}//${sentryDsn.host}/`;
 
   connectSrcValues.push(inferedSentryUrl);
+
+  // The SessionReplay integration uses a worker for compression
+  workerSrcValues.push("'self'", 'blob:');
 }
 
 if (process.env.NODE_ENV === 'development') {
@@ -65,9 +69,11 @@ function formatSecurityHeaders(nonce?: string) {
       ' '
     )};object-src 'none';script-src ${`'nonce-${nonce}'`} ${scriptSrcValues.join(' ')};script-src-attr 'none';connect-src ${connectSrcValues.join(
       ' '
-    )};style-src ${styleSrcValues.join(' ')};style-src-elem 'unsafe-inline' ${styleSrcValues.join(' ')};style-src-attr 'self' ${
-      libraryCompatibilityWorkaround ? "'unsafe-inline'" : ''
-    }${upgradeInsecureRequests ? ';upgrade-insecure-requests' : ''}`,
+    )};worker-src ${workerSrcValues.join(' ')};style-src ${styleSrcValues.join(' ')};style-src-elem 'unsafe-inline' ${styleSrcValues.join(
+      ' '
+    )};style-src-attr 'self' ${libraryCompatibilityWorkaround ? "'unsafe-inline'" : ''}${
+      upgradeInsecureRequests ? ';upgrade-insecure-requests' : ''
+    }`,
     'Origin-Agent-Cluster': '?1',
     'Referrer-Policy': 'no-referrer',
     'Strict-Transport-Security': 'max-age=15552000; includeSubDomains',
