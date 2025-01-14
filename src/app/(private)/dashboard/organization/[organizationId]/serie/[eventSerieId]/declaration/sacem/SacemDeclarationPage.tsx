@@ -214,13 +214,14 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                           sx={{
                             '& > .MuiAccordionSummary-content': {
                               gap: 1,
+                              flexWrap: 'wrap',
                             },
                           }}
                         >
                           <Typography sx={{ fontWeight: 600 }} data-sentry-mask>
                             {capitalizeFirstLetter(t('date.longWithTime', { date: eventsWrapper.event.startAt }))}
                           </Typography>
-                          <Box sx={{ display: 'flex', gap: 1, marginLeft: 'auto', pr: 2 }}>
+                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', marginLeft: 'auto', pr: 2 }}>
                             <Chip
                               label={
                                 <>
