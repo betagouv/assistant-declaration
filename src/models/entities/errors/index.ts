@@ -72,6 +72,9 @@ export const passwordRequiresASpecialCharactersError = new BusinessError(
   t('errors.validation.newPassword.passwordRequiresASpecialCharacters')
 );
 
+// File management
+export const fileNotFoundError = new BusinessError('fileNotFound', t('errors.custom.fileNotFound'));
+
 // Authentication
 export const authCredentialsRequiredError = new BusinessError('authCredentialsRequired', t('errors.custom.authCredentialsRequired'));
 export const authNoCredentialsMatchError = new BusinessError('authNoCredentialsMatch', t('errors.custom.authNoCredentialsMatch'));

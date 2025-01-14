@@ -22,6 +22,7 @@
       "eventCategoryTicketsNotFound": "ces données de catégorie de tickets n'existent pas",
       "eventSerieNotFound": "cette série de représentations n'existe pas",
       "expiredVerificationToken": "vous avez dépassé le temps imparti, merci de renouveler votre demande",
+      "fileNotFound": "aucun fichier n'a été trouvé",
       "internalServerError": "une erreur interne est survenue, veuillez retenter",
       "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",
       "invalidVerificationToken": "l'opération que vous essayez de réaliser a été refusée",

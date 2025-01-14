@@ -1,12 +1,13 @@
-import { Table, TableCell, TableHeader, TableRow } from '@ag-media/react-pdf-table';
+// [WORKAROUND] Local copy needed due to ESM incompatibilities
+// Ref: https://github.com/ag-media/react-pdf-table/issues/6
+// import { Table, TableCell, TableHeader, TableRow } from '@ag-media/react-pdf-table';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Image, Link, StyleSheet, Text, View } from '@react-pdf/renderer';
-import slugify from '@sindresorhus/slugify';
-import { useState } from 'react';
 
 import { StandardLayout, layoutStyles, styles } from '@ad/src/components/documents/layouts/StandardLayout';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration';
+import { Table, TableCell, TableHeader, TableRow } from '@ad/src/proxies/@ag-media/react-pdf-table';
 import { currencyFormatter } from '@ad/src/utils/currency';
 import { getBaseUrl } from '@ad/src/utils/url';
 
@@ -26,8 +27,6 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
   const { t } = useServerTranslation('common');
   const theme = fr.colors.getHex({ isDark: false });
   const title = `Déclaration SACEM - ${props.sacemDeclaration.eventSerieName}`;
-
-  const [currentDate] = useState<Date>(() => new Date());
 
   return (
     <StandardLayout
@@ -179,7 +178,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
         <View style={{ ...styles.gridItem, textAlign: 'right', paddingRight: '6vw', paddingTop: 10 }}>
           <Text>Je certifie l&apos;exactitude des renseignements ci-dessus.</Text>
           <Text style={{ marginTop: 10 }}>
-            Fait à {props.sacemDeclaration.declarationPlace}, le {t('date.short', { date: currentDate })}
+            Fait à {props.sacemDeclaration.declarationPlace}, le {t('date.short', { date: new Date() })}
           </Text>
           <Text
             style={

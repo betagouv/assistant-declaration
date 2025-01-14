@@ -46,25 +46,40 @@ export function transformStringOrNull(value: string): string | null {
   return value !== '' ? value : null;
 }
 
+export function coerceBoolean(value: any): boolean {
+  if (typeof value === 'string') {
+    if (value.toLowerCase() === 'true' || value === '1') {
+      return true;
+    } else if (value.toLowerCase() === 'false' || value === '0') {
+      return false;
+    }
+  } else if (typeof value === 'number') {
+    if (value === 1) {
+      return true;
+    } else if (value === 0) {
+      return false;
+    }
+  } else {
+    return value;
+  }
+
+  throw new Error('not a safe value to coerce to boolean');
+}
+
+export function safeCoerceToOptionalBoolean(initialValidation: z.ZodOptional<z.ZodBoolean>) {
+  // This is to avoid the situation of `z.coerce.boolean()` that is always true when passing a string (for example, new Boolean('false'))
+  return z.preprocess((value) => {
+    if (value === undefined) {
+      return undefined;
+    }
+
+    return coerceBoolean(value);
+  }, initialValidation);
+}
+
 export function safeCoerceToBoolean(initialValidation: z.ZodBoolean) {
   // This is to avoid the situation of `z.coerce.boolean()` that is always true when passing a string (for example, new Boolean('false'))
   return z.preprocess((value) => {
-    if (typeof value === 'string') {
-      if (value.toLowerCase() === 'true' || value === '1') {
-        return true;
-      } else if (value.toLowerCase() === 'false' || value === '0') {
-        return false;
-      }
-    } else if (typeof value === 'number') {
-      if (value === 1) {
-        return true;
-      } else if (value === 0) {
-        return false;
-      }
-    } else {
-      return value;
-    }
-
-    throw new Error('not a safe value to coerce to boolean');
+    return coerceBoolean(value);
   }, initialValidation);
 }

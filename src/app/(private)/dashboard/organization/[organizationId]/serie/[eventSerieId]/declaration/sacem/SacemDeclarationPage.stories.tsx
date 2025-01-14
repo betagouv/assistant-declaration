@@ -1,6 +1,5 @@
 import { Meta, StoryFn } from '@storybook/react';
 
-import { userSessionContext } from '@ad/.storybook/auth';
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindMainTitle } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
@@ -66,9 +65,6 @@ NormalStory.args = {
   ...commonComponentProps,
 };
 NormalStory.parameters = {
-  nextAuthMock: {
-    session: userSessionContext,
-  },
   msw: {
     handlers: [
       ...mswCommonParameters,

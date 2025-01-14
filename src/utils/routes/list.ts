@@ -33,6 +33,13 @@ export const localizedRoutes = {
       fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}/serie/${p.eventSerieId}/declaration/${p.declarationType}`,
     }
   ),
+  declarationPdf: defineLocalizedRoute(
+    { eventSerieId: param.path.string, type: param.query.string, download: param.query.optional.boolean },
+    {
+      en: (p) => `/api/declaration/${p.eventSerieId}`,
+      fr: (p) => `/api/declaration/${p.eventSerieId}`,
+    }
+  ),
   forgottenPassword: defineLocalizedRoute(
     {},
     {
@@ -142,6 +149,7 @@ export const routes = {
     accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.en),
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.en),
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.en),
+    declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.en),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.en),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.en),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.en),
@@ -157,6 +165,7 @@ export const routes = {
     accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.fr),
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.fr),
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.fr),
+    declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.fr),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.fr),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.fr),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.fr),
