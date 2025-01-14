@@ -50,7 +50,7 @@ export function EventSerieCard(props: EventSerieCardProps) {
           </Tooltip>
         </Box>
       </CardContent>
-      <CardActions sx={{ justifyContent: 'flex-end' }}>
+      <CardActions sx={{ justifyContent: 'flex-end', flexWrap: 'wrap' }}>
         <Typography component="div" variant="subtitle2" sx={{ display: { xs: 'none', sm: 'block' } }}>
           Déclarations :
         </Typography>
