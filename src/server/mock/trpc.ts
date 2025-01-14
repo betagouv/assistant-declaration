@@ -35,7 +35,7 @@ export const getTRPCMock = <
   O extends RouterOutputs[K1], // all its keys
 >(endpoint: {
   path: [K1];
-  response: O | object | Error;
+  response: O | Error; // Ideally `response` should satisfies `O` instead of extending to avoid mistake when merging objects with wrong properties but there is no solution for now (ref: https://github.com/microsoft/TypeScript/issues/51556)
   type?: 'query' | 'mutation' | 'subscription';
   delayHook?: (request: StrictRequest<DefaultBodyType>, params: RouterInputs[K1]) => number | DelayMode | null;
 }) => {
