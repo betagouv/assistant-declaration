@@ -178,12 +178,12 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
             Fait à {props.sacemDeclaration.declarationPlace}, le {t('date.short', { date: new Date() })}
           </Text>
           <Text
-            style={
-              {
-                // TODO: For whatever reason this custom font is not working at all despite the source file is reachable... it needs to be investigated
-                // fontFamily: 'Dancing Script',
-              }
-            }
+            style={{
+              fontFamily: 'Dancing Script',
+              fontSize: 35,
+              marginTop: 10,
+              marginRight: 10,
+            }}
           >
             {props.signatory}
           </Text>

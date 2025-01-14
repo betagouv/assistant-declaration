@@ -160,42 +160,43 @@ Font.register({
   family: 'Marianne',
   fonts: [
     {
-      src: `${getBaseUrl()}/assets/fonts/Marianne-Light.woff2`,
+      src: `${getBaseUrl()}/assets/fonts/Marianne-Light.woff`,
       fontWeight: 300,
       fontStyle: 'normal',
     },
     {
-      src: `${getBaseUrl()}/assets/fonts/Marianne-Light_Italic.woff2`,
+      src: `${getBaseUrl()}/assets/fonts/Marianne-Light_Italic.woff`,
       fontWeight: 300,
       fontStyle: 'italic',
     },
     {
-      src: `${getBaseUrl()}/assets/fonts/Marianne-Regular.woff2`,
-      fontWeight: 400,
-      fontStyle: 'normal',
+      src: `${getBaseUrl()}/assets/fonts/Marianne-Regular.woff`,
+      // Commenting the following to make it the default no matter the variation
+      // fontWeight: 400,
+      // fontStyle: 'normal',
     },
     {
-      src: `${getBaseUrl()}/assets/fonts/Marianne-Regular_Italic.woff2`,
+      src: `${getBaseUrl()}/assets/fonts/Marianne-Regular_Italic.woff`,
       fontWeight: 400,
       fontStyle: 'italic',
     },
     {
-      src: `${getBaseUrl()}/assets/fonts/Marianne-Medium.woff2`,
+      src: `${getBaseUrl()}/assets/fonts/Marianne-Medium.woff`,
       fontWeight: 500,
       fontStyle: 'normal',
     },
     {
-      src: `${getBaseUrl()}/assets/fonts/Marianne-Medium_Italic.woff2`,
+      src: `${getBaseUrl()}/assets/fonts/Marianne-Medium_Italic.woff`,
       fontWeight: 500,
       fontStyle: 'italic',
     },
     {
-      src: `${getBaseUrl()}/assets/fonts/Marianne-Bold.woff2`,
+      src: `${getBaseUrl()}/assets/fonts/Marianne-Bold.woff`,
       fontWeight: 700,
       fontStyle: 'normal',
     },
     {
-      src: `${getBaseUrl()}/assets/fonts/Marianne-Bold_Italic.woff2`,
+      src: `${getBaseUrl()}/assets/fonts/Marianne-Bold_Italic.woff`,
       fontWeight: 700,
       fontStyle: 'italic',
     },
@@ -206,12 +207,13 @@ Font.register({
   family: 'Spectral',
   fonts: [
     {
-      src: `${getBaseUrl()}/assets/fonts/Spectral-Regular.woff2`,
-      fontWeight: 400,
-      fontStyle: 'normal',
+      src: `${getBaseUrl()}/assets/fonts/Spectral-Regular.woff`,
+      // Commenting the following to make it the default no matter the variation
+      // fontWeight: 400,
+      // fontStyle: 'normal',
     },
     {
-      src: `${getBaseUrl()}/assets/fonts/Spectral-ExtraBold.woff2`,
+      src: `${getBaseUrl()}/assets/fonts/Spectral-ExtraBold.woff`,
       fontWeight: 900,
       fontStyle: 'normal',
     },
@@ -222,10 +224,10 @@ Font.register({
   family: 'Dancing Script',
   fonts: [
     {
-      src: `${getBaseUrl()}/assets/fonts/dancing-script-latin-400-normal.woff2`,
-      // [WORKAROUND] Commenting the following to make it the default no matter the variation
-      // fontWeight: 400,
-      // fontStyle: 'normal',
+      src: `${getBaseUrl()}/assets/fonts/dancing-script-latin-400-normal.woff`,
+      // Commenting the following to make it the default no matter the variation
+      fontWeight: 400,
+      fontStyle: 'normal',
     },
   ],
 });
