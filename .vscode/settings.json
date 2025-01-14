@@ -5,6 +5,7 @@
   "files.eol": "\n",
   "files.trimTrailingWhitespace": true,
   "i18n-ally.displayLanguage": "fr",
+  "i18n-ally.keystyle": "nested",
   "i18n-ally.localesPaths": ["src/i18n"],
   "i18n-ally.sourceLanguage": "fr",
   "jest.jestCommandLine": "npm run test:unit --",
