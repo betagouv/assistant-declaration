@@ -3,29 +3,29 @@ import { within } from '@storybook/test';
 import { useForm } from 'react-hook-form';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
-import { sacemDeclarations } from '@ad/src/fixtures/declaration/sacem';
-import { FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { SacdAccountingEntriesTable } from '@ad/src/components/SacdAccountingEntriesTable';
+import { sacdDeclarations } from '@ad/src/fixtures/declaration/sacd';
+import { FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 
-type ComponentType = typeof SacemRevenuesTable;
+type ComponentType = typeof SacdAccountingEntriesTable;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Components/SacemRevenuesTable',
-  component: SacemRevenuesTable,
+  title: 'Components/SacdAccountingEntriesTable',
+  component: SacdAccountingEntriesTable,
   ...generateMetaDefault({
     parameters: {},
   }),
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  const { control } = useForm<FillSacemDeclarationSchemaType>({
+  const { control } = useForm<FillSacdDeclarationSchemaType>({
     defaultValues: {
-      revenues: sacemDeclarations[0].revenues,
+      accountingEntries: sacdDeclarations[0].accountingEntries,
     },
   });
 
-  return <SacemRevenuesTable {...args} control={control} />;
+  return <SacdAccountingEntriesTable {...args} control={control} />;
 };
 
 const NormalStory = Template.bind({});

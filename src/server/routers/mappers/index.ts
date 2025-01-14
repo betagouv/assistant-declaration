@@ -1,25 +1,38 @@
 import {
+  Address,
   Event,
   EventCategoryTickets,
   EventSerie,
   EventSerieDeclaration,
+  EventSerieSacdDeclaration,
   EventSerieSacemDeclaration,
   Organization,
+  Phone,
+  SacdDeclarationAccountingEntry,
+  SacdDeclarationOrganization,
+  SacdDeclarationPerformedWork,
   SacemDeclarationAccountingEntry,
   TicketCategory,
   TicketingSystem,
   User,
 } from '@prisma/client';
 
-import { ensureMinimumSacemExpenseItems, ensureMinimumSacemRevenueItems } from '@ad/src/core/declaration';
+import { ensureMinimumSacdAccountingItems, ensureMinimumSacemExpenseItems, ensureMinimumSacemRevenueItems } from '@ad/src/core/declaration';
+import { AddressSchemaType } from '@ad/src/models/entities/address';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
+import {
+  SacdDeclarationAccountingEntrySchemaType,
+  SacdDeclarationOrganizationSchemaType,
+  SacdDeclarationSchemaType,
+} from '@ad/src/models/entities/declaration/sacd';
 import {
   AccountingCategorySchema,
   SacemDeclarationAccountingFluxEntrySchemaType,
   SacemDeclarationSchemaType,
-} from '@ad/src/models/entities/declaration';
+} from '@ad/src/models/entities/declaration/sacem';
 import { EventCategoryTicketsSchemaType, EventSchemaType, EventSerieSchemaType, TicketCategorySchemaType } from '@ad/src/models/entities/event';
 import { OrganizationSchemaType } from '@ad/src/models/entities/organization';
+import { PhoneSchemaType } from '@ad/src/models/entities/phone';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
 import { UserSchemaType } from '@ad/src/models/entities/user';
 
@@ -43,6 +56,28 @@ export function organizationPrismaToModel(organization: Organization): Organizat
     name: organization.name,
     createdAt: organization.createdAt,
     updatedAt: organization.updatedAt,
+  };
+}
+
+export function addressPrismaToModel(
+  address: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>
+): AddressSchemaType {
+  return {
+    id: address.id,
+    street: address.street,
+    city: address.city,
+    postalCode: address.postalCode,
+    countryCode: address.countryCode,
+    subdivision: address.subdivision,
+  };
+}
+
+export function phonePrismaToModel(phone: Pick<Phone, 'id' | 'callingCode' | 'countryCode' | 'number'>): PhoneSchemaType {
+  return {
+    id: phone.id,
+    callingCode: phone.callingCode,
+    countryCode: phone.countryCode,
+    number: phone.number,
   };
 }
 
@@ -114,11 +149,14 @@ export function eventCategoryTicketsPrismaToModel(eventCategoryTickets: EventCat
 
 export function declarationTypePrismaToModel(
   declaration: Partial<EventSerieDeclaration> & {
+    EventSerieSacdDeclaration: Partial<EventSerieSacdDeclaration> | null;
     EventSerieSacemDeclaration: Partial<EventSerieSacemDeclaration> | null;
   }
 ): DeclarationTypeSchemaType {
   if (declaration.EventSerieSacemDeclaration) {
     return DeclarationTypeSchema.Values.SACEM;
+  } else if (declaration.EventSerieSacdDeclaration) {
+    return DeclarationTypeSchema.Values.SACD;
   }
 
   throw new Error(`declaration type not handled`);
@@ -239,5 +277,144 @@ export function sacemDeclarationPrismaToModel(
     revenues: ensureMinimumSacemRevenueItems(revenues),
     expenses: ensureMinimumSacemExpenseItems(expenses),
     ...computedPlaceholder,
+  };
+}
+
+export function sacdPlaceholderDeclarationPrismaToModel(
+  eventSerie: Pick<EventSerie, 'id' | 'name'> & {
+    ticketingSystem: {
+      organization: Pick<Organization, 'name'>;
+    };
+    Event: {
+      EventCategoryTickets: (Pick<EventCategoryTickets, 'total' | 'totalOverride' | 'priceOverride'> & {
+        category: Pick<TicketCategory, 'price'>;
+      })[];
+    }[];
+  }
+): Pick<SacdDeclarationSchemaType, 'organizationName' | 'eventSerieName' | 'averageTicketPrice' | 'accountingEntries'> {
+  let totalAmount: number = 0;
+  let totalTickets: number = 0;
+
+  for (const event of eventSerie.Event) {
+    for (const eventCategoryTicket of event.EventCategoryTickets) {
+      const total = eventCategoryTicket.totalOverride ?? eventCategoryTicket.total;
+      const price = (eventCategoryTicket.priceOverride ?? eventCategoryTicket.category.price).toNumber();
+
+      totalTickets += total;
+      totalAmount += total * price;
+    }
+  }
+
+  // Round to 2 cents for clarity
+  const averageTicketPrice = Math.round((totalAmount / totalTickets) * 100) / 100;
+
+  return {
+    organizationName: eventSerie.ticketingSystem.organization.name,
+    eventSerieName: eventSerie.name,
+    averageTicketPrice: averageTicketPrice,
+    // With placeholder there is no reason to fill data except ticketing we have data for
+    // Note: ensuring minimum items is done at another layer
+    accountingEntries: [],
+  };
+}
+
+export function sacdDeclarationPrismaToModel(
+  eventSerie: Pick<EventSerie, 'id' | 'name' | 'startAt' | 'endAt' | 'taxRate'> & {
+    ticketingSystem: {
+      organization: Pick<Organization, 'name'>;
+    };
+    Event: {
+      EventCategoryTickets: (Pick<EventCategoryTickets, 'total' | 'totalOverride' | 'priceOverride'> & {
+        category: Pick<TicketCategory, 'price'>;
+      })[];
+    }[];
+  },
+  sacdDeclaration: Pick<
+    EventSerieSacdDeclaration,
+    | 'id'
+    | 'clientId'
+    | 'officialHeadquartersId'
+    | 'productionOperationId'
+    | 'productionType'
+    | 'placeName'
+    | 'placePostalCode'
+    | 'placeCity'
+    | 'audience'
+    | 'placeCapacity'
+    | 'declarationPlace'
+  > & {
+    organizer: Pick<SacdDeclarationOrganization, 'name' | 'email' | 'phoneId' | 'officialHeadquartersId' | 'europeanVatId'> & {
+      headquartersAddress: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
+      phone: Pick<Phone, 'id' | 'callingCode' | 'countryCode' | 'number'>;
+    };
+    producer: Pick<SacdDeclarationOrganization, 'name' | 'email' | 'phoneId' | 'officialHeadquartersId' | 'europeanVatId'> & {
+      headquartersAddress: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
+      phone: Pick<Phone, 'id' | 'callingCode' | 'countryCode' | 'number'>;
+    };
+    rightsFeesManager: Pick<SacdDeclarationOrganization, 'name' | 'email' | 'phoneId' | 'officialHeadquartersId' | 'europeanVatId'> & {
+      headquartersAddress: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
+      phone: Pick<Phone, 'id' | 'callingCode' | 'countryCode' | 'number'>;
+    };
+    SacdDeclarationAccountingEntry: Pick<SacdDeclarationAccountingEntry, 'category' | 'categoryPrecision' | 'taxRate' | 'amount'>[];
+    SacdDeclarationPerformedWork: Pick<SacdDeclarationPerformedWork, 'category' | 'name' | 'contributors' | 'durationSeconds'>[];
+  }
+): SacdDeclarationSchemaType {
+  // Reuse data from the placeholder since this one is used until the form is submitted
+  const { accountingEntries, ...computedPlaceholder } = sacdPlaceholderDeclarationPrismaToModel(eventSerie);
+
+  for (const accountingEntry of sacdDeclaration.SacdDeclarationAccountingEntry) {
+    const taxRate = accountingEntry.taxRate !== null ? accountingEntry.taxRate.toNumber() : null;
+    const includingTaxesAmount = accountingEntry.amount.toNumber();
+
+    accountingEntries.push({
+      category: accountingEntry.category,
+      categoryPrecision: accountingEntry.categoryPrecision,
+      taxRate: taxRate,
+      includingTaxesAmount: includingTaxesAmount,
+    });
+  }
+
+  return {
+    id: sacdDeclaration.id,
+    eventSerieId: eventSerie.id,
+    clientId: sacdDeclaration.clientId,
+    officialHeadquartersId: sacdDeclaration.officialHeadquartersId,
+    productionOperationId: sacdDeclaration.productionOperationId,
+    productionType: sacdDeclaration.productionType,
+    placeName: sacdDeclaration.placeName,
+    placePostalCode: sacdDeclaration.placePostalCode,
+    placeCity: sacdDeclaration.placeCity,
+    audience: sacdDeclaration.audience,
+    placeCapacity: sacdDeclaration.placeCapacity,
+    declarationPlace: sacdDeclaration.declarationPlace,
+    organizer: sacdDeclarationOrganizationPrismaToModel(sacdDeclaration.organizer),
+    producer: sacdDeclarationOrganizationPrismaToModel(sacdDeclaration.producer),
+    rightsFeesManager: sacdDeclarationOrganizationPrismaToModel(sacdDeclaration.rightsFeesManager),
+    accountingEntries: ensureMinimumSacdAccountingItems(accountingEntries),
+    performedWorks: sacdDeclaration.SacdDeclarationPerformedWork.map((performedWork) => {
+      return {
+        category: performedWork.category,
+        name: performedWork.name,
+        contributors: performedWork.contributors,
+        durationSeconds: performedWork.durationSeconds,
+      };
+    }),
+    ...computedPlaceholder,
+  };
+}
+
+export function sacdDeclarationOrganizationPrismaToModel(
+  organization: Pick<SacdDeclarationOrganization, 'name' | 'email' | 'officialHeadquartersId' | 'europeanVatId'> & {
+    headquartersAddress: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
+    phone: Pick<Phone, 'id' | 'callingCode' | 'countryCode' | 'number'>;
+  }
+): SacdDeclarationOrganizationSchemaType {
+  return {
+    name: organization.name,
+    email: organization.email,
+    officialHeadquartersId: organization.officialHeadquartersId,
+    europeanVatId: organization.europeanVatId,
+    headquartersAddress: addressPrismaToModel(organization.headquartersAddress),
+    phone: phonePrismaToModel(organization.phone),
   };
 }

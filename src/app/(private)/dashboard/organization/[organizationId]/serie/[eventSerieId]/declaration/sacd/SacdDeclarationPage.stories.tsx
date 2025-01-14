@@ -3,17 +3,17 @@ import { Meta, StoryFn } from '@storybook/react';
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindMainTitle } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
-import { SacemDeclarationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacem/SacemDeclarationPage';
-import { sacemDeclarations, sacemDeclarationsWrappers } from '@ad/src/fixtures/declaration/sacem';
+import { SacdDeclarationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacd/SacdDeclarationPage';
+import { sacdDeclarations, sacdDeclarationsWrappers } from '@ad/src/fixtures/declaration/sacd';
 import { eventCategoryTickets, eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
-type ComponentType = typeof SacemDeclarationPage;
+type ComponentType = typeof SacdDeclarationPage;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Pages/SacemDeclaration',
-  component: SacemDeclarationPage,
+  title: 'Pages/SacdDeclaration',
+  component: SacdDeclarationPage,
   ...generateMetaDefault({
     parameters: {},
   }),
@@ -29,9 +29,9 @@ const mswCommonParameters = [
   }),
   getTRPCMock({
     type: 'query',
-    path: ['getSacemDeclaration'],
+    path: ['getSacdDeclaration'],
     response: {
-      sacemDeclarationWrapper: sacemDeclarationsWrappers[0],
+      sacdDeclarationWrapper: sacdDeclarationsWrappers[0],
     },
   }),
   getTRPCMock({
@@ -43,9 +43,9 @@ const mswCommonParameters = [
   }),
   getTRPCMock({
     type: 'mutation',
-    path: ['fillSacemDeclaration'],
+    path: ['fillSacdDeclaration'],
     response: {
-      sacemDeclaration: sacemDeclarations[0],
+      sacdDeclaration: sacdDeclarations[0],
     },
   }),
 ];
@@ -57,7 +57,7 @@ const commonComponentProps: ComponentProps<ComponentType> = {
 };
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <SacemDeclarationPage {...args} />;
+  return <SacdDeclarationPage {...args} />;
 };
 
 const NormalStory = Template.bind({});

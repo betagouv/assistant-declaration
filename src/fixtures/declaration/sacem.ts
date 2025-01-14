@@ -7,7 +7,7 @@ import {
   SacemDeclarationSchemaType,
   SacemDeclarationWrapperSchema,
   SacemDeclarationWrapperSchemaType,
-} from '@ad/src/models/entities/declaration';
+} from '@ad/src/models/entities/declaration/sacem';
 
 export const sacemDeclarations: SacemDeclarationSchemaType[] = [
   SacemDeclarationSchema.parse({

@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
 import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
 import { FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
-import { AccountingCategorySchema } from '@ad/src/models/entities/declaration';
+import { AccountingCategorySchema } from '@ad/src/models/entities/declaration/sacem';
 import { currencyFormatter } from '@ad/src/utils/currency';
 import { nameof } from '@ad/src/utils/typescript';
 import { RowForForm } from '@ad/src/utils/validation';

@@ -554,6 +554,11 @@ export const eventRouter = router({
       include: {
         EventSerieDeclaration: {
           include: {
+            EventSerieSacdDeclaration: {
+              select: {
+                id: true,
+              },
+            },
             EventSerieSacemDeclaration: {
               select: {
                 id: true,
@@ -604,6 +609,11 @@ export const eventRouter = router({
       include: {
         EventSerieDeclaration: {
           include: {
+            EventSerieSacdDeclaration: {
+              select: {
+                id: true,
+              },
+            },
             EventSerieSacemDeclaration: {
               select: {
                 id: true,

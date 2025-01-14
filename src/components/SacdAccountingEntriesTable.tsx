@@ -9,26 +9,26 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
 import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
-import { FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
-import { AccountingCategorySchema } from '@ad/src/models/entities/declaration/sacem';
+import { FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { SacdAccountingCategorySchema } from '@ad/src/models/entities/declaration/sacd';
 import { currencyFormatter } from '@ad/src/utils/currency';
 import { nameof } from '@ad/src/utils/typescript';
 import { RowForForm } from '@ad/src/utils/validation';
 
 const rowTypedNameof = nameof<RowForForm<any, any>>;
-const entryTypedNameof = nameof<FillSacemDeclarationSchemaType['expenses'][0]>;
+const entryTypedNameof = nameof<FillSacdDeclarationSchemaType['accountingEntries'][0]>;
 
-export interface SacemExpensesTableProps {
-  control: Control<FillSacemDeclarationSchemaType, any>;
-  errors: FieldErrors<FillSacemDeclarationSchemaType>['expenses'];
+export interface SacdAccountingEntriesTableProps {
+  control: Control<FillSacdDeclarationSchemaType, any>;
+  errors: FieldErrors<FillSacdDeclarationSchemaType>['accountingEntries'];
 }
 
-export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps) {
+export function SacdAccountingEntriesTable({ control, errors }: SacdAccountingEntriesTableProps) {
   const { t } = useTranslation('common');
 
   const { fields, append, update, remove } = useFieldArray({
     control,
-    name: 'expenses',
+    name: 'accountingEntries',
   });
 
   const apiRef = useGridApiRef();
@@ -72,14 +72,14 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
   const [columns] = useState<GridColDef<(typeof rowsWithErrorLogic)[0]>[]>([
     {
       field: `${rowTypedNameof('data')}.${entryTypedNameof('category')}`,
-      headerName: 'Type de contrat',
+      headerName: 'Intitulé de la somme',
       editable: true,
       display: 'flex', // Needed to align properly `ErrorCellWrapper`
       valueGetter: (_, row) => {
         return row.data.categoryPrecision ?? row.data.category;
       },
       valueSetter: (value, row) => {
-        // Editable category should only be for "other expenses"
+        // Editable category should only be for "other accountingEntries"
         return {
           ...row,
           data: {
@@ -91,7 +91,7 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
       renderCell: (params) => {
         return (
           <ErrorCellWrapper errorMessage={params.row.errors?.category?.message ?? params.row.errors?.categoryPrecision?.message} data-sentry-mask>
-            {params.row.data.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${params.row.data.category}`)}
+            {params.row.data.categoryPrecision ?? t(`model.sacdDeclaration.accountingCategory.enum.${params.row.data.category}`)}
           </ErrorCellWrapper>
         );
       },
@@ -104,7 +104,7 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
       display: 'flex', // Needed to align properly `ErrorCellWrapper`
       valueGetter: (_, row) => {
         // Display a percentage tax rate so it's easier for people to understand
-        return row.data.taxRate * 100;
+        return row.data.taxRate !== null ? row.data.taxRate * 100 : null;
       },
       valueSetter: (value, row) => {
         // As we choose to display a percentage, we switch back to the technical format
@@ -112,32 +112,22 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
           ...row,
           data: {
             ...row.data,
-            taxRate: value / 100,
+            taxRate: row.data.taxRate !== null ? value / 100 : null,
           },
         };
       },
       renderCell: (params) => {
         return (
           <ErrorCellWrapper errorMessage={params.row.errors?.taxRate?.message} data-sentry-mask>
-            {params.row.data.taxRate * 100}%
+            {params.row.data.taxRate !== null ? (
+              `${params.row.data.taxRate * 100}%`
+            ) : (
+              <Tooltip title="Non applicable">
+                <span>NA</span>
+              </Tooltip>
+            )}
           </ErrorCellWrapper>
         );
-      },
-    },
-    {
-      field: `excludingTaxesAmount`,
-      headerName: 'Recettes HT',
-      type: 'number', // To respect the same alignment than others
-      renderCell: (params) => {
-        return <span data-sentry-mask>{currencyFormatter.format((1 - params.row.data.taxRate) * params.row.data.includingTaxesAmount)}</span>;
-      },
-    },
-    {
-      field: `tvaAmount`,
-      headerName: 'Montant de la TVA',
-      type: 'number', // To respect the same alignment than others
-      renderCell: (params) => {
-        return <span data-sentry-mask>{currencyFormatter.format(params.row.data.taxRate * params.row.data.includingTaxesAmount)}</span>;
       },
     },
     {
@@ -175,8 +165,8 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
       renderCell: (params) => {
         return (
           <IconButton
-            disabled={params.row.data.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS}
-            aria-label="enlever une ligne de dépense"
+            disabled={params.row.data.category !== SacdAccountingCategorySchema.Values.OTHER}
+            aria-label="enlever une ligne de somme versée"
             onClick={() => {
               remove(params.row.index);
             }}
@@ -200,7 +190,7 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
         isCellEditable={(params) => {
           if (
             params.field === `${rowTypedNameof('data')}.${entryTypedNameof('category')}` &&
-            params.row.data.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS
+            params.row.data.category !== SacdAccountingCategorySchema.Values.OTHER
           ) {
             // If not a custom expense the category field cannot be edited
             return false;
@@ -210,10 +200,7 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
         }}
         processRowUpdate={(newRow, oldRow, params) => {
           // If the category has been changed we need to make sure it does not exist already to keep the uniqueness of fields
-          if (
-            newRow.data.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS &&
-            newRow.data.categoryPrecision !== oldRow.data.categoryPrecision
-          ) {
+          if (newRow.data.category === SacdAccountingCategorySchema.Values.OTHER && newRow.data.categoryPrecision !== oldRow.data.categoryPrecision) {
             while (true) {
               const anotherRowWithThisLabel = fields.find((item) => {
                 return (
@@ -272,7 +259,7 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
         autosizeOnMount={true}
         autosizeOptions={autosizeOption}
         disableVirtualization={true}
-        aria-label="tableau des dépenses artistiques d'une série de représentations"
+        aria-label="tableau des sommes versées"
         data-sentry-mask
       />
       {errors?.message && (
@@ -281,17 +268,17 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
         </Typography>
       )}
       <Button
-        onClick={async () => {
-          // Each row must have a unique key for DataGrid (implicitly a unique category precision for "other expenses")
-          let categoryPrecision = `${t(`model.sacemDeclaration.accountingCategory.enum.OTHER_ARTISTIC_CONTRACTS`)} ${
+        onClick={() => {
+          // Each row must have a unique key for DataGrid (implicitly a unique category precision for "other accountingEntries")
+          let categoryPrecision = `${t(`model.sacdDeclaration.accountingCategory.enum.OTHER`)} ${
             fields.filter((row) => {
-              return row.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS;
+              return row.category === SacdAccountingCategorySchema.Values.OTHER;
             }).length + 1
           }`;
 
           while (true) {
             const anotherRowWithThisLabel = fields.find((item) => {
-              return item.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS && item.categoryPrecision === categoryPrecision;
+              return item.category === SacdAccountingCategorySchema.Values.OTHER && item.categoryPrecision === categoryPrecision;
             });
 
             if (anotherRowWithThisLabel) {
@@ -303,7 +290,7 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
           }
 
           append({
-            category: AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS,
+            category: SacdAccountingCategorySchema.Values.OTHER,
             categoryPrecision: categoryPrecision,
             taxRate: 0.2,
             includingTaxesAmount: 0,
@@ -316,7 +303,7 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
           mt: 1,
         }}
       >
-        Ajouter une autre dépense
+        Ajouter une autre somme versée
       </Button>
     </Box>
   );
