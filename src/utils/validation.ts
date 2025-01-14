@@ -8,16 +8,20 @@ export interface RowForForm<T, E> {
 }
 
 export function recursiveCountErrors(errors: FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined): number {
+  // [WORKDAROUND] We cannot rely on `control._fields` that does not contain arrays and so their children
+  // Also `control._names` does not list the children so we ended with a hack below just to keep a uniform logic
+  // Ref: https://github.com/orgs/react-hook-form/discussions/12527
+
   let count = 0;
 
-  if (!errors) {
-    return count;
-  }
-  if (errors.message) {
-    count += 1;
-  }
+  // `null` is of type `object` so checking this
+  // Also, skip properties that would refer to the DOM element of an input since it has circular loops due to parent/children properties
+  if (typeof errors === 'object' && errors && !(errors instanceof Element)) {
+    // A field could be named `message` so we make sure here it's an error and not a field to parse
+    if (typeof errors.message === 'string') {
+      count += 1;
+    }
 
-  if (typeof errors === 'object') {
     if (Array.isArray(errors)) {
       errors.forEach((error) => {
         count += recursiveCountErrors(error);

@@ -18,7 +18,7 @@ import Typography from '@mui/material/Typography';
 import { Mutex } from 'locks';
 import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -27,16 +27,18 @@ import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { SignInPrefillSchemaType, SignInSchema, SignInSchemaType } from '@ad/src/models/actions/auth';
 import {
   BusinessError,
+  UnexpectedError,
   authCredentialsRequiredError,
   authFatalError,
   authNoCredentialsMatchError,
   authRetriableError,
+  internalServerErrorError,
 } from '@ad/src/models/entities/errors';
 import { signIn } from '@ad/src/proxies/next-auth/react';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
-function errorCodeToError(errorCode: string): BusinessError | null {
-  let error: BusinessError | null;
+function errorCodeToError(errorCode: string): BusinessError | UnexpectedError {
+  let error: BusinessError | UnexpectedError;
 
   switch (errorCode) {
     case authCredentialsRequiredError.code:
@@ -46,7 +48,8 @@ function errorCodeToError(errorCode: string): BusinessError | null {
       error = authNoCredentialsMatchError;
       break;
     case 'undefined':
-      error = null;
+      // Probably the server has thrown something that is not a basic `Error` object
+      error = internalServerErrorError;
       break;
     default:
       error = authRetriableError;
@@ -70,10 +73,11 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
   const [showSessionEndBlock, setShowSessionEndBlock] = useState<boolean>(sessionEnd);
   const [showRegisteredBlock, setShowRegisteredBlock] = useState<boolean>(registered);
 
-  const [error, setError] = useState<BusinessError | null>(() => {
+  const [error, setError] = useState<BusinessError | UnexpectedError | null>(() => {
     return attemptErrorCode ? errorCodeToError(attemptErrorCode) : null;
   });
   const [mutex] = useState<Mutex>(new Mutex());
+  const formContainerRef = useRef<HTMLFormElement | null>(null); // This is used to scroll to the error messages
 
   const {
     register,
@@ -118,6 +122,7 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
 
       if (result && !result.ok && result.error) {
         setError(errorCodeToError(result.error));
+        formContainerRef.current?.scrollIntoView({ behavior: 'smooth' });
       } else if (result && result.ok && result.url) {
         setError(null);
 
@@ -128,6 +133,7 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
         router.push(linkRegistry.get('dashboard', undefined));
       } else {
         setError(authFatalError);
+        formContainerRef.current?.scrollIntoView({ behavior: 'smooth' });
       }
     } finally {
       // Unlock to allow a new submit
@@ -140,7 +146,7 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
   const handleMouseDownPassword = () => setShowPassword(!showPassword);
 
   return (
-    <BaseForm handleSubmit={enhancedHandleSubmit} onSubmit={onSubmit} control={control} ariaLabel="se connecter">
+    <BaseForm handleSubmit={enhancedHandleSubmit} onSubmit={onSubmit} control={control} ariaLabel="se connecter" innerRef={formContainerRef}>
       {(!!error || showSessionEndBlock || showRegisteredBlock) && (
         <Grid item xs={12}>
           {!!error && <ErrorAlert errors={[error]} />}

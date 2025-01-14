@@ -32,9 +32,11 @@ export const nextAuthOptions: NextAuthOptions = {
       id: 'credentials',
       name: 'Connexion',
       async authorize(credentials: any): Promise<TokenUserSchemaType> {
+        // Below the thrown object must be a basic `Error` otherwise it won't be passed on the frontend
+
         // TODO: parse with zod SignInSchema
         if (!credentials.email || !credentials.password) {
-          throw authCredentialsRequiredError.code;
+          throw new Error(authCredentialsRequiredError.code);
         }
 
         const user = await prisma.user.findUnique({
@@ -51,12 +53,12 @@ export const nextAuthOptions: NextAuthOptions = {
         });
 
         if (!user || !user.Secrets) {
-          throw authNoCredentialsMatchError.code;
+          throw new Error(authNoCredentialsMatchError.code);
         }
 
         const matchPassword = await bcrypt.compare(credentials.password, user.Secrets.passwordHash);
         if (!matchPassword) {
-          throw authNoCredentialsMatchError.code;
+          throw new Error(authNoCredentialsMatchError.code);
         }
 
         const tokenUserParse = TokenUserSchema.safeParse({
@@ -67,7 +69,7 @@ export const nextAuthOptions: NextAuthOptions = {
         });
 
         if (!tokenUserParse.success) {
-          throw authFatalError.code;
+          throw new Error(authFatalError.code);
         }
 
         return tokenUserParse.data;
