@@ -85,7 +85,7 @@
     "seed": "tsx src/prisma/seed.script.ts"
   },
   "dependencies": {
-    "@ag-media/react-pdf-table": "^2.0.0",
+    "@ag-media/react-pdf-table": "^2.0.1",
     "@codegouvfr/react-dsfr": "1.15.0",
     "@commander-js/extra-typings": "^12.1.0",
     "@faire/mjml-react": "^3.4.0",
@@ -102,7 +102,6 @@
     "@next/bundle-analyzer": "^15.1.0",
     "@prisma/client": "5.19.1",
     "@react-pdf/renderer": "^4.1.6",
-    "@react-pdf/stylesheet": "^5.2.0",
     "@sentry/nextjs": "^8.30.0",
     "@sindresorhus/slugify": "^2.2.1",
     "@socialgouv/matomo-next": "^1.8.1",

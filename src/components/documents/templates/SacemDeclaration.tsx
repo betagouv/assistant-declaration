@@ -1,13 +1,10 @@
-// [WORKAROUND] Local copy needed due to ESM incompatibilities
-// Ref: https://github.com/ag-media/react-pdf-table/issues/6
-// import { Table, TableCell, TableHeader, TableRow } from '@ag-media/react-pdf-table';
+import { Table, TableCell, TableHeader, TableRow } from '@ag-media/react-pdf-table';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Image, Link, StyleSheet, Text, View } from '@react-pdf/renderer';
 
 import { StandardLayout, layoutStyles, styles } from '@ad/src/components/documents/layouts/StandardLayout';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration';
-import { Table, TableCell, TableHeader, TableRow } from '@ad/src/proxies/@ag-media/react-pdf-table';
 import { currencyFormatter } from '@ad/src/utils/currency';
 import { getBaseUrl } from '@ad/src/utils/url';
 
