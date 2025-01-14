@@ -164,7 +164,7 @@ export const declarationRouter = router({
     // Fill with unique values
     for (const previousDeclaration of previousDeclarations) {
       if (!placeholder.clientId.includes(previousDeclaration.clientId)) placeholder.clientId.push(previousDeclaration.clientId);
-      if (!placeholder.placeName.includes(previousDeclaration.clientId)) placeholder.placeName.push(previousDeclaration.placeName);
+      if (!placeholder.placeName.includes(previousDeclaration.placeName)) placeholder.placeName.push(previousDeclaration.placeName);
       if (!placeholder.placeCapacity.includes(previousDeclaration.placeCapacity)) placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
       if (!placeholder.managerName.includes(previousDeclaration.managerName)) placeholder.managerName.push(previousDeclaration.managerName);
       if (!placeholder.managerTitle.includes(previousDeclaration.managerTitle)) placeholder.managerTitle.push(previousDeclaration.managerTitle);
