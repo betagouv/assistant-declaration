@@ -116,6 +116,44 @@ DesynchronizedStory.play = async ({ canvasElement }) => {
 
 export const Desynchronized = prepareStory(DesynchronizedStory);
 
+const NeverSynchronizedStory = Template.bind({});
+NeverSynchronizedStory.args = {
+  ...commonComponentProps,
+};
+NeverSynchronizedStory.parameters = {
+  date: workaroundDate,
+  msw: {
+    handlers: [
+      ...mswCommonParameters,
+      getTRPCMock({
+        type: 'query' as 'query',
+        path: ['listEventsSeries'],
+        response: {
+          eventsSeriesWrappers: [],
+        },
+      }),
+      getTRPCMock({
+        type: 'query' as 'query',
+        path: ['listTicketingSystems'],
+        response: {
+          ticketingSystems: [
+            {
+              ...ticketingSystems[0],
+              lastSynchronizationAt: null,
+            },
+          ],
+        },
+      }),
+    ],
+  },
+};
+NeverSynchronizedStory.decorators = [mockDateDecorator];
+NeverSynchronizedStory.play = async ({ canvasElement }) => {
+  await playFindButton(canvasElement, /synchroniser/i);
+};
+
+export const NeverSynchronized = prepareStory(NeverSynchronizedStory);
+
 const NoTicketingSystemStory = Template.bind({});
 NoTicketingSystemStory.args = {
   ...commonComponentProps,
