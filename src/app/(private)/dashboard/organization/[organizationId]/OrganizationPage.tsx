@@ -114,7 +114,6 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
         py: 3,
       }}
     >
