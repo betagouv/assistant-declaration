@@ -15,7 +15,7 @@ export function customErrorToZodIssue(customError: CustomErrorInterface & Custom
     params: {
       type: customError.code,
     },
-    message: customError.message,
+    message: capitalizeFirstLetter(customError.message),
   };
 }
 
