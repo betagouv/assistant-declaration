@@ -4,13 +4,13 @@ import { GridAutosizeOptions, type GridColDef, useGridApiRef } from '@mui/x-data
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import debounce from 'lodash.debounce';
 import { useEffect, useMemo, useState } from 'react';
-import { Control, FieldErrors, useFieldArray } from 'react-hook-form';
+import { Control, FieldErrors, UseFormTrigger, useFieldArray } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
 import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
 import { FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
-import { AccountingCategorySchema } from '@ad/src/models/entities/declaration';
+import { AccountingCategorySchema } from '@ad/src/models/entities/declaration/sacem';
 import { currencyFormatter } from '@ad/src/utils/currency';
 import { nameof } from '@ad/src/utils/typescript';
 import { RowForForm } from '@ad/src/utils/validation';
@@ -20,10 +20,11 @@ const entryTypedNameof = nameof<FillSacemDeclarationSchemaType['expenses'][0]>;
 
 export interface SacemExpensesTableProps {
   control: Control<FillSacemDeclarationSchemaType, any>;
+  trigger: UseFormTrigger<FillSacemDeclarationSchemaType>;
   errors: FieldErrors<FillSacemDeclarationSchemaType>['expenses'];
 }
 
-export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps) {
+export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTableProps) {
   const { t } = useTranslation('common');
 
   const { fields, append, update, remove } = useFieldArray({
@@ -178,6 +179,7 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
             disabled={params.row.data.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS}
             aria-label="enlever une ligne de dépense"
             onClick={() => {
+              // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
               remove(params.row.index);
             }}
             size="small"
@@ -235,6 +237,11 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
 
           update(newRow.index, newFormItemValue);
 
+          // To mimic the behavior from fields like `TextField`, we want the UI to adjust if the user has fixed an error
+          if (newRow.errors) {
+            trigger(`expenses.${newRow.index}`);
+          }
+
           return newRow;
         }}
         getRowClassName={(params) => {
@@ -245,29 +252,40 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
         disableColumnFilter
         disableColumnMenu
         disableRowSelectionOnClick
-        onCellEditStart={(params, event) => {
+        onRowEditStart={(params, event) => {
           // [WORKAROUND] As for number inputs outside the datagrid, there is the native issue of scrolling making the value changing
           // So doing the same workaround to prevent scrolling when it is focused
           // Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
-          const editCellElement = event.target as HTMLDivElement;
+          const rowElement = apiRef.current.getRowElement(params.id);
 
-          // At the time of the callback the input child is not yet created, so we have to wait for it
-          // Note: it appears in a few cases it does not work the first time... maybe we should delay a bit the "observe"?
-          const observer = new MutationObserver(() => {
-            const editCellInputElement = editCellElement.querySelector('input[type="number"]');
+          if (rowElement) {
+            // At the time of the callback the input children are not yet created, so we have to wait for them
+            // Note: it appears in a few cases it does not work the first time... maybe we should delay a bit the "observe"?
+            const observer = new MutationObserver(() => {
+              const editCellInputElements = rowElement.querySelectorAll('input[type="number"]');
 
-            if (editCellInputElement) {
-              observer.disconnect();
+              if (editCellInputElements.length > 0) {
+                observer.disconnect();
 
-              // Note: no need to remove the listener since it will after the focus is released due to the cell input element being deleted by `DataGrid`
-              editCellInputElement.addEventListener('wheel', (event) => {
-                (event.target as HTMLInputElement).blur();
-              });
-            }
-          });
+                // Note: no need to remove the listener since it will after the focus is released due to the cell input element being deleted by `DataGrid`
+                for (const inputElement of editCellInputElements) {
+                  inputElement.addEventListener('wheel', (event) => {
+                    (event.target as HTMLInputElement).blur();
+                  });
+                }
+              }
+            });
 
-          // Start observing the cell element for child additions
-          observer.observe(editCellElement, { childList: true, subtree: true });
+            // Start observing the cell element for child additions
+            observer.observe(rowElement, { childList: true, subtree: true });
+          }
+        }}
+        onRowEditStop={(params, event, details) => {
+          // This is due to autocomplete with multiple selections that make since really large
+          // Note: `details.api` is undefined for whatever reason so using our variable
+          setTimeout(() => {
+            apiRef.current.autosizeColumns(autosizeOption);
+          }, 10);
         }}
         autosizeOnMount={true}
         autosizeOptions={autosizeOption}

@@ -4,7 +4,7 @@ import { Image, Link, StyleSheet, Text, View } from '@react-pdf/renderer';
 
 import { StandardLayout, layoutStyles, styles } from '@ad/src/components/documents/layouts/StandardLayout';
 import { useServerTranslation } from '@ad/src/i18n/index';
-import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration';
+import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import { currencyFormatter } from '@ad/src/utils/currency';
 import { getBaseUrl } from '@ad/src/utils/url';
 

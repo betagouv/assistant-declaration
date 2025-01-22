@@ -8,6 +8,7 @@ import { EventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
 export interface EventSerieCardProps {
   wrapper: EventSerieWrapperSchemaType;
   sacemDeclarationLink: string;
+  sacdDeclarationLink: string;
 }
 
 export function EventSerieCard(props: EventSerieCardProps) {
@@ -57,6 +58,9 @@ export function EventSerieCard(props: EventSerieCardProps) {
         <Button component={NextLink} href={props.sacemDeclarationLink} size="small">
           SACEM
         </Button>
+        <Button component={NextLink} href={props.sacdDeclarationLink} size="small">
+          SACD
+        </Button>
         <Tooltip title="Bientôt disponible">
           <span>
             <Button size="small" disabled={true}>
@@ -67,7 +71,7 @@ export function EventSerieCard(props: EventSerieCardProps) {
         <Tooltip title="Bientôt disponible">
           <span>
             <Button size="small" disabled={true}>
-              SACD
+              CNM
             </Button>
           </span>
         </Tooltip>

@@ -35,20 +35,58 @@
       "unexpectedError": "une erreur inattendue est survenue, veuillez retenter"
     },
     "validation": {
+      "accountingEntries": {
+        "categoryPrecision": {
+          "too_small_one": "l'intitulé du flux de comptabilité est requis"
+        },
+        "duplicateEntryCategoryLabel": "les libellées des cessions de droit d'exploitation doivent être uniques",
+        "duplicateFluxEntryCategoryLabel": "les libellées des flux de comptabilité doivent être uniques",
+        "includingTaxesAmount": {
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
+        "taxRate": {
+          "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
+        },
+        "too_big": "il ne peut y avoir que {{maximum}} flux de comptabilité au maximum"
+      },
+      "address": {
+        "city": {
+          "too_big": "la ville doit faire {{maximum}} caractères maximum",
+          "too_small_one": "la ville est requise"
+        },
+        "countryCode": {
+          "countryInvalid": "le pays saisi est invalide"
+        },
+        "postalCode": {
+          "too_big": "le code postal doit faire {{maximum}} caractères maximum",
+          "too_small_one": "le code postal est requis"
+        },
+        "street": {
+          "too_big": "le numéro et la voie doivent faire {{maximum}} caractères maximum",
+          "too_small_one": "le numéro et la voie sont requis"
+        }
+      },
+      "audience": {
+        "invalid_enum_value": "la nature des représentations est requise"
+      },
       "clientId": {
         "too_small_one": "le numéro client est requis",
-        "too_big": "le numéro client doit faire moins de {{maximum}} caractères"
+        "too_big": "le numéro client doit faire {{maximum}} caractères maximum"
       },
       "currentPassword": {
         "too_small_one": "le mot de passe actuel est requis"
       },
       "declarationPlace": {
         "too_small_one": "le lieu de la déclaration est requis",
-        "too_big": "le lieu de la déclaration doit faire moins de {{maximum}} caractères"
+        "too_big": "le lieu de la déclaration doit faire {{maximum}} caractères maximum"
       },
       "email": {
         "invalid_string": "l'email n'est pas valide",
         "too_small_one": "l'email est requis"
+      },
+      "europeanVatId": {
+        "too_small_one": "le numéro de TVA intracommunautaire est requis",
+        "too_big": "le numéro de TVA intracommunautaire doit faire {{maximum}} caractères maximum"
       },
       "expenses": {
         "categoryPrecision": {
@@ -66,19 +104,33 @@
       "firstname": {
         "too_small_one": "le prénom est requis"
       },
-      "accountingEntries": {
-        "duplicateFluxEntryCategoryLabel": "les libellées des flux de comptabilité doivent être uniques"
+      "headquartersAddress": {
+        "city": {
+          "too_big": "la ville doit faire {{maximum}} caractères maximum",
+          "too_small_one": "la ville est requise"
+        },
+        "countryCode": {
+          "countryInvalid": "le pays saisi est invalide"
+        },
+        "postalCode": {
+          "too_big": "le code postal doit faire {{maximum}} caractères maximum",
+          "too_small_one": "le code postal est requis"
+        },
+        "street": {
+          "too_big": "le numéro et la voie doivent faire {{maximum}} caractères maximum",
+          "too_small_one": "le numéro et la voie sont requis"
+        }
       },
       "lastname": {
         "too_small_one": "le nom de famille est requis"
       },
       "managerName": {
         "too_small_one": "le nom de la personne en charge est requis",
-        "too_big": "le nom de la personne en charge doit faire moins de {{maximum}} caractères"
+        "too_big": "le nom de la personne en charge doit faire {{maximum}} caractères maximum"
       },
       "managerTitle": {
         "too_small_one": "le rôle de la personne en charge est requis",
-        "too_big": "le rôle de la personne en charge doit faire moins de {{maximum}} caractères"
+        "too_big": "le rôle de la personne en charge doit faire {{maximum}} caractères maximum"
       },
       "message": {
         "too_big": "le message doit faire {{maximum}} caractères maximum",
@@ -91,6 +143,16 @@
         "passwordRequiresLowerAndUpperCharacters": "le nouveau mot de passe doit contenir au moins une majuscule et une minuscule",
         "too_small_one": "le nouveau mot de passe est requis"
       },
+      "officialHeadquartersId": {
+        "too_small_one": "le numéro Siret est requis",
+        "too_big": "le numéro Siret doit faire {{maximum}} caractères maximum"
+      },
+      "organizer": {
+        "name": {
+          "too_small_one": "le nom de l'organisateur/diffuseur est requis",
+          "too_big": "le nom de l'organisateur/diffuseur doit faire {{maximum}} caractères maximum"
+        }
+      },
       "password": {
         "passwordRequiresANumeric": "le mot de passe doit contenir au moins un chiffre",
         "passwordRequiresASpecialCharacters": "le mot de passe doit contenir au moins un caractère spécial (@,!,?...)",
@@ -100,19 +162,70 @@
       },
       "performanceType": {
         "too_small_one": "le genre du spectacle est requis",
-        "too_big": "le genre du spectacle doit faire moins de {{maximum}} caractères"
+        "too_big": "le genre du spectacle doit faire {{maximum}} caractères maximum"
+      },
+      "performedWorks": {
+        "category": {
+          "too_small_one": "la discipline est requise",
+          "too_big": "la discipline doit faire {{maximum}} caractères maximum"
+        },
+        "contributors": {
+          "too_big": "chaque nom de contributeur doit faire {{maximum}} caractères maximum"
+        },
+        "durationSeconds": {
+          "too_small": "la durée de l'œuvre est requise"
+        },
+        "name": {
+          "too_small_one": "le titre est requis",
+          "too_big": "le titre doit faire {{maximum}} caractères maximum"
+        }
+      },
+      "phone": {
+        "countryCode": {
+          "countryInvalid": "le pays saisi est invalide"
+        },
+        "invalid_type": "le numéro de téléphone est requis",
+        "number": {
+          "too_big": "le numéro de téléphone doit faire {{maximum}} caractères maximum",
+          "too_small_one": "le numéro de téléphone est requis"
+        },
+        "phoneCombinationInvalid": "le numéro de téléphone doit avoir une combinaison valide",
+        "phoneCombinationInvalidWithLeadingZeroWarning": "le numéro de téléphone doit avoir une combinaison valide, peut-être un zéro en trop devant",
+        "phoneInvalid": "le numéro de téléphone doit être valide"
       },
       "placeCapacity": {
         "invalid_type": "la capacité de la salle doit être un nombre entier",
         "too_small": "la capacité de la salle doit être supérieure à {{minimum}}",
         "too_small_one": "la capacité de la salle est requise"
       },
+      "placeCity": {
+        "too_small_one": "la ville est requise",
+        "too_big": "la ville doit faire {{maximum}} caractères maximum"
+      },
       "placeName": {
         "too_small_one": "le nom de la salle est requis",
-        "too_big": "le nom de la salle doit faire moins de {{maximum}} caractères"
+        "too_big": "le nom de la salle doit faire {{maximum}} caractères maximum"
+      },
+      "placePostalCode": {
+        "too_small_one": "le code postal est requis",
+        "too_big": "le code postal doit faire {{maximum}} caractères maximum"
       },
       "priceOverride": {
         "too_small": "le prix doit être supérieur à {{minimum}} euro"
+      },
+      "producer": {
+        "invalid_type": "le producteur/tourneur est requis",
+        "name": {
+          "too_small_one": "le nom du producteur/tourneur est requis",
+          "too_big": "le nom du producteur/tourneur doit faire {{maximum}} caractères maximum"
+        }
+      },
+      "productionOperationId": {
+        "too_small_one": "le numéro du dossier d'exploitation est requis",
+        "too_big": "le numéro du dossier d'exploitation doit faire {{maximum}} caractères maximum"
+      },
+      "productionType": {
+        "invalid_enum_value": "la nature de l'exploitation est requise"
       },
       "query": {
         "too_big": "la recherche doit faire {{maximum}} caractères maximum"
@@ -129,6 +242,13 @@
           "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
         },
         "too_big": "il ne peut y avoir que {{maximum}} revenus au maximum"
+      },
+      "rightsFeesManager": {
+        "invalid_type": "l'organisme responsable du paiement est requis",
+        "name": {
+          "too_small_one": "le nom de l'organisme responsable du paiement est requis",
+          "too_big": "le nom de l'organisme responsable du paiement doit faire {{maximum}} caractères maximum"
+        }
       },
       "totalOverride": {
         "invalid_type": "le nombre de places doit être un nombre entier",
@@ -174,6 +294,32 @@
           "COREALIZATION_CONTRACTS": "Contrat de coréalisation",
           "COPRODUCTION_CONTRACTS": "Contrat de coproduction",
           "OTHER_ARTISTIC_CONTRACTS": "Autre contrat artistique"
+        }
+      }
+    },
+    "sacdDeclaration": {
+      "accountingCategory": {
+        "enum": {
+          "GLOBAL": "Prix global",
+          "SALE_OF_RIGHTS": "Prix de cession",
+          "INTRODUCTION_FEES": "Frais d'approche",
+          "COPRODUCTION_CONTRIBUTION": "Apport en coproduction",
+          "REVENUE_GUARANTEE": "Garantie de recette",
+          "OTHER": "Autre somme"
+        }
+      },
+      "audience": {
+        "enum": {
+          "ALL": "Tout public",
+          "YOUNG": "Jeune public",
+          "SCHOOL": "Scolaire",
+          "READING": "Lecture"
+        }
+      },
+      "productionType": {
+        "enum": {
+          "AMATEUR": "Amateur",
+          "PROFESSIONAL": "Professionnel"
         }
       }
     }

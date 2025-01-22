@@ -1,10 +1,12 @@
 import z from 'zod';
 
-import { SacemDeclarationSchema } from '@ad/src/models/entities/declaration';
+import { SacdDeclarationOrganizationInputSchema, SacdDeclarationSchema } from '@ad/src/models/entities/declaration/sacd';
+import { SacemDeclarationSchema } from '@ad/src/models/entities/declaration/sacem';
+import { EventSerieSchema } from '@ad/src/models/entities/event';
 
 export const GetSacemDeclarationSchema = z
   .object({
-    eventSerieId: SacemDeclarationSchema.shape.id,
+    eventSerieId: EventSerieSchema.shape.id,
   })
   .strict();
 export type GetSacemDeclarationSchemaType = z.infer<typeof GetSacemDeclarationSchema>;
@@ -14,7 +16,7 @@ export type GetSacemDeclarationPrefillSchemaType = z.infer<typeof GetSacemDeclar
 
 export const FillSacemDeclarationSchema = z
   .object({
-    eventSerieId: SacemDeclarationSchema.shape.id,
+    eventSerieId: SacemDeclarationSchema.shape.eventSerieId,
     clientId: SacemDeclarationSchema.shape.clientId,
     placeName: SacemDeclarationSchema.shape.placeName,
     placeCapacity: SacemDeclarationSchema.shape.placeCapacity,
@@ -30,3 +32,38 @@ export type FillSacemDeclarationSchemaType = z.infer<typeof FillSacemDeclaration
 
 export const FillSacemDeclarationPrefillSchema = FillSacemDeclarationSchema.deepPartial();
 export type FillSacemDeclarationPrefillSchemaType = z.infer<typeof FillSacemDeclarationPrefillSchema>;
+
+export const GetSacdDeclarationSchema = z
+  .object({
+    eventSerieId: EventSerieSchema.shape.id,
+  })
+  .strict();
+export type GetSacdDeclarationSchemaType = z.infer<typeof GetSacdDeclarationSchema>;
+
+export const GetSacdDeclarationPrefillSchema = GetSacdDeclarationSchema.deepPartial();
+export type GetSacdDeclarationPrefillSchemaType = z.infer<typeof GetSacdDeclarationPrefillSchema>;
+
+export const FillSacdDeclarationSchema = z
+  .object({
+    eventSerieId: SacdDeclarationSchema.shape.eventSerieId,
+    clientId: SacdDeclarationSchema.shape.clientId,
+    officialHeadquartersId: SacdDeclarationSchema.shape.officialHeadquartersId,
+    productionOperationId: SacdDeclarationSchema.shape.productionOperationId,
+    productionType: SacdDeclarationSchema.shape.productionType,
+    placeName: SacdDeclarationSchema.shape.placeName,
+    placePostalCode: SacdDeclarationSchema.shape.placePostalCode,
+    placeCity: SacdDeclarationSchema.shape.placeCity,
+    audience: SacdDeclarationSchema.shape.audience,
+    placeCapacity: SacdDeclarationSchema.shape.placeCapacity,
+    accountingEntries: SacdDeclarationSchema.shape.accountingEntries,
+    organizer: SacdDeclarationOrganizationInputSchema,
+    producer: SacdDeclarationOrganizationInputSchema,
+    rightsFeesManager: SacdDeclarationOrganizationInputSchema,
+    performedWorks: SacdDeclarationSchema.shape.performedWorks,
+    declarationPlace: SacdDeclarationSchema.shape.declarationPlace,
+  })
+  .strict();
+export type FillSacdDeclarationSchemaType = z.infer<typeof FillSacdDeclarationSchema>;
+
+export const FillSacdDeclarationPrefillSchema = FillSacdDeclarationSchema.deepPartial();
+export type FillSacdDeclarationPrefillSchemaType = z.infer<typeof FillSacdDeclarationPrefillSchema>;

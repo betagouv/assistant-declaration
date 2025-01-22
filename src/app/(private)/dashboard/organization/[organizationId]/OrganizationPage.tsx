@@ -64,11 +64,11 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
         case ListFilter.ARCHIVED_ONLY:
           return isBefore(eventSerieWrapper.serie.endAt, archivedThreshold);
         case ListFilter.ENDED_ONLY:
-          return isBefore(eventSerieWrapper.serie.endAt, currentDate);
+          return isBefore(eventSerieWrapper.serie.endAt, currentDate) && !isBefore(eventSerieWrapper.serie.endAt, archivedThreshold);
         case ListFilter.CURRENT_ONLY:
-          return isBefore(eventSerieWrapper.serie.startAt, currentDate) && isAfter(eventSerieWrapper.serie.endAt, currentDate);
+          return isBefore(eventSerieWrapper.serie.startAt, currentDate) && !isBefore(eventSerieWrapper.serie.endAt, currentDate);
         case ListFilter.FUTURE_ONLY:
-          return isAfter(eventSerieWrapper.serie.startAt, currentDate);
+          return !isBefore(eventSerieWrapper.serie.startAt, currentDate);
         default:
           return true;
       }
@@ -114,7 +114,6 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
         py: 3,
       }}
     >
@@ -200,6 +199,11 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                                   organizationId: organizationId,
                                   eventSerieId: eventsSeriesWrapper.serie.id,
                                   declarationType: 'sacem',
+                                })}
+                                sacdDeclarationLink={linkRegistry.get('declaration', {
+                                  organizationId: organizationId,
+                                  eventSerieId: eventsSeriesWrapper.serie.id,
+                                  declarationType: 'sacd',
                                 })}
                               />
                             </Grid>

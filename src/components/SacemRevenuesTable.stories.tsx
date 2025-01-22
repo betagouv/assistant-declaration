@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
-import { sacemDeclarations } from '@ad/src/fixtures/declaration';
+import { sacemDeclarations } from '@ad/src/fixtures/declaration/sacem';
 import { FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 
 type ComponentType = typeof SacemRevenuesTable;

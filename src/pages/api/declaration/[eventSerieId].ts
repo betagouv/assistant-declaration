@@ -7,7 +7,7 @@ import z from 'zod';
 
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
-import { SacemDeclarationSchema } from '@ad/src/models/entities/declaration';
+import { SacemDeclarationSchema } from '@ad/src/models/entities/declaration/sacem';
 import { fileNotFoundError, organizationCollaboratorRoleRequiredError } from '@ad/src/models/entities/errors';
 import { nextAuthOptions } from '@ad/src/pages/api/auth/[...nextauth]';
 import { prisma } from '@ad/src/prisma/client';

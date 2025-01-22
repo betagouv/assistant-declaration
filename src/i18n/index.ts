@@ -161,18 +161,21 @@ export const formatMessageFromIssue = (issue: z.ZodIssueOptionalMessage): string
     (potentialParameters as any).count = issue.minimum;
   }
 
+  // Skip number since arrays have no sense for i18n paths
   const valuablePathParts = path.filter((v) => typeof v === 'string') as string[];
-  const formattedI18nSubpath = valuablePathParts.length > 0 ? valuablePathParts.join('.') : null; // Skip number since arrays have no sense for i18n paths
-  let translation = getIssueTranslationWithSubpath(issue, formattedI18nSubpath, potentialParameters);
 
-  // If not found try without path first parts
-  if (!translation) {
-    translation = getIssueTranslationWithSubpath(issue, valuablePathParts[valuablePathParts.length - 1], potentialParameters);
-  }
+  // Check for an exact match, if not, try finding the error in a more general context (upper layers)
+  let translation: string | null = null;
+  for (let i = 0; i < valuablePathParts.length; i++) {
+    const currentValuablePathParts = valuablePathParts.slice(i);
+    const formattedI18nSubpath = currentValuablePathParts.join('.');
 
-  // Also check it's not an object if not end i18n translation
-  if (!!translation && typeof translation !== 'object') {
-    return translation;
+    translation = getIssueTranslationWithSubpath(issue, formattedI18nSubpath, potentialParameters);
+
+    // Also check it's not an object if not end i18n translation
+    if (!!translation && typeof translation !== 'object') {
+      return translation;
+    }
   }
 
   return null;

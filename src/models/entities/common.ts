@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const DeclarationTypeSchema = z.enum(['SACEM']);
+export const DeclarationTypeSchema = z.enum(['SACEM', 'SACD']);
 export type DeclarationTypeSchemaType = z.infer<typeof DeclarationTypeSchema>;
 
 export const DeclarationStatusSchema = z.enum(['PENDING', 'PROCESSED', 'CANCELED']);

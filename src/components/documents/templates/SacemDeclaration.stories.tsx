@@ -4,7 +4,7 @@ import { WithDocumentRenderer, commonDocumentsParameters } from '@ad/.storybook/
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindDocumentStructure } from '@ad/.storybook/testing';
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
-import { sacemDeclarations } from '@ad/src/fixtures/declaration';
+import { sacemDeclarations } from '@ad/src/fixtures/declaration/sacem';
 
 type ComponentType = typeof SacemDeclarationDocument;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();

@@ -70,6 +70,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
     handleSubmit,
     formState: { errors, isDirty },
     control,
+    trigger,
     reset,
   } = useForm<FillSacemDeclarationSchemaType>({
     resolver: zodResolver(FillSacemDeclarationSchema),
@@ -724,7 +725,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                         mt: 1,
                       }}
                     >
-                      <SacemRevenuesTable control={control} errors={errors.revenues} />
+                      <SacemRevenuesTable control={control} trigger={trigger} errors={errors.revenues} />
                     </Box>
                   </Grid>
                 </Grid>
@@ -745,7 +746,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                         mt: 1,
                       }}
                     >
-                      <SacemExpensesTable control={control} errors={errors.expenses} />
+                      <SacemExpensesTable control={control} trigger={trigger} errors={errors.expenses} />
                     </Box>
                   </Grid>
                 </Grid>

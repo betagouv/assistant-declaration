@@ -71,6 +71,13 @@ export const passwordRequiresASpecialCharactersError = new BusinessError(
   'passwordRequiresASpecialCharacters',
   t('errors.validation.newPassword.passwordRequiresASpecialCharacters')
 );
+export const phoneCombinationInvalidError = new BusinessError('phoneCombinationInvalid', t('errors.validation.phone.phoneCombinationInvalid'));
+export const phoneCombinationInvalidWithLeadingZeroWarningError = new BusinessError(
+  'phoneCombinationInvalidWithLeadingZeroWarning',
+  t('errors.validation.phone.phoneCombinationInvalidWithLeadingZeroWarning')
+);
+export const phoneInvalidError = new BusinessError('phoneInvalid', t('errors.validation.phone.phoneInvalid'));
+export const countryInvalidError = new BusinessError('countryInvalid', t('errors.validation.address.countryCode.countryInvalid'));
 
 // File management
 export const fileNotFoundError = new BusinessError('fileNotFound', t('errors.custom.fileNotFound'));
@@ -132,4 +139,8 @@ export const eventCategoryTicketsNotFoundError = new BusinessError('eventCategor
 export const duplicateFluxEntryCategoryLabelError = new BusinessError(
   'duplicateFluxEntryCategoryLabel',
   t('errors.validation.accountingEntries.duplicateFluxEntryCategoryLabel')
+);
+export const duplicateEntryCategoryLabelError = new BusinessError(
+  'duplicateEntryCategoryLabel',
+  t('errors.validation.accountingEntries.duplicateEntryCategoryLabel')
 );

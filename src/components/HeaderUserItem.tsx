@@ -80,6 +80,12 @@ export function HeaderUserItem(props: PropsWithChildren<HeaderUserItemProps>) {
               Tableau de bord
             </MenuItem>
           )}
+          <MenuItem component={NextLink} href={linkRegistry.get('accountSettings', undefined)}>
+            <ListItemIcon>
+              <ManageAccountsIcon fontSize="small" />
+            </ListItemIcon>
+            Mon compte
+          </MenuItem>
           <MenuItem onClick={logout}>
             <ListItemIcon>
               <LogoutIcon fontSize="small" />

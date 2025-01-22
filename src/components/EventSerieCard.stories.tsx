@@ -24,6 +24,7 @@ const NormalStory = Template.bind({});
 NormalStory.args = {
   wrapper: eventsSeriesWrappers[0],
   sacemDeclarationLink: '',
+  sacdDeclarationLink: '',
 };
 NormalStory.parameters = {};
 NormalStory.play = async ({ canvasElement }) => {
