@@ -1,4 +1,4 @@
-import { PhoneNumber, PhoneNumberFormat, PhoneNumberUtil } from 'google-libphonenumber';
+import { default as libphonenumber } from 'google-libphonenumber';
 
 import { PhoneInputSchemaType, PhoneSchemaType } from '@ad/src/models/entities/phone';
 import { mostUsedSortedCountries } from '@ad/src/utils/country';
@@ -54,8 +54,8 @@ export function transformPhoneNumberPlaceholderToMask(phoneNumberPlaceholder: st
 }
 
 // Helper to retrieve Google object from our own input model
-export function convertInputModelToGooglePhoneNumber(phoneNumber: PhoneInputSchemaType): PhoneNumber {
-  const phoneNumberUtil = PhoneNumberUtil.getInstance();
+export function convertInputModelToGooglePhoneNumber(phoneNumber: PhoneInputSchemaType): libphonenumber.PhoneNumber {
+  const phoneNumberUtil = libphonenumber.PhoneNumberUtil.getInstance();
   const potentialE164Number: string = `${phoneNumber.callingCode}${phoneNumber.number}`;
   const fullPhoneNumber = phoneNumberUtil.parse(potentialE164Number, phoneNumber.countryCode);
 
@@ -63,8 +63,8 @@ export function convertInputModelToGooglePhoneNumber(phoneNumber: PhoneInputSche
 }
 
 // Helper to retrieve Google object from our own model
-export function convertModelToGooglePhoneNumber(phoneNumber: PhoneSchemaType): PhoneNumber {
-  const phoneNumberUtil = PhoneNumberUtil.getInstance();
+export function convertModelToGooglePhoneNumber(phoneNumber: PhoneSchemaType): libphonenumber.PhoneNumber {
+  const phoneNumberUtil = libphonenumber.PhoneNumberUtil.getInstance();
   const potentialE164Number: string = `${phoneNumber.callingCode}${phoneNumber.number}`;
   const fullPhoneNumber = phoneNumberUtil.parse(potentialE164Number, phoneNumber.countryCode);
 
@@ -72,9 +72,9 @@ export function convertModelToGooglePhoneNumber(phoneNumber: PhoneSchemaType): P
 }
 
 // This returns "611223344" in case the phone number E164 format would be "+33611223344"
-export function getE164Number(fullPhoneNumber: PhoneNumber): string {
-  const phoneNumberUtil = PhoneNumberUtil.getInstance();
-  const e164PhoneNumber = phoneNumberUtil.format(fullPhoneNumber, PhoneNumberFormat.E164);
+export function getE164Number(fullPhoneNumber: libphonenumber.PhoneNumber): string {
+  const phoneNumberUtil = libphonenumber.PhoneNumberUtil.getInstance();
+  const e164PhoneNumber = phoneNumberUtil.format(fullPhoneNumber, libphonenumber.PhoneNumberFormat.E164);
 
   // Remove the calling code from the E164 format
   const callingCodeNumber: number = fullPhoneNumber.getCountryCodeOrDefault();

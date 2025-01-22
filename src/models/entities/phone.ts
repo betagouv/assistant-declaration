@@ -1,11 +1,11 @@
-import { PhoneNumberFormat, PhoneNumberUtil } from 'google-libphonenumber';
+import { default as libphonenumber } from 'google-libphonenumber';
 import z from 'zod';
 
 import { CountryCodeSchema } from '@ad/src/models/entities/country';
 import { phoneCombinationInvalidError, phoneCombinationInvalidWithLeadingZeroWarningError, phoneInvalidError } from '@ad/src/models/entities/errors';
 import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 
-const phoneNumberUtil = PhoneNumberUtil.getInstance();
+const phoneNumberUtil = libphonenumber.PhoneNumberUtil.getInstance();
 
 export const PhoneTypeSchema = z.enum(['UNSPECIFIED', 'HOME', 'MOBILE']);
 export type PhoneTypeSchemaType = z.infer<typeof PhoneTypeSchema>;
@@ -44,7 +44,7 @@ export const PhoneInputSchema = z
         }
 
         // Just in case compare potential and computed ones since to avoid leading zeros on national number to be stored
-        const e164PhoneNumber = phoneNumberUtil.format(parsedPhone, PhoneNumberFormat.E164);
+        const e164PhoneNumber = phoneNumberUtil.format(parsedPhone, libphonenumber.PhoneNumberFormat.E164);
         if (potentialE164PhoneNumber !== e164PhoneNumber) {
           ctx.addIssue(customErrorToZodIssue(phoneCombinationInvalidWithLeadingZeroWarningError));
         }
