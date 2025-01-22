@@ -71,14 +71,14 @@
       },
       "clientId": {
         "too_small_one": "le numéro client est requis",
-        "too_big": "le numéro client doit faire moins de {{maximum}} caractères"
+        "too_big": "le numéro client doit faire {{maximum}} caractères maximum"
       },
       "currentPassword": {
         "too_small_one": "le mot de passe actuel est requis"
       },
       "declarationPlace": {
         "too_small_one": "le lieu de la déclaration est requis",
-        "too_big": "le lieu de la déclaration doit faire moins de {{maximum}} caractères"
+        "too_big": "le lieu de la déclaration doit faire {{maximum}} caractères maximum"
       },
       "email": {
         "invalid_string": "l'email n'est pas valide",
@@ -86,7 +86,7 @@
       },
       "europeanVatId": {
         "too_small_one": "le numéro de TVA intracommunautaire est requis",
-        "too_big": "le numéro de TVA intracommunautaire doit faire moins de {{maximum}} caractères"
+        "too_big": "le numéro de TVA intracommunautaire doit faire {{maximum}} caractères maximum"
       },
       "expenses": {
         "categoryPrecision": {
@@ -126,11 +126,11 @@
       },
       "managerName": {
         "too_small_one": "le nom de la personne en charge est requis",
-        "too_big": "le nom de la personne en charge doit faire moins de {{maximum}} caractères"
+        "too_big": "le nom de la personne en charge doit faire {{maximum}} caractères maximum"
       },
       "managerTitle": {
         "too_small_one": "le rôle de la personne en charge est requis",
-        "too_big": "le rôle de la personne en charge doit faire moins de {{maximum}} caractères"
+        "too_big": "le rôle de la personne en charge doit faire {{maximum}} caractères maximum"
       },
       "message": {
         "too_big": "le message doit faire {{maximum}} caractères maximum",
@@ -145,12 +145,12 @@
       },
       "officialHeadquartersId": {
         "too_small_one": "le numéro Siret est requis",
-        "too_big": "le numéro Siret doit faire moins de {{maximum}} caractères"
+        "too_big": "le numéro Siret doit faire {{maximum}} caractères maximum"
       },
       "organizer": {
         "name": {
           "too_small_one": "le nom de l'organisateur/diffuseur est requis",
-          "too_big": "le nom de l'organisateur/diffuseur doit faire moins de {{maximum}} caractères"
+          "too_big": "le nom de l'organisateur/diffuseur doit faire {{maximum}} caractères maximum"
         }
       },
       "password": {
@@ -162,22 +162,22 @@
       },
       "performanceType": {
         "too_small_one": "le genre du spectacle est requis",
-        "too_big": "le genre du spectacle doit faire moins de {{maximum}} caractères"
+        "too_big": "le genre du spectacle doit faire {{maximum}} caractères maximum"
       },
       "performedWorks": {
         "category": {
           "too_small_one": "la discipline est requise",
-          "too_big": "la discipline doit faire moins de {{maximum}} caractères"
+          "too_big": "la discipline doit faire {{maximum}} caractères maximum"
         },
         "contributors": {
-          "too_big": "chaque nom de contributeur doit faire moins de {{maximum}} caractères"
+          "too_big": "chaque nom de contributeur doit faire {{maximum}} caractères maximum"
         },
         "durationSeconds": {
           "too_small": "la durée de l'œuvre est requise"
         },
         "name": {
           "too_small_one": "le titre est requis",
-          "too_big": "le titre doit faire moins de {{maximum}} caractères"
+          "too_big": "le titre doit faire {{maximum}} caractères maximum"
         }
       },
       "phone": {
@@ -204,7 +204,7 @@
       },
       "placeName": {
         "too_small_one": "le nom de la salle est requis",
-        "too_big": "le nom de la salle doit faire moins de {{maximum}} caractères"
+        "too_big": "le nom de la salle doit faire {{maximum}} caractères maximum"
       },
       "placePostalCode": {
         "too_small_one": "le code postal est requis",
@@ -217,12 +217,12 @@
         "invalid_type": "le producteur/tourneur est requis",
         "name": {
           "too_small_one": "le nom du producteur/tourneur est requis",
-          "too_big": "le nom du producteur/tourneur doit faire moins de {{maximum}} caractères"
+          "too_big": "le nom du producteur/tourneur doit faire {{maximum}} caractères maximum"
         }
       },
       "productionOperationId": {
         "too_small_one": "le numéro du dossier d'exploitation est requis",
-        "too_big": "le numéro du dossier d'exploitation doit faire moins de {{maximum}} caractères"
+        "too_big": "le numéro du dossier d'exploitation doit faire {{maximum}} caractères maximum"
       },
       "productionType": {
         "invalid_enum_value": "la nature de l'exploitation est requise"
@@ -247,7 +247,7 @@
         "invalid_type": "l'organisme responsable du paiement est requis",
         "name": {
           "too_small_one": "le nom de l'organisme responsable du paiement est requis",
-          "too_big": "le nom de l'organisme responsable du paiement doit faire moins de {{maximum}} caractères"
+          "too_big": "le nom de l'organisme responsable du paiement doit faire {{maximum}} caractères maximum"
         }
       },
       "totalOverride": {
