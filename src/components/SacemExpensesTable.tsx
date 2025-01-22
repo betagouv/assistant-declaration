@@ -245,29 +245,40 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
         disableColumnFilter
         disableColumnMenu
         disableRowSelectionOnClick
-        onCellEditStart={(params, event) => {
+        onRowEditStart={(params, event) => {
           // [WORKAROUND] As for number inputs outside the datagrid, there is the native issue of scrolling making the value changing
           // So doing the same workaround to prevent scrolling when it is focused
           // Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
-          const editCellElement = event.target as HTMLDivElement;
+          const rowElement = apiRef.current.getRowElement(params.id);
 
-          // At the time of the callback the input child is not yet created, so we have to wait for it
-          // Note: it appears in a few cases it does not work the first time... maybe we should delay a bit the "observe"?
-          const observer = new MutationObserver(() => {
-            const editCellInputElement = editCellElement.querySelector('input[type="number"]');
+          if (rowElement) {
+            // At the time of the callback the input children are not yet created, so we have to wait for them
+            // Note: it appears in a few cases it does not work the first time... maybe we should delay a bit the "observe"?
+            const observer = new MutationObserver(() => {
+              const editCellInputElements = rowElement.querySelectorAll('input[type="number"]');
 
-            if (editCellInputElement) {
-              observer.disconnect();
+              if (editCellInputElements.length > 0) {
+                observer.disconnect();
 
-              // Note: no need to remove the listener since it will after the focus is released due to the cell input element being deleted by `DataGrid`
-              editCellInputElement.addEventListener('wheel', (event) => {
-                (event.target as HTMLInputElement).blur();
-              });
-            }
-          });
+                // Note: no need to remove the listener since it will after the focus is released due to the cell input element being deleted by `DataGrid`
+                for (const inputElement of editCellInputElements) {
+                  inputElement.addEventListener('wheel', (event) => {
+                    (event.target as HTMLInputElement).blur();
+                  });
+                }
+              }
+            });
 
-          // Start observing the cell element for child additions
-          observer.observe(editCellElement, { childList: true, subtree: true });
+            // Start observing the cell element for child additions
+            observer.observe(rowElement, { childList: true, subtree: true });
+          }
+        }}
+        onRowEditStop={(params, event, details) => {
+          // This is due to autocomplete with multiple selections that make since really large
+          // Note: `details.api` is undefined for whatever reason so using our variable
+          setTimeout(() => {
+            apiRef.current.autosizeColumns(autosizeOption);
+          }, 10);
         }}
         autosizeOnMount={true}
         autosizeOptions={autosizeOption}
