@@ -4,7 +4,7 @@ import { GridAutosizeOptions, type GridColDef, useGridApiRef } from '@mui/x-data
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import debounce from 'lodash.debounce';
 import { useEffect, useMemo, useState } from 'react';
-import { Control, FieldErrors, useFieldArray } from 'react-hook-form';
+import { Control, FieldErrors, UseFormTrigger, useFieldArray } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
@@ -20,10 +20,11 @@ const entryTypedNameof = nameof<FillSacdDeclarationSchemaType['accountingEntries
 
 export interface SacdAccountingEntriesTableProps {
   control: Control<FillSacdDeclarationSchemaType, any>;
+  trigger: UseFormTrigger<FillSacdDeclarationSchemaType>;
   errors: FieldErrors<FillSacdDeclarationSchemaType>['accountingEntries'];
 }
 
-export function SacdAccountingEntriesTable({ control, errors }: SacdAccountingEntriesTableProps) {
+export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAccountingEntriesTableProps) {
   const { t } = useTranslation('common');
 
   const { fields, append, update, remove } = useFieldArray({
@@ -168,6 +169,7 @@ export function SacdAccountingEntriesTable({ control, errors }: SacdAccountingEn
             disabled={params.row.data.category !== SacdAccountingCategorySchema.Values.OTHER}
             aria-label="enlever une ligne de somme versée"
             onClick={() => {
+              // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
               remove(params.row.index);
             }}
             size="small"
@@ -221,6 +223,11 @@ export function SacdAccountingEntriesTable({ control, errors }: SacdAccountingEn
           const { id, ...newFormItemValue } = newRow.data;
 
           update(newRow.index, newFormItemValue);
+
+          // To mimic the behavior from fields like `TextField`, we want the UI to adjust if the user has fixed an error
+          if (newRow.errors) {
+            trigger(`accountingEntries.${newRow.index}`);
+          }
 
           return newRow;
         }}

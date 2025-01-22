@@ -96,6 +96,7 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
     getValues,
     setValue,
     control,
+    trigger,
     reset,
   } = useForm<FillSacdDeclarationSchemaType>({
     resolver: zodResolver(FillSacdDeclarationSchema),
@@ -909,7 +910,7 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                         mt: 1,
                       }}
                     >
-                      <SacdAccountingEntriesTable control={control} errors={errors.accountingEntries} />
+                      <SacdAccountingEntriesTable control={control} trigger={trigger} errors={errors.accountingEntries} />
                     </Box>
                   </Grid>
                 </Grid>
@@ -1039,6 +1040,7 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                     >
                       <SacdPerformedWorksTable
                         control={control}
+                        trigger={trigger}
                         placeholder={sacdDeclarationWrapper.placeholder.performedWorksOptions}
                         errors={errors.performedWorks}
                       />

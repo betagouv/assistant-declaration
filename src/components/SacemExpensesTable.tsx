@@ -4,7 +4,7 @@ import { GridAutosizeOptions, type GridColDef, useGridApiRef } from '@mui/x-data
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import debounce from 'lodash.debounce';
 import { useEffect, useMemo, useState } from 'react';
-import { Control, FieldErrors, useFieldArray } from 'react-hook-form';
+import { Control, FieldErrors, UseFormTrigger, useFieldArray } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
@@ -20,10 +20,11 @@ const entryTypedNameof = nameof<FillSacemDeclarationSchemaType['expenses'][0]>;
 
 export interface SacemExpensesTableProps {
   control: Control<FillSacemDeclarationSchemaType, any>;
+  trigger: UseFormTrigger<FillSacemDeclarationSchemaType>;
   errors: FieldErrors<FillSacemDeclarationSchemaType>['expenses'];
 }
 
-export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps) {
+export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTableProps) {
   const { t } = useTranslation('common');
 
   const { fields, append, update, remove } = useFieldArray({
@@ -178,6 +179,7 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
             disabled={params.row.data.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS}
             aria-label="enlever une ligne de dépense"
             onClick={() => {
+              // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
               remove(params.row.index);
             }}
             size="small"
@@ -234,6 +236,11 @@ export function SacemExpensesTable({ control, errors }: SacemExpensesTableProps)
           const { id, ...newFormItemValue } = newRow.data;
 
           update(newRow.index, newFormItemValue);
+
+          // To mimic the behavior from fields like `TextField`, we want the UI to adjust if the user has fixed an error
+          if (newRow.errors) {
+            trigger(`expenses.${newRow.index}`);
+          }
 
           return newRow;
         }}

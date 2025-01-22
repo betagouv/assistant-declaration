@@ -6,7 +6,7 @@ import { formatDuration, formatISODuration } from 'date-fns';
 import { parse, toSeconds } from 'iso8601-duration';
 import debounce from 'lodash.debounce';
 import { KeyboardEventHandler, forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
-import { Control, FieldErrors, useFieldArray } from 'react-hook-form';
+import { Control, FieldErrors, UseFormTrigger, useFieldArray } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { IMask, IMaskInput } from 'react-imask';
 
@@ -68,11 +68,12 @@ const DurationMaskInput = forwardRef<HTMLInputElement, InputBaseComponentProps>(
 
 export interface SacdPerformedWorksTableProps {
   control: Control<FillSacdDeclarationSchemaType, any>;
+  trigger: UseFormTrigger<FillSacdDeclarationSchemaType>;
   placeholder: SacdDeclarationWrapperSchemaType['placeholder']['performedWorksOptions'];
   errors: FieldErrors<FillSacdDeclarationSchemaType>['performedWorks'];
 }
 
-export function SacdPerformedWorksTable({ control, placeholder, errors }: SacdPerformedWorksTableProps) {
+export function SacdPerformedWorksTable({ control, trigger, placeholder, errors }: SacdPerformedWorksTableProps) {
   const { t } = useTranslation('common');
 
   const { fields, append, update, remove } = useFieldArray({
@@ -353,6 +354,7 @@ export function SacdPerformedWorksTable({ control, placeholder, errors }: SacdPe
           <IconButton
             aria-label="enlever une œuvre représentée"
             onClick={() => {
+              // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
               remove(params.row.index);
             }}
             size="small"
@@ -397,6 +399,11 @@ export function SacdPerformedWorksTable({ control, placeholder, errors }: SacdPe
           const { id, ...newFormItemValue } = newRow.data;
 
           update(newRow.index, newFormItemValue);
+
+          // To mimic the behavior from fields like `TextField`, we want the UI to adjust if the user has fixed an error
+          if (newRow.errors) {
+            trigger(`performedWorks.${newRow.index}`);
+          }
 
           return newRow;
         }}
