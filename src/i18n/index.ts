@@ -60,6 +60,7 @@ i18next.use(LanguageDetector).init(
             const locale = dateFnsLocales[lng];
 
             if (format === 'short') return formatDate(value, 'P', { locale });
+            if (format === 'shortWithTime') return formatDate(value, 'Pp', { locale });
             if (format === 'long') return formatDate(value, 'PPPP', { locale });
             if (format === 'longWithTime') return formatDate(value, 'PPPPp', { locale });
             if (format === 'relative') return formatRelative(value, new Date(), { locale });

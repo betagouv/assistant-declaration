@@ -5,13 +5,21 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getToken as nextAuthGetToken } from 'next-auth/jwt';
 import z from 'zod';
 
+import { SacdDeclarationDocument } from '@ad/src/components/documents/templates/SacdDeclaration';
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { SacemDeclarationSchema } from '@ad/src/models/entities/declaration/sacem';
 import { fileNotFoundError, organizationCollaboratorRoleRequiredError } from '@ad/src/models/entities/errors';
+import { EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { nextAuthOptions } from '@ad/src/pages/api/auth/[...nextauth]';
 import { prisma } from '@ad/src/prisma/client';
-import { sacemDeclarationPrismaToModel } from '@ad/src/server/routers/mappers';
+import {
+  eventCategoryTicketsPrismaToModel,
+  eventPrismaToModel,
+  sacdDeclarationPrismaToModel,
+  sacemDeclarationPrismaToModel,
+  ticketCategoryPrismaToModel,
+} from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { apiHandlerWrapper } from '@ad/src/utils/api';
 import { safeCoerceToOptionalBoolean } from '@ad/src/utils/validation';
@@ -86,43 +94,164 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
       EventSerieDeclaration: {
         select: {
           id: true,
-          EventSerieSacemDeclaration: {
-            select: {
-              id: true,
-              clientId: true,
-              placeName: true,
-              placeCapacity: true,
-              managerName: true,
-              managerTitle: true,
-              performanceType: true,
-              declarationPlace: true,
-              SacemDeclarationAccountingEntry: {
+          EventSerieSacemDeclaration: true
+            ? {
                 select: {
-                  flux: true,
-                  category: true,
-                  categoryPrecision: true,
-                  taxRate: true,
-                  amount: true,
+                  id: true,
+                  clientId: true,
+                  placeName: true,
+                  placeCapacity: true,
+                  managerName: true,
+                  managerTitle: true,
+                  performanceType: true,
+                  declarationPlace: true,
+                  SacemDeclarationAccountingEntry: {
+                    select: {
+                      flux: true,
+                      category: true,
+                      categoryPrecision: true,
+                      taxRate: true,
+                      amount: true,
+                    },
+                  },
                 },
+              }
+            : undefined,
+          EventSerieSacdDeclaration:
+            input.type === DeclarationTypeSchema.Values.SACD
+              ? {
+                  select: {
+                    id: true,
+                    clientId: true,
+                    officialHeadquartersId: true,
+                    productionOperationId: true,
+                    productionType: true,
+                    placeName: true,
+                    placePostalCode: true,
+                    placeCity: true,
+                    audience: true,
+                    placeCapacity: true,
+                    declarationPlace: true,
+                    organizer: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phoneId: true,
+                        officialHeadquartersId: true,
+                        europeanVatId: true,
+                        headquartersAddress: {
+                          select: {
+                            id: true,
+                            street: true,
+                            city: true,
+                            postalCode: true,
+                            countryCode: true,
+                            subdivision: true,
+                          },
+                        },
+                        phone: {
+                          select: {
+                            id: true,
+                            callingCode: true,
+                            countryCode: true,
+                            number: true,
+                          },
+                        },
+                      },
+                    },
+                    producer: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phoneId: true,
+                        officialHeadquartersId: true,
+                        europeanVatId: true,
+                        headquartersAddress: {
+                          select: {
+                            id: true,
+                            street: true,
+                            city: true,
+                            postalCode: true,
+                            countryCode: true,
+                            subdivision: true,
+                          },
+                        },
+                        phone: {
+                          select: {
+                            id: true,
+                            callingCode: true,
+                            countryCode: true,
+                            number: true,
+                          },
+                        },
+                      },
+                    },
+                    rightsFeesManager: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phoneId: true,
+                        officialHeadquartersId: true,
+                        europeanVatId: true,
+                        headquartersAddress: {
+                          select: {
+                            id: true,
+                            street: true,
+                            city: true,
+                            postalCode: true,
+                            countryCode: true,
+                            subdivision: true,
+                          },
+                        },
+                        phone: {
+                          select: {
+                            id: true,
+                            callingCode: true,
+                            countryCode: true,
+                            number: true,
+                          },
+                        },
+                      },
+                    },
+                    SacdDeclarationAccountingEntry: {
+                      select: {
+                        category: true,
+                        categoryPrecision: true,
+                        taxRate: true,
+                        amount: true,
+                      },
+                    },
+                    SacdDeclarationPerformedWork: {
+                      select: {
+                        category: true,
+                        name: true,
+                        contributors: true,
+                        durationSeconds: true,
+                      },
+                    },
+                  },
+                }
+              : undefined,
+        },
+      },
+      Event: {
+        include: {
+          EventCategoryTickets: {
+            include: {
+              category: true,
+            },
+            orderBy: {
+              category: {
+                name: 'asc',
               },
             },
           },
         },
-      },
-      Event: {
-        select: {
-          EventCategoryTickets: {
-            select: {
-              total: true,
-              totalOverride: true,
-              priceOverride: true,
-              category: {
-                select: {
-                  price: true,
-                },
-              },
-            },
-          },
+        orderBy: {
+          startAt: 'desc',
         },
       },
     },
@@ -140,13 +269,17 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
   let jsxDocument: JSX.Element;
   let filename: string;
   if (input.type === DeclarationTypeSchema.Values.SACEM) {
-    const existingDeclaration = eventSerie.EventSerieDeclaration.find((eSD) => eSD.EventSerieSacemDeclaration !== null);
+    const existingDeclaration = eventSerie.EventSerieDeclaration.find((eSD) => {
+      return eSD.EventSerieSacemDeclaration !== null;
+    });
 
     if (!existingDeclaration) {
       throw fileNotFoundError;
     }
 
-    const sacemDeclaration = sacemDeclarationPrismaToModel(eventSerie, existingDeclaration.EventSerieSacemDeclaration!);
+    // [WORKAROUND] To optimize we put conditions into the database request but due to dynamic Prisma typings
+    // it thinks `EventSerieSacemDeclaration.SacemDeclarationAccountingEntry` is missing whereas it's not, so casting
+    const sacemDeclaration = sacemDeclarationPrismaToModel(eventSerie, existingDeclaration.EventSerieSacemDeclaration as any);
 
     jsxDocument = SacemDeclarationDocument({
       sacemDeclaration: sacemDeclaration,
@@ -154,6 +287,35 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
 
     filename = `Déclaration SACEM - ${slugify(eventSerie.name)}`;
+  } else if (input.type === DeclarationTypeSchema.Values.SACD) {
+    const existingDeclaration = eventSerie.EventSerieDeclaration.find((eSD) => eSD.EventSerieSacdDeclaration !== null);
+
+    if (!existingDeclaration) {
+      throw fileNotFoundError;
+    }
+
+    // [WORKAROUND] To optimize we put conditions into the database request but due to dynamic Prisma typings
+    // it thinks `EventSerieSacdDeclaration` associations are missing whereas they are not, so casting
+    const sacdDeclaration = sacdDeclarationPrismaToModel(eventSerie, existingDeclaration.EventSerieSacdDeclaration as any);
+
+    jsxDocument = SacdDeclarationDocument({
+      sacdDeclaration: sacdDeclaration,
+      eventsWrappers: eventSerie.Event.map((event): EventWrapperSchemaType => {
+        return {
+          event: eventPrismaToModel(event),
+          sales: event.EventCategoryTickets.map((eventCategoryTickets) => {
+            return {
+              ticketCategory: ticketCategoryPrismaToModel(eventCategoryTickets.category),
+              eventCategoryTickets: eventCategoryTicketsPrismaToModel(eventCategoryTickets),
+            };
+          }),
+        };
+      }),
+      taxRate: eventSerie.taxRate.toNumber(),
+      signatory: `${token.given_name} ${token.family_name}`,
+    });
+
+    filename = `Déclaration SACD - ${slugify(eventSerie.name)}`;
   } else {
     throw fileNotFoundError;
   }

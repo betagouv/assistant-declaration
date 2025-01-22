@@ -1127,12 +1127,11 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                       <Grid item xs>
                         <Button
                           component={NextLink}
-                          href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-                          // href={linkRegistry.get('declarationPdf', {
-                          //   eventSerieId: eventSerie.id,
-                          //   type: DeclarationTypeSchema.Values.SACD,
-                          //   download: true,
-                          // })}
+                          href={linkRegistry.get('declarationPdf', {
+                            eventSerieId: eventSerie.id,
+                            type: DeclarationTypeSchema.Values.SACD,
+                            download: true,
+                          })}
                           download // Not forcing the download so using an explicit query parameter to force headers from the server
                           target="_blank" // Needed otherwise after the first click it won't work again (probably due to this page receiving headers already)
                           size="large"
@@ -1151,11 +1150,10 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                       <Grid item xs>
                         <Button
                           component={NextLink}
-                          href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-                          // href={linkRegistry.get('declarationPdf', {
-                          //   eventSerieId: eventSerie.id,
-                          //   type: DeclarationTypeSchema.Values.SACD,
-                          // })}
+                          href={linkRegistry.get('declarationPdf', {
+                            eventSerieId: eventSerie.id,
+                            type: DeclarationTypeSchema.Values.SACD,
+                          })}
                           target="_blank"
                           size="large"
                           variant="contained"
