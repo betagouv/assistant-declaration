@@ -9,6 +9,8 @@ import {
   SacemDeclarationAccountingFluxEntrySchemaType,
 } from '@ad/src/models/entities/declaration/sacem';
 
+export type EditableAmountSwitch = 'excludingTaxes' | 'includingTaxes';
+
 const revenueSortOrder: AccountingCategorySchemaType[] = [
   AccountingCategorySchema.Values.TICKETING,
   AccountingCategorySchema.Values.CONSUMPTIONS,
@@ -142,4 +144,8 @@ export function getExcludingTaxesAmountFromIncludingTaxesAmount(includingTaxesAm
 
 export function getTaxAmountFromIncludingTaxesAmount(includingTaxesAmount: number, taxRate: number): number {
   return includingTaxesAmount - getExcludingTaxesAmountFromIncludingTaxesAmount(includingTaxesAmount, taxRate);
+}
+
+export function getIncludingTaxesAmountFromExcludingTaxesAmount(excludingTaxesAmount: number, taxRate: number): number {
+  return (1 + taxRate) * excludingTaxesAmount;
 }

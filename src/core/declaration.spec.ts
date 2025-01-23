@@ -1,4 +1,8 @@
-import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
+import {
+  getExcludingTaxesAmountFromIncludingTaxesAmount,
+  getIncludingTaxesAmountFromExcludingTaxesAmount,
+  getTaxAmountFromIncludingTaxesAmount,
+} from '@ad/src/core/declaration';
 
 describe('calculations related to tax rate', () => {
   const includingTaxesAmount = 9.6;
@@ -13,6 +17,12 @@ describe('calculations related to tax rate', () => {
   describe('getTaxAmountFromIncludingTaxesAmount()', () => {
     it('should return the tax amount', () => {
       expect(getTaxAmountFromIncludingTaxesAmount(includingTaxesAmount, taxRate)).toEqual(1.5999999999999996);
+    });
+  });
+
+  describe('getIncludingTaxesAmountFromExcludingTaxesAmount()', () => {
+    it('should return the tax amount', () => {
+      expect(getIncludingTaxesAmountFromExcludingTaxesAmount(8, taxRate)).toEqual(includingTaxesAmount);
     });
   });
 });
