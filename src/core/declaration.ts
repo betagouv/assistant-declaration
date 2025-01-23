@@ -135,3 +135,11 @@ export function ensureMinimumSacdAccountingItems(items: SacdDeclarationAccountin
     return indexA - indexB;
   });
 }
+
+export function getExcludingTaxesAmountFromIncludingTaxesAmount(includingTaxesAmount: number, taxRate: number): number {
+  return includingTaxesAmount / (1 + taxRate);
+}
+
+export function getTaxAmountFromIncludingTaxesAmount(includingTaxesAmount: number, taxRate: number): number {
+  return includingTaxesAmount - getExcludingTaxesAmountFromIncludingTaxesAmount(includingTaxesAmount, taxRate);
+}

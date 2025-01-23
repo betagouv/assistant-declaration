@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
 import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
+import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { AccountingCategorySchema } from '@ad/src/models/entities/declaration/sacem';
 import { currencyFormatter } from '@ad/src/utils/currency';
@@ -130,7 +131,11 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
       headerName: 'Recettes HT',
       type: 'number', // To respect the same alignment than others
       renderCell: (params) => {
-        return <span data-sentry-mask>{currencyFormatter.format((1 - params.row.data.taxRate) * params.row.data.includingTaxesAmount)}</span>;
+        return (
+          <span data-sentry-mask>
+            {currencyFormatter.format(getExcludingTaxesAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate))}
+          </span>
+        );
       },
     },
     {
@@ -138,7 +143,11 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
       headerName: 'Montant de la TVA',
       type: 'number', // To respect the same alignment than others
       renderCell: (params) => {
-        return <span data-sentry-mask>{currencyFormatter.format(params.row.data.taxRate * params.row.data.includingTaxesAmount)}</span>;
+        return (
+          <span data-sentry-mask>
+            {currencyFormatter.format(getTaxAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate))}
+          </span>
+        );
       },
     },
     {

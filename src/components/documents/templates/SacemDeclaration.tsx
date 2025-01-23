@@ -3,6 +3,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Image, Link, StyleSheet, Text, View } from '@react-pdf/renderer';
 
 import { StandardLayout, layoutStyles, styles } from '@ad/src/components/documents/layouts/StandardLayout';
+import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import { currencyFormatter } from '@ad/src/utils/currency';
@@ -127,10 +128,10 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 <TableCell>{revenue.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${revenue.category}`)}</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>{revenue.taxRate * 100}%</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {currencyFormatter.format((1 - revenue.taxRate) * revenue.includingTaxesAmount)}
+                  {currencyFormatter.format(getExcludingTaxesAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate))}
                 </TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {currencyFormatter.format(revenue.taxRate * revenue.includingTaxesAmount)}
+                  {currencyFormatter.format(getTaxAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate))}
                 </TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>{currencyFormatter.format(revenue.includingTaxesAmount)}</TableCell>
               </TableRow>
@@ -160,10 +161,10 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 <TableCell>{expense.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${expense.category}`)}</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>{expense.taxRate * 100}%</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {currencyFormatter.format((1 - expense.taxRate) * expense.includingTaxesAmount)}
+                  {currencyFormatter.format(getExcludingTaxesAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate))}
                 </TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {currencyFormatter.format(expense.taxRate * expense.includingTaxesAmount)}
+                  {currencyFormatter.format(getTaxAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate))}
                 </TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>{currencyFormatter.format(expense.includingTaxesAmount)}</TableCell>
               </TableRow>

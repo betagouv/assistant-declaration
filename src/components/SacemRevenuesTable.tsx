@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
 import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
+import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { AccountingCategorySchema } from '@ad/src/models/entities/declaration/sacem';
 import { currencyFormatter } from '@ad/src/utils/currency';
@@ -146,7 +147,11 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
                 : null
             }
           >
-            <span data-sentry-mask>{currencyFormatter.format((1 - params.row.data.taxRate) * params.row.data.includingTaxesAmount)}</span>
+            <span data-sentry-mask>
+              {currencyFormatter.format(
+                getExcludingTaxesAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate)
+              )}
+            </span>
           </Tooltip>
         );
       },
@@ -164,7 +169,9 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
                 : null
             }
           >
-            <span data-sentry-mask>{currencyFormatter.format(params.row.data.taxRate * params.row.data.includingTaxesAmount)}</span>
+            <span data-sentry-mask>
+              {currencyFormatter.format(getTaxAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate))}
+            </span>
           </Tooltip>
         );
       },
