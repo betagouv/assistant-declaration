@@ -1,5 +1,5 @@
 import { Delete } from '@mui/icons-material';
-import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, Button, FormControl, FormControlLabel, FormLabel, IconButton, Radio, RadioGroup, Tooltip, Typography } from '@mui/material';
 import { GridAutosizeOptions, type GridColDef, useGridApiRef } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import debounce from 'lodash.debounce';
@@ -9,6 +9,12 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
 import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
+import {
+  EditableAmountSwitch,
+  getExcludingTaxesAmountFromIncludingTaxesAmount,
+  getIncludingTaxesAmountFromExcludingTaxesAmount,
+  getTaxAmountFromIncludingTaxesAmount,
+} from '@ad/src/core/declaration';
 import { FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { AccountingCategorySchema } from '@ad/src/models/entities/declaration/sacem';
 import { currencyFormatter } from '@ad/src/utils/currency';
@@ -52,10 +58,6 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
   }, [fields, errors]);
 
   useEffect(() => {
-    apiRef.current.autosizeColumns(autosizeOption);
-  }, [apiRef, rowsWithErrorLogic, autosizeOption]);
-
-  useEffect(() => {
     // We also autosize when the frame is changing
     // Note: using `onResize` is triggered sometimes for internal DataGrid things so it's not relevent for us
     const update = debounce(() => {
@@ -69,127 +71,99 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
     };
   }, [apiRef, autosizeOption]);
 
+  const [editableAmount, setEditableAmount] = useState<EditableAmountSwitch>('includingTaxes');
+
   // To type options functions have a look at https://github.com/mui/mui-x/pull/4064
-  const [columns] = useState<GridColDef<(typeof rowsWithErrorLogic)[0]>[]>([
-    {
-      field: `${rowTypedNameof('data')}.${entryTypedNameof('category')}`,
-      headerName: 'Origine des recettes',
-      editable: true,
-      display: 'flex', // Needed to align properly `ErrorCellWrapper`
-      valueGetter: (_, row) => {
-        return row.data.categoryPrecision ?? row.data.category;
+  const columns = useMemo<GridColDef<(typeof rowsWithErrorLogic)[0]>[]>(
+    () => [
+      {
+        field: `${rowTypedNameof('data')}.${entryTypedNameof('category')}`,
+        headerName: 'Origine des recettes',
+        editable: true,
+        display: 'flex', // Needed to align properly `ErrorCellWrapper`
+        valueGetter: (_, row) => {
+          return row.data.categoryPrecision ?? row.data.category;
+        },
+        valueSetter: (value, row) => {
+          // Editable category should only be for "other revenues"
+          return {
+            ...row,
+            data: {
+              ...row.data,
+              categoryPrecision: value,
+            },
+          };
+        },
+        renderCell: (params) => {
+          return (
+            <ErrorCellWrapper errorMessage={params.row.errors?.category?.message ?? params.row.errors?.categoryPrecision?.message} data-sentry-mask>
+              {params.row.data.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${params.row.data.category}`)}
+            </ErrorCellWrapper>
+          );
+        },
       },
-      valueSetter: (value, row) => {
-        // Editable category should only be for "other revenues"
-        return {
-          ...row,
-          data: {
-            ...row.data,
-            categoryPrecision: value,
-          },
-        };
+      {
+        field: `${rowTypedNameof('data')}.${entryTypedNameof('taxRate')}`,
+        headerName: 'Taux de TVA',
+        editable: true,
+        type: 'number',
+        display: 'flex', // Needed to align properly `ErrorCellWrapper`
+        valueGetter: (_, row) => {
+          // Display a percentage tax rate so it's easier for people to understand
+          return row.data.taxRate * 100;
+        },
+        valueSetter: (value, row) => {
+          // As we choose to display a percentage, we switch back to the technical format
+          return {
+            ...row,
+            data: {
+              ...row.data,
+              taxRate: value / 100,
+            },
+          };
+        },
+        renderCell: (params) => {
+          return (
+            <ErrorCellWrapper errorMessage={params.row.errors?.taxRate?.message} data-sentry-mask>
+              <Tooltip
+                title={
+                  params.row.data.category === AccountingCategorySchema.Values.TICKETING
+                    ? 'Cette valeur provient initialement de votre billetterie'
+                    : null
+                }
+              >
+                <span data-sentry-mask>{params.row.data.taxRate * 100}%</span>
+              </Tooltip>
+            </ErrorCellWrapper>
+          );
+        },
       },
-      renderCell: (params) => {
-        return (
-          <ErrorCellWrapper errorMessage={params.row.errors?.category?.message ?? params.row.errors?.categoryPrecision?.message} data-sentry-mask>
-            {params.row.data.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${params.row.data.category}`)}
-          </ErrorCellWrapper>
-        );
-      },
-    },
-    {
-      field: `${rowTypedNameof('data')}.${entryTypedNameof('taxRate')}`,
-      headerName: 'Taux de TVA',
-      editable: true,
-      type: 'number',
-      display: 'flex', // Needed to align properly `ErrorCellWrapper`
-      valueGetter: (_, row) => {
-        // Display a percentage tax rate so it's easier for people to understand
-        return row.data.taxRate * 100;
-      },
-      valueSetter: (value, row) => {
-        // As we choose to display a percentage, we switch back to the technical format
-        return {
-          ...row,
-          data: {
-            ...row.data,
-            taxRate: value / 100,
-          },
-        };
-      },
-      renderCell: (params) => {
-        return (
-          <ErrorCellWrapper errorMessage={params.row.errors?.taxRate?.message} data-sentry-mask>
-            <Tooltip
-              title={
-                params.row.data.category === AccountingCategorySchema.Values.TICKETING
-                  ? 'Cette valeur provient initialement de votre billetterie'
-                  : null
-              }
-            >
-              <span data-sentry-mask>{params.row.data.taxRate * 100}%</span>
-            </Tooltip>
-          </ErrorCellWrapper>
-        );
-      },
-    },
-    {
-      field: `excludingTaxesAmount`,
-      headerName: 'Recettes HT',
-      type: 'number', // To respect the same alignment than others
-      renderCell: (params) => {
-        return (
-          <Tooltip
-            title={
-              params.row.data.category === AccountingCategorySchema.Values.TICKETING
-                ? 'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                : null
-            }
-          >
-            <span data-sentry-mask>{currencyFormatter.format((1 - params.row.data.taxRate) * params.row.data.includingTaxesAmount)}</span>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      field: `tvaAmount`,
-      headerName: 'Montant de la TVA',
-      type: 'number', // To respect the same alignment than others
-      renderCell: (params) => {
-        return (
-          <Tooltip
-            title={
-              params.row.data.category === AccountingCategorySchema.Values.TICKETING
-                ? 'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                : null
-            }
-          >
-            <span data-sentry-mask>{currencyFormatter.format(params.row.data.taxRate * params.row.data.includingTaxesAmount)}</span>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      field: `${rowTypedNameof('data')}.${entryTypedNameof('includingTaxesAmount')}`,
-      headerName: 'Recettes TTC',
-      editable: true,
-      type: 'number',
-      display: 'flex', // Needed to align properly `ErrorCellWrapper`
-      valueGetter: (_, row) => {
-        return row.data.includingTaxesAmount;
-      },
-      valueSetter: (value, row) => {
-        return {
-          ...row,
-          data: {
-            ...row.data,
-            includingTaxesAmount: value,
-          },
-        };
-      },
-      renderCell: (params) => {
-        return (
-          <ErrorCellWrapper errorMessage={params.row.errors?.includingTaxesAmount?.message} data-sentry-mask>
+      {
+        field: `excludingTaxesAmount`,
+        headerName: 'Recettes HT',
+        editable: editableAmount === 'excludingTaxes',
+        type: 'number',
+        display: 'flex', // Needed to align properly `ErrorCellWrapper`
+        valueGetter: (_, row) => {
+          const excludingTaxesAmount = getExcludingTaxesAmountFromIncludingTaxesAmount(row.data.includingTaxesAmount, row.data.taxRate);
+
+          // Since it comes from an operation we make sure to round it before display in the input
+          return Math.round(excludingTaxesAmount * 100) / 100;
+        },
+        valueSetter: (value, row) => {
+          const includingTaxesAmount = getIncludingTaxesAmountFromExcludingTaxesAmount(value, row.data.taxRate);
+
+          // Since it comes from an operation we make sure to round it before any other modification
+          return {
+            ...row,
+            data: {
+              ...row.data,
+              includingTaxesAmount: Math.round(includingTaxesAmount * 100) / 100,
+            },
+          };
+        },
+        renderCell: (params) => {
+          return (
             <Tooltip
               title={
                 params.row.data.category === AccountingCategorySchema.Values.TICKETING
@@ -197,38 +171,138 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
                   : null
               }
             >
-              <span data-sentry-mask>{currencyFormatter.format(params.row.data.includingTaxesAmount)}</span>
+              <span data-sentry-mask>
+                {currencyFormatter.format(
+                  getExcludingTaxesAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate)
+                )}
+              </span>
             </Tooltip>
-          </ErrorCellWrapper>
-        );
+          );
+        },
       },
-    },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      headerAlign: 'right',
-      align: 'right',
-      sortable: false,
-      renderCell: (params) => {
-        return (
-          <IconButton
-            disabled={params.row.data.category !== AccountingCategorySchema.Values.OTHER_REVENUES}
-            aria-label="enlever une ligne de recette"
-            onClick={() => {
-              // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
-              remove(params.row.index);
-            }}
-            size="small"
-          >
-            <Delete />
-          </IconButton>
-        );
+      {
+        field: `tvaAmount`,
+        headerName: 'Montant de la TVA',
+        type: 'number', // To respect the same alignment than others
+        renderCell: (params) => {
+          return (
+            <Tooltip
+              title={
+                params.row.data.category === AccountingCategorySchema.Values.TICKETING
+                  ? 'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
+                  : null
+              }
+            >
+              <span data-sentry-mask>
+                {currencyFormatter.format(getTaxAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate))}
+              </span>
+            </Tooltip>
+          );
+        },
       },
-    },
+      {
+        field: `${rowTypedNameof('data')}.${entryTypedNameof('includingTaxesAmount')}`,
+        headerName: 'Recettes TTC',
+        editable: editableAmount === 'includingTaxes',
+        type: 'number',
+        display: 'flex', // Needed to align properly `ErrorCellWrapper`
+        valueGetter: (_, row) => {
+          return row.data.includingTaxesAmount;
+        },
+        valueSetter: (value, row) => {
+          return {
+            ...row,
+            data: {
+              ...row.data,
+              includingTaxesAmount: value,
+            },
+          };
+        },
+        renderCell: (params) => {
+          return (
+            <ErrorCellWrapper errorMessage={params.row.errors?.includingTaxesAmount?.message} data-sentry-mask>
+              <Tooltip
+                title={
+                  params.row.data.category === AccountingCategorySchema.Values.TICKETING
+                    ? 'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
+                    : null
+                }
+              >
+                <span data-sentry-mask>{currencyFormatter.format(params.row.data.includingTaxesAmount)}</span>
+              </Tooltip>
+            </ErrorCellWrapper>
+          );
+        },
+      },
+      {
+        field: 'actions',
+        headerName: 'Actions',
+        headerAlign: 'right',
+        align: 'right',
+        sortable: false,
+        renderCell: (params) => {
+          return (
+            <IconButton
+              disabled={params.row.data.category !== AccountingCategorySchema.Values.OTHER_REVENUES}
+              aria-label="enlever une ligne de recette"
+              onClick={() => {
+                // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
+                remove(params.row.index);
+              }}
+              size="small"
+            >
+              <Delete />
+            </IconButton>
+          );
+        },
+      },
+    ],
+    [t, remove, editableAmount]
+  );
+
+  useEffect(() => {
+    if ('autosizeColumns' in apiRef.current) {
+      apiRef.current.autosizeColumns(autosizeOption);
+    }
+  }, [
+    columns, // W did it aside `setEditableAmount` but it was breaking the table keeping the previous display (and a `setTimeout` would have been too uncertain)
+    apiRef,
+    rowsWithErrorLogic,
+    autosizeOption,
   ]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      <FormControl
+        sx={{
+          flexDirection: 'row',
+          justifyContent: 'end',
+          alignItems: 'center',
+          // There is no way to modify easily all children font size and radio buttons size so just hacking a bit with scaling the whole
+          transform: 'scale(0.8)',
+          transformOrigin: 'center right',
+        }}
+      >
+        <FormLabel
+          id="editable-amount-group-label"
+          sx={{
+            mr: 2,
+          }}
+        >
+          Montants modifiables :
+        </FormLabel>
+        <RadioGroup
+          row
+          value={editableAmount}
+          onChange={(event) => {
+            setEditableAmount(event.target.value as EditableAmountSwitch);
+          }}
+          aria-labelledby="editable-amount-group-label"
+        >
+          <FormControlLabel value="excludingTaxes" control={<Radio />} label="HT" />
+          <FormControlLabel value="includingTaxes" control={<Radio />} label="TTC" />
+        </RadioGroup>
+      </FormControl>
       <DataGrid
         apiRef={apiRef}
         rows={rowsWithErrorLogic}

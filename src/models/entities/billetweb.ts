@@ -14,7 +14,10 @@ export const JsonEventOccurenceSchema = applyTypedParsers(
       description: z.string().transform(transformStringOrNull),
       instructions: z.string().transform(transformStringOrNull),
       disabled: z.unknown(), // Integer enum
-      last_update: z.coerce.date(),
+      last_update: z.preprocess((value) => {
+        // Some old entries do not have this field initialized (dated ~2018)
+        return value === '0000-00-00 00:00:00' ? null : value;
+      }, z.coerce.date().nullable()),
       quota: z.coerce.number().nonnegative(),
       total_sales: z.coerce.number().nonnegative(),
       tickets: z.record(z.string().min(1), z.string().min(1)),
