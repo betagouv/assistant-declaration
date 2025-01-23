@@ -13,6 +13,7 @@ import {
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
   LiteEventSchema,
+  LiteEventSchemaType,
   LiteEventSerieSchema,
   LiteEventSerieWrapperSchemaType,
   LiteTicketCategorySchema,
@@ -121,19 +122,48 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
       const datesDataJson = await datesResponse.json();
       const dates = JsonGetEventsOccurencesResponseSchema.parse(datesDataJson);
 
-      const schemaEvents = dates.map((date) =>
-        LiteEventSchema.parse({
-          internalTicketingSystemId: date.id,
-          startAt: date.start,
-          endAt: date.end,
-        })
-      );
+      // From the workaround we get the appropriate event entity
+      const event = events.find((e) => e.id === eventId);
 
-      // Some live performance organizations are using those technical entries to sell either subscriptions, a series of performances, or gift tickets
-      // So we consider not displaying them, and even if it was a real show, it would not been to declare since no dates for now
-      if (schemaEvents.length === 0) {
-        return;
+      assert(event);
+
+      // For this ticketing system, if an event has only 1 session it won't have any date in their backend, which is weird but we have to emulate it for our own logic
+
+      // From what we saw it's always '0', but due to it's no longer unique across series so we add a prefix
+      // Uniqueness is required for us to compare easily the differences
+      const fallbackEventTicketingSystemId = `fallback_${event.id}_0`;
+
+      let schemaEvents: LiteEventSchemaType[];
+      if (event.multiple === false) {
+        // We make sure of this logic to no miss something
+        assert(dates.length === 0, `event ${event.id} is not multiple but has sessions`);
+
+        schemaEvents = [
+          LiteEventSchema.parse({
+            internalTicketingSystemId: fallbackEventTicketingSystemId,
+            startAt: event.start,
+            endAt: event.end,
+          }),
+        ];
+      } else {
+        schemaEvents = dates.map((date) =>
+          LiteEventSchema.parse({
+            internalTicketingSystemId: date.id,
+            startAt: date.start,
+            endAt: date.end,
+          })
+        );
       }
+
+      // [WARNING] Some live performance organizations are using those technical entries to sell either subscriptions, a series of performances, or gift tickets
+      // We considered filtering them but we ended not finding a right solution:
+      // - Those events has the same structure
+      // - VAT can not be used to differenciate
+      // - Having no place (`null`) cannot help becasue some subscriptions had the place
+      // - Having a serie taking place over more than 11 months does not mean it's a subscription, it could also be a performance serie
+      // - Having all attendees `session_start=""` is not viable because a real performance also has this if it's not yet started (not a strong indicator comparing with current date)
+      //
+      // At the end, we let them pass all, but will implement a way for users to ignore specific ones so the UI is clean
 
       const attendeesResponse = await fetch(
         this.formatUrl(`/event/${eventId}/attendees`, {
@@ -159,14 +189,21 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
         LiteEventSalesSchemaType
       > = new Map();
       for (const attendee of attendees) {
-        const uniqueId = `${attendee.order_session}_${attendee.ticket_id}`;
+        const orderSession = attendee.order_session === '0' ? fallbackEventTicketingSystemId : attendee.order_session;
+        const uniqueId = `${orderSession}_${attendee.ticket_id}`;
         const eventSales = schemaEventSales.get(uniqueId);
 
         if (!eventSales) {
+          // We make sure the event has been properly retrieved or emulated (since a serie may have no date associated but represents a single one implicitly)
+          const relatedEvent = schemaEvents.find((event) => event.internalTicketingSystemId === orderSession);
+          if (!relatedEvent) {
+            throw new Error('a sold ticket should always match an existing event');
+          }
+
           schemaEventSales.set(
             uniqueId,
             LiteEventSalesSchema.parse({
-              internalEventTicketingSystemId: attendee.order_session,
+              internalEventTicketingSystemId: orderSession,
               internalTicketCategoryTicketingSystemId: attendee.ticket_id,
               total: 1,
             })
@@ -201,11 +238,6 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
           price: price,
         });
       });
-
-      // From the workaround we get the appropriate event entity
-      const event = events.find((e) => e.id === eventId);
-
-      assert(event);
 
       eventsSeriesWrappers.push({
         serie: LiteEventSerieSchema.parse({
