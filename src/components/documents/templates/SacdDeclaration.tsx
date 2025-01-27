@@ -414,6 +414,42 @@ export function SacdDeclarationDocument(props: SacdDeclarationDocumentProps) {
           </Text>
         </View>
       </View>
+      <Text style={styles.h1} break>
+        Annexes de billetterie
+      </Text>
+      {props.eventsWrappers.map((eventWrapper, wrapperIndex) => (
+        <View key={wrapperIndex} style={{ width: '100%' }}>
+          <Text style={styles.h2}>{capitalizeFirstLetter(t('date.longWithTime', { date: eventWrapper.event.startAt }))}</Text>
+          <View style={styles.gridContainer}>
+            <View style={styles.gridItem}>
+              <Table weightings={[2, 1, 1]} tdStyle={{ padding: 5 }}>
+                <TableHeader fixed>
+                  <TableCell>Catégorie des tickets</TableCell>
+                  <TableCell style={{ justifyContent: 'flex-end' }}>Prix unitaire TTC</TableCell>
+                  <TableCell style={{ justifyContent: 'flex-end' }}>Nombre de billets vendus</TableCell>
+                </TableHeader>
+                {eventWrapper.sales.map((sale, index) => (
+                  <TableRow
+                    key={index}
+                    style={{
+                      backgroundColor:
+                        index % 2 === 0 ? theme.decisions.background.alt.blueFrance.default : theme.decisions.background.default.grey.default,
+                    }}
+                  >
+                    <TableCell>{sale.ticketCategory.name}</TableCell>
+                    <TableCell style={{ justifyContent: 'flex-end' }}>
+                      {currencyFormatter.format(sale.eventCategoryTickets.priceOverride ?? sale.ticketCategory.price)}
+                    </TableCell>
+                    <TableCell style={{ justifyContent: 'flex-end' }}>
+                      {sale.eventCategoryTickets.totalOverride ?? sale.eventCategoryTickets.total}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </Table>
+            </View>
+          </View>
+        </View>
+      ))}
     </StandardLayout>
   );
 }
