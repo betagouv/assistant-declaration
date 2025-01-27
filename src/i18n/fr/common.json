@@ -281,6 +281,9 @@
     },
     "template": {}
   },
+  "duration": {
+    "fromSeconds": "{{ duration, fromSeconds }}"
+  },
   "model": {
     "sacemDeclaration": {
       "accountingCategory": {

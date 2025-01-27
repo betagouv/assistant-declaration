@@ -2,7 +2,6 @@ import { Delete } from '@mui/icons-material';
 import { Autocomplete, Box, Button, IconButton, InputBaseComponentProps, TextField, Typography } from '@mui/material';
 import { GridAutosizeOptions, type GridColDef, useGridApiRef, useGridRootProps } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
-import { formatDuration, formatISODuration } from 'date-fns';
 import { parse, toSeconds } from 'iso8601-duration';
 import debounce from 'lodash.debounce';
 import { KeyboardEventHandler, forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
@@ -327,16 +326,9 @@ export function SacdPerformedWorksTable({ control, trigger, placeholder, errors 
         return row;
       },
       renderCell: (params) => {
-        const seconds = Number(params.row.data.durationSeconds);
-        const { h, m, s } = {
-          h: Math.floor(seconds / 3600),
-          m: Math.floor((seconds % 3600) / 60),
-          s: Math.floor((seconds % 3600) % 60),
-        };
-
         return (
           <ErrorCellWrapper errorMessage={params.row.errors?.durationSeconds?.message} data-sentry-mask>
-            {formatDuration({ hours: h, minutes: m, seconds: s })}
+            {t('duration.fromSeconds', { duration: params.row.data.durationSeconds })}
           </ErrorCellWrapper>
         );
       },

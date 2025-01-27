@@ -1,9 +1,5 @@
-import type { Locale } from 'date-fns';
+import { type Locale, formatDate, formatDistance, formatDuration, formatRelative, isDate } from 'date-fns';
 // import utcToZonedTime from 'date-fns-tz/utcToZonedTime';
-import { formatDate } from 'date-fns/format';
-import { formatDistance } from 'date-fns/formatDistance';
-import { formatRelative } from 'date-fns/formatRelative';
-import { isDate } from 'date-fns/isDate';
 import { fr as frDateLocale } from 'date-fns/locale/fr';
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
@@ -72,6 +68,17 @@ i18next.use(LanguageDetector).init(
             }
 
             return formatDate(value, format, { locale });
+          } else if (typeof value === 'number') {
+            if (format === 'fromSeconds') {
+              const locale = dateFnsLocales[lng];
+
+              const seconds = Number(value);
+
+              return formatDuration(
+                { hours: Math.floor(seconds / 3600), minutes: Math.floor((seconds % 3600) / 60), seconds: Math.floor((seconds % 3600) % 60) },
+                { locale }
+              );
+            }
           }
         }
 

@@ -2,7 +2,6 @@ import { Table, TableCell, TableHeader, TableRow } from '@ag-media/react-pdf-tab
 import { fr } from '@codegouvfr/react-dsfr';
 import addressFormatter from '@fragaria/address-formatter';
 import { Image, Link, StyleSheet, Text, View } from '@react-pdf/renderer';
-import { formatDuration } from 'date-fns';
 import { default as libphonenumber } from 'google-libphonenumber';
 import diff from 'microdiff';
 
@@ -368,13 +367,6 @@ export function SacdDeclarationDocument(props: SacdDeclarationDocumentProps) {
                 <TableCell>Durée</TableCell>
               </TableHeader>
               {props.sacdDeclaration.performedWorks.map((performedWork, index) => {
-                const seconds = Number(performedWork.durationSeconds);
-                const { h, m, s } = {
-                  h: Math.floor(seconds / 3600),
-                  m: Math.floor((seconds % 3600) / 60),
-                  s: Math.floor((seconds % 3600) % 60),
-                };
-
                 return (
                   <TableRow
                     key={index}
@@ -386,7 +378,7 @@ export function SacdDeclarationDocument(props: SacdDeclarationDocumentProps) {
                     <TableCell>{performedWork.category}</TableCell>
                     <TableCell>{performedWork.name}</TableCell>
                     <TableCell>{performedWork.contributors.join(', ')}</TableCell>
-                    <TableCell>{formatDuration({ hours: h, minutes: m, seconds: s })}</TableCell>
+                    <TableCell>{t('duration.fromSeconds', { duration: performedWork.durationSeconds })}</TableCell>
                   </TableRow>
                 );
               })}
