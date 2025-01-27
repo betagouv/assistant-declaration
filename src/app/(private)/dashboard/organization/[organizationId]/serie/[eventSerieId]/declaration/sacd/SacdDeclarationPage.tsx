@@ -43,6 +43,7 @@ import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SacdAccountingEntriesTable } from '@ad/src/components/SacdAccountingEntriesTable';
 import { SacdOrganizationFields } from '@ad/src/components/SacdOrganizationFields';
 import { SacdPerformedWorksTable } from '@ad/src/components/SacdPerformedWorksTable';
+import { SacdTicketingEntriesTable } from '@ad/src/components/SacdTicketingEntriesTable';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { FillSacdDeclarationSchema, FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
@@ -95,6 +96,7 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
     formState: { errors, isDirty },
     getValues,
     setValue,
+    watch,
     control,
     trigger,
     reset,
@@ -816,6 +818,20 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                         );
                       }}
                     />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Box
+                      sx={{
+                        bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
+                        borderRadius: '8px',
+                        py: { xs: 2, md: 3 },
+                        px: { xs: 1, md: 2 },
+                        mt: 1,
+                        mb: 2,
+                      }}
+                    >
+                      <SacdTicketingEntriesTable wrappers={eventsWrappers} audience={watch('audience')} taxRate={eventSerie.taxRate} />
+                    </Box>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Tooltip
