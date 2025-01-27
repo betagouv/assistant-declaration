@@ -10,6 +10,7 @@ import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
+import { formatAmountForPdf } from '@ad/src/utils/pdf';
 import { convertInputModelToGooglePhoneNumber } from '@ad/src/utils/phone';
 import { getBaseUrl } from '@ad/src/utils/url';
 
@@ -146,7 +147,7 @@ export function SacdDeclarationDocument(props: SacdDeclarationDocumentProps) {
                   <TableCell>{capitalizeFirstLetter(t('date.shortWithTime', { date: eventWrapper.event.startAt }))}</TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>1</TableCell>
                   <TableCell>{t(`model.sacdDeclaration.audience.enum.${props.sacdDeclaration.audience}`)}</TableCell>
-                  <TableCell style={{ justifyContent: 'flex-end' }}>{t('currency.amount', { amount: includingTaxesAmount })}</TableCell>
+                  <TableCell style={{ justifyContent: 'flex-end' }}>{formatAmountForPdf(t, includingTaxesAmount)}</TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>{props.taxRate * 100}%</TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>{paidTickets}</TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>{freeTickets}</TableCell>
@@ -157,7 +158,7 @@ export function SacdDeclarationDocument(props: SacdDeclarationDocumentProps) {
         </View>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Tarif moyen du billet affiché pour le spectacle</Text>
-          <Text>{t('currency.amount', { amount: props.sacdDeclaration.averageTicketPrice })}</Text>
+          <Text>{formatAmountForPdf(t, props.sacdDeclaration.averageTicketPrice)}</Text>
         </View>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Jauge théorique du spectacle</Text>
@@ -184,7 +185,7 @@ export function SacdDeclarationDocument(props: SacdDeclarationDocumentProps) {
                 <TableCell>
                   {accountingEntry.categoryPrecision ?? t(`model.sacdDeclaration.accountingCategory.enum.${accountingEntry.category}`)}
                 </TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>{t('currency.amount', { amount: accountingEntry.includingTaxesAmount })}</TableCell>
+                <TableCell style={{ justifyContent: 'flex-end' }}>{formatAmountForPdf(t, accountingEntry.includingTaxesAmount)}</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>{(accountingEntry.taxRate ?? 0) * 100}%</TableCell>
               </TableRow>
             ))}
@@ -429,7 +430,7 @@ export function SacdDeclarationDocument(props: SacdDeclarationDocumentProps) {
                   >
                     <TableCell>{sale.ticketCategory.name}</TableCell>
                     <TableCell style={{ justifyContent: 'flex-end' }}>
-                      {t('currency.amount', { amount: sale.eventCategoryTickets.priceOverride ?? sale.ticketCategory.price })}
+                      {formatAmountForPdf(t, sale.eventCategoryTickets.priceOverride ?? sale.ticketCategory.price)}
                     </TableCell>
                     <TableCell style={{ justifyContent: 'flex-end' }}>
                       {sale.eventCategoryTickets.totalOverride ?? sale.eventCategoryTickets.total}
