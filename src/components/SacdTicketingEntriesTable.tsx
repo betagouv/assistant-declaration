@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 
 import { SacdAudienceSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { EventSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
-import { currencyFormatter } from '@ad/src/utils/currency';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
 import { nameof } from '@ad/src/utils/typescript';
 
@@ -130,7 +129,7 @@ export function SacdTicketingEntriesTable({ wrappers, audience, taxRate }: SacdT
               'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
             }
           >
-            <span data-sentry-mask>{currencyFormatter.format(params.row.includingTaxesAmount)}</span>
+            <span data-sentry-mask>{t('currency.amount', { amount: params.row.includingTaxesAmount })}</span>
           </Tooltip>
         );
       },

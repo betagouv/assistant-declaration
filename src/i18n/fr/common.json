@@ -9,6 +9,10 @@
       "form_contains_errors_other": "Le formulaire soumis contient plusieurs erreurs. Les champs invalides ont été marqués en rouge."
     }
   },
+  "currency": {
+    "amount": "{{ amount, amount }}",
+    "amountWithNoDecimal": "{{ amount, amountWithNoDecimal }}"
+  },
   "errors": {
     "custom": {
       "accountAlreadyWithThisEmail": "un compte est déjà enregistré avec cet email",
@@ -282,7 +286,7 @@
     "template": {}
   },
   "duration": {
-    "fromSeconds": "{{ duration, fromSeconds }}"
+    "fromSeconds": "{{ duration, durationFromSeconds }}"
   },
   "model": {
     "sacemDeclaration": {

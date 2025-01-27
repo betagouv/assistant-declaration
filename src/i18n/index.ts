@@ -69,7 +69,7 @@ i18next.use(LanguageDetector).init(
 
             return formatDate(value, format, { locale });
           } else if (typeof value === 'number') {
-            if (format === 'fromSeconds') {
+            if (format === 'durationFromSeconds') {
               const locale = dateFnsLocales[lng];
 
               const seconds = Number(value);
@@ -78,6 +78,20 @@ i18next.use(LanguageDetector).init(
                 { hours: Math.floor(seconds / 3600), minutes: Math.floor((seconds % 3600) / 60), seconds: Math.floor((seconds % 3600) % 60) },
                 { locale }
               );
+            } else if (format === 'amount') {
+              return new Intl.NumberFormat(lng, {
+                style: 'currency',
+                currency: 'EUR', // The currency is unique for this application
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(value);
+            } else if (format === 'amountWithNoDecimal') {
+              return new Intl.NumberFormat(lng, {
+                style: 'currency',
+                currency: 'EUR', // The currency is unique for this application
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(value);
             }
           }
         }

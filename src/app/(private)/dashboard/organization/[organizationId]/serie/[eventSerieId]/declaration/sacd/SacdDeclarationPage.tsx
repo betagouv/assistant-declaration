@@ -48,7 +48,6 @@ import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModa
 import { FillSacdDeclarationSchema, FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { SacdAudienceSchema, SacdProductionTypeSchema } from '@ad/src/models/entities/declaration/sacd';
-import { currencyFormatter, currencyFormatterWithNoDecimals } from '@ad/src/utils/currency';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
@@ -387,15 +386,15 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                               data-sentry-mask
                             />
                             <Chip
-                              label={`${currencyFormatterWithNoDecimals.format(
-                                eventsWrapper.sales.reduce(
+                              label={`${t('currency.amountWithNoDecimal', {
+                                amount: eventsWrapper.sales.reduce(
                                   (acc, sales) =>
                                     acc +
                                     (sales.eventCategoryTickets.totalOverride ?? sales.eventCategoryTickets.total) *
                                       (sales.eventCategoryTickets.priceOverride ?? sales.ticketCategory.price),
                                   0
-                                )
-                              )} TTC`}
+                                ),
+                              })} TTC`}
                               sx={{
                                 bgcolor: 'var(--background-contrast-brown-opera)',
                                 height: 'auto',
@@ -451,9 +450,9 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                                             </Typography>{' '}
                                             de{' '}
                                             <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
-                                              {currencyFormatter.format(
-                                                updatedRow.eventCategoryTickets.priceOverride ?? updatedRow.ticketCategory.price
-                                              )}
+                                              {t('currency.amount', {
+                                                amount: updatedRow.eventCategoryTickets.priceOverride ?? updatedRow.ticketCategory.price,
+                                              })}
                                             </Typography>{' '}
                                             sur les autres représentations de{' '}
                                             <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
@@ -842,9 +841,9 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                       <TextField
                         disabled
                         label="Tarif moyen du billet affiché pour le spectacle"
-                        value={currencyFormatter.format(
-                          sacdDeclarationWrapper.declaration?.averageTicketPrice ?? sacdDeclarationWrapper.placeholder.averageTicketPrice
-                        )}
+                        value={t('currency.amount', {
+                          amount: sacdDeclarationWrapper.declaration?.averageTicketPrice ?? sacdDeclarationWrapper.placeholder.averageTicketPrice,
+                        })}
                         fullWidth
                       />
                     </Tooltip>

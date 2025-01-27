@@ -6,7 +6,6 @@ import { StandardLayout, layoutStyles, styles } from '@ad/src/components/documen
 import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
-import { currencyFormatter } from '@ad/src/utils/currency';
 import { getBaseUrl } from '@ad/src/utils/url';
 
 export const sacemStyles = StyleSheet.create({
@@ -128,12 +127,12 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 <TableCell>{revenue.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${revenue.category}`)}</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>{revenue.taxRate * 100}%</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {currencyFormatter.format(getExcludingTaxesAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate))}
+                  {t('currency.amount', { amount: getExcludingTaxesAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate) })}
                 </TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {currencyFormatter.format(getTaxAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate))}
+                  {t('currency.amount', { amount: getTaxAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate) })}
                 </TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>{currencyFormatter.format(revenue.includingTaxesAmount)}</TableCell>
+                <TableCell style={{ justifyContent: 'flex-end' }}>{t('currency.amount', { amount: revenue.includingTaxesAmount })}</TableCell>
               </TableRow>
             ))}
           </Table>
@@ -161,12 +160,12 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 <TableCell>{expense.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${expense.category}`)}</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>{expense.taxRate * 100}%</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {currencyFormatter.format(getExcludingTaxesAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate))}
+                  {t('currency.amount', { amount: getExcludingTaxesAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate) })}
                 </TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {currencyFormatter.format(getTaxAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate))}
+                  {t('currency.amount', { amount: getTaxAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate) })}
                 </TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>{currencyFormatter.format(expense.includingTaxesAmount)}</TableCell>
+                <TableCell style={{ justifyContent: 'flex-end' }}>{t('currency.amount', { amount: expense.includingTaxesAmount })}</TableCell>
               </TableRow>
             ))}
           </Table>

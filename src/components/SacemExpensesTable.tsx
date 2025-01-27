@@ -17,7 +17,6 @@ import {
 } from '@ad/src/core/declaration';
 import { FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { AccountingCategorySchema } from '@ad/src/models/entities/declaration/sacem';
-import { currencyFormatter } from '@ad/src/utils/currency';
 import { nameof } from '@ad/src/utils/typescript';
 import { RowForForm } from '@ad/src/utils/validation';
 
@@ -157,9 +156,9 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
         renderCell: (params) => {
           return (
             <span data-sentry-mask>
-              {currencyFormatter.format(
-                getExcludingTaxesAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate)
-              )}
+              {t('currency.amount', {
+                amount: getExcludingTaxesAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate),
+              })}
             </span>
           );
         },
@@ -171,7 +170,7 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
         renderCell: (params) => {
           return (
             <span data-sentry-mask>
-              {currencyFormatter.format(getTaxAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate))}
+              {t('currency.amount', { amount: getTaxAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate) })}
             </span>
           );
         },
@@ -197,7 +196,7 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
         renderCell: (params) => {
           return (
             <ErrorCellWrapper errorMessage={params.row.errors?.includingTaxesAmount?.message} data-sentry-mask>
-              {currencyFormatter.format(params.row.data.includingTaxesAmount)}
+              {t('currency.amount', { amount: params.row.data.includingTaxesAmount })}
             </ErrorCellWrapper>
           );
         },
