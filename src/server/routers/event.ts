@@ -1,7 +1,12 @@
 import { Prisma } from '@prisma/client';
 import { minutesToMilliseconds, subMonths } from 'date-fns';
 
-import { BilletwebTicketingSystemClient, MockTicketingSystemClient, TicketingSystemClient } from '@ad/src/core/ticketing';
+import {
+  BilletwebTicketingSystemClient,
+  MockTicketingSystemClient,
+  SupersoniksTicketingSystemClient,
+  TicketingSystemClient,
+} from '@ad/src/core/ticketing';
 import {
   GetEventSerieSchema,
   ListEventsSchema,
@@ -106,6 +111,11 @@ export const eventRouter = router({
                   assert(ticketingSystem.apiSecretKey);
 
                   ticketingSystemClient = new BilletwebTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
+                  break;
+                case 'SUPERSONIKS':
+                  assert(ticketingSystem.apiSecretKey);
+
+                  ticketingSystemClient = new SupersoniksTicketingSystemClient(ticketingSystem.apiSecretKey);
                   break;
                 default:
                   throw new Error('unknown ticketing system');
