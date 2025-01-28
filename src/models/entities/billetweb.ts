@@ -32,8 +32,14 @@ export const JsonEventSchema = applyTypedParsers(
       id: z.string().min(1),
       ext_id: z.string().min(1),
       name: z.string().min(1),
-      start: z.coerce.date(),
-      end: z.coerce.date(),
+      start: z.preprocess((value) => {
+        // Some old entries do not have this field initialized (dated ~2018)
+        return value === '0000-00-00 00:00:00' ? null : value;
+      }, z.coerce.date().nullable()),
+      end: z.preprocess((value) => {
+        // Some old entries do not have this field initialized (dated ~2018)
+        return value === '0000-00-00 00:00:00' ? null : value;
+      }, z.coerce.date().nullable()),
       multiple: safeCoerceToBoolean(z.boolean()),
       place: z.string().transform(transformStringOrNull),
       shop: z.string().url(),
@@ -51,8 +57,8 @@ export const JsonEventSchema = applyTypedParsers(
         },
         z.array(z.string().min(1))
       ),
-      image: z.string().url(),
-      cover: z.string().url(),
+      image: emptyStringtoNullPreprocessor(z.string().url().nullable()),
+      cover: emptyStringtoNullPreprocessor(z.string().url().nullable()),
       confirmation_message: z.string().transform(transformStringOrNull),
     })
     .strip()
@@ -72,8 +78,14 @@ export const JsonTicketCategorySchema = applyTypedParsers(
       label: z.string().transform(transformStringOrNull),
       visibility: z.unknown(), // Integer enum
       instructions: z.string().transform(transformStringOrNull),
-      start_time: emptyStringtoNullPreprocessor(z.date().nullable()),
-      end_time: emptyStringtoNullPreprocessor(z.date().nullable()),
+      start_time: z.preprocess((value) => {
+        // Don't understand why?
+        return value === '' ? null : value;
+      }, z.coerce.date().nullable()),
+      end_time: z.preprocess((value) => {
+        // Don't understand why?
+        return value === '' ? null : value;
+      }, z.coerce.date().nullable()),
       form: z.string().min(1),
       tax: z.string().transform(transformStringOrNull),
       commission: z.number().nonnegative().or(z.literal(false)),
@@ -126,7 +138,7 @@ export const JsonEventAttendeeSchema = applyTypedParsers(
       }, z.coerce.date().nullable()),
       order_accreditation: z.unknown(), // Integer enum
       order_management: z.string().url(),
-      order_language: z.string().min(1),
+      order_language: z.string().transform(transformStringOrNull),
       custom_order: z.record(z.string().min(1), z.unknown()).optional(),
     })
     .strip()
