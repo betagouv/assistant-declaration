@@ -17,7 +17,6 @@ import {
 } from '@ad/src/core/declaration';
 import { FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { SacdAccountingCategorySchema } from '@ad/src/models/entities/declaration/sacd';
-import { currencyFormatter } from '@ad/src/utils/currency';
 import { nameof } from '@ad/src/utils/typescript';
 import { RowForForm } from '@ad/src/utils/validation';
 
@@ -163,9 +162,9 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
         renderCell: (params) => {
           return (
             <span data-sentry-mask>
-              {currencyFormatter.format(
-                getExcludingTaxesAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate ?? 0)
-              )}
+              {t('currency.amount', {
+                amount: getExcludingTaxesAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate ?? 0),
+              })}
             </span>
           );
         },
@@ -177,7 +176,9 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
         renderCell: (params) => {
           return (
             <span data-sentry-mask>
-              {currencyFormatter.format(getTaxAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate ?? 0))}
+              {t('currency.amount', {
+                amount: getTaxAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate ?? 0),
+              })}
             </span>
           );
         },
@@ -203,7 +204,7 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
         renderCell: (params) => {
           return (
             <ErrorCellWrapper errorMessage={params.row.errors?.includingTaxesAmount?.message} data-sentry-mask>
-              {currencyFormatter.format(params.row.data.includingTaxesAmount)}
+              {t('currency.amount', { amount: params.row.data.includingTaxesAmount })}
             </ErrorCellWrapper>
           );
         },

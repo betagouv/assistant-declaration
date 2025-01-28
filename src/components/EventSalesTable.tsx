@@ -3,6 +3,7 @@ import { GridAutosizeOptions, type GridColDef, type GridRowModel, useGridApiRef 
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import styles from '@ad/src/components/EventSalesTable.module.scss';
@@ -12,7 +13,6 @@ import {
   SalesWrapperSchemaType,
   TicketCategorySchemaType,
 } from '@ad/src/models/entities/event';
-import { currencyFormatter } from '@ad/src/utils/currency';
 import { nameof } from '@ad/src/utils/typescript';
 
 const salesTypedNameof = nameof<SalesWrapperSchemaType>;
@@ -25,6 +25,8 @@ export interface EventSalesTableProps {
 }
 
 export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) {
+  const { t } = useTranslation('common');
+
   const apiRef = useGridApiRef();
 
   const [autosizeOption] = useState<GridAutosizeOptions>({
@@ -86,14 +88,14 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
         if (params.row.eventCategoryTickets.priceOverride !== null) {
           return (
             <Tooltip
-              title={`Le prix remonté par la billetterie était de ${currencyFormatter.format(params.row.ticketCategory.price)}`}
+              title={`Le prix remonté par la billetterie était de ${t('currency.amount', { amount: params.row.ticketCategory.price })}`}
               data-sentry-mask
             >
-              <span data-sentry-mask>{currencyFormatter.format(params.row.eventCategoryTickets.priceOverride)}</span>
+              <span data-sentry-mask>{t('currency.amount', { amount: params.row.eventCategoryTickets.priceOverride })}</span>
             </Tooltip>
           );
         } else {
-          return `${currencyFormatter.format(params.row.ticketCategory.price)}`;
+          return `${t('currency.amount', { amount: params.row.ticketCategory.price })}`;
         }
       },
       cellClassName: (params) => {

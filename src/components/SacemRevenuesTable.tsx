@@ -17,7 +17,6 @@ import {
 } from '@ad/src/core/declaration';
 import { FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { AccountingCategorySchema } from '@ad/src/models/entities/declaration/sacem';
-import { currencyFormatter } from '@ad/src/utils/currency';
 import { nameof } from '@ad/src/utils/typescript';
 import { RowForForm } from '@ad/src/utils/validation';
 
@@ -172,9 +171,9 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
               }
             >
               <span data-sentry-mask>
-                {currencyFormatter.format(
-                  getExcludingTaxesAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate)
-                )}
+                {t('currency.amount', {
+                  amount: getExcludingTaxesAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate),
+                })}
               </span>
             </Tooltip>
           );
@@ -194,7 +193,9 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
               }
             >
               <span data-sentry-mask>
-                {currencyFormatter.format(getTaxAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate))}
+                {t('currency.amount', {
+                  amount: getTaxAmountFromIncludingTaxesAmount(params.row.data.includingTaxesAmount, params.row.data.taxRate),
+                })}
               </span>
             </Tooltip>
           );
@@ -228,7 +229,7 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
                     : null
                 }
               >
-                <span data-sentry-mask>{currencyFormatter.format(params.row.data.includingTaxesAmount)}</span>
+                <span data-sentry-mask>{t('currency.amount', { amount: params.row.data.includingTaxesAmount })}</span>
               </Tooltip>
             </ErrorCellWrapper>
           );

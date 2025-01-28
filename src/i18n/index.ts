@@ -1,9 +1,5 @@
-import type { Locale } from 'date-fns';
+import { type Locale, formatDate, formatDistance, formatDuration, formatRelative, isDate } from 'date-fns';
 // import utcToZonedTime from 'date-fns-tz/utcToZonedTime';
-import { formatDate } from 'date-fns/format';
-import { formatDistance } from 'date-fns/formatDistance';
-import { formatRelative } from 'date-fns/formatRelative';
-import { isDate } from 'date-fns/isDate';
 import { fr as frDateLocale } from 'date-fns/locale/fr';
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
@@ -60,6 +56,7 @@ i18next.use(LanguageDetector).init(
             const locale = dateFnsLocales[lng];
 
             if (format === 'short') return formatDate(value, 'P', { locale });
+            if (format === 'shortWithTime') return formatDate(value, 'Pp', { locale });
             if (format === 'long') return formatDate(value, 'PPPP', { locale });
             if (format === 'longWithTime') return formatDate(value, 'PPPPp', { locale });
             if (format === 'relative') return formatRelative(value, new Date(), { locale });
@@ -71,6 +68,31 @@ i18next.use(LanguageDetector).init(
             }
 
             return formatDate(value, format, { locale });
+          } else if (typeof value === 'number') {
+            if (format === 'durationFromSeconds') {
+              const locale = dateFnsLocales[lng];
+
+              const seconds = Number(value);
+
+              return formatDuration(
+                { hours: Math.floor(seconds / 3600), minutes: Math.floor((seconds % 3600) / 60), seconds: Math.floor((seconds % 3600) % 60) },
+                { locale }
+              );
+            } else if (format === 'amount') {
+              return new Intl.NumberFormat(lng, {
+                style: 'currency',
+                currency: 'EUR', // The currency is unique for this application
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(value);
+            } else if (format === 'amountWithNoDecimal') {
+              return new Intl.NumberFormat(lng, {
+                style: 'currency',
+                currency: 'EUR', // The currency is unique for this application
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(value);
+            }
           }
         }
 

@@ -25,7 +25,6 @@ import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { FillSacemDeclarationSchema, FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
-import { currencyFormatter, currencyFormatterWithNoDecimals } from '@ad/src/utils/currency';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
@@ -249,15 +248,15 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                               data-sentry-mask
                             />
                             <Chip
-                              label={`${currencyFormatterWithNoDecimals.format(
-                                eventsWrapper.sales.reduce(
+                              label={`${t('currency.amountWithNoDecimal', {
+                                amount: eventsWrapper.sales.reduce(
                                   (acc, sales) =>
                                     acc +
                                     (sales.eventCategoryTickets.totalOverride ?? sales.eventCategoryTickets.total) *
                                       (sales.eventCategoryTickets.priceOverride ?? sales.ticketCategory.price),
                                   0
-                                )
-                              )} TTC`}
+                                ),
+                              })} TTC`}
                               sx={{
                                 bgcolor: 'var(--background-contrast-brown-opera)',
                                 height: 'auto',
@@ -313,9 +312,9 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                                             </Typography>{' '}
                                             de{' '}
                                             <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
-                                              {currencyFormatter.format(
-                                                updatedRow.eventCategoryTickets.priceOverride ?? updatedRow.ticketCategory.price
-                                              )}
+                                              {t('currency.amount', {
+                                                amount: updatedRow.eventCategoryTickets.priceOverride ?? updatedRow.ticketCategory.price,
+                                              })}
                                             </Typography>{' '}
                                             sur les autres représentations de{' '}
                                             <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>

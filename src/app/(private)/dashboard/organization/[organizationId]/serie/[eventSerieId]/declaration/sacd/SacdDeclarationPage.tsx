@@ -43,11 +43,11 @@ import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SacdAccountingEntriesTable } from '@ad/src/components/SacdAccountingEntriesTable';
 import { SacdOrganizationFields } from '@ad/src/components/SacdOrganizationFields';
 import { SacdPerformedWorksTable } from '@ad/src/components/SacdPerformedWorksTable';
+import { SacdTicketingEntriesTable } from '@ad/src/components/SacdTicketingEntriesTable';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { FillSacdDeclarationSchema, FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { SacdAudienceSchema, SacdProductionTypeSchema } from '@ad/src/models/entities/declaration/sacd';
-import { currencyFormatter, currencyFormatterWithNoDecimals } from '@ad/src/utils/currency';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
@@ -95,6 +95,7 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
     formState: { errors, isDirty },
     getValues,
     setValue,
+    watch,
     control,
     trigger,
     reset,
@@ -385,15 +386,15 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                               data-sentry-mask
                             />
                             <Chip
-                              label={`${currencyFormatterWithNoDecimals.format(
-                                eventsWrapper.sales.reduce(
+                              label={`${t('currency.amountWithNoDecimal', {
+                                amount: eventsWrapper.sales.reduce(
                                   (acc, sales) =>
                                     acc +
                                     (sales.eventCategoryTickets.totalOverride ?? sales.eventCategoryTickets.total) *
                                       (sales.eventCategoryTickets.priceOverride ?? sales.ticketCategory.price),
                                   0
-                                )
-                              )} TTC`}
+                                ),
+                              })} TTC`}
                               sx={{
                                 bgcolor: 'var(--background-contrast-brown-opera)',
                                 height: 'auto',
@@ -449,9 +450,9 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                                             </Typography>{' '}
                                             de{' '}
                                             <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
-                                              {currencyFormatter.format(
-                                                updatedRow.eventCategoryTickets.priceOverride ?? updatedRow.ticketCategory.price
-                                              )}
+                                              {t('currency.amount', {
+                                                amount: updatedRow.eventCategoryTickets.priceOverride ?? updatedRow.ticketCategory.price,
+                                              })}
                                             </Typography>{' '}
                                             sur les autres représentations de{' '}
                                             <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
@@ -817,6 +818,20 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                       }}
                     />
                   </Grid>
+                  <Grid item xs={12}>
+                    <Box
+                      sx={{
+                        bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
+                        borderRadius: '8px',
+                        py: { xs: 2, md: 3 },
+                        px: { xs: 1, md: 2 },
+                        mt: 1,
+                        mb: 2,
+                      }}
+                    >
+                      <SacdTicketingEntriesTable wrappers={eventsWrappers} audience={watch('audience')} taxRate={eventSerie.taxRate} />
+                    </Box>
+                  </Grid>
                   <Grid item xs={12} sm={6}>
                     <Tooltip
                       title={
@@ -826,9 +841,9 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                       <TextField
                         disabled
                         label="Tarif moyen du billet affiché pour le spectacle"
-                        value={currencyFormatter.format(
-                          sacdDeclarationWrapper.declaration?.averageTicketPrice ?? sacdDeclarationWrapper.placeholder.averageTicketPrice
-                        )}
+                        value={t('currency.amount', {
+                          amount: sacdDeclarationWrapper.declaration?.averageTicketPrice ?? sacdDeclarationWrapper.placeholder.averageTicketPrice,
+                        })}
                         fullWidth
                       />
                     </Tooltip>
@@ -1111,12 +1126,11 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                       <Grid item xs>
                         <Button
                           component={NextLink}
-                          href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-                          // href={linkRegistry.get('declarationPdf', {
-                          //   eventSerieId: eventSerie.id,
-                          //   type: DeclarationTypeSchema.Values.SACD,
-                          //   download: true,
-                          // })}
+                          href={linkRegistry.get('declarationPdf', {
+                            eventSerieId: eventSerie.id,
+                            type: DeclarationTypeSchema.Values.SACD,
+                            download: true,
+                          })}
                           download // Not forcing the download so using an explicit query parameter to force headers from the server
                           target="_blank" // Needed otherwise after the first click it won't work again (probably due to this page receiving headers already)
                           size="large"
@@ -1135,11 +1149,10 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                       <Grid item xs>
                         <Button
                           component={NextLink}
-                          href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-                          // href={linkRegistry.get('declarationPdf', {
-                          //   eventSerieId: eventSerie.id,
-                          //   type: DeclarationTypeSchema.Values.SACD,
-                          // })}
+                          href={linkRegistry.get('declarationPdf', {
+                            eventSerieId: eventSerie.id,
+                            type: DeclarationTypeSchema.Values.SACD,
+                          })}
                           target="_blank"
                           size="large"
                           variant="contained"

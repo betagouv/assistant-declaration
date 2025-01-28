@@ -127,6 +127,12 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
 
       assert(event);
 
+      // Some really old events series have neither a start date nor an end date, their data is probably broken...
+      // Since it's not for recent events we just avoid them
+      if (event.start === null || event.end === null) {
+        return;
+      }
+
       // For this ticketing system, if an event has only 1 session it won't have any date in their backend, which is weird but we have to emulate it for our own logic
 
       // From what we saw it's always '0', but due to it's no longer unique across series so we add a prefix
