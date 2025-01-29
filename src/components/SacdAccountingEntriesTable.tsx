@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
 import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
+import { TaxRateEditCell } from '@ad/src/components/TaxRateEditCell';
 import {
   EditableAmountSwitch,
   getExcludingTaxesAmountFromIncludingTaxesAmount,
@@ -142,6 +143,7 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
             </ErrorCellWrapper>
           );
         },
+        renderEditCell: (params) => <TaxRateEditCell {...params} />,
       },
       {
         field: `excludingTaxesAmount`,
