@@ -20,14 +20,14 @@ export const TaxRateEditCell: NonNullable<GridColDef<RowForForm<{ taxRate: numbe
   api,
 }) => {
   // [WORKAROUND] SACD was mentioning the tax rate as nullable so we did it but without any use case for now compared to using `0`
-  const safeValue = useMemo(() => (value !== null ? value : 0), [value]);
+  const safeValue = useMemo(() => (typeof value === 'number' ? value : 0), [value]);
 
   return (
     <Autocomplete
       options={taxRateOptions}
       freeSolo
       disableClearable
-      value={value || 0}
+      value={safeValue}
       onInputChange={(event, newValue, reason) => {
         // From the number input it's a float, but it's a string when an option is selected due to being an option label (string)
         const safeNewValue = parseFloat(newValue);
