@@ -4,32 +4,48 @@ import { GridColDef } from '@mui/x-data-grid';
 import { currentTaxRates } from '@ad/src/core/declaration';
 import { RowForForm } from '@ad/src/utils/validation';
 
-const taxRateOptions: string[] = currentTaxRates.map((taxRate) => {
-  // Display a percentage tax rate so it's easier for people to understand
-  const valueToDisplay = taxRate * 100;
+const taxRateOptions = currentTaxRates.map((taxRate) => {
+  const valueToDisplay = taxRate * 100; // Display a percentage tax rate so it's easier for people to understand
+  const safeValue = Math.round(valueToDisplay * 100) / 100; // Since it comes from an operation we make sure to round it before displaying the input
 
-  // Since it comes from an operation we make sure to round it before displaying the input
-  return `${Math.round(valueToDisplay * 100) / 100}%`;
+  return {
+    value: safeValue,
+    label: `${safeValue}%`,
+  };
 });
 
 export const TaxRateEditCell: NonNullable<GridColDef<RowForForm<{ taxRate: number }, any>>['renderEditCell']> = ({ id, field, value, api }) => {
   return (
     <Autocomplete
-      // [WORKAROUND] We had issue for `value` and some errors on changes when dealing with number
-      // So only using numbers for the underlying `TextField`
-      options={currentTaxRates.map((taxRate) => {
-        // Display a percentage tax rate so it's easier for people to understand
-        const valueToDisplay = taxRate * 100;
-
-        // Since it comes from an operation we make sure to round it before displaying the input
-        return (Math.round(valueToDisplay * 100) / 100).toString();
-      })}
+      options={taxRateOptions}
       freeSolo
-      value={value.toString() || ''}
+      filterOptions={(x) => x} // Always return all options
+      disableClearable
+      value={value || taxRateOptions[0]}
+      onChange={(event, newValue, reason) => {
+        console.log(22222222222);
+        console.log(reason);
+        console.log(newValue);
+      }}
       onInputChange={(event, newValue, reason) => {
-        const correctNewValue = parseInt(newValue, 10);
+        const safeNewValue = parseInt(newValue, 10);
 
-        api.setEditCellValue({ id, field, value: correctNewValue }, event);
+        console.log(33333333333);
+        console.log(reason);
+        console.log(newValue);
+        // console.log(newValue);
+        // console.log(safeNewValue);
+
+        // console.log(typeof newValue);
+        // if (typeof newValue === 'string') {
+        //   console.log(1111111111111111111111111111);
+        //   console.log(newValue);
+        //   console.log(reason);
+
+        //   return;
+        // }
+
+        api.setEditCellValue({ id, field, value: safeNewValue }, event);
       }}
       renderInput={(params) => (
         <TextField
@@ -52,12 +68,26 @@ export const TaxRateEditCell: NonNullable<GridColDef<RowForForm<{ taxRate: numbe
           fullWidth
         />
       )}
-      renderOption={(props, option) => {
-        return (
-          <li {...props} key={option}>
-            {option}%
-          </li>
-        );
+      // renderOption={(props, option) => {
+      //   // Just needed for the Sentry mask
+      //   return (
+      //     <li {...props} key={option} data-sentry-mask>
+      //       {option}%
+      //     </li>
+      //   );
+      // }}
+      getOptionLabel={(option) => {
+        // console.log(11111111);
+        // console.log(option);
+
+        if (typeof option === 'number') {
+          return option.toString();
+        }
+
+        return option.label;
+      }}
+      isOptionEqualToValue={(option, value) => {
+        return option.value === value;
       }}
       sx={{
         // `Autocomplete` has double borders due to `TextField`, we wanted to use `InputBase` but it was breaking items so we ended patching the CSS
@@ -66,6 +96,7 @@ export const TaxRateEditCell: NonNullable<GridColDef<RowForForm<{ taxRate: numbe
         // It also does not respect the CSS style due to `TextField` (as done for hardcoded GridEditInputCellRoot, but here we only patch what we need for simplicity)
         '& input': { fontSize: '0.875rem' },
       }}
+      fullWidth
     />
   );
 };
