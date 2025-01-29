@@ -272,6 +272,15 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
   }
 }
 
+export class MapadoTicketingSystemClient implements TicketingSystemClient {
+  constructor(private readonly secretKey: string) {}
+
+  public async getEventsSeries(fromDate: Date, toDate?: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
+    // TODO: ...
+    return [];
+  }
+}
+
 export class MockTicketingSystemClient implements TicketingSystemClient {
   public async getEventsSeries(fromDate: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
     // Simulate loading

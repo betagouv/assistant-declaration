@@ -66,6 +66,9 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: npm install
 
+      - name: Setup API clients
+        run: npm run setup
+
       - name: Prepare linting
         run: npm run lint:prepare
 
