@@ -4,14 +4,12 @@ import { GridColDef } from '@mui/x-data-grid';
 import { currentTaxRates } from '@ad/src/core/declaration';
 import { RowForForm } from '@ad/src/utils/validation';
 
-const taxRateOptions = currentTaxRates.map((taxRate) => {
-  const valueToDisplay = taxRate * 100; // Display a percentage tax rate so it's easier for people to understand
-  const safeValue = Math.round(valueToDisplay * 100) / 100; // Since it comes from an operation we make sure to round it before displaying the input
+const taxRateOptions: number[] = currentTaxRates.map((taxRate) => {
+  // Display a percentage tax rate so it's easier for people to understand
+  const valueToDisplay = taxRate * 100;
 
-  return {
-    value: safeValue,
-    label: `${safeValue}%`,
-  };
+  // Since it comes from an operation we make sure to round it before displaying the input
+  return Math.round(valueToDisplay * 100) / 100;
 });
 
 export const TaxRateEditCell: NonNullable<GridColDef<RowForForm<{ taxRate: number }, any>>['renderEditCell']> = ({ id, field, value, api }) => {
@@ -19,31 +17,11 @@ export const TaxRateEditCell: NonNullable<GridColDef<RowForForm<{ taxRate: numbe
     <Autocomplete
       options={taxRateOptions}
       freeSolo
-      filterOptions={(x) => x} // Always return all options
       disableClearable
-      value={value || taxRateOptions[0]}
-      onChange={(event, newValue, reason) => {
-        console.log(22222222222);
-        console.log(reason);
-        console.log(newValue);
-      }}
+      value={value || 0}
       onInputChange={(event, newValue, reason) => {
-        const safeNewValue = parseInt(newValue, 10);
-
-        console.log(33333333333);
-        console.log(reason);
-        console.log(newValue);
-        // console.log(newValue);
-        // console.log(safeNewValue);
-
-        // console.log(typeof newValue);
-        // if (typeof newValue === 'string') {
-        //   console.log(1111111111111111111111111111);
-        //   console.log(newValue);
-        //   console.log(reason);
-
-        //   return;
-        // }
+        // From the number input it's a float, but it's a string when an option is selected due to being an option label (string)
+        const safeNewValue = parseFloat(newValue);
 
         api.setEditCellValue({ id, field, value: safeNewValue }, event);
       }}
@@ -68,27 +46,20 @@ export const TaxRateEditCell: NonNullable<GridColDef<RowForForm<{ taxRate: numbe
           fullWidth
         />
       )}
-      // renderOption={(props, option) => {
-      //   // Just needed for the Sentry mask
-      //   return (
-      //     <li {...props} key={option} data-sentry-mask>
-      //       {option}%
-      //     </li>
-      //   );
-      // }}
+      renderOption={(props, option) => {
+        // Needed because using `getOptionLabel` to formatting with locale and percentage would also be set into
+        // the number input... The workaround is to use `getOptionLabel` as "float string" to parse them after no matter the locale
+        return (
+          <li {...props} key={option}>
+            {option}%
+          </li>
+        );
+      }}
       getOptionLabel={(option) => {
-        // console.log(11111111);
-        // console.log(option);
-
-        if (typeof option === 'number') {
-          return option.toString();
-        }
-
-        return option.label;
+        // Has to be a string (so we parse it when an option is selected)
+        return option.toString();
       }}
-      isOptionEqualToValue={(option, value) => {
-        return option.value === value;
-      }}
+      filterOptions={(x) => x} // Always return full options
       sx={{
         // `Autocomplete` has double borders due to `TextField`, we wanted to use `InputBase` but it was breaking items so we ended patching the CSS
         // Ref: https://stackoverflow.com/questions/79374017/any-way-to-use-inputbase-with-autocomplete-with-multiple-items
