@@ -9,6 +9,8 @@ import {
   SacemDeclarationAccountingFluxEntrySchemaType,
 } from '@ad/src/models/entities/declaration/sacem';
 
+export const currentTaxRates: number[] = [0, 0.021, 0.055, 0.1, 0.2];
+
 export type EditableAmountSwitch = 'excludingTaxes' | 'includingTaxes';
 
 const revenueSortOrder: AccountingCategorySchemaType[] = [
