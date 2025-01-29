@@ -17,15 +17,13 @@ module.exports = {
     // 'import/no-unused-modules': [1, { unusedExports: true }],
   },
   overrides: [
-    overrides: [
-      {
-        files: ['src/client/supersoniks/core/*.ts'],
-        rules: {
-          'no-prototype-builtins': 'off',
-          'no-undef': 'off',
-        },
+    {
+      files: ['src/client/supersoniks/*.ts'],
+      rules: {
+        'no-prototype-builtins': 'off',
+        'no-undef': 'off',
       },
-    ],
+    },
     {
       files: ['*.md', '*.mdx'],
       extends: 'plugin:mdx/recommended',
