@@ -1,6 +1,7 @@
 import { Autocomplete, TextField } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { currentTaxRates } from '@ad/src/core/declaration';
 import { RowForForm } from '@ad/src/utils/validation';
@@ -19,6 +20,8 @@ export const TaxRateEditCell: NonNullable<GridColDef<RowForForm<{ taxRate: numbe
   value,
   api,
 }) => {
+  const { t } = useTranslation('common');
+
   // [WORKAROUND] SACD was mentioning the tax rate as nullable so we did it but without any use case for now compared to using `0`
   const safeValue = useMemo(() => (typeof value === 'number' ? value : 0), [value]);
 
@@ -60,7 +63,9 @@ export const TaxRateEditCell: NonNullable<GridColDef<RowForForm<{ taxRate: numbe
         // the number input... The workaround is to use `getOptionLabel` as "float string" to parse them after no matter the locale
         return (
           <li {...props} key={option}>
-            {option}%
+            {t('number.percent', {
+              percentage: option / 100, // Bring back to technical format
+            })}
           </li>
         );
       }}

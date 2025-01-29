@@ -127,11 +127,17 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
         if (params.row.eventCategoryTickets.totalOverride !== null) {
           return (
             <Tooltip title={`Le nombre de places remonté par la billetterie était de ${params.row.eventCategoryTickets.total}`} data-sentry-mask>
-              <span data-sentry-mask>{params.row.eventCategoryTickets.totalOverride}</span>
+              <span data-sentry-mask>
+                {t('number.default', {
+                  number: params.row.eventCategoryTickets.totalOverride,
+                })}
+              </span>
             </Tooltip>
           );
         } else {
-          return params.row.eventCategoryTickets.total;
+          return t('number.default', {
+            number: params.row.eventCategoryTickets.total,
+          });
         }
       },
       cellClassName: (params) => {

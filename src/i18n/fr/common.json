@@ -331,5 +331,11 @@
         }
       }
     }
+  },
+  "number": {
+    "default": "{{ number, number }}",
+    "defaultWithNoDecimal": "{{ number, numberWithNoDecimal }}",
+    "percent": "{{ percentage, percent }}",
+    "percentWithNoDecimal": "{{ percentage, percentWithNoDecimal }}"
   }
 }

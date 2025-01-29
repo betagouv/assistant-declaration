@@ -126,8 +126,6 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
           };
         },
         renderCell: (params) => {
-          const valueToDisplay = params.row.data.taxRate * 100;
-
           return (
             <ErrorCellWrapper errorMessage={params.row.errors?.taxRate?.message} data-sentry-mask>
               <Tooltip
@@ -137,8 +135,11 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
                     : null
                 }
               >
-                {/* Since it comes from an operation we make sure to round it before displaying the input */}
-                <span data-sentry-mask>{Math.round(valueToDisplay * 100) / 100}%</span>
+                <span data-sentry-mask>
+                  {t('number.percent', {
+                    percentage: params.row.data.taxRate,
+                  })}
+                </span>
               </Tooltip>
             </ErrorCellWrapper>
           );
