@@ -1,5 +1,6 @@
 import { Autocomplete, TextField } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
+import { useMemo } from 'react';
 
 import { currentTaxRates } from '@ad/src/core/declaration';
 import { RowForForm } from '@ad/src/utils/validation';
@@ -12,7 +13,15 @@ const taxRateOptions: number[] = currentTaxRates.map((taxRate) => {
   return Math.round(valueToDisplay * 100) / 100;
 });
 
-export const TaxRateEditCell: NonNullable<GridColDef<RowForForm<{ taxRate: number }, any>>['renderEditCell']> = ({ id, field, value, api }) => {
+export const TaxRateEditCell: NonNullable<GridColDef<RowForForm<{ taxRate: number | null }, any>>['renderEditCell']> = ({
+  id,
+  field,
+  value,
+  api,
+}) => {
+  // [WORKAROUND] SACD was mentioning the tax rate as nullable so we did it but without any use case for now compared to using `0`
+  const safeValue = useMemo(() => (value !== null ? value : 0), [value]);
+
   return (
     <Autocomplete
       options={taxRateOptions}
