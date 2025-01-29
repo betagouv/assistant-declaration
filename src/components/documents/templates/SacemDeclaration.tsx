@@ -6,7 +6,7 @@ import { StandardLayout, layoutStyles, styles } from '@ad/src/components/documen
 import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
-import { formatAmountForPdf } from '@ad/src/utils/pdf';
+import { escapeFormattedNumberForPdf } from '@ad/src/utils/pdf';
 import { getBaseUrl } from '@ad/src/utils/url';
 
 export const sacemStyles = StyleSheet.create({
@@ -63,7 +63,13 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
         </View>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Jauge</Text>
-          <Text>{props.sacemDeclaration.placeCapacity}</Text>
+          <Text>
+            {escapeFormattedNumberForPdf(
+              t('number.default', {
+                number: props.sacemDeclaration.placeCapacity,
+              })
+            )}
+          </Text>
         </View>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Personne en charge</Text>
@@ -91,7 +97,13 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
         </View>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Nombre de représentations</Text>
-          <Text>{props.sacemDeclaration.eventsCount}</Text>
+          <Text>
+            {escapeFormattedNumberForPdf(
+              t('number.default', {
+                number: props.sacemDeclaration.eventsCount,
+              })
+            )}
+          </Text>
         </View>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Genre du spectacle</Text>
@@ -102,11 +114,23 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
       <View style={styles.gridContainer}>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Nombre d&apos;entrées payantes</Text>
-          <Text>{props.sacemDeclaration.paidTickets}</Text>
+          <Text>
+            {escapeFormattedNumberForPdf(
+              t('number.default', {
+                number: props.sacemDeclaration.paidTickets,
+              })
+            )}
+          </Text>
         </View>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Nombre d&apos;entrées gratuites</Text>
-          <Text>{props.sacemDeclaration.freeTickets}</Text>
+          <Text>
+            {escapeFormattedNumberForPdf(
+              t('number.default', {
+                number: props.sacemDeclaration.freeTickets,
+              })
+            )}
+          </Text>
         </View>
         <View style={{ ...styles.gridItem, paddingTop: 10 }}>
           <Table weightings={[2, 1, 1, 1, 1]} tdStyle={{ padding: 5 }}>
@@ -126,14 +150,26 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 }}
               >
                 <TableCell>{revenue.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${revenue.category}`)}</TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>{revenue.taxRate * 100}%</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {formatAmountForPdf(t, getExcludingTaxesAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate))}
+                  {escapeFormattedNumberForPdf(
+                    t('number.percent', {
+                      percentage: revenue.taxRate,
+                    })
+                  )}
                 </TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {formatAmountForPdf(t, getTaxAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate))}
+                  {escapeFormattedNumberForPdf(
+                    t('currency.amount', { amount: getExcludingTaxesAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate) })
+                  )}
                 </TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>{formatAmountForPdf(t, revenue.includingTaxesAmount)}</TableCell>
+                <TableCell style={{ justifyContent: 'flex-end' }}>
+                  {escapeFormattedNumberForPdf(
+                    t('currency.amount', { amount: getTaxAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate) })
+                  )}
+                </TableCell>
+                <TableCell style={{ justifyContent: 'flex-end' }}>
+                  {escapeFormattedNumberForPdf(t('currency.amount', { amount: revenue.includingTaxesAmount }))}
+                </TableCell>
               </TableRow>
             ))}
           </Table>
@@ -159,14 +195,26 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 }}
               >
                 <TableCell>{expense.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${expense.category}`)}</TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>{expense.taxRate * 100}%</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {formatAmountForPdf(t, getExcludingTaxesAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate))}
+                  {escapeFormattedNumberForPdf(
+                    t('number.percent', {
+                      percentage: expense.taxRate,
+                    })
+                  )}
                 </TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {formatAmountForPdf(t, getTaxAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate))}
+                  {escapeFormattedNumberForPdf(
+                    t('currency.amount', { amount: getExcludingTaxesAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate) })
+                  )}
                 </TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>{formatAmountForPdf(t, expense.includingTaxesAmount)}</TableCell>
+                <TableCell style={{ justifyContent: 'flex-end' }}>
+                  {escapeFormattedNumberForPdf(
+                    t('currency.amount', { amount: getTaxAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate) })
+                  )}
+                </TableCell>
+                <TableCell style={{ justifyContent: 'flex-end' }}>
+                  {escapeFormattedNumberForPdf(t('currency.amount', { amount: expense.includingTaxesAmount }))}
+                </TableCell>
               </TableRow>
             ))}
           </Table>

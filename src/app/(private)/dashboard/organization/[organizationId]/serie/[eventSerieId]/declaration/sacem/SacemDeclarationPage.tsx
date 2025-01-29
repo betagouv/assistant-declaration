@@ -246,10 +246,12 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                               label={
                                 <>
                                   <i className={fr.cx('fr-icon-pantone-line')} />{' '}
-                                  {eventsWrapper.sales.reduce(
-                                    (acc, sales) => acc + (sales.eventCategoryTickets.totalOverride ?? sales.eventCategoryTickets.total),
-                                    0
-                                  )}
+                                  {t('number.default', {
+                                    number: eventsWrapper.sales.reduce(
+                                      (acc, sales) => acc + (sales.eventCategoryTickets.totalOverride ?? sales.eventCategoryTickets.total),
+                                      0
+                                    ),
+                                  })}
                                 </>
                               }
                               aria-label="nombre de billets vendus"
@@ -655,7 +657,9 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                       <TextField
                         disabled
                         label="Nombre de représentations"
-                        value={sacemDeclarationWrapper.declaration?.eventsCount ?? sacemDeclarationWrapper.placeholder.eventsCount}
+                        value={t('number.default', {
+                          number: sacemDeclarationWrapper.declaration?.eventsCount ?? sacemDeclarationWrapper.placeholder.eventsCount,
+                        })}
                         fullWidth
                       />
                     </Tooltip>
@@ -715,7 +719,9 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                       <TextField
                         disabled
                         label="Nombre d'entrées payantes"
-                        value={sacemDeclarationWrapper.declaration?.paidTickets ?? sacemDeclarationWrapper.placeholder.paidTickets}
+                        value={t('number.default', {
+                          number: sacemDeclarationWrapper.declaration?.paidTickets ?? sacemDeclarationWrapper.placeholder.paidTickets,
+                        })}
                         fullWidth
                       />
                     </Tooltip>
@@ -729,7 +735,9 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
                       <TextField
                         disabled
                         label="Nombre d'entrées gratuites"
-                        value={sacemDeclarationWrapper.declaration?.freeTickets ?? sacemDeclarationWrapper.placeholder.freeTickets}
+                        value={t('number.default', {
+                          number: sacemDeclarationWrapper.declaration?.freeTickets ?? sacemDeclarationWrapper.placeholder.freeTickets,
+                        })}
                         fullWidth
                       />
                     </Tooltip>

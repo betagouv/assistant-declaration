@@ -126,11 +126,11 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
           };
         },
         renderCell: (params) => {
-          const valueToDisplay = params.row.data.taxRate * 100;
-
           return (
             <ErrorCellWrapper errorMessage={params.row.errors?.taxRate?.message} data-sentry-mask>
-              {Math.round(valueToDisplay * 100) / 100}%
+              {t('number.percent', {
+                percentage: params.row.data.taxRate,
+              })}
             </ErrorCellWrapper>
           );
         },

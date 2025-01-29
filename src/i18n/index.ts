@@ -92,6 +92,28 @@ i18next.use(LanguageDetector).init(
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
               }).format(value);
+            } else if (format === 'number') {
+              return new Intl.NumberFormat(lng, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              }).format(value);
+            } else if (format === 'numberWithNoDecimal') {
+              return new Intl.NumberFormat(lng, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(value);
+            } else if (format === 'percent') {
+              return new Intl.NumberFormat(lng, {
+                style: 'percent',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              }).format(value);
+            } else if (format === 'percentWithNoDecimal') {
+              return new Intl.NumberFormat(lng, {
+                style: 'percent',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(value);
             }
           }
         }

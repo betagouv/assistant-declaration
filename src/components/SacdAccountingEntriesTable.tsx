@@ -133,8 +133,9 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
           return (
             <ErrorCellWrapper errorMessage={params.row.errors?.taxRate?.message} data-sentry-mask>
               {params.row.data.taxRate !== null ? (
-                // Since it comes from an operation we make sure to round it before displaying the input
-                `${Math.round(params.row.data.taxRate * 100 * 100) / 100}%`
+                t('number.percent', {
+                  percentage: params.row.data.taxRate,
+                })
               ) : (
                 <Tooltip title="Non applicable">
                   <span>NA</span>
