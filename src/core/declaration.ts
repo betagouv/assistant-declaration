@@ -11,6 +11,28 @@ import {
 
 export const currentTaxRates: number[] = [0, 0.021, 0.055, 0.1, 0.2];
 
+export const defaultSacemAccountingTaxRates: Record<keyof typeof AccountingCategorySchema.Values, number> = {
+  TICKETING: 0.055,
+  CONSUMPTIONS: 0.2,
+  CATERING: 0.1,
+  PROGRAM_SALES: 0.2,
+  OTHER_REVENUES: 0.2,
+  ENGAGEMENT_CONTRACTS: 0.055,
+  RIGHTS_TRANSFER_CONTRACTS: 0.055,
+  COREALIZATION_CONTRACTS: 0.055,
+  COPRODUCTION_CONTRACTS: 0.055,
+  OTHER_ARTISTIC_CONTRACTS: 0.055,
+};
+
+export const defaultSacdAccountingTaxRates: Record<keyof typeof SacdAccountingCategorySchema.Values, number> = {
+  GLOBAL: 0.055,
+  SALE_OF_RIGHTS: 0.055,
+  INTRODUCTION_FEES: 0.055,
+  COPRODUCTION_CONTRIBUTION: 0.055,
+  REVENUE_GUARANTEE: 0.055,
+  OTHER: 0.055,
+};
+
 export type EditableAmountSwitch = 'excludingTaxes' | 'includingTaxes';
 
 const revenueSortOrder: AccountingCategorySchemaType[] = [
@@ -68,7 +90,7 @@ export function ensureMinimumSacemRevenueItems(
       newItems.push({
         category: category,
         categoryPrecision: null,
-        taxRate: 0.2, // Set it as default for all... but could vary for specific categories
+        taxRate: defaultSacemAccountingTaxRates[category],
         includingTaxesAmount: 0,
       });
     }
@@ -96,7 +118,7 @@ export function ensureMinimumSacemExpenseItems(
       newItems.push({
         category: category,
         categoryPrecision: null,
-        taxRate: 0.2, // Set it as default for all... but could vary for specific categories
+        taxRate: defaultSacemAccountingTaxRates[category],
         includingTaxesAmount: 0,
       });
     }
@@ -122,7 +144,7 @@ export function ensureMinimumSacdAccountingItems(items: SacdDeclarationAccountin
       newItems.push({
         category: category,
         categoryPrecision: null,
-        taxRate: 0.055, // Set it as default for all... but could vary for specific categories
+        taxRate: defaultSacdAccountingTaxRates[category],
         includingTaxesAmount: 0,
       });
     }
