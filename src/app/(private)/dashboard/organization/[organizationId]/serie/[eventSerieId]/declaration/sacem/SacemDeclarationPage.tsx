@@ -68,6 +68,8 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
   const {
     handleSubmit,
     formState: { errors, isDirty },
+    getValues,
+    setValue,
     control,
     trigger,
     reset,
@@ -101,29 +103,47 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
   );
 
   useEffect(() => {
-    if (!formInitialized && getSacemDeclaration.data) {
-      setFormInitialized(true); // It's needed otherwise if you blur/focus again the window the new fetch data will override the "dirty form data"
+    if (getSacemDeclaration.data) {
+      if (!formInitialized) {
+        setFormInitialized(true); // It's needed otherwise if you blur/focus again the window the new fetch data will override the "dirty form data"
 
-      // Update the form with fetched data
-      if (getSacemDeclaration.data.sacemDeclarationWrapper.declaration) {
-        reset({
-          eventSerieId: eventSerieId,
-          clientId: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.clientId,
-          placeName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeName,
-          placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeCapacity,
-          managerName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerName,
-          managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerTitle,
-          performanceType: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.performanceType,
-          declarationPlace: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.declarationPlace,
-          revenues: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.revenues,
-          expenses: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.expenses,
-        });
-      } else if (getSacemDeclaration.data.sacemDeclarationWrapper.placeholder) {
-        reset({
-          eventSerieId: eventSerieId,
-          revenues: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.revenues,
-          expenses: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.expenses,
-        });
+        // Update the form with fetched data
+        if (getSacemDeclaration.data.sacemDeclarationWrapper.declaration) {
+          reset({
+            eventSerieId: eventSerieId,
+            clientId: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.clientId,
+            placeName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeName,
+            placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeCapacity,
+            managerName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerName,
+            managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerTitle,
+            performanceType: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.performanceType,
+            declarationPlace: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.declarationPlace,
+            revenues: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.revenues,
+            expenses: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.expenses,
+          });
+        } else if (getSacemDeclaration.data.sacemDeclarationWrapper.placeholder) {
+          reset({
+            eventSerieId: eventSerieId,
+            revenues: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.revenues,
+            expenses: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.expenses,
+          });
+        }
+      } else {
+        // Here it's a special case, we don't want to override the modified form except the ticketing revenues that are calculated and that result
+        // from other entity modifications (we could have tried to separate first item from others revenues but it seemed not ideal)
+        // Notes:
+        // - it should always be the first item and filled so no check needed
+        // - we tried to only mutate `revenues.à`
+        setValue(
+          'revenues',
+          [
+            getSacemDeclaration.data.sacemDeclarationWrapper.declaration
+              ? getSacemDeclaration.data.sacemDeclarationWrapper.declaration.revenues[0]
+              : getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.revenues[0],
+            ...getValues('revenues').slice(1),
+          ],
+          { shouldValidate: true }
+        );
       }
     }
   }, [getSacemDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
