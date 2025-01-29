@@ -146,7 +146,7 @@ export function SacemDeclarationPage({ params: { eventSerieId } }: SacemDeclarat
         );
       }
     }
-  }, [getSacemDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
+  }, [getSacemDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId, getValues, setValue]);
 
   if (aggregatedQueries.isLoading) {
     return <LoadingArea ariaLabelTarget="contenu" />;
