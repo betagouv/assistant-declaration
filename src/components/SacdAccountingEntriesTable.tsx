@@ -108,8 +108,15 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
         type: 'number',
         display: 'flex', // Needed to align properly `ErrorCellWrapper`
         valueGetter: (_, row) => {
-          // Display a percentage tax rate so it's easier for people to understand
-          return row.data.taxRate !== null ? row.data.taxRate * 100 : null;
+          if (row.data.taxRate !== null) {
+            // Display a percentage tax rate so it's easier for people to understand
+            const valueToDisplay = row.data.taxRate * 100;
+
+            // Since it comes from an operation we make sure to round it before displaying the input
+            return Math.round(valueToDisplay * 100) / 100;
+          } else {
+            return null;
+          }
         },
         valueSetter: (value, row) => {
           // As we choose to display a percentage, we switch back to the technical format
@@ -125,7 +132,8 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
           return (
             <ErrorCellWrapper errorMessage={params.row.errors?.taxRate?.message} data-sentry-mask>
               {params.row.data.taxRate !== null ? (
-                `${params.row.data.taxRate * 100}%`
+                // Since it comes from an operation we make sure to round it before displaying the input
+                `${Math.round(params.row.data.taxRate * 100 * 100) / 100}%`
               ) : (
                 <Tooltip title="Non applicable">
                   <span>NA</span>

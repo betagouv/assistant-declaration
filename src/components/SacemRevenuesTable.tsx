@@ -109,7 +109,10 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
         display: 'flex', // Needed to align properly `ErrorCellWrapper`
         valueGetter: (_, row) => {
           // Display a percentage tax rate so it's easier for people to understand
-          return row.data.taxRate * 100;
+          const valueToDisplay = row.data.taxRate * 100;
+
+          // Since it comes from an operation we make sure to round it before displaying the input
+          return Math.round(valueToDisplay * 100) / 100;
         },
         valueSetter: (value, row) => {
           // As we choose to display a percentage, we switch back to the technical format
@@ -122,6 +125,8 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
           };
         },
         renderCell: (params) => {
+          const valueToDisplay = params.row.data.taxRate * 100;
+
           return (
             <ErrorCellWrapper errorMessage={params.row.errors?.taxRate?.message} data-sentry-mask>
               <Tooltip
@@ -131,7 +136,8 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
                     : null
                 }
               >
-                <span data-sentry-mask>{params.row.data.taxRate * 100}%</span>
+                {/* Since it comes from an operation we make sure to round it before displaying the input */}
+                <span data-sentry-mask>{Math.round(valueToDisplay * 100) / 100}%</span>
               </Tooltip>
             </ErrorCellWrapper>
           );
