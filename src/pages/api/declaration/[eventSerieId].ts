@@ -327,7 +327,7 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
       res,
       {
         contentType: 'application/pdf',
-        name: filename,
+        name: `${filename}.pdf`,
       },
       input.download === true
     );

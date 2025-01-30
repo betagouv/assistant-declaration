@@ -102,7 +102,11 @@ export function SacdTicketingEntriesTable({ wrappers, audience, taxRate }: SacdT
       renderCell: (params) => {
         return (
           <Tooltip title={'Cette valeur est non modifiable car elle provient de votre système de billetterie'}>
-            <span>1</span>
+            <span>
+              {t('number.default', {
+                number: 1,
+              })}
+            </span>
           </Tooltip>
         );
       },
@@ -141,7 +145,11 @@ export function SacdTicketingEntriesTable({ wrappers, audience, taxRate }: SacdT
       renderCell: (params) => {
         return (
           <Tooltip title={'Cette valeur est non modifiable car elle provient de votre système de billetterie'}>
-            <span>{taxRate * 100}%</span>
+            <span>
+              {t('number.percent', {
+                percentage: taxRate,
+              })}
+            </span>
           </Tooltip>
         );
       },
@@ -157,7 +165,11 @@ export function SacdTicketingEntriesTable({ wrappers, audience, taxRate }: SacdT
               'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
             }
           >
-            <span data-sentry-mask>{params.row.paidTickets}</span>
+            <span data-sentry-mask>
+              {t('number.default', {
+                number: params.row.paidTickets,
+              })}
+            </span>
           </Tooltip>
         );
       },
@@ -173,7 +185,11 @@ export function SacdTicketingEntriesTable({ wrappers, audience, taxRate }: SacdT
               'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
             }
           >
-            <span data-sentry-mask>{params.row.freeTickets}</span>
+            <span data-sentry-mask>
+              {t('number.default', {
+                number: params.row.freeTickets,
+              })}
+            </span>
           </Tooltip>
         );
       },

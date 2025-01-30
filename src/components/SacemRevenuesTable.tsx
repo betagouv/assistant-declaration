@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
 import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
+import { TaxRateEditCell } from '@ad/src/components/TaxRateEditCell';
 import {
   EditableAmountSwitch,
   getExcludingTaxesAmountFromIncludingTaxesAmount,
@@ -109,7 +110,10 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
         display: 'flex', // Needed to align properly `ErrorCellWrapper`
         valueGetter: (_, row) => {
           // Display a percentage tax rate so it's easier for people to understand
-          return row.data.taxRate * 100;
+          const valueToDisplay = row.data.taxRate * 100;
+
+          // Since it comes from an operation we make sure to round it before displaying the input
+          return Math.round(valueToDisplay * 100) / 100;
         },
         valueSetter: (value, row) => {
           // As we choose to display a percentage, we switch back to the technical format
@@ -131,11 +135,16 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
                     : null
                 }
               >
-                <span data-sentry-mask>{params.row.data.taxRate * 100}%</span>
+                <span data-sentry-mask>
+                  {t('number.percent', {
+                    percentage: params.row.data.taxRate,
+                  })}
+                </span>
               </Tooltip>
             </ErrorCellWrapper>
           );
         },
+        renderEditCell: (params) => <TaxRateEditCell {...params} />,
       },
       {
         field: `excludingTaxesAmount`,
