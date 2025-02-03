@@ -9,7 +9,9 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
 import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
+import { RowEditActionsCell } from '@ad/src/components/RowEditActionsCell';
 import { TaxRateEditCell } from '@ad/src/components/TaxRateEditCell';
+import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import {
   EditableAmountSwitch,
   getExcludingTaxesAmountFromIncludingTaxesAmount,
@@ -32,6 +34,8 @@ export interface SacemExpensesTableProps {
 
 export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTableProps) {
   const { t } = useTranslation('common');
+
+  const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   const { fields, append, update, remove } = useFieldArray({
     control,
@@ -214,24 +218,41 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
         headerAlign: 'right',
         align: 'right',
         sortable: false,
-        renderCell: (params) => {
-          return (
-            <IconButton
-              disabled={params.row.data.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS}
-              aria-label="enlever une ligne de dépense"
-              onClick={() => {
-                // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
-                remove(params.row.index);
-              }}
-              size="small"
-            >
-              <Delete />
-            </IconButton>
-          );
-        },
+        renderCell: (params) => (
+          <RowEditActionsCell
+            {...params}
+            editFieldToFocus={`${rowTypedNameof('data')}.${entryTypedNameof('category')}`}
+            onDelete={
+              params.row.data.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS
+                ? () => {
+                    showConfirmationDialog({
+                      description: (
+                        <>
+                          Êtes-vous sûr de vouloir supprimer la dépense{' '}
+                          <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
+                            {params.row.data.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${params.row.data.category}`)}
+                          </Typography>{' '}
+                          ?
+                        </>
+                      ),
+                      onConfirm: async () => {
+                        // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
+                        remove(params.row.index);
+                      },
+                    });
+                  }
+                : undefined
+            }
+            notEditable={params.row.data.category === AccountingCategorySchema.Values.TICKETING}
+            submitAriaLabel={'soumettre les modifications de la dépense'}
+            cancelAriaLabel={'annuler les modifications de la dépense'}
+            editAriaLabel={'modifier la dépense'}
+            deleteAriaLabel={'enlever la dépense'}
+          />
+        ),
       },
     ],
-    [t, remove, editableAmount]
+    [t, remove, editableAmount, showConfirmationDialog]
   );
 
   useEffect(() => {
