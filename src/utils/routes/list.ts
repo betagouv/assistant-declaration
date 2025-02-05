@@ -107,7 +107,7 @@ export const localizedRoutes = {
     {},
     {
       en: (p) => `/terms-of-use`,
-      fr: (p) => `/conditions-generales-d-utilisation`,
+      fr: (p) => `/modalites-d-utilisation`,
     }
   ),
 };
