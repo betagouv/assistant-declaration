@@ -263,7 +263,7 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
                     showConfirmationDialog({
                       description: (
                         <>
-                          Êtes-vous sûr de vouloir supprimer la ligne de recette{' '}
+                          Êtes-vous sûr de vouloir supprimer la recette{' '}
                           <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
                             {params.row.data.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${params.row.data.category}`)}
                           </Typography>{' '}
@@ -279,15 +279,15 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
                 : undefined
             }
             notEditable={params.row.data.category === AccountingCategorySchema.Values.TICKETING}
-            submitAriaLabel={'soumettre les modifications de la ligne de recette'}
-            cancelAriaLabel={'annuler les modifications de la ligne de recette'}
-            editAriaLabel={'modifier la ligne de recette'}
-            deleteAriaLabel={'enlever la ligne de recette'}
+            submitAriaLabel={'soumettre les modifications de la recette'}
+            cancelAriaLabel={'annuler les modifications de la recette'}
+            editAriaLabel={'modifier la recette'}
+            deleteAriaLabel={'enlever la recette'}
           />
         ),
       },
     ],
-    [t, remove, editableAmount]
+    [t, remove, editableAmount, showConfirmationDialog]
   );
 
   useEffect(() => {
