@@ -1,4 +1,4 @@
-import { Alert, Snackbar, Tooltip } from '@mui/material';
+import { Alert, Snackbar, Tooltip, Typography } from '@mui/material';
 import { GridAutosizeOptions, type GridColDef, type GridRowModel, useGridApiRef } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import debounce from 'lodash.debounce';
@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import styles from '@ad/src/components/EventSalesTable.module.scss';
+import { RowEditActionsCell } from '@ad/src/components/RowEditActionsCell';
+import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import {
   EventCategoryTicketsSchemaType,
   EventWrapperSchemaType,
@@ -26,6 +28,8 @@ export interface EventSalesTableProps {
 
 export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) {
   const { t } = useTranslation('common');
+
+  const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   const apiRef = useGridApiRef();
 
@@ -144,6 +148,23 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
         return params.row.eventCategoryTickets.totalOverride !== null ? styles.overridenCell : '';
       },
     },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      headerAlign: 'right',
+      align: 'right',
+      sortable: false,
+      renderCell: (params) => (
+        <RowEditActionsCell
+          {...params}
+          editFieldToFocus={`${salesTypedNameof('eventCategoryTickets')}.${ticketCategoryTypedNameof('price')}`}
+          submitAriaLabel={'soumettre les modifications de la catégorie'}
+          cancelAriaLabel={'annuler les modifications de la catégorie'}
+          editAriaLabel={'modifier la catégorie'}
+          deleteAriaLabel={'enlever la catégorie'}
+        />
+      ),
+    },
   ]);
 
   const [snackbarAlert, setSnackbarAlert] = useState<JSX.Element | null>(null);
@@ -151,12 +172,19 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
 
   const processRowUpdate = useCallback(
     async (newRow: GridRowModel<SalesWrapperSchemaType>, oldRow: GridRowModel<SalesWrapperSchemaType>, params: unknown) => {
-      // If no modification while exiting the edit mode, we don't consider having a useless override property (due to people testing clicking without any intent)
+      // The input will always return a number, so patching if needed the overriden value
+      if (oldRow.eventCategoryTickets.priceOverride === null && newRow.eventCategoryTickets.priceOverride === newRow.ticketCategory.price) {
+        newRow.eventCategoryTickets.priceOverride = null;
+      }
+
+      if (oldRow.eventCategoryTickets.totalOverride === null && newRow.eventCategoryTickets.totalOverride === newRow.eventCategoryTickets.total) {
+        newRow.eventCategoryTickets.totalOverride = null;
+      }
+
+      // If no modification while exiting the edit mode, we prevent triggering an update (due to people testing clicking without any intent)
       if (
-        (newRow.eventCategoryTickets.priceOverride === oldRow.eventCategoryTickets.priceOverride &&
-          newRow.eventCategoryTickets.totalOverride === oldRow.eventCategoryTickets.totalOverride) ||
-        (oldRow.eventCategoryTickets.priceOverride === null && newRow.eventCategoryTickets.priceOverride === newRow.ticketCategory.price) ||
-        (oldRow.eventCategoryTickets.totalOverride === null && newRow.eventCategoryTickets.totalOverride === newRow.eventCategoryTickets.total)
+        newRow.eventCategoryTickets.priceOverride === oldRow.eventCategoryTickets.priceOverride &&
+        newRow.eventCategoryTickets.totalOverride === oldRow.eventCategoryTickets.totalOverride
       ) {
         return oldRow;
       }
@@ -200,6 +228,7 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
         disableColumnFilter
         disableColumnMenu
         disableRowSelectionOnClick
+        editMode="row"
         processRowUpdate={processRowUpdate}
         onProcessRowUpdateError={handleProcessRowUpdateError}
         onCellEditStart={(params, event) => {
