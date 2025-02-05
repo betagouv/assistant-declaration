@@ -1,84 +1,90 @@
+import { Clear, Delete, Done, Edit } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
+import { ReactNode, useMemo } from 'react';
 
-export const RowEditActionsCell: NonNullable<GridColDef<any, any>>['renderCell'] = ({ id, api }) => {
-  const { showConfirmationDialog } = useSingletonConfirmationDialog();
+export interface RowEditActionsCellProps extends NonNullable<GridColDef<any, any>['renderCell']> {
+  editFieldToFocus: string;
+  onDelete?: () => void;
+  notEditable?: boolean;
+  submitAriaLabel?: string;
+  cancelAriaLabel?: string;
+  editAriaLabel?: string;
+  deleteAriaLabel?: string;
+}
 
-  const beingEdited: boolean = useMemo(() => {
-    // We want the `useMemo` to react less frequently than with a direct `params.api.getRowMode(params.id)`
-    return !!params.api.state.editRows[params.id];
-  }, [params.api.state.editRows, params.id]);
+export function RowEditActionsCell({
+  id,
+  api,
+  editFieldToFocus,
+  onDelete,
+  notEditable,
+  submitAriaLabel,
+  cancelAriaLabel,
+  editAriaLabel,
+  deleteAriaLabel,
+}: any): ReactNode {
+  const rowBeingEdited: boolean = useMemo(() => {
+    // We want the `useMemo` to react less frequently than with a direct `api.getRowMode(id)`
+    return !!api.state.editRows[id];
+  }, [api.state.editRows, id]);
 
-  return null;
-
-  //   return (
-  // <>
-  //               {beingEdited ? (
-  //                 <>
-  //                   <IconButton
-  //                     aria-label="soumettre les modifications de la ligne de recette"
-  //                     onClick={() => {
-  //                       params.api.stopRowEditMode({
-  //                         id: params.id,
-  //                         ignoreModifications: false,
-  //                       });
-  //                     }}
-  //                     size="small"
-  //                   >
-  //                     <Done />
-  //                   </IconButton>
-  //                   <IconButton
-  //                     aria-label="annuler les modifications de la ligne de recette"
-  //                     onClick={() => {
-  //                       params.api.stopRowEditMode({
-  //                         id: params.id,
-  //                         ignoreModifications: true,
-  //                       });
-  //                     }}
-  //                     size="small"
-  //                   >
-  //                     <Clear />
-  //                   </IconButton>
-  //                 </>
-  //               ) : (
-  //                 <>
-  //                   <IconButton
-  //                     aria-label="modifier la ligne de recette"
-  //                     onClick={() => {
-  //                       params.api.startRowEditMode({
-  //                         id: params.id,
-  //                         fieldToFocus: `${rowTypedNameof('data')}.${entryTypedNameof('category')}`,
-  //                       });
-  //                     }}
-  //                     size="small"
-  //                   >
-  //                     <Edit />
-  //                   </IconButton>
-  //                   <IconButton
-  //                     disabled={params.row.data.category !== AccountingCategorySchema.Values.OTHER_REVENUES}
-  //                     aria-label="enlever la ligne de recette"
-  //                     onClick={() => {
-  //                       showConfirmationDialog({
-  //                         description: (
-  //                           <>
-  //                             Êtes-vous sûr de vouloir supprimer la ligne{' '}
-  //                             <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
-  //                               XXXXXXXXXXXX
-  //                             </Typography>{' '}
-  //                             ?
-  //                           </>
-  //                         ),
-  //                         onConfirm: async () => {
-  //                           // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
-  //                           remove(params.row.index);
-  //                         },
-  //                       });
-  //                     }}
-  //                     size="small"
-  //                   >
-  //                     <Delete />
-  //                   </IconButton>
-  //                 </>
-  //               )}
-  //             </>
-  //   );
-};
+  return (
+    <>
+      {rowBeingEdited ? (
+        <>
+          <IconButton
+            aria-label={submitAriaLabel || `soumettre les modifications de la ligne`}
+            onClick={() => {
+              api.stopRowEditMode({
+                id: id,
+                ignoreModifications: false,
+              });
+            }}
+            size="small"
+          >
+            <Done />
+          </IconButton>
+          <IconButton
+            aria-label={cancelAriaLabel || `annuler les modifications de la ligne`}
+            onClick={() => {
+              api.stopRowEditMode({
+                id: id,
+                ignoreModifications: true,
+              });
+            }}
+            size="small"
+          >
+            <Clear />
+          </IconButton>
+        </>
+      ) : (
+        <>
+          <IconButton
+            disabled={notEditable === true}
+            aria-label={editAriaLabel || `modifier la ligne`}
+            onClick={() => {
+              api.startRowEditMode({
+                id: id,
+                fieldToFocus: editFieldToFocus,
+              });
+            }}
+            size="small"
+          >
+            <Edit />
+          </IconButton>
+          <IconButton
+            disabled={!onDelete}
+            aria-label={deleteAriaLabel || `enlever la ligne`}
+            onClick={() => {
+              onDelete && onDelete();
+            }}
+            size="small"
+          >
+            <Delete />
+          </IconButton>
+        </>
+      )}
+    </>
+  );
+}
