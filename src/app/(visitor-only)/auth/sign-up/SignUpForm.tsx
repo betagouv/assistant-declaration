@@ -100,7 +100,7 @@ export function SignUpForm({ prefill }: { prefill?: SignUpPrefillSchemaType }) {
               <span>
                 J&apos;accepte les&nbsp;
                 <Link href={linkRegistry.get('termsOfUse', undefined)} variant="subtitle2" underline="none">
-                  conditions générales d&apos;utilisation
+                  modalités d&apos;utilisation
                 </Link>
               </span>
             }

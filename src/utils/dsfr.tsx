@@ -93,6 +93,14 @@ export const commonFooterAttributes = {
     {
       iconId: undefined as any,
       linkProps: {
+        // href: linkRegistry.get('termsOfUse', undefined),
+        href: '/modalites-d-utilisation',
+      },
+      text: `Modalités d'utilisation`,
+    },
+    {
+      iconId: undefined as any,
+      linkProps: {
         href: 'https://github.com/betagouv/assistant-declaration',
         target: '_blank',
       },

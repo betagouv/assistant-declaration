@@ -221,14 +221,19 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                 </>
               ) : (
                 <>
-                  <Grid item xs={12} sx={{ py: 2 }}>
-                    <Alert severity="warning" sx={{ mb: 3 }}>
+                  <Grid item xs={12} sx={{ pt: 2, pb: 1 }}>
+                    <Alert severity="warning">
                       Veuillez synchroniser les données de votre billetterie pour débuter vos déclarations.{' '}
                       <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 600 }}>
                         À noter que pour la première synchronisation cette opération peut durer jusqu&apos;à 1 minute.
                       </Typography>
                     </Alert>
                   </Grid>
+                  {synchronizeDataFromTicketingSystems.error && (
+                    <Grid item xs={12} sx={{ py: 1 }}>
+                      <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />
+                    </Grid>
+                  )}
                   <Button
                     onClick={async () => {
                       await synchronizeDataFromTicketingSystems.mutateAsync({
@@ -238,6 +243,7 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                     loading={synchronizeDataFromTicketingSystems.isLoading}
                     size="large"
                     variant="contained"
+                    sx={{ mt: 2 }}
                   >
                     Synchroniser les données
                   </Button>

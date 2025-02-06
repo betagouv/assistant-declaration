@@ -259,7 +259,7 @@
         "too_small": "le nombre de places doit être supérieur à {{minimum}}"
       },
       "termsAccepted": {
-        "invalid_literal": "les conditions générales d'utilisation doivent être acceptées"
+        "invalid_literal": "les modalités d'utilisation doivent être acceptées"
       }
     }
   },

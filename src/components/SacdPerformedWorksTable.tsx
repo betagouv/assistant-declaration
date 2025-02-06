@@ -11,6 +11,8 @@ import { IMask, IMaskInput } from 'react-imask';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
 import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
+import { RowEditActionsCell } from '@ad/src/components/RowEditActionsCell';
+import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { SacdDeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { GridEditInputCellRoot, useUtilityClasses } from '@ad/src/utils/datagrid';
@@ -74,6 +76,8 @@ export interface SacdPerformedWorksTableProps {
 
 export function SacdPerformedWorksTable({ control, trigger, placeholder, errors }: SacdPerformedWorksTableProps) {
   const { t } = useTranslation('common');
+
+  const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   const { fields, append, update, remove } = useFieldArray({
     control,
@@ -341,20 +345,33 @@ export function SacdPerformedWorksTable({ control, trigger, placeholder, errors 
       display: 'flex', // Needed to align correctly with row height to `auto`
       align: 'right',
       sortable: false,
-      renderCell: (params) => {
-        return (
-          <IconButton
-            aria-label="enlever une œuvre représentée"
-            onClick={() => {
-              // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
-              remove(params.row.index);
-            }}
-            size="small"
-          >
-            <Delete />
-          </IconButton>
-        );
-      },
+      renderCell: (params) => (
+        <RowEditActionsCell
+          {...params}
+          editFieldToFocus={`${rowTypedNameof('data')}.${entryTypedNameof('category')}`}
+          onDelete={() => {
+            showConfirmationDialog({
+              description: (
+                <>
+                  Êtes-vous sûr de vouloir supprimer l&apos;œuvre représentée{' '}
+                  <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
+                    {params.row.data.category}
+                  </Typography>{' '}
+                  ?
+                </>
+              ),
+              onConfirm: async () => {
+                // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
+                remove(params.row.index);
+              },
+            });
+          }}
+          submitAriaLabel={`soumettre les modifications de l'œuvre représentée`}
+          cancelAriaLabel={`annuler les modifications de l'œuvre représentée`}
+          editAriaLabel={`modifier l'œuvre représentée`}
+          deleteAriaLabel={`enlever l'œuvre représentée`}
+        />
+      ),
     },
   ]);
 

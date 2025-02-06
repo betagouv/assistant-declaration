@@ -9,7 +9,9 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorCellWrapper } from '@ad/src/components/ErrorCellWrapper';
 import styles from '@ad/src/components/ErrorCellWrapper.module.scss';
+import { RowEditActionsCell } from '@ad/src/components/RowEditActionsCell';
 import { TaxRateEditCell } from '@ad/src/components/TaxRateEditCell';
+import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import {
   EditableAmountSwitch,
   getExcludingTaxesAmountFromIncludingTaxesAmount,
@@ -32,6 +34,8 @@ export interface SacdAccountingEntriesTableProps {
 
 export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAccountingEntriesTableProps) {
   const { t } = useTranslation('common');
+
+  const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   const { fields, append, update, remove } = useFieldArray({
     control,
@@ -226,24 +230,40 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
         headerAlign: 'right',
         align: 'right',
         sortable: false,
-        renderCell: (params) => {
-          return (
-            <IconButton
-              disabled={params.row.data.category !== SacdAccountingCategorySchema.Values.OTHER}
-              aria-label="enlever une ligne de somme versée"
-              onClick={() => {
-                // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
-                remove(params.row.index);
-              }}
-              size="small"
-            >
-              <Delete />
-            </IconButton>
-          );
-        },
+        renderCell: (params) => (
+          <RowEditActionsCell
+            {...params}
+            editFieldToFocus={`${rowTypedNameof('data')}.${entryTypedNameof('category')}`}
+            onDelete={
+              params.row.data.category === SacdAccountingCategorySchema.Values.OTHER
+                ? () => {
+                    showConfirmationDialog({
+                      description: (
+                        <>
+                          Êtes-vous sûr de vouloir supprimer la somme versée{' '}
+                          <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
+                            {params.row.data.categoryPrecision ?? t(`model.sacdDeclaration.accountingCategory.enum.${params.row.data.category}`)}
+                          </Typography>{' '}
+                          ?
+                        </>
+                      ),
+                      onConfirm: async () => {
+                        // Note: here `trigger` won't help since the visual error will disappear with the row, and an `BaseForm` error alert has no reason to change
+                        remove(params.row.index);
+                      },
+                    });
+                  }
+                : undefined
+            }
+            submitAriaLabel={'soumettre les modifications de la somme versée'}
+            cancelAriaLabel={'annuler les modifications de la somme versée'}
+            editAriaLabel={'modifier la somme versée'}
+            deleteAriaLabel={'enlever la somme versée'}
+          />
+        ),
       },
     ],
-    [t, remove, editableAmount]
+    [t, remove, editableAmount, showConfirmationDialog]
   );
 
   useEffect(() => {
