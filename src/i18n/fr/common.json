@@ -30,6 +30,7 @@
       "internalServerError": "une erreur interne est survenue, veuillez retenter",
       "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",
       "invalidVerificationToken": "l'opération que vous essayez de réaliser a été refusée",
+      "missingBilletwebEventsRights": "la clé d'identification Billetweb que vous nous avez fournie est restreinte à certains événements. Il est nécessaire de la régler en \"Tous sélectionnés\" pour que nous puissions synchroniser vos données.",
       "noAccountWithThisEmail": "aucun compte n'existe avec cette adresse email",
       "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",

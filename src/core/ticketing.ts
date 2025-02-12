@@ -9,6 +9,7 @@ import {
   JsonGetEventsResponseSchemaType,
   JsonGetTicketCategoriesResponseSchema,
 } from '@ad/src/models/entities/billetweb';
+import { missingBilletwebEventsRightsError } from '@ad/src/models/entities/errors';
 import {
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
@@ -65,6 +66,14 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
     }
 
     const lastModifiedAttendeesDataJson = await lastModifiedAttendeesResponse.json();
+
+    if (
+      lastModifiedAttendeesDataJson.error === 'unauthorized' &&
+      lastModifiedAttendeesDataJson.description?.includes('limited rights to specific events')
+    ) {
+      throw missingBilletwebEventsRightsError;
+    }
+
     const lastModifiedAttendees = JsonGetAttendeesResponseSchema.parse(lastModifiedAttendeesDataJson);
 
     const eventsIdsToSynchronize: string[] = [...new Set(lastModifiedAttendees.map((attendee) => attendee.event))];
