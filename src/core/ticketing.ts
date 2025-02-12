@@ -1,6 +1,13 @@
+import { Client, createClient, createConfig } from '@hey-api/client-fetch';
 import { eachOfLimit } from 'async';
 import { getUnixTime, set } from 'date-fns';
 
+import {
+  TicketingJsonldTicketingReadEventDateReadMinisiteReadTicketingRead,
+  getEventDateCollection,
+  getTicketCollection,
+  getTicketingCollection,
+} from '@ad/src/client/mapado';
 import {
   JsonGetAttendeesResponseSchema,
   JsonGetEventAttendeesResponseSchema,
@@ -273,11 +280,101 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
 }
 
 export class MapadoTicketingSystemClient implements TicketingSystemClient {
-  constructor(private readonly secretKey: string) {}
+  protected client: Client;
+
+  constructor(private readonly secretKey: string) {
+    this.client = createClient(
+      createConfig({
+        baseUrl: 'https://ticketing.mapado.net/',
+        auth: secretKey,
+      })
+    );
+  }
 
   public async getEventsSeries(fromDate: Date, toDate?: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
-    // TODO: ...
-    return [];
+    // Get tickets modifications to know which events to synchronize (for the first time, or again)
+    const ticketsResult = await getTicketCollection({
+      client: this.client,
+      query: {
+        updatedSince: fromDate.toISOString(),
+        itemsPerPage: 100_000_000, // Simplify the pagination retrieval
+        ...{ fields: 'eventDate' },
+      },
+    });
+
+    if (ticketsResult.error) {
+      throw ticketsResult.error;
+    }
+
+    assert(ticketsResult.data);
+
+    const recentlyUpdatedEventDatesIds: string[] = [
+      ...new Set(
+        ticketsResult.data['hydra:member'].map((ticket) => {
+          // [WORKAROUND] The type thinks we can make a join to have the association but it's not
+          assert(typeof ticket.eventDate === 'string');
+
+          return ticket.eventDate;
+        })
+      ),
+    ];
+
+    // Since having only event dates with need to retrieve the event
+    const recentlyUpdatedEventDatesResult = await getEventDateCollection({
+      client: this.client,
+      query: {
+        '@id': recentlyUpdatedEventDatesIds.join(','),
+        itemsPerPage: 100_000_000, // Simplify the pagination retrieval
+        ...{ fields: 'ticketing' },
+      },
+    });
+
+    if (recentlyUpdatedEventDatesResult.error) {
+      throw recentlyUpdatedEventDatesResult.error;
+    }
+
+    assert(recentlyUpdatedEventDatesResult.data);
+
+    const ticketingIdsToSynchronize: string[] = [
+      ...new Set(
+        recentlyUpdatedEventDatesResult.data['hydra:member'].map((eventDate) => {
+          return eventDate.ticketing;
+        })
+      ),
+    ];
+
+    const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
+
+    let ticketings: TicketingJsonldTicketingReadEventDateReadMinisiteReadTicketingRead[];
+    if (ticketingIdsToSynchronize.length > 0) {
+      const ticketingsResult = await getTicketingCollection({
+        client: this.client,
+        query: {
+          '@id': ticketingIdsToSynchronize.join(','),
+          itemsPerPage: 100_000_000, // Simplify the pagination retrieval
+          ...{ fields: 'TODO' },
+        },
+      });
+
+      if (ticketingsResult.error) {
+        throw ticketingsResult.error;
+      }
+
+      assert(ticketingsResult.data);
+
+      ticketings = ticketingsResult.data['hydra:member'];
+    } else {
+      ticketings = [];
+    }
+
+    // Get all data to be returned and compared with stored data we have
+    // Note: for now we do not parallelize to not flood the ticketing system
+    await eachOfLimit(ticketingIdsToSynchronize, 1, async (eventId) => {
+      // TODO
+      ticketings;
+    });
+
+    return eventsSeriesWrappers;
   }
 }
 

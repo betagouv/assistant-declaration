@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { secondsToMilliseconds, set } from 'date-fns';
 
 import { BilletwebTicketingSystemClient, MapadoTicketingSystemClient } from '@ad/src/core/ticketing';
