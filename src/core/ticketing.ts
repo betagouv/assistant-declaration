@@ -366,6 +366,11 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     await eachOfLimit(ticketingsToSynchronize, 1, async (ticketing) => {
       const schemaEvents: LiteEventSchemaType[] = [];
       const schemaTicketCategories: LiteTicketCategorySchemaType[] = [];
+      const schemaEventSales: Map<
+        LiteEventSalesSchemaType['internalEventTicketingSystemId'] & LiteEventSalesSchemaType['internalTicketCategoryTicketingSystemId'],
+        LiteEventSalesSchemaType
+      > = new Map();
+
       let taxRate: number | null = null;
 
       if (ticketing.eventDateList.length > 0) {
@@ -389,6 +394,8 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
         const eventDatesData = JsonGetEventDatesResponseSchema.parse(eventDatesResult.data);
         this.assertCollectionResponseValid(eventDatesData);
+
+        const replacedTicketCategoryIdToMainIdMapper = new Map<string, string>();
 
         for (const eventDate of eventDatesData['hydra:member']) {
           const safeStartDate = eventDate.startDate || eventDate.startOfEventDay;
@@ -416,8 +423,6 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             return a.id - b.id;
           });
 
-          const replacedTicketCategoryIdToMainIdMapper = new Map<string, string>();
-
           for (const ticketPrice of safeTickePriceList) {
             assert(ticketPrice.name && ticketPrice.description);
 
@@ -425,7 +430,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
               internalTicketingSystemId: ticketPrice.id.toString(),
               name: ticketPrice.name,
               description: ticketPrice.description,
-              price: ticketPrice.facialValue / 100, // Adjust since cents from their API
+              price: ticketPrice.facialValue / 100, // Adjust since cents from their API (note this `ticketPrice.valueIncvat` do not include commission, this latter is only specified on each `Ticket` entity)
             });
 
             const similarLiteTicketCategory = schemaTicketCategories.find((anotherLiteRegisteredTicketCategory) => {
@@ -437,10 +442,18 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             });
 
             if (similarLiteTicketCategory) {
-              replacedTicketCategoryIdToMainIdMapper.set(
-                liteTicketCategory.internalTicketingSystemId,
-                similarLiteTicketCategory.internalTicketingSystemId
-              );
+              const currentMainId = replacedTicketCategoryIdToMainIdMapper.get(liteTicketCategory.internalTicketingSystemId);
+
+              if (!currentMainId) {
+                replacedTicketCategoryIdToMainIdMapper.set(
+                  liteTicketCategory.internalTicketingSystemId,
+                  similarLiteTicketCategory.internalTicketingSystemId
+                );
+              } else if (currentMainId !== similarLiteTicketCategory.internalTicketingSystemId) {
+                // We make this check since we had to set `replacedTicketCategoryIdToMainIdMapper` outside this loop
+                // To easily associate tickets to categories, but we don't want there is kind of leak between them
+                throw new Error(`ticket category mapper item tries to point to 2 differents main categories`);
+              }
             } else {
               schemaTicketCategories.push(liteTicketCategory);
             }
@@ -457,8 +470,73 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           }
         }
 
-        // // Make them unique
-        // ticketPricesIds = [...new Set(ticketPricesIds)];
+        // Now retrieve all tickets for this event serie to bind them to ticket categories
+        const ticketsResult = await getTicketCollection({
+          client: this.client,
+          query: {
+            user: 'me',
+            ticketing: ticketing['@id'],
+            itemsPerPage: this.itemsPerPageToAvoidPagination,
+            ...{ fields: 'status,ticketPrice,eventDate' },
+          },
+        });
+
+        if (ticketsResult.error) {
+          throw ticketsResult.error;
+        }
+
+        const ticketsData = JsonGetTicketsResponseSchema.parse(ticketsResult.data);
+
+        this.assertCollectionResponseValid(ticketsData);
+
+        for (const ticket of ticketsData['hydra:member']) {
+          // Only consider the ticket if the money has been transferred at a time
+          if (!(ticket.status === 'payed' || ticket.status === 'refunded')) {
+            continue;
+          }
+
+          // [WORKAROUND] `ticketPrice` is a combination, we want the raw `id` to try matching ticket categories we have already parsed
+          const ticketPriceMatch = ticket.ticketPrice.match(/\/v1\/ticket_prices\/(\d+)/);
+          assert(ticketPriceMatch && ticketPriceMatch[1]);
+          const ticketPriceId = ticketPriceMatch[1];
+
+          // [WORKAROUND] `eventDate` is a combination, we want the raw `id` to try matching event date we have already parsed
+          const eventDateMatch = ticket.eventDate.match(/\/v1\/event_dates\/(\d+)/);
+          assert(eventDateMatch && eventDateMatch[1]);
+          const eventDateId = eventDateMatch[1];
+
+          // Make sure it belongs to a retrieved category
+          // Note: due to our merge of different categories we take this into account
+          const adjustedTicketPriceId = replacedTicketCategoryIdToMainIdMapper.get(ticketPriceId) || ticketPriceId;
+
+          const correspondingTicketCategory = schemaTicketCategories.find((ticketCategory) => {
+            return ticketCategory.internalTicketingSystemId === adjustedTicketPriceId;
+          });
+
+          assert(correspondingTicketCategory);
+
+          const uniqueId = `${eventDateId}_${adjustedTicketPriceId}`;
+          const eventSales = schemaEventSales.get(uniqueId);
+
+          if (!eventSales) {
+            // We make sure the event has been properly retrieved
+            const relatedEvent = schemaEvents.find((event) => event.internalTicketingSystemId === eventDateId);
+            if (!relatedEvent) {
+              throw new Error('a sold ticket should always match an existing event');
+            }
+
+            schemaEventSales.set(
+              uniqueId,
+              LiteEventSalesSchema.parse({
+                internalEventTicketingSystemId: eventDateId,
+                internalTicketCategoryTicketingSystemId: adjustedTicketPriceId,
+                total: 1,
+              })
+            );
+          } else {
+            eventSales.total += 1;
+          }
+        }
       }
 
       // Calculate the date range for the event serie
@@ -479,13 +557,13 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
       assert(taxRate !== null);
 
       // [WORKAROUND] `@id` is a combination, we prefer to focus on the raw `id` but this one is not directly gettable for the `Ticketing` entity
-      const match = ticketing['@id'].match(/\/v1\/ticketings\/(\d+)/);
+      const ticketingMatch = ticketing['@id'].match(/\/v1\/ticketings\/(\d+)/);
 
-      assert(match && match[1]);
+      assert(ticketingMatch && ticketingMatch[1]);
 
       eventsSeriesWrappers.push({
         serie: LiteEventSerieSchema.parse({
-          internalTicketingSystemId: match[1],
+          internalTicketingSystemId: ticketingMatch[1],
           name: ticketing.title,
           startAt: serieStartDate,
           endAt: serieStartDate,
@@ -495,33 +573,6 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         ticketCategories: schemaTicketCategories,
         sales: Array.from(schemaEventSales.values()),
       });
-
-      // if (ticketPricesIds.length > 0) {
-      //   const ticketPricesDatesResult = await getEventDateCollection({
-      //     client: this.client,
-      //     query: {
-      //       '@id': ticketPricesIds.join(','),
-      //       itemsPerPage: this.itemsPerPageToAvoidPagination,
-      //       ...{ fields: 'id,type,name,description,currency,facialValue,tax,valueIncvat' },
-      //     },
-      //   });
-
-      //   if (ticketPricesDatesResult.error) {
-      //     throw ticketPricesDatesResult.error;
-      //   }
-
-      //   assert(ticketPricesDatesResult.data);
-      //   this.assertCollectionResponseValid(ticketPricesDatesResult.data);
-      // }
-
-      // /ticket_prices/361639?fields=type,name,description,tax,ticketPriceGroup,valueIncvat,currency,facialValue
-
-      //
-      // TODO:
-      // TODO:
-      // TODO:
-      // TODO:
-      //
     });
 
     return eventsSeriesWrappers;

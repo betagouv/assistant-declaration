@@ -22,6 +22,17 @@ export const JsonRecentTicketSchema = applyTypedParsers(
 );
 export type JsonRecentTicketSchemaType = z.infer<typeof JsonRecentTicketSchema>;
 
+export const JsonTicketSchema = applyTypedParsers(
+  z
+    .object({
+      status: z.enum(['payed', 'refunded', 'booked', 'cancelled']),
+      ticketPrice: z.string().min(1),
+      eventDate: z.string().min(1),
+    })
+    .strip()
+);
+export type JsonTicketSchemaType = z.infer<typeof JsonTicketSchema>;
+
 export const JsonTicketingSchema = applyTypedParsers(
   z
     .object({
@@ -85,6 +96,11 @@ export const JsonGetRecentTicketsResponseSchema = JsonCollectionSchema.extend({
   'hydra:member': z.array(JsonRecentTicketSchema),
 });
 export type JsonGetRecentTicketsResponseSchemaType = z.infer<typeof JsonGetRecentTicketsResponseSchema>;
+
+export const JsonGetTicketsResponseSchema = JsonCollectionSchema.extend({
+  'hydra:member': z.array(JsonTicketSchema),
+});
+export type JsonGetTicketsResponseSchemaType = z.infer<typeof JsonGetTicketsResponseSchema>;
 
 export const JsonGetTicketingsResponseSchema = JsonCollectionSchema.extend({
   'hydra:member': z.array(JsonTicketingSchema),
