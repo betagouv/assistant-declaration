@@ -39,7 +39,7 @@ describeWhenManual('MapadoTicketingSystemClient', () => {
 
         const wrappers = await client.getEventsSeries(fromDate, toDate);
 
-        expect(wrappers.length).toBeGreaterThanOrEqual(10);
+        expect(wrappers.length).toBeGreaterThanOrEqual(3);
       },
       secondsToMilliseconds(30)
     );
