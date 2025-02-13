@@ -300,55 +300,30 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
   public async getEventsSeries(fromDate: Date, toDate?: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
     // Get tickets modifications to know which events to synchronize (for the first time, or again)
-    const ticketsResult = await getTicketCollection({
+    const recentlyUpdatedTicketsResult = await getTicketCollection({
       client: this.client,
       query: {
         user: 'me',
         updatedSince: fromDate.toISOString(),
         itemsPerPage: this.itemsPerPageToAvoidPagination,
-        ...{ fields: 'eventDate' },
+        ...{ fields: 'eventDate{ticketing}' },
       },
     });
 
-    if (ticketsResult.error) {
-      throw ticketsResult.error;
+    if (recentlyUpdatedTicketsResult.error) {
+      throw recentlyUpdatedTicketsResult.error;
     }
 
-    assert(ticketsResult.data);
-    this.assertCollectionResponseValid(ticketsResult.data);
+    assert(recentlyUpdatedTicketsResult.data);
+    this.assertCollectionResponseValid(recentlyUpdatedTicketsResult.data);
 
-    const recentlyUpdatedEventDatesIds: string[] = [
-      ...new Set(
-        ticketsResult.data['hydra:member'].map((ticket) => {
-          // [WORKAROUND] The type thinks we can make a join to have the association but it's not
-          assert(typeof ticket.eventDate === 'string');
-
-          return ticket.eventDate;
-        })
-      ),
-    ];
-
-    // Since having only event dates with need to retrieve the event
-    const recentlyUpdatedEventDatesResult = await getEventDateCollection({
-      client: this.client,
-      query: {
-        '@id': recentlyUpdatedEventDatesIds.join(','),
-        itemsPerPage: this.itemsPerPageToAvoidPagination,
-        ...{ fields: 'ticketing' },
-      },
-    });
-
-    if (recentlyUpdatedEventDatesResult.error) {
-      throw recentlyUpdatedEventDatesResult.error;
-    }
-
-    assert(recentlyUpdatedEventDatesResult.data);
-    this.assertCollectionResponseValid(recentlyUpdatedEventDatesResult.data);
-
+    // We did not get ticketings as associations in the previous call otherwise it would return a lot of copies
     const ticketingIdsToSynchronize: string[] = [
       ...new Set(
-        recentlyUpdatedEventDatesResult.data['hydra:member'].map((eventDate) => {
-          return eventDate.ticketing;
+        recentlyUpdatedTicketsResult.data['hydra:member'].map((ticket) => {
+          assert(ticket.eventDate?.ticketing);
+
+          return ticket.eventDate.ticketing;
         })
       ),
     ];
@@ -375,11 +350,11 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
       assert(ticketingsResult.data);
       this.assertCollectionResponseValid(ticketingsResult.data);
 
-      ticketingsToSynchronize = ticketingsResult.data['hydra:member'].map(({ '@id': id, type, title, eventDateList, currency }) => {
-        assert(typeof id === 'string' && type && typeof title === 'string' && eventDateList && currency === 'EUR');
+      ticketingsToSynchronize = ticketingsResult.data['hydra:member'].map(({ '@id': idCombination, type, title, eventDateList, currency }) => {
+        assert(typeof idCombination === 'string' && type && typeof title === 'string' && eventDateList && currency === 'EUR');
 
         return {
-          '@id': id,
+          '@id': idCombination,
           type: type,
           title: title,
           eventDateList: eventDateList,
@@ -396,12 +371,17 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
       let ticketPricesIds: string[] = [];
 
       if (ticketing.eventDateList.length > 0) {
+        // Thanks to associations we can retrieve "price category"
+        // Note: it won't have duplicate entries since `TicketPrice` entity is unique per event (it causes us complications below to aggregate them due to our internal structure)
         const eventDatesResult = await getEventDateCollection({
           client: this.client,
           query: {
             '@id': ticketing.eventDateList.join(','),
             itemsPerPage: this.itemsPerPageToAvoidPagination,
-            ...{ fields: 'startDate,endDate,startOfEventDay,endOfEventDay,ticketPriceList' },
+            ...{
+              fields:
+                'startDate,endDate,startOfEventDay,endOfEventDay,ticketPriceList{id,type,name,description,currency,facialValue,tax{rate,countryCode},valueIncvat}',
+            },
           },
         });
 
@@ -412,26 +392,89 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         assert(eventDatesResult.data);
         this.assertCollectionResponseValid(eventDatesResult.data);
 
-        for (const { '@id': id, startDate, endDate, startOfEventDay, endOfEventDay, ticketPriceList } of eventDatesResult.data['hydra:member']) {
+        for (const { '@id': idCombination, startDate, endDate, startOfEventDay, endOfEventDay, ticketPriceList } of eventDatesResult.data[
+          'hydra:member'
+        ]) {
           const safeStartDate = startDate || startOfEventDay;
           const safeEndDate = endDate || endOfEventDay;
 
-          assert(id && safeStartDate && safeEndDate && ticketPriceList);
+          assert(idCombination && safeStartDate && safeEndDate && ticketPriceList);
+
+          // [WORKAROUND] `@id` is a combination, we prefer to focus on the raw `id` but this one is not directly gettable for the `EventDate` entity
+          const match = idCombination.match(/\/v1\/event_dates\/(\d+)/);
+
+          assert(match && match[1]);
 
           schemaEvents.push(
             LiteEventSchema.parse({
-              internalTicketingSystemId: id,
+              internalTicketingSystemId: match[1],
               startAt: new Date(safeStartDate),
               endAt: new Date(safeEndDate),
             })
           );
 
-          ticketPricesIds.push(...ticketPricesIds);
+          //
+
+          // TicketPriceJsonldTicketPriceReadEventDateReadHasVatReadTaxReadTicketPriceGroupReadTicketPriceRead
+
+          // ticketPricesIds.push(...ticketPricesIds);
         }
 
-        // Make them unique
-        ticketPricesIds = [...new Set(ticketPricesIds)];
+        // // Make them unique
+        // ticketPricesIds = [...new Set(ticketPricesIds)];
       }
+
+      // Calculate the date range for the event serie
+      let serieStartDate: Date | null = null;
+      let serieEndDate: Date | null = null;
+
+      for (const schemaEvent of schemaEvents) {
+        if (serieStartDate === null || isBefore(schemaEvent.startAt, serieStartDate)) {
+          serieStartDate = schemaEvent.startAt;
+        }
+
+        if (serieEndDate === null || isAfter(schemaEvent.endAt, serieEndDate)) {
+          serieEndDate = schemaEvent.endAt;
+        }
+      }
+
+      assert(serieStartDate !== null && serieEndDate !== null);
+
+      // [WORKAROUND] `@id` is a combination, we prefer to focus on the raw `id` but this one is not directly gettable for the `Ticketing` entity
+      const match = ticketing['@id'].match(/\/v1\/ticketings\/(\d+)/);
+
+      assert(match && match[1]);
+
+      eventsSeriesWrappers.push({
+        serie: LiteEventSerieSchema.parse({
+          internalTicketingSystemId: match[1],
+          name: ticketing.title,
+          startAt: serieStartDate,
+          endAt: serieStartDate,
+          taxRate: event.tax_rate / 100,
+        }),
+        events: schemaEvents,
+        ticketCategories: schemaTicketCategories,
+        sales: Array.from(schemaEventSales.values()),
+      });
+
+      // if (ticketPricesIds.length > 0) {
+      //   const ticketPricesDatesResult = await getEventDateCollection({
+      //     client: this.client,
+      //     query: {
+      //       '@id': ticketPricesIds.join(','),
+      //       itemsPerPage: this.itemsPerPageToAvoidPagination,
+      //       ...{ fields: 'id,type,name,description,currency,facialValue,tax,valueIncvat' },
+      //     },
+      //   });
+
+      //   if (ticketPricesDatesResult.error) {
+      //     throw ticketPricesDatesResult.error;
+      //   }
+
+      //   assert(ticketPricesDatesResult.data);
+      //   this.assertCollectionResponseValid(ticketPricesDatesResult.data);
+      // }
 
       // /ticket_prices/361639?fields=type,name,description,tax,ticketPriceGroup,valueIncvat,currency,facialValue
 
