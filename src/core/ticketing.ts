@@ -2,12 +2,7 @@ import { Client, createClient, createConfig } from '@hey-api/client-fetch';
 import { eachOfLimit } from 'async';
 import { getUnixTime, isAfter, isBefore, set } from 'date-fns';
 
-import {
-  TicketPriceJsonldTicketPriceReadEventDateReadHasVatReadTaxReadTicketPriceGroupReadTicketPriceRead,
-  getEventDateCollection,
-  getTicketCollection,
-  getTicketingCollection,
-} from '@ad/src/client/mapado';
+import { getEventDateCollection, getTicketCollection, getTicketingCollection } from '@ad/src/client/mapado';
 import {
   JsonGetAttendeesResponseSchema,
   JsonGetEventAttendeesResponseSchema,
