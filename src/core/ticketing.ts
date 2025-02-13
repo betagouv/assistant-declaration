@@ -1,9 +1,9 @@
 import { Client, createClient, createConfig } from '@hey-api/client-fetch';
 import { eachOfLimit } from 'async';
-import { getUnixTime, set } from 'date-fns';
+import { getUnixTime, isAfter, isBefore, set } from 'date-fns';
 
 import {
-  TicketingJsonldTicketingReadEventDateReadMinisiteReadTicketingRead,
+  TicketPriceJsonldTicketPriceReadEventDateReadHasVatReadTaxReadTicketPriceGroupReadTicketPriceRead,
   getEventDateCollection,
   getTicketCollection,
   getTicketingCollection,
@@ -25,7 +25,15 @@ import {
   LiteEventSerieSchema,
   LiteEventSerieWrapperSchemaType,
   LiteTicketCategorySchema,
+  LiteTicketCategorySchemaType,
 } from '@ad/src/models/entities/event';
+import {
+  JsonCollectionSchemaType,
+  JsonGetEventDatesResponseSchema,
+  JsonGetRecentTicketsResponseSchema,
+  JsonGetTicketingsResponseSchema,
+  JsonTicketingSchemaType,
+} from '@ad/src/models/entities/mapado';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { sleep } from '@ad/src/utils/sleep';
 
@@ -292,7 +300,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     );
   }
 
-  protected assertCollectionResponseValid(data: { 'hydra:totalItems'?: number }) {
+  protected assertCollectionResponseValid(data: JsonCollectionSchemaType) {
     if (!(typeof data['hydra:totalItems'] === 'number' && data['hydra:totalItems'] <= this.itemsPerPageToAvoidPagination)) {
       throw new Error('our workaround to avoid handling pagination logic seems to not fit a specific case');
     }
@@ -314,15 +322,14 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
       throw recentlyUpdatedTicketsResult.error;
     }
 
-    assert(recentlyUpdatedTicketsResult.data);
-    this.assertCollectionResponseValid(recentlyUpdatedTicketsResult.data);
+    const recentlyUpdatedTicketsData = JsonGetRecentTicketsResponseSchema.parse(recentlyUpdatedTicketsResult.data);
+
+    this.assertCollectionResponseValid(recentlyUpdatedTicketsData);
 
     // We did not get ticketings as associations in the previous call otherwise it would return a lot of copies
     const ticketingIdsToSynchronize: string[] = [
       ...new Set(
-        recentlyUpdatedTicketsResult.data['hydra:member'].map((ticket) => {
-          assert(ticket.eventDate?.ticketing);
-
+        recentlyUpdatedTicketsData['hydra:member'].map((ticket) => {
           return ticket.eventDate.ticketing;
         })
       ),
@@ -330,9 +337,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
     const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
 
-    let ticketingsToSynchronize: Required<
-      Pick<TicketingJsonldTicketingReadEventDateReadMinisiteReadTicketingRead, '@id' | 'type' | 'title' | 'eventDateList'>
-    >[];
+    let ticketingsToSynchronize: JsonTicketingSchemaType[];
     if (ticketingIdsToSynchronize.length > 0) {
       const ticketingsResult = await getTicketingCollection({
         client: this.client,
@@ -347,19 +352,11 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         throw ticketingsResult.error;
       }
 
-      assert(ticketingsResult.data);
-      this.assertCollectionResponseValid(ticketingsResult.data);
+      const ticketingsData = JsonGetTicketingsResponseSchema.parse(ticketingsResult.data);
 
-      ticketingsToSynchronize = ticketingsResult.data['hydra:member'].map(({ '@id': idCombination, type, title, eventDateList, currency }) => {
-        assert(typeof idCombination === 'string' && type && typeof title === 'string' && eventDateList && currency === 'EUR');
+      this.assertCollectionResponseValid(ticketingsData);
 
-        return {
-          '@id': idCombination,
-          type: type,
-          title: title,
-          eventDateList: eventDateList,
-        };
-      });
+      ticketingsToSynchronize = ticketingsData['hydra:member'];
     } else {
       ticketingsToSynchronize = [];
     }
@@ -368,7 +365,8 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     // Note: for now we do not parallelize to not flood the ticketing system
     await eachOfLimit(ticketingsToSynchronize, 1, async (ticketing) => {
       const schemaEvents: LiteEventSchemaType[] = [];
-      let ticketPricesIds: string[] = [];
+      const schemaTicketCategories: LiteTicketCategorySchemaType[] = [];
+      let taxRate: number | null = null;
 
       if (ticketing.eventDateList.length > 0) {
         // Thanks to associations we can retrieve "price category"
@@ -380,7 +378,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             itemsPerPage: this.itemsPerPageToAvoidPagination,
             ...{
               fields:
-                'startDate,endDate,startOfEventDay,endOfEventDay,ticketPriceList{id,type,name,description,currency,facialValue,tax{rate,countryCode},valueIncvat}',
+                '@id,startDate,endDate,startOfEventDay,endOfEventDay,ticketPriceList{id,type,name,description,currency,facialValue,tax{rate,countryCode},valueIncvat}',
             },
           },
         });
@@ -389,35 +387,74 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           throw eventDatesResult.error;
         }
 
-        assert(eventDatesResult.data);
-        this.assertCollectionResponseValid(eventDatesResult.data);
+        const eventDatesData = JsonGetEventDatesResponseSchema.parse(eventDatesResult.data);
+        this.assertCollectionResponseValid(eventDatesData);
 
-        for (const { '@id': idCombination, startDate, endDate, startOfEventDay, endOfEventDay, ticketPriceList } of eventDatesResult.data[
-          'hydra:member'
-        ]) {
-          const safeStartDate = startDate || startOfEventDay;
-          const safeEndDate = endDate || endOfEventDay;
+        for (const eventDate of eventDatesData['hydra:member']) {
+          const safeStartDate = eventDate.startDate || eventDate.startOfEventDay;
+          const safeEndDate = eventDate.endDate || eventDate.endOfEventDay;
 
-          assert(idCombination && safeStartDate && safeEndDate && ticketPriceList);
+          assert(safeStartDate && safeEndDate);
 
           // [WORKAROUND] `@id` is a combination, we prefer to focus on the raw `id` but this one is not directly gettable for the `EventDate` entity
-          const match = idCombination.match(/\/v1\/event_dates\/(\d+)/);
+          const match = eventDate['@id'].match(/\/v1\/event_dates\/(\d+)/);
 
           assert(match && match[1]);
 
           schemaEvents.push(
             LiteEventSchema.parse({
               internalTicketingSystemId: match[1],
-              startAt: new Date(safeStartDate),
-              endAt: new Date(safeEndDate),
+              startAt: safeStartDate,
+              endAt: safeEndDate,
             })
           );
 
-          //
+          // Since the Mapado logic differs from ours since it considers a category price per event date
+          // whereas we do it per event serie... We try to merge those that are the same hoping it will work in most case
+          // Note: we sort them first by "id" to be sure a new ticket price creation would not change the key (it's unlikely a previous created price would be deleted after any entry)
+          const safeTickePriceList = eventDate.ticketPriceList.sort((a, b) => {
+            return a.id - b.id;
+          });
 
-          // TicketPriceJsonldTicketPriceReadEventDateReadHasVatReadTaxReadTicketPriceGroupReadTicketPriceRead
+          const replacedTicketCategoryIdToMainIdMapper = new Map<string, string>();
 
-          // ticketPricesIds.push(...ticketPricesIds);
+          for (const ticketPrice of safeTickePriceList) {
+            assert(ticketPrice.name && ticketPrice.description);
+
+            const liteTicketCategory = LiteTicketCategorySchema.parse({
+              internalTicketingSystemId: ticketPrice.id.toString(),
+              name: ticketPrice.name,
+              description: ticketPrice.description,
+              price: ticketPrice.facialValue / 100, // Adjust since cents from their API
+            });
+
+            const similarLiteTicketCategory = schemaTicketCategories.find((anotherLiteRegisteredTicketCategory) => {
+              return (
+                liteTicketCategory.name === anotherLiteRegisteredTicketCategory.name &&
+                liteTicketCategory.description === anotherLiteRegisteredTicketCategory.description &&
+                liteTicketCategory.price === anotherLiteRegisteredTicketCategory.price
+              );
+            });
+
+            if (similarLiteTicketCategory) {
+              replacedTicketCategoryIdToMainIdMapper.set(
+                liteTicketCategory.internalTicketingSystemId,
+                similarLiteTicketCategory.internalTicketingSystemId
+              );
+            } else {
+              schemaTicketCategories.push(liteTicketCategory);
+            }
+
+            // Now since internally we manage a unique tax rate per event serie, we make sure all prices are using the same
+            if (taxRate === null) {
+              taxRate = ticketPrice.tax.rate;
+            } else if (taxRate !== ticketPrice.tax.rate) {
+              // throw new Error(`an event serie should have the same tax rate for all dates and prices`)
+
+              // [WORKAROUND] Until we decide the right way to do, just keep a tax rate none null
+              taxRate = Math.max(taxRate, ticketPrice.tax.rate);
+            }
+          }
         }
 
         // // Make them unique
@@ -439,6 +476,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
       }
 
       assert(serieStartDate !== null && serieEndDate !== null);
+      assert(taxRate !== null);
 
       // [WORKAROUND] `@id` is a combination, we prefer to focus on the raw `id` but this one is not directly gettable for the `Ticketing` entity
       const match = ticketing['@id'].match(/\/v1\/ticketings\/(\d+)/);
@@ -451,7 +489,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           name: ticketing.title,
           startAt: serieStartDate,
           endAt: serieStartDate,
-          taxRate: event.tax_rate / 100,
+          taxRate: taxRate,
         }),
         events: schemaEvents,
         ticketCategories: schemaTicketCategories,
