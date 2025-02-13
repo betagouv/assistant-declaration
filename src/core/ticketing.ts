@@ -280,9 +280,10 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
 }
 
 export class MapadoTicketingSystemClient implements TicketingSystemClient {
-  protected client: Client;
+  protected readonly client: Client;
+  protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;
 
-  constructor(private readonly secretKey: string) {
+  constructor(secretKey: string) {
     this.client = createClient(
       createConfig({
         baseUrl: 'https://ticketing.mapado.net/',
@@ -291,13 +292,20 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     );
   }
 
+  protected assertCollectionResponseValid(data: { 'hydra:totalItems'?: number }) {
+    if (!(typeof data['hydra:totalItems'] === 'number' && data['hydra:totalItems'] <= this.itemsPerPageToAvoidPagination)) {
+      throw new Error('our workaround to avoid handling pagination logic seems to not fit a specific case');
+    }
+  }
+
   public async getEventsSeries(fromDate: Date, toDate?: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
     // Get tickets modifications to know which events to synchronize (for the first time, or again)
     const ticketsResult = await getTicketCollection({
       client: this.client,
       query: {
+        user: 'me',
         updatedSince: fromDate.toISOString(),
-        itemsPerPage: 100_000_000, // Simplify the pagination retrieval
+        itemsPerPage: this.itemsPerPageToAvoidPagination,
         ...{ fields: 'eventDate' },
       },
     });
@@ -307,6 +315,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     }
 
     assert(ticketsResult.data);
+    this.assertCollectionResponseValid(ticketsResult.data);
 
     const recentlyUpdatedEventDatesIds: string[] = [
       ...new Set(
@@ -324,7 +333,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
       client: this.client,
       query: {
         '@id': recentlyUpdatedEventDatesIds.join(','),
-        itemsPerPage: 100_000_000, // Simplify the pagination retrieval
+        itemsPerPage: this.itemsPerPageToAvoidPagination,
         ...{ fields: 'ticketing' },
       },
     });
@@ -334,6 +343,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     }
 
     assert(recentlyUpdatedEventDatesResult.data);
+    this.assertCollectionResponseValid(recentlyUpdatedEventDatesResult.data);
 
     const ticketingIdsToSynchronize: string[] = [
       ...new Set(
@@ -345,14 +355,16 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
     const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
 
-    let ticketings: TicketingJsonldTicketingReadEventDateReadMinisiteReadTicketingRead[];
+    let ticketingsToSynchronize: Required<
+      Pick<TicketingJsonldTicketingReadEventDateReadMinisiteReadTicketingRead, '@id' | 'type' | 'title' | 'eventDateList'>
+    >[];
     if (ticketingIdsToSynchronize.length > 0) {
       const ticketingsResult = await getTicketingCollection({
         client: this.client,
         query: {
           '@id': ticketingIdsToSynchronize.join(','),
-          itemsPerPage: 100_000_000, // Simplify the pagination retrieval
-          ...{ fields: 'TODO' },
+          itemsPerPage: this.itemsPerPageToAvoidPagination,
+          ...{ fields: 'type,title,eventDateList' },
         },
       });
 
@@ -361,17 +373,43 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
       }
 
       assert(ticketingsResult.data);
+      this.assertCollectionResponseValid(ticketingsResult.data);
 
-      ticketings = ticketingsResult.data['hydra:member'];
+      ticketingsToSynchronize = ticketingsResult.data['hydra:member'].map(({ '@id': id, type, title, eventDateList }) => {
+        assert(typeof id === 'string');
+        assert(type);
+        assert(typeof title === 'string');
+        assert(eventDateList);
+
+        return {
+          '@id': id,
+          type: type,
+          title: title,
+          eventDateList: eventDateList,
+        };
+      });
     } else {
-      ticketings = [];
+      ticketingsToSynchronize = [];
     }
 
     // Get all data to be returned and compared with stored data we have
     // Note: for now we do not parallelize to not flood the ticketing system
-    await eachOfLimit(ticketingIdsToSynchronize, 1, async (eventId) => {
-      // TODO
-      ticketings;
+    await eachOfLimit(ticketingsToSynchronize, 1, async (ticketing) => {
+      const eventDatesResult = await getEventDateCollection({
+        client: this.client,
+        query: {
+          '@id': ticketing.eventDateList.join(','),
+          itemsPerPage: this.itemsPerPageToAvoidPagination,
+          ...{ fields: 'ticketing' },
+        },
+      });
+
+      if (eventDatesResult.error) {
+        throw eventDatesResult.error;
+      }
+
+      assert(eventDatesResult.data);
+      this.assertCollectionResponseValid(eventDatesResult.data);
     });
 
     return eventsSeriesWrappers;
