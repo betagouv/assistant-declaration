@@ -364,7 +364,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         query: {
           '@id': ticketingIdsToSynchronize.join(','),
           itemsPerPage: this.itemsPerPageToAvoidPagination,
-          ...{ fields: 'type,title,eventDateList' },
+          ...{ fields: 'type,title,eventDateList,currency' },
         },
       });
 
@@ -375,11 +375,8 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
       assert(ticketingsResult.data);
       this.assertCollectionResponseValid(ticketingsResult.data);
 
-      ticketingsToSynchronize = ticketingsResult.data['hydra:member'].map(({ '@id': id, type, title, eventDateList }) => {
-        assert(typeof id === 'string');
-        assert(type);
-        assert(typeof title === 'string');
-        assert(eventDateList);
+      ticketingsToSynchronize = ticketingsResult.data['hydra:member'].map(({ '@id': id, type, title, eventDateList, currency }) => {
+        assert(typeof id === 'string' && type && typeof title === 'string' && eventDateList && currency === 'EUR');
 
         return {
           '@id': id,
@@ -395,21 +392,55 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     // Get all data to be returned and compared with stored data we have
     // Note: for now we do not parallelize to not flood the ticketing system
     await eachOfLimit(ticketingsToSynchronize, 1, async (ticketing) => {
-      const eventDatesResult = await getEventDateCollection({
-        client: this.client,
-        query: {
-          '@id': ticketing.eventDateList.join(','),
-          itemsPerPage: this.itemsPerPageToAvoidPagination,
-          ...{ fields: 'ticketing' },
-        },
-      });
+      const schemaEvents: LiteEventSchemaType[] = [];
+      let ticketPricesIds: string[] = [];
 
-      if (eventDatesResult.error) {
-        throw eventDatesResult.error;
+      if (ticketing.eventDateList.length > 0) {
+        const eventDatesResult = await getEventDateCollection({
+          client: this.client,
+          query: {
+            '@id': ticketing.eventDateList.join(','),
+            itemsPerPage: this.itemsPerPageToAvoidPagination,
+            ...{ fields: 'startDate,endDate,startOfEventDay,endOfEventDay,ticketPriceList' },
+          },
+        });
+
+        if (eventDatesResult.error) {
+          throw eventDatesResult.error;
+        }
+
+        assert(eventDatesResult.data);
+        this.assertCollectionResponseValid(eventDatesResult.data);
+
+        for (const { '@id': id, startDate, endDate, startOfEventDay, endOfEventDay, ticketPriceList } of eventDatesResult.data['hydra:member']) {
+          const safeStartDate = startDate || startOfEventDay;
+          const safeEndDate = endDate || endOfEventDay;
+
+          assert(id && safeStartDate && safeEndDate && ticketPriceList);
+
+          schemaEvents.push(
+            LiteEventSchema.parse({
+              internalTicketingSystemId: id,
+              startAt: new Date(safeStartDate),
+              endAt: new Date(safeEndDate),
+            })
+          );
+
+          ticketPricesIds.push(...ticketPricesIds);
+        }
+
+        // Make them unique
+        ticketPricesIds = [...new Set(ticketPricesIds)];
       }
 
-      assert(eventDatesResult.data);
-      this.assertCollectionResponseValid(eventDatesResult.data);
+      // /ticket_prices/361639?fields=type,name,description,tax,ticketPriceGroup,valueIncvat,currency,facialValue
+
+      //
+      // TODO:
+      // TODO:
+      // TODO:
+      // TODO:
+      //
     });
 
     return eventsSeriesWrappers;
