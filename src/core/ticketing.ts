@@ -32,6 +32,7 @@ import {
   JsonGetEventDatesResponseSchema,
   JsonGetRecentTicketsResponseSchema,
   JsonGetTicketingsResponseSchema,
+  JsonGetTicketsResponseSchema,
   JsonTicketingSchemaType,
 } from '@ad/src/models/entities/mapado';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -424,7 +425,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           });
 
           for (const ticketPrice of safeTickePriceList) {
-            assert(ticketPrice.name && ticketPrice.description);
+            assert(ticketPrice.name);
 
             const liteTicketCategory = LiteTicketCategorySchema.parse({
               internalTicketingSystemId: ticketPrice.id.toString(),
