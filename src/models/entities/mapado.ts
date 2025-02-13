@@ -17,6 +17,7 @@ export const JsonRecentTicketSchema = applyTypedParsers(
       eventDate: z.object({
         ticketing: z.string().min(1),
       }),
+      updatedAt: z.coerce.date(),
     })
     .strip()
 );

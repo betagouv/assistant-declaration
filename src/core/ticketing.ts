@@ -315,7 +315,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         user: 'me',
         updatedSince: fromDate.toISOString(),
         itemsPerPage: this.itemsPerPageToAvoidPagination,
-        ...{ fields: 'eventDate{ticketing}' },
+        ...{ fields: 'eventDate{ticketing},updatedAt' },
       },
     });
 
@@ -327,10 +327,15 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
     this.assertCollectionResponseValid(recentlyUpdatedTicketsData);
 
+    // Since there is no API `before` we simulate it to be consistent across tests (despite getting more data over time)
+    const tickets = toDate
+      ? recentlyUpdatedTicketsData['hydra:member'].filter((ticket) => isBefore(ticket.updatedAt, toDate))
+      : recentlyUpdatedTicketsData['hydra:member'];
+
     // We did not get ticketings as associations in the previous call otherwise it would return a lot of copies
     const ticketingIdsToSynchronize: string[] = [
       ...new Set(
-        recentlyUpdatedTicketsData['hydra:member'].map((ticket) => {
+        tickets.map((ticket) => {
           return ticket.eventDate.ticketing;
         })
       ),
