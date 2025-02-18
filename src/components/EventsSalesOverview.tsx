@@ -538,7 +538,7 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label="Tarif moyen du billet affiché pour le spectacle"
+                  label="Tarif moyen du billet TTC"
                   value={t('currency.amount', {
                     amount: averageTicketPrice,
                   })}
