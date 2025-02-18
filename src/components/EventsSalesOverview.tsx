@@ -3,7 +3,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { LoadingButton as Button } from '@mui/lab';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Chip, Grid, Snackbar, TextField, Typography } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -60,6 +60,22 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
       freeTickets: freeTickets,
     };
   }, [wrappers]);
+
+  const [snackbarAlert, setSnackbarAlert] = useState<JSX.Element | null>(null);
+  const handleCloseSnackbar = useCallback(() => setSnackbarAlert(null), [setSnackbarAlert]);
+
+  const copyValue = useCallback(
+    async (value: string) => {
+      await navigator.clipboard.writeText(value);
+
+      setSnackbarAlert(
+        <Alert severity="success" onClose={handleCloseSnackbar}>
+          La valeur a été copiée
+        </Alert>
+      );
+    },
+    [setSnackbarAlert, handleCloseSnackbar]
+  );
 
   return (
     <>
@@ -267,264 +283,294 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
             sx={{
               bgcolor: fr.colors.decisions.background.default.grey.default,
               borderRadius: '8px',
-              py: { xs: 2, md: 3 },
-              px: { xs: 1, md: 3 },
+              py: 3,
+              px: 3,
               mt: 1,
               mb: 3,
             }}
           >
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <Tooltip
-                  title={
-                    <>
-                      Du {t('date.longWithTime', { date: eventSerie.startAt })} au{' '}
-                      {t('date.longWithTime', {
-                        date: eventSerie.endAt,
-                      })}
-                      <br />
-                      <br />
-                      Ces dates sont non modifiables car elles proviennent de votre système de billetterie
-                    </>
-                  }
-                  data-sentry-mask
-                >
-                  <TextField
-                    label="Date"
-                    value={`${t('date.short', { date: eventSerie.startAt })}  →  ${t('date.short', {
-                      date: eventSerie.endAt,
-                    })}`}
-                    slotProps={{
-                      input: {
-                        disableUnderline: true,
+                <TextField
+                  label="Date"
+                  value={`${t('date.short', { date: eventSerie.startAt })}  →  ${t('date.short', {
+                    date: eventSerie.endAt,
+                  })}`}
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                      onClick: async () => {
+                        await copyValue(
+                          `${t('date.short', { date: eventSerie.startAt })} - ${t('date.short', {
+                            date: eventSerie.endAt,
+                          })}`
+                        );
                       },
-                      htmlInput: {
-                        readOnly: true,
-                      },
-                    }}
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                  />
-                </Tooltip>
+                    },
+                    htmlInput: {
+                      readOnly: true,
+                    },
+                  }}
+                  variant="standard"
+                  size="small"
+                  fullWidth
+                  sx={{
+                    input: { cursor: 'pointer' },
+                    '.MuiFormLabel-root': { cursor: 'pointer' },
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Tooltip title={'Cette valeur est non modifiable car elle provient de votre système de billetterie'}>
-                  <TextField
-                    label="Nombre de représentations"
-                    value={t('number.default', {
-                      number: wrappers.length,
-                    })}
-                    slotProps={{
-                      input: {
-                        disableUnderline: true,
+                <TextField
+                  label="Nombre de représentations"
+                  value={t('number.default', {
+                    number: wrappers.length,
+                  })}
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                      onClick: async () => {
+                        await copyValue(wrappers.length.toString());
                       },
-                      htmlInput: {
-                        readOnly: true,
-                      },
-                    }}
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                  />
-                </Tooltip>
+                    },
+                    htmlInput: {
+                      readOnly: true,
+                    },
+                  }}
+                  variant="standard"
+                  size="small"
+                  fullWidth
+                  sx={{
+                    input: { cursor: 'pointer' },
+                    '.MuiFormLabel-root': { cursor: 'pointer' },
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Tooltip
-                  title={
-                    'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                  }
-                >
-                  <TextField
-                    label="Recette de billetterie HT"
-                    value={t('currency.amount', {
-                      amount: getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
-                    })}
-                    slotProps={{
-                      input: {
-                        disableUnderline: true,
+                <TextField
+                  label="Recette de billetterie HT"
+                  value={t('currency.amount', {
+                    amount: getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
+                  })}
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                      onClick: async () => {
+                        await copyValue(
+                          t('number.defaultWithNoGrouping', {
+                            number: getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
+                          })
+                        );
                       },
-                      htmlInput: {
-                        readOnly: true,
-                      },
-                    }}
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                  />
-                </Tooltip>
+                    },
+                    htmlInput: {
+                      readOnly: true,
+                    },
+                  }}
+                  variant="standard"
+                  size="small"
+                  fullWidth
+                  sx={{
+                    input: { cursor: 'pointer' },
+                    '.MuiFormLabel-root': { cursor: 'pointer' },
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Tooltip
-                  title={
-                    'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                  }
-                >
-                  <TextField
-                    label="Recette de billetterie TTC"
-                    value={t('currency.amount', {
-                      amount: totalIncludingTaxesAmount,
-                    })}
-                    slotProps={{
-                      input: {
-                        disableUnderline: true,
+                <TextField
+                  label="Recette de billetterie TTC"
+                  value={t('currency.amount', {
+                    amount: totalIncludingTaxesAmount,
+                  })}
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                      onClick: async () => {
+                        await copyValue(t('number.defaultWithNoGrouping', { number: totalIncludingTaxesAmount }));
                       },
-                      htmlInput: {
-                        readOnly: true,
-                      },
-                    }}
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                  />
-                </Tooltip>
+                    },
+                    htmlInput: {
+                      readOnly: true,
+                    },
+                  }}
+                  variant="standard"
+                  size="small"
+                  fullWidth
+                  sx={{
+                    input: { cursor: 'pointer' },
+                    '.MuiFormLabel-root': { cursor: 'pointer' },
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Tooltip title={'Cette valeur est non modifiable car elle provient de votre système de billetterie'}>
-                  <TextField
-                    label="Taux de TVA"
-                    value={t('number.percent', {
-                      percentage: eventSerie.taxRate,
-                    })}
-                    slotProps={{
-                      input: {
-                        disableUnderline: true,
+                <TextField
+                  label="Taux de TVA"
+                  value={t('number.percent', {
+                    percentage: eventSerie.taxRate,
+                  })}
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                      onClick: async () => {
+                        await copyValue(t('number.defaultWithNoGrouping', { number: 100 * eventSerie.taxRate }));
                       },
-                      htmlInput: {
-                        readOnly: true,
-                      },
-                    }}
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                  />
-                </Tooltip>
+                    },
+                    htmlInput: {
+                      readOnly: true,
+                    },
+                  }}
+                  variant="standard"
+                  size="small"
+                  fullWidth
+                  sx={{
+                    input: { cursor: 'pointer' },
+                    '.MuiFormLabel-root': { cursor: 'pointer' },
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Tooltip
-                  title={
-                    'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                  }
-                >
-                  <TextField
-                    label="Montant de TVA"
-                    value={t('currency.amount', {
-                      amount: getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
-                    })}
-                    slotProps={{
-                      input: {
-                        disableUnderline: true,
+                <TextField
+                  label="Montant de TVA"
+                  value={t('currency.amount', {
+                    amount: getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
+                  })}
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                      onClick: async () => {
+                        await copyValue(
+                          t('number.defaultWithNoGrouping', {
+                            number: getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
+                          })
+                        );
                       },
-                      htmlInput: {
-                        readOnly: true,
-                      },
-                    }}
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                  />
-                </Tooltip>
+                    },
+                    htmlInput: {
+                      readOnly: true,
+                    },
+                  }}
+                  variant="standard"
+                  size="small"
+                  fullWidth
+                  sx={{
+                    input: { cursor: 'pointer' },
+                    '.MuiFormLabel-root': { cursor: 'pointer' },
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Tooltip
-                  title={
-                    'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                  }
-                >
-                  <TextField
-                    label="Nombre d'entrées payantes"
-                    value={t('number.default', {
-                      number: paidTickets,
-                    })}
-                    slotProps={{
-                      input: {
-                        disableUnderline: true,
+                <TextField
+                  label="Nombre d'entrées payantes"
+                  value={t('number.default', {
+                    number: paidTickets,
+                  })}
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                      onClick: async () => {
+                        await copyValue(paidTickets.toString());
                       },
-                      htmlInput: {
-                        readOnly: true,
-                      },
-                    }}
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                  />
-                </Tooltip>
+                    },
+                    htmlInput: {
+                      readOnly: true,
+                    },
+                  }}
+                  variant="standard"
+                  size="small"
+                  fullWidth
+                  sx={{
+                    input: { cursor: 'pointer' },
+                    '.MuiFormLabel-root': { cursor: 'pointer' },
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Tooltip
-                  title={
-                    'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                  }
-                >
-                  <TextField
-                    label="Nombre d'entrées gratuites"
-                    value={t('number.default', {
-                      number: freeTickets,
-                    })}
-                    slotProps={{
-                      input: {
-                        disableUnderline: true,
+                <TextField
+                  label="Nombre d'entrées gratuites"
+                  value={t('number.default', {
+                    number: freeTickets,
+                  })}
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                      onClick: async () => {
+                        await copyValue(freeTickets.toString());
                       },
-                      htmlInput: {
-                        readOnly: true,
-                      },
-                    }}
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                  />
-                </Tooltip>
+                    },
+                    htmlInput: {
+                      readOnly: true,
+                    },
+                  }}
+                  variant="standard"
+                  size="small"
+                  fullWidth
+                  sx={{
+                    input: { cursor: 'pointer' },
+                    '.MuiFormLabel-root': { cursor: 'pointer' },
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Tooltip title={'Cette valeur est déduite des entrées payantes et gratuites'}>
-                  <TextField
-                    label="Nombre total d'entrées"
-                    value={t('number.default', {
-                      number: freeTickets + paidTickets,
-                    })}
-                    slotProps={{
-                      input: {
-                        disableUnderline: true,
+                <TextField
+                  label="Nombre total d'entrées"
+                  value={t('number.default', {
+                    number: freeTickets + paidTickets,
+                  })}
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                      onClick: async () => {
+                        await copyValue((freeTickets + paidTickets).toString());
                       },
-                      htmlInput: {
-                        readOnly: true,
-                      },
-                    }}
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                  />
-                </Tooltip>
+                    },
+                    htmlInput: {
+                      readOnly: true,
+                    },
+                  }}
+                  variant="standard"
+                  size="small"
+                  fullWidth
+                  sx={{
+                    input: { cursor: 'pointer' },
+                    '.MuiFormLabel-root': { cursor: 'pointer' },
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Tooltip
-                  title={
-                    'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
-                  }
-                >
-                  <TextField
-                    label="Tarif moyen du billet TTC"
-                    value={t('currency.amount', {
-                      amount: averageTicketPrice,
-                    })}
-                    slotProps={{
-                      input: {
-                        disableUnderline: true,
+                <TextField
+                  label="Tarif moyen du billet TTC"
+                  value={t('currency.amount', {
+                    amount: averageTicketPrice,
+                  })}
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                      onClick: async () => {
+                        await copyValue(t('number.defaultWithNoGrouping', { number: averageTicketPrice }));
                       },
-                      htmlInput: {
-                        readOnly: true,
-                      },
-                    }}
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                  />
-                </Tooltip>
+                    },
+                    htmlInput: {
+                      readOnly: true,
+                    },
+                  }}
+                  variant="standard"
+                  size="small"
+                  fullWidth
+                  sx={{
+                    input: { cursor: 'pointer' },
+                    '.MuiFormLabel-root': { cursor: 'pointer' },
+                  }}
+                />
               </Grid>
             </Grid>
           </Box>
         </Grid>
       </Grid>
+      {!!snackbarAlert && (
+        <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={4000}>
+          {snackbarAlert}
+        </Snackbar>
+      )}
     </>
   );
 }

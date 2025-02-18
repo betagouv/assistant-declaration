@@ -336,6 +336,7 @@
   "number": {
     "default": "{{ number, number }}",
     "defaultWithNoDecimal": "{{ number, numberWithNoDecimal }}",
+    "defaultWithNoGrouping": "{{ number, numberWithNoGrouping }}",
     "percent": "{{ percentage, percent }}",
     "percentWithNoDecimal": "{{ percentage, percentWithNoDecimal }}"
   }
