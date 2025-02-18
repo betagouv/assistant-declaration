@@ -205,6 +205,16 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                                   eventSerieId: eventsSeriesWrapper.serie.id,
                                   declarationType: 'sacd',
                                 })}
+                                astpDeclarationLink={linkRegistry.get('declaration', {
+                                  organizationId: organizationId,
+                                  eventSerieId: eventsSeriesWrapper.serie.id,
+                                  declarationType: 'astp',
+                                })}
+                                cnmDeclarationLink={linkRegistry.get('declaration', {
+                                  organizationId: organizationId,
+                                  eventSerieId: eventsSeriesWrapper.serie.id,
+                                  declarationType: 'cnm',
+                                })}
                               />
                             </Grid>
                           );

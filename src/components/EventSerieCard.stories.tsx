@@ -25,6 +25,8 @@ NormalStory.args = {
   wrapper: eventsSeriesWrappers[0],
   sacemDeclarationLink: '',
   sacdDeclarationLink: '',
+  astpDeclarationLink: '',
+  cnmDeclarationLink: '',
 };
 NormalStory.parameters = {};
 NormalStory.play = async ({ canvasElement }) => {

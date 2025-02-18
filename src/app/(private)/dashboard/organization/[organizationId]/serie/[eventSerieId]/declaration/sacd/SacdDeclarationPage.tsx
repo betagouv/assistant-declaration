@@ -3,18 +3,13 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { zodResolver } from '@hookform/resolvers/zod';
 import DownloadIcon from '@mui/icons-material/Download';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveIcon from '@mui/icons-material/Save';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { LoadingButton as Button } from '@mui/lab';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Alert,
   Autocomplete,
   Box,
-  Chip,
   FormControl,
   FormControlLabel,
   FormHelperText,
@@ -23,6 +18,7 @@ import {
   MenuItem,
   Radio,
   RadioGroup,
+  Select,
   TextField,
   Tooltip,
   Typography,
@@ -31,37 +27,42 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import diff from 'microdiff';
 import NextLink from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { createContext, useContext } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
-import { EventSalesTable } from '@ad/src/components/EventSalesTable';
+import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SacdAccountingEntriesTable } from '@ad/src/components/SacdAccountingEntriesTable';
 import { SacdOrganizationFields } from '@ad/src/components/SacdOrganizationFields';
 import { SacdPerformedWorksTable } from '@ad/src/components/SacdPerformedWorksTable';
 import { SacdTicketingEntriesTable } from '@ad/src/components/SacdTicketingEntriesTable';
-import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { FillSacdDeclarationSchema, FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { SacdAudienceSchema, SacdProductionTypeSchema } from '@ad/src/models/entities/declaration/sacd';
-import { capitalizeFirstLetter } from '@ad/src/utils/format';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 import { getBaseUrl } from '@ad/src/utils/url';
 
+export const SacdDeclarationPageContext = createContext({
+  ContextualEventsSalesOverview: EventsSalesOverview,
+});
+
 export interface SacdDeclarationPageProps {
-  params: { eventSerieId: string };
+  params: { organizationId: string; eventSerieId: string };
 }
 
-export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclarationPageProps) {
+export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }: SacdDeclarationPageProps) {
   const { t } = useTranslation('common');
+  const { ContextualEventsSalesOverview } = useContext(SacdDeclarationPageContext);
+  const router = useRouter();
 
-  const updateEventCategoryTickets = trpc.updateEventCategoryTickets.useMutation();
   const fillSacdDeclaration = trpc.fillSacdDeclaration.useMutation();
 
   const getEventSerie = trpc.getEventSerie.useQuery({
@@ -82,13 +83,8 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
   const aggregatedQueries = new AggregatedQueries(getEventSerie, listEvents, getSacdDeclaration);
 
   const [formInitialized, setFormInitialized] = useState<boolean>(false);
-  const [expandedAccordions, setExpandedAccordions] = useState<string[]>([]);
-  const collapseAllAccordions = useCallback(() => setExpandedAccordions([]), []);
-  const expandAllAccordions = useCallback(() => setExpandedAccordions(listEvents.data!.eventsWrappers.map((eW) => eW.event.id)), [listEvents.data]);
   const [producerSameThanOrganizer, setProducerSameThanOrganizer] = useState<boolean | null>(null);
   const [rightsFeesManagerSameThan, setRightsFeesManagerSameThan] = useState<'organizer' | 'producer' | 'none' | null>(null);
-
-  const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   const {
     handleSubmit,
@@ -291,7 +287,30 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
       <Container>
         <Grid item xs={12} sx={{ pb: 3 }}>
           <Typography component="h1" variant="h5">
-            Déclaration SACD
+            Déclaration{' '}
+            <Select
+              variant="standard"
+              value={'sacd'}
+              onChange={(event) => {
+                router.push(
+                  linkRegistry.get('declaration', {
+                    organizationId: organizationId,
+                    eventSerieId: eventSerie.id,
+                    declarationType: event.target.value as string,
+                  })
+                );
+              }}
+              disableUnderline
+              sx={{
+                fontWeight: 700,
+                fontSize: '1.25rem',
+              }}
+            >
+              <MenuItem value="sacem">SACEM</MenuItem>
+              <MenuItem value="sacd">SACD</MenuItem>
+              <MenuItem value="astp">ASTP</MenuItem>
+              <MenuItem value="cnm">CNM</MenuItem>
+            </Select>
           </Typography>
           <Typography component="h2" variant="h6" data-sentry-mask>
             {eventSerie.name}
@@ -310,202 +329,7 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
             }}
           >
             <Container>
-              <Grid container spacing={1} sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 1 }}>
-                <Grid item>
-                  <Typography component="div" variant="h6">
-                    Liste des représentations
-                  </Typography>
-                  <Typography component="div" variant="body2">
-                    Les valeurs associées aux tickets sont modifiables en double-cliquant dessus
-                  </Typography>
-                </Grid>
-                <Grid item sx={{ ml: 'auto' }}>
-                  {expandedAccordions.length === eventsWrappers.length ? (
-                    <Button variant="text" onClick={() => collapseAllAccordions()}>
-                      Tout replier
-                    </Button>
-                  ) : (
-                    <Button variant="text" onClick={() => expandAllAccordions()}>
-                      Tout déplier
-                    </Button>
-                  )}
-                </Grid>
-              </Grid>
-              <Grid container spacing={2} justifyContent="center" sx={{ pt: 3 }}>
-                <Grid item xs={12} sx={{ py: 2 }}>
-                  {eventsWrappers.map((eventsWrapper) => {
-                    return (
-                      <Accordion
-                        key={eventsWrapper.event.id}
-                        expanded={expandedAccordions.includes(eventsWrapper.event.id)}
-                        onChange={(_, toExpand) => {
-                          if (toExpand) {
-                            setExpandedAccordions([...expandedAccordions, eventsWrapper.event.id]);
-                          } else {
-                            setExpandedAccordions(expandedAccordions.filter((id) => id !== eventsWrapper.event.id));
-                          }
-                        }}
-                        sx={{ boxShadow: 'none' }}
-                      >
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          sx={{
-                            '& > .MuiAccordionSummary-content': {
-                              gap: 1,
-                              flexWrap: 'wrap',
-                            },
-                          }}
-                        >
-                          <Typography sx={{ fontWeight: 600 }} data-sentry-mask>
-                            {capitalizeFirstLetter(t('date.longWithTime', { date: eventsWrapper.event.startAt }))}
-                          </Typography>
-                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', marginLeft: 'auto', pr: 2 }}>
-                            <Chip
-                              label={
-                                <>
-                                  <i className={fr.cx('fr-icon-pantone-line')} />{' '}
-                                  {eventsWrapper.sales.reduce(
-                                    (acc, sales) => acc + (sales.eventCategoryTickets.totalOverride ?? sales.eventCategoryTickets.total),
-                                    0
-                                  )}
-                                </>
-                              }
-                              aria-label="nombre de billets vendus"
-                              sx={{
-                                bgcolor: 'var(--background-contrast-brown-opera)',
-                                height: 'auto',
-                                '& > .MuiChip-label': {
-                                  whiteSpace: 'pre-wrap !important',
-                                  wordBreak: 'break-word !important', // Needed in case of word/sentence bigger than parent width
-                                },
-                                '& ::before': {
-                                  // Needed since we cannot override the `<i>` icon style since it's a ::before
-                                  '--icon-size': '1rem !important',
-                                },
-                              }}
-                              data-sentry-mask
-                            />
-                            <Chip
-                              label={`${t('currency.amountWithNoDecimal', {
-                                amount: eventsWrapper.sales.reduce(
-                                  (acc, sales) =>
-                                    acc +
-                                    (sales.eventCategoryTickets.totalOverride ?? sales.eventCategoryTickets.total) *
-                                      (sales.eventCategoryTickets.priceOverride ?? sales.ticketCategory.price),
-                                  0
-                                ),
-                              })} TTC`}
-                              sx={{
-                                bgcolor: 'var(--background-contrast-brown-opera)',
-                                height: 'auto',
-                                '& > .MuiChip-label': {
-                                  whiteSpace: 'pre-wrap !important',
-                                  wordBreak: 'break-word !important', // Needed in case of word/sentence bigger than parent width
-                                },
-                              }}
-                              data-sentry-mask
-                            />
-                          </Box>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          {eventsWrapper.sales.length > 0 ? (
-                            <EventSalesTable
-                              wrapper={eventsWrapper}
-                              onRowUpdate={async (updatedRow) => {
-                                // The logic is more complex here to provide a feature to override multiple events at once
-                                const oldSales = eventsWrapper.sales.find((s) => s.ticketCategory.id === updatedRow.ticketCategory.id)!;
-                                const isPriceMutated =
-                                  updatedRow.eventCategoryTickets.priceOverride !== null &&
-                                  updatedRow.eventCategoryTickets.priceOverride !== oldSales.eventCategoryTickets.priceOverride;
-
-                                const mutationsToPerform = [
-                                  updateEventCategoryTickets.mutateAsync({
-                                    eventCategoryTicketsId: updatedRow.eventCategoryTickets.id,
-                                    // If the override equals the original value we remove it for the simplicity of understanding for the user (background colors...)
-                                    priceOverride:
-                                      updatedRow.eventCategoryTickets.priceOverride !== updatedRow.ticketCategory.price
-                                        ? updatedRow.eventCategoryTickets.priceOverride
-                                        : null,
-                                    totalOverride:
-                                      updatedRow.eventCategoryTickets.totalOverride !== updatedRow.eventCategoryTickets.total
-                                        ? updatedRow.eventCategoryTickets.totalOverride
-                                        : null,
-                                  }),
-                                ];
-
-                                if (isPriceMutated) {
-                                  const otherEventsWrappersWithThisTicketCategory = eventsWrappers.filter((eW) => {
-                                    // Exclude the current one
-                                    return eW !== eventsWrapper && eW.sales.some((s) => s.ticketCategory.id === updatedRow.ticketCategory.id);
-                                  });
-
-                                  if (otherEventsWrappersWithThisTicketCategory.length > 0) {
-                                    await new Promise<void>((resolve) => {
-                                      showConfirmationDialog({
-                                        description: (
-                                          <>
-                                            Voulez-vous aussi appliquer le tarif{' '}
-                                            <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
-                                              {updatedRow.ticketCategory.name}
-                                            </Typography>{' '}
-                                            de{' '}
-                                            <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
-                                              {t('currency.amount', {
-                                                amount: updatedRow.eventCategoryTickets.priceOverride ?? updatedRow.ticketCategory.price,
-                                              })}
-                                            </Typography>{' '}
-                                            sur les autres représentations de{' '}
-                                            <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
-                                              {eventSerie.name}
-                                            </Typography>{' '}
-                                            ?
-                                          </>
-                                        ),
-                                        onConfirm: async () => {
-                                          otherEventsWrappersWithThisTicketCategory.forEach((otherEventsWrapper) => {
-                                            const otherWrapperSales = otherEventsWrapper.sales.find(
-                                              (s) => s.ticketCategory.id === updatedRow.ticketCategory.id
-                                            )!;
-
-                                            mutationsToPerform.push(
-                                              updateEventCategoryTickets.mutateAsync({
-                                                eventCategoryTicketsId: otherWrapperSales.eventCategoryTickets.id,
-                                                // If the override equals the original value we remove it for the simplicity of understanding for the user (background colors...)
-                                                priceOverride:
-                                                  updatedRow.eventCategoryTickets.priceOverride !== otherWrapperSales.ticketCategory.price
-                                                    ? updatedRow.eventCategoryTickets.priceOverride
-                                                    : null,
-                                                totalOverride:
-                                                  otherWrapperSales.eventCategoryTickets.totalOverride !==
-                                                  otherWrapperSales.eventCategoryTickets.total
-                                                    ? otherWrapperSales.eventCategoryTickets.totalOverride
-                                                    : null,
-                                              })
-                                            );
-                                          });
-
-                                          resolve();
-                                        },
-                                        onCancel: async () => {
-                                          resolve();
-                                        },
-                                      });
-                                    });
-                                  }
-                                }
-
-                                await Promise.all(mutationsToPerform);
-                              }}
-                            />
-                          ) : (
-                            <>Aucune catégorie de ticket pour cette représentation n&apos;a été trouvée.</>
-                          )}
-                        </AccordionDetails>
-                      </Accordion>
-                    );
-                  })}
-                </Grid>
-              </Grid>
+              <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} />
             </Container>
           </Container>
           <Container sx={{ pt: 2 }}>
@@ -1184,7 +1008,23 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                 <Alert severity="info">
                   Si l&apos;interface ne répond pas à toutes les spécificités de votre déclaration, vous pouvez :
                   <ol>
-                    <li>Contacter le support pour que nous sachions quoi améliorer ;</li>
+                    <li>
+                      Déclarer{' '}
+                      <Link
+                        component={NextLink}
+                        href="https://moncompte.sacd.fr/nea/main/mon-accueil"
+                        target="_blank"
+                        underline="none"
+                        sx={{
+                          '&::after': {
+                            display: 'none !important',
+                          },
+                        }}
+                      >
+                        sur le formulaire en ligne SACD
+                      </Link>{' '}
+                      ;
+                    </li>
                     <li>
                       Reporter manuellement les données sur le PDF fourni par la SACD (
                       <Link
@@ -1200,8 +1040,9 @@ export function SacdDeclarationPage({ params: { eventSerieId } }: SacdDeclaratio
                       >
                         téléchargeable ici
                       </Link>
-                      ).
+                      ) ;
                     </li>
+                    <li>Contacter le support pour que nous sachions quoi améliorer.</li>
                   </ol>
                 </Alert>
               </Grid>

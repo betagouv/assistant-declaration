@@ -4,20 +4,19 @@ import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindMainTitle } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
 import {
-  SacdDeclarationPage,
-  SacdDeclarationPageContext,
-} from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacd/SacdDeclarationPage';
+  CnmDeclarationPage,
+  CnmDeclarationPageContext,
+} from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/cnm/CnmDeclarationPage';
 import { Normal as EventsSalesOverviewNormalStory } from '@ad/src/components/EventsSalesOverview.stories';
-import { sacdDeclarations, sacdDeclarationsWrappers } from '@ad/src/fixtures/declaration/sacd';
-import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
+import { eventCategoryTickets, eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
-type ComponentType = typeof SacdDeclarationPage;
+type ComponentType = typeof CnmDeclarationPage;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Pages/SacdDeclaration',
-  component: SacdDeclarationPage,
+  title: 'Pages/CnmDeclaration',
+  component: CnmDeclarationPage,
   ...generateMetaDefault({
     parameters: {},
   }),
@@ -32,17 +31,10 @@ const mswCommonParameters = [
     },
   }),
   getTRPCMock({
-    type: 'query',
-    path: ['getSacdDeclaration'],
-    response: {
-      sacdDeclarationWrapper: sacdDeclarationsWrappers[0],
-    },
-  }),
-  getTRPCMock({
     type: 'mutation',
-    path: ['fillSacdDeclaration'],
+    path: ['updateEventCategoryTickets'],
     response: {
-      sacdDeclaration: sacdDeclarations[0],
+      eventCategoryTickets: eventCategoryTickets[0],
     },
   }),
 ];
@@ -55,7 +47,7 @@ const commonComponentProps: ComponentProps<ComponentType> = {
 };
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <SacdDeclarationPage {...args} />;
+  return <CnmDeclarationPage {...args} />;
 };
 
 const NormalStory = Template.bind({});
@@ -82,7 +74,7 @@ NormalStory.play = async ({ canvasElement }) => {
 
 export const Normal = prepareStory(NormalStory, {
   childrenContext: {
-    context: SacdDeclarationPageContext,
+    context: CnmDeclarationPageContext,
     value: {
       ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
     },
@@ -113,7 +105,7 @@ NotFoundStory.play = async ({ canvasElement }) => {
 
 export const NotFound = prepareStory(NotFoundStory, {
   childrenContext: {
-    context: SacdDeclarationPageContext,
+    context: CnmDeclarationPageContext,
     value: {
       ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
     },
@@ -135,7 +127,7 @@ WithLayoutStory.play = async ({ canvasElement }) => {
 export const WithLayout = prepareStory(WithLayoutStory, {
   layoutStory: PrivateLayoutAsCollaboratorStory,
   childrenContext: {
-    context: SacdDeclarationPageContext,
+    context: CnmDeclarationPageContext,
     value: {
       ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
     },
