@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 
 export interface ClipboardTicketingKeyFiguresProps {
+  t: ReturnType<typeof useTranslation>['t'];
   eventSerieName: string;
   startAt: Date;
   endAt: Date;
@@ -15,7 +16,9 @@ export interface ClipboardTicketingKeyFiguresProps {
 }
 
 export function ClipboardTicketingKeyFigures(props: ClipboardTicketingKeyFiguresProps) {
-  const { t } = useTranslation('common');
+  // `useTranslation` nor `useServerTranslation` can be used with `renderToStaticMarkup()` because it resolves no i18n key
+  // So passing the browser component translation instance as prop to use the correct context
+  const t = props.t;
 
   return (
     <table>

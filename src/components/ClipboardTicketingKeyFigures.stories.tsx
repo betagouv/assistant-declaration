@@ -2,6 +2,7 @@ import { Button } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 import { within } from '@storybook/test';
 import { set } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { ClipboardTicketingKeyFigures } from '@ad/src/components/ClipboardTicketingKeyFigures';
@@ -19,12 +20,14 @@ export default {
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
+  const { t } = useTranslation();
+
   return (
     <>
-      <ClipboardTicketingKeyFigures {...args} />
+      <ClipboardTicketingKeyFigures {...args} t={t} />
       <Button
         onClick={async () => {
-          await componentToClipboard(<ClipboardTicketingKeyFigures {...args} />);
+          await componentToClipboard(<ClipboardTicketingKeyFigures {...args} t={t} />);
         }}
         variant="contained"
         sx={{ width: 'fit-content', mt: 3 }}
