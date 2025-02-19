@@ -37,6 +37,7 @@ const Template: StoryFn<ComponentType> = (args) => {
 
 const NormalStory = Template.bind({});
 NormalStory.args = {
+  eventSerieName: 'The real live performance',
   startAt: set(new Date(0), { year: 2024, month: 11, date: 18 }),
   endAt: set(new Date(0), { year: 2024, month: 11, date: 30 }),
   eventsCount: 4,
