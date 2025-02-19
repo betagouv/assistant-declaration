@@ -189,7 +189,14 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
 
                         const mutationsToPerform = [
                           updateEventCategoryTickets.mutateAsync({
-                            eventCategoryTicketsId: updatedRow.eventCategoryTickets.id,
+                            // Since the backend is generating virtual entries to allow the frontend to display them
+                            // We make sure to manage the "update process" for virtual ones to be created
+                            eventCategoryTicketsId: updatedRow.eventCategoryTickets.id.includes('not_existing_')
+                              ? {
+                                  eventId: updatedRow.eventCategoryTickets.eventId,
+                                  categoryId: updatedRow.eventCategoryTickets.categoryId,
+                                }
+                              : updatedRow.eventCategoryTickets.id,
                             // If the override equals the original value we remove it for the simplicity of understanding for the user (background colors...)
                             priceOverride:
                               updatedRow.eventCategoryTickets.priceOverride !== updatedRow.ticketCategory.price
@@ -238,7 +245,14 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
 
                                     mutationsToPerform.push(
                                       updateEventCategoryTickets.mutateAsync({
-                                        eventCategoryTicketsId: otherWrapperSales.eventCategoryTickets.id,
+                                        // Since the backend is generating virtual entries to allow the frontend to display them
+                                        // We make sure to manage the "update process" for virtual ones to be created
+                                        eventCategoryTicketsId: otherWrapperSales.eventCategoryTickets.id.includes('not_existing_')
+                                          ? {
+                                              eventId: otherWrapperSales.eventCategoryTickets.eventId,
+                                              categoryId: otherWrapperSales.eventCategoryTickets.categoryId,
+                                            }
+                                          : otherWrapperSales.eventCategoryTickets.id,
                                         // If the override equals the original value we remove it for the simplicity of understanding for the user (background colors...)
                                         priceOverride:
                                           updatedRow.eventCategoryTickets.priceOverride !== otherWrapperSales.ticketCategory.price
