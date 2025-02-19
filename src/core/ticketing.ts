@@ -585,7 +585,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           internalTicketingSystemId: ticketingMatch[1],
           name: ticketing.title,
           startAt: serieStartDate,
-          endAt: serieStartDate,
+          endAt: serieEndDate,
           taxRate: taxRate,
         }),
         events: schemaEvents,
