@@ -47,7 +47,7 @@ export function ClipboardTicketingEventsSales(props: ClipboardTicketingEventsSal
             {eventWrapper.sales.length > 0 ? (
               <>
                 {eventWrapper.sales.map((salesItem) => (
-                  <tr>
+                  <tr key={salesItem.eventCategoryTickets.id}>
                     <td></td>
                     <td></td>
                     <td>{salesItem.ticketCategory.name}</td>
