@@ -22,6 +22,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
+import { ClipboardTicketingEventsSales } from '@ad/src/components/ClipboardTicketingEventsSales';
 import { ClipboardTicketingKeyFigures } from '@ad/src/components/ClipboardTicketingKeyFigures';
 import { ClipboardTrigger } from '@ad/src/components/ClipboardTrigger';
 import { EventSalesTable } from '@ad/src/components/EventSalesTable';
@@ -105,17 +106,7 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
             Liste des représentations
             {triggerEventsSalesCopy && (
               <ClipboardTrigger onCopy={() => setTriggerEventsSalesCopy(false)}>
-                <ClipboardTicketingKeyFigures
-                  eventSerieName={eventSerie.name}
-                  startAt={eventSerie.startAt}
-                  endAt={eventSerie.endAt}
-                  eventsCount={wrappers.length}
-                  totalIncludingTaxesAmount={totalIncludingTaxesAmount}
-                  taxRate={eventSerie.taxRate}
-                  averageTicketPrice={averageTicketPrice}
-                  paidTickets={paidTickets}
-                  freeTickets={freeTickets}
-                />
+                <ClipboardTicketingEventsSales eventSerieName={eventSerie.name} eventsWrappers={eventsWrappersToCopy} />
               </ClipboardTrigger>
             )}
             <Tooltip title={'Copier le tableau des ventes de toutes les représentations pour Excel, Word...'} sx={{ ml: 1 }}>
