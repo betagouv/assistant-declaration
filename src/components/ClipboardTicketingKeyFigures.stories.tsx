@@ -2,11 +2,10 @@ import { Button } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 import { within } from '@storybook/test';
 import { set } from 'date-fns';
-import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { ClipboardTicketingKeyFigures } from '@ad/src/components/ClipboardTicketingKeyFigures';
-import { componentToClipboard } from '@ad/src/utils/clipboard';
 
 type ComponentType = typeof ClipboardTicketingKeyFigures;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -20,14 +19,15 @@ export default {
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  const { t } = useTranslation();
+  const [display, setDisplay] = useState(false);
 
   return (
     <>
-      <ClipboardTicketingKeyFigures {...args} t={t} />
+      <ClipboardTicketingKeyFigures {...args} preview={true} />
+      {display && <ClipboardTicketingKeyFigures {...args} onCopy={() => setDisplay(false)} />}
       <Button
         onClick={async () => {
-          await componentToClipboard(<ClipboardTicketingKeyFigures {...args} t={t} />);
+          setDisplay(true);
         }}
         variant="contained"
         sx={{ width: 'fit-content', mt: 3 }}
