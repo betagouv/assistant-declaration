@@ -47,6 +47,7 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   const [triggerKeyFiguresCopy, setTriggerKeyFiguresCopy] = useState(false);
+  const [triggerEventsSalesCopy, setTriggerEventsSalesCopy] = useState(false);
 
   const { totalIncludingTaxesAmount, averageTicketPrice, paidTickets, freeTickets } = useMemo(() => {
     let totalIncludingTaxesAmount: number = 0;
@@ -101,9 +102,33 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
         <Grid item>
           <Typography component="div" variant="h6">
             Liste des représentations
+            {triggerEventsSalesCopy && (
+              <ClipboardTrigger onCopy={() => setTriggerEventsSalesCopy(false)}>
+                <ClipboardTicketingKeyFigures
+                  eventSerieName={eventSerie.name}
+                  startAt={eventSerie.startAt}
+                  endAt={eventSerie.endAt}
+                  eventsCount={wrappers.length}
+                  totalIncludingTaxesAmount={totalIncludingTaxesAmount}
+                  taxRate={eventSerie.taxRate}
+                  averageTicketPrice={averageTicketPrice}
+                  paidTickets={paidTickets}
+                  freeTickets={freeTickets}
+                />
+              </ClipboardTrigger>
+            )}
+            <Tooltip title={'Copier le tableau des ventes de toutes les représentations pour Excel, Word...'} sx={{ ml: 1 }}>
+              <IconButton
+                onClick={async () => {
+                  setTriggerEventsSalesCopy(true);
+                }}
+              >
+                <ContentCopy fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Typography>
           <Typography component="div" variant="body2">
-            Les valeurs associées aux tickets sont modifiables en double-cliquant dessus
+            Les valeurs associées aux tickets sont modifiables pour ajuster les totaux à déclarer.
           </Typography>
         </Grid>
         <Grid item sx={{ ml: 'auto' }}>
