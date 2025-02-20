@@ -15,7 +15,7 @@ export function ClipboardTrigger({ onCopy, children }: PropsWithChildren<Clipboa
         onCopy && onCopy();
       });
     }
-  }, []);
+  }, [onCopy]);
 
   return (
     <div ref={wrapperRef} style={{ display: 'none' }}>

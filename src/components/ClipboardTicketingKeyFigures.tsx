@@ -60,15 +60,15 @@ export function ClipboardTicketingKeyFigures(props: ClipboardTicketingKeyFigures
           </td>
         </tr>
         <tr>
-          <td>Nombre d'entrées payantes</td>
+          <td>Nombre d&apos;entrées payantes</td>
           <td>{props.paidTickets}</td>
         </tr>
         <tr>
-          <td>Nombre d'entrées gratuites</td>
+          <td>Nombre d&apos;entrées gratuites</td>
           <td>{props.freeTickets}</td>
         </tr>
         <tr>
-          <td>Nombre total d'entrées</td>
+          <td>Nombre total d&apos;entrées</td>
           <td>{props.freeTickets + props.paidTickets}</td>
         </tr>
         <tr>
