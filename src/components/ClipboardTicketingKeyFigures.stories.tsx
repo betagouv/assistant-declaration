@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { ClipboardTicketingKeyFigures } from '@ad/src/components/ClipboardTicketingKeyFigures';
+import { ClipboardTrigger } from '@ad/src/components/ClipboardTrigger';
 
 type ComponentType = typeof ClipboardTicketingKeyFigures;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -19,15 +20,19 @@ export default {
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  const [display, setDisplay] = useState(false);
+  const [triggerCopy, setTriggerCopy] = useState(false);
 
   return (
     <>
-      <ClipboardTicketingKeyFigures {...args} preview={true} />
-      {display && <ClipboardTicketingKeyFigures {...args} onCopy={() => setDisplay(false)} />}
+      <ClipboardTicketingKeyFigures {...args} />
+      {triggerCopy && (
+        <ClipboardTrigger onCopy={() => setTriggerCopy(false)}>
+          <ClipboardTicketingKeyFigures {...args} />
+        </ClipboardTrigger>
+      )}
       <Button
         onClick={async () => {
-          setDisplay(true);
+          setTriggerCopy(true);
         }}
         variant="contained"
         sx={{ width: 'fit-content', mt: 3 }}
