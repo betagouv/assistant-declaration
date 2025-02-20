@@ -1,13 +1,29 @@
 'use client';
 
 import { fr } from '@codegouvfr/react-dsfr';
+import { ContentCopy } from '@mui/icons-material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { LoadingButton as Button } from '@mui/lab';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Chip, Grid, Snackbar, TextField, Typography } from '@mui/material';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
+  Box,
+  Chip,
+  Grid,
+  IconButton,
+  Snackbar,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
+import { ClipboardTicketingKeyFigures } from '@ad/src/components/ClipboardTicketingKeyFigures';
+import { ClipboardTrigger } from '@ad/src/components/ClipboardTrigger';
 import { EventSalesTable } from '@ad/src/components/EventSalesTable';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
@@ -29,6 +45,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
   const expandAllAccordions = useCallback(() => setExpandedAccordions(wrappers.map((eW) => eW.event.id)), [wrappers]);
 
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
+
+  const [triggerKeyFiguresCopy, setTriggerKeyFiguresCopy] = useState(false);
 
   const { totalIncludingTaxesAmount, averageTicketPrice, paidTickets, freeTickets } = useMemo(() => {
     let totalIncludingTaxesAmount: number = 0;
@@ -290,6 +308,30 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
         <Grid item xs={12}>
           <Typography component="div" variant="h6">
             Chiffres clés du spectacle
+            {triggerKeyFiguresCopy && (
+              <ClipboardTrigger onCopy={() => setTriggerKeyFiguresCopy(false)}>
+                <ClipboardTicketingKeyFigures
+                  eventSerieName={eventSerie.name}
+                  startAt={eventSerie.startAt}
+                  endAt={eventSerie.endAt}
+                  eventsCount={wrappers.length}
+                  totalIncludingTaxesAmount={totalIncludingTaxesAmount}
+                  taxRate={eventSerie.taxRate}
+                  averageTicketPrice={averageTicketPrice}
+                  paidTickets={paidTickets}
+                  freeTickets={freeTickets}
+                />
+              </ClipboardTrigger>
+            )}
+            <Tooltip title={'Copier le tableau des chiffres clés pour Excel, Word...'} sx={{ ml: 1 }}>
+              <IconButton
+                onClick={async () => {
+                  setTriggerKeyFiguresCopy(true);
+                }}
+              >
+                <ContentCopy fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Typography>
         </Grid>
         <Grid item xs={12}>
