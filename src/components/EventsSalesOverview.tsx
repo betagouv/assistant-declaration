@@ -22,6 +22,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
+import { ClipboardTicketingEventsSales } from '@ad/src/components/ClipboardTicketingEventsSales';
 import { ClipboardTicketingKeyFigures } from '@ad/src/components/ClipboardTicketingKeyFigures';
 import { ClipboardTrigger } from '@ad/src/components/ClipboardTrigger';
 import { EventSalesTable } from '@ad/src/components/EventSalesTable';
@@ -47,6 +48,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   const [triggerKeyFiguresCopy, setTriggerKeyFiguresCopy] = useState(false);
+  const [triggerEventsSalesCopy, setTriggerEventsSalesCopy] = useState(false);
+  const [eventsWrappersToCopy, setEventsWrappersToCopy] = useState<EventWrapperSchemaType[]>([]);
 
   const { totalIncludingTaxesAmount, averageTicketPrice, paidTickets, freeTickets } = useMemo(() => {
     let totalIncludingTaxesAmount: number = 0;
@@ -99,11 +102,26 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
     <>
       <Grid container spacing={1} sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 1 }}>
         <Grid item>
-          <Typography component="div" variant="h6">
+          <Typography component="div" variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
             Liste des représentations
+            {triggerEventsSalesCopy && (
+              <ClipboardTrigger onCopy={() => setTriggerEventsSalesCopy(false)}>
+                <ClipboardTicketingEventsSales eventSerieName={eventSerie.name} eventsWrappers={eventsWrappersToCopy} />
+              </ClipboardTrigger>
+            )}
+            <Tooltip title={'Copier le tableau des ventes de toutes les représentations pour Excel, Word...'} sx={{ ml: 1 }}>
+              <IconButton
+                onClick={async () => {
+                  setEventsWrappersToCopy(wrappers);
+                  setTriggerEventsSalesCopy(true);
+                }}
+              >
+                <ContentCopy fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Typography>
           <Typography component="div" variant="body2">
-            Les valeurs associées aux tickets sont modifiables en double-cliquant dessus
+            Les valeurs associées aux tickets sont modifiables pour ajuster les totaux à déclarer.
           </Typography>
         </Grid>
         <Grid item sx={{ ml: 'auto' }}>
@@ -143,8 +161,25 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                     },
                   }}
                 >
-                  <Typography sx={{ fontWeight: 600 }} data-sentry-mask>
+                  <Typography sx={{ display: 'flex', fontWeight: 600 }} data-sentry-mask>
                     {capitalizeFirstLetter(t('date.longWithTime', { date: eventsWrapper.event.startAt }))}
+                    <Tooltip title={'Copier le tableau des ventes de cette représentation pour Excel, Word...'} sx={{ ml: 1 }}>
+                      <IconButton
+                        onClick={async (event) => {
+                          setEventsWrappersToCopy([eventsWrapper]);
+                          setTriggerEventsSalesCopy(true);
+
+                          event.stopPropagation();
+                        }}
+                        size="small"
+                      >
+                        <ContentCopy
+                          sx={{
+                            fontSize: 13, // It has been chosen to not increase the line height of 24px, it would add too much complexity to try dealing with absolute and ensuring the right available space
+                          }}
+                        />
+                      </IconButton>
+                    </Tooltip>
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', marginLeft: 'auto', pr: 2 }}>
                     <Chip
@@ -306,7 +341,7 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
           })}
         </Grid>
         <Grid item xs={12}>
-          <Typography component="div" variant="h6">
+          <Typography component="div" variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
             Chiffres clés du spectacle
             {triggerKeyFiguresCopy && (
               <ClipboardTrigger onCopy={() => setTriggerKeyFiguresCopy(false)}>
