@@ -11,6 +11,10 @@ export interface ClipboardTicketingEventsSalesProps {
 
 export function ClipboardTicketingEventsSales(props: ClipboardTicketingEventsSalesProps) {
   const { t } = useTranslation();
+
+  // [WORKAROUND] `colspan={x}` attribute to merge cells is working in browser, also Google Sheets
+  // but unfortunately not inside Excel when pasting, it worst than that since it breaks the positioning.
+  // So we multiply `<td>` tags to get something similar
   return (
     <table>
       <thead>
@@ -24,7 +28,11 @@ export function ClipboardTicketingEventsSales(props: ClipboardTicketingEventsSal
       </thead>
       <tbody>
         <tr>
-          <td colSpan={5}>
+          {/* Add a separation to make it cleaner */}
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>
             <b>{props.eventSerieName}</b>
           </td>
         </tr>
@@ -32,7 +40,7 @@ export function ClipboardTicketingEventsSales(props: ClipboardTicketingEventsSal
           <>
             <tr key={eventWrapper.event.id}>
               <td></td>
-              <td colSpan={4}>
+              <td>
                 <b>{capitalizeFirstLetter(t('date.longWithTime', { date: eventWrapper.event.startAt }))}</b>
               </td>
             </tr>
@@ -40,7 +48,8 @@ export function ClipboardTicketingEventsSales(props: ClipboardTicketingEventsSal
               <>
                 {eventWrapper.sales.map((salesItem) => (
                   <tr>
-                    <td colSpan={2}></td>
+                    <td></td>
+                    <td></td>
                     <td>{salesItem.ticketCategory.name}</td>
                     <td>
                       {t('number.defaultWithNoGrouping', { number: salesItem.eventCategoryTickets.priceOverride ?? salesItem.ticketCategory.price })}
@@ -51,12 +60,11 @@ export function ClipboardTicketingEventsSales(props: ClipboardTicketingEventsSal
               </>
             ) : (
               <>
-                {/* If there is no sales for a category we leave a line row so it's understandable */}
+                {/* Add a separation, better in case of no ticketing category */}
                 <tr>
-                  <td colSpan={2}></td>
                   <td></td>
                   <td></td>
-                  <td></td>
+                  <td>-</td>
                 </tr>
               </>
             )}
