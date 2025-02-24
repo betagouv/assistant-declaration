@@ -157,6 +157,7 @@ model Organization {
 enum TicketingSystemName {
   BILLETWEB
   MAPADO
+  FESTIK
 }
 
 model TicketingSystem {

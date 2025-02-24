@@ -3,6 +3,7 @@ import { minutesToMilliseconds, subMonths } from 'date-fns';
 
 import { BilletwebTicketingSystemClient } from '@ad/src/core/ticketing/billetweb';
 import { MockTicketingSystemClient, TicketingSystemClient } from '@ad/src/core/ticketing/common';
+import { FestikTicketingSystemClient } from '@ad/src/core/ticketing/festik';
 import { MapadoTicketingSystemClient } from '@ad/src/core/ticketing/mapado';
 import {
   GetEventSerieSchema,
@@ -113,6 +114,12 @@ export const eventRouter = router({
                   assert(ticketingSystem.apiSecretKey);
 
                   ticketingSystemClient = new MapadoTicketingSystemClient(ticketingSystem.apiSecretKey);
+                  break;
+                case 'FESTIK':
+                  assert(ticketingSystem.apiAccessKey);
+                  assert(ticketingSystem.apiSecretKey);
+
+                  ticketingSystemClient = new FestikTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
                   break;
                 default:
                   throw new Error('unknown ticketing system');
