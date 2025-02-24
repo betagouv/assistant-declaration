@@ -18,6 +18,13 @@ module.exports = {
   },
   overrides: [
     {
+      files: ['src/client/mapado/*.ts'],
+      rules: {
+        'no-prototype-builtins': 'off',
+        'no-undef': 'off',
+      },
+    },
+    {
       files: ['*.md', '*.mdx'],
       extends: 'plugin:mdx/recommended',
       parserOptions: {

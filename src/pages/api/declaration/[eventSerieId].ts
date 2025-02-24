@@ -239,6 +239,8 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
       },
       Event: {
         include: {
+          // Here unlike the `listEvents` endpoint there is no need to list `EventCategoryTickets` entries that
+          // do not exist in database (because the PDF does no need to show those having "no price and no sold ticket")
           EventCategoryTickets: {
             include: {
               category: true,

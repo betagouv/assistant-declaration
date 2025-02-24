@@ -66,6 +66,12 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: npm install
 
+      - name: Check the generated API clients are synchronized with the schema
+        run: npm run client:generate && (git diff --exit-code > /dev/null || (echo "API clients seem not updated according to their remote schema" && exit 1))
+
+      - name: Setup API clients
+        run: npm run setup
+
       - name: Prepare linting
         run: npm run lint:prepare
 

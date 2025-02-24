@@ -1,7 +1,7 @@
 import z from 'zod';
 
 import { GetterInputSchema } from '@ad/src/models/actions/common';
-import { EventCategoryTicketsSchema, EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
+import { EventCategoryTicketsSchema, EventSchema, EventSerieSchema, TicketCategorySchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 
 export const SynchronizeDataFromTicketingSystemsSchema = z
@@ -46,7 +46,12 @@ export type ListEventsPrefillSchemaType = z.infer<typeof ListEventsPrefillSchema
 
 export const UpdateEventCategoryTicketsSchema = z
   .object({
-    eventCategoryTicketsId: EventCategoryTicketsSchema.shape.id,
+    eventCategoryTicketsId: EventCategoryTicketsSchema.shape.id.or(
+      z.object({
+        eventId: EventSchema.shape.id,
+        categoryId: TicketCategorySchema.shape.id,
+      })
+    ),
     totalOverride: EventCategoryTicketsSchema.shape.totalOverride,
     priceOverride: EventCategoryTicketsSchema.shape.priceOverride,
   })

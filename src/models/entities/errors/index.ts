@@ -128,6 +128,7 @@ export const anotherTicketingSystemSynchronizationOngoingError = new BusinessErr
   'anotherTicketingSystemSynchronizationOngoing',
   t('errors.custom.anotherTicketingSystemSynchronizationOngoing')
 );
+export const missingBilletwebEventsRightsError = new BusinessError('missingBilletwebEventsRights', t('errors.custom.missingBilletwebEventsRights'));
 
 // Event serie
 export const eventSerieNotFoundError = new BusinessError('eventSerieNotFound', t('errors.custom.eventSerieNotFound'));

@@ -102,6 +102,12 @@ i18next.use(LanguageDetector).init(
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
               }).format(value);
+            } else if (format === 'numberWithNoGrouping') {
+              return new Intl.NumberFormat(lng, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+                useGrouping: false,
+              }).format(value);
             } else if (format === 'percent') {
               return new Intl.NumberFormat(lng, {
                 style: 'percent',

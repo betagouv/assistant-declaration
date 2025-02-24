@@ -9,6 +9,8 @@ export interface EventSerieCardProps {
   wrapper: EventSerieWrapperSchemaType;
   sacemDeclarationLink: string;
   sacdDeclarationLink: string;
+  astpDeclarationLink: string;
+  cnmDeclarationLink: string;
 }
 
 export function EventSerieCard(props: EventSerieCardProps) {
@@ -61,20 +63,12 @@ export function EventSerieCard(props: EventSerieCardProps) {
         <Button component={NextLink} href={props.sacdDeclarationLink} size="small">
           SACD
         </Button>
-        <Tooltip title="Bientôt disponible">
-          <span>
-            <Button size="small" disabled={true}>
-              ASTP
-            </Button>
-          </span>
-        </Tooltip>
-        <Tooltip title="Bientôt disponible">
-          <span>
-            <Button size="small" disabled={true}>
-              CNM
-            </Button>
-          </span>
-        </Tooltip>
+        <Button component={NextLink} href={props.astpDeclarationLink} size="small">
+          ASTP
+        </Button>
+        <Button component={NextLink} href={props.cnmDeclarationLink} size="small">
+          CNM
+        </Button>
       </CardActions>
     </Card>
   );

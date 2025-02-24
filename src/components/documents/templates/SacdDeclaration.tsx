@@ -454,36 +454,40 @@ export function SacdDeclarationDocument(props: SacdDeclarationDocumentProps) {
           <Text style={styles.h2}>{capitalizeFirstLetter(t('date.longWithTime', { date: eventWrapper.event.startAt }))}</Text>
           <View style={styles.gridContainer}>
             <View style={styles.gridItem}>
-              <Table weightings={[2, 1, 1]} tdStyle={{ padding: 5 }}>
-                <TableHeader fixed>
-                  <TableCell>Catégorie des tickets</TableCell>
-                  <TableCell style={{ justifyContent: 'flex-end' }}>Prix unitaire TTC</TableCell>
-                  <TableCell style={{ justifyContent: 'flex-end' }}>Nombre de billets vendus</TableCell>
-                </TableHeader>
-                {eventWrapper.sales.map((sale, index) => (
-                  <TableRow
-                    key={index}
-                    style={{
-                      backgroundColor:
-                        index % 2 === 0 ? theme.decisions.background.alt.blueFrance.default : theme.decisions.background.default.grey.default,
-                    }}
-                  >
-                    <TableCell>{sale.ticketCategory.name}</TableCell>
-                    <TableCell style={{ justifyContent: 'flex-end' }}>
-                      {escapeFormattedNumberForPdf(
-                        t('currency.amount', { amount: sale.eventCategoryTickets.priceOverride ?? sale.ticketCategory.price })
-                      )}
-                    </TableCell>
-                    <TableCell style={{ justifyContent: 'flex-end' }}>
-                      {escapeFormattedNumberForPdf(
-                        t('number.default', {
-                          number: sale.eventCategoryTickets.totalOverride ?? sale.eventCategoryTickets.total,
-                        })
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </Table>
+              {eventWrapper.sales.length > 0 ? (
+                <Table weightings={[2, 1, 1]} tdStyle={{ padding: 5 }}>
+                  <TableHeader fixed>
+                    <TableCell>Catégorie des tickets</TableCell>
+                    <TableCell style={{ justifyContent: 'flex-end' }}>Prix unitaire TTC</TableCell>
+                    <TableCell style={{ justifyContent: 'flex-end' }}>Nombre de billets vendus</TableCell>
+                  </TableHeader>
+                  {eventWrapper.sales.map((sale, index) => (
+                    <TableRow
+                      key={index}
+                      style={{
+                        backgroundColor:
+                          index % 2 === 0 ? theme.decisions.background.alt.blueFrance.default : theme.decisions.background.default.grey.default,
+                      }}
+                    >
+                      <TableCell>{sale.ticketCategory.name}</TableCell>
+                      <TableCell style={{ justifyContent: 'flex-end' }}>
+                        {escapeFormattedNumberForPdf(
+                          t('currency.amount', { amount: sale.eventCategoryTickets.priceOverride ?? sale.ticketCategory.price })
+                        )}
+                      </TableCell>
+                      <TableCell style={{ justifyContent: 'flex-end' }}>
+                        {escapeFormattedNumberForPdf(
+                          t('number.default', {
+                            number: sale.eventCategoryTickets.totalOverride ?? sale.eventCategoryTickets.total,
+                          })
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </Table>
+              ) : (
+                <Text>Aucun billet n&apos;a été vendu pour cette séance.</Text>
+              )}
             </View>
           </View>
         </View>

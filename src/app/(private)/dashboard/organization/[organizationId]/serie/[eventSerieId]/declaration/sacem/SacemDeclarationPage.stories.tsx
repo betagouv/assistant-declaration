@@ -3,9 +3,13 @@ import { Meta, StoryFn } from '@storybook/react';
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindMainTitle } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
-import { SacemDeclarationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacem/SacemDeclarationPage';
+import {
+  SacemDeclarationPage,
+  SacemDeclarationPageContext,
+} from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacem/SacemDeclarationPage';
+import { Normal as EventsSalesOverviewNormalStory } from '@ad/src/components/EventsSalesOverview.stories';
 import { sacemDeclarations, sacemDeclarationsWrappers } from '@ad/src/fixtures/declaration/sacem';
-import { eventCategoryTickets, eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
+import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
 type ComponentType = typeof SacemDeclarationPage;
@@ -36,13 +40,6 @@ const mswCommonParameters = [
   }),
   getTRPCMock({
     type: 'mutation',
-    path: ['updateEventCategoryTickets'],
-    response: {
-      eventCategoryTickets: eventCategoryTickets[0],
-    },
-  }),
-  getTRPCMock({
-    type: 'mutation',
     path: ['fillSacemDeclaration'],
     response: {
       sacemDeclaration: sacemDeclarations[0],
@@ -52,6 +49,7 @@ const mswCommonParameters = [
 
 const commonComponentProps: ComponentProps<ComponentType> = {
   params: {
+    organizationId: 'a79cb3ba-745e-5d9a-8903-4a02327a7e01',
     eventSerieId: 'd79cb3ba-745e-5d9a-8903-4a02327a7e01',
   },
 };
@@ -82,7 +80,14 @@ NormalStory.play = async ({ canvasElement }) => {
   await playFindMainTitle(canvasElement, /déclaration/i);
 };
 
-export const Normal = prepareStory(NormalStory);
+export const Normal = prepareStory(NormalStory, {
+  childrenContext: {
+    context: SacemDeclarationPageContext,
+    value: {
+      ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
+    },
+  },
+});
 
 const NotFoundStory = Template.bind({});
 NotFoundStory.args = {
@@ -106,7 +111,14 @@ NotFoundStory.play = async ({ canvasElement }) => {
   await playFindMainTitle(canvasElement, /déclaration/i);
 };
 
-export const NotFound = prepareStory(NotFoundStory);
+export const NotFound = prepareStory(NotFoundStory, {
+  childrenContext: {
+    context: SacemDeclarationPageContext,
+    value: {
+      ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
+    },
+  },
+});
 
 const WithLayoutStory = Template.bind({});
 WithLayoutStory.args = {
@@ -122,4 +134,10 @@ WithLayoutStory.play = async ({ canvasElement }) => {
 
 export const WithLayout = prepareStory(WithLayoutStory, {
   layoutStory: PrivateLayoutAsCollaboratorStory,
+  childrenContext: {
+    context: SacemDeclarationPageContext,
+    value: {
+      ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
+    },
+  },
 });
