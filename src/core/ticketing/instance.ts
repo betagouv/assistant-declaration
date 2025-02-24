@@ -2,6 +2,7 @@ import { TicketingSystem } from '@prisma/client';
 
 import { BilletwebTicketingSystemClient } from '@ad/src/core/ticketing/billetweb';
 import { MockTicketingSystemClient, TicketingSystemClient } from '@ad/src/core/ticketing/common';
+import { FestikTicketingSystemClient } from '@ad/src/core/ticketing/festik';
 import { MapadoTicketingSystemClient } from '@ad/src/core/ticketing/mapado';
 import { SupersoniksTicketingSystemClient } from '@ad/src/core/ticketing/supersoniks';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -24,6 +25,12 @@ export function getTicketingSystemClient(
         assert(ticketingSystem.apiSecretKey);
 
         ticketingSystemClient = new BilletwebTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
+        break;
+      case 'FESTIK':
+        assert(ticketingSystem.apiAccessKey);
+        assert(ticketingSystem.apiSecretKey);
+
+        ticketingSystemClient = new FestikTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
         break;
       case 'MAPADO':
         assert(ticketingSystem.apiSecretKey);

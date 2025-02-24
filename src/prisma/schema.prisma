@@ -157,6 +157,7 @@ model Organization {
 
 enum TicketingSystemName {
   BILLETWEB
+  FESTIK
   MAPADO
   SUPERSONIKS
 }
