@@ -1,12 +1,9 @@
 import { EventCategoryTickets, Prisma } from '@prisma/client';
 import { minutesToMilliseconds, subMonths } from 'date-fns';
 
-import {
-  BilletwebTicketingSystemClient,
-  MapadoTicketingSystemClient,
-  MockTicketingSystemClient,
-  TicketingSystemClient,
-} from '@ad/src/core/ticketing';
+import { BilletwebTicketingSystemClient } from '@ad/src/core/ticketing/billetweb';
+import { MockTicketingSystemClient, TicketingSystemClient } from '@ad/src/core/ticketing/common';
+import { MapadoTicketingSystemClient } from '@ad/src/core/ticketing/mapado';
 import {
   GetEventSerieSchema,
   ListEventsSchema,
