@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-import { emptyStringtoNullPreprocessor, safeCoerceToBoolean, transformStringOrNull } from '@ad/src/utils/validation';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
 //
@@ -9,10 +8,13 @@ import { applyTypedParsers } from '@ad/src/utils/zod';
 
 export const BilletSchema = applyTypedParsers(
   z.object({
-    nb_billets_vendus: z.number(),
-    total_ht: z.number(),
-    tva: z.number(),
-    total_ttc: z.number(),
+    tarif: z.string().min(1),
+    prix_unitaire_ttc: z.coerce.number().nonnegative(),
+    nb_billets_vendus: z.coerce.number().int().nonnegative(),
+    taux_tva: z.coerce.number().nonnegative(),
+    // total_ht: z.coerce.number().nonnegative(),
+    // tva: z.coerce.number().nonnegative(),
+    // total_ttc: z.coerce.number().nonnegative(),
   })
 );
 
