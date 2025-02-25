@@ -65,6 +65,7 @@ export const eventRouter = router({
       },
       select: {
         id: true,
+        organizationId: true,
         name: true,
         apiAccessKey: true,
         apiSecretKey: true,
@@ -140,7 +141,13 @@ export const eventRouter = router({
                   ticketingSystem: {
                     // Just to make sure it's isolated for uniqueness of their IDs across ticketing systems
                     // and to check it cannot affect the wrong organization if the remote data is wrong
-                    id: ticketingSystem.id,
+                    //
+                    // Before we were just checking `id === ticketingSystem.id` but it's risky in case a ticketing system has been deleted and recreated
+                    // We have no way to now the unicity since `apiAccessKey` can be null and the `apiAccessSecret` may vary if regenerated
+                    // So to simplify our logic we take all series from the same organization for this ticketing system since we do not remove those already created
+                    // It makes the process safe
+                    organizationId: ticketingSystem.organizationId,
+                    name: ticketingSystem.name,
                   },
                 },
                 select: {
