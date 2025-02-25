@@ -87,7 +87,7 @@ export const localizedRoutes = {
   signIn: defineLocalizedRoute(
     {
       session_end: param.query.optional.boolean,
-      registered: param.query.optional.boolean,
+      token: param.query.optional.string,
     },
     {
       en: (p) => `/auth/sign-in`,

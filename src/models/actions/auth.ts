@@ -26,6 +26,14 @@ export type SignUpSchemaType = z.infer<typeof SignUpSchema>;
 export const SignUpPrefillSchema = SignUpSchema.deepPartial();
 export type SignUpPrefillSchemaType = z.infer<typeof SignUpPrefillSchema>;
 
+export const ConfirmSignUpSchema = z.object({
+  token: z.string().uuid(),
+});
+export type ConfirmSignUpSchemaType = z.infer<typeof ConfirmSignUpSchema>;
+
+export const ConfirmSignUpPrefillSchema = ConfirmSignUpSchema.deepPartial();
+export type ConfirmSignUpPrefillSchemaType = z.infer<typeof ConfirmSignUpPrefillSchema>;
+
 export const RequestNewPasswordSchema = z
   .object({
     email: UserSchema.shape.email,
