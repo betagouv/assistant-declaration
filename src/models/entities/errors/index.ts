@@ -88,6 +88,7 @@ export const authNoCredentialsMatchError = new BusinessError('authNoCredentialsM
 export const authRetriableError = new BusinessError('authRetriable', t('errors.custom.authRetriable'));
 export const authFatalError = new BusinessError('authFatal', t('errors.custom.authFatal'));
 export const unauthorizedError = new BusinessError('unauthorizedError', t('errors.custom.unauthorizedError'));
+export const userNotConfirmedError = new BusinessError('userNotConfirmed', t('errors.custom.userNotConfirmed'));
 
 // Access
 export const organizationCollaboratorRoleRequiredError = new BusinessError(
@@ -97,6 +98,11 @@ export const organizationCollaboratorRoleRequiredError = new BusinessError(
 
 // Sign up
 export const accountAlreadyWithThisEmailError = new BusinessError('accountAlreadyWithThisEmail', t('errors.custom.accountAlreadyWithThisEmail'));
+
+// Confirm sign up
+export const userAlreadyConfirmedError = new BusinessError('userAlreadyConfirmed', t('errors.custom.userAlreadyConfirmed'));
+export const wrongConfirmationTokenError = new BusinessError('wrongConfirmationToken', t('errors.custom.wrongConfirmationToken'));
+export const expiredConfirmationTokenError = new BusinessError('expiredConfirmationToken', t('errors.custom.expiredConfirmationToken'));
 
 // Request new password
 export const noAccountWithThisEmailError = new BusinessError('noAccountWithThisEmail', t('errors.custom.noAccountWithThisEmail'));

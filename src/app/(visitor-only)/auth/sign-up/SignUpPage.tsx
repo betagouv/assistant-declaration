@@ -2,10 +2,11 @@
 
 import { fr } from '@codegouvfr/react-dsfr';
 import humanCooperation from '@gouvfr/dsfr/dist/artwork/pictograms/environment/human-cooperation.svg';
+import { Alert } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 import { SignUpForm } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpForm';
 import { formTitleProps } from '@ad/src/utils/form';
@@ -18,14 +19,28 @@ export const SignUpPageContext = createContext({
 export function SignUpPage() {
   const { ContextualSignUpForm } = useContext(SignUpPageContext);
 
+  const [success, setSuccess] = useState(false);
+
   return (
     <Grid container>
       <Grid item xs={12} lg={6} sx={{ display: 'flex', justifyContent: 'center' }}>
         <Grid container {...centeredFormContainerGridProps}>
-          <Typography component="h1" {...formTitleProps}>
-            Inscription
-          </Typography>
-          <ContextualSignUpForm />
+          {success ? (
+            <Alert severity="success">
+              Votre inscription a bien été prise en compte. Vous allez recevoir un email à l&apos;adresse indiquée pour confirmer votre inscription.
+            </Alert>
+          ) : (
+            <>
+              <Typography component="h1" {...formTitleProps}>
+                Inscription
+              </Typography>
+              <ContextualSignUpForm
+                onSuccess={() => {
+                  setSuccess(true);
+                }}
+              />
+            </>
+          )}
         </Grid>
       </Grid>
       <Grid

@@ -47,7 +47,7 @@ export const UserSchema = z
   .strict();
 export type UserSchemaType = z.infer<typeof UserSchema>;
 
-export const VerificationTokenActionSchema = z.enum(['RESET_PASSWORD']);
+export const VerificationTokenActionSchema = z.enum(['SIGN_UP', 'RESET_PASSWORD']);
 export type VerificationTokenActionSchemaType = z.infer<typeof VerificationTokenActionSchema>;
 
 export const VerificationTokenSchema = z

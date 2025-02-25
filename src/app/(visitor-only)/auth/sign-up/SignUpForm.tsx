@@ -25,7 +25,11 @@ import { PasswordFieldHinter } from '@ad/src/components/PasswordFieldHinter';
 import { SignUpPrefillSchemaType, SignUpSchema, SignUpSchemaType } from '@ad/src/models/actions/auth';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
-export function SignUpForm({ prefill }: { prefill?: SignUpPrefillSchemaType }) {
+export interface SignUpFormProps {
+  onSuccess: () => void;
+}
+
+export function SignUpForm({ prefill, onSuccess }: { prefill?: SignUpPrefillSchemaType } & SignUpFormProps) {
   const router = useRouter();
 
   const signUp = trpc.signUp.useMutation();
@@ -44,7 +48,7 @@ export function SignUpForm({ prefill }: { prefill?: SignUpPrefillSchemaType }) {
   const onSubmit = async (input: SignUpSchemaType) => {
     const result = await signUp.mutateAsync(input);
 
-    router.push(linkRegistry.get('signIn', { registered: true }));
+    onSuccess();
   };
 
   const [showPassword, setShowPassword] = useState(false);

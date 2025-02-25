@@ -4,7 +4,7 @@ import NextAuth from 'next-auth';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-import { authCredentialsRequiredError, authFatalError, authNoCredentialsMatchError } from '@ad/src/models/entities/errors';
+import { authCredentialsRequiredError, authFatalError, authNoCredentialsMatchError, userNotConfirmedError } from '@ad/src/models/entities/errors';
 import { TokenUserSchema, TokenUserSchemaType } from '@ad/src/models/entities/user';
 import { prisma } from '@ad/src/prisma/client';
 import { apiHandlerWrapper } from '@ad/src/utils/api';
@@ -59,6 +59,8 @@ export const nextAuthOptions: NextAuthOptions = {
         const matchPassword = await bcrypt.compare(credentials.password, user.Secrets.passwordHash);
         if (!matchPassword) {
           throw new Error(authNoCredentialsMatchError.code);
+        } else if (user.status !== 'CONFIRMED') {
+          throw new Error(userNotConfirmedError.code);
         }
 
         const tokenUserParse = TokenUserSchema.safeParse({
