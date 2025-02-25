@@ -30,7 +30,7 @@ const Template: StoryFn<ComponentType> = (args) => {
 const NormalStory = Template.bind({});
 NormalStory.args = {
   firstname: 'Thomas',
-  signInUrl: '',
+  confirmationUrl: '',
 };
 NormalStory.decorators = [withEmailRenderer];
 NormalStory.play = async ({ canvasElement }) => {

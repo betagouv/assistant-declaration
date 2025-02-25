@@ -39,6 +39,7 @@ model Session {
 }
 
 enum VerificationTokenAction {
+  SIGN_UP
   RESET_PASSWORD
 }
 

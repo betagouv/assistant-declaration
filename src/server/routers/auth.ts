@@ -1,20 +1,25 @@
 import bcrypt from 'bcrypt';
-import { addMinutes } from 'date-fns';
+import { addDays, addMinutes } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 import { mailer } from '@ad/src/emails/mailer';
-import { ChangePasswordSchema, RequestNewPasswordSchema, ResetPasswordSchema, SignUpSchema } from '@ad/src/models/actions/auth';
+import { ChangePasswordSchema, ConfirmSignUpSchema, RequestNewPasswordSchema, ResetPasswordSchema, SignUpSchema } from '@ad/src/models/actions/auth';
 import {
   accountAlreadyWithThisEmailError,
+  expiredConfirmationTokenError,
   expiredVerificationTokenError,
   invalidCurrentPasswordError,
   invalidVerificationTokenError,
   noAccountWithThisEmailError,
+  userAlreadyConfirmedError,
+  userNotFoundError,
+  wrongConfirmationTokenError,
 } from '@ad/src/models/entities/errors';
 import { UserStatusSchema, VerificationTokenActionSchema } from '@ad/src/models/entities/user';
 import { prisma } from '@ad/src/prisma/client';
 import { userPrismaToModel } from '@ad/src/server/routers/mappers';
 import { privateProcedure, publicProcedure, router } from '@ad/src/server/trpc';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export async function hashPassword(password: string) {
@@ -35,27 +40,95 @@ export const authRouter = router({
     }
     const passwordHash = await hashPassword(input.password);
 
-    const createdUser = await prisma.user.create({
-      data: {
-        firstname: input.firstname,
-        lastname: input.lastname,
-        email: input.email,
-        status: UserStatusSchema.Values.CONFIRMED, // "confirmed" directly since we avoid sending an email confirmation, the user has been invited with a token so little chance it's not the right email
-        Secrets: {
-          create: {
-            passwordHash: passwordHash,
+    const newUser = await prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
+        data: {
+          firstname: input.firstname,
+          lastname: input.lastname,
+          email: input.email,
+          status: UserStatusSchema.Values.REGISTERED,
+          Secrets: {
+            create: {
+              passwordHash: passwordHash,
+            },
           },
         },
+      });
+
+      // We set a large timeframe since people may have other things to do and also because for now we have no logic to resend the verification token
+      const expiresAt = addDays(new Date(), 14);
+
+      const verificationToken = await tx.verificationToken.create({
+        data: {
+          action: VerificationTokenActionSchema.Values.SIGN_UP,
+          token: uuidv4(),
+          identifier: createdUser.id,
+          expires: expiresAt,
+        },
+      });
+
+      await mailer.sendSignUpConfirmation({
+        recipient: createdUser.email,
+        firstname: createdUser.firstname,
+        confirmationUrl: linkRegistry.get('signIn', { token: verificationToken.token }, { absolute: true }),
+      });
+
+      return createdUser;
+    });
+
+    return { user: userPrismaToModel(newUser) };
+  }),
+  confirmSignUp: publicProcedure.input(ConfirmSignUpSchema).mutation(async ({ ctx, input }) => {
+    const verificationToken = await prisma.verificationToken.findFirst({
+      where: {
+        action: VerificationTokenActionSchema.Values.SIGN_UP,
+        token: input.token,
       },
     });
 
-    await mailer.sendSignUpConfirmation({
-      recipient: createdUser.email,
-      firstname: createdUser.firstname,
-      signInUrl: linkRegistry.get('signIn', undefined, { absolute: true }),
+    const currentTime = new Date();
+
+    if (!verificationToken) {
+      throw wrongConfirmationTokenError;
+    } else if (verificationToken.expires < currentTime) {
+      throw expiredConfirmationTokenError;
+    }
+
+    let existingUser = await prisma.user.findUnique({
+      where: {
+        id: verificationToken.identifier,
+      },
+      select: {
+        id: true,
+        status: true,
+      },
     });
 
-    return { user: userPrismaToModel(createdUser) };
+    if (!existingUser) {
+      throw userNotFoundError;
+    } else if (existingUser.status === 'CONFIRMED') {
+      throw userAlreadyConfirmedError;
+    }
+
+    // Disabled account should not try confirming again its account
+    assert(existingUser.status === 'REGISTERED');
+
+    await prisma.user.update({
+      where: {
+        id: existingUser.id,
+      },
+      data: {
+        status: 'CONFIRMED',
+      },
+    });
+
+    await prisma.verificationToken.delete({
+      where: {
+        token: input.token,
+      },
+    });
+
+    return;
   }),
   requestNewPassword: publicProcedure.input(RequestNewPasswordSchema).mutation(async ({ ctx, input }) => {
     const user = await prisma.user.findUnique({
@@ -135,7 +208,13 @@ export const authRouter = router({
     await mailer.sendPasswordReset({
       recipient: user.email,
       firstname: user.firstname,
-      signInUrl: linkRegistry.get('signIn', undefined, { absolute: true }),
+      signInUrl: linkRegistry.get(
+        'signIn',
+        {
+          token: verificationToken.token,
+        },
+        { absolute: true }
+      ),
     });
 
     return;

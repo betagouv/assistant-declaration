@@ -26,6 +26,7 @@
       "eventCategoryTicketsNotFound": "ces données de catégorie de tickets n'existent pas",
       "eventSerieNotFound": "cette série de représentations n'existe pas",
       "expiredVerificationToken": "vous avez dépassé le temps imparti, merci de renouveler votre demande",
+      "expiredConfirmationToken": "le lien de confirmation a expiré, veuillez contacter notre support",
       "fileNotFound": "aucun fichier n'a été trouvé",
       "internalServerError": "une erreur interne est survenue, veuillez retenter",
       "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",
@@ -35,9 +36,12 @@
       "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
       "organizationNotFound": "aucune organisation trouvée",
+      "userAlreadyConfirmed": "votre compte est déjà confirmé",
+      "userNotConfirmed": "votre inscription doit être confirmée en cliquant sur le lien de l'email avant de pouvoir vous authentifier",
       "userNotFound": "cet utilisateur n'existe pas",
       "unauthorizedError": "vous devez être connecté pour effectuer cette action",
-      "unexpectedError": "une erreur inattendue est survenue, veuillez retenter"
+      "unexpectedError": "une erreur inattendue est survenue, veuillez retenter",
+      "wrongConfirmationToken": "le lien de confirmation est invalide, veuillez contacter notre support"
     },
     "validation": {
       "accountingEntries": {

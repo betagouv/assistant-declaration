@@ -3,12 +3,12 @@ import { MjmlButton, MjmlText } from '@faire/mjml-react';
 import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
 
 export function formatTitle() {
-  return `Confirmation d'inscription`;
+  return `Inscription en attente de confirmation`;
 }
 
 export interface SignUpConfirmationEmailProps {
   firstname: string;
-  signInUrl: string;
+  confirmationUrl: string;
 }
 
 export function SignUpConfirmationEmail(props: SignUpConfirmationEmailProps) {
@@ -19,9 +19,9 @@ export function SignUpConfirmationEmail(props: SignUpConfirmationEmailProps) {
       <MjmlText>
         <h1>{title}</h1>
         <p>Bonjour {props.firstname},</p>
-        <p>Nous sommes ravis de vous confirmer que votre compte a été créé.</p>
+        <p>Vous devez confirmer votre inscription en cliquant sur le bouton ci-dessous afin d&apos;accéder pleinement à notre plateforme.</p>
       </MjmlText>
-      <MjmlButton href={props.signInUrl}>Se connecter</MjmlButton>
+      <MjmlButton href={props.confirmationUrl}>Confirmer mon inscription</MjmlButton>
       <MjmlText>
         <p style={{ fontWeight: 'bold' }}>
           Vos identifiants sont strictement personnels, et en aucun cas notre équipe ne vous demandera de les communiquer.
