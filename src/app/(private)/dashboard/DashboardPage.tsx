@@ -4,6 +4,7 @@ import Button from '@mui/lab/LoadingButton';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import NextLink from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { trpc } from '@ad/src/client/trpcClient';
@@ -60,12 +61,17 @@ export function DashboardPage(props: DashboardPageProps) {
               Bienvenue sur la plateforme !
             </Typography>
             <Typography component="p" variant="body2" sx={{ textAlign: 'center', py: 2 }}>
-              Vous n&apos;avez actuellement aucun accès spécifique à la plateforme. Veuillez nous contacter par la messagerie.
+              Pour commencer à synchroniser votre billetterie pour les déclarations, votre compte doit être rattaché à une organisation.
             </Typography>
           </Grid>
-          <Grid item xs={12} sx={{ py: 3, textAlign: 'center' }}>
-            <Button onClick={showLiveChat} loading={isLiveChatLoading} size="large" variant="contained">
-              Ouvrir la messagerie
+          <Grid item xs={12} sx={{ pt: 3, pb: 1, textAlign: 'center' }}>
+            <Button component={NextLink} href={linkRegistry.get('organizationCreation', undefined)} size="large" variant="contained">
+              Créer une organisation sur la plateforme
+            </Button>
+          </Grid>
+          <Grid item xs={12} sx={{ pt: 1, pb: 3, textAlign: 'center' }}>
+            <Button onClick={showLiveChat} loading={isLiveChatLoading} size="large" variant="outlined">
+              Demander à être rattaché(e) à une organisation créée par un collègue
             </Button>
           </Grid>
         </Grid>
