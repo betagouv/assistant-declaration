@@ -16,6 +16,7 @@
   "errors": {
     "custom": {
       "accountAlreadyWithThisEmail": "un compte est déjà enregistré avec cet email",
+      "anotherOrganizationAlreadyHasThisOfficialId": "une autre organisation utilise déjà ce numéro Siren, veuillez vous rapprocher du reste de votre équipe ou contactez notre support",
       "anotherTicketingSystemSynchronizationOngoing": "une autre synchronisation des données est déjà en cours",
       "authCredentialsRequired": "vous devez fournir vos informations de connexion pour poursuivre",
       "authFatal": "une erreur inattendue est survenue, merci de contacter le support",
@@ -32,6 +33,7 @@
       "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",
       "invalidVerificationToken": "l'opération que vous essayez de réaliser a été refusée",
       "missingBilletwebEventsRights": "la clé d'identification Billetweb que vous nous avez fournie est restreinte à certains événements. Il est nécessaire de la régler en \"Tous sélectionnés\" pour que nous puissions synchroniser vos données.",
+      "multipleUserOrganizationsCreation": "vous ne pouvez créer une nouvelle organisation étant déjà rattachée à une. Si c'est un besoin confirmé, veuillez contacter notre support",
       "noAccountWithThisEmail": "aucun compte n'existe avec cette adresse email",
       "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
@@ -145,6 +147,10 @@
         "too_big": "le message doit faire {{maximum}} caractères maximum",
         "too_small_one": "le message est requis"
       },
+      "name": {
+        "too_big": "le nom doit faire {{maximum}} caractères maximum",
+        "too_small_one": "le nom est requis"
+      },
       "newPassword": {
         "passwordRequiresANumeric": "le nouveau mot de passe doit contenir au moins un chiffre",
         "passwordRequiresASpecialCharacters": "le nouveau mot de passe doit contenir au moins un caractère spécial (@,!,?...)",
@@ -155,6 +161,10 @@
       "officialHeadquartersId": {
         "too_small_one": "le numéro Siret est requis",
         "too_big": "le numéro Siret doit faire {{maximum}} caractères maximum"
+      },
+      "officialId": {
+        "too_big": "le numéro Siren doit faire {{maximum}} caractères maximum",
+        "too_small_one": "le numéro Siren est requis"
       },
       "organizer": {
         "name": {

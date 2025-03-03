@@ -68,6 +68,13 @@ export const localizedRoutes = {
       fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}`,
     }
   ),
+  organizationCreation: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/dashboard/organization/create`,
+      fr: (p) => `/tableau-de-bord/collectivite/creer`,
+    }
+  ),
   privacyPolicy: defineLocalizedRoute(
     {},
     {
@@ -154,6 +161,7 @@ export const routes = {
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.en),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.en),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.en),
+    organizationCreation: defineRoute(localizedRoutes.organizationCreation.params, localizedRoutes.organizationCreation.paths.en),
     privacyPolicy: defineRoute(localizedRoutes.privacyPolicy.params, localizedRoutes.privacyPolicy.paths.en),
     resetPassword: defineRoute(localizedRoutes.resetPassword.params, localizedRoutes.resetPassword.paths.en),
     signIn: defineRoute(localizedRoutes.signIn.params, localizedRoutes.signIn.paths.en),
@@ -170,6 +178,7 @@ export const routes = {
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.fr),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.fr),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.fr),
+    organizationCreation: defineRoute(localizedRoutes.organizationCreation.params, localizedRoutes.organizationCreation.paths.fr),
     privacyPolicy: defineRoute(localizedRoutes.privacyPolicy.params, localizedRoutes.privacyPolicy.paths.fr),
     resetPassword: defineRoute(localizedRoutes.resetPassword.params, localizedRoutes.resetPassword.paths.fr),
     signIn: defineRoute(localizedRoutes.signIn.params, localizedRoutes.signIn.paths.fr),

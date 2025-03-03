@@ -118,6 +118,14 @@ export const invalidCurrentPasswordError = new BusinessError('invalidCurrentPass
 export const userNotFoundError = new BusinessError('userNotFound', t('errors.custom.userNotFound'));
 
 // Organization
+export const anotherOrganizationAlreadyHasThisOfficialIdError = new BusinessError(
+  'anotherOrganizationAlreadyHasThisOfficialId',
+  t('errors.custom.anotherOrganizationAlreadyHasThisOfficialId')
+);
+export const multipleUserOrganizationsCreationError = new BusinessError(
+  'multipleUserOrganizationsCreation',
+  t('errors.custom.multipleUserOrganizationsCreation')
+);
 export const organizationNotFoundError = new BusinessError('organizationNotFound', t('errors.custom.organizationNotFound'));
 export const collaboratorCanOnlySeeOrganizationEventsSeriesError = new BusinessError(
   'collaboratorCanOnlySeeOrganizationEventsSeries',
