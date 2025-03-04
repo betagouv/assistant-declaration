@@ -18,6 +18,7 @@ import {
   JsonCollectionSchemaType,
   JsonGetEventDatesResponseSchema,
   JsonGetRecentTicketsResponseSchema,
+  JsonGetRecentTicketsToTestConnectionResponseSchema,
   JsonGetTicketingsResponseSchema,
   JsonGetTicketsResponseSchema,
   JsonTicketingSchemaType,
@@ -40,6 +41,35 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
   protected assertCollectionResponseValid(data: JsonCollectionSchemaType) {
     if (!(typeof data['hydra:totalItems'] === 'number' && data['hydra:totalItems'] <= this.itemsPerPageToAvoidPagination)) {
       throw new Error('our workaround to avoid handling pagination logic seems to not fit a specific case');
+    }
+  }
+
+  public async testConnection(): Promise<boolean> {
+    try {
+      // We fetch the minimum of information since it's just to test the connection
+      const recentlyUpdatedTicketsToTestConnectionResult = await getTicketCollection({
+        client: this.client,
+        query: {
+          user: 'me',
+          updatedSince: new Date().toISOString(),
+          itemsPerPage: 1,
+          ...{ fields: 'updatedAt' },
+        },
+      });
+
+      if (recentlyUpdatedTicketsToTestConnectionResult.error) {
+        throw recentlyUpdatedTicketsToTestConnectionResult.error;
+      }
+
+      const recentlyUpdatedTicketsToTestConnectionData = JsonGetRecentTicketsToTestConnectionResponseSchema.parse(
+        recentlyUpdatedTicketsToTestConnectionResult.data
+      );
+
+      this.assertCollectionResponseValid(recentlyUpdatedTicketsToTestConnectionData);
+
+      return true;
+    } catch (error) {
+      return false;
     }
   }
 

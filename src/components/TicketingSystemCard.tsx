@@ -1,0 +1,161 @@
+'use client';
+
+import { AdminPanelSettings, MoreVert, NotInterested, PersonRemove } from '@mui/icons-material';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import Image from 'next/image';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import fallback from '@ad/public/assets/images/logo.png';
+import { UpdateTicketingSystemForm } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-systems/UpdateTicketingSystemForm';
+import billetweb from '@ad/src/assets/images/ticketing/billetweb.jpg';
+import mapado from '@ad/src/assets/images/ticketing/mapado.jpg';
+import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
+import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
+import { menuPaperProps } from '@ad/src/utils/menu';
+
+export const TicketingSystemCardContext = createContext({
+  ContextualUpdateTicketingSystemForm: UpdateTicketingSystemForm,
+});
+
+export interface TicketingSystemCardProps {
+  ticketingSystem: TicketingSystemSchemaType;
+  disconnectAction: () => Promise<void>;
+}
+
+export function TicketingSystemCard(props: TicketingSystemCardProps) {
+  const { t } = useTranslation('common');
+  const { ContextualUpdateTicketingSystemForm } = useContext(TicketingSystemCardContext);
+
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const handeOpenModal = () => {
+    setModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const { showConfirmationDialog } = useSingletonConfirmationDialog();
+
+  const disconnectAction = useCallback(async () => {
+    showConfirmationDialog({
+      description: (
+        <>
+          Êtes-vous sûr de vouloir déconnecter et supprimer votre billetterie{' '}
+          <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
+            {t(`model.ticketingSystemName.enum.${props.ticketingSystem.name}`)}
+          </Typography>{' '}
+          de l&apos;organisation ?
+        </>
+      ),
+      onConfirm: async () => {
+        await props.disconnectAction();
+      },
+    });
+  }, [props, showConfirmationDialog, t]);
+
+  const logo = useMemo(() => {
+    if (props.ticketingSystem.name === 'BILLETWEB') {
+      return billetweb;
+    } else if (props.ticketingSystem.name === 'MAPADO') {
+      return mapado;
+    } else {
+      return fallback;
+    }
+  }, [props.ticketingSystem.name]);
+
+  return (
+    <Card variant="outlined" sx={{ position: 'relative' }}>
+      <CardHeader
+        action={
+          <Tooltip title="Options de la billetterie">
+            <IconButton
+              onClick={handleClick}
+              size="small"
+              sx={{ ml: 2 }}
+              aria-label="options"
+              aria-controls={open ? 'ticketing-system-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? 'true' : undefined}
+            >
+              <MoreVert />
+            </IconButton>
+          </Tooltip>
+        }
+        sx={{ position: 'absolute', right: 0 }}
+      />
+      <CardContent sx={{ p: '1rem !important' }}>
+        <Grid container direction={'column'} spacing={2}>
+          <Grid item xs={12}>
+            <Grid container alignItems="center" spacing={2} sx={{ pr: '40px' }}>
+              <Grid item sx={{ display: 'flex' }}>
+                <Image src={logo} alt="" width={120} height={120} style={{ objectFit: 'contain' }} data-sentry-block />
+              </Grid>
+              <Grid item data-sentry-mask>
+                <Grid container alignItems="center" spacing={2}>
+                  <Grid item>
+                    <Typography component="b" variant="h4">
+                      {t(`model.ticketingSystemName.enum.${props.ticketingSystem.name}`)}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
+      </CardContent>
+      <Menu
+        anchorEl={anchorEl}
+        id="ticketing-system-menu"
+        open={open}
+        onClose={handleClose}
+        onClick={handleClose}
+        PaperProps={{ ...menuPaperProps }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <MenuItem onClick={handeOpenModal}>
+          <ListItemIcon>
+            <AdminPanelSettings fontSize="small" />
+          </ListItemIcon>
+          Mettre à jour les identifiants
+        </MenuItem>
+        <MenuItem onClick={disconnectAction}>
+          <ListItemIcon>
+            <NotInterested fontSize="small" />
+          </ListItemIcon>
+          Déconnecter
+        </MenuItem>
+      </Menu>
+      <Dialog open={modalOpen} onClose={handleCloseModal} fullWidth maxWidth="sm">
+        <DialogTitle>Modification des identifiants {t(`model.ticketingSystemName.enum.${props.ticketingSystem.name}`)}</DialogTitle>
+        <DialogContent>
+          <ContextualUpdateTicketingSystemForm ticketingSystem={props.ticketingSystem} onSuccess={handleCloseModal} />
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+}

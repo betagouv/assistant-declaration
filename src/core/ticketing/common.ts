@@ -1,13 +1,27 @@
 import { set } from 'date-fns';
 
 import { LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
+import { TicketingSystemNameSchemaType } from '@ad/src/models/entities/ticketing';
 import { sleep } from '@ad/src/utils/sleep';
 
+export const ticketingSystemRequiresApiAccessKey: Record<TicketingSystemNameSchemaType, boolean> = {
+  BILLETWEB: true,
+  MAPADO: false,
+};
+
 export interface TicketingSystemClient {
+  testConnection(): Promise<boolean>;
   getEventsSeries(fromDate: Date): Promise<LiteEventSerieWrapperSchemaType[]>;
 }
 
 export class MockTicketingSystemClient implements TicketingSystemClient {
+  public async testConnection(): Promise<boolean> {
+    // Simulate loading
+    await sleep(1000);
+
+    return true;
+  }
+
   public async getEventsSeries(fromDate: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
     // Simulate loading
     await sleep(4000);

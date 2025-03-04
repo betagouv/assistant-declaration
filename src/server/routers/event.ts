@@ -1,9 +1,7 @@
 import { EventCategoryTickets, Prisma } from '@prisma/client';
 import { minutesToMilliseconds, subMonths } from 'date-fns';
 
-import { BilletwebTicketingSystemClient } from '@ad/src/core/ticketing/billetweb';
-import { MockTicketingSystemClient, TicketingSystemClient } from '@ad/src/core/ticketing/common';
-import { MapadoTicketingSystemClient } from '@ad/src/core/ticketing/mapado';
+import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
 import {
   GetEventSerieSchema,
   ListEventsSchema,
@@ -94,32 +92,7 @@ export const eventRouter = router({
         // Iterate over each system
         await Promise.all(
           ticketingSystems.map(async (ticketingSystem) => {
-            let ticketingSystemClient: TicketingSystemClient;
-
-            if (
-              process.env.APP_MODE !== 'prod' &&
-              (!process.env.DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS ||
-                !process.env.DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS.split(',').includes(ctx.user.id))
-            ) {
-              ticketingSystemClient = new MockTicketingSystemClient();
-            } else {
-              switch (ticketingSystem.name) {
-                case 'BILLETWEB':
-                  assert(ticketingSystem.apiAccessKey);
-                  assert(ticketingSystem.apiSecretKey);
-
-                  ticketingSystemClient = new BilletwebTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
-                  break;
-                case 'MAPADO':
-                  assert(ticketingSystem.apiSecretKey);
-
-                  ticketingSystemClient = new MapadoTicketingSystemClient(ticketingSystem.apiSecretKey);
-                  break;
-                default:
-                  throw new Error('unknown ticketing system');
-              }
-            }
-
+            const ticketingSystemClient = getTicketingSystemClient(ticketingSystem, ctx.user.id);
             const newSynchronizationStartingDate = ticketingSystem.lastSynchronizationAt || oldestAllowedDate;
 
             try {

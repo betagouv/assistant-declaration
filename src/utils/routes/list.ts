@@ -117,6 +117,27 @@ export const localizedRoutes = {
       fr: (p) => `/modalites-d-utilisation`,
     }
   ),
+  ticketingSystemConnection: defineLocalizedRoute(
+    { organizationId: param.path.string, onboarding: param.query.optional.boolean },
+    {
+      en: (p) => `/dashboard/organization/${p.organizationId}/ticketing-system/connect`,
+      fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}/systeme-de-billetterie/connexion`,
+    }
+  ),
+  ticketingSystemEdit: defineLocalizedRoute(
+    { organizationId: param.path.string, ticketingSystemId: param.path.string },
+    {
+      en: (p) => `/dashboard/organization/${p.organizationId}/ticketing-system/${p.ticketingSystemId}/edit`,
+      fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}/systeme-de-billetterie/${p.ticketingSystemId}/editer`,
+    }
+  ),
+  ticketingSystemList: defineLocalizedRoute(
+    { organizationId: param.path.string },
+    {
+      en: (p) => `/dashboard/organization/${p.organizationId}/ticketing-systems`,
+      fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}/systemes-de-billetterie`,
+    }
+  ),
 };
 
 // function createLocalizedRouter(lang: Lang, localeRoutes: typeof localizedRoutes) {
@@ -167,6 +188,9 @@ export const routes = {
     signIn: defineRoute(localizedRoutes.signIn.params, localizedRoutes.signIn.paths.en),
     signUp: defineRoute(localizedRoutes.signUp.params, localizedRoutes.signUp.paths.en),
     termsOfUse: defineRoute(localizedRoutes.termsOfUse.params, localizedRoutes.termsOfUse.paths.en),
+    ticketingSystemConnection: defineRoute(localizedRoutes.ticketingSystemConnection.params, localizedRoutes.ticketingSystemConnection.paths.en),
+    ticketingSystemEdit: defineRoute(localizedRoutes.ticketingSystemEdit.params, localizedRoutes.ticketingSystemEdit.paths.en),
+    ticketingSystemList: defineRoute(localizedRoutes.ticketingSystemList.params, localizedRoutes.ticketingSystemList.paths.en),
   }).routes,
   fr: createLocalizedRouter({
     accessibility: defineRoute(localizedRoutes.accessibility.params, localizedRoutes.accessibility.paths.fr),
@@ -184,6 +208,9 @@ export const routes = {
     signIn: defineRoute(localizedRoutes.signIn.params, localizedRoutes.signIn.paths.fr),
     signUp: defineRoute(localizedRoutes.signUp.params, localizedRoutes.signUp.paths.fr),
     termsOfUse: defineRoute(localizedRoutes.termsOfUse.params, localizedRoutes.termsOfUse.paths.fr),
+    ticketingSystemConnection: defineRoute(localizedRoutes.ticketingSystemConnection.params, localizedRoutes.ticketingSystemConnection.paths.fr),
+    ticketingSystemEdit: defineRoute(localizedRoutes.ticketingSystemEdit.params, localizedRoutes.ticketingSystemEdit.paths.fr),
+    ticketingSystemList: defineRoute(localizedRoutes.ticketingSystemList.params, localizedRoutes.ticketingSystemList.paths.fr),
   }).routes,
 };
 
