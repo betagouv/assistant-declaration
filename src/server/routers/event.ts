@@ -231,7 +231,7 @@ export const eventRouter = router({
                   eventsTicketingSystemIdToDatabaseId.set(storedEvent.internalTicketingSystemId, storedEvent.id);
 
                   storedLiteEvents.set(storedEvent.internalTicketingSystemId, {
-                    internalEventSerieTicketingSystemId: storedEventsSerie.id,
+                    internalEventSerieTicketingSystemId: storedEventsSerie.internalTicketingSystemId,
                     ...LiteEventSchema.parse({
                       internalTicketingSystemId: storedEvent.internalTicketingSystemId,
                       startAt: storedEvent.startAt,
@@ -259,7 +259,7 @@ export const eventRouter = router({
                   ticketCategoriesTicketingSystemIdToDatabaseId.set(storedTicketCategory.internalTicketingSystemId, storedTicketCategory.id);
 
                   storedLiteTicketCategories.set(storedTicketCategory.internalTicketingSystemId, {
-                    internalEventSerieTicketingSystemId: storedEventsSerie.id,
+                    internalEventSerieTicketingSystemId: storedEventsSerie.internalTicketingSystemId,
                     ...LiteTicketCategorySchema.parse({
                       internalTicketingSystemId: storedTicketCategory.internalTicketingSystemId,
                       name: storedTicketCategory.name,
