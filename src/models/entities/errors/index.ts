@@ -137,6 +137,10 @@ export const collaboratorCanOnlySeeOrganizationTicketingSystemsError = new Busin
 );
 
 // Ticketing system
+export const tooManyOrganizationTicketingSystemsError = new BusinessError(
+  'tooManyOrganizationTicketingSystems',
+  t('errors.custom.tooManyOrganizationTicketingSystems')
+);
 export const noValidTicketingSystemError = new BusinessError('noValidTicketingSystem', t('errors.custom.noValidTicketingSystem'));
 export const anotherTicketingSystemSynchronizationOngoingError = new BusinessError(
   'anotherTicketingSystemSynchronizationOngoing',

@@ -1,7 +1,13 @@
 import { set } from 'date-fns';
 
 import { LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
+import { TicketingSystemNameSchemaType } from '@ad/src/models/entities/ticketing';
 import { sleep } from '@ad/src/utils/sleep';
+
+export const ticketingSystemRequiresApiAccessKey: Record<TicketingSystemNameSchemaType, boolean> = {
+  BILLETWEB: true,
+  MAPADO: false,
+};
 
 export interface TicketingSystemClient {
   getEventsSeries(fromDate: Date): Promise<LiteEventSerieWrapperSchemaType[]>;

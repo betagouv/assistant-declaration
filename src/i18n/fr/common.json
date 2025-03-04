@@ -38,6 +38,7 @@
       "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
       "organizationNotFound": "aucune organisation trouvée",
+      "tooManyOrganizationTicketingSystems": "vous avez atteint la limite du nombre de systèmes de billetterie par organisation",
       "userAlreadyConfirmed": "votre compte est déjà confirmé",
       "userNotConfirmed": "votre inscription doit être confirmée en cliquant sur le lien de l'email avant de pouvoir vous authentifier",
       "userNotFound": "cet utilisateur n'existe pas",
@@ -76,6 +77,12 @@
           "too_big": "le numéro et la voie doivent faire {{maximum}} caractères maximum",
           "too_small_one": "le numéro et la voie sont requis"
         }
+      },
+      "apiAccessKey": {
+        "too_small_one": "l'identifiant utilisateur est requis"
+      },
+      "apiSecretKey": {
+        "too_small_one": "la clé d'accès est requise"
       },
       "audience": {
         "invalid_enum_value": "la nature des représentations est requise"
@@ -275,6 +282,9 @@
       },
       "termsAccepted": {
         "invalid_literal": "les modalités d'utilisation doivent être acceptées"
+      },
+      "ticketingSystemName": {
+        "invalid_enum_value": "le système de billetterie est requis"
       }
     }
   },
@@ -344,6 +354,12 @@
           "AMATEUR": "Amateur",
           "PROFESSIONAL": "Professionnel"
         }
+      }
+    },
+    "ticketingSystemName": {
+      "enum": {
+        "BILLETWEB": "Billetweb",
+        "MAPADO": "Mapado"
       }
     }
   },
