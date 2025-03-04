@@ -338,6 +338,28 @@ export const eventRouter = router({
                 });
               }
 
+              // Then make the diff of events sales
+              const eventSalesDiffResult = getDiff(storedLiteEventSales, remoteLiteEventSales);
+
+              // We set the bindings removal at top of operations because it would fail if the removal is due to an associated entity being deleted (due to the `onDelete` of the database)
+              // (we cannot only on the database `onDelete` since a binding can be removed without affecting associated entities, we have to keep this removal loop)
+              for (const removedEventSales of eventSalesDiffResult.removed) {
+                const eventId = eventsTicketingSystemIdToDatabaseId.get(removedEventSales.internalEventTicketingSystemId);
+                const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(removedEventSales.internalTicketCategoryTicketingSystemId);
+
+                assert(eventId, 'dddddddd');
+                assert(categoryId, 'eeeee');
+
+                await tx.eventCategoryTickets.delete({
+                  where: {
+                    eventId_categoryId: {
+                      eventId: eventId,
+                      categoryId: categoryId,
+                    },
+                  },
+                });
+              }
+
               // Then make the diff of tickets categories (we are sure they are bound to an event serie due to returned serie wrappers)
               const ticketCategoriesDiffResult = getDiff(storedLiteTicketCategories, remoteLiteTicketCategories);
 
@@ -464,9 +486,6 @@ export const eventRouter = router({
                 });
               }
 
-              // Then make the diff of events (we are sure they are bound to an event serie due to returned serie wrappers)
-              const eventSalesDiffResult = getDiff(storedLiteEventSales, remoteLiteEventSales);
-
               for (const addedEventSales of eventSalesDiffResult.added) {
                 const eventId = eventsTicketingSystemIdToDatabaseId.get(addedEventSales.internalEventTicketingSystemId);
                 const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(addedEventSales.internalTicketCategoryTicketingSystemId);
@@ -501,23 +520,6 @@ export const eventRouter = router({
                   },
                   data: {
                     total: updatedEventSales.total,
-                  },
-                });
-              }
-
-              for (const removedEventSales of eventSalesDiffResult.removed) {
-                const eventId = eventsTicketingSystemIdToDatabaseId.get(removedEventSales.internalEventTicketingSystemId);
-                const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(removedEventSales.internalTicketCategoryTicketingSystemId);
-
-                assert(eventId);
-                assert(categoryId);
-
-                await tx.eventCategoryTickets.delete({
-                  where: {
-                    eventId_categoryId: {
-                      eventId: eventId,
-                      categoryId: categoryId,
-                    },
                   },
                 });
               }
