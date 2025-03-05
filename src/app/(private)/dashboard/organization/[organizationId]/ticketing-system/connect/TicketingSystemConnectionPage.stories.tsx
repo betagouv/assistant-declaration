@@ -8,6 +8,7 @@ import {
   TicketingSystemConnectionPage,
   TicketingSystemConnectionPageContext,
 } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-system/connect/TicketingSystemConnectionPage';
+import { organizations } from '@ad/src/fixtures/organization';
 
 type ComponentType = typeof TicketingSystemConnectionPage;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -21,11 +22,15 @@ export default {
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <TicketingSystemConnectionPage />;
+  return <TicketingSystemConnectionPage {...args} />;
 };
 
 const NormalStory = Template.bind({});
-NormalStory.args = {};
+NormalStory.args = {
+  params: {
+    organizationId: organizations[0].id,
+  },
+};
 NormalStory.play = async ({ canvasElement }) => {
   await playFindForm(canvasElement);
 };
@@ -40,7 +45,9 @@ export const Normal = prepareStory(NormalStory, {
 });
 
 const WithLayoutStory = Template.bind({});
-WithLayoutStory.args = {};
+WithLayoutStory.args = {
+  ...NormalStory.args,
+};
 WithLayoutStory.parameters = {
   layout: 'fullscreen',
 };

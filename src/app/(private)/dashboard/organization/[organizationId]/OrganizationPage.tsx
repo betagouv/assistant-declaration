@@ -264,12 +264,12 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
           </Grid>
         </>
       ) : (
-        <Grid container sx={{ justifyContent: 'center' }}>
+        <Grid container sx={{ justifyContent: 'center', my: 'auto' }}>
           <Grid item xs={12}>
             <Typography component="p" variant="body2" sx={{ textAlign: 'center', py: 2 }}>
               La dernière étape pour commencer les déclarations est de connecter votre système de billetterie.
               <br />
-              Toutes les étapes vous seront décrites en fonction du système choisi.
+              Des indications vous seront affichées en fonction du système choisi.
             </Typography>
           </Grid>
           <Grid item xs={12} sx={{ pt: 3, pb: 1, textAlign: 'center' }}>

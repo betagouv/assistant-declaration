@@ -2,7 +2,8 @@ import { Meta, StoryFn } from '@storybook/react';
 import { within } from '@storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { TicketingSystemCard } from '@ad/src/components/TicketingSystemCard';
+import { Empty as UpdateTicketingSystemFormEmptyStory } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-systems/UpdateTicketingSystemForm.stories';
+import { TicketingSystemCard, TicketingSystemCardContext } from '@ad/src/components/TicketingSystemCard';
 import { ticketingSystems } from '@ad/src/fixtures/ticketing';
 
 type ComponentType = typeof TicketingSystemCard;
@@ -33,4 +34,11 @@ NormalStory.play = async ({ canvasElement }) => {
   await playFindElement(canvasElement);
 };
 
-export const Normal = prepareStory(NormalStory);
+export const Normal = prepareStory(NormalStory, {
+  childrenContext: {
+    context: TicketingSystemCardContext,
+    value: {
+      ContextualUpdateTicketingSystemForm: UpdateTicketingSystemFormEmptyStory,
+    },
+  },
+});

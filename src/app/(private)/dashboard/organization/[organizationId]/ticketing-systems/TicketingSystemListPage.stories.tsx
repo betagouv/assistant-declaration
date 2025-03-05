@@ -33,6 +33,13 @@ const defaultMswParameters = {
         path: ['disconnectTicketingSystem'],
         response: undefined,
       }),
+      getTRPCMock({
+        type: 'mutation',
+        path: ['updateTicketingSystem'],
+        response: {
+          ticketingSystem: ticketingSystems[0],
+        },
+      }),
     ],
   },
 };

@@ -12,15 +12,19 @@ export const TicketingSystemConnectionPageContext = createContext({
   ContextualConnectTicketingSystemForm: ConnectTicketingSystemForm,
 });
 
-export function TicketingSystemConnectionPage() {
+export interface TicketingSystemConnectionPageProps {
+  params: { organizationId: string };
+}
+
+export function TicketingSystemConnectionPage({ params: { organizationId } }: TicketingSystemConnectionPageProps) {
   const { ContextualConnectTicketingSystemForm } = useContext(TicketingSystemConnectionPageContext);
 
   return (
     <Grid container {...centeredFormContainerGridProps}>
       <Typography component="h1" {...formTitleProps}>
-        Connecter un système de billetterie
+        Connecter une billetterie
       </Typography>
-      <ContextualConnectTicketingSystemForm />
+      <ContextualConnectTicketingSystemForm prefill={{ organizationId: organizationId }} />
     </Grid>
   );
 }

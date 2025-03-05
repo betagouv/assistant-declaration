@@ -8,7 +8,7 @@ import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -36,6 +36,8 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
   const searchParams = useSearchParams();
   const onboardingFlow = searchParams!.has('onboarding');
 
+  const [showOtherIndication, setShowOtherIndication] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -52,15 +54,22 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
     },
   });
 
-  const onSubmit = async (input: ConnectTicketingSystemSchemaType) => {
-    const result = await connectTicketingSystem.mutateAsync(input);
+  const onSubmit = useCallback(
+    async (input: ConnectTicketingSystemSchemaType) => {
+      if (showOtherIndication) {
+        return;
+      }
 
-    if (onboardingFlow) {
-      router.push(linkRegistry.get('organization', { organizationId: props.prefill!.organizationId! }));
-    } else {
-      router.push(linkRegistry.get('ticketingSystemList', { organizationId: props.prefill!.organizationId! }));
-    }
-  };
+      const result = await connectTicketingSystem.mutateAsync(input);
+
+      if (onboardingFlow) {
+        router.push(linkRegistry.get('organization', { organizationId: props.prefill!.organizationId! }));
+      } else {
+        router.push(linkRegistry.get('ticketingSystemList', { organizationId: props.prefill!.organizationId! }));
+      }
+    },
+    [connectTicketingSystem, onboardingFlow, router, showOtherIndication, props.prefill]
+  );
 
   const [showApiSecretKey, setShowApiSecretKey] = useState(false);
   const handleClickShowApiSecretKey = () => setShowApiSecretKey(!showApiSecretKey);
@@ -71,6 +80,15 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
   const watchedTicketingSystemName = watch('ticketingSystemName');
 
   useEffect(() => {
+    // Casting because otherwise it complexifies the whole form validation logic
+    if ((watchedTicketingSystemName as any) === 'other') {
+      setShowOtherIndication(true);
+
+      return;
+    }
+
+    setShowOtherIndication(false);
+
     const required = ticketingSystemRequiresApiAccessKey[watchedTicketingSystemName];
 
     setDisplayApiAccessKey(required);
@@ -79,7 +97,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
     if (!required) {
       setValue('apiAccessKey', '');
     }
-  }, [watchedTicketingSystemName]);
+  }, [watchedTicketingSystemName, setValue]);
 
   return (
     <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="créer une organisation">
@@ -99,67 +117,79 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
               {t(`model.ticketingSystemName.enum.${ticketingSystemName}`)}
             </MenuItem>
           ))}
+          <MenuItem value="other">Autre</MenuItem>
         </TextField>
       </Grid>
-      {displayApiAccessKey && (
+      {showOtherIndication ? (
         <Grid item xs={12}>
-          <TextField
-            type="text"
-            label="Identifiant utilisateur"
-            {...register('apiAccessKey')}
-            error={!!errors.apiAccessKey}
-            helperText={errors?.apiAccessKey?.message}
-            fullWidth
-          />
+          <Alert severity="warning">
+            Nous sommes désolés mais pour l&apos;instant nous ne supportons pas d&apos;autres sytèmes de billetterie. N&apos;hésitez pas à contacter
+            notre support pour que nous planifions l&apos;implémentation du vôtre.
+          </Alert>
         </Grid>
+      ) : (
+        <>
+          {displayApiAccessKey && (
+            <Grid item xs={12}>
+              <TextField
+                type="text"
+                label="Identifiant utilisateur"
+                {...register('apiAccessKey')}
+                error={!!errors.apiAccessKey}
+                helperText={errors?.apiAccessKey?.message}
+                fullWidth
+              />
+            </Grid>
+          )}
+          <Grid item xs={12}>
+            <TextField
+              type={showApiSecretKey ? 'text' : 'password'}
+              label="Clé d'accès"
+              {...register('apiSecretKey')}
+              error={!!errors.apiSecretKey}
+              helperText={errors?.apiSecretKey?.message}
+              fullWidth
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="changer la visibilité de la clé d'accès"
+                      onClick={handleClickShowApiSecretKey}
+                      onMouseDown={handleMouseDownShowApiSecretKey}
+                    >
+                      {showApiSecretKey ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Alert severity="info">
+              Nous vous recommandons de suivre{' '}
+              <Link
+                component={NextLink}
+                href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
+                target="_blank"
+                underline="none"
+                sx={{
+                  '&::after': {
+                    display: 'none !important',
+                  },
+                }}
+              >
+                notre tutoriel pour bien configurer et récupérer les options de connexion
+              </Link>{' '}
+              à nous fournir.
+            </Alert>
+          </Grid>
+          <Grid item xs={12}>
+            <Button type="submit" loading={connectTicketingSystem.isLoading} size="large" variant="contained" fullWidth>
+              Tester et connecter
+            </Button>
+          </Grid>
+        </>
       )}
-      <Grid item xs={12}>
-        <TextField
-          type={showApiSecretKey ? 'text' : 'password'}
-          label="Clé d'accès"
-          {...register('apiSecretKey')}
-          error={!!errors.apiSecretKey}
-          helperText={errors?.apiSecretKey?.message}
-          fullWidth
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="changer la visibilité de la clé d'accès"
-                  onClick={handleClickShowApiSecretKey}
-                  onMouseDown={handleMouseDownShowApiSecretKey}
-                >
-                  {showApiSecretKey ? <Visibility /> : <VisibilityOff />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <Alert severity="info">
-          Nous vous recommandons de suivre{' '}
-          <Link
-            component={NextLink}
-            href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
-            target="_blank"
-            underline="none"
-            sx={{
-              '&::after': {
-                display: 'none !important',
-              },
-            }}
-          >
-            notre tutoriel pour bien configurer et récupérer les options de connexion
-          </Link>{' '}
-          à nous fournir.
-        </Alert>
-      </Grid>
-      <Grid item xs={12}>
-        <Button type="submit" loading={connectTicketingSystem.isLoading} size="large" variant="contained" fullWidth>
-          Tester et connecter
-        </Button>
-      </Grid>
     </BaseForm>
   );
 }

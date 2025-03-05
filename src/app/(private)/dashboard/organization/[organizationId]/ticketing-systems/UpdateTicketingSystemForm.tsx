@@ -54,7 +54,7 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
   const handleClickShowApiSecretKey = () => setShowApiSecretKey(!showApiSecretKey);
   const handleMouseDownShowApiSecretKey = () => setShowApiSecretKey(!showApiSecretKey);
 
-  const displayApiAccessKey = useMemo(() => ticketingSystemRequiresApiAccessKey[props.ticketingSystem.name], []);
+  const displayApiAccessKey = useMemo(() => ticketingSystemRequiresApiAccessKey[props.ticketingSystem.name], [props.ticketingSystem.name]);
 
   return (
     <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="créer une organisation">

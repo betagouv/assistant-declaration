@@ -85,7 +85,7 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
     } else {
       return fallback;
     }
-  }, [props.ticketingSystem]);
+  }, [props.ticketingSystem.name]);
 
   return (
     <Card variant="outlined" sx={{ position: 'relative' }}>
@@ -107,11 +107,11 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
         }
         sx={{ position: 'absolute', right: 0 }}
       />
-      <CardContent>
+      <CardContent sx={{ p: '1rem !important' }}>
         <Grid container direction={'column'} spacing={2}>
           <Grid item xs={12}>
             <Grid container alignItems="center" spacing={2} sx={{ pr: '40px' }}>
-              <Grid item>
+              <Grid item sx={{ display: 'flex' }}>
                 <Image src={logo} alt="" width={120} height={120} style={{ objectFit: 'contain' }} data-sentry-block />
               </Grid>
               <Grid item data-sentry-mask>
@@ -147,7 +147,7 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
           <ListItemIcon>
             <PersonRemove fontSize="small" />
           </ListItemIcon>
-          Supprimer de la collectivité
+          Déconnecter
         </MenuItem>
       </Menu>
       <Dialog open={modalOpen} onClose={handleCloseModal} fullWidth maxWidth="lg">
