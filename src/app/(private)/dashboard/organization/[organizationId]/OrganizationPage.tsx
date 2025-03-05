@@ -275,7 +275,7 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
           <Grid item xs={12} sx={{ pt: 3, pb: 1, textAlign: 'center' }}>
             <Button
               component={NextLink}
-              href={linkRegistry.get('ticketingSystemConnection', { organizationId: organizationId })}
+              href={linkRegistry.get('ticketingSystemConnection', { organizationId: organizationId, onboarding: true })}
               size="large"
               variant="contained"
             >

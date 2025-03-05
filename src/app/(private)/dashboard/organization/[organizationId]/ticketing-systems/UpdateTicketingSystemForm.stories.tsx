@@ -2,17 +2,16 @@ import { Meta, StoryFn } from '@storybook/react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindForm } from '@ad/.storybook/testing';
-import { ConnectTicketingSystemForm } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-system/connect/ConnectTicketingSystemForm';
-import { organizations } from '@ad/src/fixtures/organization';
+import { UpdateTicketingSystemForm } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-systems/UpdateTicketingSystemForm';
 import { ticketingSystems } from '@ad/src/fixtures/ticketing';
-import { ConnectTicketingSystemPrefillSchema } from '@ad/src/models/actions/ticketing';
+import { UpdateTicketingSystemPrefillSchema } from '@ad/src/models/actions/ticketing';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
-type ComponentType = typeof ConnectTicketingSystemForm;
+type ComponentType = typeof UpdateTicketingSystemForm;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 export default {
-  title: 'Forms/ConnectTicketingSystem',
-  component: ConnectTicketingSystemForm,
+  title: 'Forms/UpdateTicketingSystem',
+  component: UpdateTicketingSystemForm,
   ...generateMetaDefault({
     parameters: {},
   }),
@@ -23,7 +22,7 @@ const defaultMswParameters = {
     handlers: [
       getTRPCMock({
         type: 'mutation',
-        path: ['connectTicketingSystem'],
+        path: ['updateTicketingSystem'],
         response: {
           ticketingSystem: ticketingSystems[0],
         },
@@ -33,14 +32,12 @@ const defaultMswParameters = {
 };
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <ConnectTicketingSystemForm {...args} />;
+  return <UpdateTicketingSystemForm {...args} />;
 };
 
 const EmptyStory = Template.bind({});
 EmptyStory.args = {
-  prefill: {
-    organizationId: organizations[0].id,
-  },
+  ticketingSystem: ticketingSystems[0],
 };
 EmptyStory.parameters = { ...defaultMswParameters };
 EmptyStory.play = async ({ canvasElement }) => {
@@ -51,9 +48,8 @@ export const Empty = prepareStory(EmptyStory);
 
 const FilledStory = Template.bind({});
 FilledStory.args = {
-  prefill: ConnectTicketingSystemPrefillSchema.parse({
-    organizationId: organizations[0].id,
-    ticketingSystemName: 'BILLETWEB',
+  ticketingSystem: ticketingSystems[0],
+  prefill: UpdateTicketingSystemPrefillSchema.parse({
     apiAccessKey: '123456789',
     apiSecretKey: '123456789',
   }),

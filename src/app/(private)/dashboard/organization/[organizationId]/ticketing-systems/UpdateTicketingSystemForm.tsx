@@ -3,104 +3,61 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import Button from '@mui/lab/LoadingButton';
-import { Alert, IconButton, InputAdornment, Link, MenuItem } from '@mui/material';
+import { Alert, IconButton, InputAdornment, Link } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import NextLink from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { ticketingSystemRequiresApiAccessKey } from '@ad/src/core/ticketing/common';
 import {
-  ConnectTicketingSystemPrefillSchemaType,
-  ConnectTicketingSystemSchema,
-  ConnectTicketingSystemSchemaType,
+  UpdateTicketingSystemPrefillSchemaType,
+  UpdateTicketingSystemSchema,
+  UpdateTicketingSystemSchemaType,
 } from '@ad/src/models/actions/ticketing';
-import { TicketingSystemNameSchema, TicketingSystemNameSchemaType } from '@ad/src/models/entities/ticketing';
-import { linkRegistry } from '@ad/src/utils/routes/registry';
+import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
 
-export interface ConnectTicketingSystemFormProps {
-  prefill?: ConnectTicketingSystemPrefillSchemaType;
+export interface UpdateTicketingSystemFormProps {
+  ticketingSystem: TicketingSystemSchemaType;
+  prefill?: UpdateTicketingSystemPrefillSchemaType;
+  onSuccess?: () => void;
 }
 
-export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProps) {
-  const { t } = useTranslation('common');
-  const router = useRouter();
-
+export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps) {
   const connectTicketingSystem = trpc.connectTicketingSystem.useMutation();
-
-  const searchParams = useSearchParams();
-  const onboardingFlow = searchParams!.has('onboarding');
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
     control,
     watch,
-  } = useForm<ConnectTicketingSystemSchemaType>({
-    resolver: zodResolver(ConnectTicketingSystemSchema),
+  } = useForm<UpdateTicketingSystemSchemaType>({
+    resolver: zodResolver(UpdateTicketingSystemSchema),
     defaultValues: {
-      organizationId: props.prefill?.organizationId,
-      ticketingSystemName: TicketingSystemNameSchema.Values.BILLETWEB,
       ...props.prefill,
+      ticketingSystemId: props.ticketingSystem.id,
+      ticketingSystemName: props.ticketingSystem.name,
     },
   });
 
-  const onSubmit = async (input: ConnectTicketingSystemSchemaType) => {
+  const onSubmit = async (input: UpdateTicketingSystemSchemaType) => {
     const result = await connectTicketingSystem.mutateAsync(input);
 
-    if (onboardingFlow) {
-      router.push(linkRegistry.get('organization', { organizationId: props.prefill!.organizationId! }));
-    } else {
-      router.push(linkRegistry.get('ticketingSystemList', { organizationId: props.prefill!.organizationId! }));
-    }
+    props.onSuccess && props.onSuccess();
   };
 
   const [showApiSecretKey, setShowApiSecretKey] = useState(false);
   const handleClickShowApiSecretKey = () => setShowApiSecretKey(!showApiSecretKey);
   const handleMouseDownShowApiSecretKey = () => setShowApiSecretKey(!showApiSecretKey);
 
-  const [displayApiAccessKey, setDisplayApiAccessKey] = useState(true);
-
-  const watchedTicketingSystemName = watch('ticketingSystemName');
-
-  useEffect(() => {
-    const required = ticketingSystemRequiresApiAccessKey[watchedTicketingSystemName];
-
-    setDisplayApiAccessKey(required);
-
-    // Reset the value if the field is not required so it's not passed when submitting (empty string will be converted to null)
-    if (!required) {
-      setValue('apiAccessKey', '');
-    }
-  }, [watchedTicketingSystemName]);
+  const displayApiAccessKey = useMemo(() => ticketingSystemRequiresApiAccessKey[props.ticketingSystem.name], []);
 
   return (
     <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="créer une organisation">
-      <Grid item xs={12}>
-        <TextField
-          select
-          label="Système de billetterie"
-          defaultValue={control._defaultValues.ticketingSystemName || ''}
-          inputProps={register('ticketingSystemName')}
-          error={!!errors.ticketingSystemName}
-          helperText={errors.ticketingSystemName?.message}
-          margin="dense"
-          fullWidth
-        >
-          {Object.values(TicketingSystemNameSchema.Values).map((ticketingSystemName) => (
-            <MenuItem key={ticketingSystemName} value={ticketingSystemName}>
-              {t(`model.ticketingSystemName.enum.${ticketingSystemName}`)}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Grid>
       {displayApiAccessKey && (
         <Grid item xs={12}>
           <TextField
@@ -138,7 +95,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
       </Grid>
       <Grid item xs={12}>
         <Alert severity="info">
-          Nous vous recommandons de suivre{' '}
+          Pour retrouver ou récréer vos identifiants, nous vous recommandons de suivre{' '}
           <Link
             component={NextLink}
             href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
@@ -150,14 +107,14 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
               },
             }}
           >
-            notre tutoriel pour bien configurer et récupérer les options de connexion
-          </Link>{' '}
-          à nous fournir.
+            notre tutoriel
+          </Link>
+          .
         </Alert>
       </Grid>
       <Grid item xs={12}>
         <Button type="submit" loading={connectTicketingSystem.isLoading} size="large" variant="contained" fullWidth>
-          Tester et connecter
+          Tester et enregistrer
         </Button>
       </Grid>
     </BaseForm>

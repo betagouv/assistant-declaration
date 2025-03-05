@@ -16,6 +16,7 @@
   "errors": {
     "custom": {
       "accountAlreadyWithThisEmail": "un compte est déjà enregistré avec cet email",
+      "alreadyExistingTicketingSystem": "un système de billetterie est déjà connecté avec ces identifiants",
       "anotherOrganizationAlreadyHasThisOfficialId": "une autre organisation utilise déjà ce numéro Siren, veuillez vous rapprocher du reste de votre équipe ou contactez notre support",
       "anotherTicketingSystemSynchronizationOngoing": "une autre synchronisation des données est déjà en cours",
       "authCredentialsRequired": "vous devez fournir vos informations de connexion pour poursuivre",
@@ -38,6 +39,7 @@
       "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
       "organizationNotFound": "aucune organisation trouvée",
+      "ticketingSystemNotFound": "ce système de billetterie n'existe pas",
       "tooManyOrganizationTicketingSystems": "vous avez atteint la limite du nombre de systèmes de billetterie par organisation",
       "userAlreadyConfirmed": "votre compte est déjà confirmé",
       "userNotConfirmed": "votre inscription doit être confirmée en cliquant sur le lien de l'email avant de pouvoir vous authentifier",
