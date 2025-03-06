@@ -92,7 +92,7 @@ export const eventRouter = router({
         // Iterate over each system
         await Promise.all(
           ticketingSystems.map(async (ticketingSystem) => {
-            const ticketingSystemClient = getTicketingSystemClient(ticketingSystem);
+            const ticketingSystemClient = getTicketingSystemClient(ticketingSystem, ctx.user.id);
             const newSynchronizationStartingDate = ticketingSystem.lastSynchronizationAt || oldestAllowedDate;
 
             try {

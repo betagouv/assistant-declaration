@@ -66,11 +66,14 @@ export const ticketingRouter = router({
     }
 
     // We want to check the connection to immediately tell the user if the credentials are wrong
-    const ticketingSystemClient = getTicketingSystemClient({
-      name: input.ticketingSystemName,
-      apiAccessKey: input.apiAccessKey,
-      apiSecretKey: input.apiSecretKey,
-    });
+    const ticketingSystemClient = getTicketingSystemClient(
+      {
+        name: input.ticketingSystemName,
+        apiAccessKey: input.apiAccessKey,
+        apiSecretKey: input.apiSecretKey,
+      },
+      ctx.user.id
+    );
 
     if (!(await ticketingSystemClient.testConnection())) {
       throw ticketingSystemConnectionFailedError;
@@ -147,11 +150,14 @@ export const ticketingRouter = router({
     assert(input.ticketingSystemName === ticketingSystem.name);
 
     // We want to check the connection to immediately tell the user if the credentials are wrong
-    const ticketingSystemClient = getTicketingSystemClient({
-      name: ticketingSystem.name,
-      apiAccessKey: input.apiAccessKey,
-      apiSecretKey: input.apiSecretKey,
-    });
+    const ticketingSystemClient = getTicketingSystemClient(
+      {
+        name: ticketingSystem.name,
+        apiAccessKey: input.apiAccessKey,
+        apiSecretKey: input.apiSecretKey,
+      },
+      ctx.user.id
+    );
 
     if (!(await ticketingSystemClient.testConnection())) {
       throw ticketingSystemConnectionFailedError;

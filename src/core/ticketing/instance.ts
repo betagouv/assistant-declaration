@@ -5,13 +5,15 @@ import { MockTicketingSystemClient, TicketingSystemClient } from '@ad/src/core/t
 import { MapadoTicketingSystemClient } from '@ad/src/core/ticketing/mapado';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
-export function getTicketingSystemClient(ticketingSystem: Pick<TicketingSystem, 'name' | 'apiAccessKey' | 'apiSecretKey'>): TicketingSystemClient {
+export function getTicketingSystemClient(
+  ticketingSystem: Pick<TicketingSystem, 'name' | 'apiAccessKey' | 'apiSecretKey'>,
+  userId: string
+): TicketingSystemClient {
   let ticketingSystemClient: TicketingSystemClient;
 
   if (
     process.env.APP_MODE !== 'prod' &&
-    (!process.env.DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS ||
-      !process.env.DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS.split(',').includes(ctx.user.id))
+    (!process.env.DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS || !process.env.DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS.split(',').includes(userId))
   ) {
     ticketingSystemClient = new MockTicketingSystemClient();
   } else {
