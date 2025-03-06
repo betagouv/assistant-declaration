@@ -150,7 +150,7 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
           Déconnecter
         </MenuItem>
       </Menu>
-      <Dialog open={modalOpen} onClose={handleCloseModal} fullWidth maxWidth="lg">
+      <Dialog open={modalOpen} onClose={handleCloseModal} fullWidth maxWidth="sm">
         <DialogTitle>Modification des identifiants {t(`model.ticketingSystemName.enum.${props.ticketingSystem.name}`)}</DialogTitle>
         <DialogContent>
           <ContextualUpdateTicketingSystemForm ticketingSystem={props.ticketingSystem} onSuccess={handleCloseModal} />
