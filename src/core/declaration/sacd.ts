@@ -93,7 +93,7 @@ export class SacdClient {
 
     const bodyParams = new URLSearchParams(this.commonBodyParams);
 
-    const response = await fetch(`${this.baseUrl}/ticketing/broker/HelloWorldWS?${queryParams.toString}`, {
+    const response = await fetch(`${this.baseUrl}/ticketing/broker/HelloWorldWS?${queryParams.toString()}`, {
       method: 'POST',
       headers: this.commonPostHeaders,
       body: bodyParams.toString(),
