@@ -122,7 +122,7 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
         <>
           <Grid item xs={12} sx={{ pb: 3 }}>
             <Typography component="h1" variant="h5">
-              Séries de représentations
+              Spectacles
             </Typography>
           </Grid>
           <Grid container spacing={2} justifyContent="center" sx={{ pt: 3 }}>
@@ -225,8 +225,8 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                   ) : (
                     <Grid item xs={12} sx={{ py: 2 }}>
                       {eventsSeriesWrappers.length === 0
-                        ? `Aucune série de représentations n'a été trouvée dans votre billetterie.`
-                        : `Aucune série de représentations n'a été trouvée dans votre billetterie avec le filtre choisi.`}
+                        ? `Aucun spectacle n'a été trouvé dans votre billetterie.`
+                        : `Aucun spectacle n'a été trouvé dans votre billetterie avec le filtre choisi.`}
                     </Grid>
                   )}
                 </>

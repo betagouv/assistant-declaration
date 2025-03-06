@@ -433,7 +433,7 @@ export function SacemRevenuesTable({ control, trigger, errors }: SacemRevenuesTa
         autosizeOnMount={true}
         autosizeOptions={autosizeOption}
         disableVirtualization={true}
-        aria-label="tableau des recettes d'une série de représentations"
+        aria-label="tableau des recettes d'un spectacle"
         data-sentry-mask
       />
       {errors?.message && (

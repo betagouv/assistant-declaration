@@ -7,7 +7,7 @@ import {
 import { formatPageTitle } from '@ad/src/utils/page';
 
 export const metadata: Metadata = {
-  title: formatPageTitle(`Déclaration ASTP d'une série de représentation`),
+  title: formatPageTitle(`Déclaration ASTP d'un spectacle`),
 };
 
 export default function Page(props: AstpDeclarationPageProps) {

@@ -395,7 +395,7 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
         autosizeOnMount={true}
         autosizeOptions={autosizeOption}
         disableVirtualization={true}
-        aria-label="tableau des dépenses artistiques d'une série de représentations"
+        aria-label="tableau des dépenses artistiques d'un spectacle"
         data-sentry-mask
       />
       {errors?.message && (

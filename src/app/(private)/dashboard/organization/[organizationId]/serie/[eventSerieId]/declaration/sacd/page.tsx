@@ -7,7 +7,7 @@ import {
 import { formatPageTitle } from '@ad/src/utils/page';
 
 export const metadata: Metadata = {
-  title: formatPageTitle(`Déclaration SACD d'une série de représentation`),
+  title: formatPageTitle(`Déclaration SACD d'un spectacle`),
 };
 
 export default function Page(props: SacdDeclarationPageProps) {

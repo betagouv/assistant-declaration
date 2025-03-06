@@ -1057,7 +1057,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
         >
           <Grid container spacing={2} justifyContent="center" sx={{ pt: 3 }}>
             <Grid item xs={12} sx={{ py: 2 }}>
-              Aucune date n&apos;a pu être récupérée pour cette série de représentations. Il n&apos;y a donc aucune déclaration à faire à la SACD.
+              Aucune date n&apos;a pu être récupérée pour ce spectacle. Il n&apos;y a donc aucune déclaration à faire à la SACD.
             </Grid>
           </Grid>
         </Container>
