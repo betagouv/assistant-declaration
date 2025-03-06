@@ -64,19 +64,6 @@ export function PrivateLayout(props: PropsWithChildren) {
     return false;
   });
 
-  const dashboardLink = linkRegistry.get('dashboard', undefined);
-
-  const navigation: MainNavigationProps.Item[] = [
-    {
-      isActive: hasPathnameThisMatch(pathname, dashboardLink),
-      text: 'Tableau de bord',
-      linkProps: {
-        href: dashboardLink,
-        target: '_self',
-      },
-    },
-  ];
-
   const quickAccessItems: HeaderProps.QuickAccessItem[] = [
     {
       iconId: 'fr-icon-questionnaire-line',
@@ -97,6 +84,46 @@ export function PrivateLayout(props: PropsWithChildren) {
         currentOrganization: currentOrganization,
       })
     );
+  }
+
+  const dashboardLink = linkRegistry.get('dashboard', undefined);
+
+  const navigation: MainNavigationProps.Item[] = [];
+
+  if (currentOrganization) {
+    const organizationLink = linkRegistry.get('organization', {
+      organizationId: currentOrganization.id,
+    });
+    const ticketingSystemsLink = linkRegistry.get('ticketingSystemList', {
+      organizationId: currentOrganization.id,
+    });
+
+    navigation.push({
+      isActive: hasPathnameThisMatch(pathname, organizationLink),
+      text: 'Spectacles',
+      linkProps: {
+        href: organizationLink,
+        target: '_self',
+      },
+    });
+
+    navigation.push({
+      isActive: hasPathnameThisMatch(pathname, ticketingSystemsLink),
+      text: 'Billetteries',
+      linkProps: {
+        href: ticketingSystemsLink,
+        target: '_self',
+      },
+    });
+  } else {
+    navigation.push({
+      isActive: hasPathnameThisMatch(pathname, dashboardLink),
+      text: 'Tableau de bord',
+      linkProps: {
+        href: dashboardLink,
+        target: '_self',
+      },
+    });
   }
 
   return (
