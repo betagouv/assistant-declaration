@@ -7,21 +7,31 @@ import { JsonHelloWorldResponseSchema, JsonLoginResponseSchema } from '@ad/src/m
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export class SacdClient {
+  protected readonly baseUrl: string = process.env.SACD_API_BASE_URL || 'https://nowhere';
   protected commonBodyParams: URLSearchParams;
+  protected commonPostHeaders: HeadersInit = new Headers({
+    'Content-Type': 'application/x-www-form-urlencoded',
+    // Random but asked:
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+    Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+  });
   protected authToken: string | null = null;
+  protected md5Password: string;
 
   constructor(
-    protected readonly username: string,
-    protected readonly password: string,
     protected readonly consumerKey: string,
     protected readonly secretKey: string,
     protected readonly providerName: string,
-    protected readonly providerReffile: string
+    protected readonly providerReffile: string,
+    protected readonly providerPassword: string
   ) {
     this.commonBodyParams = new URLSearchParams();
     this.commonBodyParams.append('parameters[Application]', this.providerName);
     this.commonBodyParams.append('parameters[LoginRefFile]', this.providerReffile);
     this.commonBodyParams.append('parameters[Language]', 'FR');
+
+    this.md5Password = crypto.createHash('md5').update(this.providerPassword).digest('hex');
   }
 
   protected getAccessToken(): string {
@@ -30,19 +40,13 @@ export class SacdClient {
 
   public async login() {
     const bodyParams = new URLSearchParams();
-    bodyParams.append('login[login]', this.username);
-    bodyParams.append('login[password]', this.password);
+    bodyParams.append('login[login]', this.providerReffile);
+    bodyParams.append('login[password]', this.md5Password);
     bodyParams.append('login[consumer_key]', this.consumerKey);
 
     const response = await fetch(`${this.baseUrl}/ticketing/auto-access.json`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        // Random but asked:
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
-      },
+      headers: this.commonPostHeaders,
       body: bodyParams.toString(),
     });
 
@@ -90,6 +94,8 @@ export class SacdClient {
     const bodyParams = new URLSearchParams(this.commonBodyParams);
 
     const response = await fetch(`${this.baseUrl}/ticketing/broker/HelloWorldWS?${queryParams.toString}`, {
+      method: 'POST',
+      headers: this.commonPostHeaders,
       body: bodyParams.toString(),
     });
 
