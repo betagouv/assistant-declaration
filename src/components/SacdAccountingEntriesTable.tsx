@@ -152,7 +152,7 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
       },
       {
         field: `excludingTaxesAmount`,
-        headerName: 'Recettes HT',
+        headerName: 'Montant HT',
         editable: editableAmount === 'excludingTaxes',
         type: 'number',
         display: 'flex', // Needed to align properly `ErrorCellWrapper`
@@ -200,7 +200,7 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
       },
       {
         field: `${rowTypedNameof('data')}.${entryTypedNameof('includingTaxesAmount')}`,
-        headerName: 'Recettes TTC',
+        headerName: 'Montant TTC',
         editable: editableAmount === 'includingTaxes',
         type: 'number',
         display: 'flex', // Needed to align properly `ErrorCellWrapper`

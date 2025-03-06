@@ -142,7 +142,7 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
       },
       {
         field: `excludingTaxesAmount`,
-        headerName: 'Recettes HT',
+        headerName: 'Montant HT',
         editable: editableAmount === 'excludingTaxes',
         type: 'number',
         display: 'flex', // Needed to align properly `ErrorCellWrapper`
@@ -188,7 +188,7 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
       },
       {
         field: `${rowTypedNameof('data')}.${entryTypedNameof('includingTaxesAmount')}`,
-        headerName: 'Recettes TTC',
+        headerName: 'Montant TTC',
         editable: editableAmount === 'includingTaxes',
         type: 'number',
         display: 'flex', // Needed to align properly `ErrorCellWrapper`
