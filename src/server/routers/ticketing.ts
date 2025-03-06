@@ -1,3 +1,4 @@
+import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
 import {
   ConnectTicketingSystemSchema,
   DisconnectTicketingSystemSchema,
@@ -8,6 +9,7 @@ import {
   alreadyExistingTicketingSystemError,
   collaboratorCanOnlySeeOrganizationTicketingSystemsError,
   organizationCollaboratorRoleRequiredError,
+  ticketingSystemConnectionFailedError,
   ticketingSystemNotFoundError,
   tooManyOrganizationTicketingSystemsError,
 } from '@ad/src/models/entities/errors';
@@ -61,6 +63,17 @@ export const ticketingRouter = router({
 
     if (sameCredentialsOrganization) {
       throw alreadyExistingTicketingSystemError;
+    }
+
+    // We want to check the connection to immediately tell the user if the credentials are wrong
+    const ticketingSystemClient = getTicketingSystemClient({
+      name: input.ticketingSystemName,
+      apiAccessKey: input.apiAccessKey,
+      apiSecretKey: input.apiSecretKey,
+    });
+
+    if (!(await ticketingSystemClient.testConnection())) {
+      throw ticketingSystemConnectionFailedError;
     }
 
     const newOrganization = await prisma.ticketingSystem.create({
@@ -132,6 +145,17 @@ export const ticketingRouter = router({
 
     // We have the `name` in the input only to properly ajust the validation on passed credentials
     assert(input.ticketingSystemName === ticketingSystem.name);
+
+    // We want to check the connection to immediately tell the user if the credentials are wrong
+    const ticketingSystemClient = getTicketingSystemClient({
+      name: ticketingSystem.name,
+      apiAccessKey: input.apiAccessKey,
+      apiSecretKey: input.apiSecretKey,
+    });
+
+    if (!(await ticketingSystemClient.testConnection())) {
+      throw ticketingSystemConnectionFailedError;
+    }
 
     const updatedTicketingSystem = await prisma.ticketingSystem.update({
       where: {

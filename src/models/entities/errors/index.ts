@@ -137,6 +137,10 @@ export const collaboratorCanOnlySeeOrganizationTicketingSystemsError = new Busin
 );
 
 // Ticketing system
+export const ticketingSystemConnectionFailedError = new BusinessError(
+  'ticketingSystemConnectionFailed',
+  t('errors.custom.ticketingSystemConnectionFailed')
+);
 export const ticketingSystemNotFoundError = new BusinessError('ticketingSystemNotFound', t('errors.custom.ticketingSystemNotFound'));
 export const alreadyExistingTicketingSystemError = new BusinessError(
   'alreadyExistingTicketingSystem',

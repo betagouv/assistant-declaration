@@ -1,6 +1,6 @@
 'use client';
 
-import { AdminPanelSettings, MoreVert, PersonRemove } from '@mui/icons-material';
+import { AdminPanelSettings, MoreVert, NotInterested, PersonRemove } from '@mui/icons-material';
 import {
   Card,
   CardContent,
@@ -145,7 +145,7 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
         </MenuItem>
         <MenuItem onClick={disconnectAction}>
           <ListItemIcon>
-            <PersonRemove fontSize="small" />
+            <NotInterested fontSize="small" />
           </ListItemIcon>
           Déconnecter
         </MenuItem>

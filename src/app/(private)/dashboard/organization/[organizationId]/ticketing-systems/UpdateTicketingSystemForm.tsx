@@ -27,7 +27,7 @@ export interface UpdateTicketingSystemFormProps {
 }
 
 export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps) {
-  const connectTicketingSystem = trpc.connectTicketingSystem.useMutation();
+  const updateTicketingSystem = trpc.updateTicketingSystem.useMutation();
 
   const {
     register,
@@ -45,7 +45,7 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
   });
 
   const onSubmit = async (input: UpdateTicketingSystemSchemaType) => {
-    const result = await connectTicketingSystem.mutateAsync(input);
+    const result = await updateTicketingSystem.mutateAsync(input);
 
     props.onSuccess && props.onSuccess();
   };
@@ -113,7 +113,7 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
         </Alert>
       </Grid>
       <Grid item xs={12}>
-        <Button type="submit" loading={connectTicketingSystem.isLoading} size="large" variant="contained" fullWidth>
+        <Button type="submit" loading={updateTicketingSystem.isLoading} size="large" variant="contained" fullWidth>
           Tester et enregistrer
         </Button>
       </Grid>

@@ -43,6 +43,46 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
     return url.toString();
   }
 
+  public async testConnection(): Promise<boolean> {
+    try {
+      // We fetch the minimum of information since it's just to test the connection
+      const lastModifiedAttendeesResponse = await fetch(
+        this.formatUrl(`/attendees`, {
+          last_update: getUnixTime(new Date()).toString(),
+        }),
+        {
+          method: 'GET',
+        }
+      );
+
+      if (!lastModifiedAttendeesResponse.ok) {
+        const error = await lastModifiedAttendeesResponse.json();
+
+        throw error;
+      }
+
+      const lastModifiedAttendeesDataJson = await lastModifiedAttendeesResponse.json();
+
+      if (
+        lastModifiedAttendeesDataJson.error === 'unauthorized' &&
+        lastModifiedAttendeesDataJson.description?.includes('limited rights to specific events')
+      ) {
+        throw missingBilletwebEventsRightsError;
+      }
+
+      JsonGetAttendeesResponseSchema.parse(lastModifiedAttendeesDataJson);
+
+      return true;
+    } catch (error) {
+      // Specific errors may be useful for the frontend, so letting them pass
+      if (error === missingBilletwebEventsRightsError) {
+        throw error;
+      } else {
+        return false;
+      }
+    }
+  }
+
   public async getEventsSeries(fromDate: Date, toDate?: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
     // Get attendees modifications to know which events to synchronize (for the first time, or again)
     const lastModifiedAttendeesResponse = await fetch(
