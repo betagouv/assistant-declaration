@@ -125,6 +125,14 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
             eventSerieId: eventSerieId,
             revenues: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.revenues,
             expenses: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.expenses,
+            // Taking the first placeholder since the backend sorted them by the last modification (likely to have the right data)
+            clientId: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.clientId[0] ?? undefined,
+            placeName: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.placeName[0] ?? undefined,
+            placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.placeCapacity[0] ?? undefined,
+            managerName: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.managerName[0] ?? undefined,
+            managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.managerTitle[0] ?? undefined,
+            performanceType: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.performanceType[0] ?? undefined,
+            declarationPlace: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.declarationPlace[0] ?? undefined,
           });
         }
       } else {

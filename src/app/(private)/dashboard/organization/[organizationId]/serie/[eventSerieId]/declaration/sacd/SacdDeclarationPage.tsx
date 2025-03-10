@@ -42,6 +42,7 @@ import { SacdAccountingEntriesTable } from '@ad/src/components/SacdAccountingEnt
 import { SacdOrganizationFields } from '@ad/src/components/SacdOrganizationFields';
 import { SacdPerformedWorksTable } from '@ad/src/components/SacdPerformedWorksTable';
 import { SacdTicketingEntriesTable } from '@ad/src/components/SacdTicketingEntriesTable';
+import { sacdOrganizationPlaceholderToOrganizationInput } from '@ad/src/core/declaration';
 import { FillSacdDeclarationSchema, FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { SacdAudienceSchema, SacdProductionTypeSchema } from '@ad/src/models/entities/declaration/sacd';
@@ -253,11 +254,42 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
           organizerRightsFeesManagerDiff.length === 0 ? 'organizer' : producerRightsFeesManagerDiff.length === 0 ? 'producer' : 'none'
         );
       } else if (getSacdDeclaration.data.sacdDeclarationWrapper.placeholder) {
+        const organizer = sacdOrganizationPlaceholderToOrganizationInput(getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.organizer);
+        const producer = sacdOrganizationPlaceholderToOrganizationInput(getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.producer);
+        const rightsFeesManager = sacdOrganizationPlaceholderToOrganizationInput(
+          getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.rightsFeesManager
+        );
+
         reset({
           eventSerieId: eventSerieId,
           accountingEntries: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.accountingEntries,
           performedWorks: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.performedWorks,
+          // Taking the first placeholder since the backend sorted them by the last modification (likely to have the right data)
+          clientId: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.clientId[0] ?? undefined,
+          officialHeadquartersId: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.officialHeadquartersId[0] ?? undefined,
+          productionOperationId: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.productionOperationId[0] ?? undefined,
+          productionType: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.productionType,
+          placeName: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.placeName[0] ?? undefined,
+          placePostalCode: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.placePostalCode[0] ?? undefined,
+          placeCity: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.placeCity[0] ?? undefined,
+          audience: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.audience,
+          placeCapacity: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.placeCapacity[0] ?? undefined,
+          declarationPlace: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.declarationPlace[0] ?? undefined,
+          organizer: organizer,
+          producer: producer,
+          rightsFeesManager: rightsFeesManager,
         });
+
+        // Init the UI correctly
+        const organizerProducerDiff = diff(organizer, producer);
+        const producerRightsFeesManagerDiff = diff(producer, rightsFeesManager);
+        const organizerRightsFeesManagerDiff = diff(organizer, rightsFeesManager);
+
+        setProducerSameThanOrganizer(organizerProducerDiff.length === 0);
+        setRightsFeesManagerSameThan(
+          // Here by default we set "organizer" if "producer" is also the same
+          organizerRightsFeesManagerDiff.length === 0 ? 'organizer' : producerRightsFeesManagerDiff.length === 0 ? 'producer' : 'none'
+        );
       }
     }
   }, [getSacdDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
