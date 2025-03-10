@@ -254,12 +254,6 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
           organizerRightsFeesManagerDiff.length === 0 ? 'organizer' : producerRightsFeesManagerDiff.length === 0 ? 'producer' : 'none'
         );
       } else if (getSacdDeclaration.data.sacdDeclarationWrapper.placeholder) {
-        const organizer = sacdOrganizationPlaceholderToOrganizationInput(getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.organizer);
-        const producer = sacdOrganizationPlaceholderToOrganizationInput(getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.producer);
-        const rightsFeesManager = sacdOrganizationPlaceholderToOrganizationInput(
-          getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.rightsFeesManager
-        );
-
         reset({
           eventSerieId: eventSerieId,
           accountingEntries: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.accountingEntries,
@@ -267,7 +261,6 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
           // Taking the first placeholder since the backend sorted them by the last modification (likely to have the right data)
           clientId: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.clientId[0] ?? undefined,
           officialHeadquartersId: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.officialHeadquartersId[0] ?? undefined,
-          productionOperationId: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.productionOperationId[0] ?? undefined,
           productionType: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.productionType,
           placeName: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.placeName[0] ?? undefined,
           placePostalCode: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.placePostalCode[0] ?? undefined,
@@ -275,21 +268,13 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
           audience: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.audience,
           placeCapacity: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.placeCapacity[0] ?? undefined,
           declarationPlace: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.declarationPlace[0] ?? undefined,
-          organizer: organizer,
-          producer: producer,
-          rightsFeesManager: rightsFeesManager,
+          // Here we just manage the organizer since the producer and the rights fees manager are unlikely to be the same across events series
+          organizer: sacdOrganizationPlaceholderToOrganizationInput(getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.organizer),
         });
 
-        // Init the UI correctly
-        const organizerProducerDiff = diff(organizer, producer);
-        const producerRightsFeesManagerDiff = diff(producer, rightsFeesManager);
-        const organizerRightsFeesManagerDiff = diff(organizer, rightsFeesManager);
-
-        setProducerSameThanOrganizer(organizerProducerDiff.length === 0);
-        setRightsFeesManagerSameThan(
-          // Here by default we set "organizer" if "producer" is also the same
-          organizerRightsFeesManagerDiff.length === 0 ? 'organizer' : producerRightsFeesManagerDiff.length === 0 ? 'producer' : 'none'
-        );
+        // Make sure to have the right radio states
+        setProducerSameThanOrganizer(null);
+        setRightsFeesManagerSameThan(null);
       }
     }
   }, [getSacdDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
