@@ -42,6 +42,7 @@ import { SacdAccountingEntriesTable } from '@ad/src/components/SacdAccountingEnt
 import { SacdOrganizationFields } from '@ad/src/components/SacdOrganizationFields';
 import { SacdPerformedWorksTable } from '@ad/src/components/SacdPerformedWorksTable';
 import { SacdTicketingEntriesTable } from '@ad/src/components/SacdTicketingEntriesTable';
+import { sacdOrganizationPlaceholderToOrganizationInput } from '@ad/src/core/declaration';
 import { FillSacdDeclarationSchema, FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { SacdAudienceSchema, SacdProductionTypeSchema } from '@ad/src/models/entities/declaration/sacd';
@@ -257,7 +258,23 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
           eventSerieId: eventSerieId,
           accountingEntries: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.accountingEntries,
           performedWorks: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.performedWorks,
+          // Taking the first placeholder since the backend sorted them by the last modification (likely to have the right data)
+          clientId: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.clientId[0] ?? undefined,
+          officialHeadquartersId: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.officialHeadquartersId[0] ?? undefined,
+          productionType: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.productionType,
+          placeName: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.placeName[0] ?? undefined,
+          placePostalCode: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.placePostalCode[0] ?? undefined,
+          placeCity: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.placeCity[0] ?? undefined,
+          audience: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.audience,
+          placeCapacity: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.placeCapacity[0] ?? undefined,
+          declarationPlace: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.declarationPlace[0] ?? undefined,
+          // Here we just manage the organizer since the producer and the rights fees manager are unlikely to be the same across events series
+          organizer: sacdOrganizationPlaceholderToOrganizationInput(getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.organizer),
         });
+
+        // Make sure to have the right radio states
+        setProducerSameThanOrganizer(null);
+        setRightsFeesManagerSameThan(null);
       }
     }
   }, [getSacdDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);

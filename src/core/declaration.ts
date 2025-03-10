@@ -2,6 +2,8 @@ import {
   SacdAccountingCategorySchema,
   SacdAccountingCategorySchemaType,
   SacdDeclarationAccountingEntrySchemaType,
+  SacdDeclarationOrganizationInputSchemaType,
+  SacdDeclarationOrganizationPlaceholderSchemaType,
 } from '@ad/src/models/entities/declaration/sacd';
 import {
   AccountingCategorySchema,
@@ -172,4 +174,28 @@ export function getTaxAmountFromIncludingTaxesAmount(includingTaxesAmount: numbe
 
 export function getIncludingTaxesAmountFromExcludingTaxesAmount(excludingTaxesAmount: number, taxRate: number): number {
   return (1 + taxRate) * excludingTaxesAmount;
+}
+
+export function sacdOrganizationPlaceholderToOrganizationInput(
+  placeholder: SacdDeclarationOrganizationPlaceholderSchemaType
+): SacdDeclarationOrganizationInputSchemaType {
+  // Since this data comes from registered declarations, the existing index for a field should also exist for other fields
+  return {
+    name: placeholder.name[0] ?? undefined,
+    email: placeholder.email[0] ?? undefined,
+    officialHeadquartersId: placeholder.officialHeadquartersId[0] ?? undefined,
+    europeanVatId: placeholder.europeanVatId[0] ?? undefined,
+    headquartersAddress: {
+      street: placeholder.headquartersAddress.street[0] ?? undefined,
+      city: placeholder.headquartersAddress.city[0] ?? undefined,
+      postalCode: placeholder.headquartersAddress.postalCode[0] ?? undefined,
+      countryCode: placeholder.headquartersAddress.countryCode[0] ?? undefined,
+      subdivision: placeholder.headquartersAddress.subdivision[0] ?? undefined,
+    },
+    phone: {
+      callingCode: placeholder.phone.callingCode[0] ?? undefined,
+      countryCode: placeholder.phone.countryCode[0] ?? undefined,
+      number: placeholder.phone.number[0] ?? undefined,
+    },
+  };
 }
