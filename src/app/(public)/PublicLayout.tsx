@@ -22,7 +22,7 @@ export function PublicLayout(props: PropsWithChildren) {
       linkProps: {
         href: linkRegistry.get('home', undefined),
       },
-      text: 'Présentation',
+      text: 'À propos',
     },
     {
       iconId: 'fr-icon-questionnaire-line',
