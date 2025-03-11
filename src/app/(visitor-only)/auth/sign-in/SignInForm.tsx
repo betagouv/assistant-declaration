@@ -243,6 +243,14 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
           </Link>
         </Typography>
       </Grid>
+      <Grid item xs={12}>
+        <Typography color="textSecondary" variant="body2">
+          Vous n&apos;avez pas encore de compte ?&nbsp;
+          <Link component={NextLink} href={linkRegistry.get('signUp', undefined)} variant="subtitle2" underline="none">
+            S&apos;inscrire
+          </Link>
+        </Typography>
+      </Grid>
     </BaseForm>
   );
 }
