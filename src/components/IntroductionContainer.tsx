@@ -49,7 +49,7 @@ export function IntroductionContainer({
                   alignItems: 'center',
                   px: '3vw',
                   py: '20px',
-                  bgcolor: fr.colors.decisions.background.alt.grey.default,
+                  bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
                   minWidth: {
                     md: `${100 / (12 / 5)}vw`,
                     lg: `${100 / (12 / 6)}vw`,

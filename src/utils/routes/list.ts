@@ -103,7 +103,7 @@ export const localizedRoutes = {
   ),
   signUp: defineLocalizedRoute(
     {
-      token: param.query.string,
+      token: param.query.optional.string,
     },
     {
       en: (p) => `/auth/sign-up`,
