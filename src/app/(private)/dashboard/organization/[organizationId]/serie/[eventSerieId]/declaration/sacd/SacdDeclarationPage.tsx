@@ -271,6 +271,9 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
           declarationPlace: getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.declarationPlace[0] ?? undefined,
           // Here we just manage the organizer since the producer and the rights fees manager are unlikely to be the same across events series
           organizer: sacdOrganizationPlaceholderToOrganizationInput(getSacdDeclaration.data.sacdDeclarationWrapper.placeholder.organizer),
+          // The following is needed otherwise `isDirty` is true due to comparing undefined to the default empty string from the `TextField`
+          // Note: if the form was too complex we could have use a virtual `isDirty` based on `dirtyFields` (that is empty in this specific case) (ref: https://github.com/react-hook-form/react-hook-form/issues/4740)
+          productionOperationId: '',
         });
 
         // Make sure to have the right radio states
