@@ -31,7 +31,7 @@ export function PublicLayout(props: PropsWithChildren) {
           showLiveChat();
         },
       },
-      text: isLiveChatLoading ? 'Chargement...' : 'Support',
+      text: isLiveChatLoading ? 'Chargement...' : 'Aide',
     },
   ];
 

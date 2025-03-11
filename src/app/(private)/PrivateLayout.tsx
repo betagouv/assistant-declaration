@@ -72,7 +72,7 @@ export function PrivateLayout(props: PropsWithChildren) {
           showLiveChat();
         },
       },
-      text: 'Support',
+      text: 'Aide',
     },
     userQuickAccessItem(sessionWrapper.data?.user),
   ];
