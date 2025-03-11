@@ -372,7 +372,7 @@ Add to the team the people you need (without giving too many rights depending on
 
 Into the `Chatbox & Email settings` section go to `Chat Appearance` and set:
 
-- Color theme (chatbot color): `Red`
+- Color theme (chatbot color): `Indigo`
 - Chatbox background (message texture): `Default (No background)`
 
 Then go to `Chatbox Security` and enable `Lock the chatbox to website domain (and subdomains)` (no need to enable it inside the development environment).
