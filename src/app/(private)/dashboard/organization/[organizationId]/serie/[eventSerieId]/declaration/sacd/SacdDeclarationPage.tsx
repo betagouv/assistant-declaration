@@ -18,7 +18,6 @@ import {
   MenuItem,
   Radio,
   RadioGroup,
-  Select,
   TextField,
   Tooltip,
   Typography,
@@ -27,14 +26,13 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import diff from 'microdiff';
 import NextLink from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { createContext, useContext } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
+import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
@@ -62,7 +60,6 @@ export interface SacdDeclarationPageProps {
 export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }: SacdDeclarationPageProps) {
   const { t } = useTranslation('common');
   const { ContextualEventsSalesOverview } = useContext(SacdDeclarationPageContext);
-  const router = useRouter();
 
   const fillSacdDeclaration = trpc.fillSacdDeclaration.useMutation();
 
@@ -298,56 +295,32 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
       maxWidth={false}
       disableGutters
       sx={{
-        py: 3,
+        pb: 3,
       }}
     >
-      <Container>
-        <Grid item xs={12} sx={{ pb: 3 }}>
-          <Typography component="h1" variant="h5">
-            Déclaration{' '}
-            <Select
-              variant="standard"
-              value={'sacd'}
-              onChange={(event) => {
-                router.push(
-                  linkRegistry.get('declaration', {
-                    organizationId: organizationId,
-                    eventSerieId: eventSerie.id,
-                    declarationType: event.target.value as string,
-                  })
-                );
-              }}
-              disableUnderline
-              sx={{
-                fontWeight: 700,
-                fontSize: '1.25rem',
-              }}
-            >
-              <MenuItem value="sacem">SACEM</MenuItem>
-              <MenuItem value="sacd">SACD</MenuItem>
-              <MenuItem value="astp">ASTP</MenuItem>
-              <MenuItem value="cnm">CNM</MenuItem>
-            </Select>
-          </Typography>
-          <Typography component="h2" variant="h6" data-sentry-mask>
-            {eventSerie.name}
-          </Typography>
-        </Grid>
+      <Container
+        maxWidth={false}
+        disableGutters
+        sx={{
+          bgcolor: fr.colors.decisions.background.alt.pinkMacaron.default,
+        }}
+      >
+        <Container>
+          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} currentDeclaration="sacd" />
+        </Container>
       </Container>
       {eventsWrappers.length > 0 ? (
         <>
           <Container
-            maxWidth={false}
-            disableGutters
             sx={{
               bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
-              pt: { xs: 3, md: 3 },
-              pb: { xs: 3, md: 3 },
+              borderRadius: '8px',
+              pt: { xs: 1, md: 1 },
+              pb: { xs: 1, md: 1 },
+              mt: 3,
             }}
           >
-            <Container>
-              <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} />
-            </Container>
+            <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} />
           </Container>
           <Container sx={{ pt: 2 }}>
             <BaseForm

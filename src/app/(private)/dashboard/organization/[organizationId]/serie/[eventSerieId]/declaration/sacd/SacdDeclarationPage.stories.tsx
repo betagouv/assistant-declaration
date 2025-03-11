@@ -77,7 +77,7 @@ NormalStory.parameters = {
   },
 };
 NormalStory.play = async ({ canvasElement }) => {
-  await playFindMainTitle(canvasElement, /déclaration/i);
+  await playFindMainTitle(canvasElement, /cracheur/i);
 };
 
 export const Normal = prepareStory(NormalStory, {
@@ -108,7 +108,7 @@ NotFoundStory.parameters = {
   },
 };
 NotFoundStory.play = async ({ canvasElement }) => {
-  await playFindMainTitle(canvasElement, /déclaration/i);
+  await playFindMainTitle(canvasElement, /cracheur/i);
 };
 
 export const NotFound = prepareStory(NotFoundStory, {
@@ -129,7 +129,7 @@ WithLayoutStory.parameters = {
   ...NormalStory.parameters,
 };
 WithLayoutStory.play = async ({ canvasElement }) => {
-  await playFindMainTitle(canvasElement, /déclaration/i);
+  await playFindMainTitle(canvasElement, /cracheur/i);
 };
 
 export const WithLayout = prepareStory(WithLayoutStory, {
