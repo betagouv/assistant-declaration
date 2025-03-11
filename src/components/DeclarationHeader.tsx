@@ -62,15 +62,15 @@ export function DeclarationHeader({ organizationId, eventSerie, currentDeclarati
             { tabId: 'cnm', label: 'CNM' },
           ]}
           onTabChange={(tabId) => {
-            console.log(1111111);
-
-            router.push(
-              linkRegistry.get('declaration', {
-                organizationId: organizationId,
-                eventSerieId: eventSerie.id,
-                declarationType: tabId as string,
-              })
-            );
+            if (tabId !== currentDeclaration) {
+              router.push(
+                linkRegistry.get('declaration', {
+                  organizationId: organizationId,
+                  eventSerieId: eventSerie.id,
+                  declarationType: tabId as string,
+                })
+              );
+            }
           }}
         >
           <></>

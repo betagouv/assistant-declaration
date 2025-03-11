@@ -22,6 +22,7 @@ import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
 import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
+import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
 import { FillSacemDeclarationSchema, FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
@@ -77,6 +78,9 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
       eventSerieId: eventSerieId,
     }, // The rest will be set with data fetched
   });
+
+  // Due to the UI having tabs to switch between different declarations, we make sure the user is aware of loosing modifications
+  useConfirmationIfUnsavedChange(isDirty);
 
   const onSubmit = useCallback(
     async (input: FillSacemDeclarationSchemaType) => {

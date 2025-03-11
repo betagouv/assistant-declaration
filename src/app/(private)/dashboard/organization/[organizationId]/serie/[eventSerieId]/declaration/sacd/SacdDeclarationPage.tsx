@@ -40,6 +40,7 @@ import { SacdAccountingEntriesTable } from '@ad/src/components/SacdAccountingEnt
 import { SacdOrganizationFields } from '@ad/src/components/SacdOrganizationFields';
 import { SacdPerformedWorksTable } from '@ad/src/components/SacdPerformedWorksTable';
 import { SacdTicketingEntriesTable } from '@ad/src/components/SacdTicketingEntriesTable';
+import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
 import { sacdOrganizationPlaceholderToOrganizationInput } from '@ad/src/core/declaration';
 import { FillSacdDeclarationSchema, FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
@@ -100,6 +101,9 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
       eventSerieId: eventSerieId,
     }, // The rest will be set with data fetched
   });
+
+  // Due to the UI having tabs to switch between different declarations, we make sure the user is aware of loosing modifications
+  useConfirmationIfUnsavedChange(isDirty);
 
   const preHandleSubmit: typeof handleSubmit = useCallback(
     (onValid, onInvalid) => {
