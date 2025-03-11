@@ -101,7 +101,7 @@ export function AstpDeclarationPage({ params: { organizationId, eventSerieId } }
                   Pour déclarer, vous pouvez :
                   <ol>
                     <li>
-                      Se rendre{' '}
+                      Vous rendre{' '}
                       <Link
                         component={NextLink}
                         href="https://dectanet.astp.asso.fr/mon-espace-declarant/declarer-mes-recettes"
