@@ -120,9 +120,12 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
     >
       {ticketingSystems.length > 0 ? (
         <>
-          <Grid item xs={12} sx={{ pb: 3 }}>
-            <Typography component="h1" variant="h5">
-              Spectacles
+          <Grid item xs={12} sx={{ pb: 1 }}>
+            <Typography component="h1" variant="h4">
+              Vos spectacles
+            </Typography>
+            <Typography component="p" variant="body1">
+              Sélectionnez un spectacle à déclarer
             </Typography>
           </Grid>
           <Grid container spacing={2} justifyContent="center" sx={{ pt: 3 }}>
@@ -163,6 +166,9 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                           aria-label="filtre"
                           sx={{
                             flexWrap: 'wrap',
+                            button: {
+                              textTransform: 'none',
+                            },
                           }}
                         >
                           <ToggleButton value={ListFilter.ALL}>Toutes</ToggleButton>

@@ -53,20 +53,29 @@ export function EventSerieCard(props: EventSerieCardProps) {
           </Tooltip>
         </Box>
       </CardContent>
-      <CardActions sx={{ justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+      <CardActions
+        sx={{
+          justifyContent: 'flex-start',
+          flexWrap: 'wrap',
+          px: 2,
+          a: {
+            backgroundImage: 'none !important',
+          },
+        }}
+      >
         <Typography component="div" variant="subtitle2" sx={{ display: { xs: 'none', sm: 'block' } }}>
-          Déclarations :
+          Déclarer :
         </Typography>
-        <Button component={NextLink} href={props.sacemDeclarationLink} size="small">
+        <Button component={NextLink} href={props.sacemDeclarationLink} size="small" variant="outlined">
           SACEM
         </Button>
-        <Button component={NextLink} href={props.sacdDeclarationLink} size="small">
+        <Button component={NextLink} href={props.sacdDeclarationLink} size="small" variant="outlined">
           SACD
         </Button>
-        <Button component={NextLink} href={props.astpDeclarationLink} size="small">
+        <Button component={NextLink} href={props.astpDeclarationLink} size="small" variant="outlined">
           ASTP
         </Button>
-        <Button component={NextLink} href={props.cnmDeclarationLink} size="small">
+        <Button component={NextLink} href={props.cnmDeclarationLink} size="small" variant="outlined">
           CNM
         </Button>
       </CardActions>
