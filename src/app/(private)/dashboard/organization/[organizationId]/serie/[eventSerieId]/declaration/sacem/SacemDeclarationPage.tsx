@@ -6,23 +6,23 @@ import DownloadIcon from '@mui/icons-material/Download';
 import SaveIcon from '@mui/icons-material/Save';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { LoadingButton as Button } from '@mui/lab';
-import { Alert, Autocomplete, Box, Link, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Link, TextField, Tooltip, Typography } from '@mui/material';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import NextLink from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { createContext, useContext } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
+import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
 import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
+import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
 import { FillSacemDeclarationSchema, FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
@@ -41,7 +41,6 @@ export interface SacemDeclarationPageProps {
 export function SacemDeclarationPage({ params: { organizationId, eventSerieId } }: SacemDeclarationPageProps) {
   const { t } = useTranslation('common');
   const { ContextualEventsSalesOverview } = useContext(SacemDeclarationPageContext);
-  const router = useRouter();
 
   const fillSacemDeclaration = trpc.fillSacemDeclaration.useMutation();
 
@@ -79,6 +78,9 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
       eventSerieId: eventSerieId,
     }, // The rest will be set with data fetched
   });
+
+  // Due to the UI having tabs to switch between different declarations, we make sure the user is aware of loosing modifications
+  useConfirmationIfUnsavedChange(isDirty);
 
   const onSubmit = useCallback(
     async (input: FillSacemDeclarationSchemaType) => {
@@ -125,6 +127,14 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
             eventSerieId: eventSerieId,
             revenues: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.revenues,
             expenses: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.expenses,
+            // Taking the first placeholder since the backend sorted them by the last modification (likely to have the right data)
+            clientId: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.clientId[0] ?? undefined,
+            placeName: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.placeName[0] ?? undefined,
+            placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.placeCapacity[0] ?? undefined,
+            managerName: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.managerName[0] ?? undefined,
+            managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.managerTitle[0] ?? undefined,
+            performanceType: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.performanceType[0] ?? undefined,
+            declarationPlace: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.declarationPlace[0] ?? undefined,
           });
         }
       } else {
@@ -166,56 +176,32 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
       maxWidth={false}
       disableGutters
       sx={{
-        py: 3,
+        pb: 3,
       }}
     >
-      <Container>
-        <Grid item xs={12} sx={{ pb: 3 }}>
-          <Typography component="h1" variant="h5">
-            Déclaration{' '}
-            <Select
-              variant="standard"
-              value={'sacem'}
-              onChange={(event) => {
-                router.push(
-                  linkRegistry.get('declaration', {
-                    organizationId: organizationId,
-                    eventSerieId: eventSerie.id,
-                    declarationType: event.target.value as string,
-                  })
-                );
-              }}
-              disableUnderline
-              sx={{
-                fontWeight: 700,
-                fontSize: '1.25rem',
-              }}
-            >
-              <MenuItem value="sacem">SACEM</MenuItem>
-              <MenuItem value="sacd">SACD</MenuItem>
-              <MenuItem value="astp">ASTP</MenuItem>
-              <MenuItem value="cnm">CNM</MenuItem>
-            </Select>
-          </Typography>
-          <Typography component="h2" variant="h6" data-sentry-mask>
-            {eventSerie.name}
-          </Typography>
-        </Grid>
+      <Container
+        maxWidth={false}
+        disableGutters
+        sx={{
+          bgcolor: fr.colors.decisions.background.alt.pinkMacaron.default,
+        }}
+      >
+        <Container>
+          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} currentDeclaration="sacem" />
+        </Container>
       </Container>
       {eventsWrappers.length > 0 ? (
         <>
           <Container
-            maxWidth={false}
-            disableGutters
             sx={{
               bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
-              pt: { xs: 3, md: 3 },
-              pb: { xs: 3, md: 3 },
+              borderRadius: '8px',
+              pt: { xs: 1, md: 1 },
+              pb: { xs: 1, md: 1 },
+              mt: 3,
             }}
           >
-            <Container>
-              <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} />
-            </Container>
+            <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} />
           </Container>
           <Container sx={{ pt: 2 }}>
             <BaseForm
@@ -756,7 +742,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
         >
           <Grid container spacing={2} justifyContent="center" sx={{ pt: 3 }}>
             <Grid item xs={12} sx={{ py: 2 }}>
-              Aucune date n&apos;a pu être récupérée pour cette série de représentations. Il n&apos;y a donc aucune déclaration à faire à la SACEM.
+              Aucune date n&apos;a pu être récupérée pour ce spectacle. Il n&apos;y a donc aucune déclaration à faire à la SACEM.
             </Grid>
           </Grid>
         </Container>

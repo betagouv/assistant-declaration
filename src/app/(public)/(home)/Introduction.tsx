@@ -2,16 +2,14 @@ import Button from '@mui/lab/LoadingButton';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
-import * as React from 'react';
+import NextLink from 'next/link';
 
 import style from '@ad/src/app/(public)/(home)/Introduction.module.scss';
 import hero from '@ad/src/assets/images/hero.png';
 import { IntroductionContainer } from '@ad/src/components/IntroductionContainer';
-import { useLiveChat } from '@ad/src/components/live-chat/useLiveChat';
+import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export function Introduction() {
-  const { showLiveChat, isLiveChatLoading } = useLiveChat();
-
   return (
     <IntroductionContainer
       left={
@@ -23,17 +21,13 @@ export function Introduction() {
           }}
         >
           <Typography component="h1" variant="h2" sx={{ my: 2, maxWidth: 500 }}>
-            S&apos;aider de son logiciel de billetterie pour faire ses déclarations
+            Simplifiez la déclaration de vos spectacles
           </Typography>
           <Typography color="text.secondary" sx={{ mb: 3, maxWidth: 500 }}>
-            <Typography component="span" sx={{ fontWeight: 'bold' }}>
-              Assistant déclaration
-            </Typography>{' '}
-            est un service destiné aux professionnels œuvrant dans le secteur de la culture et du spectacle vivant. En se connectant au système de
-            billetterie, il permet de pré-remplir automatiquement les champs de déclaration auprès des différents organismes.
+            L&apos;Assistant déclaration collecte les données de billetteries afin de vous aider à réaliser vos déclarations SACEM, SACD, ASTP, CNM.
           </Typography>
-          <Button onClick={showLiveChat} loading={isLiveChatLoading} size="large" variant="contained" sx={{ mb: 3 }}>
-            Demander accès à l&apos;outil
+          <Button component={NextLink} href={linkRegistry.get('signUp', undefined)} size="large" variant="contained" sx={{ mb: 3 }}>
+            Tester l&apos;assistant
           </Button>
         </Box>
       }

@@ -16,28 +16,38 @@
   "errors": {
     "custom": {
       "accountAlreadyWithThisEmail": "un compte est déjà enregistré avec cet email",
+      "alreadyExistingTicketingSystem": "un système de billetterie est déjà connecté avec ces identifiants",
+      "anotherOrganizationAlreadyHasThisOfficialId": "une autre organisation utilise déjà ce numéro Siren, veuillez vous rapprocher du reste de votre équipe ou contactez notre support",
       "anotherTicketingSystemSynchronizationOngoing": "une autre synchronisation des données est déjà en cours",
       "authCredentialsRequired": "vous devez fournir vos informations de connexion pour poursuivre",
       "authFatal": "une erreur inattendue est survenue, merci de contacter le support",
       "authNoCredentialsMatch": "les informations de connexion fournies sont incorrectes",
       "authRetriable": "une erreur est survenue, veuillez retenter",
-      "collaboratorCanOnlySeeOrganizationEventsSeries": "en tant que collaborateur vous ne pouvez que lister les séries de représentation concernant votre organisation",
+      "collaboratorCanOnlySeeOrganizationEventsSeries": "en tant que collaborateur vous ne pouvez que lister les spectacles concernant votre organisation",
       "collaboratorCanOnlySeeOrganizationTicketingSystems": "en tant que collaborateur vous ne pouvez que lister les systèmes de billetterie de votre organisation",
       "eventCategoryTicketsNotFound": "ces données de catégorie de tickets n'existent pas",
-      "eventSerieNotFound": "cette série de représentations n'existe pas",
+      "eventSerieNotFound": "ce spectacle n'existe pas",
       "expiredVerificationToken": "vous avez dépassé le temps imparti, merci de renouveler votre demande",
+      "expiredConfirmationToken": "le lien de confirmation a expiré, veuillez contacter notre support",
       "fileNotFound": "aucun fichier n'a été trouvé",
       "internalServerError": "une erreur interne est survenue, veuillez retenter",
       "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",
       "invalidVerificationToken": "l'opération que vous essayez de réaliser a été refusée",
       "missingBilletwebEventsRights": "la clé d'identification Billetweb que vous nous avez fournie est restreinte à certains événements. Il est nécessaire de la régler en \"Tous sélectionnés\" pour que nous puissions synchroniser vos données.",
+      "multipleUserOrganizationsCreation": "vous ne pouvez créer une nouvelle organisation étant déjà rattachée à une. Si c'est un besoin confirmé, veuillez contacter notre support",
       "noAccountWithThisEmail": "aucun compte n'existe avec cette adresse email",
       "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
       "organizationNotFound": "aucune organisation trouvée",
+      "ticketingSystemConnectionFailed": "le test de connexion à la billetterie a échoué, veuillez vérifier vos identifiants",
+      "ticketingSystemNotFound": "ce système de billetterie n'existe pas",
+      "tooManyOrganizationTicketingSystems": "vous avez atteint la limite du nombre de systèmes de billetterie par organisation",
+      "userAlreadyConfirmed": "votre compte est déjà confirmé",
+      "userNotConfirmed": "votre inscription doit être confirmée en cliquant sur le lien de l'email avant de pouvoir vous authentifier",
       "userNotFound": "cet utilisateur n'existe pas",
       "unauthorizedError": "vous devez être connecté pour effectuer cette action",
-      "unexpectedError": "une erreur inattendue est survenue, veuillez retenter"
+      "unexpectedError": "une erreur inattendue est survenue, veuillez retenter",
+      "wrongConfirmationToken": "le lien de confirmation est invalide, veuillez contacter notre support"
     },
     "validation": {
       "accountingEntries": {
@@ -70,6 +80,12 @@
           "too_big": "le numéro et la voie doivent faire {{maximum}} caractères maximum",
           "too_small_one": "le numéro et la voie sont requis"
         }
+      },
+      "apiAccessKey": {
+        "too_small_one": "l'identifiant utilisateur est requis"
+      },
+      "apiSecretKey": {
+        "too_small_one": "la clé d'accès est requise"
       },
       "audience": {
         "invalid_enum_value": "la nature des représentations est requise"
@@ -141,6 +157,10 @@
         "too_big": "le message doit faire {{maximum}} caractères maximum",
         "too_small_one": "le message est requis"
       },
+      "name": {
+        "too_big": "le nom doit faire {{maximum}} caractères maximum",
+        "too_small_one": "le nom est requis"
+      },
       "newPassword": {
         "passwordRequiresANumeric": "le nouveau mot de passe doit contenir au moins un chiffre",
         "passwordRequiresASpecialCharacters": "le nouveau mot de passe doit contenir au moins un caractère spécial (@,!,?...)",
@@ -151,6 +171,10 @@
       "officialHeadquartersId": {
         "too_small_one": "le numéro Siret est requis",
         "too_big": "le numéro Siret doit faire {{maximum}} caractères maximum"
+      },
+      "officialId": {
+        "too_big": "le numéro Siren doit faire {{maximum}} caractères maximum",
+        "too_small_one": "le numéro Siren est requis"
       },
       "organizer": {
         "name": {
@@ -261,6 +285,9 @@
       },
       "termsAccepted": {
         "invalid_literal": "les modalités d'utilisation doivent être acceptées"
+      },
+      "ticketingSystemName": {
+        "invalid_enum_value": "le système de billetterie est requis"
       }
     }
   },
@@ -330,6 +357,12 @@
           "AMATEUR": "Amateur",
           "PROFESSIONAL": "Professionnel"
         }
+      }
+    },
+    "ticketingSystemName": {
+      "enum": {
+        "BILLETWEB": "Billetweb",
+        "MAPADO": "Mapado"
       }
     }
   },

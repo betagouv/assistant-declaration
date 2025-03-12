@@ -88,6 +88,7 @@ export const authNoCredentialsMatchError = new BusinessError('authNoCredentialsM
 export const authRetriableError = new BusinessError('authRetriable', t('errors.custom.authRetriable'));
 export const authFatalError = new BusinessError('authFatal', t('errors.custom.authFatal'));
 export const unauthorizedError = new BusinessError('unauthorizedError', t('errors.custom.unauthorizedError'));
+export const userNotConfirmedError = new BusinessError('userNotConfirmed', t('errors.custom.userNotConfirmed'));
 
 // Access
 export const organizationCollaboratorRoleRequiredError = new BusinessError(
@@ -97,6 +98,11 @@ export const organizationCollaboratorRoleRequiredError = new BusinessError(
 
 // Sign up
 export const accountAlreadyWithThisEmailError = new BusinessError('accountAlreadyWithThisEmail', t('errors.custom.accountAlreadyWithThisEmail'));
+
+// Confirm sign up
+export const userAlreadyConfirmedError = new BusinessError('userAlreadyConfirmed', t('errors.custom.userAlreadyConfirmed'));
+export const wrongConfirmationTokenError = new BusinessError('wrongConfirmationToken', t('errors.custom.wrongConfirmationToken'));
+export const expiredConfirmationTokenError = new BusinessError('expiredConfirmationToken', t('errors.custom.expiredConfirmationToken'));
 
 // Request new password
 export const noAccountWithThisEmailError = new BusinessError('noAccountWithThisEmail', t('errors.custom.noAccountWithThisEmail'));
@@ -112,6 +118,14 @@ export const invalidCurrentPasswordError = new BusinessError('invalidCurrentPass
 export const userNotFoundError = new BusinessError('userNotFound', t('errors.custom.userNotFound'));
 
 // Organization
+export const anotherOrganizationAlreadyHasThisOfficialIdError = new BusinessError(
+  'anotherOrganizationAlreadyHasThisOfficialId',
+  t('errors.custom.anotherOrganizationAlreadyHasThisOfficialId')
+);
+export const multipleUserOrganizationsCreationError = new BusinessError(
+  'multipleUserOrganizationsCreation',
+  t('errors.custom.multipleUserOrganizationsCreation')
+);
 export const organizationNotFoundError = new BusinessError('organizationNotFound', t('errors.custom.organizationNotFound'));
 export const collaboratorCanOnlySeeOrganizationEventsSeriesError = new BusinessError(
   'collaboratorCanOnlySeeOrganizationEventsSeries',
@@ -123,6 +137,19 @@ export const collaboratorCanOnlySeeOrganizationTicketingSystemsError = new Busin
 );
 
 // Ticketing system
+export const ticketingSystemConnectionFailedError = new BusinessError(
+  'ticketingSystemConnectionFailed',
+  t('errors.custom.ticketingSystemConnectionFailed')
+);
+export const ticketingSystemNotFoundError = new BusinessError('ticketingSystemNotFound', t('errors.custom.ticketingSystemNotFound'));
+export const alreadyExistingTicketingSystemError = new BusinessError(
+  'alreadyExistingTicketingSystem',
+  t('errors.custom.alreadyExistingTicketingSystem')
+);
+export const tooManyOrganizationTicketingSystemsError = new BusinessError(
+  'tooManyOrganizationTicketingSystems',
+  t('errors.custom.tooManyOrganizationTicketingSystems')
+);
 export const noValidTicketingSystemError = new BusinessError('noValidTicketingSystem', t('errors.custom.noValidTicketingSystem'));
 export const anotherTicketingSystemSynchronizationOngoingError = new BusinessError(
   'anotherTicketingSystemSynchronizationOngoing',

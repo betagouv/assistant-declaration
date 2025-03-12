@@ -342,7 +342,7 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
         </Grid>
         <Grid item xs={12}>
           <Typography component="div" variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-            Chiffres clés du spectacle
+            Synthèse des données de billetterie
             {triggerKeyFiguresCopy && (
               <ClipboardTrigger onCopy={() => setTriggerKeyFiguresCopy(false)}>
                 <ClipboardTicketingKeyFigures

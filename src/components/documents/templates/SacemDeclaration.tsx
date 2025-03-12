@@ -137,9 +137,9 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
             <TableHeader fixed>
               <TableCell>Origine des recettes</TableCell>
               <TableCell style={{ justifyContent: 'flex-end' }}>Taux de TVA</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Recettes HT</TableCell>
+              <TableCell style={{ justifyContent: 'flex-end' }}>Montant HT</TableCell>
               <TableCell style={{ justifyContent: 'flex-end' }}>Montant de la TVA</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Recettes TTC</TableCell>
+              <TableCell style={{ justifyContent: 'flex-end' }}>Montant TTC</TableCell>
             </TableHeader>
             {props.sacemDeclaration.revenues.map((revenue, index) => (
               <TableRow
@@ -182,9 +182,9 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
             <TableHeader fixed>
               <TableCell>Type de contrat</TableCell>
               <TableCell style={{ justifyContent: 'flex-end' }}>Taux de TVA</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Recettes HT</TableCell>
+              <TableCell style={{ justifyContent: 'flex-end' }}>Montant HT</TableCell>
               <TableCell style={{ justifyContent: 'flex-end' }}>Montant de la TVA</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Recettes TTC</TableCell>
+              <TableCell style={{ justifyContent: 'flex-end' }}>Montant TTC</TableCell>
             </TableHeader>
             {props.sacemDeclaration.expenses.map((expense, index) => (
               <TableRow

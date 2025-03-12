@@ -11,6 +11,15 @@ import { applyTypedParsers } from '@ad/src/utils/zod';
 // This is the best way to make the production not breaking for unused fields during validation.
 //
 
+export const JsonRecentTicketToTestConnectionSchema = applyTypedParsers(
+  z
+    .object({
+      updatedAt: z.coerce.date(),
+    })
+    .strip()
+);
+export type JsonRecentTicketToTestConnectionSchemaType = z.infer<typeof JsonRecentTicketToTestConnectionSchema>;
+
 export const JsonRecentTicketSchema = applyTypedParsers(
   z
     .object({
@@ -94,6 +103,11 @@ export const JsonCollectionSchema = applyTypedParsers(
   })
 );
 export type JsonCollectionSchemaType = z.infer<typeof JsonCollectionSchema>;
+
+export const JsonGetRecentTicketsToTestConnectionResponseSchema = JsonCollectionSchema.extend({
+  'hydra:member': z.array(JsonRecentTicketToTestConnectionSchema),
+});
+export type JsonGetRecentTicketsToTestConnectionResponseSchemaType = z.infer<typeof JsonGetRecentTicketsToTestConnectionResponseSchema>;
 
 export const JsonGetRecentTicketsResponseSchema = JsonCollectionSchema.extend({
   'hydra:member': z.array(JsonRecentTicketSchema),

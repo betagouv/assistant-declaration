@@ -13,7 +13,7 @@ export function FlashMessage(props: FlashMessageProps) {
       <Notice
         title={
           props.appMode === 'prod' ? (
-            <>Ce service vient tout juste d&apos;être lancé, merci de nous faire vos retours dans la section support</>
+            <>Ce service vient tout juste d&apos;être lancé, merci de nous faire vos retours dans la section &quot;Aide&quot;</>
           ) : (
             <>
               Vous êtes actuellement sur la version de test interne. La version grand public est accessible sur{' '}

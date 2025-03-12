@@ -7,7 +7,7 @@ import {
 import { formatPageTitle } from '@ad/src/utils/page';
 
 export const metadata: Metadata = {
-  title: formatPageTitle(`Déclaration CNM d'une série de représentation`),
+  title: formatPageTitle(`Déclaration CNM d'un spectacle`),
 };
 
 export default function Page(props: CnmDeclarationPageProps) {

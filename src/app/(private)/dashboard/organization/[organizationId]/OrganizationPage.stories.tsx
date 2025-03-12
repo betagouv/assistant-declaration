@@ -2,7 +2,7 @@ import { Meta, StoryFn } from '@storybook/react';
 import { mockDateDecorator } from 'storybook-mock-date-decorator';
 
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
-import { playFindAlert, playFindButton } from '@ad/.storybook/testing';
+import { playFindAlert, playFindButton, playFindLink } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
 import { OrganizationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/OrganizationPage';
 import { eventsSeriesWrappers } from '@ad/src/fixtures/event';
@@ -182,7 +182,7 @@ NoTicketingSystemStory.parameters = {
 };
 NoTicketingSystemStory.decorators = [mockDateDecorator];
 NoTicketingSystemStory.play = async ({ canvasElement }) => {
-  await playFindAlert(canvasElement);
+  await playFindLink(canvasElement, /connecter/i);
 };
 
 export const NoTicketingSystem = prepareStory(NoTicketingSystemStory);

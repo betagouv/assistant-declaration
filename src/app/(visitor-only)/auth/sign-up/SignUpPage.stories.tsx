@@ -36,7 +36,9 @@ const Template: StoryFn<ComponentType> = (args) => {
 };
 
 const NormalStory = Template.bind({});
-NormalStory.args = {};
+NormalStory.args = {
+  onSuccess: () => {},
+};
 NormalStory.parameters = { ...defaultMswParameters, ...tokenProvidedParameters };
 NormalStory.play = async ({ canvasElement }) => {
   await playFindForm(canvasElement);
@@ -52,7 +54,9 @@ export const Normal = prepareStory(NormalStory, {
 });
 
 const WithLayoutStory = Template.bind({});
-WithLayoutStory.args = {};
+WithLayoutStory.args = {
+  ...NormalStory.args,
+};
 WithLayoutStory.parameters = {
   layout: 'fullscreen',
   ...defaultMswParameters,

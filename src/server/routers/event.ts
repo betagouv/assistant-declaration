@@ -1,12 +1,7 @@
 import { EventCategoryTickets, Prisma } from '@prisma/client';
 import { minutesToMilliseconds, subMonths } from 'date-fns';
 
-import {
-  BilletwebTicketingSystemClient,
-  MapadoTicketingSystemClient,
-  MockTicketingSystemClient,
-  TicketingSystemClient,
-} from '@ad/src/core/ticketing';
+import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
 import {
   GetEventSerieSchema,
   ListEventsSchema,
@@ -65,6 +60,7 @@ export const eventRouter = router({
       },
       select: {
         id: true,
+        organizationId: true,
         name: true,
         apiAccessKey: true,
         apiSecretKey: true,
@@ -96,32 +92,7 @@ export const eventRouter = router({
         // Iterate over each system
         await Promise.all(
           ticketingSystems.map(async (ticketingSystem) => {
-            let ticketingSystemClient: TicketingSystemClient;
-
-            if (
-              process.env.APP_MODE !== 'prod' &&
-              (!process.env.DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS ||
-                !process.env.DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS.split(',').includes(ctx.user.id))
-            ) {
-              ticketingSystemClient = new MockTicketingSystemClient();
-            } else {
-              switch (ticketingSystem.name) {
-                case 'BILLETWEB':
-                  assert(ticketingSystem.apiAccessKey);
-                  assert(ticketingSystem.apiSecretKey);
-
-                  ticketingSystemClient = new BilletwebTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
-                  break;
-                case 'MAPADO':
-                  assert(ticketingSystem.apiSecretKey);
-
-                  ticketingSystemClient = new MapadoTicketingSystemClient(ticketingSystem.apiSecretKey);
-                  break;
-                default:
-                  throw new Error('unknown ticketing system');
-              }
-            }
-
+            const ticketingSystemClient = getTicketingSystemClient(ticketingSystem, ctx.user.id);
             const newSynchronizationStartingDate = ticketingSystem.lastSynchronizationAt || oldestAllowedDate;
 
             try {
@@ -140,7 +111,13 @@ export const eventRouter = router({
                   ticketingSystem: {
                     // Just to make sure it's isolated for uniqueness of their IDs across ticketing systems
                     // and to check it cannot affect the wrong organization if the remote data is wrong
-                    id: ticketingSystem.id,
+                    //
+                    // Before we were just checking `id === ticketingSystem.id` but it's risky in case a ticketing system has been deleted and recreated
+                    // We have no way to now the unicity since `apiAccessKey` can be null and the `apiAccessSecret` may vary if regenerated
+                    // So to simplify our logic we take all series from the same organization for this ticketing system since we do not remove those already created
+                    // It makes the process safe
+                    organizationId: ticketingSystem.organizationId,
+                    name: ticketingSystem.name,
                   },
                 },
                 select: {

@@ -19,7 +19,7 @@ export const brandTop = (
 
 export const homeLinkProps = {
   href: '/',
-  title: 'Présentation - Assistant déclaration',
+  title: 'À propos - Assistant déclaration',
 };
 
 export interface OrganizationSwitchQuickAccessItemOptions extends Omit<HeaderOrganizationSwitchItemProps, 'eventEmitter'> {}

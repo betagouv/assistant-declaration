@@ -5,6 +5,7 @@ import { Alert, ToggleButton, ToggleButtonGroup, Typography } from '@mui/materia
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import { isAfter, isBefore, subHours, subMonths } from 'date-fns';
+import NextLink from 'next/link';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -119,9 +120,12 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
     >
       {ticketingSystems.length > 0 ? (
         <>
-          <Grid item xs={12} sx={{ pb: 3 }}>
-            <Typography component="h1" variant="h5">
-              Séries de représentations
+          <Grid item xs={12} sx={{ pb: 1 }}>
+            <Typography component="h1" variant="h4">
+              Vos spectacles
+            </Typography>
+            <Typography component="p" variant="body1">
+              Sélectionnez un spectacle à déclarer
             </Typography>
           </Grid>
           <Grid container spacing={2} justifyContent="center" sx={{ pt: 3 }}>
@@ -162,6 +166,9 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                           aria-label="filtre"
                           sx={{
                             flexWrap: 'wrap',
+                            button: {
+                              textTransform: 'none',
+                            },
                           }}
                         >
                           <ToggleButton value={ListFilter.ALL}>Toutes</ToggleButton>
@@ -224,8 +231,8 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                   ) : (
                     <Grid item xs={12} sx={{ py: 2 }}>
                       {eventsSeriesWrappers.length === 0
-                        ? `Aucune série de représentations n'a été trouvée dans votre billetterie.`
-                        : `Aucune série de représentations n'a été trouvée dans votre billetterie avec le filtre choisi.`}
+                        ? `Aucun spectacle n'a été trouvé dans votre billetterie.`
+                        : `Aucun spectacle n'a été trouvé dans votre billetterie avec le filtre choisi.`}
                     </Grid>
                   )}
                 </>
@@ -263,14 +270,25 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
           </Grid>
         </>
       ) : (
-        <>
-          <Alert severity="error">
-            Aucun système de billetterie n&apos;est actuellement connecté à votre organisation.{' '}
-            <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 600 }}>
-              Veuillez contacter notre support pour corriger cela et ainsi commencer vos déclarations.
+        <Grid container sx={{ justifyContent: 'center', my: 'auto' }}>
+          <Grid item xs={12}>
+            <Typography component="p" variant="body2" sx={{ textAlign: 'center', py: 2 }}>
+              La dernière étape pour commencer les déclarations est de connecter votre système de billetterie.
+              <br />
+              Des indications vous seront affichées en fonction du système choisi.
             </Typography>
-          </Alert>
-        </>
+          </Grid>
+          <Grid item xs={12} sx={{ pt: 3, pb: 1, textAlign: 'center' }}>
+            <Button
+              component={NextLink}
+              href={linkRegistry.get('ticketingSystemConnection', { organizationId: organizationId, onboarding: true })}
+              size="large"
+              variant="contained"
+            >
+              Connecter un système de billetterie
+            </Button>
+          </Grid>
+        </Grid>
       )}
     </Container>
   );

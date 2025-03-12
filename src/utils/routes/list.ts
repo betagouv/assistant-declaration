@@ -68,6 +68,13 @@ export const localizedRoutes = {
       fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}`,
     }
   ),
+  organizationCreation: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/dashboard/organization/create`,
+      fr: (p) => `/tableau-de-bord/collectivite/creer`,
+    }
+  ),
   privacyPolicy: defineLocalizedRoute(
     {},
     {
@@ -87,7 +94,7 @@ export const localizedRoutes = {
   signIn: defineLocalizedRoute(
     {
       session_end: param.query.optional.boolean,
-      registered: param.query.optional.boolean,
+      token: param.query.optional.string,
     },
     {
       en: (p) => `/auth/sign-in`,
@@ -96,7 +103,7 @@ export const localizedRoutes = {
   ),
   signUp: defineLocalizedRoute(
     {
-      token: param.query.string,
+      token: param.query.optional.string,
     },
     {
       en: (p) => `/auth/sign-up`,
@@ -108,6 +115,27 @@ export const localizedRoutes = {
     {
       en: (p) => `/terms-of-use`,
       fr: (p) => `/modalites-d-utilisation`,
+    }
+  ),
+  ticketingSystemConnection: defineLocalizedRoute(
+    { organizationId: param.path.string, onboarding: param.query.optional.boolean },
+    {
+      en: (p) => `/dashboard/organization/${p.organizationId}/ticketing-system/connect`,
+      fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}/systeme-de-billetterie/connexion`,
+    }
+  ),
+  ticketingSystemEdit: defineLocalizedRoute(
+    { organizationId: param.path.string, ticketingSystemId: param.path.string },
+    {
+      en: (p) => `/dashboard/organization/${p.organizationId}/ticketing-system/${p.ticketingSystemId}/edit`,
+      fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}/systeme-de-billetterie/${p.ticketingSystemId}/editer`,
+    }
+  ),
+  ticketingSystemList: defineLocalizedRoute(
+    { organizationId: param.path.string },
+    {
+      en: (p) => `/dashboard/organization/${p.organizationId}/ticketing-systems`,
+      fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}/systemes-de-billetterie`,
     }
   ),
 };
@@ -154,11 +182,15 @@ export const routes = {
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.en),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.en),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.en),
+    organizationCreation: defineRoute(localizedRoutes.organizationCreation.params, localizedRoutes.organizationCreation.paths.en),
     privacyPolicy: defineRoute(localizedRoutes.privacyPolicy.params, localizedRoutes.privacyPolicy.paths.en),
     resetPassword: defineRoute(localizedRoutes.resetPassword.params, localizedRoutes.resetPassword.paths.en),
     signIn: defineRoute(localizedRoutes.signIn.params, localizedRoutes.signIn.paths.en),
     signUp: defineRoute(localizedRoutes.signUp.params, localizedRoutes.signUp.paths.en),
     termsOfUse: defineRoute(localizedRoutes.termsOfUse.params, localizedRoutes.termsOfUse.paths.en),
+    ticketingSystemConnection: defineRoute(localizedRoutes.ticketingSystemConnection.params, localizedRoutes.ticketingSystemConnection.paths.en),
+    ticketingSystemEdit: defineRoute(localizedRoutes.ticketingSystemEdit.params, localizedRoutes.ticketingSystemEdit.paths.en),
+    ticketingSystemList: defineRoute(localizedRoutes.ticketingSystemList.params, localizedRoutes.ticketingSystemList.paths.en),
   }).routes,
   fr: createLocalizedRouter({
     accessibility: defineRoute(localizedRoutes.accessibility.params, localizedRoutes.accessibility.paths.fr),
@@ -170,11 +202,15 @@ export const routes = {
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.fr),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.fr),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.fr),
+    organizationCreation: defineRoute(localizedRoutes.organizationCreation.params, localizedRoutes.organizationCreation.paths.fr),
     privacyPolicy: defineRoute(localizedRoutes.privacyPolicy.params, localizedRoutes.privacyPolicy.paths.fr),
     resetPassword: defineRoute(localizedRoutes.resetPassword.params, localizedRoutes.resetPassword.paths.fr),
     signIn: defineRoute(localizedRoutes.signIn.params, localizedRoutes.signIn.paths.fr),
     signUp: defineRoute(localizedRoutes.signUp.params, localizedRoutes.signUp.paths.fr),
     termsOfUse: defineRoute(localizedRoutes.termsOfUse.params, localizedRoutes.termsOfUse.paths.fr),
+    ticketingSystemConnection: defineRoute(localizedRoutes.ticketingSystemConnection.params, localizedRoutes.ticketingSystemConnection.paths.fr),
+    ticketingSystemEdit: defineRoute(localizedRoutes.ticketingSystemEdit.params, localizedRoutes.ticketingSystemEdit.paths.fr),
+    ticketingSystemList: defineRoute(localizedRoutes.ticketingSystemList.params, localizedRoutes.ticketingSystemList.paths.fr),
   }).routes,
 };
 

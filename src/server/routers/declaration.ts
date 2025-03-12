@@ -765,6 +765,8 @@ export const declarationRouter = router({
             },
             phone: {
               select: {
+                callingCode: true,
+                countryCode: true,
                 number: true,
               },
             },
@@ -788,6 +790,8 @@ export const declarationRouter = router({
             },
             phone: {
               select: {
+                callingCode: true,
+                countryCode: true,
                 number: true,
               },
             },
@@ -811,6 +815,8 @@ export const declarationRouter = router({
             },
             phone: {
               select: {
+                callingCode: true,
+                countryCode: true,
                 number: true,
               },
             },
@@ -972,6 +978,10 @@ export const declarationRouter = router({
         placeholder.organizer.headquartersAddress.countryCode.push(previousDeclaration.organizer.headquartersAddress.countryCode);
       if (!placeholder.organizer.headquartersAddress.subdivision.includes(previousDeclaration.organizer.headquartersAddress.subdivision))
         placeholder.organizer.headquartersAddress.subdivision.push(previousDeclaration.organizer.headquartersAddress.subdivision);
+      if (!placeholder.organizer.phone.callingCode.includes(previousDeclaration.organizer.phone.callingCode))
+        placeholder.organizer.phone.callingCode.push(previousDeclaration.organizer.phone.callingCode);
+      if (!placeholder.organizer.phone.countryCode.includes(previousDeclaration.organizer.phone.countryCode))
+        placeholder.organizer.phone.countryCode.push(previousDeclaration.organizer.phone.countryCode);
       if (!placeholder.organizer.phone.number.includes(previousDeclaration.organizer.phone.number))
         placeholder.organizer.phone.number.push(previousDeclaration.organizer.phone.number);
 
@@ -992,6 +1002,10 @@ export const declarationRouter = router({
         placeholder.producer.headquartersAddress.countryCode.push(previousDeclaration.producer.headquartersAddress.countryCode);
       if (!placeholder.producer.headquartersAddress.subdivision.includes(previousDeclaration.producer.headquartersAddress.subdivision))
         placeholder.producer.headquartersAddress.subdivision.push(previousDeclaration.producer.headquartersAddress.subdivision);
+      if (!placeholder.producer.phone.callingCode.includes(previousDeclaration.producer.phone.callingCode))
+        placeholder.producer.phone.callingCode.push(previousDeclaration.producer.phone.callingCode);
+      if (!placeholder.producer.phone.countryCode.includes(previousDeclaration.producer.phone.countryCode))
+        placeholder.producer.phone.countryCode.push(previousDeclaration.producer.phone.countryCode);
       if (!placeholder.producer.phone.number.includes(previousDeclaration.producer.phone.number))
         placeholder.producer.phone.number.push(previousDeclaration.producer.phone.number);
 
@@ -1019,6 +1033,10 @@ export const declarationRouter = router({
         !placeholder.rightsFeesManager.headquartersAddress.subdivision.includes(previousDeclaration.rightsFeesManager.headquartersAddress.subdivision)
       )
         placeholder.rightsFeesManager.headquartersAddress.subdivision.push(previousDeclaration.rightsFeesManager.headquartersAddress.subdivision);
+      if (!placeholder.rightsFeesManager.phone.callingCode.includes(previousDeclaration.rightsFeesManager.phone.callingCode))
+        placeholder.rightsFeesManager.phone.callingCode.push(previousDeclaration.rightsFeesManager.phone.callingCode);
+      if (!placeholder.rightsFeesManager.phone.countryCode.includes(previousDeclaration.rightsFeesManager.phone.countryCode))
+        placeholder.rightsFeesManager.phone.countryCode.push(previousDeclaration.rightsFeesManager.phone.countryCode);
       if (!placeholder.rightsFeesManager.phone.number.includes(previousDeclaration.rightsFeesManager.phone.number))
         placeholder.rightsFeesManager.phone.number.push(previousDeclaration.rightsFeesManager.phone.number);
 

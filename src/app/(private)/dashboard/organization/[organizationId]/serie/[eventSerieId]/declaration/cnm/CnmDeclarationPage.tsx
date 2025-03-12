@@ -1,20 +1,18 @@
 'use client';
 
 import { fr } from '@codegouvfr/react-dsfr';
-import { Alert, Button, MenuItem, Select, Typography } from '@mui/material';
+import { Alert, Button, Typography } from '@mui/material';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import NextLink from 'next/link';
-import { useRouter } from 'next/navigation';
 import { createContext, useContext } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
+import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
-import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 
 export const CnmDeclarationPageContext = createContext({
@@ -26,9 +24,7 @@ export interface CnmDeclarationPageProps {
 }
 
 export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }: CnmDeclarationPageProps) {
-  const { t } = useTranslation('common');
   const { ContextualEventsSalesOverview } = useContext(CnmDeclarationPageContext);
-  const router = useRouter();
 
   const getEventSerie = trpc.getEventSerie.useQuery({
     id: eventSerieId,
@@ -61,56 +57,32 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
       maxWidth={false}
       disableGutters
       sx={{
-        py: 3,
+        pb: 3,
       }}
     >
-      <Container>
-        <Grid item xs={12} sx={{ pb: 3 }}>
-          <Typography component="h1" variant="h5">
-            Déclaration{' '}
-            <Select
-              variant="standard"
-              value={'cnm'}
-              onChange={(event) => {
-                router.push(
-                  linkRegistry.get('declaration', {
-                    organizationId: organizationId,
-                    eventSerieId: eventSerie.id,
-                    declarationType: event.target.value as string,
-                  })
-                );
-              }}
-              disableUnderline
-              sx={{
-                fontWeight: 700,
-                fontSize: '1.25rem',
-              }}
-            >
-              <MenuItem value="sacem">SACEM</MenuItem>
-              <MenuItem value="sacd">SACD</MenuItem>
-              <MenuItem value="astp">ASTP</MenuItem>
-              <MenuItem value="cnm">CNM</MenuItem>
-            </Select>
-          </Typography>
-          <Typography component="h2" variant="h6" data-sentry-mask>
-            {eventSerie.name}
-          </Typography>
-        </Grid>
+      <Container
+        maxWidth={false}
+        disableGutters
+        sx={{
+          bgcolor: fr.colors.decisions.background.alt.pinkMacaron.default,
+        }}
+      >
+        <Container>
+          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} currentDeclaration="cnm" />
+        </Container>
       </Container>
       {eventsWrappers.length > 0 ? (
         <>
           <Container
-            maxWidth={false}
-            disableGutters
             sx={{
               bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
-              pt: { xs: 3, md: 3 },
-              pb: { xs: 3, md: 3 },
+              borderRadius: '8px',
+              pt: { xs: 1, md: 1 },
+              pb: { xs: 1, md: 1 },
+              mt: 3,
             }}
           >
-            <Container>
-              <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} />
-            </Container>
+            <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} />
           </Container>
           <Container sx={{ pt: 2 }}>
             <Grid container spacing={2}>
@@ -151,7 +123,7 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
         >
           <Grid container spacing={2} justifyContent="center" sx={{ pt: 3 }}>
             <Grid item xs={12} sx={{ py: 2 }}>
-              Aucune date n&apos;a pu être récupérée pour cette série de représentations. Il n&apos;y a donc aucune déclaration à faire au CNM.
+              Aucune date n&apos;a pu être récupérée pour ce spectacle. Il n&apos;y a donc aucune déclaration à faire au CNM.
             </Grid>
           </Grid>
         </Container>

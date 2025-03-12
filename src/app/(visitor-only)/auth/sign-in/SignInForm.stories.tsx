@@ -4,6 +4,7 @@ import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindForm } from '@ad/.storybook/testing';
 import { SignInForm } from '@ad/src/app/(visitor-only)/auth/sign-in/SignInForm';
 import { SignInPrefillSchema } from '@ad/src/models/actions/auth';
+import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
 type ComponentType = typeof SignInForm;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -15,6 +16,18 @@ export default {
     parameters: {},
   }),
 } as Meta<ComponentType>;
+
+const defaultMswParameters = {
+  msw: {
+    handlers: [
+      getTRPCMock({
+        type: 'mutation',
+        path: ['confirmSignUp'],
+        response: undefined,
+      }),
+    ],
+  },
+};
 
 const Template: StoryFn<ComponentType> = (args) => {
   return <SignInForm {...args} />;
@@ -59,19 +72,20 @@ LoggedOutStory.play = async ({ canvasElement }) => {
 
 export const LoggedOut = prepareStory(LoggedOutStory);
 
-const JustRegisteredStory = Template.bind({});
-JustRegisteredStory.parameters = {
+const ConfirmedStory = Template.bind({});
+ConfirmedStory.parameters = {
   nextjs: {
     navigation: {
       query: {
-        registered: true,
+        token: 'abc',
       },
     },
   },
 };
-JustRegisteredStory.args = {};
-JustRegisteredStory.play = async ({ canvasElement }) => {
+ConfirmedStory.args = {};
+ConfirmedStory.parameters = { ...defaultMswParameters };
+ConfirmedStory.play = async ({ canvasElement }) => {
   await playFindForm(canvasElement);
 };
 
-export const JustRegistered = prepareStory(JustRegisteredStory);
+export const Confirmed = prepareStory(ConfirmedStory);
