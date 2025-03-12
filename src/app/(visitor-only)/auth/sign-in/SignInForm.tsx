@@ -35,6 +35,7 @@ import {
   authNoCredentialsMatchError,
   authRetriableError,
   internalServerErrorError,
+  userNotConfirmedError,
 } from '@ad/src/models/entities/errors';
 import { signIn } from '@ad/src/proxies/next-auth/react';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
@@ -48,6 +49,9 @@ function errorCodeToError(errorCode: string): BusinessError | UnexpectedError {
       break;
     case authNoCredentialsMatchError.code:
       error = authNoCredentialsMatchError;
+      break;
+    case userNotConfirmedError.code:
+      error = userNotConfirmedError;
       break;
     case 'undefined':
       // Probably the server has thrown something that is not a basic `Error` object
