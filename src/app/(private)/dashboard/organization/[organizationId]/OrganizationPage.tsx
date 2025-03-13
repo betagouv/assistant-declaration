@@ -171,9 +171,9 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                             },
                           }}
                         >
-                          <ToggleButton value={ListFilter.ALL}>Toutes</ToggleButton>
-                          <ToggleButton value={ListFilter.ARCHIVED_ONLY}>Archivées</ToggleButton>
-                          <ToggleButton value={ListFilter.ENDED_ONLY}>Terminées</ToggleButton>
+                          <ToggleButton value={ListFilter.ALL}>Tous</ToggleButton>
+                          <ToggleButton value={ListFilter.ARCHIVED_ONLY}>Archivés</ToggleButton>
+                          <ToggleButton value={ListFilter.ENDED_ONLY}>Terminés</ToggleButton>
                           <ToggleButton value={ListFilter.CURRENT_ONLY}>En cours</ToggleButton>
                           <ToggleButton value={ListFilter.FUTURE_ONLY}>À venir</ToggleButton>
                         </ToggleButtonGroup>
