@@ -6,6 +6,7 @@ import Button from '@mui/lab/LoadingButton';
 import { Alert, IconButton, InputAdornment, Link } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
+import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -48,6 +49,8 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
     const result = await updateTicketingSystem.mutateAsync(input);
 
     props.onSuccess && props.onSuccess();
+
+    push(['trackEvent', 'ticketing', 'update', 'system', input.ticketingSystemName]);
   };
 
   const [showApiSecretKey, setShowApiSecretKey] = useState(false);

@@ -4,6 +4,7 @@ import { LoadingButton as Button } from '@mui/lab';
 import { Alert, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
+import { push } from '@socialgouv/matomo-next';
 import { isAfter, isBefore, subHours, subMonths } from 'date-fns';
 import NextLink from 'next/link';
 import { useMemo, useState } from 'react';
@@ -184,6 +185,8 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                             await synchronizeDataFromTicketingSystems.mutateAsync({
                               organizationId: organization.id,
                             });
+
+                            push(['trackEvent', 'ticketing', 'synchronize']);
                           }}
                           loading={synchronizeDataFromTicketingSystems.isLoading}
                           size="large"
@@ -256,6 +259,8 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                       await synchronizeDataFromTicketingSystems.mutateAsync({
                         organizationId: organization.id,
                       });
+
+                      push(['trackEvent', 'ticketing', 'synchronize']);
                     }}
                     loading={synchronizeDataFromTicketingSystems.isLoading}
                     size="large"

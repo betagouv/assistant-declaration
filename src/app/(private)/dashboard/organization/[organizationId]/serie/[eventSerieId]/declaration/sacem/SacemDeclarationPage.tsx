@@ -9,6 +9,7 @@ import { LoadingButton as Button } from '@mui/lab';
 import { Alert, Autocomplete, Box, Link, TextField, Tooltip, Typography } from '@mui/material';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
+import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -99,6 +100,8 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
         revenues: result.sacemDeclaration.revenues,
         expenses: result.sacemDeclaration.expenses,
       });
+
+      push(['trackEvent', 'declaration', 'fill', 'type', DeclarationTypeSchema.Values.SACEM]);
     },
     [fillSacemDeclaration, reset, eventSerieId]
   );

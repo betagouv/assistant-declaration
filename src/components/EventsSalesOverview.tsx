@@ -18,6 +18,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { push } from '@socialgouv/matomo-next';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -330,6 +331,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                         }
 
                         await Promise.all(mutationsToPerform);
+
+                        push(['trackEvent', 'declaration', 'updateEventSales']);
                       }}
                     />
                   ) : (

@@ -24,6 +24,7 @@ import {
 } from '@mui/material';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
+import { push } from '@socialgouv/matomo-next';
 import diff from 'microdiff';
 import NextLink from 'next/link';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
@@ -181,6 +182,8 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
         // Here by default we set "organizer" if "producer" is also the same
         organizerRightsFeesManagerDiff.length === 0 ? 'organizer' : producerRightsFeesManagerDiff.length === 0 ? 'producer' : 'none'
       );
+
+      push(['trackEvent', 'declaration', 'fill', 'type', DeclarationTypeSchema.Values.SACD]);
     },
     [fillSacdDeclaration, reset, eventSerieId]
   );
