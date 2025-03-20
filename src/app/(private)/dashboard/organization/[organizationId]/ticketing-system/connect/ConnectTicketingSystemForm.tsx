@@ -6,6 +6,7 @@ import Button from '@mui/lab/LoadingButton';
 import { Alert, IconButton, InputAdornment, Link, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
+import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -42,6 +43,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
     setValue,
     control,
     watch,
@@ -67,6 +69,8 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
       } else {
         router.push(linkRegistry.get('ticketingSystemList', { organizationId: props.prefill!.organizationId! }));
       }
+
+      push(['trackEvent', 'ticketing', 'connect', 'system', input.ticketingSystemName]);
     },
     [connectTicketingSystem, onboardingFlow, router, showOtherIndication, props.prefill]
   );
@@ -171,6 +175,9 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
                 component={NextLink}
                 href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
                 target="_blank"
+                onClick={() => {
+                  push(['trackEvent', 'ticketing', 'openHowTo', 'system', getValues('ticketingSystemName')]);
+                }}
                 underline="none"
                 sx={{
                   '&::after': {

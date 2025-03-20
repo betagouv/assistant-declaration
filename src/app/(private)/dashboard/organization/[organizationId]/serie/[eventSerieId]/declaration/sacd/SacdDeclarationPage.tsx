@@ -24,6 +24,7 @@ import {
 } from '@mui/material';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
+import { push } from '@socialgouv/matomo-next';
 import diff from 'microdiff';
 import NextLink from 'next/link';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
@@ -181,6 +182,8 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
         // Here by default we set "organizer" if "producer" is also the same
         organizerRightsFeesManagerDiff.length === 0 ? 'organizer' : producerRightsFeesManagerDiff.length === 0 ? 'producer' : 'none'
       );
+
+      push(['trackEvent', 'declaration', 'fill', 'type', DeclarationTypeSchema.Values.SACD]);
     },
     [fillSacdDeclaration, reset, eventSerieId]
   );
@@ -954,6 +957,9 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                           })}
                           download // Not forcing the download so using an explicit query parameter to force headers from the server
                           target="_blank" // Needed otherwise after the first click it won't work again (probably due to this page receiving headers already)
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'download', 'type', DeclarationTypeSchema.Values.SACD]);
+                          }}
                           size="large"
                           variant="contained"
                           fullWidth
@@ -975,6 +981,9 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                             type: DeclarationTypeSchema.Values.SACD,
                           })}
                           target="_blank"
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'preview', 'type', DeclarationTypeSchema.Values.SACD]);
+                          }}
                           size="large"
                           variant="contained"
                           fullWidth
@@ -1011,6 +1020,9 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                         component={NextLink}
                         href="https://moncompte.sacd.fr/nea/main/mon-accueil"
                         target="_blank"
+                        onClick={() => {
+                          push(['trackEvent', 'declaration', 'openOfficialWebsite', 'type', DeclarationTypeSchema.Values.SACD]);
+                        }}
                         underline="none"
                         sx={{
                           '&::after': {
@@ -1028,6 +1040,9 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                         component={NextLink}
                         href={`${getBaseUrl()}/assets/templates/declaration/sacd.pdf`}
                         target="_blank"
+                        onClick={() => {
+                          push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.SACD]);
+                        }}
                         underline="none"
                         sx={{
                           '&::after': {

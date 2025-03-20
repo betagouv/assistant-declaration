@@ -4,6 +4,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { useCallback } from 'react';
 
@@ -27,6 +28,8 @@ export function TicketingSystemListPage({ params: { organizationId } }: Ticketin
       await disconnectTicketingSystem.mutateAsync({
         ticketingSystemId: ticketingSystemId,
       });
+
+      push(['trackEvent', 'ticketing', 'disconnect']);
     },
     [disconnectTicketingSystem]
   );
