@@ -34,6 +34,7 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
     control,
     watch,
   } = useForm<UpdateTicketingSystemSchemaType>({
@@ -103,6 +104,9 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
             component={NextLink}
             href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
             target="_blank"
+            onClick={() => {
+              push(['trackEvent', 'ticketing', 'openHowTo', 'system', getValues('ticketingSystemName')]);
+            }}
             underline="none"
             sx={{
               '&::after': {

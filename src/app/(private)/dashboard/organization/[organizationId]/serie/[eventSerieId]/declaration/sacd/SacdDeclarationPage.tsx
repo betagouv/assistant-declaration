@@ -957,6 +957,9 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                           })}
                           download // Not forcing the download so using an explicit query parameter to force headers from the server
                           target="_blank" // Needed otherwise after the first click it won't work again (probably due to this page receiving headers already)
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'download', 'type', DeclarationTypeSchema.Values.SACD]);
+                          }}
                           size="large"
                           variant="contained"
                           fullWidth
@@ -978,6 +981,9 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                             type: DeclarationTypeSchema.Values.SACD,
                           })}
                           target="_blank"
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'preview', 'type', DeclarationTypeSchema.Values.SACD]);
+                          }}
                           size="large"
                           variant="contained"
                           fullWidth
@@ -1014,6 +1020,9 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                         component={NextLink}
                         href="https://moncompte.sacd.fr/nea/main/mon-accueil"
                         target="_blank"
+                        onClick={() => {
+                          push(['trackEvent', 'declaration', 'openOfficialWebsite', 'type', DeclarationTypeSchema.Values.SACD]);
+                        }}
                         underline="none"
                         sx={{
                           '&::after': {
@@ -1031,6 +1040,9 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                         component={NextLink}
                         href={`${getBaseUrl()}/assets/templates/declaration/sacd.pdf`}
                         target="_blank"
+                        onClick={() => {
+                          push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.SACD]);
+                        }}
                         underline="none"
                         sx={{
                           '&::after': {

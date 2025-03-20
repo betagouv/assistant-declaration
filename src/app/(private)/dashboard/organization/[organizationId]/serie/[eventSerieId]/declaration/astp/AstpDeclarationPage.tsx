@@ -4,6 +4,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Alert, Link, Typography } from '@mui/material';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
+import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { createContext, useContext } from 'react';
 
@@ -12,6 +13,7 @@ import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
+import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 import { getBaseUrl } from '@ad/src/utils/url';
@@ -106,6 +108,9 @@ export function AstpDeclarationPage({ params: { organizationId, eventSerieId } }
                         component={NextLink}
                         href="https://dectanet.astp.asso.fr/mon-espace-declarant/declarer-mes-recettes"
                         target="_blank"
+                        onClick={() => {
+                          push(['trackEvent', 'declaration', 'openOfficialWebsite', 'type', DeclarationTypeSchema.Values.ASTP]);
+                        }}
                         underline="none"
                         sx={{
                           '&::after': {
@@ -123,6 +128,9 @@ export function AstpDeclarationPage({ params: { organizationId, eventSerieId } }
                         component={NextLink}
                         href={`${getBaseUrl()}/assets/templates/declaration/astp.pdf`}
                         target="_blank"
+                        onClick={() => {
+                          push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.ASTP]);
+                        }}
                         underline="none"
                         sx={{
                           '&::after': {

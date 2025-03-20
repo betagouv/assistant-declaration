@@ -106,7 +106,13 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
           <Typography component="div" variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
             Liste des représentations
             {triggerEventsSalesCopy && (
-              <ClipboardTrigger onCopy={() => setTriggerEventsSalesCopy(false)}>
+              <ClipboardTrigger
+                onCopy={() => {
+                  setTriggerEventsSalesCopy(false);
+
+                  push(['trackEvent', 'declaration', 'copyEventsSales', 'scope', eventsWrappersToCopy.length > 1 ? 'all' : 'one']);
+                }}
+              >
                 <ClipboardTicketingEventsSales eventSerieName={eventSerie.name} eventsWrappers={eventsWrappersToCopy} />
               </ClipboardTrigger>
             )}
@@ -347,7 +353,13 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
           <Typography component="div" variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
             Synthèse des données de billetterie
             {triggerKeyFiguresCopy && (
-              <ClipboardTrigger onCopy={() => setTriggerKeyFiguresCopy(false)}>
+              <ClipboardTrigger
+                onCopy={() => {
+                  setTriggerKeyFiguresCopy(false);
+
+                  push(['trackEvent', 'declaration', 'copyKeyFigures']);
+                }}
+              >
                 <ClipboardTicketingKeyFigures
                   eventSerieName={eventSerie.name}
                   startAt={eventSerie.startAt}
@@ -399,6 +411,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                             date: eventSerie.endAt,
                           })}`
                         );
+
+                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'date']);
                       },
                     },
                     htmlInput: {
@@ -425,6 +439,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                       disableUnderline: true,
                       onClick: async () => {
                         await copyValue(wrappers.length.toString());
+
+                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'eventsCount']);
                       },
                     },
                     htmlInput: {
@@ -455,6 +471,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                             number: getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
                           })
                         );
+
+                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalExcludingTaxesAmount']);
                       },
                     },
                     htmlInput: {
@@ -481,6 +499,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                       disableUnderline: true,
                       onClick: async () => {
                         await copyValue(t('number.defaultWithNoGrouping', { number: totalIncludingTaxesAmount }));
+
+                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalIncludingTaxesAmount']);
                       },
                     },
                     htmlInput: {
@@ -507,6 +527,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                       disableUnderline: true,
                       onClick: async () => {
                         await copyValue(t('number.defaultWithNoGrouping', { number: 100 * eventSerie.taxRate }));
+
+                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'taxRate']);
                       },
                     },
                     htmlInput: {
@@ -537,6 +559,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                             number: getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
                           })
                         );
+
+                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalTaxAmount']);
                       },
                     },
                     htmlInput: {
@@ -563,6 +587,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                       disableUnderline: true,
                       onClick: async () => {
                         await copyValue(paidTickets.toString());
+
+                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'paidTickets']);
                       },
                     },
                     htmlInput: {
@@ -589,6 +615,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                       disableUnderline: true,
                       onClick: async () => {
                         await copyValue(freeTickets.toString());
+
+                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'freeTickets']);
                       },
                     },
                     htmlInput: {
@@ -615,6 +643,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                       disableUnderline: true,
                       onClick: async () => {
                         await copyValue((freeTickets + paidTickets).toString());
+
+                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'ticketsCount']);
                       },
                     },
                     htmlInput: {
@@ -641,6 +671,8 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                       disableUnderline: true,
                       onClick: async () => {
                         await copyValue(t('number.defaultWithNoGrouping', { number: averageTicketPrice }));
+
+                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'averageTicketPrice']);
                       },
                     },
                     htmlInput: {

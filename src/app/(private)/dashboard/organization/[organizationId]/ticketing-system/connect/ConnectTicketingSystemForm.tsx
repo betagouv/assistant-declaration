@@ -43,6 +43,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
     setValue,
     control,
     watch,
@@ -174,6 +175,9 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
                 component={NextLink}
                 href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
                 target="_blank"
+                onClick={() => {
+                  push(['trackEvent', 'ticketing', 'openHowTo', 'system', getValues('ticketingSystemName')]);
+                }}
                 underline="none"
                 sx={{
                   '&::after': {

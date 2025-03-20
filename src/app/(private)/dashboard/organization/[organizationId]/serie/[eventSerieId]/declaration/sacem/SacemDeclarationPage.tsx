@@ -662,6 +662,9 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                           })}
                           download // Not forcing the download so using an explicit query parameter to force headers from the server
                           target="_blank" // Needed otherwise after the first click it won't work again (probably due to this page receiving headers already)
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'download', 'type', DeclarationTypeSchema.Values.SACEM]);
+                          }}
                           size="large"
                           variant="contained"
                           fullWidth
@@ -683,6 +686,9 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                             type: DeclarationTypeSchema.Values.SACEM,
                           })}
                           target="_blank"
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'preview', 'type', DeclarationTypeSchema.Values.SACEM]);
+                          }}
                           size="large"
                           variant="contained"
                           fullWidth
@@ -720,6 +726,9 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                         component={NextLink}
                         href={`${getBaseUrl()}/assets/templates/declaration/sacem.pdf`}
                         target="_blank"
+                        onClick={() => {
+                          push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.SACEM]);
+                        }}
                         underline="none"
                         sx={{
                           '&::after': {
