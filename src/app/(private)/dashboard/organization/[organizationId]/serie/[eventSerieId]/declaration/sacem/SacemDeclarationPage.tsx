@@ -9,6 +9,7 @@ import { LoadingButton as Button } from '@mui/lab';
 import { Alert, Autocomplete, Box, Link, TextField, Tooltip, Typography } from '@mui/material';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
+import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -99,6 +100,8 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
         revenues: result.sacemDeclaration.revenues,
         expenses: result.sacemDeclaration.expenses,
       });
+
+      push(['trackEvent', 'declaration', 'fill', 'type', DeclarationTypeSchema.Values.SACEM]);
     },
     [fillSacemDeclaration, reset, eventSerieId]
   );
@@ -659,6 +662,9 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                           })}
                           download // Not forcing the download so using an explicit query parameter to force headers from the server
                           target="_blank" // Needed otherwise after the first click it won't work again (probably due to this page receiving headers already)
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'download', 'type', DeclarationTypeSchema.Values.SACEM]);
+                          }}
                           size="large"
                           variant="contained"
                           fullWidth
@@ -680,6 +686,9 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                             type: DeclarationTypeSchema.Values.SACEM,
                           })}
                           target="_blank"
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'preview', 'type', DeclarationTypeSchema.Values.SACEM]);
+                          }}
                           size="large"
                           variant="contained"
                           fullWidth
@@ -717,6 +726,9 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                         component={NextLink}
                         href={`${getBaseUrl()}/assets/templates/declaration/sacem.pdf`}
                         target="_blank"
+                        onClick={() => {
+                          push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.SACEM]);
+                        }}
                         underline="none"
                         sx={{
                           '&::after': {
