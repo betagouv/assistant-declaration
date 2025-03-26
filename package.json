@@ -74,6 +74,7 @@
     "db:studio:unsecure": "prisma studio",
     "client:generate": "npm run client:mapado:generate",
     "client:mapado:generate": "echo \"cannot be done programmatically because the documentation is generating the .json file on demand, that's why the seen url has the blob: protocol, the url changes at any refresh so you have to download it manually and point to your local path directly\" || openapi-ts -i blob:https://ticketing.mapado.net/169a0938-cf05-4982-a96e-89538fa00213 -o src/client/mapado -c @hey-api/client-fetch",
+    "client:weezevent:generate": "openapi-ts -i https://docapi.weezevent.com/weezticket.json -o src/client/weezevent -c @hey-api/client-fetch",
     "scalingo-postbuild": "npm run build:app && ./prepare-standalone.sh",
     "clean": "rm -rf .next && rm -rf node_modules",
     "chromatic": "only-include-used-icons && chromatic --build-script-name build:storybook:command --auto-accept-changes --exit-zero-on-changes --only-changed --externals \"public/**\"",

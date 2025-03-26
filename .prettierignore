@@ -9,6 +9,7 @@
 /storybook-static/
 /public/mockServiceWorker.js
 /src/client/mapado/
+/src/client/weezevent/
 /src/prisma/migrations/migration_lock.toml
 /src/server/trpc-next-layout/**/*.ts
 /src/server/trpc-next-layout/**/*.tsx
