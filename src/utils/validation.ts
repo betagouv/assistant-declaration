@@ -50,6 +50,10 @@ export function transformStringOrNull(value: string): string | null {
   return value !== '' ? value : null;
 }
 
+export function transformTimestampOrNull(value: number): number | null {
+  return value === 0 ? null : value;
+}
+
 export function coerceBoolean(value: any): boolean {
   if (typeof value === 'string') {
     if (value.toLowerCase() === 'true' || value === '1') {

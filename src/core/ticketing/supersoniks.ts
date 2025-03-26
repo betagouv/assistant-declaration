@@ -1,8 +1,9 @@
 import { Client, createClient, createConfig } from '@hey-api/client-fetch';
 import { eachOfLimit } from 'async';
-import { isAfter, isBefore } from 'date-fns';
+import { addYears, getUnixTime, isAfter, isBefore } from 'date-fns';
 
 import { getEventDateCollection, getTicketCollection, getTicketingCollection } from '@ad/src/client/mapado';
+import { getClosingStatements } from '@ad/src/client/supersoniks';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
 import {
   LiteEventSalesSchema,
@@ -48,7 +49,34 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
   }
 
   public async getEventsSeries(fromDate: Date, toDate?: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
+    // By default the API does not return ongoing statements (which is helpful for us in the UI), so increase the window to fetch them
+    const appropriateToDate = toDate ?? addYears(new Date(), 1);
+
+    const statementsResult = await getClosingStatements({
+      query: {
+        bypass_closed: true, // Not all organizations are closing their statements
+        from: getUnixTime(fromDate),
+        to: getUnixTime(appropriateToDate),
+      },
+    });
+
+    if (statementsResult.error) {
+      throw statementsResult.error;
+    }
+
+    const statementsData = JsonGetRecentTicketsResponseSchema.parse(statementsResult.data);
+
+    this.assertCollectionResponseValid(statementsData);
+
+    console.log(JSON.stringify(statementsData));
+
     // TODO:
+    // TODO:
+    // TODO:
+    // TODO: WARNING, there is no way to refetch only statements that have changed it seems...
+    // TODO:
+    // TODO:
+
     return [];
   }
 }
