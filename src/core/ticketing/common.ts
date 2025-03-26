@@ -7,6 +7,7 @@ import { sleep } from '@ad/src/utils/sleep';
 export const ticketingSystemRequiresApiAccessKey: Record<TicketingSystemNameSchemaType, boolean> = {
   BILLETWEB: true,
   MAPADO: false,
+  SUPERSONIKS: true,
 };
 
 export interface TicketingSystemClient {

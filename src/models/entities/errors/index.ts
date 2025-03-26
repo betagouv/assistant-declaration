@@ -157,6 +157,10 @@ export const anotherTicketingSystemSynchronizationOngoingError = new BusinessErr
 );
 export const missingBilletwebEventsRightsError = new BusinessError('missingBilletwebEventsRights', t('errors.custom.missingBilletwebEventsRights'));
 export const foreignTaxRateOnPriceError = new BusinessError('foreignTaxRateOnPrice', t('errors.custom.foreignTaxRateOnPrice'));
+export const supersoniksAccessKeyInvalidDomainNameError = new BusinessError(
+  'supersoniksAccessKeyInvalidDomainName',
+  t('errors.custom.supersoniksAccessKeyInvalidDomainName')
+);
 
 // Event serie
 export const eventSerieNotFoundError = new BusinessError('eventSerieNotFound', t('errors.custom.eventSerieNotFound'));

@@ -2,9 +2,13 @@ import z from 'zod';
 
 import { ticketingSystemRequiresApiAccessKey } from '@ad/src/core/ticketing/common';
 import { GetterInputSchema } from '@ad/src/models/actions/common';
+import { supersoniksAccessKeyInvalidDomainNameError } from '@ad/src/models/entities/errors';
+import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { TicketingSystemNameSchemaType, TicketingSystemSchema } from '@ad/src/models/entities/ticketing';
 import { applyTypedParsers } from '@ad/src/utils/zod';
+
+const domainNameRegexp = /^(?!:\/\/)([a-zA-Z0-9-_]{1,63}\.)+[a-zA-Z]{2,63}$/; // Should accept most case, the idea is to avoid people passing things like /:?= ...
 
 function preprocessDependingOnTicketingSystem(data: any, ctx: any) {
   // We tried at first to make a `OBJECT.or(OBJECT) with different systems in each and `apiAccessKey` being required or not
@@ -27,7 +31,16 @@ const rawConnectTicketingSystemSchema = z
   })
   .strict();
 
-export const ConnectTicketingSystemSchema = applyTypedParsers(z.preprocess(preprocessDependingOnTicketingSystem, rawConnectTicketingSystemSchema));
+export const ConnectTicketingSystemSchema = applyTypedParsers(
+  z.preprocess(
+    preprocessDependingOnTicketingSystem,
+    rawConnectTicketingSystemSchema.superRefine((data, ctx) => {
+      if (data.ticketingSystemName === 'SUPERSONIKS' && data.apiAccessKey && !domainNameRegexp.test(data.apiAccessKey)) {
+        ctx.addIssue(customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError));
+      }
+    })
+  )
+);
 export type ConnectTicketingSystemSchemaType = z.infer<typeof ConnectTicketingSystemSchema>;
 
 export const ConnectTicketingSystemPrefillSchema = rawConnectTicketingSystemSchema.deepPartial();
@@ -52,7 +65,16 @@ const rawUpdateTicketingSystemSchema = applyTypedParsers(
   })
 );
 
-export const UpdateTicketingSystemSchema = applyTypedParsers(z.preprocess(preprocessDependingOnTicketingSystem, rawUpdateTicketingSystemSchema));
+export const UpdateTicketingSystemSchema = applyTypedParsers(
+  z.preprocess(
+    preprocessDependingOnTicketingSystem,
+    rawUpdateTicketingSystemSchema.superRefine((data, ctx) => {
+      if (data.ticketingSystemName === 'SUPERSONIKS' && data.apiAccessKey && !domainNameRegexp.test(data.apiAccessKey)) {
+        ctx.addIssue(customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError));
+      }
+    })
+  )
+);
 export type UpdateTicketingSystemSchemaType = z.infer<typeof UpdateTicketingSystemSchema>;
 
 export const UpdateTicketingSystemPrefillSchema = rawUpdateTicketingSystemSchema.deepPartial();
