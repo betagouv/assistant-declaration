@@ -1,39 +1,55 @@
-import { Client, createClient, createConfig } from '@hey-api/client-fetch';
-import { eachOfLimit } from 'async';
-import { addYears, getUnixTime, isAfter, isBefore } from 'date-fns';
-
-import { getEventDateCollection, getTicketCollection, getTicketingCollection } from '@ad/src/client/mapado';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
-import {
-  LiteEventSalesSchema,
-  LiteEventSalesSchemaType,
-  LiteEventSchema,
-  LiteEventSchemaType,
-  LiteEventSerieSchema,
-  LiteEventSerieWrapperSchemaType,
-  LiteTicketCategorySchema,
-  LiteTicketCategorySchemaType,
-} from '@ad/src/models/entities/event';
-import { JsonCollectionSchemaType } from '@ad/src/models/entities/mapado';
-import { workaroundAssert as assert } from '@ad/src/utils/assert';
+import { LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
+import { JsonAuthResponseSchema } from '@ad/src/models/entities/secutix';
 
 export class SecutixTicketingSystemClient implements TicketingSystemClient {
-  protected readonly client: Client;
+  public readonly baseUrl = 'https://cube.demo-ws.secutix.com/tnai/backend-apis';
+  private accessToken: string = '';
   protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;
 
-  constructor(secretKey: string) {
-    this.client = createClient(
-      createConfig({
-        baseUrl: 'https://ticketing.mapado.net/',
-        auth: secretKey,
-      })
-    );
+  constructor(
+    private readonly accessKey: string,
+    private readonly secretKey: string
+  ) {}
+
+  protected formatUrl(subpathname: string): string {
+    const url = new URL(`${this.baseUrl}${subpathname}`);
+
+    return url.toString();
   }
 
-  protected assertCollectionResponseValid(data: JsonCollectionSchemaType) {
-    if (!(typeof data['hydra:totalItems'] === 'number' && data['hydra:totalItems'] <= this.itemsPerPageToAvoidPagination)) {
-      throw new Error('our workaround to avoid handling pagination logic seems to not fit a specific case');
+  // protected assertCollectionResponseValid(data: JsonCollectionSchemaType) {
+  //   if (!(typeof data['hydra:totalItems'] === 'number' && data['hydra:totalItems'] <= this.itemsPerPageToAvoidPagination)) {
+  //     throw new Error('our workaround to avoid handling pagination logic seems to not fit a specific case');
+  //   }
+  // }
+
+  public async login(): Promise<void> {
+    // Since we have a few operations and the token lives for a short time, we don't manage exactly the token lifecycle
+    // and just regenerate a new one for each method process
+    const requestHeaders = new Headers();
+    requestHeaders.append('Content-Type', 'application/json');
+
+    const authResponse = await fetch(this.formatUrl(`/v1/auth`), {
+      method: 'POST',
+      headers: requestHeaders,
+      body: JSON.stringify({
+        operator: 'OJ0YSCVW_FLZZCDA03K1JX8J',
+        partner: this.accessKey,
+        secret: this.secretKey,
+      }),
+    });
+
+    if (!authResponse.ok) {
+      const error = await authResponse.json();
+
+      throw error;
     }
+
+    const authDataJson = await authResponse.json();
+    const authData = JsonAuthResponseSchema.parse(authDataJson);
+
+    this.accessToken = authData.token;
   }
 
   public async testConnection(): Promise<boolean> {

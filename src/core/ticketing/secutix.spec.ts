@@ -9,7 +9,7 @@ const describeWhenManual = process.env.TEST_MANUAL === 'true' ? describe : descr
 const itWhenManual = process.env.TEST_MANUAL === 'true' ? it : it.skip;
 
 describeWhenManual('SecutixTicketingSystemClient', () => {
-  const client = new SecutixTicketingSystemClient(process.env.TEST_SUPERSONIKS_SECRET_KEY || '');
+  const client = new SecutixTicketingSystemClient(process.env.TEST_SECUTIX_ACCESS_KEY || '', process.env.TEST_SECUTIX_SECRET_KEY || '');
 
   describe('getEventsSeries()', () => {
     it(
