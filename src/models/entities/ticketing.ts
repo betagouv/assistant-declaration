@@ -2,7 +2,7 @@ import z from 'zod';
 
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
-export const TicketingSystemNameSchema = z.enum(['BILLETWEB', 'MAPADO']);
+export const TicketingSystemNameSchema = z.enum(['BILLETWEB', 'MAPADO', 'SECUTIX']);
 export type TicketingSystemNameSchemaType = z.infer<typeof TicketingSystemNameSchema>;
 
 export const TicketingSystemSchema = applyTypedParsers(

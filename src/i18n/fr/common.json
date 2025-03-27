@@ -362,7 +362,8 @@
     "ticketingSystemName": {
       "enum": {
         "BILLETWEB": "Billetweb",
-        "MAPADO": "Mapado"
+        "MAPADO": "Mapado",
+        "SECUTIX": "Secutix"
       }
     }
   },
