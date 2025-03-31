@@ -17,10 +17,12 @@ import {
 import {
   JsonCollectionSchemaType,
   JsonGetEventDatesResponseSchema,
+  JsonGetRecentPurchasedEventDatesResponseSchema,
   JsonGetRecentTicketsResponseSchema,
   JsonGetRecentTicketsToTestConnectionResponseSchema,
   JsonGetTicketingsResponseSchema,
   JsonGetTicketsResponseSchema,
+  JsonRecentTicketSchemaType,
   JsonTicketingSchemaType,
 } from '@ad/src/models/entities/mapado';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -75,42 +77,79 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
   public async getEventsSeries(fromDate: Date, toDate?: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
     // Get tickets modifications to know which events to synchronize (for the first time, or again)
-    const recentlyUpdatedTicketsResult = await getTicketCollection({
-      client: this.client,
-      query: {
-        user: 'me',
-        updatedSince: fromDate.toISOString(),
-        itemsPerPage: this.itemsPerPageToAvoidPagination,
-        ...{ fields: 'eventDate{ticketing},updatedAt' },
-      },
-    });
+    // Note: before we were doing a join on event date and without pagination, for some organizations it was breaking
+    // at first synchronization and we had to handle the 2 differently. There was no way to skip this step at first synchronization
+    // because sometimes could also synchronize months after with the same amount of data to retrieve
+    const recentlyUpdatedTickets: JsonRecentTicketSchemaType[] = [];
 
-    if (recentlyUpdatedTicketsResult.error) {
-      throw recentlyUpdatedTicketsResult.error;
+    // There is a risk a ticket is "added" to the list while going across pagination (since not based on cursors), but this is not sensitive here
+    let currentPage = 1;
+
+    while (true) {
+      const recentlyUpdatedTicketsResult = await getTicketCollection({
+        client: this.client,
+        query: {
+          user: 'me',
+          updatedSince: fromDate.toISOString(),
+          itemsPerPage: 10_000, // After testing we saw this limit was not erroring the Mapado API
+          page: currentPage,
+          ...{ fields: 'eventDate,updatedAt' },
+        },
+      });
+
+      if (recentlyUpdatedTicketsResult.error) {
+        throw recentlyUpdatedTicketsResult.error;
+      }
+
+      const recentlyUpdatedTicketsData = JsonGetRecentTicketsResponseSchema.parse(recentlyUpdatedTicketsResult.data);
+
+      this.assertCollectionResponseValid(recentlyUpdatedTicketsData);
+
+      recentlyUpdatedTicketsData['hydra:member'].forEach((ticket) => {
+        recentlyUpdatedTickets.push(ticket);
+      });
+
+      if (!recentlyUpdatedTicketsData['hydra:nextPage']) {
+        break;
+      }
+
+      currentPage++;
     }
 
-    const recentlyUpdatedTicketsData = JsonGetRecentTicketsResponseSchema.parse(recentlyUpdatedTicketsResult.data);
-
-    this.assertCollectionResponseValid(recentlyUpdatedTicketsData);
-
     // Since there is no API `before` we simulate it to be consistent across tests (despite getting more data over time)
-    const tickets = toDate
-      ? recentlyUpdatedTicketsData['hydra:member'].filter((ticket) => isBefore(ticket.updatedAt, toDate))
-      : recentlyUpdatedTicketsData['hydra:member'];
+    const tickets = toDate ? recentlyUpdatedTickets.filter((ticket) => isBefore(ticket.updatedAt, toDate)) : recentlyUpdatedTickets;
 
-    // We did not get ticketings as associations in the previous call otherwise it would return a lot of copies
-    const ticketingIdsToSynchronize: string[] = [
-      ...new Set(
-        tickets.map((ticket) => {
-          return ticket.eventDate.ticketing;
-        })
-      ),
-    ];
-
-    const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
+    // Retrieve eligible event series from events dates
+    const uniqueEventDatesIds = [...new Set(tickets.map((ticket) => ticket.eventDate))];
 
     let ticketingsToSynchronize: JsonTicketingSchemaType[];
-    if (ticketingIdsToSynchronize.length > 0) {
+    if (uniqueEventDatesIds.length > 0) {
+      const recentlyPurchasedEventDatesResult = await getEventDateCollection({
+        client: this.client,
+        query: {
+          '@id': uniqueEventDatesIds.join(','),
+          itemsPerPage: this.itemsPerPageToAvoidPagination,
+          ...{ fields: 'ticketing' },
+        },
+      });
+
+      if (recentlyPurchasedEventDatesResult.error) {
+        throw recentlyPurchasedEventDatesResult.error;
+      }
+
+      const recentlyPurchasedEventDatesData = JsonGetRecentPurchasedEventDatesResponseSchema.parse(recentlyPurchasedEventDatesResult.data);
+
+      this.assertCollectionResponseValid(recentlyPurchasedEventDatesData);
+
+      // We did not get ticketings as associations in the previous call otherwise it would return a lot of copies
+      const ticketingIdsToSynchronize: string[] = [
+        ...new Set(
+          recentlyPurchasedEventDatesData['hydra:member'].map((eventDate) => {
+            return eventDate.ticketing;
+          })
+        ),
+      ];
+
       const ticketingsResult = await getTicketingCollection({
         client: this.client,
         query: {
@@ -132,6 +171,8 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     } else {
       ticketingsToSynchronize = [];
     }
+
+    const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
 
     // Get all data to be returned and compared with stored data we have
     // Note: for now we do not parallelize to not flood the ticketing system

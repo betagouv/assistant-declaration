@@ -23,9 +23,7 @@ export type JsonRecentTicketToTestConnectionSchemaType = z.infer<typeof JsonRece
 export const JsonRecentTicketSchema = applyTypedParsers(
   z
     .object({
-      eventDate: z.object({
-        ticketing: z.string().min(1),
-      }),
+      eventDate: z.string().min(1),
       updatedAt: z.coerce.date(),
     })
     .strip()
@@ -44,6 +42,15 @@ export const JsonTicketSchema = applyTypedParsers(
     .strip()
 );
 export type JsonTicketSchemaType = z.infer<typeof JsonTicketSchema>;
+
+export const JsonRecentPurchasedEventDateSchema = applyTypedParsers(
+  z
+    .object({
+      ticketing: z.string().min(1),
+    })
+    .strip()
+);
+export type JsonRecentPurchasedEventDateSchemaType = z.infer<typeof JsonRecentPurchasedEventDateSchema>;
 
 export const JsonTicketingSchema = applyTypedParsers(
   z
@@ -100,6 +107,7 @@ export type JsonEventDateSchemaType = z.infer<typeof JsonEventDateSchema>;
 export const JsonCollectionSchema = applyTypedParsers(
   z.object({
     'hydra:totalItems': z.number().int().nonnegative(),
+    'hydra:nextPage': z.string().min(1).optional(),
   })
 );
 export type JsonCollectionSchemaType = z.infer<typeof JsonCollectionSchema>;
@@ -113,6 +121,11 @@ export const JsonGetRecentTicketsResponseSchema = JsonCollectionSchema.extend({
   'hydra:member': z.array(JsonRecentTicketSchema),
 });
 export type JsonGetRecentTicketsResponseSchemaType = z.infer<typeof JsonGetRecentTicketsResponseSchema>;
+
+export const JsonGetRecentPurchasedEventDatesResponseSchema = JsonCollectionSchema.extend({
+  'hydra:member': z.array(JsonRecentPurchasedEventDateSchema),
+});
+export type JsonGetRecentPurchasedEventDatesResponseSchemaType = z.infer<typeof JsonGetRecentPurchasedEventDatesResponseSchema>;
 
 export const JsonGetTicketsResponseSchema = JsonCollectionSchema.extend({
   'hydra:member': z.array(JsonTicketSchema),

@@ -245,7 +245,8 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                     <Alert severity="warning">
                       Veuillez synchroniser les données de votre billetterie pour débuter vos déclarations.{' '}
                       <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 600 }}>
-                        À noter que pour la première synchronisation cette opération peut durer jusqu&apos;à 1 minute.
+                        À noter que pour la première synchronisation cette opération peut durer quelques minutes en fonction de la quantité de
+                        spectacles à retrouver.
                       </Typography>
                     </Alert>
                   </Grid>
