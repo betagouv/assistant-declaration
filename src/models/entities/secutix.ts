@@ -47,6 +47,7 @@ export const JsonGetCatalogDetailedResponseSchema = applyTypedParsers(
           products: z.array(
             z.object({
               id: z.number().int().nonnegative(),
+              code: z.string().min(1),
               state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']),
               vatCodeId: z.number().int().nonnegative(),
               externalName: JsonTranslatedStringSchema,
@@ -54,21 +55,23 @@ export const JsonGetCatalogDetailedResponseSchema = applyTypedParsers(
                 performances: z.array(
                   z.object({
                     id: z.number().int().nonnegative(),
+                    state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']),
                     start: z.coerce.date(),
                     duration: z.number().int().nonnegative().optional(),
                     seatCategories: z.array(
                       z.object({
                         id: z.number().int().nonnegative(),
+                        code: z.string().min(1),
                         externalName: JsonTranslatedStringSchema,
                       })
                     ),
-                  })
-                ),
-                prices: z.array(
-                  z.object({
-                    seatCatId: z.number().int().nonnegative(),
-                    audSubCatId: z.number().int().nonnegative(),
-                    amount: z.number().nonnegative(),
+                    prices: z.array(
+                      z.object({
+                        seatCatId: z.number().int().nonnegative(),
+                        audSubCatId: z.number().int().nonnegative(),
+                        amount: z.number().int().nonnegative(), // 4000 for 4€
+                      })
+                    ),
                   })
                 ),
               }),
@@ -80,3 +83,42 @@ export const JsonGetCatalogDetailedResponseSchema = applyTypedParsers(
   }).strip()
 );
 export type JsonGetCatalogDetailedResponseSchemaType = z.infer<typeof JsonGetCatalogDetailedResponseSchema>;
+
+export const JsonGetPosConfigResponseSchema = applyTypedParsers(
+  JsonSuccessResponseSchema.extend({
+    posConfigData: z.object({
+      posId: z.number().int().nonnegative(),
+      currencyCode: z.literal('EUR'),
+      organizationTimeZone: z.literal('Europe/Paris').or(z.string().min(1)),
+    }),
+  }).strip()
+);
+export type JsonGetPosConfigResponseSchemaType = z.infer<typeof JsonGetPosConfigResponseSchema>;
+
+export const JsonGetUpdatedAvailabilitiesResponseSchema = applyTypedParsers(
+  JsonSuccessResponseSchema.extend({
+    availabilityUpdateData: z.array(
+      z.object({
+        productId: z.number().int().nonnegative(),
+        lastUpdate: z.coerce.date(),
+      })
+    ),
+  }).strip()
+);
+export type JsonGetUpdatedAvailabilitiesResponseSchemaType = z.infer<typeof JsonGetUpdatedAvailabilitiesResponseSchema>;
+
+export const JsonListTicketsByCriteriaResponseSchema = applyTypedParsers(
+  JsonSuccessResponseSchema.extend({
+    truncated: z.literal(false), // Didn't get the case where it's true but make sure we don't miss anything
+    ticketSummaries: z.array(
+      z.object({
+        ticketState: z.enum(['CANCELLED', 'VALID', 'NOT_PRINTED', 'INVALIDATED']),
+        performanceId: z.number().int().nonnegative(),
+        seatCategoryId: z.number().int().nonnegative(),
+        audienceSubCategoryId: z.number().int().nonnegative(),
+        audienceSubCategory: z.string().min(1),
+      })
+    ),
+  }).strip()
+);
+export type JsonListTicketsByCriteriaResponseSchemaType = z.infer<typeof JsonListTicketsByCriteriaResponseSchema>;
