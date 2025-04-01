@@ -48,33 +48,46 @@ export const JsonGetCatalogDetailedResponseSchema = applyTypedParsers(
             z.object({
               id: z.number().int().nonnegative(),
               code: z.string().min(1),
+              productFamilyType: z.enum([
+                'SINGLE_ENTRY',
+                'SEASONTICKET',
+                'PASS',
+                'PACKAGE',
+                'MEMBERSHIP',
+                'SERVICE',
+                'GOODS',
+                'TRANSPORT',
+                'HOSPITALITY',
+              ]),
               state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']),
-              vatCodeId: z.number().int().nonnegative(),
+              vatCodeId: z.number().int().nonnegative().optional(),
               externalName: JsonTranslatedStringSchema,
-              event: z.object({
-                performances: z.array(
-                  z.object({
-                    id: z.number().int().nonnegative(),
-                    state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']),
-                    start: z.coerce.date(),
-                    duration: z.number().int().nonnegative().optional(),
-                    seatCategories: z.array(
-                      z.object({
-                        id: z.number().int().nonnegative(),
-                        code: z.string().min(1),
-                        externalName: JsonTranslatedStringSchema,
-                      })
-                    ),
-                    prices: z.array(
-                      z.object({
-                        seatCatId: z.number().int().nonnegative(),
-                        audSubCatId: z.number().int().nonnegative(),
-                        amount: z.number().int().nonnegative(), // 4000 for 4€
-                      })
-                    ),
-                  })
-                ),
-              }),
+              event: z
+                .object({
+                  performances: z.array(
+                    z.object({
+                      id: z.number().int().nonnegative(),
+                      state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']),
+                      start: z.coerce.date(),
+                      duration: z.number().int().nonnegative().optional(),
+                      seatCategories: z.array(
+                        z.object({
+                          id: z.number().int().nonnegative(),
+                          code: z.string().min(1),
+                          externalName: JsonTranslatedStringSchema,
+                        })
+                      ),
+                      prices: z.array(
+                        z.object({
+                          seatCatId: z.number().int().nonnegative(),
+                          audSubCatId: z.number().int().nonnegative(),
+                          amount: z.number().int().nonnegative(), // 4000 for 4€
+                        })
+                      ),
+                    })
+                  ),
+                })
+                .optional(),
             })
           ),
         })

@@ -139,13 +139,24 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
     }
 
     const catalogDataJson = await catalogResponse.json();
+
+    if (catalogDataJson.statusCode !== 'success') {
+      console.warn(JSON.stringify(catalogDataJson));
+    }
+
     const catalogData = JsonGetCatalogDetailedResponseSchema.parse(catalogDataJson);
 
-    const existingProductsIds = new Set<number>();
     const existingProducts = new Map<number, (typeof catalogData)['catalogData']['seasons'][0]['products'][0]>();
 
     for (const season of catalogData.catalogData.seasons) {
       for (const product of season.products) {
+        // We only want to retrieve live performance entities (no gift, season ticket, pass...)
+        // Note: in case `productFamilyType === PACKAGE` it may put some product being `SINGLE_ENTRY` into the property `packageLine`
+        // but we consider each live performance is also defined without a package (they should are packed if existing aside this)
+        if (product.productFamilyType !== 'SINGLE_ENTRY') {
+          continue;
+        }
+
         // No need of looking for event serie that have been cancelled
         if (product.state === 'CANCELED' || product.state === 'CANCELED_CLOSED') {
           continue;
@@ -164,7 +175,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
         headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
         body: JSON.stringify({
           pointOfSalesId: pointOfSaleId,
-          productIds: [...existingProductsIds],
+          productIds: Array.from(existingProducts.values()).map((product) => product.id),
           referenceDate: fromDate.toISOString(),
         }),
       });
@@ -193,6 +204,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
         const product = existingProducts.get(productId);
 
         assert(product);
+        assert(product.event && product.vatCodeId !== undefined); // Since we filtered `productFamilyType === SINGLE_ENTRY` those properties are provided
 
         const schemaEvents: LiteEventSchemaType[] = [];
         const schemaTicketCategories: Map<LiteTicketCategorySchemaType['internalTicketingSystemId'], LiteTicketCategorySchemaType> = new Map();
@@ -293,7 +305,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
               continue;
             }
 
-            // Increment the category
+            // Increment category sales
             const uniqueEventSalesId = `${performance.id.toString()}_${ticketCategory.internalTicketingSystemId}`;
 
             let eventSales = schemaEventSales.get(uniqueEventSalesId);
@@ -313,12 +325,12 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
           }
         }
 
-        const externalNameTranslation = product.externalName.translations.find((translation) => {
+        const productExternalNameTranslation = product.externalName.translations.find((translation) => {
           // For now only consider the french entry or default to the internal code
           return translation.locale === 'fr';
         });
 
-        const eventSerieName: string = externalNameTranslation ? externalNameTranslation.value : product.code;
+        const eventSerieName: string = productExternalNameTranslation ? productExternalNameTranslation.value : product.code;
 
         // Calculate the date range for the event serie
         let serieStartDate: Date | null = null;
@@ -357,7 +369,8 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
 
       // TODO: tax rate
 
-      // should not be "truncated"
+      // maybe https://platform.secutix.com/swagger/ with dataExportService could help?
+      // but trying to list available ones returns "forbidden"
 
       // product.ticketModelId ... ? could give good idea of categories?
 
@@ -365,7 +378,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
       // TODO:
       // TODO: if getting "sub audience category" (adult/youth...) only with tickets there is a risk
       // TODO: of missing pricing category name if no sale for a specific one... (but maybe there is no endpoint for this :/)
-      // TODO:
+      // TODO: https://platform.secutix.com/backend/sales/glossary --> "tariff"
       // TODO:
       // TODO:
       // TODO: faut-il qu'un "event" ait un endDate nullable ? Pour coller à plusieurs ticketingSystem ?

@@ -15,14 +15,14 @@ describeWhenManual('SecutixTicketingSystemClient', () => {
     it(
       'should return events in specific timeframe',
       async () => {
-        const fromDate = set(new Date(0), { year: 2024, month: 11, date: 18 });
-        const toDate = set(new Date(0), { year: 2024, month: 12, date: 1 });
+        const fromDate = set(new Date(0), { year: 2024, month: 1, date: 1 });
+        const toDate = set(new Date(0), { year: 2025, month: 1, date: 1 });
 
         const wrappers = await client.getEventsSeries(fromDate, toDate);
 
         expect(wrappers.length).toBeGreaterThanOrEqual(10);
       },
-      secondsToMilliseconds(30)
+      secondsToMilliseconds(60)
     );
   });
 });
