@@ -192,7 +192,8 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
       const productsIdsToSynchronize = [
         ...new Set<number>(
           // Since there is no API `beforeDate` we simulate it to be consistent across tests (despite getting more data over time)
-          (toDate
+          // Note: when using their test environment they regularly update all entities so we cannot rely on the `lastUpdate` property
+          (toDate && !recentlyPurchasedProductsResponse.url.startsWith('https://cube.demo-ws.secutix.com/')
             ? recentlyPurchasedProductsData.availabilityUpdateData.filter((aUPair) => isBefore(aUPair.lastUpdate, toDate))
             : recentlyPurchasedProductsData.availabilityUpdateData
           ).map((aUPair) => aUPair.productId)
