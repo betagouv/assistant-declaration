@@ -1,6 +1,6 @@
 import { Client, createClient, createConfig } from '@hey-api/client-fetch';
 import slugify from '@sindresorhus/slugify';
-import { addMinutes, addYears, fromUnixTime, getUnixTime, isAfter, isBefore, subMonths } from 'date-fns';
+import { addDays, addMinutes, addYears, fromUnixTime, getUnixTime, isAfter, isBefore, set, subMonths } from 'date-fns';
 
 import { getClosingStatements } from '@ad/src/client/supersoniks';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
@@ -97,7 +97,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
     // series even with margins, so just relying first requests filter on the statements
 
     const series: Map<
-      number,
+      string,
       {
         name: string;
         statements: JsonStatementSchemaType[];
@@ -106,11 +106,24 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
     // Since everything is indexed by statement (= event statement) we reindex by event series for ease of logic
     for (const statement of statementsData.data) {
-      const serie = series.get(statement.session.multisession.multisession_id);
+      // `multisession` means it exists a serie of sessions (to find among all statements)
+      // If there is none, we consider the session itself as a serie
+      let serieId: string;
+      let serieName: string;
+
+      if (statement.session.multisession) {
+        serieId = statement.session.multisession.multisession_id.toString();
+        serieName = statement.session.multisession.title;
+      } else {
+        serieId = `session_${statement.session.id}`;
+        serieName = statement.session.edito.title;
+      }
+
+      const serie = series.get(serieId);
 
       if (!serie) {
-        series.set(statement.session.multisession.multisession_id, {
-          name: statement.session.multisession.title,
+        series.set(serieId, {
+          name: serieName,
           statements: [statement],
         });
       } else {
@@ -134,8 +147,16 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
         }
 
         const startDate = fromUnixTime(statement.session.start_date);
-        const endDate =
-          statement.session.end_date !== null ? fromUnixTime(statement.session.end_date) : addMinutes(startDate, statement.session.settings.duration);
+
+        let endDate: Date;
+        if (statement.session.end_date !== null) {
+          endDate = fromUnixTime(statement.session.end_date);
+        } else if (statement.session.settings.duration !== null) {
+          endDate = addMinutes(startDate, statement.session.settings.duration);
+        } else {
+          // Doing as ticketing system Mapado that is setting by default the end date to the end of the night
+          endDate = set(addDays(startDate, 1), { hours: 5, minutes: 0, seconds: 0, milliseconds: 0 });
+        }
 
         schemaEvents.push(
           LiteEventSchema.parse({
