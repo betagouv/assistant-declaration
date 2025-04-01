@@ -27,6 +27,31 @@ export const JsonStatementSchema = applyTypedParsers(
         //     name: z.string().min(1),
         //   })
         // ),
+        multisession: z.object({
+          id: z.number().int().nonnegative(),
+          multisession_id: z.number().int().nonnegative(),
+          title: z.string().min(1),
+          // body: z.string().transform(transformStringOrNull),
+          // edito: z.object({
+          //   over_title: z.string().transform(transformStringOrNull),
+          //   title: z.string().min(1),
+          //   alt_title: z.string().transform(transformStringOrNull),
+          //   sub_title: z.string().transform(transformStringOrNull),
+          //   body: z.string().transform(transformStringOrNull),
+          // }),
+          // picture: z.object({
+          //   fid: z.number().int().nonnegative(),
+          //   url: z.string().url(),
+          //   src: z.string().url(),
+          //   ratio_1x1_120: z.string().url(),
+          //   ratio_1x1_360: z.string().url(),
+          //   ratio_1x1_640: z.string().url(),
+          //   ratio_1x1_1000: z.string().url(),
+          //   ratio_1x1_1920: z.string().url(),
+          // }),
+          // site_link: z.string().transform(transformStringOrNull),
+          // display: z.literal('default'),
+        }),
         // range: z.object({
         //   id: z.number().int().nonnegative(),
         //   title: z.string().min(1),
