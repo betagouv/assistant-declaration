@@ -148,13 +148,13 @@ export const JsonStatementSchema = applyTypedParsers(
         // }),
         // public_link: z.string().url(),
         id: z.number().int().nonnegative(),
-        edito: z.object({
-          // over_title: z.string().transform(transformStringOrNull),
-          title: z.string().min(1),
-          // alt_title: z.string().transform(transformStringOrNull),
-          // sub_title: z.string().transform(transformStringOrNull),
-          // body: z.string().transform(transformStringOrNull),
-        }),
+        // edito: z.object({
+        //   over_title: z.string().transform(transformStringOrNull),
+        //   title: z.string().min(1),
+        //   alt_title: z.string().transform(transformStringOrNull),
+        //   sub_title: z.string().transform(transformStringOrNull),
+        //   body: z.string().transform(transformStringOrNull),
+        // }),
         // slug: z.string().min(1),
         // season: z.object({
         //   id: z.number().int().nonnegative(),
