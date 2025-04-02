@@ -42,6 +42,8 @@ export interface OrganizationPageProps {
 export function OrganizationPage({ params: { organizationId } }: OrganizationPageProps) {
   const { t } = useTranslation('common');
 
+  const trpcUtils = trpc.useUtils();
+
   const getOrganization = trpc.getOrganization.useQuery({
     id: organizationId,
   });
@@ -102,7 +104,8 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
             const rawChunk = chunkLine.substring(CHUNK_DATA_PREFIX.length).trim();
 
             if (rawChunk === 'done') {
-              // It has worked
+              // It has worked, we need to refresh data (usually a mutation success would do it)
+              trpcUtils.invalidate();
             }
           } else if (chunkLine.startsWith(CHUNK_PING_PREFIX)) {
             // Meaningless, just to prevent the provider not timing out due to long-running request
