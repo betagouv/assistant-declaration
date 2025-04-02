@@ -16,7 +16,7 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
   const token = await nextAuthGetToken({ req: nextjsReq, secret: nextAuthOptions.secret });
 
   if (!token) {
-    throw unauthorizedError;
+    throw unauthorizedError.cloneWithHttpCode(401);
   }
 
   const input = SynchronizeDataFromTicketingSystemsSchema.parse(req.body);
