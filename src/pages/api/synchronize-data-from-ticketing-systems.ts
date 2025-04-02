@@ -4,7 +4,7 @@ import { getToken as nextAuthGetToken } from 'next-auth/jwt';
 
 import { synchronizeDataFromTicketingSystems } from '@ad/src/core/ticketing/synchronize';
 import { SynchronizeDataFromTicketingSystemsSchema } from '@ad/src/models/actions/event';
-import { internalServerErrorError, unauthorizedError } from '@ad/src/models/entities/errors';
+import { BusinessError, internalServerErrorError, unauthorizedError } from '@ad/src/models/entities/errors';
 import { nextAuthOptions } from '@ad/src/pages/api/auth/[...nextauth]';
 import { CHUNK_DATA_PREFIX, CHUNK_ERROR_PREFIX, CHUNK_PING_PREFIX, apiHandlerWrapper } from '@ad/src/utils/api';
 
@@ -38,7 +38,9 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
     console.log(`an error has occured during synchronization`);
     console.log(error);
 
-    res.write(`${CHUNK_ERROR_PREFIX}${JSON.stringify(internalServerErrorError.json())}\n`); // Add a new line to have the same format
+    const safeError = error instanceof BusinessError ? error : internalServerErrorError;
+
+    res.write(`${CHUNK_ERROR_PREFIX}${JSON.stringify(safeError.json())}\n`); // Add a new line to have the same format
 
     // We still throw the error so the wrapper can perform its additional custom logic
     throw error;
