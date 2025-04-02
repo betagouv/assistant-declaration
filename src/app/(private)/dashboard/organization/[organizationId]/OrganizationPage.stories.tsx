@@ -1,4 +1,5 @@
 import { Meta, StoryFn } from '@storybook/react';
+import { HttpResponse, http } from 'msw';
 import { mockDateDecorator } from 'storybook-mock-date-decorator';
 
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
@@ -8,7 +9,9 @@ import { OrganizationPage } from '@ad/src/app/(private)/dashboard/organization/[
 import { eventsSeriesWrappers } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
 import { ticketingSystems } from '@ad/src/fixtures/ticketing';
+import { SynchronizeDataFromTicketingSystemsSchemaType } from '@ad/src/models/actions/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
+import { mockBaseUrl } from '@ad/src/server/mock/environment';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
 type ComponentType = typeof OrganizationPage;
@@ -30,10 +33,8 @@ const mswCommonParameters = [
       organization: OrganizationSchema.parse(organizations[0]),
     },
   }),
-  getTRPCMock({
-    type: 'mutation',
-    path: ['synchronizeDataFromTicketingSystems'],
-    response: undefined,
+  http.post<SynchronizeDataFromTicketingSystemsSchemaType>(`${mockBaseUrl}/api/synchronize-data-from-ticketing-systems`, (info) => {
+    return HttpResponse.text('data:done');
   }),
 ];
 
