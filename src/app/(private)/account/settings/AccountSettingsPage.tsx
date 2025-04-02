@@ -33,7 +33,7 @@ export function AccountSettingsPage() {
     );
   }
 
-  const profile = data.user;
+  const profile = data!.user;
 
   return (
     <Grid container {...centeredContainerGridProps} spacing={5} alignContent="flex-start">
