@@ -4,7 +4,7 @@ import { getToken as nextAuthGetToken } from 'next-auth/jwt';
 
 import { synchronizeDataFromTicketingSystems } from '@ad/src/core/ticketing/synchronize';
 import { SynchronizeDataFromTicketingSystemsSchema } from '@ad/src/models/actions/event';
-import { internalServerErrorError } from '@ad/src/models/entities/errors';
+import { internalServerErrorError, unauthorizedError } from '@ad/src/models/entities/errors';
 import { nextAuthOptions } from '@ad/src/pages/api/auth/[...nextauth]';
 import { CHUNK_DATA_PREFIX, CHUNK_ERROR_PREFIX, CHUNK_PING_PREFIX, apiHandlerWrapper } from '@ad/src/utils/api';
 
@@ -16,7 +16,7 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
   const token = await nextAuthGetToken({ req: nextjsReq, secret: nextAuthOptions.secret });
 
   if (!token) {
-    throw { status_code: 401, body: `you don't have the rights to synchronize data` };
+    throw unauthorizedError;
   }
 
   const input = SynchronizeDataFromTicketingSystemsSchema.parse(req.body);
