@@ -31,9 +31,10 @@ export function getTicketingSystemClient(
         ticketingSystemClient = new MapadoTicketingSystemClient(ticketingSystem.apiSecretKey);
         break;
       case 'SUPERSONIKS':
+        assert(ticketingSystem.apiAccessKey);
         assert(ticketingSystem.apiSecretKey);
 
-        ticketingSystemClient = new SupersoniksTicketingSystemClient(ticketingSystem.apiSecretKey);
+        ticketingSystemClient = new SupersoniksTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
         break;
       default:
         throw new Error('unknown ticketing system');

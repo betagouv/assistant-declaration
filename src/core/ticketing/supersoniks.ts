@@ -26,7 +26,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
     // since Supersoniks is not having a shared API for all its customers
 
     // Test it's valid (it should since we made a specific validation at form submission)
-    const baseUrl = new URL(`https://${accessKey}/`);
+    const baseUrl = new URL(`https://${accessKey}/api/v2/`);
 
     this.client = createClient(
       createConfig({
