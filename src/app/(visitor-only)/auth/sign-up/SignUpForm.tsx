@@ -78,6 +78,7 @@ export function SignUpForm({ prefill, onSuccess }: { prefill?: SignUpPrefillSche
           type={showPassword ? 'text' : 'password'}
           label="Mot de passe"
           {...register('password')}
+          autoComplete="new-password"
           error={!!errors.password}
           helperText={errors?.password?.message}
           fullWidth

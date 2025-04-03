@@ -139,6 +139,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
                 type="text"
                 label="Identifiant utilisateur"
                 {...register('apiAccessKey')}
+                autoComplete="off"
                 error={!!errors.apiAccessKey}
                 helperText={errors?.apiAccessKey?.message}
                 fullWidth
@@ -150,6 +151,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
               type={showApiSecretKey ? 'text' : 'password'}
               label="Clé d'accès"
               {...register('apiSecretKey')}
+              autoComplete="off"
               error={!!errors.apiSecretKey}
               helperText={errors?.apiSecretKey?.message}
               fullWidth

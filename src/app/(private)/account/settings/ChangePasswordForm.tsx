@@ -61,6 +61,7 @@ export function ChangePasswordForm(props: ChangePasswordFormProps) {
           type={showCurrentPassword ? 'text' : 'password'}
           label="Mot de passe actuel"
           {...register('currentPassword')}
+          autoComplete="current-password"
           error={!!errors.currentPassword}
           helperText={errors?.currentPassword?.message}
           fullWidth
@@ -84,6 +85,7 @@ export function ChangePasswordForm(props: ChangePasswordFormProps) {
           type={showNewPassword ? 'text' : 'password'}
           label="Nouveau mot de passe"
           {...register('newPassword')}
+          autoComplete="new-password"
           error={!!errors.newPassword}
           helperText={errors?.newPassword?.message}
           fullWidth

@@ -210,6 +210,7 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
           type={showPassword ? 'text' : 'password'}
           label="Mot de passe"
           {...register('password')}
+          autoComplete="current-password"
           error={!!errors.password}
           helperText={errors?.password?.message}
           fullWidth
