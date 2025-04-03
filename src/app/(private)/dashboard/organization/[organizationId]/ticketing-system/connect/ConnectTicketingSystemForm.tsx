@@ -148,7 +148,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
           )}
           <Grid item xs={12}>
             <TextField
-              type={showApiSecretKey ? 'text' : 'password'}
+              type="text"
               label="Clé d'accès"
               {...register('apiSecretKey')}
               autoComplete="off"
@@ -167,6 +167,13 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
                     </IconButton>
                   </InputAdornment>
                 ),
+              }}
+              sx={{
+                '& input': {
+                  // When using `type="password"` Chrome was forcing autofilling password despite the `autocomplete="off"`, so using a text input with password style
+                  // Note: this webkit property is broadly adopted so it's fine, and in case it's not, we are fine it's not like a standard password (should be longer than input display...)
+                  '-webkit-text-security': showApiSecretKey ? 'none' : 'disc',
+                },
               }}
             />
           </Grid>
