@@ -4,6 +4,7 @@ import { isAfter, isBefore } from 'date-fns';
 
 import { getEventDateCollection, getTicketCollection, getTicketingCollection } from '@ad/src/client/mapado';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
+import { foreignTaxRateOnPriceError } from '@ad/src/models/entities/errors';
 import {
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
@@ -155,7 +156,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         query: {
           '@id': ticketingIdsToSynchronize.join(','),
           itemsPerPage: this.itemsPerPageToAvoidPagination,
-          ...{ fields: 'type,title,eventDateList,currency' },
+          ...{ fields: 'type,title,eventDateList,currency,venue{countryCode}' },
         },
       });
 
@@ -167,7 +168,25 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
       this.assertCollectionResponseValid(ticketingsData);
 
-      ticketingsToSynchronize = ticketingsData['hydra:member'];
+      ticketingsToSynchronize = ticketingsData['hydra:member'].filter((ticketing) => {
+        // Mapado allows creating "ticketings" that are not directly linked to a live performance
+        // Like a subscription, a "free solidarity ticket", an offer... So we skip those since not appropriate for us
+        if (ticketing.type !== 'dated_events') {
+          return false;
+        }
+
+        // If a `dated_events` it should have a location
+        assert(ticketing.venue);
+
+        // A live performance taking place outside France has no reason to be declared
+        // (skipping them helps not messing with different tax rate grids)
+        // Note: sometimes it's not filled, but since Mapado is french we assume a null country code means France
+        if (ticketing.venue.countryCode !== null && ticketing.venue.countryCode !== 'FR') {
+          return false;
+        }
+
+        return true;
+      });
     } else {
       ticketingsToSynchronize = [];
     }
@@ -177,12 +196,6 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     // Get all data to be returned and compared with stored data we have
     // Note: for now we do not parallelize to not flood the ticketing system
     await eachOfLimit(ticketingsToSynchronize, 1, async (ticketing) => {
-      // Mapado allows creating "ticketings" that are not directly linked to a live performance
-      // Like a subscription, a "free solidarity ticket", an offer... So we skip those since not appropriate for us
-      if (ticketing.type !== 'dated_events') {
-        return;
-      }
-
       const schemaEvents: LiteEventSchemaType[] = [];
       const schemaTicketCategories: LiteTicketCategorySchemaType[] = [];
       const schemaEventSales: Map<
@@ -243,6 +256,14 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           });
 
           for (const ticketPrice of safeTickePriceList) {
+            // At the beginning of the synchronization we made sure keeping only live performances taking place in France
+            // but it appears multiple prices could use tax rates from different countries (outside France), which could be problematic
+            // in our interface and for the user to reason
+            // Note: if the tax country code is not filled, we consider it as being for France
+            if (ticketPrice.tax.countryCode !== null && ticketPrice.tax.countryCode !== 'FR') {
+              throw foreignTaxRateOnPriceError;
+            }
+
             assert(ticketPrice.name);
 
             const liteTicketCategory = LiteTicketCategorySchema.parse({

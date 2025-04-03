@@ -21,7 +21,7 @@ export function Introduction() {
           }}
         >
           <Typography component="h1" variant="h2" sx={{ my: 2, maxWidth: 500 }}>
-            Simplifiez la déclaration de vos spectacles
+            Simplifiez vos déclarations de spectacles
           </Typography>
           <Typography color="text.secondary" sx={{ mb: 3, maxWidth: 500 }}>
             L&apos;Assistant déclaration collecte les données de billetteries afin de vous aider à réaliser vos déclarations SACEM, SACD, ASTP, CNM.

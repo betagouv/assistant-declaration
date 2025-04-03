@@ -5,6 +5,13 @@ import { ZodError } from 'zod';
 
 import { BusinessError, internalServerErrorError } from '@ad/src/models/entities/errors';
 
+// This is required because the streaming protocol has no error management implemented
+// We did try using `trailers` (headers added at the end after multiple `res.write()`) but we never saw them in Chrome despite declaring the header name
+// in the `Trailer` header, and also it seems the Node.js fetch API does not manage them for now. So just using a manual workaround that seems to be used also be other big actors
+export const CHUNK_PING_PREFIX = 'ping:';
+export const CHUNK_DATA_PREFIX = 'data:';
+export const CHUNK_ERROR_PREFIX = 'error:';
+
 export type Method = 'GET' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'POST' | 'PUT' | 'PATCH' | 'PURGE' | 'LINK' | 'UNLINK';
 
 export interface ApiHandlerWrapperOptions {

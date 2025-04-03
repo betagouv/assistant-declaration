@@ -9,14 +9,23 @@ import { isAfter, isBefore, subHours, subMonths } from 'date-fns';
 import NextLink from 'next/link';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAsyncFn } from 'react-use';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventSerieCard } from '@ad/src/components/EventSerieCard';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
+import { SynchronizeDataFromTicketingSystemsSchemaType } from '@ad/src/models/actions/event';
+import { CustomError, internalServerErrorError } from '@ad/src/models/entities/errors';
+import { mockBaseUrl, shouldTargetMock } from '@ad/src/server/mock/environment';
+import { CHUNK_DATA_PREFIX, CHUNK_ERROR_PREFIX, CHUNK_PING_PREFIX } from '@ad/src/utils/api';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
+import { getBaseUrl } from '@ad/src/utils/url';
+
+const textDecoder = new TextDecoder();
 
 export enum ListFilter {
   ALL = 1,
@@ -32,6 +41,8 @@ export interface OrganizationPageProps {
 
 export function OrganizationPage({ params: { organizationId } }: OrganizationPageProps) {
   const { t } = useTranslation('common');
+
+  const trpcUtils = trpc.useUtils();
 
   const getOrganization = trpc.getOrganization.useQuery({
     id: organizationId,
@@ -53,7 +64,63 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
 
   const aggregatedQueries = new AggregatedQueries(getOrganization, listTicketingSystems, listEventsSeries);
 
-  const synchronizeDataFromTicketingSystems = trpc.synchronizeDataFromTicketingSystems.useMutation();
+  // This custom stream logic is due to Scalingo timing out long-running requests
+  const [synchronizeDataFromTicketingSystems, synchronizeDataFromTicketingSystemsTrigger] = useAsyncFn(
+    async (input: SynchronizeDataFromTicketingSystemsSchemaType) => {
+      const response = await fetch(`${shouldTargetMock ? mockBaseUrl : getBaseUrl()}/api/synchronize-data-from-ticketing-systems`, {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(input),
+      });
+
+      if (response.status !== 200) {
+        throw internalServerErrorError;
+      }
+
+      assert(response.body);
+
+      const reader = response.body.getReader();
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        // A chunk may include multiple lines from multiple `res.write()`, so having to take this into acocunt
+        let buffer = textDecoder.decode(value, { stream: true });
+        let firstNewLine: number;
+
+        while ((firstNewLine = buffer.indexOf('\n')) !== -1) {
+          // Maybe it was not the "\n" of the ending chunk line, maybe it was
+          const chunkLine = buffer.substring(0, firstNewLine);
+          buffer = buffer.substring(firstNewLine + 1);
+
+          // As explained into `src/utils/api.ts` we have to manage our own protocol to handle errors properly
+          if (chunkLine.startsWith(CHUNK_DATA_PREFIX)) {
+            const rawChunk = chunkLine.substring(CHUNK_DATA_PREFIX.length).trim();
+
+            if (rawChunk === 'done') {
+              // It has worked, we need to refresh data (usually a mutation success would do it)
+              trpcUtils.invalidate();
+            }
+          } else if (chunkLine.startsWith(CHUNK_PING_PREFIX)) {
+            // Meaningless, just to prevent the provider not timing out due to long-running request
+          } else if (chunkLine.startsWith(CHUNK_ERROR_PREFIX)) {
+            const rawError = chunkLine.substring(CHUNK_ERROR_PREFIX.length).trim();
+            const jsonError = JSON.parse(rawError);
+
+            throw !!jsonError.code && !!jsonError.message ? new CustomError(jsonError.code, jsonError.message) : internalServerErrorError;
+          } else {
+            throw new Error(`the chunk line "${chunkLine}" is not handled`);
+          }
+        }
+      }
+    }
+  );
 
   const [listFilter, setListFilter] = useState<ListFilter>(ListFilter.ENDED_ONLY);
 
@@ -182,13 +249,13 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                       <Grid item sx={{ ml: 'auto' }}>
                         <Button
                           onClick={async () => {
-                            await synchronizeDataFromTicketingSystems.mutateAsync({
+                            await synchronizeDataFromTicketingSystemsTrigger({
                               organizationId: organization.id,
                             });
 
                             push(['trackEvent', 'ticketing', 'synchronize']);
                           }}
-                          loading={synchronizeDataFromTicketingSystems.isLoading}
+                          loading={synchronizeDataFromTicketingSystems.loading}
                           size="large"
                           variant="contained"
                         >
@@ -257,13 +324,13 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                   )}
                   <Button
                     onClick={async () => {
-                      await synchronizeDataFromTicketingSystems.mutateAsync({
+                      await synchronizeDataFromTicketingSystemsTrigger({
                         organizationId: organization.id,
                       });
 
                       push(['trackEvent', 'ticketing', 'synchronize']);
                     }}
-                    loading={synchronizeDataFromTicketingSystems.isLoading}
+                    loading={synchronizeDataFromTicketingSystems.loading}
                     size="large"
                     variant="contained"
                     sx={{ mt: 2 }}
