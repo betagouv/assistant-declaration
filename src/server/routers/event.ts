@@ -340,6 +340,19 @@ export const eventRouter = router({
               // Then make the diff of tickets categories (we are sure they are bound to an event serie due to returned serie wrappers)
               const ticketCategoriesDiffResult = getDiff(storedLiteTicketCategories, remoteLiteTicketCategories);
 
+              // TODO:
+              // TODO:
+              // TODO: first sync is working (but no ticket category are mixed between event series)
+              // TODO: second is not
+              // TODO:
+              // TODO:
+              // TODO: we should fix boundaries of getDiff... maybe to prefix ticketCategory/ticketSale with remoteEventSerieId ?
+              // TODO: so it won't mess in all cases...?
+              // TODO:
+              // TODO: look at what we do with mapado... messing with names... was it normal?
+              // TODO:
+              // TODO:
+
               for (const addedTicketCategory of ticketCategoriesDiffResult.added) {
                 const newTicketCategory = await tx.ticketCategory.create({
                   data: {
