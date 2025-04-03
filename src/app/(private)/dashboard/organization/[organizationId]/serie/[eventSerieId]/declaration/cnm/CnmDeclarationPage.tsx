@@ -84,7 +84,7 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
               mt: 3,
             }}
           >
-            <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} />
+            <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} roundValuesForCopy={true} />
           </Container>
           <Container sx={{ pt: 2 }}>
             <Grid container spacing={2}>

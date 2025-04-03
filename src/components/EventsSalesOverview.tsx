@@ -35,9 +35,10 @@ import { capitalizeFirstLetter } from '@ad/src/utils/format';
 export interface EventsSalesOverviewProps {
   wrappers: EventWrapperSchemaType[];
   eventSerie: EventSerieSchemaType;
+  roundValuesForCopy?: boolean; // Some organisms to declare are expected integers
 }
 
-export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOverviewProps) {
+export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }: EventsSalesOverviewProps) {
   const { t } = useTranslation('common');
 
   const updateEventCategoryTickets = trpc.updateEventCategoryTickets.useMutation();
@@ -52,7 +53,7 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
   const [triggerEventsSalesCopy, setTriggerEventsSalesCopy] = useState(false);
   const [eventsWrappersToCopy, setEventsWrappersToCopy] = useState<EventWrapperSchemaType[]>([]);
 
-  const { totalIncludingTaxesAmount, averageTicketPrice, paidTickets, freeTickets } = useMemo(() => {
+  const { totalIncludingTaxesAmount, totalExcludingTaxesAmount, totalTaxesAmount, averageTicketPrice, paidTickets, freeTickets } = useMemo(() => {
     let totalIncludingTaxesAmount: number = 0;
     let paidTickets: number = 0;
     let freeTickets: number = 0;
@@ -77,22 +78,45 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
 
     return {
       totalIncludingTaxesAmount: totalIncludingTaxesAmount,
+      totalExcludingTaxesAmount: getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
+      totalTaxesAmount: getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
       averageTicketPrice: averageTicketPrice,
       paidTickets: paidTickets,
       freeTickets: freeTickets,
     };
-  }, [wrappers]);
+  }, [wrappers, eventSerie.taxRate]);
+
+  const { totalIncludingTaxesAmountForCopy, totalExcludingTaxesAmountForCopy, totalTaxesAmountForCopy, averageTicketPriceForCopy } = useMemo(() => {
+    if (roundValuesForCopy === true) {
+      const includingTaxesAmount = Math.round(totalIncludingTaxesAmount);
+      const excludingTaxesAmount = Math.round(totalExcludingTaxesAmount);
+
+      return {
+        totalIncludingTaxesAmountForCopy: includingTaxesAmount,
+        totalExcludingTaxesAmountForCopy: excludingTaxesAmount,
+        totalTaxesAmountForCopy: Math.round(includingTaxesAmount - excludingTaxesAmount), // It cannot be done other way since rounding could mess to always have "exc + tax = inc"
+        averageTicketPriceForCopy: Math.round(averageTicketPrice),
+      };
+    } else {
+      return {
+        totalIncludingTaxesAmountForCopy: totalIncludingTaxesAmount,
+        totalExcludingTaxesAmountForCopy: totalExcludingTaxesAmount,
+        totalTaxesAmountForCopy: totalTaxesAmount,
+        averageTicketPriceForCopy: averageTicketPrice,
+      };
+    }
+  }, [totalIncludingTaxesAmount, totalExcludingTaxesAmount, totalTaxesAmount, averageTicketPrice, roundValuesForCopy]);
 
   const [snackbarAlert, setSnackbarAlert] = useState<JSX.Element | null>(null);
   const handleCloseSnackbar = useCallback(() => setSnackbarAlert(null), [setSnackbarAlert]);
 
   const copyValue = useCallback(
-    async (value: string) => {
+    async (value: string, roundedValue?: boolean) => {
       await navigator.clipboard.writeText(value);
 
       setSnackbarAlert(
         <Alert severity="success" onClose={handleCloseSnackbar}>
-          La valeur a été copiée
+          {roundedValue ? `La valeur arrondie a été copiée` : `La valeur a été copiée`}
         </Alert>
       );
     },
@@ -460,17 +484,13 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                 <TextField
                   label="Recette de billetterie HT"
                   value={t('currency.amount', {
-                    amount: getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
+                    amount: totalExcludingTaxesAmount,
                   })}
                   slotProps={{
                     input: {
                       disableUnderline: true,
                       onClick: async () => {
-                        await copyValue(
-                          t('number.defaultWithNoGrouping', {
-                            number: getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
-                          })
-                        );
+                        await copyValue(t('number.defaultWithNoGrouping', { number: totalExcludingTaxesAmountForCopy }), true);
 
                         push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalExcludingTaxesAmount']);
                       },
@@ -498,7 +518,7 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                     input: {
                       disableUnderline: true,
                       onClick: async () => {
-                        await copyValue(t('number.defaultWithNoGrouping', { number: totalIncludingTaxesAmount }));
+                        await copyValue(t('number.defaultWithNoGrouping', { number: totalIncludingTaxesAmountForCopy }), true);
 
                         push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalIncludingTaxesAmount']);
                       },
@@ -548,17 +568,13 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                 <TextField
                   label="Montant de TVA"
                   value={t('currency.amount', {
-                    amount: getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
+                    amount: totalTaxesAmount,
                   })}
                   slotProps={{
                     input: {
                       disableUnderline: true,
                       onClick: async () => {
-                        await copyValue(
-                          t('number.defaultWithNoGrouping', {
-                            number: getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
-                          })
-                        );
+                        await copyValue(t('number.defaultWithNoGrouping', { number: totalTaxesAmountForCopy }), true);
 
                         push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalTaxAmount']);
                       },
@@ -670,7 +686,7 @@ export function EventsSalesOverview({ wrappers, eventSerie }: EventsSalesOvervie
                     input: {
                       disableUnderline: true,
                       onClick: async () => {
-                        await copyValue(t('number.defaultWithNoGrouping', { number: averageTicketPrice }));
+                        await copyValue(t('number.defaultWithNoGrouping', { number: averageTicketPriceForCopy }), true);
 
                         push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'averageTicketPrice']);
                       },
