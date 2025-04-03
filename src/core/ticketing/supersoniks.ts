@@ -21,10 +21,16 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
   protected readonly client: Client;
   protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;
 
-  constructor(secretKey: string) {
+  constructor(accessKey: string, secretKey: string) {
+    // To avoid complexifying our common logic between ticketing systems we reuse the "username" as domain name
+    // since Supersoniks is not having a shared API for all its customers
+
+    // Test it's valid (it should since we made a specific validation at form submission)
+    const baseUrl = new URL(`https://${accessKey}/`);
+
     this.client = createClient(
       createConfig({
-        baseUrl: 'https://ticketing.mapado.net/',
+        baseUrl: baseUrl.toString(),
         auth: secretKey,
       })
     );

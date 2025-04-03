@@ -9,7 +9,7 @@ const describeWhenManual = process.env.TEST_MANUAL === 'true' ? describe : descr
 const itWhenManual = process.env.TEST_MANUAL === 'true' ? it : it.skip;
 
 describeWhenManual('SupersoniksTicketingSystemClient', () => {
-  const client = new SupersoniksTicketingSystemClient(process.env.TEST_SUPERSONIKS_SECRET_KEY || '');
+  const client = new SupersoniksTicketingSystemClient(process.env.TEST_SUPERSONIKS_ACCESS_KEY || '', process.env.TEST_SUPERSONIKS_SECRET_KEY || '');
 
   describe('getEventsSeries()', () => {
     it(
