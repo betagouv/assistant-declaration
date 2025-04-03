@@ -50,6 +50,7 @@ export function ResetPasswordForm({ prefill }: { prefill?: ResetPasswordPrefillS
           type={showPassword ? 'text' : 'password'}
           label="Nouveau mot de passe"
           {...register('password')}
+          autoComplete="new-password"
           error={!!errors.password}
           helperText={errors?.password?.message}
           fullWidth
