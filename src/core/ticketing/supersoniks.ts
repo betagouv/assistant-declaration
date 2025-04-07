@@ -182,26 +182,68 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
           taxRate = Math.max(taxRate, statement.session.settings.tax.rate);
         }
 
+        // Detect duplicates before looping to adjust logic from the first duplicate occurence
+        const enhancedInternalPrices = statement.internals_prices.map((internalPrice) => {
+          // To not mess with slug and multiple occurences having spaces to be trimmed
+          const title = internalPrice.title.trim();
+
+          return {
+            ...internalPrice,
+            title: title,
+            slug: slugify(title),
+          };
+        });
+
+        const renamedTicketCategoriesCounts = new Map<string, number>();
+        const slugs = enhancedInternalPrices.map((enhancedInternalPrice) => enhancedInternalPrice.slug);
+        const duplicates = slugs.filter((slug, i, arr) => arr.indexOf(slug) !== i);
+        const uniqueDuplicates = [...new Set(duplicates)];
+
         // The Supersoniks logic differs from ours since it exposes a category price per event date
         // whereas we consider it per event serie... We try to merge those that are the same hoping it will work in most case
-        for (const internalPrice of statement.internals_prices) {
+        for (const enhancedInternalPrice of enhancedInternalPrices) {
           // They do not expose internal ID so we consider using the name as slug
           // but we have in addition to add the serie ID to make it unique during comparaisons (since across series they are likely to have the same name)
-          const fallbackTicketCategoryId = `fallback_${serieId}_${slugify(internalPrice.title)}`;
+          //
+          // Also, Supersoniks may list multiple internal prices with the same name for the same session if the price
+          // has changed over time so we have to differenciate them since they have different prices
+          // Note: we applied the suffix on all (not just 2+) because in case the order change in the API we want the "first one" to be correctly consistently patched
+          let fallbackTicketCategoryId: string = `fallback_${serieId}_${enhancedInternalPrice.slug}`;
+
+          if (uniqueDuplicates.includes(enhancedInternalPrice.slug)) {
+            const previousOccurencesCount = renamedTicketCategoriesCounts.get(enhancedInternalPrice.slug) ?? 0;
+            const currentOccurencesCount = previousOccurencesCount + 1;
+
+            fallbackTicketCategoryId = `${fallbackTicketCategoryId}_${enhancedInternalPrice.amount}`;
+            enhancedInternalPrice.title = `${enhancedInternalPrice.title} (n°${currentOccurencesCount})`;
+
+            renamedTicketCategoriesCounts.set(enhancedInternalPrice.slug, currentOccurencesCount);
+          }
 
           let ticketCategory = schemaTicketCategories.find((schemaTicketCategory) => {
-            return schemaTicketCategory.internalTicketingSystemId === fallbackTicketCategoryId;
+            // Will only be true for ticket categories across sessions having 1 price over the serie period
+            return (
+              schemaTicketCategory.internalTicketingSystemId === fallbackTicketCategoryId &&
+              schemaTicketCategory.price === enhancedInternalPrice.amount
+            );
           });
 
           if (ticketCategory) {
-            // Since we rely a guessed ID (from name), we want to make sure it's working all the time
-            assert(internalPrice.title === ticketCategory.name && internalPrice.amount === ticketCategory.price);
+            // No event sales for this combo should exist already
+            const relatedEventSales = schemaEventSales.find((eventSales) => {
+              return (
+                eventSales.internalEventTicketingSystemId === statement.session.id.toString() &&
+                eventSales.internalTicketCategoryTicketingSystemId === fallbackTicketCategoryId
+              );
+            });
+
+            assert(!relatedEventSales);
           } else {
             ticketCategory = LiteTicketCategorySchema.parse({
               internalTicketingSystemId: fallbackTicketCategoryId,
-              name: internalPrice.title,
+              name: enhancedInternalPrice.title,
               description: null,
-              price: internalPrice.amount,
+              price: enhancedInternalPrice.amount,
             });
 
             schemaTicketCategories.push(ticketCategory);
@@ -211,7 +253,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
             LiteEventSalesSchema.parse({
               internalEventTicketingSystemId: statement.session.id.toString(),
               internalTicketCategoryTicketingSystemId: fallbackTicketCategoryId,
-              total: internalPrice.quantity,
+              total: enhancedInternalPrice.quantity,
             })
           );
         }
