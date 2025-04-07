@@ -186,10 +186,11 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
         // whereas we consider it per event serie... We try to merge those that are the same hoping it will work in most case
         for (const internalPrice of statement.internals_prices) {
           // They do not expose internal ID so we consider using the name as slug
-          const ticketCategoryId = slugify(internalPrice.title);
+          // but we have in addition to add the serie ID to make it unique during comparaisons (since across series they are likely to have the same name)
+          const fallbackTicketCategoryId = `fallback_${serieId}_${slugify(internalPrice.title)}`;
 
           let ticketCategory = schemaTicketCategories.find((schemaTicketCategory) => {
-            return schemaTicketCategory.internalTicketingSystemId === ticketCategoryId;
+            return schemaTicketCategory.internalTicketingSystemId === fallbackTicketCategoryId;
           });
 
           if (ticketCategory) {
@@ -197,7 +198,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
             assert(internalPrice.title === ticketCategory.name && internalPrice.amount === ticketCategory.price);
           } else {
             ticketCategory = LiteTicketCategorySchema.parse({
-              internalTicketingSystemId: ticketCategoryId,
+              internalTicketingSystemId: fallbackTicketCategoryId,
               name: internalPrice.title,
               description: null,
               price: internalPrice.amount,
@@ -209,7 +210,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
           schemaEventSales.push(
             LiteEventSalesSchema.parse({
               internalEventTicketingSystemId: statement.session.id.toString(),
-              internalTicketCategoryTicketingSystemId: ticketCategoryId,
+              internalTicketCategoryTicketingSystemId: fallbackTicketCategoryId,
               total: internalPrice.quantity,
             })
           );
