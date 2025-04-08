@@ -185,15 +185,32 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
         // Supersoniks allow selling on partner platforms like FNAC/Digitick/Ticketmaster... so we look at those too
         const allPrices = statement.internals_prices.concat(statement.externals_prices);
 
-        // Detect duplicates before looping to adjust logic from the first duplicate occurence
-        const enhancedPrices = allPrices.map((price) => {
+        // Merge duplicates entries since for some reasons Supersoniks is displaying sometimes
+        // different entries with the same title and price (doing so will help below since renaming similar ones if different prices...)
+        const uniquePrices: typeof allPrices = [];
+
+        for (const price of allPrices) {
           // To not mess with slug and multiple occurences having spaces to be trimmed
           const title = price.title.trim();
 
+          const existing = uniquePrices.find((uP) => uP.amount === price.amount && uP.title === title);
+
+          if (existing) {
+            existing.quantity += price.quantity;
+            existing.revenue += price.revenue;
+          } else {
+            uniquePrices.push({
+              ...price,
+              title: title,
+            });
+          }
+        }
+
+        // Detect duplicates on titles before looping to adjust logic from the first duplicate occurence
+        const enhancedPrices = uniquePrices.map((price) => {
           return {
             ...price,
-            title: title,
-            slug: slugify(title),
+            slug: slugify(price.title),
           };
         });
 
@@ -239,8 +256,6 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
             schemaTicketCategories.push(ticketCategory);
           }
 
-          // Look for this combo already exist to increment due to Supersoniks sometimes returning
-          // multiple time the same pair of "title + price" for the same session
           let relatedEventSales = schemaEventSales.find((eventSales) => {
             return (
               eventSales.internalEventTicketingSystemId === statement.session.id.toString() &&
@@ -248,17 +263,15 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
             );
           });
 
-          if (!relatedEventSales) {
-            relatedEventSales = LiteEventSalesSchema.parse({
+          assert(!relatedEventSales);
+
+          schemaEventSales.push(
+            LiteEventSalesSchema.parse({
               internalEventTicketingSystemId: statement.session.id.toString(),
               internalTicketCategoryTicketingSystemId: fallbackTicketCategoryId,
-              total: 0,
-            });
-
-            schemaEventSales.push(relatedEventSales);
-          }
-
-          relatedEventSales.total += enhancedPrice.quantity;
+              total: enhancedPrice.quantity,
+            })
+          );
         }
       }
 
