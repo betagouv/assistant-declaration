@@ -76,6 +76,11 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
       return true;
     } catch (error) {
+      // [IMPORTANT] Sometimes having "Bearer token expired\/invalid" means for this specific Supersoniks customer the firewall is complaining
+      // If the IP has been correctly authorized, forcing IPv4 would do the trick but there is no easy way
+      // on the generated client we can configure (like Agent/Dispatcher), so it's better to rely only on a more abstract way by using:
+      // `NODE_OPTIONS=--dns-result-order=ipv4first`
+      // Note: it should not be an issue on our provider since it also manage IPv4 for know, this trick is only for specific debugs locally
       return false;
     }
   }
