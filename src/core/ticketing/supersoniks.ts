@@ -19,6 +19,7 @@ import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
   protected readonly client: Client;
+  protected readonly publicIdentifier: string;
   protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;
 
   constructor(accessKey: string, secretKey: string) {
@@ -34,6 +35,15 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
         auth: secretKey,
       })
     );
+
+    this.publicIdentifier = accessKey;
+  }
+
+  public formatForUniqueness(input: string): string {
+    // Since Supersoniks uniqueness of ID is scoped by customer and not across all of them
+    // we have to prefix any internal ID so it will be unique when comparing any entity type from the provider Supersoniks
+    // (this may seem strange but we do this comparaison in case the user removes and adds again the same ticketing credentials, we don't want to all being duplicated)
+    return `${slugify(this.publicIdentifier)}_${input}`;
   }
 
   protected assertCollectionResponseValid(data: JsonCollectionSchemaType) {
@@ -114,21 +124,21 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
     for (const statement of statementsData.data) {
       // `multisession` means it exists a serie of sessions (to find among all statements)
       // If there is none, we consider the session itself as a serie
-      let serieId: string;
+      let nonUniqueSerieId: string;
       let serieName: string;
 
       if (statement.session.multisession) {
-        serieId = statement.session.multisession.multisession_id.toString();
+        nonUniqueSerieId = statement.session.multisession.multisession_id.toString();
         serieName = statement.session.multisession.title;
       } else {
-        serieId = `session_${statement.session.id}`;
+        nonUniqueSerieId = `session_${statement.session.id}`;
         serieName = statement.session.edito.title;
       }
 
-      const serie = series.get(serieId);
+      const serie = series.get(nonUniqueSerieId);
 
       if (!serie) {
-        series.set(serieId, {
+        series.set(nonUniqueSerieId, {
           name: serieName,
           statements: [statement],
         });
@@ -139,7 +149,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
     const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
 
-    for (const [serieId, serie] of series) {
+    for (const [nonUniqueSerieId, serie] of series) {
       const schemaEvents: LiteEventSchemaType[] = [];
       const schemaTicketCategories: LiteTicketCategorySchemaType[] = [];
       const schemaEventSales: LiteEventSalesSchemaType[] = [];
@@ -166,7 +176,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
         schemaEvents.push(
           LiteEventSchema.parse({
-            internalTicketingSystemId: statement.session.id.toString(),
+            internalTicketingSystemId: this.formatForUniqueness(statement.session.id.toString()),
             startAt: startDate,
             endAt: endDate,
           })
@@ -228,7 +238,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
           // Also, Supersoniks may list multiple internal prices with the same name for the same session if the price
           // has changed over time so we have to differenciate them since they have different prices
           // Note: we applied the suffix on all (not just 2+) because in case the order change in the API we want the "first one" to be correctly consistently patched
-          let fallbackTicketCategoryId: string = `fallback_${serieId}_${enhancedPrice.slug}`;
+          let fallbackTicketCategoryId: string = `fallback_${nonUniqueSerieId}_${enhancedPrice.slug}`;
 
           if (uniqueDuplicates.includes(enhancedPrice.slug)) {
             const previousOccurencesCount = renamedTicketCategoriesCounts.get(enhancedPrice.slug) ?? 0;
@@ -239,6 +249,8 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
             renamedTicketCategoriesCounts.set(enhancedPrice.slug, currentOccurencesCount);
           }
+
+          fallbackTicketCategoryId = this.formatForUniqueness(fallbackTicketCategoryId);
 
           let ticketCategory = schemaTicketCategories.find((schemaTicketCategory) => {
             // Will only be true for ticket categories across sessions having 1 price over the serie period
@@ -258,7 +270,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
           let relatedEventSales = schemaEventSales.find((eventSales) => {
             return (
-              eventSales.internalEventTicketingSystemId === statement.session.id.toString() &&
+              eventSales.internalEventTicketingSystemId === this.formatForUniqueness(statement.session.id.toString()) &&
               eventSales.internalTicketCategoryTicketingSystemId === fallbackTicketCategoryId
             );
           });
@@ -267,7 +279,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
           schemaEventSales.push(
             LiteEventSalesSchema.parse({
-              internalEventTicketingSystemId: statement.session.id.toString(),
+              internalEventTicketingSystemId: this.formatForUniqueness(statement.session.id.toString()),
               internalTicketCategoryTicketingSystemId: fallbackTicketCategoryId,
               total: enhancedPrice.quantity,
             })
@@ -294,7 +306,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
       eventsSeriesWrappers.push({
         serie: LiteEventSerieSchema.parse({
-          internalTicketingSystemId: serieId.toString(),
+          internalTicketingSystemId: this.formatForUniqueness(nonUniqueSerieId),
           name: serie.name,
           startAt: serieStartDate,
           endAt: serieEndDate,
