@@ -11,6 +11,16 @@ import { applyTypedParsers } from '@ad/src/utils/zod';
 // This is the best way to make the production not breaking for unused fields during validation.
 //
 
+export const JsonPriceSchema = applyTypedParsers(
+  z.object({
+    amount: z.number().nonnegative(),
+    quantity: z.number().int().nonnegative(),
+    revenue: z.number().nonnegative(),
+    title: z.string().min(1),
+  })
+);
+export type JsonPriceSchemaType = z.infer<typeof JsonPriceSchema>;
+
 export const JsonStatementSchema = applyTypedParsers(
   z
     .object({
@@ -184,15 +194,8 @@ export const JsonStatementSchema = applyTypedParsers(
       closing_date: z.number().int().nonnegative().transform(transformTimestampOrNull),
       // average_amount: z.number().nonnegative(),
       prices: z.array(z.unknown()),
-      externals_prices: z.array(z.unknown()),
-      internals_prices: z.array(
-        z.object({
-          amount: z.number().nonnegative(),
-          quantity: z.number().int().nonnegative(),
-          revenue: z.number().nonnegative(),
-          title: z.string().min(1),
-        })
-      ),
+      externals_prices: z.array(JsonPriceSchema),
+      internals_prices: z.array(JsonPriceSchema),
     })
     .strip()
 );

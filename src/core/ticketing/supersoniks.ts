@@ -182,80 +182,83 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
           taxRate = Math.max(taxRate, statement.session.settings.tax.rate);
         }
 
+        // Supersoniks allow selling on partner platforms like FNAC/Digitick/Ticketmaster... so we look at those too
+        const allPrices = statement.internals_prices.concat(statement.externals_prices);
+
         // Detect duplicates before looping to adjust logic from the first duplicate occurence
-        const enhancedInternalPrices = statement.internals_prices.map((internalPrice) => {
+        const enhancedPrices = allPrices.map((price) => {
           // To not mess with slug and multiple occurences having spaces to be trimmed
-          const title = internalPrice.title.trim();
+          const title = price.title.trim();
 
           return {
-            ...internalPrice,
+            ...price,
             title: title,
             slug: slugify(title),
           };
         });
 
         const renamedTicketCategoriesCounts = new Map<string, number>();
-        const slugs = enhancedInternalPrices.map((enhancedInternalPrice) => enhancedInternalPrice.slug);
+        const slugs = enhancedPrices.map((enhancedPrice) => enhancedPrice.slug);
         const duplicates = slugs.filter((slug, i, arr) => arr.indexOf(slug) !== i);
         const uniqueDuplicates = [...new Set(duplicates)];
 
         // The Supersoniks logic differs from ours since it exposes a category price per event date
         // whereas we consider it per event serie... We try to merge those that are the same hoping it will work in most case
-        for (const enhancedInternalPrice of enhancedInternalPrices) {
+        for (const enhancedPrice of enhancedPrices) {
           // They do not expose internal ID so we consider using the name as slug
           // but we have in addition to add the serie ID to make it unique during comparaisons (since across series they are likely to have the same name)
           //
           // Also, Supersoniks may list multiple internal prices with the same name for the same session if the price
           // has changed over time so we have to differenciate them since they have different prices
           // Note: we applied the suffix on all (not just 2+) because in case the order change in the API we want the "first one" to be correctly consistently patched
-          let fallbackTicketCategoryId: string = `fallback_${serieId}_${enhancedInternalPrice.slug}`;
+          let fallbackTicketCategoryId: string = `fallback_${serieId}_${enhancedPrice.slug}`;
 
-          if (uniqueDuplicates.includes(enhancedInternalPrice.slug)) {
-            const previousOccurencesCount = renamedTicketCategoriesCounts.get(enhancedInternalPrice.slug) ?? 0;
+          if (uniqueDuplicates.includes(enhancedPrice.slug)) {
+            const previousOccurencesCount = renamedTicketCategoriesCounts.get(enhancedPrice.slug) ?? 0;
             const currentOccurencesCount = previousOccurencesCount + 1;
 
-            fallbackTicketCategoryId = `${fallbackTicketCategoryId}_${enhancedInternalPrice.amount}`;
-            enhancedInternalPrice.title = `${enhancedInternalPrice.title} (n°${currentOccurencesCount})`;
+            fallbackTicketCategoryId = `${fallbackTicketCategoryId}_${enhancedPrice.amount}`;
+            enhancedPrice.title = `${enhancedPrice.title} (n°${currentOccurencesCount})`;
 
-            renamedTicketCategoriesCounts.set(enhancedInternalPrice.slug, currentOccurencesCount);
+            renamedTicketCategoriesCounts.set(enhancedPrice.slug, currentOccurencesCount);
           }
 
           let ticketCategory = schemaTicketCategories.find((schemaTicketCategory) => {
             // Will only be true for ticket categories across sessions having 1 price over the serie period
-            return (
-              schemaTicketCategory.internalTicketingSystemId === fallbackTicketCategoryId &&
-              schemaTicketCategory.price === enhancedInternalPrice.amount
-            );
+            return schemaTicketCategory.internalTicketingSystemId === fallbackTicketCategoryId && schemaTicketCategory.price === enhancedPrice.amount;
           });
 
-          if (ticketCategory) {
-            // No event sales for this combo should exist already
-            const relatedEventSales = schemaEventSales.find((eventSales) => {
-              return (
-                eventSales.internalEventTicketingSystemId === statement.session.id.toString() &&
-                eventSales.internalTicketCategoryTicketingSystemId === fallbackTicketCategoryId
-              );
-            });
-
-            assert(!relatedEventSales);
-          } else {
+          if (!ticketCategory) {
             ticketCategory = LiteTicketCategorySchema.parse({
               internalTicketingSystemId: fallbackTicketCategoryId,
-              name: enhancedInternalPrice.title,
+              name: enhancedPrice.title,
               description: null,
-              price: enhancedInternalPrice.amount,
+              price: enhancedPrice.amount,
             });
 
             schemaTicketCategories.push(ticketCategory);
           }
 
-          schemaEventSales.push(
-            LiteEventSalesSchema.parse({
+          // Look for this combo already exist to increment due to Supersoniks sometimes returning
+          // multiple time the same pair of "title + price" for the same session
+          let relatedEventSales = schemaEventSales.find((eventSales) => {
+            return (
+              eventSales.internalEventTicketingSystemId === statement.session.id.toString() &&
+              eventSales.internalTicketCategoryTicketingSystemId === fallbackTicketCategoryId
+            );
+          });
+
+          if (!relatedEventSales) {
+            relatedEventSales = LiteEventSalesSchema.parse({
               internalEventTicketingSystemId: statement.session.id.toString(),
               internalTicketCategoryTicketingSystemId: fallbackTicketCategoryId,
-              total: enhancedInternalPrice.quantity,
-            })
-          );
+              total: 0,
+            });
+
+            schemaEventSales.push(relatedEventSales);
+          }
+
+          relatedEventSales.total += enhancedPrice.quantity;
         }
       }
 
