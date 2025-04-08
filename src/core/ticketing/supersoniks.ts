@@ -200,43 +200,43 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
         // Supersoniks allow selling on partner platforms like FNAC/Digitick/Ticketmaster... so we look at those too
         const allPrices = statement.internals_prices.concat(statement.externals_prices);
 
-        // Merge duplicates entries since for some reasons Supersoniks is displaying sometimes
-        // different entries with the same title and price (doing so will help below since renaming similar ones if different prices...)
-        const uniquePrices: typeof allPrices = [];
-
-        for (const price of allPrices) {
-          // To not mess with slug and multiple occurences having spaces to be trimmed
+        // To not mess with slug and multiple occurences having spaces to be trimmed
+        // we use the slug from here because in some cases there are duplicates but with doubled spaces within the title
+        const enhancedPrices = allPrices.map((price) => {
           const title = price.title.trim();
 
-          const existing = uniquePrices.find((uP) => uP.amount === price.amount && uP.title === title);
+          return {
+            ...price,
+            title: title,
+            slug: slugify(title),
+          };
+        });
+
+        // Merge duplicates entries since for some reasons Supersoniks is displaying sometimes
+        // different entries with the same title and price (doing so will help below since renaming similar ones if different prices...)
+        const uniqueEnhancedPrices: typeof enhancedPrices = [];
+
+        for (const price of enhancedPrices) {
+          const existing = uniqueEnhancedPrices.find((uEP) => uEP.amount === price.amount && uEP.slug === price.slug);
 
           if (existing) {
             existing.quantity += price.quantity;
             existing.revenue += price.revenue;
           } else {
-            uniquePrices.push({
-              ...price,
-              title: title,
-            });
+            uniqueEnhancedPrices.push({ ...price });
           }
         }
 
-        // Detect duplicates on titles before looping to adjust logic from the first duplicate occurence
-        const enhancedPrices = uniquePrices.map((price) => {
-          return {
-            ...price,
-            slug: slugify(price.title),
-          };
-        });
 
+        // Detect duplicates on titles before looping to adjust logic from the first duplicate occurence
         const renamedTicketCategoriesCounts = new Map<string, number>();
-        const slugs = enhancedPrices.map((enhancedPrice) => enhancedPrice.slug);
+        const slugs = uniqueEnhancedPrices.map((uniqueEnhancedPrice) => uniqueEnhancedPrice.slug);
         const duplicates = slugs.filter((slug, i, arr) => arr.indexOf(slug) !== i);
         const uniqueDuplicates = [...new Set(duplicates)];
 
         // The Supersoniks logic differs from ours since it exposes a category price per event date
         // whereas we consider it per event serie... We try to merge those that are the same hoping it will work in most case
-        for (const enhancedPrice of enhancedPrices) {
+        for (const enhancedPrice of uniqueEnhancedPrices) {
           // They do not expose internal ID so we consider using the name as slug
           // but we have in addition to add the serie ID to make it unique during comparaisons (since across series they are likely to have the same name)
           //
