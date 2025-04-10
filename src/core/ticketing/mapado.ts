@@ -123,12 +123,17 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     // Retrieve eligible event series from events dates
     const uniqueEventDatesIds = [...new Set(tickets.map((ticket) => ticket.eventDate))];
 
+    // For a few organisations having a lot of event dates it was triggering either the server error
+    // `400 Bad Request`, or when reducing a bit the URL length, `414 Request-URI Too Large` so we try to
+    // use the short ID to go under limit. If it persists for another organization we would have to split the request
+    const uniqueShortEventDatesIds = uniqueEventDatesIds.map((id) => id.replace(/^\/v1\/event_dates\//, ''));
+
     let ticketingsToSynchronize: JsonTicketingSchemaType[];
-    if (uniqueEventDatesIds.length > 0) {
+    if (uniqueShortEventDatesIds.length > 0) {
       const recentlyPurchasedEventDatesResult = await getEventDateCollection({
         client: this.client,
         query: {
-          '@id': uniqueEventDatesIds.join(','),
+          '@id': uniqueShortEventDatesIds.join(','),
           itemsPerPage: this.itemsPerPageToAvoidPagination,
           ...{ fields: 'ticketing' },
         },
@@ -151,10 +156,13 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         ),
       ];
 
+      // As for the `event_dates` endpoint and just in case we use the short IDs to avoid `414 Request-URI Too Large`
+      const shortTicketingIdsToSynchronize = ticketingIdsToSynchronize.map((id) => id.replace(/^\/v1\/ticketings\//, ''));
+
       const ticketingsResult = await getTicketingCollection({
         client: this.client,
         query: {
-          '@id': ticketingIdsToSynchronize.join(','),
+          '@id': shortTicketingIdsToSynchronize.join(','),
           itemsPerPage: this.itemsPerPageToAvoidPagination,
           ...{ fields: 'type,title,eventDateList,currency,venue{countryCode}' },
         },
@@ -175,13 +183,10 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           return false;
         }
 
-        // If a `dated_events` it should have a location
-        assert(ticketing.venue);
-
         // A live performance taking place outside France has no reason to be declared
         // (skipping them helps not messing with different tax rate grids)
         // Note: sometimes it's not filled, but since Mapado is french we assume a null country code means France
-        if (ticketing.venue.countryCode !== null && ticketing.venue.countryCode !== 'FR') {
+        if (ticketing.venue !== null && ticketing.venue.countryCode !== null && ticketing.venue.countryCode !== 'FR') {
           return false;
         }
 
@@ -206,12 +211,15 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
       let taxRate: number | null = null;
 
       if (ticketing.eventDateList.length > 0) {
+        // As for the `event_dates` endpoint and just in case we use the short IDs to avoid `414 Request-URI Too Large`
+        const shortEventDatesIds = ticketing.eventDateList.map((id) => id.replace(/^\/v1\/event_dates\//, ''));
+
         // Thanks to associations we can retrieve "price category"
         // Note: it won't have duplicate entries since `TicketPrice` entity is unique per event (it causes us complications below to aggregate them due to our internal structure)
         const eventDatesResult = await getEventDateCollection({
           client: this.client,
           query: {
-            '@id': ticketing.eventDateList.join(','),
+            '@id': shortEventDatesIds.join(','),
             itemsPerPage: this.itemsPerPageToAvoidPagination,
             ...{
               fields:
