@@ -175,13 +175,10 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           return false;
         }
 
-        // If a `dated_events` it should have a location
-        assert(ticketing.venue);
-
         // A live performance taking place outside France has no reason to be declared
         // (skipping them helps not messing with different tax rate grids)
         // Note: sometimes it's not filled, but since Mapado is french we assume a null country code means France
-        if (ticketing.venue.countryCode !== null && ticketing.venue.countryCode !== 'FR') {
+        if (ticketing.venue !== null && ticketing.venue.countryCode !== null && ticketing.venue.countryCode !== 'FR') {
           return false;
         }
 
