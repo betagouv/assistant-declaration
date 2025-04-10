@@ -167,6 +167,8 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
           continue;
         }
 
+        const uniqueSessionId = this.formatForUniqueness(statement.session.id.toString());
+
         const startDate = fromUnixTime(statement.session.start_date);
 
         let endDate: Date;
@@ -181,7 +183,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
         schemaEvents.push(
           LiteEventSchema.parse({
-            internalTicketingSystemId: this.formatForUniqueness(statement.session.id.toString()),
+            internalTicketingSystemId: uniqueSessionId,
             startAt: startDate,
             endAt: endDate,
           })
@@ -275,7 +277,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
           let relatedEventSales = schemaEventSales.find((eventSales) => {
             return (
-              eventSales.internalEventTicketingSystemId === this.formatForUniqueness(statement.session.id.toString()) &&
+              eventSales.internalEventTicketingSystemId === uniqueSessionId &&
               eventSales.internalTicketCategoryTicketingSystemId === fallbackTicketCategoryId
             );
           });
@@ -284,7 +286,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
           schemaEventSales.push(
             LiteEventSalesSchema.parse({
-              internalEventTicketingSystemId: this.formatForUniqueness(statement.session.id.toString()),
+              internalEventTicketingSystemId: uniqueSessionId,
               internalTicketCategoryTicketingSystemId: fallbackTicketCategoryId,
               total: enhancedPrice.quantity,
             })
