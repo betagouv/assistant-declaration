@@ -200,7 +200,20 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
         }
 
         // Supersoniks allow selling on partner platforms like FNAC/Digitick/Ticketmaster... so we look at those too
-        const allPrices = statement.internals_prices.concat(statement.externals_prices);
+        // but we skip partial reimbursements from Supersoniks for now (see details below)
+        const allPrices = statement.internals_prices.concat(statement.externals_prices).filter((price) => {
+          // [IMPORTANT] Supersoniks allows partial reimbursement, which will appear as a separate price entry
+          // as a sum of all partial reimbursements for a specific price (even if different amounts refunded).
+          // There is no way to know how they are splitted since the quantity is always 0 (for Supersoniks to keep accountability clear since it's not a full refund).
+          // For now we just ignore those for declarations until we have more thoughts from users on this
+          if (price.amount >= 0) {
+            assert(price.revenue >= 0);
+
+            return true;
+          }
+
+          return false;
+        });
 
         // To not mess with slug and multiple occurences having spaces to be trimmed
         // we use the slug from here because in some cases there are duplicates but with doubled spaces within the title
@@ -228,7 +241,6 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
             uniqueEnhancedPrices.push({ ...price });
           }
         }
-
 
         // Detect duplicates on titles before looping to adjust logic from the first duplicate occurence
         const renamedTicketCategoriesCounts = new Map<string, number>();
