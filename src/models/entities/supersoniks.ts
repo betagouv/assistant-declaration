@@ -13,9 +13,10 @@ import { applyTypedParsers } from '@ad/src/utils/zod';
 
 export const JsonPriceSchema = applyTypedParsers(
   z.object({
-    amount: z.number().nonnegative(),
+    // [IMPORTANT] We accept a negative amount/revenue since Supersoniks allows partial reimbursement, see details into the controller logic
+    amount: z.number(),
     quantity: z.number().int().nonnegative(),
-    revenue: z.number().nonnegative(),
+    revenue: z.number(),
     title: z.string().min(1),
   })
 );
