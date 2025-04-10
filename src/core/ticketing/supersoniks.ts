@@ -36,14 +36,14 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
       })
     );
 
-    this.publicIdentifier = accessKey;
+    this.publicIdentifier = slugify(accessKey);
   }
 
   public formatForUniqueness(input: string): string {
     // Since Supersoniks uniqueness of ID is scoped by customer and not across all of them
     // we have to prefix any internal ID so it will be unique when comparing any entity type from the provider Supersoniks
     // (this may seem strange but we do this comparaison in case the user removes and adds again the same ticketing credentials, we don't want to all being duplicated)
-    return `${slugify(this.publicIdentifier)}_${input}`;
+    return `${this.publicIdentifier}_${input}`;
   }
 
   protected assertCollectionResponseValid(data: JsonCollectionSchemaType) {
