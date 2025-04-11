@@ -186,7 +186,12 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         // A live performance taking place outside France has no reason to be declared
         // (skipping them helps not messing with different tax rate grids)
         // Note: sometimes it's not filled, but since Mapado is french we assume a null country code means France
-        if (ticketing.venue !== null && ticketing.venue.countryCode !== null && ticketing.venue.countryCode !== 'FR') {
+        if (
+          ticketing.venue !== null &&
+          ticketing.venue.countryCode !== null &&
+          ticketing.venue.countryCode !== 'FR' &&
+          ticketing.venue.countryCode !== 'CORSE'
+        ) {
           return false;
         }
 
@@ -268,7 +273,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             // but it appears multiple prices could use tax rates from different countries (outside France), which could be problematic
             // in our interface and for the user to reason
             // Note: if the tax country code is not filled, we consider it as being for France
-            if (ticketPrice.tax.countryCode !== null && ticketPrice.tax.countryCode !== 'FR') {
+            if (ticketPrice.tax.countryCode !== null && ticketPrice.tax.countryCode !== 'FR' && ticketPrice.tax.countryCode !== 'CORSE') {
               throw foreignTaxRateOnPriceError;
             }
 
