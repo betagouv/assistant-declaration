@@ -62,7 +62,7 @@ export const JsonTicketingSchema = applyTypedParsers(
       eventDateList: z.array(z.string().min(1)),
       venue: z
         .object({
-          countryCode: z.literal('FR').or(z.string().min(1)).nullable(),
+          countryCode: z.literal('FR').or(z.literal('CORSE')).or(z.string().min(1)).nullable(),
         })
         .nullable(),
     })
@@ -93,14 +93,14 @@ export const JsonEventDateSchema = applyTypedParsers(
             'reseller',
             'other',
           ]),
-          name: z.string().transform(transformStringOrNull),
-          description: z.string().transform(transformStringOrNull),
+          name: z.string().transform(transformStringOrNull).nullable(),
+          description: z.string().transform(transformStringOrNull).nullable(),
           currency: z.literal('EUR'),
           facialValue: z.number().int().nonnegative(), // Cents
           valueIncvat: z.number().nonnegative(), // Not cents
           tax: z.object({
             rate: z.number().nonnegative(),
-            countryCode: z.literal('FR').or(z.string().min(1)).nullable(),
+            countryCode: z.literal('FR').or(z.literal('CORSE')).or(z.string().min(1)).nullable(),
           }),
         })
       ),

@@ -24,6 +24,7 @@ import {
   JsonGetTicketingsResponseSchema,
   JsonGetTicketsResponseSchema,
   JsonRecentTicketSchemaType,
+  JsonTicketSchemaType,
   JsonTicketingSchemaType,
 } from '@ad/src/models/entities/mapado';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -84,7 +85,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     const recentlyUpdatedTickets: JsonRecentTicketSchemaType[] = [];
 
     // There is a risk a ticket is "added" to the list while going across pagination (since not based on cursors), but this is not sensitive here
-    let currentPage = 1;
+    let recentlyUpdatedTicketsCurrentPage = 1;
 
     while (true) {
       const recentlyUpdatedTicketsResult = await getTicketCollection({
@@ -93,7 +94,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           user: 'me',
           updatedSince: fromDate.toISOString(),
           itemsPerPage: 10_000, // After testing we saw this limit was not erroring the Mapado API
-          page: currentPage,
+          page: recentlyUpdatedTicketsCurrentPage,
           ...{ fields: 'eventDate,updatedAt' },
         },
       });
@@ -114,7 +115,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         break;
       }
 
-      currentPage++;
+      recentlyUpdatedTicketsCurrentPage++;
     }
 
     // Since there is no API `before` we simulate it to be consistent across tests (despite getting more data over time)
@@ -186,7 +187,12 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         // A live performance taking place outside France has no reason to be declared
         // (skipping them helps not messing with different tax rate grids)
         // Note: sometimes it's not filled, but since Mapado is french we assume a null country code means France
-        if (ticketing.venue !== null && ticketing.venue.countryCode !== null && ticketing.venue.countryCode !== 'FR') {
+        if (
+          ticketing.venue !== null &&
+          ticketing.venue.countryCode !== null &&
+          ticketing.venue.countryCode !== 'FR' &&
+          ticketing.venue.countryCode !== 'CORSE'
+        ) {
           return false;
         }
 
@@ -268,15 +274,17 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             // but it appears multiple prices could use tax rates from different countries (outside France), which could be problematic
             // in our interface and for the user to reason
             // Note: if the tax country code is not filled, we consider it as being for France
-            if (ticketPrice.tax.countryCode !== null && ticketPrice.tax.countryCode !== 'FR') {
+            if (ticketPrice.tax.countryCode !== null && ticketPrice.tax.countryCode !== 'FR' && ticketPrice.tax.countryCode !== 'CORSE') {
               throw foreignTaxRateOnPriceError;
             }
 
-            assert(ticketPrice.name);
+            // For some reasons Mapado allows price name to be empty
+            // We do not use an increment in the fallback name so it's easy to be merged since ticket prices are scoped to event dates (events), not ticketings (series)
+            let ticketPriceName: string = !ticketPrice.name ? `Tarif sans nom` : ticketPrice.name;
 
             const liteTicketCategory = LiteTicketCategorySchema.parse({
               internalTicketingSystemId: ticketPrice.id.toString(),
-              name: ticketPrice.name,
+              name: ticketPriceName,
               description: ticketPrice.description,
               price: ticketPrice.facialValue / 100, // Adjust since cents from their API (note this `ticketPrice.valueIncvat` do not include commission, this latter is only specified on each `Ticket` entity)
             });
@@ -319,25 +327,43 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         }
 
         // Now retrieve all tickets for this event serie to bind them to ticket categories
-        const ticketsResult = await getTicketCollection({
-          client: this.client,
-          query: {
-            user: 'me',
-            ticketing: ticketing['@id'],
-            itemsPerPage: this.itemsPerPageToAvoidPagination,
-            ...{ fields: 'status,ticketPrice,eventDate,isValid,imported' },
-          },
-        });
+        const tickets: JsonTicketSchemaType[] = [];
 
-        if (ticketsResult.error) {
-          throw ticketsResult.error;
+        // There is a risk a ticket is "added" to the list while going across pagination (since not based on cursors), but this is an inevitable risk
+        let ticketsCurrentPage = 1;
+
+        while (true) {
+          const ticketsResult = await getTicketCollection({
+            client: this.client,
+            query: {
+              user: 'me',
+              ticketing: ticketing['@id'],
+              itemsPerPage: 10_000, // After testing we saw this limit was not erroring the Mapado API
+              page: ticketsCurrentPage,
+              ...{ fields: 'status,ticketPrice,eventDate,isValid,imported' },
+            },
+          });
+
+          if (ticketsResult.error) {
+            throw ticketsResult.error;
+          }
+
+          const ticketsData = JsonGetTicketsResponseSchema.parse(ticketsResult.data);
+
+          this.assertCollectionResponseValid(ticketsData);
+
+          ticketsData['hydra:member'].forEach((ticket) => {
+            tickets.push(ticket);
+          });
+
+          if (!ticketsData['hydra:nextPage']) {
+            break;
+          }
+
+          ticketsCurrentPage++;
         }
 
-        const ticketsData = JsonGetTicketsResponseSchema.parse(ticketsResult.data);
-
-        this.assertCollectionResponseValid(ticketsData);
-
-        for (const ticket of ticketsData['hydra:member']) {
+        for (const ticket of tickets) {
           // Only consider the ticket if the money has been transferred and is kept at the time of synchronization
           // (it excludes tickets that have been refunded)
           if (ticket.status !== 'payed') {
