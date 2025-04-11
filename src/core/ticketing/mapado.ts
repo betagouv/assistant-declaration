@@ -24,6 +24,7 @@ import {
   JsonGetTicketingsResponseSchema,
   JsonGetTicketsResponseSchema,
   JsonRecentTicketSchemaType,
+  JsonTicketSchemaType,
   JsonTicketingSchemaType,
 } from '@ad/src/models/entities/mapado';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -84,7 +85,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
     const recentlyUpdatedTickets: JsonRecentTicketSchemaType[] = [];
 
     // There is a risk a ticket is "added" to the list while going across pagination (since not based on cursors), but this is not sensitive here
-    let currentPage = 1;
+    let recentlyUpdatedTicketsCurrentPage = 1;
 
     while (true) {
       const recentlyUpdatedTicketsResult = await getTicketCollection({
@@ -93,7 +94,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           user: 'me',
           updatedSince: fromDate.toISOString(),
           itemsPerPage: 10_000, // After testing we saw this limit was not erroring the Mapado API
-          page: currentPage,
+          page: recentlyUpdatedTicketsCurrentPage,
           ...{ fields: 'eventDate,updatedAt' },
         },
       });
@@ -114,7 +115,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         break;
       }
 
-      currentPage++;
+      recentlyUpdatedTicketsCurrentPage++;
     }
 
     // Since there is no API `before` we simulate it to be consistent across tests (despite getting more data over time)
@@ -326,25 +327,43 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         }
 
         // Now retrieve all tickets for this event serie to bind them to ticket categories
-        const ticketsResult = await getTicketCollection({
-          client: this.client,
-          query: {
-            user: 'me',
-            ticketing: ticketing['@id'],
-            itemsPerPage: this.itemsPerPageToAvoidPagination,
-            ...{ fields: 'status,ticketPrice,eventDate,isValid,imported' },
-          },
-        });
+        const tickets: JsonTicketSchemaType[] = [];
 
-        if (ticketsResult.error) {
-          throw ticketsResult.error;
+        // There is a risk a ticket is "added" to the list while going across pagination (since not based on cursors), but this is an inevitable risk
+        let ticketsCurrentPage = 1;
+
+        while (true) {
+          const ticketsResult = await getTicketCollection({
+            client: this.client,
+            query: {
+              user: 'me',
+              ticketing: ticketing['@id'],
+              itemsPerPage: 10_000, // After testing we saw this limit was not erroring the Mapado API
+              page: ticketsCurrentPage,
+              ...{ fields: 'status,ticketPrice,eventDate,isValid,imported' },
+            },
+          });
+
+          if (ticketsResult.error) {
+            throw ticketsResult.error;
+          }
+
+          const ticketsData = JsonGetTicketsResponseSchema.parse(ticketsResult.data);
+
+          this.assertCollectionResponseValid(ticketsData);
+
+          ticketsData['hydra:member'].forEach((ticket) => {
+            tickets.push(ticket);
+          });
+
+          if (!ticketsData['hydra:nextPage']) {
+            break;
+          }
+
+          ticketsCurrentPage++;
         }
 
-        const ticketsData = JsonGetTicketsResponseSchema.parse(ticketsResult.data);
-
-        this.assertCollectionResponseValid(ticketsData);
-
-        for (const ticket of ticketsData['hydra:member']) {
+        for (const ticket of tickets) {
           // Only consider the ticket if the money has been transferred and is kept at the time of synchronization
           // (it excludes tickets that have been refunded)
           if (ticket.status !== 'payed') {
