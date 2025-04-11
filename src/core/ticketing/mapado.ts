@@ -277,11 +277,13 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
               throw foreignTaxRateOnPriceError;
             }
 
-            assert(ticketPrice.name);
+            // For some reasons Mapado allows price name to be empty
+            // We do not use an increment in the fallback name so it's easy to be merged since ticket prices are scoped to event dates (events), not ticketings (series)
+            let ticketPriceName: string = !ticketPrice.name ? `Tarif sans nom` : ticketPrice.name;
 
             const liteTicketCategory = LiteTicketCategorySchema.parse({
               internalTicketingSystemId: ticketPrice.id.toString(),
-              name: ticketPrice.name,
+              name: ticketPriceName,
               description: ticketPrice.description,
               price: ticketPrice.facialValue / 100, // Adjust since cents from their API (note this `ticketPrice.valueIncvat` do not include commission, this latter is only specified on each `Ticket` entity)
             });

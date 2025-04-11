@@ -93,8 +93,8 @@ export const JsonEventDateSchema = applyTypedParsers(
             'reseller',
             'other',
           ]),
-          name: z.string().transform(transformStringOrNull),
-          description: z.string().transform(transformStringOrNull),
+          name: z.string().transform(transformStringOrNull).nullable(),
+          description: z.string().transform(transformStringOrNull).nullable(),
           currency: z.literal('EUR'),
           facialValue: z.number().int().nonnegative(), // Cents
           valueIncvat: z.number().nonnegative(), // Not cents
