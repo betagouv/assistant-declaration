@@ -40,6 +40,7 @@
       "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
       "organizationNotFound": "aucune organisation trouvée",
+      "supersoniksAccessKeyInvalidDomainName": "l'identifiant est invalide, il doit correspondre au nom de domaine de votre billetterie (par exemple \"billetterie.masalledespectacle.com\" si votre billetterie est accessible via l'adresse https://billetterie.masalledespectacle.com/",
       "ticketingSystemConnectionFailed": "le test de connexion à la billetterie a échoué, veuillez vérifier vos identifiants",
       "ticketingSystemNotFound": "ce système de billetterie n'existe pas",
       "tooManyOrganizationTicketingSystems": "vous avez atteint la limite du nombre de systèmes de billetterie par organisation",
@@ -363,7 +364,8 @@
     "ticketingSystemName": {
       "enum": {
         "BILLETWEB": "Billetweb",
-        "MAPADO": "Mapado"
+        "MAPADO": "Mapado",
+        "SUPERSONIKS": "Supersoniks"
       }
     }
   },

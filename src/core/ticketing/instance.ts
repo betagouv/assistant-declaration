@@ -3,6 +3,7 @@ import { TicketingSystem } from '@prisma/client';
 import { BilletwebTicketingSystemClient } from '@ad/src/core/ticketing/billetweb';
 import { MockTicketingSystemClient, TicketingSystemClient } from '@ad/src/core/ticketing/common';
 import { MapadoTicketingSystemClient } from '@ad/src/core/ticketing/mapado';
+import { SupersoniksTicketingSystemClient } from '@ad/src/core/ticketing/supersoniks';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export function getTicketingSystemClient(
@@ -28,6 +29,12 @@ export function getTicketingSystemClient(
         assert(ticketingSystem.apiSecretKey);
 
         ticketingSystemClient = new MapadoTicketingSystemClient(ticketingSystem.apiSecretKey);
+        break;
+      case 'SUPERSONIKS':
+        assert(ticketingSystem.apiAccessKey);
+        assert(ticketingSystem.apiSecretKey);
+
+        ticketingSystemClient = new SupersoniksTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
         break;
       default:
         throw new Error('unknown ticketing system');
