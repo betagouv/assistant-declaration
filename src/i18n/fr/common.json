@@ -365,6 +365,7 @@
       "enum": {
         "BILLETWEB": "Billetweb",
         "MAPADO": "Mapado",
+        "SEETICKETS": "SeeTickets",
         "SUPERSONIKS": "Supersoniks"
       }
     }
