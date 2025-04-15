@@ -35,7 +35,11 @@ export const ConnectTicketingSystemSchema = applyTypedParsers(
   z.preprocess(
     preprocessDependingOnTicketingSystem,
     rawConnectTicketingSystemSchema.superRefine((data, ctx) => {
-      if (data.ticketingSystemName === 'SUPERSONIKS' && data.apiAccessKey && !domainNameRegexp.test(data.apiAccessKey)) {
+      if (
+        (data.ticketingSystemName === 'SUPERSONIKS' || data.ticketingSystemName === 'SOTICKET') &&
+        data.apiAccessKey &&
+        !domainNameRegexp.test(data.apiAccessKey)
+      ) {
         ctx.addIssue(customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError));
       }
     })
@@ -69,7 +73,11 @@ export const UpdateTicketingSystemSchema = applyTypedParsers(
   z.preprocess(
     preprocessDependingOnTicketingSystem,
     rawUpdateTicketingSystemSchema.superRefine((data, ctx) => {
-      if (data.ticketingSystemName === 'SUPERSONIKS' && data.apiAccessKey && !domainNameRegexp.test(data.apiAccessKey)) {
+      if (
+        (data.ticketingSystemName === 'SUPERSONIKS' || data.ticketingSystemName === 'SOTICKET') &&
+        data.apiAccessKey &&
+        !domainNameRegexp.test(data.apiAccessKey)
+      ) {
         ctx.addIssue(customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError));
       }
     })
