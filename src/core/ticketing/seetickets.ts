@@ -57,13 +57,9 @@ export class SeeticketsTicketingSystemClient implements TicketingSystemClient {
 
     const authResult = await authorize({
       client: this.client,
-      security: [
-        {
-          scheme: 'basic',
-          type: 'http',
-        },
-      ],
-      auth: encodedCredentials,
+      headers: {
+        Authorization: `Basic ${encodedCredentials}`, // Did not succeed using properties `security+auth`, so falling back to raw headers
+      },
       body: new URLSearchParams({
         grant_type: 'client_credentials',
         scope: 'catalog distribution document order user venue pos user:merge order:refund order:transfer modifUserId:XX',
@@ -130,7 +126,7 @@ export class SeeticketsTicketingSystemClient implements TicketingSystemClient {
         auth: accessToken,
         query: {
           'filters[salesChannelId][]': [salesChannelId],
-          'filters[afterPurchaseDate]': fromDate.toString(),
+          'filters[afterPurchaseDate]': fromDate.toISOString(),
           'orderBy[id]': 'asc', // Make sure new ones will be at the end to not break pagination in case of order in the meantime
           offset: (recentTransactionsCurrentPage - 1) * this.maximumItemsPerPage,
           limit: this.maximumItemsPerPage,
