@@ -24,6 +24,7 @@ import fallback from '@ad/public/assets/images/logo.png';
 import { UpdateTicketingSystemForm } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-systems/UpdateTicketingSystemForm';
 import billetweb from '@ad/src/assets/images/ticketing/billetweb.jpg';
 import mapado from '@ad/src/assets/images/ticketing/mapado.jpg';
+import soticket from '@ad/src/assets/images/ticketing/soticket.jpg';
 import supersoniks from '@ad/src/assets/images/ticketing/supersoniks.jpg';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
@@ -83,6 +84,8 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
       return billetweb;
     } else if (props.ticketingSystem.name === 'MAPADO') {
       return mapado;
+    } else if (props.ticketingSystem.name === 'SOTICKET') {
+      return soticket;
     } else if (props.ticketingSystem.name === 'SUPERSONIKS') {
       return supersoniks;
     } else {
