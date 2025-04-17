@@ -44,6 +44,26 @@ export const JsonGetCatalogDetailedResponseSchema = applyTypedParsers(
     catalogData: z.object({
       seasons: z.array(
         z.object({
+          audienceCategories: z.array(
+            z.object({
+              id: z.number().int().nonnegative(),
+              code: z.string().min(1),
+              mainCategory: z.enum(['OCCASIONAL', 'SUBSCRIBER', 'INSIDE_SEASONTICKET', 'MEMBER', 'INVITED']),
+              secondaryCategory: z.enum(['INDIVIDUAL', 'COMMUNITY', 'GROUP', 'TAXED', 'FREE', 'PROMOTIONAL', 'ERROR']),
+              externalName: JsonTranslatedStringSchema,
+              audienceSubCategories: z.array(
+                z.object({
+                  id: z.number().int().nonnegative(),
+                  code: z.string().min(1),
+                  externalName: JsonTranslatedStringSchema,
+                  // externalDescription: JsonTranslatedStringSchema,
+                  audienceCategoryKind: z.enum(['FULL', 'REDUCED', 'FREE']),
+                  requiredAudienceSubCategoryIds: z.array(z.number().int().nonnegative()),
+                  crossSeatCategory: z.boolean(),
+                })
+              ),
+            })
+          ),
           products: z.array(
             z.object({
               id: z.number().int().nonnegative(),
@@ -119,6 +139,20 @@ export const JsonGetUpdatedAvailabilitiesResponseSchema = applyTypedParsers(
   }).strip()
 );
 export type JsonGetUpdatedAvailabilitiesResponseSchemaType = z.infer<typeof JsonGetUpdatedAvailabilitiesResponseSchema>;
+
+export const JsonListVatCodesResponseSchema = applyTypedParsers(
+  JsonSuccessResponseSchema.extend({
+    vatCodes: z.array(
+      z.object({
+        id: z.number().int().nonnegative(),
+        code: z.string().min(1),
+        currentRate: z.number().int().nonnegative(),
+        country: z.literal('FR').or(z.string().min(1)),
+      })
+    ),
+  }).strip()
+);
+export type JsonListVatCodesResponseSchemaType = z.infer<typeof JsonListVatCodesResponseSchema>;
 
 export const JsonListTicketsByCriteriaResponseSchema = applyTypedParsers(
   JsonSuccessResponseSchema.extend({

@@ -2,6 +2,7 @@ import { eachOfLimit } from 'async';
 import { addDays, addSeconds, addYears, isAfter, isBefore, set } from 'date-fns';
 
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
+import { foreignTaxRateOnPriceError } from '@ad/src/models/entities/errors';
 import {
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
@@ -19,6 +20,7 @@ import {
   JsonGetUpdatedAvailabilitiesResponseSchema,
   JsonIsCatalogServiceAliveResponseSchema,
   JsonListTicketsByCriteriaResponseSchema,
+  JsonListVatCodesResponseSchema,
 } from '@ad/src/models/entities/secutix';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
@@ -124,9 +126,26 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
 
     const pointOfSaleId = pointOfSaleData.posConfigData.posId;
 
+    // Fetch possible tax rates
+    const vatCodesResponse = await fetch(this.formatUrl(`/setupService/v1_33/listVatCodes`), {
+      method: 'POST',
+      headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
+      body: JSON.stringify({}),
+    });
+
+    if (!vatCodesResponse.ok) {
+      const error = await vatCodesResponse.json();
+
+      throw error;
+    }
+
+    const vatCodesDataJson = await vatCodesResponse.json();
+    const vatCodesData = JsonListVatCodesResponseSchema.parse(vatCodesDataJson);
+
     // This call to `getCatalogDetailed` is not perfect since it fetches all the events, and despite it takes ~20 seconds
     // it's still less time than using the endpoint `setupService/v1_33/searchProductsByCriteria` that is taking ~1 minute just for 1 event
-    // Note: in the future if we switch over it, make sure to specify filters `granularity` and `searchProductsCriteria.productFamilyTypes`
+    // and also after testing ~3 minutes for 3 events...
+    // Note: in case we would we switch over it, make sure to specify filters `granularity` and `searchProductsCriteria.productFamilyTypes`
     const catalogResponse = await fetch(this.formatUrl(`/catalogService/v1_33/getCatalogDetailed`), {
       method: 'POST',
       headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
@@ -150,6 +169,10 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
     const catalogData = JsonGetCatalogDetailedResponseSchema.parse(catalogDataJson);
 
     const existingProducts = new Map<number, (typeof catalogData)['catalogData']['seasons'][0]['products'][0]>();
+    const existingAudienceSubcategories = new Map<
+      number,
+      (typeof catalogData)['catalogData']['seasons'][0]['audienceCategories'][0]['audienceSubCategories'][0]
+    >();
 
     for (const season of catalogData.catalogData.seasons) {
       for (const product of season.products) {
@@ -166,6 +189,12 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
         }
 
         existingProducts.set(product.id, product);
+      }
+
+      for (const audienceCategory of season.audienceCategories) {
+        for (const audienceSubcategory of audienceCategory.audienceSubCategories) {
+          existingAudienceSubcategories.set(audienceSubcategory.id, audienceSubcategory);
+        }
       }
     }
 
@@ -209,6 +238,18 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
 
         assert(product);
         assert(product.event && product.vatCodeId !== undefined); // Since we filtered `productFamilyType === SINGLE_ENTRY` those properties are provided
+
+        const vatCode = vatCodesData.vatCodes.find((code) => {
+          return code.id === product.vatCodeId;
+        });
+
+        assert(vatCode);
+
+        if (vatCode.country !== 'FR') {
+          throw foreignTaxRateOnPriceError;
+        }
+
+        const taxRate = vatCode.currentRate / 100000; // Receiving 2100 mening 2.1%, so have to convert it to 0.021
 
         const schemaEvents: LiteEventSchemaType[] = [];
         const schemaTicketCategories: Map<LiteTicketCategorySchemaType['internalTicketingSystemId'], LiteTicketCategorySchemaType> = new Map();
@@ -262,52 +303,67 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
             return ticket.performanceId === performance.id;
           });
 
-          for (const ticket of performanceTickets) {
-            // [WORKAROUND] It seems the API does not allow retrieving ticket subcategory (adult, kid...)
-            // so we retrieve them through the ticket. It means if a subcategory is not sold for a product we won't be able to list it
-            // Note: we do this before filtering the ticket state to increase chance of getting more subcategories
+          // Reference the ticket categories to be bound to tickets after
+          for (const price of performance.prices) {
+            // Unique ID to be retrieved
+            const uniqueTicketCategoryId = `${price.seatCatId}_${price.audSubCatId}`;
 
-            // Since with Secutix a same pricing category (= subcategory) can be of multiple variations (= categories)
-            // We make sure to concatenate them so they match our own data model
-            const uniqueTicketCategoryId = `${ticket.seatCategoryId}_${ticket.audienceSubCategoryId}`;
-
-            // Register this category if not yet processed
             let ticketCategory = schemaTicketCategories.get(uniqueTicketCategoryId);
 
             if (!ticketCategory) {
               const seatCategory = performance.seatCategories.find((seatCategory) => {
-                return seatCategory.id === ticket.seatCategoryId;
+                return seatCategory.id === price.seatCatId;
               });
 
               assert(seatCategory);
 
-              const categoryExternalNameTranslation = seatCategory.externalName.translations.find((translation) => {
+              const seatCategoryExternalNameTranslation = seatCategory.externalName.translations.find((translation) => {
                 // For now only consider the french entry or default to the internal code
                 return translation.locale === 'fr';
               });
 
-              const categoryName: string = categoryExternalNameTranslation ? categoryExternalNameTranslation.value : seatCategory.code;
+              const seatCategoryName: string = seatCategoryExternalNameTranslation ? seatCategoryExternalNameTranslation.value : seatCategory.code;
 
-              const categoryPrice = performance.prices.find((price) => {
-                return price.seatCatId === ticket.seatCategoryId && price.audSubCatId === ticket.audienceSubCategoryId;
+              const audienceSubcategory = existingAudienceSubcategories.get(price.audSubCatId);
+
+              assert(audienceSubcategory);
+
+              const audienceSubcategoryExternalNameTranslation = seatCategory.externalName.translations.find((translation) => {
+                // For now only consider the french entry or default to the internal code
+                return translation.locale === 'fr';
               });
 
-              assert(categoryPrice);
+              const audienceSubcategoryName: string = audienceSubcategoryExternalNameTranslation
+                ? audienceSubcategoryExternalNameTranslation.value
+                : seatCategory.code;
 
               ticketCategory = LiteTicketCategorySchema.parse({
                 internalTicketingSystemId: uniqueTicketCategoryId,
-                name: `${categoryName} - ${ticket.audienceSubCategory}`,
+                name: `${seatCategoryName} - ${audienceSubcategoryName}`,
                 description: null,
-                price: categoryPrice.amount / 1000, // Since 4000 = 4€, we have to convert it
+                price: price.amount / 1000, // Since 4000 = 4€, we have to convert it
               });
 
               schemaTicketCategories.set(uniqueTicketCategoryId, ticketCategory);
+            } else {
+              // Make sure the registered ticket category has the same amount
+              assert(ticketCategory.price === price.amount / 1000);
             }
+          }
+
+          for (const ticket of performanceTickets) {
+            // Since with Secutix a same pricing category (= subcategory) can be of multiple variations (= categories)
+            // We make sure to concatenate them so they match our own data model
+            const uniqueTicketCategoryId = `${ticket.seatCategoryId}_${ticket.audienceSubCategoryId}`;
 
             // Do not consider a cancelled ticket
             if (ticket.ticketState === 'CANCELLED') {
               continue;
             }
+
+            const ticketCategory = schemaTicketCategories.get(uniqueTicketCategoryId);
+
+            assert(ticketCategory);
 
             // Increment category sales
             const uniqueEventSalesId = `${performance.id.toString()}_${ticketCategory.internalTicketingSystemId}`;
@@ -358,37 +414,13 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
             name: eventSerieName,
             startAt: serieStartDate,
             endAt: serieEndDate,
-            taxRate: 0, // TODO: ...
+            taxRate: taxRate,
           }),
           events: schemaEvents,
           ticketCategories: Array.from(schemaTicketCategories.values()),
           sales: Array.from(schemaEventSales.values()),
         });
       });
-
-      // listVatCodes seems to not exist... whereas documented https://platform.secutix.com/backend/setup
-      // maybe it's the same for ticketsCategories
-      // ou https://mosa.demo-ws.secutix.com/tnseb/apidocs/CatalogService_latest.html ?
-      // faudrait refetch le global...
-
-      // TODO: tax rate
-
-      // maybe https://platform.secutix.com/swagger/ with dataExportService could help?
-      // but trying to list available ones returns "forbidden"
-
-      // product.ticketModelId ... ? could give good idea of categories?
-
-      // TODO:
-      // TODO:
-      // TODO: if getting "sub audience category" (adult/youth...) only with tickets there is a risk
-      // TODO: of missing pricing category name if no sale for a specific one... (but maybe there is no endpoint for this :/)
-      // TODO: https://platform.secutix.com/backend/sales/glossary --> "tariff"
-      // TODO:
-      // TODO:
-      // TODO: faut-il qu'un "event" ait un endDate nullable ? Pour coller à plusieurs ticketingSystem ?
-      // TODO: bizarre sinon d'utiliser un placeholder "5h du matin après" si jamais y'avait des calculs statistiques derrière ?
-      // TODO: (et même dans la UI...)... créer une issue dans le backlog ?
-      // TODO:
     }
 
     return eventsSeriesWrappers;
