@@ -35,7 +35,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
 
   protected formatUrl(subpathname: string): string {
     const pathnamePrefix = subpathname === '/v1/auth' ? 'tnai' : 'tnseb';
-    const baseUrl = `https://cube.demo-ws.secutix.com/${pathnamePrefix}/backend-apis`;
+    const baseUrl = `https://mosa.demo-ws.secutix.com/${pathnamePrefix}/backend-apis`;
 
     const url = new URL(`${baseUrl}${subpathname}`);
 
@@ -124,6 +124,9 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
 
     const pointOfSaleId = pointOfSaleData.posConfigData.posId;
 
+    // This call to `getCatalogDetailed` is not perfect since it fetches all the events, and despite it takes ~20 seconds
+    // it's still less time than using the endpoint `setupService/v1_33/searchProductsByCriteria` that is taking ~1 minute just for 1 event
+    // Note: in the future if we switch over it, make sure to specify filters `granularity` and `searchProductsCriteria.productFamilyTypes`
     const catalogResponse = await fetch(this.formatUrl(`/catalogService/v1_33/getCatalogDetailed`), {
       method: 'POST',
       headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
@@ -193,7 +196,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
         ...new Set<number>(
           // Since there is no API `beforeDate` we simulate it to be consistent across tests (despite getting more data over time)
           // Note: when using their test environment they regularly update all entities so we cannot rely on the `lastUpdate` property
-          (toDate && !recentlyPurchasedProductsResponse.url.startsWith('https://cube.demo-ws.secutix.com/')
+          (toDate && !recentlyPurchasedProductsResponse.url.startsWith('https://mosa.demo-ws.secutix.com/')
             ? recentlyPurchasedProductsData.availabilityUpdateData.filter((aUPair) => isBefore(aUPair.lastUpdate, toDate))
             : recentlyPurchasedProductsData.availabilityUpdateData
           ).map((aUPair) => aUPair.productId)
