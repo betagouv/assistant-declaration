@@ -300,8 +300,12 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
               pointOfSalesId: pointOfSaleId,
               productId: product.id,
               // Dates range are mandatory so using a safe margin
-              startDate: set(new Date(0), { year: 2010, month: 1, date: 1 }),
-              endDate: addYears(new Date(), 1),
+              startDate: set(new Date(0), { year: 2010, month: 1, date: 1 }).toISOString(),
+              endDate: addYears(new Date(), 1).toISOString(),
+            },
+            paginationParameter: {
+              startPosition: 0,
+              maxResult: 100_000_000, // Try to avoid pagination for simplicity, if none precised it would be only first 5000 items
             },
           }),
         });
