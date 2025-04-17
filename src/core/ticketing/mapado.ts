@@ -247,7 +247,12 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           const safeStartDate = eventDate.startDate || eventDate.startOfEventDay;
           const safeEndDate = eventDate.endDate || eventDate.endOfEventDay;
 
-          assert(safeStartDate && safeEndDate);
+          // We faced some organizations having ticketings being `type: 'dated_events'` but that had no date at all
+          // We cannot say if it's normal or a bug due to a Mapado evolution, but since some had those ticketings already closed
+          // they had no way to change their type to `undated_event` or `offer`... so we just skip them
+          if (!safeStartDate || !safeEndDate) {
+            return;
+          }
 
           // [WORKAROUND] `@id` is a combination, we prefer to focus on the raw `id` but this one is not directly gettable for the `EventDate` entity
           const match = eventDate['@id'].match(/\/v1\/event_dates\/(\d+)/);
