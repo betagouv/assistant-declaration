@@ -1,8 +1,8 @@
 import { eachOfLimit } from 'async';
-import { addDays, addSeconds, addYears, isAfter, isBefore, set } from 'date-fns';
+import { addDays, addSeconds, addYears, isAfter, isBefore, secondsToMilliseconds, set } from 'date-fns';
 
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
-import { foreignTaxRateOnPriceError } from '@ad/src/models/entities/errors';
+import { foreignTaxRateOnPriceError, secutixDataBeingPreparedError } from '@ad/src/models/entities/errors';
 import {
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
@@ -16,6 +16,7 @@ import {
 import {
   JsonAuthResponseSchema,
   JsonGetCatalogDetailedResponseSchema,
+  JsonGetCatalogDetailedResponseSchemaType,
   JsonGetPosConfigResponseSchema,
   JsonGetUpdatedAvailabilitiesResponseSchema,
   JsonIsCatalogServiceAliveResponseSchema,
@@ -23,6 +24,7 @@ import {
   JsonListVatCodesResponseSchema,
 } from '@ad/src/models/entities/secutix';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
+import { sleep } from '@ad/src/utils/sleep';
 
 export class SecutixTicketingSystemClient implements TicketingSystemClient {
   protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;
@@ -142,31 +144,47 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
     const vatCodesDataJson = await vatCodesResponse.json();
     const vatCodesData = JsonListVatCodesResponseSchema.parse(vatCodesDataJson);
 
-    // This call to `getCatalogDetailed` is not perfect since it fetches all the events, and despite it takes ~20 seconds
-    // it's still less time than using the endpoint `setupService/v1_33/searchProductsByCriteria` that is taking ~1 minute just for 1 event
-    // and also after testing ~3 minutes for 3 events...
-    // Note: in case we would we switch over it, make sure to specify filters `granularity` and `searchProductsCriteria.productFamilyTypes`
-    const catalogResponse = await fetch(this.formatUrl(`/catalogService/v1_33/getCatalogDetailed`), {
-      method: 'POST',
-      headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
-      body: JSON.stringify({
-        scope: 'EXTENDED', // To also get events no longer "on sale"
-      }),
-    });
+    // It seems they are caching this aggregating endpoint, so on first calls it may appear as `in_progress` and not `success`
+    // so to avoid disturbing the user we just loop a few
+    let catalogData: JsonGetCatalogDetailedResponseSchemaType | null = null;
 
-    if (!catalogResponse.ok) {
-      const error = await catalogResponse.json();
+    for (let i = 0; i < 5; i++) {
+      // This call to `getCatalogDetailed` is not perfect since it fetches all the events, and despite it takes ~20 seconds
+      // it's still less time than using the endpoint `setupService/v1_33/searchProductsByCriteria` that is taking ~1 minute just for 1 event
+      // and also after testing ~3 minutes for 3 events...
+      // Note: in case we would we switch over it, make sure to specify filters `granularity` and `searchProductsCriteria.productFamilyTypes`
+      const catalogResponse = await fetch(this.formatUrl(`/catalogService/v1_33/getCatalogDetailed`), {
+        method: 'POST',
+        headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
+        body: JSON.stringify({
+          scope: 'EXTENDED', // To also get events no longer "on sale"
+        }),
+      });
 
-      throw error;
+      if (!catalogResponse.ok) {
+        const error = await catalogResponse.json();
+
+        throw error;
+      }
+
+      const catalogDataJson = await catalogResponse.json();
+      catalogData = JsonGetCatalogDetailedResponseSchema.parse(catalogDataJson);
+
+      if (catalogData.statusCode === 'success') {
+        break;
+      } else if (catalogData.statusCode === 'in_progress') {
+        // Wait and retry
+        await sleep(secondsToMilliseconds(10));
+      } else {
+        throw new Error(`unexpected catalog status response`);
+      }
     }
 
-    const catalogDataJson = await catalogResponse.json();
+    assert(catalogData);
 
-    if (catalogDataJson.statusCode !== 'success') {
-      console.warn(JSON.stringify(catalogDataJson));
+    if (catalogData.statusCode !== 'success') {
+      throw secutixDataBeingPreparedError;
     }
-
-    const catalogData = JsonGetCatalogDetailedResponseSchema.parse(catalogDataJson);
 
     const existingProducts = new Map<number, (typeof catalogData)['catalogData']['seasons'][0]['products'][0]>();
     const existingAudienceSubcategories = new Map<

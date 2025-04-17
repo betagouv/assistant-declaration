@@ -39,6 +39,7 @@
       "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
       "organizationNotFound": "aucune organisation trouvée",
+      "secutixDataBeingPrepared": "les données sont en cours de préparation par Secutix, veuillez réessayer 1 minute",
       "ticketingSystemConnectionFailed": "le test de connexion à la billetterie a échoué, veuillez vérifier vos identifiants",
       "ticketingSystemNotFound": "ce système de billetterie n'existe pas",
       "tooManyOrganizationTicketingSystems": "vous avez atteint la limite du nombre de systèmes de billetterie par organisation",

@@ -156,6 +156,7 @@ export const anotherTicketingSystemSynchronizationOngoingError = new BusinessErr
   t('errors.custom.anotherTicketingSystemSynchronizationOngoing')
 );
 export const missingBilletwebEventsRightsError = new BusinessError('missingBilletwebEventsRights', t('errors.custom.missingBilletwebEventsRights'));
+export const secutixDataBeingPreparedError = new BusinessError('secutixDataBeingPrepared', t('errors.custom.secutixDataBeingPrepared'));
 export const foreignTaxRateOnPriceError = new BusinessError('foreignTaxRateOnPrice', t('errors.custom.foreignTaxRateOnPrice'));
 
 // Event serie
