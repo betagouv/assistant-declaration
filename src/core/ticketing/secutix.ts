@@ -27,6 +27,7 @@ import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { sleep } from '@ad/src/utils/sleep';
 
 export class SecutixTicketingSystemClient implements TicketingSystemClient {
+  protected domainName: string;
   protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;
   protected readonly defaultHeaders = new Headers({
     'Content-Type': 'application/json',
@@ -35,11 +36,19 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
   constructor(
     private readonly accessKey: string,
     private readonly secretKey: string
-  ) {}
+  ) {
+    // Endpoint URL form is: https://<institCode>.ws.secutix.com/<module>/backend-apis/<serviceName>/<version>/<method>
+    this.domainName = `${accessKey}.ws.secutix.com`;
+  }
+
+  public useTestEnvironnement(subdomain: string) {
+    this.usingTestEnvironnement = true;
+    this.domainName = `${subdomain}.demo-ws.secutix.com`;
+  }
 
   protected formatUrl(subpathname: string): string {
     const pathnamePrefix = subpathname === '/v1/auth' ? 'tnai' : 'tnseb';
-    const baseUrl = `https://mosa.demo-ws.secutix.com/${pathnamePrefix}/backend-apis`;
+    const baseUrl = `https://${this.domainName}/${pathnamePrefix}/backend-apis`;
 
     const url = new URL(`${baseUrl}${subpathname}`);
 
@@ -243,7 +252,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
         ...new Set<number>(
           // Since there is no API `beforeDate` we simulate it to be consistent across tests (despite getting more data over time)
           // Note: when using their test environment they regularly update all entities so we cannot rely on the `lastUpdate` property
-          (toDate && !recentlyPurchasedProductsResponse.url.startsWith('https://mosa.demo-ws.secutix.com/')
+          (toDate && !this.usingTestEnvironnement
             ? recentlyPurchasedProductsData.availabilityUpdateData.filter((aUPair) => isBefore(aUPair.lastUpdate, toDate))
             : recentlyPurchasedProductsData.availabilityUpdateData
           ).map((aUPair) => aUPair.productId)

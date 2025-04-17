@@ -10,6 +10,7 @@ const itWhenManual = process.env.TEST_MANUAL === 'true' ? it : it.skip;
 
 describeWhenManual('SecutixTicketingSystemClient', () => {
   const client = new SecutixTicketingSystemClient(process.env.TEST_SECUTIX_ACCESS_KEY || '', process.env.TEST_SECUTIX_SECRET_KEY || '');
+  client.useTestEnvironnement('mosa');
 
   describe('getEventsSeries()', () => {
     it(
@@ -22,7 +23,7 @@ describeWhenManual('SecutixTicketingSystemClient', () => {
 
         expect(wrappers.length).toBeGreaterThanOrEqual(10);
       },
-      secondsToMilliseconds(60)
+      secondsToMilliseconds(120)
     );
   });
 });
