@@ -23,6 +23,7 @@
       "authFatal": "une erreur inattendue est survenue, merci de contacter le support",
       "authNoCredentialsMatch": "les informations de connexion fournies sont incorrectes",
       "authRetriable": "une erreur est survenue, veuillez retenter",
+      "billetwebFirewall": "Billetweb semble rejeter nos requêtes du fait de leur trop grand nombre. Merci de réessayer dans quelques secondes ou de nous contacter si le problème persiste",
       "collaboratorCanOnlySeeOrganizationEventsSeries": "en tant que collaborateur vous ne pouvez que lister les spectacles concernant votre organisation",
       "collaboratorCanOnlySeeOrganizationTicketingSystems": "en tant que collaborateur vous ne pouvez que lister les systèmes de billetterie de votre organisation",
       "eventCategoryTicketsNotFound": "ces données de catégorie de tickets n'existent pas",
