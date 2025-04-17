@@ -10,7 +10,7 @@ import {
   JsonGetEventsResponseSchemaType,
   JsonGetTicketCategoriesResponseSchema,
 } from '@ad/src/models/entities/billetweb';
-import { missingBilletwebEventsRightsError } from '@ad/src/models/entities/errors';
+import { billetwebFirewallError, missingBilletwebEventsRightsError } from '@ad/src/models/entities/errors';
 import {
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
@@ -21,6 +21,7 @@ import {
   LiteTicketCategorySchema,
 } from '@ad/src/models/entities/event';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
+import { sleep } from '@ad/src/utils/sleep';
 
 export class BilletwebTicketingSystemClient implements TicketingSystemClient {
   public readonly baseUrl = 'https://www.billetweb.fr/api';
@@ -43,6 +44,14 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
     return url.toString();
   }
 
+  protected assertErrorResponseIsNotFirewall(content: string): void {
+    // It returns a page needing JavaScript that uses a relative script from Cloudflare
+    // (pointing to https://www.billetweb.fr/cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/v1)
+    if (content.includes('cdn-cgi/challenge-platform')) {
+      throw billetwebFirewallError;
+    }
+  }
+
   public async testConnection(): Promise<boolean> {
     try {
       // We fetch the minimum of information since it's just to test the connection
@@ -56,7 +65,9 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
       );
 
       if (!lastModifiedAttendeesResponse.ok) {
-        const error = await lastModifiedAttendeesResponse.json();
+        const error = await lastModifiedAttendeesResponse.text();
+
+        this.assertErrorResponseIsNotFirewall(error);
 
         throw error;
       }
@@ -96,7 +107,9 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
     );
 
     if (!lastModifiedAttendeesResponse.ok) {
-      const error = await lastModifiedAttendeesResponse.json();
+      const error = await lastModifiedAttendeesResponse.text();
+
+      this.assertErrorResponseIsNotFirewall(error);
 
       throw error;
     }
@@ -130,7 +143,9 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
       );
 
       if (!eventsResponse.ok) {
-        const error = await eventsResponse.json();
+        const error = await eventsResponse.text();
+
+        this.assertErrorResponseIsNotFirewall(error);
 
         throw error;
       }
@@ -144,6 +159,9 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
     // Get all data to be returned and compared with stored data we have
     // Note: for now we do not parallelize to not flood the ticketing system
     await eachOfLimit(eventsIdsToSynchronize, 1, async (eventId) => {
+      // Wait a bit since for an organization it was triggering their Cloudflare captcha
+      await sleep(250);
+
       // TODO: unfortunately there is no endpoint to get an event alone, so to get name/description/startDate we have to reuse them from `/attendees`
       // endpoint to not fetch all events from the beginning... (missing endDate)
 
@@ -159,7 +177,9 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
       );
 
       if (!datesResponse.ok) {
-        const error = await datesResponse.json();
+        const error = await datesResponse.text();
+
+        this.assertErrorResponseIsNotFirewall(error);
 
         throw error;
       }
@@ -227,7 +247,9 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
       );
 
       if (!attendeesResponse.ok) {
-        const error = await attendeesResponse.json();
+        const error = await attendeesResponse.text();
+
+        this.assertErrorResponseIsNotFirewall(error);
 
         throw error;
       }
@@ -269,7 +291,9 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
       });
 
       if (!ticketCategoriesResponse.ok) {
-        const error = await ticketCategoriesResponse.json();
+        const error = await ticketCategoriesResponse.text();
+
+        this.assertErrorResponseIsNotFirewall(error);
 
         throw error;
       }

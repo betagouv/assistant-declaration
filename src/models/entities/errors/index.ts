@@ -156,6 +156,7 @@ export const anotherTicketingSystemSynchronizationOngoingError = new BusinessErr
   t('errors.custom.anotherTicketingSystemSynchronizationOngoing')
 );
 export const missingBilletwebEventsRightsError = new BusinessError('missingBilletwebEventsRights', t('errors.custom.missingBilletwebEventsRights'));
+export const billetwebFirewallError = new BusinessError('billetwebFirewall', t('errors.custom.billetwebFirewall'));
 export const foreignTaxRateOnPriceError = new BusinessError('foreignTaxRateOnPrice', t('errors.custom.foreignTaxRateOnPrice'));
 export const supersoniksAccessKeyInvalidDomainNameError = new BusinessError(
   'supersoniksAccessKeyInvalidDomainName',
