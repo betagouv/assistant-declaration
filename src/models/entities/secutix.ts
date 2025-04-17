@@ -69,6 +69,14 @@ export const JsonGetCatalogDetailedResponseSchema = applyTypedParsers(
                   ),
                 })
               ),
+              priceLevels: z.array(
+                z.object({
+                  id: z.number().int().nonnegative(),
+                  code: z.string().min(1),
+                  mainCategory: z.enum(['OCCASIONAL', 'SUBSCRIBER', 'INSIDE_SEASONTICKET', 'MEMBER', 'INVITED']),
+                  // reduction: z.number().int().nonnegative(),
+                })
+              ),
               products: z.array(
                 z.object({
                   id: z.number().int().nonnegative(),
@@ -106,6 +114,7 @@ export const JsonGetCatalogDetailedResponseSchema = applyTypedParsers(
                             z.object({
                               seatCatId: z.number().int().nonnegative(),
                               audSubCatId: z.number().int().nonnegative(),
+                              priceLevelId: z.number().int().nonnegative().optional(),
                               amount: z.number().int().nonnegative(), // 4000 for 4€
                             })
                           ),
@@ -169,7 +178,8 @@ export const JsonListTicketsByCriteriaResponseSchema = applyTypedParsers(
         performanceId: z.number().int().nonnegative(),
         seatCategoryId: z.number().int().nonnegative(),
         audienceSubCategoryId: z.number().int().nonnegative(),
-        audienceSubCategory: z.string().min(1),
+        priceLevelId: z.number().int().nonnegative().optional(),
+        price: z.number().int().nonnegative(), // 4000 for 4€
       })
     ),
   }).strip()

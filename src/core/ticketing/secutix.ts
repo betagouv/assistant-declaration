@@ -28,6 +28,7 @@ import { sleep } from '@ad/src/utils/sleep';
 
 export class SecutixTicketingSystemClient implements TicketingSystemClient {
   protected domainName: string;
+  protected usingTestEnvironnement: boolean = false;
   protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;
   protected readonly defaultHeaders = new Headers({
     'Content-Type': 'application/json',
@@ -200,6 +201,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
       number,
       (typeof catalogData)['catalogData']['seasons'][0]['audienceCategories'][0]['audienceSubCategories'][0]
     >();
+    const existingPriceLevels = new Map<number, (typeof catalogData)['catalogData']['seasons'][0]['priceLevels'][0]>();
 
     for (const season of catalogData.catalogData.seasons) {
       for (const product of season.products) {
@@ -222,6 +224,10 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
         for (const audienceSubcategory of audienceCategory.audienceSubCategories) {
           existingAudienceSubcategories.set(audienceSubcategory.id, audienceSubcategory);
         }
+      }
+
+      for (const priceLevel of season.priceLevels) {
+        existingPriceLevels.set(priceLevel.id, priceLevel);
       }
     }
 
@@ -309,6 +315,23 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
         const productTicketsDataJson = await productTicketsResponse.json();
         const productTicketsData = JsonListTicketsByCriteriaResponseSchema.parse(productTicketsDataJson);
 
+        // Try to detect same prices combos that have different amounts among performances of a same product (before computing results)
+        const uniquePriceCombos: string[] = [];
+        const duplicatedPriceCombos = new Map<string, number>(); // The value is the count to increment names
+
+        for (const performance of product.event.performances) {
+          for (const price of performance.prices) {
+            const uniqueTicketCategoryId = `${price.priceLevelId ?? 0}_${price.seatCatId}_${price.audSubCatId}`;
+
+            if (uniquePriceCombos.includes(uniqueTicketCategoryId)) {
+              // We set 0 since it will be the counter to increment names
+              duplicatedPriceCombos.set(uniqueTicketCategoryId, 0);
+            } else {
+              uniquePriceCombos.push(uniqueTicketCategoryId);
+            }
+          }
+        }
+
         for (const performance of product.event.performances) {
           // Only synchronize events that are not considered as cancelled
           if (product.state === 'CANCELED' || product.state === 'CANCELED_CLOSED') {
@@ -333,9 +356,16 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
           // Reference the ticket categories to be bound to tickets after
           for (const price of performance.prices) {
             // Unique ID to be retrieved
-            const uniqueTicketCategoryId = `${price.seatCatId}_${price.audSubCatId}`;
+            const uniqueTicketCategoryId = `${price.priceLevelId ?? 0}_${price.seatCatId}_${price.audSubCatId}`;
+            let fallbackUniqueTicketCategoryId = uniqueTicketCategoryId;
 
-            let ticketCategory = schemaTicketCategories.get(uniqueTicketCategoryId);
+            // If there is the same combo with a different amount we need to differentiate them and we chose to always suffix them (even the first one)
+            let duplicatedCombo = duplicatedPriceCombos.get(uniqueTicketCategoryId);
+            if (duplicatedCombo !== undefined) {
+              fallbackUniqueTicketCategoryId = `${uniqueTicketCategoryId}_${price.amount}`;
+            }
+
+            let ticketCategory = schemaTicketCategories.get(fallbackUniqueTicketCategoryId);
 
             if (!ticketCategory) {
               const seatCategory = performance.seatCategories.find((seatCategory) => {
@@ -364,14 +394,36 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
                 ? audienceSubcategoryExternalNameTranslation.value
                 : seatCategory.code;
 
+              let ticketCategoryName = `${seatCategoryName} - ${audienceSubcategoryName}`;
+
+              // If any price level we concatenate
+              if (price.priceLevelId !== undefined) {
+                const priceLevel = existingPriceLevels.get(price.priceLevelId);
+
+                assert(priceLevel);
+
+                // There is no "external name" for the price level, but the code should be readable enough to be understood
+                ticketCategoryName = `${priceLevel.code} - ${ticketCategoryName}`;
+              }
+
+              // Also handle duplicated combos
+              if (duplicatedCombo !== undefined) {
+                const currentOccurencesCount = duplicatedCombo + 1;
+
+                ticketCategoryName = `${ticketCategoryName} (n°${currentOccurencesCount})`;
+
+                // Save the result next occurences
+                duplicatedPriceCombos.set(uniqueTicketCategoryId, currentOccurencesCount);
+              }
+
               ticketCategory = LiteTicketCategorySchema.parse({
-                internalTicketingSystemId: uniqueTicketCategoryId,
-                name: `${seatCategoryName} - ${audienceSubcategoryName}`,
+                internalTicketingSystemId: fallbackUniqueTicketCategoryId,
+                name: ticketCategoryName,
                 description: null,
                 price: price.amount / 1000, // Since 4000 = 4€, we have to convert it
               });
 
-              schemaTicketCategories.set(uniqueTicketCategoryId, ticketCategory);
+              schemaTicketCategories.set(fallbackUniqueTicketCategoryId, ticketCategory);
             } else {
               // Make sure the registered ticket category has the same amount
               assert(ticketCategory.price === price.amount / 1000);
@@ -379,16 +431,20 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
           }
 
           for (const ticket of performanceTickets) {
-            // Since with Secutix a same pricing category (= subcategory) can be of multiple variations (= categories)
-            // We make sure to concatenate them so they match our own data model
-            const uniqueTicketCategoryId = `${ticket.seatCategoryId}_${ticket.audienceSubCategoryId}`;
-
             // Do not consider a cancelled ticket
             if (ticket.ticketState === 'CANCELLED') {
               continue;
             }
 
-            const ticketCategory = schemaTicketCategories.get(uniqueTicketCategoryId);
+            // Since with Secutix a same pricing category (= subcategory) can be of multiple variations (= categories)
+            // We make sure to concatenate them so they match our own data model
+            let fallbackUniqueTicketCategoryId = `${ticket.priceLevelId ?? 0}_${ticket.seatCategoryId}_${ticket.audienceSubCategoryId}`;
+
+            if (duplicatedPriceCombos.has(fallbackUniqueTicketCategoryId)) {
+              fallbackUniqueTicketCategoryId = `${fallbackUniqueTicketCategoryId}_${ticket.price}`;
+            }
+
+            const ticketCategory = schemaTicketCategories.get(fallbackUniqueTicketCategoryId);
 
             assert(ticketCategory);
 
