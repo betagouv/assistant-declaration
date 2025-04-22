@@ -30,25 +30,28 @@ export const TotauxSchema = applyTypedParsers(
 export const JsonGetSpectaclesResponseSchema = applyTypedParsers(
   z
     .object({
-      error: z.number(),
-      data: z.object({
-        id_spectacle: z.number().int().nonnegative(),
-        name: z.string().min(1),
-        representations: z.record(
-          z.string().min(1),
-          z.object({
-            id_representation: z.number().int().nonnegative(),
-            start: z.number().int().nonnegative(),
-            // hall: z.object({
-            //   id: z.number().int().nonnegative(),
-            //   name: z.string().min(1),
-            //   address: z.string(),
-            //   zipcode: z.string(),
-            //   city: z.string(),
-            // }),
-          })
-        ),
-      }),
+      error: z.literal(0),
+      data: z.record(
+        z.coerce.number(),
+        z.object({
+          id_spectacle: z.number().int().nonnegative(),
+          name: z.string().min(1),
+          representations: z.record(
+            z.coerce.number(),
+            z.object({
+              id_representation: z.number().int().nonnegative(),
+              start: z.number().int().nonnegative(),
+              // hall: z.object({
+              //   id: z.number().int().nonnegative(),
+              //   name: z.string().min(1),
+              //   address: z.string(),
+              //   zipcode: z.string(),
+              //   city: z.string(),
+              // }),
+            })
+          ),
+        })
+      ),
     })
     .strip()
 );

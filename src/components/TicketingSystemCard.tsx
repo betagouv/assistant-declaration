@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import fallback from '@ad/public/assets/images/logo.png';
 import { UpdateTicketingSystemForm } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-systems/UpdateTicketingSystemForm';
 import billetweb from '@ad/src/assets/images/ticketing/billetweb.jpg';
+import festik from '@ad/src/assets/images/ticketing/festik.jpg';
 import mapado from '@ad/src/assets/images/ticketing/mapado.jpg';
 import supersoniks from '@ad/src/assets/images/ticketing/supersoniks.jpg';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
@@ -81,6 +82,8 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
   const logo = useMemo(() => {
     if (props.ticketingSystem.name === 'BILLETWEB') {
       return billetweb;
+    } else if (props.ticketingSystem.name === 'FESTIK') {
+      return festik;
     } else if (props.ticketingSystem.name === 'MAPADO') {
       return mapado;
     } else if (props.ticketingSystem.name === 'SUPERSONIKS') {
