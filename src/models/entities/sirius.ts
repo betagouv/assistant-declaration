@@ -132,7 +132,7 @@ export type JsonResponseBaseSchemaType = z.infer<typeof JsonResponseBaseSchema>;
 
 export const JsonGetContextResponseSchema = JsonResponseBaseSchema.extend({
   instPA: z.string().min(1),
-  inst: z.string().min(1),
+  inst: z.coerce.number().int().nonnegative(),
   version: z.string().min(1),
   // langues: z.string().min(1),
   // parcours: z.boolean(),
