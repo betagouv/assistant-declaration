@@ -53,6 +53,74 @@ export const JsonBilletSchema = applyTypedParsers(
 );
 export type JsonBilletSchemaType = z.infer<typeof JsonBilletSchema>;
 
+export const JsonSeanceSchema = applyTypedParsers(
+  z
+    .object({
+      id: z.number().int().nonnegative(),
+      spec: z.number().int().nonnegative(),
+      aff: z.boolean(),
+      cache: z.boolean(),
+      titre: z.string().min(1), // HTML content
+      // comm: z.string().transform(transformStringOrNull),
+      // jour: z.enum(['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']),
+      date: z.number().int().nonnegative(),
+      // salle: z.number().int().nonnegative(),
+      // num: z.boolean(),
+      // ovl: z.literal(0).or(z.literal(-1)),
+      // classSC: z.string().transform(transformStringOrNull),
+      // nonDispo: z.number().int().nonnegative(),
+      // infoSC: z.number().int().nonnegative(),
+      // infoTarifs: z.number().int().nonnegative(),
+      // ong: z.number().int().nonnegative(),
+      // ctrl: z.number().int().nonnegative(),
+      // typeOk: z.number().int().nonnegative(),
+      // nbDS: z.number().int().nonnegative(),
+      // infoDS: z.number().int().nonnegative(),
+      // plan: z.boolean(),
+    })
+    .strip()
+);
+export type JsonSeanceSchemaType = z.infer<typeof JsonSeanceSchema>;
+
+export const JsonSpectacleSchema = applyTypedParsers(
+  z
+    .object({
+      // deplie: z.number().int().nonnegative(),
+      // img: z.string().min(1),
+      // classSP: z.string().transform(transformStringOrNull),
+      // adv: z.number().int().nonnegative(),
+      titre: z.string().min(1), // HTML content
+      infoSP: z.number().int().nonnegative(),
+      // filtre: z.string().min(1),
+      id: z.number().int().nonnegative(),
+      listeSC: z.array(z.number().int().nonnegative()),
+    })
+    .strip()
+);
+export type JsonSpectacleSchemaType = z.infer<typeof JsonSpectacleSchema>;
+
+export const JsonSalleSchema = applyTypedParsers(
+  z
+    .object({
+      id: z.string().min(1),
+      nom: z.string().min(1),
+      adresse: z.string().transform(transformStringOrNull),
+      position: z.string().transform(transformStringOrNull),
+      zonage: z.object({
+        image: z.string().min(1),
+        zones: z.record(
+          z.string().min(1),
+          z.object({
+            nom: z.string().min(1),
+            coords: z.string().min(1),
+          })
+        ),
+      }),
+    })
+    .strip()
+);
+export type JsonSalleSchemaType = z.infer<typeof JsonSalleSchema>;
+
 export const JsonCollectionSchema = applyTypedParsers(
   z.object({
     statut: z.literal(true),
@@ -83,69 +151,83 @@ export const JsonListEventsParametersResponseSchema = JsonCollectionSchema.exten
     // dirImage: z.string().url(),
     // catsOVL: z.string().transform(transformStringOrNull),
     messages: z.array(z.string().min(1)),
-    spectacles: z.record(
-      z.coerce.number().int().nonnegative(),
-      z.object({
-        // deplie: z.number().int().nonnegative(),
-        // img: z.string().min(1),
-        // classSP: z.string().transform(transformStringOrNull),
-        // adv: z.number().int().nonnegative(),
-        titre: z.string().min(1), // HTML content
-        infoSP: z.number().int().nonnegative(),
-        // filtre: z.string().min(1),
-        id: z.number().int().nonnegative(),
-        listeSC: z.array(z.number().int().nonnegative()),
-      })
-    ),
-    seances: z.record(
-      z.coerce.number().int().nonnegative(),
-      z.object({
-        id: z.coerce.number().int().nonnegative(),
-        spec: z.coerce.number().int().nonnegative(),
-        aff: z.boolean(),
-        cache: z.boolean(),
-        titre: 'Le<br>Malade Imaginaire',
-        comm: z.string().transform(transformStringOrNull),
-        jour: 'Ve',
-        date: 1676660400,
-        salle: z.coerce.number().int().nonnegative(),
-        num: z.boolean(),
-        ovl: z.literal(0).or(z.literal(-1)),
-        classSC: z.string().transform(transformStringOrNull),
-        nonDispo: 2,
-        infoSC: 0,
-        infoTarifs: 1,
-        ong: 0,
-        ctrl: 0,
-        typeOk: 0,
-        nbDS: 0,
-        infoDS: 0,
-        plan: z.boolean(),
-      })
-    ),
+    spectacles: z.record(z.coerce.number().int().nonnegative(), JsonSpectacleSchema),
+    seances: z.record(z.coerce.number().int().nonnegative(), JsonSeanceSchema),
     ordreSC: z.array(z.number().int().nonnegative()),
-    // salles: z.record(
-    //   z.string().min(1),
-    //   z.object({
-    //     id: z.string().min(1),
-    //     nom: z.string().min(1),
-    //     adresse: z.string().transform(transformStringOrNull),
-    //     position: z.string().transform(transformStringOrNull),
-    //     zonage: z.object({
-    //       image: z.string().min(1),
-    //       zones: z.record(
-    //         z.string().min(1),
-    //         z.object({
-    //           nom: z.string().min(1),
-    //           coords: z.string().min(1),
-    //         })
-    //       ),
-    //     }),
-    //   })
-    // ),
+    // salles: z.record(z.string().min(1), JsonSalleSchema),
     saison: z.number().int().nonnegative(),
     // filtre: z.array(z.string().min(1)),
     // poc: z.unknown(),
   }),
 }).strip();
 export type JsonListEventsParametersResponseSchemaType = z.infer<typeof JsonListEventsParametersResponseSchema>;
+
+export const JsonListPricesResponseSchema = JsonCollectionSchema.extend({
+  data: z.object({
+    // apiLTinfos: z.unknown().nullable(),
+    // apiLTlst: z.string().min(1), // List of events
+    // apiLTmin: z.number().int().nonnegative(), // Minimal ID of event
+    // apiLTmax: z.number().int().nonnegative(), // Maximal ID of event
+    // apiLTctrl: z.unknown().nullable(),
+    apiLTcat: z.record(
+      z.string().min(1),
+      z.object({
+        nomCT: z.string().min(1),
+        // coulCT: z.string().min(1),
+      })
+    ),
+    version: z.string().min(1),
+    grilles: z.array(
+      z.array(
+        z.object({
+          ta: z.string().min(1),
+          nm: z.number().int().nonnegative(),
+          aff: z.boolean(),
+          // nbMax: z.number().int().nonnegative(),
+          // css: z.string().transform(transformStringOrNull),
+          px: z.record(z.string().min(1), z.number().int().nonnegative()), // Cents
+          // ju: z.string().transform(transformStringOrNull),
+          // com: z.string().transform(transformStringOrNull),
+          // bul: z.string().transform(transformStringOrNull),
+        })
+      )
+    ),
+    grilleSeance: z.record(z.coerce.number().int().nonnegative(), z.number().int().nonnegative()),
+    messages: z.array(z.string().min(1)),
+    // tarifs: z.record(
+    //   z.string().min(1),
+    //   z.object({
+    //     controle: z.string().min(1),
+    //     groupe: z.boolean(),
+    //   })
+    // ),
+    // controles: z.record(
+    //   z.string().min(1),
+    //   z.object({
+    //     codeTA: z.array(z.string().min(1)),
+    //     generique: z.boolean(),
+    //     okAchat: z.boolean(),
+    //     nominatif: z.boolean(),
+    //     nbMaxCtrl: z.number().int().nonnegative(),
+    //     nature: z.enum(['R']),
+    //     texte: z.string().min(1),
+    //     placeHolder: z.string().min(1),
+    //     infoNP: z.string().transform(transformStringOrNull),
+    //     okAchatMessage: z.string().min(1),
+    //   })
+    // ),
+    // justifs: z.record(z.string().min(1),z.object({
+    //   fam: z.string().min(1),
+    //   nomPres: z.string().min(1), // HTML content
+    // })),
+    // prestations: z.record(z.string().min(1),z.object({
+    //   fam: z.string().min(1),
+    //   nomPres: z.string().min(1),
+    //   prix: z.number().int(), // Can be -1 too
+    //   fifo: z.string().transform(transformStringOrNull),
+    // })),
+    // promos: z.array(z.unknown()),
+    // okTA: z.string().transform(transformStringOrNull),
+  }),
+}).strip();
+export type JsonListPricesResponseSchemaType = z.infer<typeof JsonListPricesResponseSchema>;
