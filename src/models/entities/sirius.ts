@@ -121,16 +121,30 @@ export const JsonSalleSchema = applyTypedParsers(
 );
 export type JsonSalleSchemaType = z.infer<typeof JsonSalleSchema>;
 
-export const JsonCollectionSchema = applyTypedParsers(
+export const JsonResponseBaseSchema = applyTypedParsers(
   z.object({
     statut: z.literal(true),
     nuerr: z.literal(0),
     erreur: z.string().transform(transformStringOrNull), // Sometimes filled even when no error
   })
 );
-export type JsonCollectionSchemaType = z.infer<typeof JsonCollectionSchema>;
+export type JsonResponseBaseSchemaType = z.infer<typeof JsonResponseBaseSchema>;
 
-export const JsonListReservationsResponseSchema = JsonCollectionSchema.extend({
+export const JsonGetContextResponseSchema = JsonResponseBaseSchema.extend({
+  instPA: z.string().min(1),
+  inst: z.string().min(1),
+  version: z.string().min(1),
+  // langues: z.string().min(1),
+  // parcours: z.boolean(),
+  // regle: z.string().transform(transformStringOrNull),
+  // site: z.string().transform(transformStringOrNull),
+  // bix: z.string().transform(transformStringOrNull),
+  // pNom: z.string().transform(transformStringOrNull),
+  // topFSN: z.coerce.date(),
+}).strip();
+export type JsonGetContextResponseSchemaType = z.infer<typeof JsonGetContextResponseSchema>;
+
+export const JsonListReservationsResponseSchema = JsonResponseBaseSchema.extend({
   histo: z.object({
     seances: z.array(
       z.object({
@@ -146,7 +160,7 @@ export const JsonListReservationsResponseSchema = JsonCollectionSchema.extend({
 }).strip();
 export type JsonListReservationsResponseSchemaType = z.infer<typeof JsonListReservationsResponseSchema>;
 
-export const JsonListEventsParametersResponseSchema = JsonCollectionSchema.extend({
+export const JsonListEventsParametersResponseSchema = JsonResponseBaseSchema.extend({
   data: z.object({
     // dirImage: z.string().url(),
     // catsOVL: z.string().transform(transformStringOrNull),
@@ -162,7 +176,7 @@ export const JsonListEventsParametersResponseSchema = JsonCollectionSchema.exten
 }).strip();
 export type JsonListEventsParametersResponseSchemaType = z.infer<typeof JsonListEventsParametersResponseSchema>;
 
-export const JsonListPricesResponseSchema = JsonCollectionSchema.extend({
+export const JsonListPricesResponseSchema = JsonResponseBaseSchema.extend({
   data: z.object({
     // apiLTinfos: z.unknown().nullable(),
     // apiLTlst: z.string().min(1), // List of events
