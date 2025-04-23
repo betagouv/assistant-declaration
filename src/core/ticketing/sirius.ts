@@ -373,17 +373,18 @@ export class SiriusTicketingSystemClient implements TicketingSystemClient {
 
           let eventSales = schemaEventSales.get(uniqueEventSalesId);
 
+          // It's weird but Sirius considers a "billet" (ticket) can be for multiple seats, so adjusting the logic here
           if (!eventSales) {
             schemaEventSales.set(
               uniqueEventSalesId,
               LiteEventSalesSchema.parse({
                 internalEventTicketingSystemId: this.formatForUniqueness(institutionId, eventForTickets.id),
                 internalTicketCategoryTicketingSystemId: ticketCategory.internalTicketingSystemId,
-                total: 1,
+                total: ticket.nbPlaces,
               })
             );
           } else {
-            eventSales.total += 1;
+            eventSales.total += ticket.nbPlaces;
           }
         }
       }
