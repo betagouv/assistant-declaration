@@ -18,11 +18,7 @@ export const JsonBilletSchema = applyTypedParsers(
       id_commande: z.number().int().nonnegative(),
       date: z.coerce.date(),
       date_commande: z.preprocess((value) => {
-        if (value === '') {
-          return null;
-        } else {
-          return new Date(value as string);
-        }
+        return value === '' ? null : new Date(value as string);
       }, z.date().nullable()),
       etat: z.enum([
         'B',
@@ -48,8 +44,8 @@ export const JsonBilletSchema = applyTypedParsers(
         'RZ',
       ]),
       devise: z.literal('EUR'),
-      montant: z.number().nonnegative(), // NOT cents
-      montant_base: z.number().nonnegative(), // NOT cents
+      montant: z.number(), // NOT cents, it will be negative only if `etat: 'A'`
+      montant_base: z.number(), // NOT cents, it will be negative only if `etat: 'A'`
       commission: z.number(), // NOT cents, and is returned sometimes as a negative number and sometimes positive (a solution could be to make it absolute)
       id_commission: z.string().transform(transformStringOrNull), // It can also be a "*" which is weird
       id_categorie: z.string().min(1),
@@ -109,6 +105,18 @@ export const JsonSeanceSchema = applyTypedParsers(
     .strip()
 );
 export type JsonSeanceSchemaType = z.infer<typeof JsonSeanceSchema>;
+
+export const JsonSeanceReservationSchema = applyTypedParsers(
+  z
+    .object({
+      id: z.number().int().nonnegative(),
+      id_salle: z.string().transform(transformStringOrNull),
+      taux_tva: z.number().nonnegative(), // 2.1 for 2.1%
+      billets: z.array(JsonBilletSchema),
+    })
+    .strip()
+);
+export type JsonSeanceReservationSchemaType = z.infer<typeof JsonSeanceReservationSchema>;
 
 export const JsonSpectacleSchema = applyTypedParsers(
   z
@@ -173,18 +181,19 @@ export const JsonGetContextResponseSchema = JsonResponseBaseSchema.extend({
 export type JsonGetContextResponseSchemaType = z.infer<typeof JsonGetContextResponseSchema>;
 
 export const JsonListReservationsResponseSchema = JsonResponseBaseSchema.extend({
-  histo: z.object({
-    seances: z.array(
-      z.object({
-        id: z.number().int().nonnegative(),
-        id_salle: z.string().transform(transformStringOrNull),
-        taux_tva: z.number().nonnegative(), // 2.1 for 2.1%
-        billets: z.array(JsonBilletSchema),
+  histo: z.preprocess(
+    (value) => {
+      // When there is no reservation found it returns 'null' globally...
+      return value === 'null' ? null : value;
+    },
+    z
+      .object({
+        seances: z.array(JsonSeanceReservationSchema),
+        // trace: z.string().transform(transformStringOrNull),
+        // topMin: z.string().min(1),
       })
-    ),
-    // trace: z.string().transform(transformStringOrNull),
-    // topMin: z.string().min(1),
-  }),
+      .nullable()
+  ),
 }).strip();
 export type JsonListReservationsResponseSchemaType = z.infer<typeof JsonListReservationsResponseSchema>;
 

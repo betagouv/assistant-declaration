@@ -19,6 +19,7 @@ import {
   JsonListEventsParametersResponseSchema,
   JsonListPricesResponseSchema,
   JsonListReservationsResponseSchema,
+  JsonSeanceReservationSchemaType,
 } from '@ad/src/models/entities/sirius';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
@@ -53,6 +54,7 @@ export class SiriusTicketingSystemClient implements TicketingSystemClient {
       this.formatUrl(`/Contexte`, {
         inst: this.accessKey,
         session: this.secretKey,
+        paramsURL: 'kld=1&version=2.1', // Important to force the version since they made a lot of changes in schemas structure
       }),
       { method: 'GET' }
     );
@@ -123,7 +125,8 @@ export class SiriusTicketingSystemClient implements TicketingSystemClient {
     const recentReservationsDataJson = await recentReservationsResponse.json();
     const recentReservations = JsonListReservationsResponseSchema.parse(recentReservationsDataJson);
 
-    const eventsIdsToSynchronize: number[] = recentReservations.histo.seances.map((seance) => seance.id);
+    // For whatever reason when there is none the global object is not provided
+    const eventsIdsToSynchronize: number[] = recentReservations.histo ? recentReservations.histo.seances.map((seance) => seance.id) : [];
 
     // From here we don't have the events series IDs, so we have to fetch them from the events IDs we have
     const recentEventsParametersResponse = await fetch(
@@ -335,7 +338,10 @@ export class SiriusTicketingSystemClient implements TicketingSystemClient {
 
       let taxRate: number | null = null;
 
-      for (const eventForTickets of serieReservations.histo.seances) {
+      // For whatever reason when there is none the global object is not provided
+      const seances: JsonSeanceReservationSchemaType[] = serieReservations.histo ? serieReservations.histo.seances : [];
+
+      for (const eventForTickets of seances) {
         const inputTaxRate = eventForTickets.taux_tva / 100; // Receiving 2.1 that we manage as 0.021
 
         if (taxRate === null) {
@@ -353,6 +359,10 @@ export class SiriusTicketingSystemClient implements TicketingSystemClient {
           if (ticket.etat === 'A') {
             continue;
           }
+
+          // When the ticket command is cancelled they switch the sign of the amount (so we just ensure their logic here)
+          assert(ticket.montant >= 0);
+          assert(ticket.montant_base >= 0);
 
           // Only consider tickets that have a positive number of places, we don't know yet the meaning of a negative number
           if (ticket.nbPlaces < 0) {
