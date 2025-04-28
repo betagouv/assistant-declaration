@@ -354,6 +354,11 @@ export class SiriusTicketingSystemClient implements TicketingSystemClient {
             continue;
           }
 
+          // Only consider tickets that have a positive number of places, we don't know yet the meaning of a negative number
+          if (ticket.nbPlaces < 0) {
+            continue;
+          }
+
           // Retrieve the corresponding ticket category
           const twoPartsTicketCategoryId = `${ticket.id_tarif}_${ticket.id_categorie}`;
           let uniqueTicketCategoryId = twoPartsTicketCategoryId;
@@ -361,7 +366,16 @@ export class SiriusTicketingSystemClient implements TicketingSystemClient {
           // If this combo has duplications we adjust the unique ID as done to register ticket categories
           let duplicatedComboPreviousOccurencesCount = duplicatedPriceCombos.get(twoPartsTicketCategoryId);
           if (duplicatedComboPreviousOccurencesCount !== undefined) {
-            uniqueTicketCategoryId = `${twoPartsTicketCategoryId}_${ticket.montant_base}`;
+            // The Sirius logic is `ticket.montant = ticket.montant_base + ticket.commission`
+            // Note: the `ticket.commission` is not reliable because sometimes it's returned as a negative number
+            // and sometimes a positive number... So having either `5 = 8 + (-3)` or `5 = 8 - 3`
+            // ... if needed to be used we could make it absolute
+            const unitTicketPrice = ticket.montant / ticket.nbPlaces; // The `montant` represents the total price for X seats
+
+            // The ticket category amount is defined as cents so we need to adapt to retrieve the ticket category
+            const unitTicketPriceCents = unitTicketPrice * 100;
+
+            uniqueTicketCategoryId = `${twoPartsTicketCategoryId}_${unitTicketPriceCents}`;
           }
 
           const ticketCategory = schemaTicketCategories.get(uniqueTicketCategoryId);

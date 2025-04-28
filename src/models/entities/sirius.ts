@@ -17,13 +17,41 @@ export const JsonBilletSchema = applyTypedParsers(
       id: z.number().int().nonnegative(),
       id_commande: z.number().int().nonnegative(),
       date: z.coerce.date(),
-      date_commande: z.coerce.date(),
-      etat: z.enum(['B', 'A', 'N', 'O', 'C', 'Rx', 'L']),
+      date_commande: z.preprocess((value) => {
+        if (value === '') {
+          return null;
+        } else {
+          return new Date(value as string);
+        }
+      }, z.date().nullable()),
+      etat: z.enum([
+        'B',
+        'A',
+        'N',
+        'O',
+        'C',
+        'Rx',
+        'L',
+        // The following ones are not documented but are returned by the API
+        'RA',
+        'RB',
+        'RC',
+        'RD',
+        'RE',
+        'RF',
+        'RG',
+        'RH',
+        'RS',
+        'RT',
+        'RV',
+        'RW',
+        'RZ',
+      ]),
       devise: z.literal('EUR'),
-      montant: z.number().int().nonnegative(), // Cents
-      montant_base: z.number().int().nonnegative(), // Cents
-      commission: z.number().int().nonnegative(), // Cents
-      id_commission: z.string().transform(transformStringOrNull),
+      montant: z.number().nonnegative(), // NOT cents
+      montant_base: z.number().nonnegative(), // NOT cents
+      commission: z.number(), // NOT cents, and is returned sometimes as a negative number and sometimes positive (a solution could be to make it absolute)
+      id_commission: z.string().transform(transformStringOrNull), // It can also be a "*" which is weird
       id_categorie: z.string().min(1),
       id_tarif: z.string().min(1),
       id_sous_tarif: z.string().transform(transformStringOrNull),
@@ -32,7 +60,7 @@ export const JsonBilletSchema = applyTypedParsers(
       // web: z.boolean(),
       // cir: z.unknown(),
       // fam: z.string().transform(transformStringOrNull),
-      nbPlaces: z.number().int().nonnegative(),
+      nbPlaces: z.number().int(),
       // client: z.object({
       //   id: z.number().int().nonnegative(),
       //   nom: z.string().min(1),
@@ -149,7 +177,7 @@ export const JsonListReservationsResponseSchema = JsonResponseBaseSchema.extend(
     seances: z.array(
       z.object({
         id: z.number().int().nonnegative(),
-        id_salle: z.string().min(1),
+        id_salle: z.string().transform(transformStringOrNull),
         taux_tva: z.number().nonnegative(), // 2.1 for 2.1%
         billets: z.array(JsonBilletSchema),
       })
