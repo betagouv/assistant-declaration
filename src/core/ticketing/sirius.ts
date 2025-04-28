@@ -49,6 +49,12 @@ export class SiriusTicketingSystemClient implements TicketingSystemClient {
     return `${institutionId}_${input}`;
   }
 
+  public adjustPriceId(priceId: string): string {
+    // A price ID starting with the "+" sign won't be display with it when being listed in the tickets list
+    // Since cannot guess which one has to be prepended with "+", we decided to remove it so `+P20` will always be kept as `P20`
+    return priceId.startsWith('+') ? priceId.slice(1) : priceId;
+  }
+
   public async login(): Promise<{ institutionId: number; accessToken: string }> {
     const contextResponse = await fetch(
       this.formatUrl(`/Contexte`, {
@@ -243,7 +249,7 @@ export class SiriusTicketingSystemClient implements TicketingSystemClient {
           assert(priceCategories.length > 0);
 
           for (const [priceCategoryId, priceCategoryAmountCents] of priceCategories) {
-            const twoPartsTicketCategoryId = `${price.ta}_${priceCategoryId}`;
+            const twoPartsTicketCategoryId = `${this.adjustPriceId(price.ta)}_${priceCategoryId}`;
 
             const priceComboAmount = uniquePriceCombos.get(twoPartsTicketCategoryId);
 
@@ -266,7 +272,7 @@ export class SiriusTicketingSystemClient implements TicketingSystemClient {
 
           for (const [priceCategoryId, priceCategoryAmountCents] of priceCategories) {
             // Unique ID to be retrieved
-            const twoPartsTicketCategoryId = `${price.ta}_${priceCategoryId}`;
+            const twoPartsTicketCategoryId = `${this.adjustPriceId(price.ta)}_${priceCategoryId}`;
             let uniqueTicketCategoryId = twoPartsTicketCategoryId;
 
             // If there is the same combo with a different amount we need to differentiate them and we chose to always suffix them (even the first one)
@@ -380,7 +386,7 @@ export class SiriusTicketingSystemClient implements TicketingSystemClient {
             // Note: the `ticket.commission` is not reliable because sometimes it's returned as a negative number
             // and sometimes a positive number... So having either `5 = 8 + (-3)` or `5 = 8 - 3`
             // ... if needed to be used we could make it absolute
-            const unitTicketPrice = ticket.montant / ticket.nbPlaces; // The `montant` represents the total price for X seats
+            const unitTicketPrice = ticket.montant; // The `montant` represents the unit price (no need to adjust with `ticket.nbPlaces`)
 
             // The ticket category amount is defined as cents so we need to adapt to retrieve the ticket category
             const unitTicketPriceCents = unitTicketPrice * 100;
