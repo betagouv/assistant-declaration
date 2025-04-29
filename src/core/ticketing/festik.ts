@@ -1,9 +1,20 @@
+import slugify from '@sindresorhus/slugify';
 import { eachOfLimit } from 'async';
-import { addYears, getUnixTime, subMonths } from 'date-fns';
+import { addDays, addMinutes, addYears, fromUnixTime, getUnixTime, isAfter, isBefore, set, subMonths } from 'date-fns';
 
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
-import { LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
+import {
+  LiteEventSalesSchema,
+  LiteEventSalesSchemaType,
+  LiteEventSchema,
+  LiteEventSchemaType,
+  LiteEventSerieSchema,
+  LiteEventSerieWrapperSchemaType,
+  LiteTicketCategorySchema,
+  LiteTicketCategorySchemaType,
+} from '@ad/src/models/entities/event';
 import { JsonGetRepresentationsResponseSchema, JsonGetSpectaclesResponseSchema } from '@ad/src/models/entities/festik';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export class FestikTicketingSystemClient implements TicketingSystemClient {
   public readonly baseUrl = 'https://dev.festik.tools/webservice';
@@ -81,28 +92,171 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
     // Get all data to be returned and compared with stored data we have
     // Note: for now we do not parallelize to not flood the ticketing system
     await eachOfLimit(spectacles, 1, async (spectacle) => {
+      const schemaEvents: LiteEventSchemaType[] = [];
+      const schemaTicketCategories: Map<LiteTicketCategorySchemaType['internalTicketingSystemId'], LiteTicketCategorySchemaType> = new Map();
+      const schemaEventSales: Map<
+        LiteEventSalesSchemaType['internalEventTicketingSystemId'] & LiteEventSalesSchemaType['internalTicketCategoryTicketingSystemId'],
+        LiteEventSalesSchemaType
+      > = new Map();
+
+      let taxRate: number | null = null;
+
       // We have to go through each representation (= event) to get details
       for (const representation of Object.values(spectacle.representations)) {
-        // TODO:
-        // TODO:
-        // TODO: wait to know if specific endpoint for CRMs as mentioned by Festik
-        // TODO:
+        const startDate = fromUnixTime(representation.start);
+
+        // Festik does not provide the end date so doing as ticketing system Mapado that is setting by default the end date to the end of the night
+        const endDate = set(addDays(startDate, 1), { hours: 5, minutes: 0, seconds: 0, milliseconds: 0 });
+
+        schemaEvents.push(
+          LiteEventSchema.parse({
+            internalTicketingSystemId: representation.id_representation.toString(),
+            startAt: startDate,
+            endAt: endDate,
+          })
+        );
+
+        // Now retrieve information about ticketing
+        const representationResponse = await fetch(
+          this.formatUrl(`/declaration/representation/${this.accessKey}/${this.secretKey}/${representation.id_representation}/`),
+          { method: 'GET' }
+        );
+
+        if (!representationResponse.ok) {
+          const error = await representationResponse.json();
+
+          throw error;
+        }
+
+        const representationDataJson = await representationResponse.json();
+
+        const representationData = JsonGetRepresentationsResponseSchema.parse(representationDataJson.data);
+
+        // They have the same structure
+        const ticketCategories = representationData.declaration.billets.gratuits.concat(representationData.declaration.billets.payants);
+
+        // Since Festik provides no ticket category ID and they may have the same name with different amounts
+        // We have to first loop to detect duplicates so we differenciate them with distinct adjusted names
+        const uniquePriceCombos = new Map<string, number>();
+        const duplicatedPriceCombos = new Map<string, number>(); // The value is the count to increment names
+
+        // We sort them to reduce the risk of adjusted name changes when prices will be stable (event serie fully ended)
+        const sortedTicketCategories = ticketCategories.sort((a, b) => a.prix_unitaire_ttc - b.prix_unitaire_ttc);
+
+        for (const rawTicketCategory of sortedTicketCategories) {
+          const onePartTicketCategoryId = slugify(rawTicketCategory.tarif); // `tarif` is the name
+
+          const priceComboAmount = uniquePriceCombos.get(onePartTicketCategoryId);
+
+          if (priceComboAmount !== undefined) {
+            if (priceComboAmount !== rawTicketCategory.prix_unitaire_ttc) {
+              // We set 0 since it will be the counter to increment names
+              duplicatedPriceCombos.set(onePartTicketCategoryId, 0);
+            }
+          } else {
+            uniquePriceCombos.set(onePartTicketCategoryId, rawTicketCategory.prix_unitaire_ttc);
+          }
+        }
+
+        // Now we can reprocess safely while knowing all duplicates
+        for (const rawTicketCategory of sortedTicketCategories) {
+          // Unique ID to be retrieved
+          const onePartTicketCategoryId = slugify(rawTicketCategory.tarif);
+          let uniqueTicketCategoryId = onePartTicketCategoryId;
+
+          // If there is the same combo with a different amount we need to differentiate them and we chose to always suffix them (even the first one)
+          let duplicatedComboPreviousOccurencesCount = duplicatedPriceCombos.get(onePartTicketCategoryId);
+          if (duplicatedComboPreviousOccurencesCount !== undefined) {
+            uniqueTicketCategoryId = `${onePartTicketCategoryId}_${rawTicketCategory.prix_unitaire_ttc}`;
+          }
+
+          let ticketCategory = schemaTicketCategories.get(uniqueTicketCategoryId);
+
+          if (!ticketCategory) {
+            let ticketCategoryName = rawTicketCategory.tarif;
+
+            // Also handle duplicated combos
+            if (duplicatedComboPreviousOccurencesCount !== undefined) {
+              const currentOccurencesCount = duplicatedComboPreviousOccurencesCount + 1;
+
+              ticketCategoryName = `${ticketCategoryName} (n°${currentOccurencesCount})`;
+
+              // Save the result next occurences
+              duplicatedPriceCombos.set(onePartTicketCategoryId, currentOccurencesCount);
+            }
+
+            ticketCategory = LiteTicketCategorySchema.parse({
+              internalTicketingSystemId: uniqueTicketCategoryId,
+              name: ticketCategoryName,
+              description: null,
+              price: rawTicketCategory.prix_unitaire_ttc, // It's already a float
+            });
+
+            schemaTicketCategories.set(uniqueTicketCategoryId, ticketCategory);
+          } else {
+            // Make sure the registered ticket category has the same amount
+            assert(ticketCategory.price === rawTicketCategory.prix_unitaire_ttc);
+          }
+
+          // Increment category sales
+          const uniqueEventSalesId = `${representation.id_representation}_${ticketCategory.internalTicketingSystemId}`;
+
+          const eventSales = schemaEventSales.get(uniqueEventSalesId);
+
+          if (!eventSales) {
+            schemaEventSales.set(
+              uniqueEventSalesId,
+              LiteEventSalesSchema.parse({
+                internalEventTicketingSystemId: representation.id_representation.toString(),
+                internalTicketCategoryTicketingSystemId: ticketCategory.internalTicketingSystemId,
+                total: rawTicketCategory.nb_billets_vendus,
+              })
+            );
+          } else {
+            eventSales.total += rawTicketCategory.nb_billets_vendus;
+          }
+
+          // Since internally we manage a unique tax rate per event serie, we make sure all sessions and ticket categories are using the same
+          if (taxRate === null) {
+            taxRate = rawTicketCategory.taux_tva;
+          } else if (taxRate !== rawTicketCategory.taux_tva) {
+            // throw new Error(`an event serie should have the same tax rate for all sessions of a serie`)
+
+            // [WORKAROUND] Until we decide the right way to do, just keep a tax rate not null
+            taxRate = Math.max(taxRate, rawTicketCategory.taux_tva);
+          }
+        }
       }
 
-      const spectacleResponse = await fetch(
-        this.formatUrl(`/declaration/representation/${this.accessKey}/${this.secretKey}/${spectacle.id_spectacle}/`),
-        { method: 'GET' }
-      );
+      // Calculate the date range for the event serie
+      let serieStartDate: Date | null = null;
+      let serieEndDate: Date | null = null;
 
-      if (!spectacleResponse.ok) {
-        const error = await spectacleResponse.json();
+      for (const schemaEvent of schemaEvents) {
+        if (serieStartDate === null || isBefore(schemaEvent.startAt, serieStartDate)) {
+          serieStartDate = schemaEvent.startAt;
+        }
 
-        throw error;
+        if (serieEndDate === null || isAfter(schemaEvent.endAt, serieEndDate)) {
+          serieEndDate = schemaEvent.endAt;
+        }
       }
 
-      const spectacleDataJson = await spectacleResponse.json();
+      assert(serieStartDate !== null && serieEndDate !== null);
+      assert(taxRate !== null);
 
-      const spectacleData = JsonGetRepresentationsResponseSchema.parse(spectacleDataJson.data);
+      eventsSeriesWrappers.push({
+        serie: LiteEventSerieSchema.parse({
+          internalTicketingSystemId: spectacle.id_spectacle.toString(),
+          name: spectacle.name,
+          startAt: serieStartDate,
+          endAt: serieEndDate,
+          taxRate: taxRate,
+        }),
+        events: schemaEvents,
+        ticketCategories: Array.from(schemaTicketCategories.values()),
+        sales: Array.from(schemaEventSales.values()),
+      });
     });
 
     return eventsSeriesWrappers;

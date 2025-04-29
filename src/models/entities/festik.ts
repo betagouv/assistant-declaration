@@ -32,12 +32,12 @@ export const JsonGetSpectaclesResponseSchema = applyTypedParsers(
     .object({
       error: z.literal(0),
       data: z.record(
-        z.coerce.number(),
+        z.coerce.number().int().nonnegative(),
         z.object({
           id_spectacle: z.number().int().nonnegative(),
           name: z.string().min(1),
           representations: z.record(
-            z.coerce.number(),
+            z.coerce.number().int().nonnegative(),
             z.object({
               id_representation: z.number().int().nonnegative(),
               start: z.number().int().nonnegative(),
@@ -62,10 +62,10 @@ export const JsonGetRepresentationsResponseSchema = applyTypedParsers(
     .object({
       spectacle: z.object({
         name: z.string().min(1),
-        id: z.number().int().nonnegative(),
+        id: z.coerce.number().int().nonnegative(),
       }),
       representation: z.object({
-        id: z.number().int().nonnegative(),
+        id: z.coerce.number().int().nonnegative(),
         // label: z.string().min(1),
       }),
       declaration: z.object({
