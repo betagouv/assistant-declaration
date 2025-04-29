@@ -48,7 +48,7 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
 
       const spectaclesDataJson = await spectaclesResponse.json();
 
-      const spectaclesData = JsonGetSpectaclesResponseSchema.parse(spectaclesDataJson.data);
+      const spectaclesData = JsonGetSpectaclesResponseSchema.parse(spectaclesDataJson);
 
       return true;
     } catch (error) {
@@ -82,7 +82,7 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
 
     const spectaclesDataJson = await spectaclesResponse.json();
 
-    const spectaclesData = JsonGetSpectaclesResponseSchema.parse(spectaclesDataJson.data);
+    const spectaclesData = JsonGetSpectaclesResponseSchema.parse(spectaclesDataJson);
 
     // Cannot be filtered with `from/to` since we want it to be based on updated tickets
     const spectacles = Object.values(spectaclesData.data);
@@ -130,7 +130,7 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
 
         const representationDataJson = await representationResponse.json();
 
-        const representationData = JsonGetRepresentationsResponseSchema.parse(representationDataJson.data);
+        const representationData = JsonGetRepresentationsResponseSchema.parse(representationDataJson);
 
         // They have the same structure
         const ticketCategories = representationData.declaration.billets.gratuits.concat(representationData.declaration.billets.payants);
@@ -220,10 +220,10 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
           if (taxRate === null) {
             taxRate = rawTicketCategory.taux_tva;
           } else if (taxRate !== rawTicketCategory.taux_tva) {
-            // throw new Error(`an event serie should have the same tax rate for all sessions of a serie`)
+            throw new Error(`an event serie should have the same tax rate for all sessions of a serie`);
 
-            // [WORKAROUND] Until we decide the right way to do, just keep a tax rate not null
-            taxRate = Math.max(taxRate, rawTicketCategory.taux_tva);
+            // // [WORKAROUND] Until we decide the right way to do, just keep a tax rate not null
+            // taxRate = Math.max(taxRate, rawTicketCategory.taux_tva);
           }
         }
       }
