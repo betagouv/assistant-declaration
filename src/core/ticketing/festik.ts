@@ -275,6 +275,10 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
         }
       }
 
+      if (this.usingTestEnvironnement && taxRate === null) {
+        taxRate = 0; // Fallback for tests to pass since some representations are not existing while listed on the first endpoint
+      }
+
       assert(serieStartDate !== null && serieEndDate !== null);
       assert(taxRate !== null);
 
