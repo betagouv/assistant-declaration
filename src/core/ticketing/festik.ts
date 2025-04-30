@@ -141,7 +141,12 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
         const duplicatedPriceCombos = new Map<string, number>(); // The value is the count to increment names
 
         // We sort them to reduce the risk of adjusted name changes when prices will be stable (event serie fully ended)
-        const sortedTicketCategories = ticketCategories.sort((a, b) => a.prix_unitaire_ttc - b.prix_unitaire_ttc);
+        const sortedTicketCategories = ticketCategories
+          .sort((a, b) => a.prix_unitaire_ttc - b.prix_unitaire_ttc)
+          .filter((ticketCategory) => {
+            // TODO: we saw negative amounts and we are waiting for the Festik answer about the meaning, just skipping them for tests
+            return ticketCategory.prix_unitaire_ttc >= 0;
+          });
 
         for (const rawTicketCategory of sortedTicketCategories) {
           const onePartTicketCategoryId = slugify(rawTicketCategory.tarif); // `tarif` is the name
