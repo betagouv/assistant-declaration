@@ -30,7 +30,7 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
     private readonly secretKey: string
   ) {}
 
-  public useTestEnvironnement(subdomain: string) {
+  public useTestEnvironnement() {
     this.usingTestEnvironnement = true;
     this.baseUrl = 'https://dev.festik.tools/webservice';
   }
