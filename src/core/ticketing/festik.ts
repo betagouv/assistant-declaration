@@ -13,16 +13,27 @@ import {
   LiteTicketCategorySchema,
   LiteTicketCategorySchemaType,
 } from '@ad/src/models/entities/event';
-import { JsonGetRepresentationsResponseSchema, JsonGetSpectaclesResponseSchema } from '@ad/src/models/entities/festik';
+import {
+  JsonBilletSchemaType,
+  JsonGetRepresentationsResponseSchema,
+  JsonGetRepresentationsResponseSchemaType,
+  JsonGetSpectaclesResponseSchema,
+} from '@ad/src/models/entities/festik';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export class FestikTicketingSystemClient implements TicketingSystemClient {
-  public readonly baseUrl = 'https://dev.festik.tools/webservice';
+  public baseUrl = 'https://www.festik.tools/webservice';
+  protected usingTestEnvironnement = false;
 
   constructor(
     private readonly accessKey: string,
     private readonly secretKey: string
   ) {}
+
+  public useTestEnvironnement(subdomain: string) {
+    this.usingTestEnvironnement = true;
+    this.baseUrl = 'https://dev.festik.tools/webservice';
+  }
 
   protected formatUrl(subpathname: string, params: Record<string, string> = {}): string {
     const url = new URL(`${this.baseUrl}${subpathname}`);
@@ -101,6 +112,13 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
 
       let taxRate: number | null = null;
 
+      // Festik provides no ticket category ID and they may have the same name with different amounts
+      // We have to first loop to detect duplicates so we differenciate them with distinct adjusted names
+      const uniquePriceCombos = new Map<string, number>();
+      const duplicatedPriceCombos = new Map<string, number>(); // The value is the count to increment names
+
+      const sortedTicketCategoriesPerRepresentationId: Map<number, JsonBilletSchemaType[]> = new Map();
+
       // We have to go through each representation (= event) to get details
       for (const representation of Object.values(spectacle.representations)) {
         const startDate = fromUnixTime(representation.start);
@@ -130,23 +148,28 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
 
         const representationDataJson = await representationResponse.json();
 
+        // In their test environment some representations may be listed in the first endpoint while not existing
+        // in the second... Since they set all values to `null`, we have to skip them to make our parsing working for tests
+        // (it's probably just corrupted fake data, it would have no sense of this in production)
+        if (this.usingTestEnvironnement && representationDataJson.spectacle.id === null) {
+          continue;
+        }
+
         const representationData = JsonGetRepresentationsResponseSchema.parse(representationDataJson);
 
-        // They have the same structure
-        const ticketCategories = representationData.declaration.billets.gratuits.concat(representationData.declaration.billets.payants);
+        // Free and paid tickets can be processed as the same
+        let ticketCategories = representationData.declaration.billets.gratuits.concat(representationData.declaration.billets.payants);
 
-        // Since Festik provides no ticket category ID and they may have the same name with different amounts
-        // We have to first loop to detect duplicates so we differenciate them with distinct adjusted names
-        const uniquePriceCombos = new Map<string, number>();
-        const duplicatedPriceCombos = new Map<string, number>(); // The value is the count to increment names
-
-        // We sort them to reduce the risk of adjusted name changes when prices will be stable (event serie fully ended)
-        const sortedTicketCategories = ticketCategories
-          .sort((a, b) => a.prix_unitaire_ttc - b.prix_unitaire_ttc)
-          .filter((ticketCategory) => {
-            // TODO: we saw negative amounts and we are waiting for the Festik answer about the meaning, just skipping them for tests
+        // In their test environment they have negative value they can't explain, they suggest it's just weird fake data
+        // so we just skip them for now, hoping it's not happening in production
+        if (this.usingTestEnvironnement) {
+          ticketCategories = ticketCategories.filter((ticketCategory) => {
             return ticketCategory.prix_unitaire_ttc >= 0;
           });
+        }
+
+        // We sort them to reduce the risk of adjusted name changes when prices will be stable (event serie fully ended)
+        const sortedTicketCategories = ticketCategories.sort((a, b) => a.prix_unitaire_ttc - b.prix_unitaire_ttc);
 
         for (const rawTicketCategory of sortedTicketCategories) {
           const onePartTicketCategoryId = slugify(rawTicketCategory.tarif); // `tarif` is the name
@@ -163,6 +186,11 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
           }
         }
 
+        // Due to the fallback about ticket category names the rest will be done in another loop with the whole context of duplication
+        sortedTicketCategoriesPerRepresentationId.set(representation.id_representation, sortedTicketCategories);
+      }
+
+      for (const [representationId, sortedTicketCategories] of sortedTicketCategoriesPerRepresentationId) {
         // Now we can reprocess safely while knowing all duplicates
         for (const rawTicketCategory of sortedTicketCategories) {
           // Unique ID to be retrieved
@@ -204,7 +232,7 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
           }
 
           // Increment category sales
-          const uniqueEventSalesId = `${representation.id_representation}_${ticketCategory.internalTicketingSystemId}`;
+          const uniqueEventSalesId = `${representationId}_${ticketCategory.internalTicketingSystemId}`;
 
           const eventSales = schemaEventSales.get(uniqueEventSalesId);
 
@@ -212,7 +240,7 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
             schemaEventSales.set(
               uniqueEventSalesId,
               LiteEventSalesSchema.parse({
-                internalEventTicketingSystemId: representation.id_representation.toString(),
+                internalEventTicketingSystemId: representationId.toString(),
                 internalTicketCategoryTicketingSystemId: ticketCategory.internalTicketingSystemId,
                 total: rawTicketCategory.nb_billets_vendus,
               })

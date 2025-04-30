@@ -7,6 +7,7 @@ const itWhenManual = process.env.TEST_MANUAL === 'true' ? it : it.skip;
 
 describeWhenManual('FestikTicketingSystemClient', () => {
   const client = new FestikTicketingSystemClient(process.env.TEST_FESTIK_ACCESS_KEY || '', process.env.TEST_FESTIK_SECRET_KEY || '');
+  client.useTestEnvironnement();
 
   describe('getEventsSeries()', () => {
     it(

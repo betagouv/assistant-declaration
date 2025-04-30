@@ -6,7 +6,7 @@ import { applyTypedParsers } from '@ad/src/utils/zod';
 // Below we only focus on properties we need to avoid issues if the rest of the schema evolves
 //
 
-export const BilletSchema = applyTypedParsers(
+export const JsonBilletSchema = applyTypedParsers(
   z.object({
     tarif: z.string().min(1),
     prix_unitaire_ttc: z.coerce.number(),
@@ -17,8 +17,9 @@ export const BilletSchema = applyTypedParsers(
     // total_ttc: z.coerce.number().nonnegative(),
   })
 );
+export type JsonBilletSchemaType = z.infer<typeof JsonBilletSchema>;
 
-export const TotauxSchema = applyTypedParsers(
+export const JsonTotauxSchema = applyTypedParsers(
   z.object({
     nb_billets_vendus: z.number().int().nonnegative(),
     total_ht: z.number().nonnegative(),
@@ -26,6 +27,7 @@ export const TotauxSchema = applyTypedParsers(
     total_ttc: z.number().nonnegative(),
   })
 );
+export type JsonTotauxSchemaType = z.infer<typeof JsonTotauxSchema>;
 
 export const JsonGetSpectaclesResponseSchema = applyTypedParsers(
   z
@@ -70,12 +72,12 @@ export const JsonGetRepresentationsResponseSchema = applyTypedParsers(
       }),
       declaration: z.object({
         billets: z.object({
-          payants: z.array(BilletSchema),
-          gratuits: z.array(BilletSchema),
+          payants: z.array(JsonBilletSchema),
+          gratuits: z.array(JsonBilletSchema),
         }),
         // totaux: z.object({
-        //   payants: TotauxSchema,
-        //   gratuits: TotauxSchema,
+        //   payants: JsonTotauxSchema,
+        //   gratuits: JsonTotauxSchema,
         // }),
       }),
     })
