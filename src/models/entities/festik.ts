@@ -9,7 +9,7 @@ import { applyTypedParsers } from '@ad/src/utils/zod';
 export const BilletSchema = applyTypedParsers(
   z.object({
     tarif: z.string().min(1),
-    prix_unitaire_ttc: z.coerce.number().nonnegative(),
+    prix_unitaire_ttc: z.coerce.number(),
     nb_billets_vendus: z.coerce.number().int().nonnegative(),
     taux_tva: z.coerce.number().nonnegative(),
     // total_ht: z.coerce.number().nonnegative(),
