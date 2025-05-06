@@ -68,6 +68,13 @@ export const localizedRoutes = {
       fr: (p) => `/documentation/connexion-mapado`,
     }
   ),
+  docsShotgunConnection: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/docs/shotgun-connection`,
+      fr: (p) => `/documentation/connexion-shotgun`,
+    }
+  ),
   docsSoticketConnection: defineLocalizedRoute(
     {},
     {
@@ -239,6 +246,7 @@ export const routes = {
     docsBilletwebConnection: defineRoute(localizedRoutes.docsBilletwebConnection.params, localizedRoutes.docsBilletwebConnection.paths.en),
     docsHelloassoConnection: defineRoute(localizedRoutes.docsHelloassoConnection.params, localizedRoutes.docsHelloassoConnection.paths.en),
     docsMapadoConnection: defineRoute(localizedRoutes.docsMapadoConnection.params, localizedRoutes.docsMapadoConnection.paths.en),
+    docsShotgunConnection: defineRoute(localizedRoutes.docsShotgunConnection.params, localizedRoutes.docsShotgunConnection.paths.en),
     docsSoticketConnection: defineRoute(localizedRoutes.docsSoticketConnection.params, localizedRoutes.docsSoticketConnection.paths.en),
     docsSupersoniksConnection: defineRoute(localizedRoutes.docsSupersoniksConnection.params, localizedRoutes.docsSupersoniksConnection.paths.en),
     docsTicketingApiUsage: defineRoute(localizedRoutes.docsTicketingApiUsage.params, localizedRoutes.docsTicketingApiUsage.paths.en),
@@ -267,6 +275,7 @@ export const routes = {
     docsBilletwebConnection: defineRoute(localizedRoutes.docsBilletwebConnection.params, localizedRoutes.docsBilletwebConnection.paths.fr),
     docsHelloassoConnection: defineRoute(localizedRoutes.docsHelloassoConnection.params, localizedRoutes.docsHelloassoConnection.paths.fr),
     docsMapadoConnection: defineRoute(localizedRoutes.docsMapadoConnection.params, localizedRoutes.docsMapadoConnection.paths.fr),
+    docsShotgunConnection: defineRoute(localizedRoutes.docsShotgunConnection.params, localizedRoutes.docsShotgunConnection.paths.fr),
     docsSoticketConnection: defineRoute(localizedRoutes.docsSoticketConnection.params, localizedRoutes.docsSoticketConnection.paths.fr),
     docsSupersoniksConnection: defineRoute(localizedRoutes.docsSupersoniksConnection.params, localizedRoutes.docsSupersoniksConnection.paths.fr),
     docsTicketingApiUsage: defineRoute(localizedRoutes.docsTicketingApiUsage.params, localizedRoutes.docsTicketingApiUsage.paths.fr),

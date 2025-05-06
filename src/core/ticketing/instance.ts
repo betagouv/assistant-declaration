@@ -4,6 +4,7 @@ import { BilletwebTicketingSystemClient } from '@ad/src/core/ticketing/billetweb
 import { MockTicketingSystemClient, TicketingSystemClient } from '@ad/src/core/ticketing/common';
 import { HelloassoTicketingSystemClient } from '@ad/src/core/ticketing/helloasso';
 import { MapadoTicketingSystemClient } from '@ad/src/core/ticketing/mapado';
+import { ShotgunTicketingSystemClient } from '@ad/src/core/ticketing/shotgun';
 import { SoticketTicketingSystemClient } from '@ad/src/core/ticketing/soticket';
 import { SupersoniksTicketingSystemClient } from '@ad/src/core/ticketing/supersoniks';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -37,6 +38,12 @@ export function getTicketingSystemClient(
         assert(ticketingSystem.apiSecretKey);
 
         ticketingSystemClient = new MapadoTicketingSystemClient(ticketingSystem.apiSecretKey);
+        break;
+      case 'SHOTGUN':
+        assert(ticketingSystem.apiAccessKey);
+        assert(ticketingSystem.apiSecretKey);
+
+        ticketingSystemClient = new ShotgunTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
         break;
       case 'SOTICKET':
         assert(ticketingSystem.apiAccessKey);

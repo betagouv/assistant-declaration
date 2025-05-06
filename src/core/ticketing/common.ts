@@ -8,6 +8,7 @@ export const ticketingSystemRequiresApiAccessKey: Record<TicketingSystemNameSche
   BILLETWEB: true,
   HELLOASSO: true,
   MAPADO: false,
+  SHOTGUN: true,
   SOTICKET: true,
   SUPERSONIKS: true,
 };

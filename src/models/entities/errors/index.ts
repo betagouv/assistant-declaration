@@ -164,6 +164,7 @@ export const supersoniksAccessKeyInvalidDomainNameError = new BusinessError(
   t('errors.custom.supersoniksAccessKeyInvalidDomainName')
 );
 export const helloassoMissingTierError = new BusinessError('helloassoMissingTier', t('errors.custom.helloassoMissingTier'));
+export const shotgunTooMuchToRetrieveError = new BusinessError('shotgunTooMuchToRetrieve', t('errors.custom.shotgunTooMuchToRetrieve'));
 
 // Event serie
 export const eventSerieNotFoundError = new BusinessError('eventSerieNotFound', t('errors.custom.eventSerieNotFound'));
