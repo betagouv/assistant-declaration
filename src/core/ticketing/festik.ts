@@ -148,17 +148,27 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
 
         const representationDataJson = await representationResponse.json();
 
-        // In their test environment some representations may be listed in the first endpoint while not existing
-        // in the second... Since they set all values to `null`, we have to skip them to make our parsing working for tests
-        // (it's probably just corrupted fake data, it would have no sense of this in production)
-        if (this.usingTestEnvironnement && representationDataJson.spectacle.id === null) {
-          continue;
+        // [WORKAROUND] Some representations may be listed in the first endpoint while not existing in the second...
+        // After reaching their support for having all values as `null`, they told us it may happen, and this mean
+        // the representation has no ticket sold/given. It's kind of weird instead of returning empty arrays but for now
+        // we just consider there it exists with no indication. Hoping there is a valid representation aside to get some of
+        // the ticket categories...
+        let ticketCategories: JsonBilletSchemaType[];
+
+        if (representationDataJson.spectacle.id === null) {
+          ticketCategories = [];
+
+          // Also set a fallback tax rate so validation are passing (we have no other way to retrieve it if there is no ticket category)
+          if (taxRate === null) {
+            taxRate = 0; // Fallback for tests to pass since some representations are not existing while listed on the first endpoint
+          }
+        } else {
+          const representationData = JsonGetRepresentationsResponseSchema.parse(representationDataJson);
+
+          // Free and paid tickets can be processed as the same
+          ticketCategories = representationData.declaration.billets.gratuits.concat(representationData.declaration.billets.payants);
         }
 
-        const representationData = JsonGetRepresentationsResponseSchema.parse(representationDataJson);
-
-        // Free and paid tickets can be processed as the same
-        let ticketCategories = representationData.declaration.billets.gratuits.concat(representationData.declaration.billets.payants);
 
         // In their test environment they have negative value they can't explain, they suggest it's just weird fake data
         // so we just skip them for now, hoping it's not happening in production
@@ -273,10 +283,6 @@ export class FestikTicketingSystemClient implements TicketingSystemClient {
         if (serieEndDate === null || isAfter(schemaEvent.endAt, serieEndDate)) {
           serieEndDate = schemaEvent.endAt;
         }
-      }
-
-      if (this.usingTestEnvironnement && taxRate === null) {
-        taxRate = 0; // Fallback for tests to pass since some representations are not existing while listed on the first endpoint
       }
 
       assert(serieStartDate !== null && serieEndDate !== null);
