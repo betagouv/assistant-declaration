@@ -39,12 +39,22 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
     private readonly secretKey: string
   ) {
     // Endpoint URL form is: https://<institCode>.ws.secutix.com/<module>/backend-apis/<serviceName>/<version>/<method>
-    this.domainName = `${accessKey}.ws.secutix.com`;
+    this.domainName = `${this.getInstitutionSubdomain()}.ws.secutix.com`;
   }
 
-  public useTestEnvironnement(subdomain: string) {
+  public useTestEnvironnement() {
     this.usingTestEnvironnement = true;
-    this.domainName = `${subdomain}.demo-ws.secutix.com`;
+    this.domainName = `${this.getInstitutionSubdomain()}.demo-ws.secutix.com`;
+  }
+
+  protected getInstitutionSubdomain(): string {
+    // The access key corresponds to the operator identifier in the following format: `CMOSA_HELLO`
+    // In this case the institution code is always the first part (`CMOSA`), and to be used as subdomain it's lowercased
+    const parts = this.accessKey.split('_');
+
+    assert(parts.length > 1, `invalid access key format`);
+
+    return parts[0].toLowerCase();
   }
 
   protected formatUrl(subpathname: string): string {
