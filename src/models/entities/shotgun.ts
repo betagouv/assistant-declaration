@@ -63,7 +63,7 @@ export const JsonEventSchema = applyTypedParsers(
         product_id: z.number().int().nonnegative(),
         description: z.string().min(1).nullable(),
         quantity: z.number().int().nonnegative(),
-        // target: z.enum(['online']),
+        // target: z.enum(['online', 'pass_culture']),
         subcategory_id: z.number().int().nonnegative(),
         subcategory: z
           .object({
@@ -76,7 +76,7 @@ export const JsonEventSchema = applyTypedParsers(
         price: z.number().nonnegative(), // Float
         organizer_fees: z.number().nonnegative(), // Float
         user_fees: z.number().nonnegative(), // Float
-        // sales_channel: z.enum(['online']),
+        // sales_channel: z.enum(['online', 'pass_culture']),
       })
     ),
     // isFestival: z.boolean(),

@@ -7,6 +7,7 @@ import {
   LiteEventSchemaType,
   LiteEventSerieSchema,
   LiteEventSerieWrapperSchemaType,
+  LiteTicketCategorySchema,
   LiteTicketCategorySchemaType,
 } from '@ad/src/models/entities/event';
 import {
@@ -191,6 +192,77 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
 
       let taxRate: number | null = null;
 
+      for (const deal of event.deals) {
+        // The price to declare is the one without fees for the organization
+        // Note: the user fees (`deal.user_fees`) are paid in addition of the displayed price, so it should not be handled here
+        const price = deal.price - deal.organizer_fees;
+
+        const ticketCategory = LiteTicketCategorySchema.parse({
+          internalTicketingSystemId: deal.product_id.toString(),
+          name: deal.name,
+          description: deal.description,
+          price: price,
+        });
+
+        schemaTicketCategories.set(ticketCategory.internalTicketingSystemId, ticketCategory);
+      }
+
+      const eventTickets: JsonTicketSchemaType[] = [];
+
+      let eventTicketsCurrentCursor: number | true = true; // To set the first page setting it empty or to true is fine
+
+      while (true) {
+        const eventTicketsResponse = await fetch(
+          this.formatUrl(`/tickets/sold`, {
+            event_id: event.id.toString(),
+            cursor: eventTicketsCurrentCursor.toString(), // Note: the limit of results cannot be customized with their new pagination system
+          }),
+          { method: 'GET' }
+        );
+
+        if (!eventTicketsResponse.ok) {
+          const error = await eventTicketsResponse.text();
+
+          throw error;
+        }
+
+        const eventTicketsDataJson = await eventTicketsResponse.json();
+
+        const eventTicketsData = JsonListTicketsResponseSchema.parse(eventTicketsDataJson);
+
+        eventTicketsData.data.forEach((ticket, ticketIndex) => {
+          eventTickets.push(ticket);
+        });
+
+        if (!eventTicketsData.pagination.next) {
+          break;
+        }
+
+        // Adjust to fetch the next page
+        const newCursor = eventTickets[eventTickets.length - 1].ticket_id;
+
+        assert(newCursor !== eventTicketsCurrentCursor);
+
+        eventTicketsCurrentCursor = newCursor;
+      }
+
+      for (const ticket of eventTickets) {
+        // Note: `resold` is just a metadata, this situation should not result in another ticket at the end
+        if (ticket.ticket_status !== 'valid' && ticket.ticket_status !== 'resold') {
+          continue;
+        }
+
+        // TODO:
+        // TODO:
+        // TODO: IF NOT EXISTING, THROW
+        // TODO:
+        // TODO: COMPARE VAT
+
+        const ticketCategory = schemaTicketCategories.get(ticket.product_id.toString());
+
+        assert(ticketCategory);
+      }
+
       //
       //
       //
@@ -201,10 +273,10 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
 
       eventsSeriesWrappers.push({
         serie: LiteEventSerieSchema.parse({
-          internalTicketingSystemId: spectacle.id_spectacle.toString(),
-          name: spectacle.name,
-          startAt: serieStartDate,
-          endAt: serieEndDate,
+          internalTicketingSystemId: event.id.toString(),
+          name: event.name,
+          startAt: event.startTime,
+          endAt: event.endTime,
           taxRate: taxRate,
         }),
         events: schemaEvents,
