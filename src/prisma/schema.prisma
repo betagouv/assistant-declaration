@@ -157,6 +157,7 @@ enum TicketingSystemName {
   BILLETWEB
   HELLOASSO
   MAPADO
+  SHOTGUN
   SOTICKET
   SUPERSONIKS
 }

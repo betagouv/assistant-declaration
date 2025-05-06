@@ -24,6 +24,7 @@ import fallback from '@ad/public/assets/images/logo.png';
 import billetweb from '@ad/src/assets/images/ticketing/billetweb.jpg';
 import helloasso from '@ad/src/assets/images/ticketing/helloasso.jpg';
 import mapado from '@ad/src/assets/images/ticketing/mapado.jpg';
+import shotgun from '@ad/src/assets/images/ticketing/shotgun.jpg';
 import soticket from '@ad/src/assets/images/ticketing/soticket.jpg';
 import supersoniks from '@ad/src/assets/images/ticketing/supersoniks.jpg';
 import { TicketingSystemCardContext } from '@ad/src/components/TicketingSystemCardContext';
@@ -83,6 +84,8 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
       return helloasso;
     } else if (props.ticketingSystem.name === 'MAPADO') {
       return mapado;
+    } else if (props.ticketingSystem.name === 'SHOTGUN') {
+      return shotgun;
     } else if (props.ticketingSystem.name === 'SOTICKET') {
       return soticket;
     } else if (props.ticketingSystem.name === 'SUPERSONIKS') {
