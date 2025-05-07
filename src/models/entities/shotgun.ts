@@ -11,7 +11,7 @@ export const JsonEventSchema = applyTypedParsers(
   z.object({
     id: z.number().int().nonnegative(),
     name: z.string().min(1),
-    visibility: z.enum(['public', 'private']),
+    // visibility: z.enum(['public', 'private', 'hidden', 'organizer_page']),
     startTime: z.coerce.date(),
     endTime: z.coerce.date(),
     slug: z.string().min(1),
@@ -64,7 +64,7 @@ export const JsonEventSchema = applyTypedParsers(
         description: z.string().min(1).nullable(),
         quantity: z.number().int().nonnegative(),
         // target: z.enum(['online', 'pass_culture']),
-        subcategory_id: z.number().int().nonnegative(),
+        subcategory_id: z.number().int().nonnegative().nullable(),
         subcategory: z
           .object({
             id: z.number().int().nonnegative(),
@@ -116,7 +116,7 @@ export const JsonTicketSchema = applyTypedParsers(
     ticket_id: z.number().int().nonnegative(),
     // ticket_barcode: z.string().min(1),
     ticket_redeemed_at: z.coerce.date().nullable(),
-    shotguner_id: z.number().int().nonnegative(),
+    shotguner_id: z.number().int().nonnegative().nullable(),
     cancelled_at: z.coerce.date().nullable(),
     ticket_updated_at: z.coerce.date(),
     ticket_visibilities: z.unknown(),
