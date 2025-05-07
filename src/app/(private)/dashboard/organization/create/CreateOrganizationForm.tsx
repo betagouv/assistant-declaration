@@ -6,10 +6,12 @@ import Button from '@mui/lab/LoadingButton';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useMemo } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
+import { createOfficialIdMaskInput } from '@ad/src/components/OfficialIdField';
 import { CreateOrganizationPrefillSchemaType, CreateOrganizationSchema, CreateOrganizationSchemaType } from '@ad/src/models/actions/organization';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
@@ -26,7 +28,6 @@ export function CreateOrganizationForm(props: CreateOrganizationFormProps) {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
     control,
   } = useForm<CreateOrganizationSchemaType>({
     resolver: zodResolver(CreateOrganizationSchema),
@@ -47,13 +48,38 @@ export function CreateOrganizationForm(props: CreateOrganizationFormProps) {
         <TextField type="text" label="Nom" {...register('name')} error={!!errors.name} helperText={errors?.name?.message} fullWidth />
       </Grid>
       <Grid item xs={12}>
-        <TextField
-          type="text"
-          label="N° Siren"
-          {...register('officialId')}
-          error={!!errors.officialId}
-          helperText={errors?.officialId?.message}
-          fullWidth
+        <Controller
+          control={control}
+          name="officialId"
+          defaultValue={control._defaultValues.officialId || ''}
+          render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+            // Needed to listen for unmasked value
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            const component = useMemo(
+              () =>
+                createOfficialIdMaskInput({
+                  onAccept: (unmaskedValue) => {
+                    onChange(unmaskedValue);
+                  },
+                }),
+              [onChange]
+            );
+
+            return (
+              <TextField
+                type="text"
+                label="N° Siren"
+                value={value}
+                onBlur={onBlur}
+                error={!!error}
+                helperText={error?.message}
+                fullWidth
+                InputProps={{
+                  inputComponent: component,
+                }}
+              />
+            );
+          }}
         />
       </Grid>
       <Grid item xs={12}>
