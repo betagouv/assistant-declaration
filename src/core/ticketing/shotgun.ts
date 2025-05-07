@@ -212,12 +212,9 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
       let taxRate: number | null = null;
 
       for (const deal of event.deals) {
-        // The price to declare is the one without fees for the organization
-        // TODO: at start we wanted to do `deal.price - deal.organizer_fees` but it appears this could get negative
-        // with like `0 - 2 = -2`... Which is not acceptable in our case, we have to clarify this case with Shotgun
-        // Note: the user fees (`deal.user_fees`) are paid in addition of the displayed price, so it should not be handled here
+        // The price to declare is the one without fees for the organization and user
+        // Note: `deal.price` already excludes `deal.organizer_fees` and `deal.user_fees` (confirmed by their support)
         const price = deal.price;
-        // const price = deal.price - deal.organizer_fees;
 
         const ticketCategory = LiteTicketCategorySchema.parse({
           internalTicketingSystemId: deal.product_id.toString(),
