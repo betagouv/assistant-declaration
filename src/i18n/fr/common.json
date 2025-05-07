@@ -176,6 +176,7 @@
         "too_big": "le numéro Siret doit faire {{maximum}} caractères maximum"
       },
       "officialId": {
+        "officialIdMustBe9Digits": "le numéro Siren doit être composé de 9 chiffres",
         "too_big": "le numéro Siren doit faire {{maximum}} caractères maximum",
         "too_small_one": "le numéro Siren est requis"
       },

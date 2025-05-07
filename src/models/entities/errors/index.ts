@@ -118,6 +118,7 @@ export const invalidCurrentPasswordError = new BusinessError('invalidCurrentPass
 export const userNotFoundError = new BusinessError('userNotFound', t('errors.custom.userNotFound'));
 
 // Organization
+export const officialIdMustBe9DigitsError = new BusinessError('officialIdMustBe9Digits', t('errors.validation.officialId.officialIdMustBe9Digits'));
 export const anotherOrganizationAlreadyHasThisOfficialIdError = new BusinessError(
   'anotherOrganizationAlreadyHasThisOfficialId',
   t('errors.custom.anotherOrganizationAlreadyHasThisOfficialId')
