@@ -136,56 +136,67 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
     // But we optimize this by stopping the pagination in case we found all of them sooner (they seem to be ordered by creation date DESC)
     const wantedEvents: JsonEventSchemaType[] = [];
 
-    let eventsCurrentPage: number = 1; // For whatever reason on the events endpoint there is no cursor pagination
+    let eventsCurrentPage: number = 0; // For whatever reason on the events endpoint there is no cursor pagination, and it starts at page 0, not page 1
     const eventsPageLimit: number = 50; // We can set a high number but since ordered the right way it should not be necessary
 
     const remainingEventsIdsToRetrieve = [...uniqueEventsIdsToSynchronize];
 
-    while (true) {
-      // If we found all events we wanted we can stop the pagination
-      if (remainingEventsIdsToRetrieve.length === 0) {
-        break;
-      }
+    // It seems the Shotgun API does not allow to retrieve past and future events in the same request
+    // So we have to repeat the pagination browsing twice either in the past and the future
+    // Note: we set the future events first to avoid browsing all the past ones (since recent tickets are likely for current/future events)
+    const pastEventsValues = [false, true];
 
-      const eventsResponse = await fetch(
-        this.formatUrl(`/organizers/${this.accessKey}/events`, {
-          past_events: 'true',
-          page: eventsCurrentPage.toString(),
-          limit: eventsPageLimit.toString(),
-        }),
-        { method: 'GET' }
-      );
-
-      if (!eventsResponse.ok) {
-        const error = await eventsResponse.text();
-
-        throw error;
-      }
-
-      const eventsDataJson = await eventsResponse.json();
-
-      const eventsData = JsonListEventsResponseSchema.parse(eventsDataJson);
-
-      eventsData.data.forEach((event) => {
-        const itemIndex = remainingEventsIdsToRetrieve.indexOf(event.id);
-
-        if (itemIndex !== -1) {
-          wantedEvents.push(event);
-
-          remainingEventsIdsToRetrieve.splice(itemIndex, 1);
+    for (const pastEventsValue of pastEventsValues) {
+      while (true) {
+        // If we found all events we wanted we can stop the pagination
+        if (remainingEventsIdsToRetrieve.length === 0) {
+          break;
         }
-      });
 
-      // If less than the limit it's the end of the pagination
-      if (eventsData.data.length < eventsPageLimit) {
-        break;
+        const eventsResponse = await fetch(
+          this.formatUrl(`/organizers/${this.accessKey}/events`, {
+            page: eventsCurrentPage.toString(),
+            limit: eventsPageLimit.toString(),
+            // Using `past_events=false` will still consider it as `true` so just making it optional
+            ...(pastEventsValue === true ? { past_events: 'true' } : {}),
+          }),
+          { method: 'GET' }
+        );
+
+        if (!eventsResponse.ok) {
+          const error = await eventsResponse.text();
+
+          throw error;
+        }
+
+        const eventsDataJson = await eventsResponse.json();
+
+        const eventsData = JsonListEventsResponseSchema.parse(eventsDataJson);
+
+        eventsData.data.forEach((event) => {
+          const itemIndex = remainingEventsIdsToRetrieve.indexOf(event.id);
+
+          if (itemIndex !== -1) {
+            wantedEvents.push(event);
+
+            remainingEventsIdsToRetrieve.splice(itemIndex, 1);
+          }
+        });
+
+        // If less than the limit it's the end of the pagination
+        if (eventsData.data.length < eventsPageLimit) {
+          break;
+        }
+
+        eventsCurrentPage++;
+
+        // Wait a bit since due the tiny maximum "per page" we probably have to make more requests
+        await sleep(50);
       }
-
-      eventsCurrentPage++;
-
-      // Wait a bit since due the tiny maximum "per page" we probably have to make more requests
-      await sleep(50);
     }
+
+    // In case there is a switch between the pagination of future events and past ones
+    assert(wantedEvents.length === uniqueEventsIdsToSynchronize.length);
 
     const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
 
