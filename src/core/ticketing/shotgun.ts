@@ -5,6 +5,7 @@ import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
 import {
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
+  LiteEventSchema,
   LiteEventSchemaType,
   LiteEventSerieSchema,
   LiteEventSerieWrapperSchemaType,
@@ -18,6 +19,7 @@ import {
   JsonTicketSchemaType,
 } from '@ad/src/models/entities/shotgun';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
+import { sleep } from '@ad/src/utils/sleep';
 
 export class ShotgunTicketingSystemClient implements TicketingSystemClient {
   public baseUrl = 'https://smartboard-api.shotgun.live/api/shotgun';
@@ -122,6 +124,9 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
       assert(newCursor !== recentlyUpdatedTicketsCurrentCursor);
 
       recentlyUpdatedTicketsCurrentCursor = newCursor;
+
+      // Wait a bit since due the tiny maximum "per page" we probably have to make more requests
+      await sleep(50);
     }
 
     // Retrieve eligible event series
@@ -177,6 +182,9 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
       }
 
       eventsCurrentPage++;
+
+      // Wait a bit since due the tiny maximum "per page" we probably have to make more requests
+      await sleep(50);
     }
 
     const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
@@ -184,9 +192,6 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
     // Get all data to be returned and compared with stored data we have
     // Note: for now we do not parallelize to not flood the ticketing system
     await eachOfLimit(wantedEvents, 1, async (event) => {
-      // It's important to note Shotgun is having only "1 event serie = 1 event" (there is no multiple representations for the same serie)
-      // We could have tried to merged them based on naming but it's kind of tricky before knowing well their customers
-
       const schemaEvents: LiteEventSchemaType[] = [];
       const schemaTicketCategories: Map<LiteTicketCategorySchemaType['internalTicketingSystemId'], LiteTicketCategorySchemaType> = new Map();
       const schemaEventSales: Map<
@@ -194,12 +199,25 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
         LiteEventSalesSchemaType
       > = new Map();
 
+      // It's important to note Shotgun is having only "1 event serie = 1 event" (there is no multiple representations for the same serie)
+      // We could have tried to merged them based on naming but it's kind of tricky before knowing well their customer usage of it
+      schemaEvents.push(
+        LiteEventSchema.parse({
+          internalTicketingSystemId: event.id.toString(),
+          startAt: event.startTime,
+          endAt: event.endTime,
+        })
+      );
+
       let taxRate: number | null = null;
 
       for (const deal of event.deals) {
         // The price to declare is the one without fees for the organization
+        // TODO: at start we wanted to do `deal.price - deal.organizer_fees` but it appears this could get negative
+        // with like `0 - 2 = -2`... Which is not acceptable in our case, we have to clarify this case with Shotgun
         // Note: the user fees (`deal.user_fees`) are paid in addition of the displayed price, so it should not be handled here
-        const price = deal.price - deal.organizer_fees;
+        const price = deal.price;
+        // const price = deal.price - deal.organizer_fees;
 
         const ticketCategory = LiteTicketCategorySchema.parse({
           internalTicketingSystemId: deal.product_id.toString(),
@@ -248,6 +266,9 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
         assert(newCursor !== eventTicketsCurrentCursor);
 
         eventTicketsCurrentCursor = newCursor;
+
+        // Wait a bit since due the tiny maximum "per page" we probably have to make more requests
+        await sleep(50);
       }
 
       for (const ticket of eventTickets) {
