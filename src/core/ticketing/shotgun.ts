@@ -3,6 +3,7 @@ import { addYears } from 'date-fns';
 
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
 import {
+  LiteEventSalesSchema,
   LiteEventSalesSchemaType,
   LiteEventSchemaType,
   LiteEventSerieSchema,
@@ -84,6 +85,9 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
 
     let recentlyUpdatedTicketsCurrentCursor: number | true = true; // To set the first page setting it empty or to true is fine
 
+    // TODO: since the pagination is only 50 tickets per page, we could make a workaround for the first inialization
+    // to consider all modified events during since the `fromDate`, it would save performance a bit...
+    // We could also ask them to have a filter for events for "has modified ticket after date"
     while (true) {
       const recentlyUpdatedTicketsResponse = await fetch(
         this.formatUrl(`/tickets/sold`, {
@@ -252,24 +256,46 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
           continue;
         }
 
-        // TODO:
-        // TODO:
-        // TODO: IF NOT EXISTING, THROW
-        // TODO:
-        // TODO: COMPARE VAT
+        const correspondingTicketCategory = schemaTicketCategories.get(ticket.product_id.toString());
 
-        const ticketCategory = schemaTicketCategories.get(ticket.product_id.toString());
+        assert(correspondingTicketCategory);
 
-        assert(ticketCategory);
+        const eventId = event.id.toString();
+        const ticketCategoryId = ticket.product_id.toString();
+        const uniqueId = `${eventId}_${ticketCategoryId}`;
+        const eventSales = schemaEventSales.get(uniqueId);
+
+        if (!eventSales) {
+          // We make sure the event has been properly retrieved
+          const relatedEvent = schemaEvents.find((event) => event.internalTicketingSystemId === eventId);
+          if (!relatedEvent) {
+            throw new Error('a sold ticket should always match an existing event');
+          }
+
+          schemaEventSales.set(
+            uniqueId,
+            LiteEventSalesSchema.parse({
+              internalEventTicketingSystemId: eventId,
+              internalTicketCategoryTicketingSystemId: ticketCategoryId,
+              total: 1,
+            })
+          );
+        } else {
+          eventSales.total += 1;
+        }
+
+        // Now since internally we manage a unique tax rate per event serie, we make sure all prices are using the same
+        if (taxRate === null) {
+          taxRate = ticket.vat_rate;
+        } else if (taxRate !== ticket.vat_rate) {
+          // throw new Error(`an event serie should have the same tax rate for all dates and prices`)
+
+          // [WORKAROUND] Until we decide the right way to do, just keep a tax rate none null
+          taxRate = Math.max(taxRate, ticket.vat_rate);
+        }
       }
 
-      //
-      //
-      //
-      //
-      // TODO: maybe use old pagination for tickets... at least for recent tickets to fetch a lot at once...
-      //
-      //
+      assert(taxRate !== null);
 
       eventsSeriesWrappers.push({
         serie: LiteEventSerieSchema.parse({

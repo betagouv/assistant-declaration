@@ -149,7 +149,7 @@ export const JsonListTicketsResponseSchema = applyTypedParsers(
     .object({
       query: z.record(z.unknown(), z.unknown()),
       pagination: z.object({
-        next: z.string().url(),
+        next: z.string().url().nullable(),
       }),
       data: z.array(JsonTicketSchema),
     })
