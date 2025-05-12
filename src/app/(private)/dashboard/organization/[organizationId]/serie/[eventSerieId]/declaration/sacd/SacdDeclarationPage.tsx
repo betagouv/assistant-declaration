@@ -316,7 +316,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
         }}
       >
         <Container>
-          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} currentDeclaration="sacd" />
+          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} eventsWrappers={eventsWrappers} currentDeclaration="sacd" />
         </Container>
       </Container>
       {eventsWrappers.length > 0 ? (

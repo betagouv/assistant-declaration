@@ -70,7 +70,7 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
         }}
       >
         <Container>
-          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} currentDeclaration="cnm" />
+          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} eventsWrappers={eventsWrappers} currentDeclaration="cnm" />
         </Container>
       </Container>
       {eventsWrappers.length > 0 ? (

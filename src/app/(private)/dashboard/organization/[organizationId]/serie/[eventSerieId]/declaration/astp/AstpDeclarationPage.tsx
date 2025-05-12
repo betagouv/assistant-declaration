@@ -71,7 +71,7 @@ export function AstpDeclarationPage({ params: { organizationId, eventSerieId } }
         }}
       >
         <Container>
-          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} currentDeclaration="astp" />
+          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} eventsWrappers={eventsWrappers} currentDeclaration="astp" />
         </Container>
       </Container>
       {eventsWrappers.length > 0 ? (

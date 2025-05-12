@@ -1,20 +1,34 @@
 'use client';
 
 import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
+import { Grading } from '@mui/icons-material';
+import { LoadingButton as Button } from '@mui/lab';
 import { Grid, Typography } from '@mui/material';
+import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
+import { createContext, useContext, useState } from 'react';
 
-import { EventSerieSchemaType } from '@ad/src/models/entities/event';
+import { EventsSalesViewer } from '@ad/src/components/EventsSalesViewer';
+import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
+
+export const DeclarationHeaderContext = createContext({
+  ContextualEventsSalesViewer: EventsSalesViewer,
+});
 
 export interface DeclarationHeaderProps {
   organizationId: string;
   eventSerie: EventSerieSchemaType;
+  eventsWrappers: EventWrapperSchemaType[];
   currentDeclaration: 'sacem' | 'sacd' | 'astp' | 'cnm';
 }
 
-export function DeclarationHeader({ organizationId, eventSerie, currentDeclaration }: DeclarationHeaderProps) {
+export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, currentDeclaration }: DeclarationHeaderProps) {
   const router = useRouter();
+  const { ContextualEventsSalesViewer } = useContext(DeclarationHeaderContext);
+
+  // TODO: open first time, then save into localStorage
+  const [eventsSalesViewerOpen, setEventsSalesViewerOpen] = useState(false);
 
   return (
     <>
@@ -31,6 +45,37 @@ export function DeclarationHeader({ organizationId, eventSerie, currentDeclarati
         </Typography>
         <Typography component="p" variant="body1">
           Vérifiez et corrigez les données avant de déclarer
+        </Typography>
+        <Typography component="p" variant="body1">
+          aaaaaa
+          <Button
+            component={NextLink}
+            onClick={() => {
+              setEventsSalesViewerOpen(true);
+            }}
+            size="large"
+            variant="contained"
+            fullWidth
+            startIcon={<Grading />}
+            sx={{
+              '&::after': {
+                display: 'none !important',
+              },
+            }}
+          >
+            Billetterie
+          </Button>
+          bbbbb
+          <ContextualEventsSalesViewer
+            overview={{
+              wrappers: eventsWrappers,
+              eventSerie: eventSerie,
+            }}
+            open={eventsSalesViewerOpen}
+            onClose={() => {
+              setEventsSalesViewerOpen(false);
+            }}
+          />
         </Typography>
       </Grid>
       <Grid

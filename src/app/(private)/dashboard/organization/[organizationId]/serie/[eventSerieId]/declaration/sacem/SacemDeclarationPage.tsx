@@ -190,7 +190,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
         }}
       >
         <Container>
-          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} currentDeclaration="sacem" />
+          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} eventsWrappers={eventsWrappers} currentDeclaration="sacem" />
         </Container>
       </Container>
       {eventsWrappers.length > 0 ? (
