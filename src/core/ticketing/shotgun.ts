@@ -280,8 +280,8 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
       }
 
       for (const ticket of eventTickets) {
-        // Note: `resold` is just a metadata, this situation should not result in another ticket at the end
-        if (ticket.ticket_status !== 'valid' && ticket.ticket_status !== 'resold') {
+        // Note: `resold` means another ticket has been issued to replace this one, so skipping it too
+        if (ticket.ticket_status !== 'valid') {
           continue;
         }
 
