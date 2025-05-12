@@ -26,16 +26,17 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import { push } from '@socialgouv/matomo-next';
 import diff from 'microdiff';
+import Image from 'next/image';
 import NextLink from 'next/link';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import typingImage from '@ad/src/assets/images/declaration/typing.svg';
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
-import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SacdAccountingEntriesTable } from '@ad/src/components/SacdAccountingEntriesTable';
 import { SacdOrganizationFields } from '@ad/src/components/SacdOrganizationFields';
@@ -52,7 +53,7 @@ import { AggregatedQueries } from '@ad/src/utils/trpc';
 import { getBaseUrl } from '@ad/src/utils/url';
 
 export const SacdDeclarationPageContext = createContext({
-  ContextualEventsSalesOverview: EventsSalesOverview,
+  ContextualDeclarationHeader: DeclarationHeader,
 });
 
 export interface SacdDeclarationPageProps {
@@ -61,7 +62,7 @@ export interface SacdDeclarationPageProps {
 
 export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }: SacdDeclarationPageProps) {
   const { t } = useTranslation('common');
-  const { ContextualEventsSalesOverview } = useContext(SacdDeclarationPageContext);
+  const { ContextualDeclarationHeader } = useContext(SacdDeclarationPageContext);
 
   const fillSacdDeclaration = trpc.fillSacdDeclaration.useMutation();
 
@@ -316,21 +317,101 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
         }}
       >
         <Container>
-          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} currentDeclaration="sacd" />
+          <ContextualDeclarationHeader
+            organizationId={organizationId}
+            eventSerie={eventSerie}
+            eventsWrappers={eventsWrappers}
+            currentDeclaration="sacd"
+          />
         </Container>
       </Container>
       {eventsWrappers.length > 0 ? (
         <>
           <Container
             sx={{
-              bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
-              borderRadius: '8px',
-              pt: { xs: 1, md: 1 },
-              pb: { xs: 1, md: 1 },
+              p: 1,
               mt: 3,
             }}
           >
-            <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} />
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Box
+                  sx={{
+                    bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
+                    borderRadius: '8px',
+                  }}
+                >
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6} sx={{ px: 3, display: { xs: 'none', md: 'block' } }}>
+                      <Image
+                        src={typingImage}
+                        alt=""
+                        priority={true}
+                        style={{
+                          width: '100%',
+                          maxHeight: 350,
+                          objectFit: 'contain',
+                          color: undefined, // [WORKAROUND] Ref: https://github.com/vercel/next.js/issues/61388#issuecomment-1988278891
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column', p: 3 }}>
+                      <Box sx={{ display: 'flex', flexGrow: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'start' }}>
+                        <Typography variant="h4">Utilisez les données ci-dessus pour déclarer votre spectacle en ligne auprès de la SACD.</Typography>
+                        <Button
+                          component={NextLink}
+                          href="https://moncompte.sacd.fr/nea/main/mon-accueil"
+                          target="_blank"
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'openOfficialWebsite', 'type', DeclarationTypeSchema.Values.SACD]);
+                          }}
+                          size="large"
+                          variant="contained"
+                          sx={{
+                            mt: 3,
+                            '&::after': {
+                              display: 'none !important',
+                            },
+                          }}
+                        >
+                          Commencer la déclaration
+                        </Button>
+                      </Box>
+                      <Typography variant="body2" sx={{ mt: 3, fontStyle: 'italic' }}>
+                        Si vous préférez, le formulaire ci-dessous vous permet de générer un PDF à transmettre à la SACD. Vous pouvez aussi remplir
+                        manuellement le leur (
+                        <Link
+                          component={NextLink}
+                          href={`${getBaseUrl()}/assets/templates/declaration/sacd.pdf`}
+                          target="_blank"
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.SACD]);
+                          }}
+                          underline="none"
+                          sx={{
+                            '&::after': {
+                              display: 'none !important',
+                            },
+                          }}
+                        >
+                          téléchargeable ici
+                        </Link>
+                        ).
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Grid>
+              <Grid item xs={12}>
+                <Alert severity="warning">
+                  Notre service n&apos;effectue pas de télétransmission.{' '}
+                  <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 'bold' }}>
+                    Il vous incombe de transmettre votre déclaration à votre interlocuteur SACD compétent. Et de vous assurer de l&apos;exactitude des
+                    informations saisies.
+                  </Typography>
+                </Alert>
+              </Grid>
+            </Grid>
           </Container>
           <Container sx={{ pt: 2 }}>
             <BaseForm
@@ -1000,63 +1081,6 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                     </>
                   )}
                 </Grid>
-              </Grid>
-              <Grid item xs={12}>
-                <Alert severity="warning">
-                  Notre service vous permet de générer la déclaration remplie mais n&apos;effectue pas de télétransmission.{' '}
-                  <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 'bold' }}>
-                    Il vous incombe de transmettre le fichier PDF de cette déclaration à votre interlocuteur SACD compétent. Et de vous assurer de
-                    l&apos;exactitude des informations saisies.
-                  </Typography>
-                </Alert>
-              </Grid>
-              <Grid item xs={12}>
-                <Alert severity="info">
-                  Si l&apos;interface ne répond pas à toutes les spécificités de votre déclaration, vous pouvez :
-                  <ol>
-                    <li>
-                      Déclarer{' '}
-                      <Link
-                        component={NextLink}
-                        href="https://moncompte.sacd.fr/nea/main/mon-accueil"
-                        target="_blank"
-                        onClick={() => {
-                          push(['trackEvent', 'declaration', 'openOfficialWebsite', 'type', DeclarationTypeSchema.Values.SACD]);
-                        }}
-                        underline="none"
-                        sx={{
-                          '&::after': {
-                            display: 'none !important',
-                          },
-                        }}
-                      >
-                        sur le formulaire en ligne SACD
-                      </Link>{' '}
-                      ;
-                    </li>
-                    <li>
-                      Reporter manuellement les données sur le PDF fourni par la SACD (
-                      <Link
-                        component={NextLink}
-                        href={`${getBaseUrl()}/assets/templates/declaration/sacd.pdf`}
-                        target="_blank"
-                        onClick={() => {
-                          push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.SACD]);
-                        }}
-                        underline="none"
-                        sx={{
-                          '&::after': {
-                            display: 'none !important',
-                          },
-                        }}
-                      >
-                        téléchargeable ici
-                      </Link>
-                      ) ;
-                    </li>
-                    <li>Contacter le support pour que nous sachions quoi améliorer.</li>
-                  </ol>
-                </Alert>
               </Grid>
             </BaseForm>
           </Container>

@@ -1,24 +1,25 @@
 'use client';
 
 import { fr } from '@codegouvfr/react-dsfr';
-import { Alert, Button, Typography } from '@mui/material';
+import { Alert, Box, Button, Typography } from '@mui/material';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import { push } from '@socialgouv/matomo-next';
+import Image from 'next/image';
 import NextLink from 'next/link';
 import { createContext, useContext } from 'react';
 
+import typingImage from '@ad/src/assets/images/declaration/typing.svg';
 import { trpc } from '@ad/src/client/trpcClient';
 import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
-import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 
 export const CnmDeclarationPageContext = createContext({
-  ContextualEventsSalesOverview: EventsSalesOverview,
+  ContextualDeclarationHeader: DeclarationHeader,
 });
 
 export interface CnmDeclarationPageProps {
@@ -26,7 +27,7 @@ export interface CnmDeclarationPageProps {
 }
 
 export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }: CnmDeclarationPageProps) {
-  const { ContextualEventsSalesOverview } = useContext(CnmDeclarationPageContext);
+  const { ContextualDeclarationHeader } = useContext(CnmDeclarationPageContext);
 
   const getEventSerie = trpc.getEventSerie.useQuery({
     id: eventSerieId,
@@ -70,43 +71,68 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
         }}
       >
         <Container>
-          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} currentDeclaration="cnm" />
+          <ContextualDeclarationHeader
+            organizationId={organizationId}
+            eventSerie={eventSerie}
+            eventsWrappers={eventsWrappers}
+            roundValuesForCopy={true}
+            currentDeclaration="cnm"
+          />
         </Container>
       </Container>
       {eventsWrappers.length > 0 ? (
         <>
           <Container
             sx={{
-              bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
-              borderRadius: '8px',
-              pt: { xs: 1, md: 1 },
-              pb: { xs: 1, md: 1 },
+              p: 1,
               mt: 3,
             }}
           >
-            <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} roundValuesForCopy={true} />
-          </Container>
-          <Container sx={{ pt: 2 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sx={{ textAlign: 'center' }}>
-                <Button
-                  component={NextLink}
-                  href="https://monespacepro.cnm.fr/taxe/declarations"
-                  target="_blank"
-                  onClick={() => {
-                    push(['trackEvent', 'declaration', 'openOfficialWebsite', 'type', DeclarationTypeSchema.Values.CNM]);
-                  }}
-                  size="large"
-                  variant="contained"
+              <Grid item xs={12}>
+                <Box
                   sx={{
-                    my: 5,
-                    '&::after': {
-                      display: 'none !important',
-                    },
+                    bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
+                    borderRadius: '8px',
                   }}
                 >
-                  Commencer la déclaration en ligne auprès du CNM
-                </Button>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6} sx={{ px: 3, display: { xs: 'none', md: 'block' } }}>
+                      <Image
+                        src={typingImage}
+                        alt=""
+                        priority={true}
+                        style={{
+                          width: '100%',
+                          maxHeight: 350,
+                          objectFit: 'contain',
+                          color: undefined, // [WORKAROUND] Ref: https://github.com/vercel/next.js/issues/61388#issuecomment-1988278891
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'start', p: 3 }}>
+                      <Typography variant="h4">Utilisez les données ci-dessus pour déclarer votre spectacle en ligne auprès du CNM.</Typography>
+                      <Button
+                        component={NextLink}
+                        href="https://monespacepro.cnm.fr/taxe/declarations"
+                        target="_blank"
+                        onClick={() => {
+                          push(['trackEvent', 'declaration', 'openOfficialWebsite', 'type', DeclarationTypeSchema.Values.CNM]);
+                        }}
+                        size="large"
+                        variant="contained"
+                        sx={{
+                          mt: 3,
+                          '&::after': {
+                            display: 'none !important',
+                          },
+                        }}
+                      >
+                        Commencer la déclaration
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </Box>
               </Grid>
               <Grid item xs={12}>
                 <Alert severity="warning">

@@ -19,7 +19,6 @@ import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
-import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
 import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
@@ -32,7 +31,7 @@ import { AggregatedQueries } from '@ad/src/utils/trpc';
 import { getBaseUrl } from '@ad/src/utils/url';
 
 export const SacemDeclarationPageContext = createContext({
-  ContextualEventsSalesOverview: EventsSalesOverview,
+  ContextualDeclarationHeader: DeclarationHeader,
 });
 
 export interface SacemDeclarationPageProps {
@@ -41,7 +40,7 @@ export interface SacemDeclarationPageProps {
 
 export function SacemDeclarationPage({ params: { organizationId, eventSerieId } }: SacemDeclarationPageProps) {
   const { t } = useTranslation('common');
-  const { ContextualEventsSalesOverview } = useContext(SacemDeclarationPageContext);
+  const { ContextualDeclarationHeader } = useContext(SacemDeclarationPageContext);
 
   const fillSacemDeclaration = trpc.fillSacemDeclaration.useMutation();
 
@@ -190,21 +189,59 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
         }}
       >
         <Container>
-          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} currentDeclaration="sacem" />
+          <ContextualDeclarationHeader
+            organizationId={organizationId}
+            eventSerie={eventSerie}
+            eventsWrappers={eventsWrappers}
+            currentDeclaration="sacem"
+          />
         </Container>
       </Container>
       {eventsWrappers.length > 0 ? (
         <>
           <Container
             sx={{
-              bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
-              borderRadius: '8px',
-              pt: { xs: 1, md: 1 },
-              pb: { xs: 1, md: 1 },
+              p: 1,
               mt: 3,
             }}
           >
-            <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} />
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Box
+                  sx={{
+                    bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
+                    borderRadius: '8px',
+                    p: 3,
+                  }}
+                >
+                  <Typography variant="body1">
+                    <Typography component="span" sx={{ fontWeight: 600 }}>
+                      Le formulaire ci-dessous vous permet de générer un PDF à transmettre à la SACEM.
+                    </Typography>{' '}
+                    <Typography component="span" sx={{ fontStyle: 'italic' }}>
+                      Si vous préférez, il est aussi possible de reporter manuellement les données sur le PDF fourni par la SACEM (
+                      <Link
+                        component={NextLink}
+                        href={`${getBaseUrl()}/assets/templates/declaration/sacem.pdf`}
+                        target="_blank"
+                        onClick={() => {
+                          push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.SACEM]);
+                        }}
+                        underline="none"
+                        sx={{
+                          '&::after': {
+                            display: 'none !important',
+                          },
+                        }}
+                      >
+                        téléchargeable ici
+                      </Link>
+                      ).
+                    </Typography>
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
           </Container>
           <Container sx={{ pt: 2 }}>
             <BaseForm
@@ -713,34 +750,6 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                     Il vous incombe de transmettre le fichier PDF de cette déclaration à votre interlocuteur SACEM compétent. Et de vous assurer de
                     l&apos;exactitude des informations saisies.
                   </Typography>
-                </Alert>
-              </Grid>
-              <Grid item xs={12}>
-                <Alert severity="info">
-                  Si l&apos;interface ne répond pas à toutes les spécificités de votre déclaration, vous pouvez :
-                  <ol>
-                    <li>Contacter le support pour que nous sachions quoi améliorer ;</li>
-                    <li>
-                      Reporter manuellement les données sur le PDF fourni par la SACEM (
-                      <Link
-                        component={NextLink}
-                        href={`${getBaseUrl()}/assets/templates/declaration/sacem.pdf`}
-                        target="_blank"
-                        onClick={() => {
-                          push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.SACEM]);
-                        }}
-                        underline="none"
-                        sx={{
-                          '&::after': {
-                            display: 'none !important',
-                          },
-                        }}
-                      >
-                        téléchargeable ici
-                      </Link>
-                      ).
-                    </li>
-                  </ol>
                 </Alert>
               </Grid>
             </BaseForm>
