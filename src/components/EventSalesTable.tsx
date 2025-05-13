@@ -2,7 +2,7 @@ import { Alert, Snackbar, Tooltip, Typography } from '@mui/material';
 import { GridAutosizeOptions, type GridColDef, type GridRowModel, useGridApiRef } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import debounce from 'lodash.debounce';
-import { useCallback, useEffect, useState } from 'react';
+import { KeyboardEventHandler, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
@@ -217,8 +217,19 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
     [handleCloseSnackbar]
   );
 
+  const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      // When the grids are used into a modal, exiting the edit mode was also closing the modal, so we prevent it
+      // Note: we only prevent the event if there is an edit mode active, otherwise it can be used to close the modal
+      if (event.key === 'Escape' && Object.keys(apiRef.current.state.editRows).length > 0) {
+        event.stopPropagation();
+      }
+    },
+    [apiRef]
+  );
+
   return (
-    <>
+    <div onKeyDown={handleKeyDown}>
       <DataGrid
         apiRef={apiRef}
         rows={wrapper.sales}
@@ -266,6 +277,6 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
           {snackbarAlert}
         </Snackbar>
       )}
-    </>
+    </div>
   );
 }
