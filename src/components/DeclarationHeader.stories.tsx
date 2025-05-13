@@ -2,8 +2,9 @@ import { Meta, StoryFn } from '@storybook/react';
 import { within } from '@storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
-import { eventsSeries } from '@ad/src/fixtures/event';
+import { DeclarationHeader, DeclarationHeaderContext } from '@ad/src/components/DeclarationHeader';
+import { reusableNormal as EventsSalesViewerNormalStory } from '@ad/src/components/EventsSalesViewer.stories';
+import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
 
 type ComponentType = typeof DeclarationHeader;
@@ -29,10 +30,18 @@ const NormalStory = Template.bind({});
 NormalStory.args = {
   organizationId: organizations[0].id,
   eventSerie: eventsSeries[0],
+  eventsWrappers: eventsWrappers,
   currentDeclaration: 'sacem',
 };
 NormalStory.play = async ({ canvasElement }) => {
   await playFindElement(canvasElement);
 };
 
-export const Normal = prepareStory(NormalStory, {});
+export const Normal = prepareStory(NormalStory, {
+  childrenContext: {
+    context: DeclarationHeaderContext,
+    value: {
+      ContextualEventsSalesViewer: EventsSalesViewerNormalStory,
+    },
+  },
+});

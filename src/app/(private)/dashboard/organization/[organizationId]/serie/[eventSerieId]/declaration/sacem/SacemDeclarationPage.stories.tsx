@@ -8,6 +8,7 @@ import {
   SacemDeclarationPageContext,
 } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacem/SacemDeclarationPage';
 import { Normal as EventsSalesOverviewNormalStory } from '@ad/src/components/EventsSalesOverview.stories';
+import { Normal as EventsSalesViewerNormalStory } from '@ad/src/components/EventsSalesViewer.stories';
 import { sacemDeclarations, sacemDeclarationsWrappers } from '@ad/src/fixtures/declaration/sacem';
 import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
@@ -84,6 +85,7 @@ export const Normal = prepareStory(NormalStory, {
   childrenContext: {
     context: SacemDeclarationPageContext,
     value: {
+      ContextualEventsSalesViewer: EventsSalesViewerNormalStory,
       ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
     },
   },
@@ -115,6 +117,7 @@ export const NotFound = prepareStory(NotFoundStory, {
   childrenContext: {
     context: SacemDeclarationPageContext,
     value: {
+      ContextualEventsSalesViewer: EventsSalesViewerNormalStory,
       ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
     },
   },
@@ -137,6 +140,7 @@ export const WithLayout = prepareStory(WithLayoutStory, {
   childrenContext: {
     context: SacemDeclarationPageContext,
     value: {
+      ContextualEventsSalesViewer: EventsSalesViewerNormalStory,
       ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
     },
   },

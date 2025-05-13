@@ -4,13 +4,14 @@ import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
 import { Grading } from '@mui/icons-material';
 import { LoadingButton as Button } from '@mui/lab';
 import { Grid, Typography } from '@mui/material';
-import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createContext, useContext, useState } from 'react';
 
 import { EventsSalesViewer } from '@ad/src/components/EventsSalesViewer';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
+
+import { EventsSalesKeyFigures } from './EventsSalesKeyFigures';
 
 export const DeclarationHeaderContext = createContext({
   ContextualEventsSalesViewer: EventsSalesViewer,
@@ -36,47 +37,48 @@ export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, 
         item
         xs={12}
         sx={{
-          pt: { xs: 3, md: 5 },
-          pb: { xs: 3, md: 4 },
+          pt: { xs: 3, md: 4 },
+          pb: { xs: 3, md: 2 },
         }}
       >
-        <Typography component="h1" variant="h4" data-sentry-mask>
-          {eventSerie.name}
-        </Typography>
-        <Typography component="p" variant="body1">
-          Vérifiez et corrigez les données avant de déclarer
-        </Typography>
-        <Typography component="p" variant="body1">
-          aaaaaa
-          <Button
-            component={NextLink}
-            onClick={() => {
-              setEventsSalesViewerOpen(true);
-            }}
-            size="large"
-            variant="contained"
-            fullWidth
-            startIcon={<Grading />}
-            sx={{
-              '&::after': {
-                display: 'none !important',
-              },
-            }}
-          >
-            Billetterie
-          </Button>
-          bbbbb
-          <ContextualEventsSalesViewer
-            overview={{
-              wrappers: eventsWrappers,
-              eventSerie: eventSerie,
-            }}
-            open={eventsSalesViewerOpen}
-            onClose={() => {
-              setEventsSalesViewerOpen(false);
-            }}
-          />
-        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} lg={4} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
+            <Typography component="h1" variant="h4" data-sentry-mask>
+              {eventSerie.name}
+            </Typography>
+            <Typography component="p" variant="body1">
+              <Button
+                onClick={() => {
+                  setEventsSalesViewerOpen(true);
+                }}
+                size="medium"
+                variant="contained"
+                startIcon={<Grading />}
+                sx={{
+                  mt: 1,
+                  '&::after': {
+                    display: 'none !important',
+                  },
+                }}
+              >
+                Ajuster la billetterie
+              </Button>
+              <ContextualEventsSalesViewer
+                overview={{
+                  wrappers: eventsWrappers,
+                  eventSerie: eventSerie,
+                }}
+                open={eventsSalesViewerOpen}
+                onClose={() => {
+                  setEventsSalesViewerOpen(false);
+                }}
+              />
+            </Typography>
+          </Grid>
+          <Grid item xs={12} lg={8}>
+            <EventsSalesKeyFigures eventSerie={eventSerie} wrappers={eventsWrappers} minimal={true} />
+          </Grid>
+        </Grid>
       </Grid>
       <Grid
         item

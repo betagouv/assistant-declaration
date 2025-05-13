@@ -1,3 +1,4 @@
+import { fr } from '@codegouvfr/react-dsfr';
 import CloseIcon from '@mui/icons-material/Close';
 import { AppBar, Drawer, Grid, IconButton, Toolbar, Typography, alpha, useMediaQuery, useTheme } from '@mui/material';
 import { createContext, useContext } from 'react';
@@ -56,17 +57,22 @@ export function EventsSalesViewer({ overview, open, onClose }: EventsSalesViewer
       >
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Billetterie
+            Détails de la billetterie
           </Typography>
           <IconButton onClick={onClose} size="small" edge="start" aria-label="fermer la visualisation">
             <CloseIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Grid container spacing={2} sx={{ p: 4 }}>
-        <Grid item xs={12}>
-          <Typography variant="h5">Veuillez...</Typography>
-        </Grid>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
+          flexGrow: 1, // For the background to go to the bottom
+          p: 4,
+        }}
+      >
         <Grid item xs={12}>
           <ContextualEventsSalesOverview wrappers={overview.wrappers} eventSerie={overview.eventSerie} />
         </Grid>

@@ -36,8 +36,8 @@ const Template: StoryFn<ComponentType> = (args) => {
       <EventsSalesViewer
         {...args}
         overview={{
-          wrappers: eventsWrappers,
           eventSerie: eventsSeries[0],
+          wrappers: eventsWrappers,
         }}
         open={open}
         onClose={() => {
@@ -55,9 +55,10 @@ const reusableTemplate: StoryFn<ComponentType> = (args) => {
 const NormalStory = Template.bind({});
 NormalStory.args = {
   overview: {
-    wrappers: eventsWrappers,
     eventSerie: eventsSeries[0],
+    wrappers: eventsWrappers,
   },
+  open: true,
 };
 NormalStory.parameters = {};
 NormalStory.play = async ({ canvasElement }) => {
@@ -78,6 +79,7 @@ export const Normal = prepareStory(NormalStory, {
 const reusableNormalStory = reusableTemplate.bind({});
 reusableNormalStory.args = {
   ...NormalStory.args,
+  open: false,
 };
 reusableNormalStory.parameters = {
   ...NormalStory.parameters,

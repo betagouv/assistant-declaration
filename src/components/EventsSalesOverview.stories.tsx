@@ -46,15 +46,3 @@ NormalStory.play = async ({ canvasElement }) => {
 };
 
 export const Normal = prepareStory(NormalStory);
-
-const WithRoundedValuesOnCopyStory = Template.bind({});
-WithRoundedValuesOnCopyStory.args = {
-  ...NormalStory.args,
-  roundValuesForCopy: true,
-};
-WithRoundedValuesOnCopyStory.parameters = {
-  ...NormalStory.parameters,
-};
-WithRoundedValuesOnCopyStory.play = NormalStory.play;
-
-export const WithRoundedValuesOnCopy = prepareStory(WithRoundedValuesOnCopyStory);
