@@ -23,9 +23,10 @@ export interface DeclarationHeaderProps {
   eventSerie: EventSerieSchemaType;
   eventsWrappers: EventWrapperSchemaType[];
   currentDeclaration: 'sacem' | 'sacd' | 'astp' | 'cnm';
+  roundValuesForCopy?: boolean;
 }
 
-export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, currentDeclaration }: DeclarationHeaderProps) {
+export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, currentDeclaration, roundValuesForCopy }: DeclarationHeaderProps) {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { ContextualEventsSalesViewer } = useContext(DeclarationHeaderContext);
@@ -80,6 +81,7 @@ export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, 
                 overview={{
                   wrappers: eventsWrappers,
                   eventSerie: eventSerie,
+                  roundValuesForCopy: roundValuesForCopy,
                 }}
                 open={eventsSalesViewerOpen}
                 onClose={() => {
