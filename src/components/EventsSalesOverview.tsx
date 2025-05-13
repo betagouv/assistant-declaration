@@ -4,9 +4,9 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { ContentCopy } from '@mui/icons-material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { LoadingButton as Button } from '@mui/lab';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Chip, Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
@@ -15,7 +15,6 @@ import { ClipboardTrigger } from '@ad/src/components/ClipboardTrigger';
 import { EventSalesTable } from '@ad/src/components/EventSalesTable';
 import { EventsSalesKeyFigures } from '@ad/src/components/EventsSalesKeyFigures';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
-import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
 
@@ -36,79 +35,8 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
 
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
-  const [triggerKeyFiguresCopy, setTriggerKeyFiguresCopy] = useState(false);
   const [triggerEventsSalesCopy, setTriggerEventsSalesCopy] = useState(false);
   const [eventsWrappersToCopy, setEventsWrappersToCopy] = useState<EventWrapperSchemaType[]>([]);
-
-  const { totalIncludingTaxesAmount, totalExcludingTaxesAmount, totalTaxesAmount, averageTicketPrice, paidTickets, freeTickets } = useMemo(() => {
-    let totalIncludingTaxesAmount: number = 0;
-    let paidTickets: number = 0;
-    let freeTickets: number = 0;
-
-    for (const eventWrapper of wrappers) {
-      for (const eventSale of eventWrapper.sales) {
-        const total = eventSale.eventCategoryTickets.totalOverride ?? eventSale.eventCategoryTickets.total;
-        const price = eventSale.eventCategoryTickets.priceOverride ?? eventSale.ticketCategory.price;
-
-        if (price === 0) {
-          freeTickets += total;
-        } else {
-          paidTickets += total;
-        }
-
-        totalIncludingTaxesAmount += total * price;
-      }
-    }
-
-    // Round to 2 cents for clarity
-    const averageTicketPrice = Math.round((totalIncludingTaxesAmount / (freeTickets + paidTickets)) * 100) / 100;
-
-    return {
-      totalIncludingTaxesAmount: totalIncludingTaxesAmount,
-      totalExcludingTaxesAmount: getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
-      totalTaxesAmount: getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
-      averageTicketPrice: averageTicketPrice,
-      paidTickets: paidTickets,
-      freeTickets: freeTickets,
-    };
-  }, [wrappers, eventSerie.taxRate]);
-
-  const { totalIncludingTaxesAmountForCopy, totalExcludingTaxesAmountForCopy, totalTaxesAmountForCopy, averageTicketPriceForCopy } = useMemo(() => {
-    if (roundValuesForCopy === true) {
-      const includingTaxesAmount = Math.round(totalIncludingTaxesAmount);
-      const excludingTaxesAmount = Math.round(totalExcludingTaxesAmount);
-
-      return {
-        totalIncludingTaxesAmountForCopy: includingTaxesAmount,
-        totalExcludingTaxesAmountForCopy: excludingTaxesAmount,
-        totalTaxesAmountForCopy: Math.round(includingTaxesAmount - excludingTaxesAmount), // It cannot be done other way since rounding could mess to always have "exc + tax = inc"
-        averageTicketPriceForCopy: Math.round(averageTicketPrice),
-      };
-    } else {
-      return {
-        totalIncludingTaxesAmountForCopy: totalIncludingTaxesAmount,
-        totalExcludingTaxesAmountForCopy: totalExcludingTaxesAmount,
-        totalTaxesAmountForCopy: totalTaxesAmount,
-        averageTicketPriceForCopy: averageTicketPrice,
-      };
-    }
-  }, [totalIncludingTaxesAmount, totalExcludingTaxesAmount, totalTaxesAmount, averageTicketPrice, roundValuesForCopy]);
-
-  const [snackbarAlert, setSnackbarAlert] = useState<JSX.Element | null>(null);
-  const handleCloseSnackbar = useCallback(() => setSnackbarAlert(null), [setSnackbarAlert]);
-
-  const copyValue = useCallback(
-    async (value: string, roundedValue?: boolean) => {
-      await navigator.clipboard.writeText(value);
-
-      setSnackbarAlert(
-        <Alert severity="success" onClose={handleCloseSnackbar}>
-          {roundedValue ? `La valeur arrondie a été copiée` : `La valeur a été copiée`}
-        </Alert>
-      );
-    },
-    [setSnackbarAlert, handleCloseSnackbar]
-  );
 
   return (
     <>
@@ -360,7 +288,7 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
             );
           })}
         </Grid>
-        <Grid item xs={12} sx={{ pt: 3 }}>
+        <Grid item xs={12} sx={{ py: 3 }}>
           <EventsSalesKeyFigures eventSerie={eventSerie} wrappers={wrappers} />
         </Grid>
       </Grid>

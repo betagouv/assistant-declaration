@@ -3,9 +3,10 @@
 import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
 import { Grading } from '@mui/icons-material';
 import { LoadingButton as Button } from '@mui/lab';
-import { Grid, Typography } from '@mui/material';
+import { Grid, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { createContext, useContext, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { EventsSalesViewer } from '@ad/src/components/EventsSalesViewer';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
@@ -25,8 +26,12 @@ export interface DeclarationHeaderProps {
 }
 
 export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, currentDeclaration }: DeclarationHeaderProps) {
+  const { t } = useTranslation('common');
   const router = useRouter();
   const { ContextualEventsSalesViewer } = useContext(DeclarationHeaderContext);
+
+  const theme = useTheme();
+  const mdUp = useMediaQuery(theme.breakpoints.up('md'));
 
   // TODO: open first time, then save into localStorage
   const [eventsSalesViewerOpen, setEventsSalesViewerOpen] = useState(false);
@@ -37,7 +42,7 @@ export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, 
         item
         xs={12}
         sx={{
-          pt: { xs: 3, md: 4 },
+          pt: { xs: 3, md: 3 },
           pb: { xs: 3, md: 2 },
         }}
       >
@@ -46,12 +51,20 @@ export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, 
             <Typography component="h1" variant="h4" data-sentry-mask>
               {eventSerie.name}
             </Typography>
+            {mdUp && (
+              <Typography component="p" variant="subtitle1" sx={{ fontWeight: 300 }}>
+                {t('date.short', { date: eventSerie.startAt })} →{' '}
+                {t('date.short', {
+                  date: eventSerie.endAt,
+                })}
+              </Typography>
+            )}
             <Typography component="p" variant="body1">
               <Button
                 onClick={() => {
                   setEventsSalesViewerOpen(true);
                 }}
-                size="medium"
+                size="small"
                 variant="contained"
                 startIcon={<Grading />}
                 sx={{
