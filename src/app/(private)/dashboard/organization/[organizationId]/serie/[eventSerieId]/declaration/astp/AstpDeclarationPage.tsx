@@ -13,7 +13,6 @@ import typingImage from '@ad/src/assets/images/declaration/typing.svg';
 import { trpc } from '@ad/src/client/trpcClient';
 import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
-import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
@@ -21,7 +20,7 @@ import { AggregatedQueries } from '@ad/src/utils/trpc';
 import { getBaseUrl } from '@ad/src/utils/url';
 
 export const AstpDeclarationPageContext = createContext({
-  ContextualEventsSalesOverview: EventsSalesOverview,
+  ContextualDeclarationHeader: DeclarationHeader,
 });
 
 export interface AstpDeclarationPageProps {
@@ -29,7 +28,7 @@ export interface AstpDeclarationPageProps {
 }
 
 export function AstpDeclarationPage({ params: { organizationId, eventSerieId } }: AstpDeclarationPageProps) {
-  const { ContextualEventsSalesOverview } = useContext(AstpDeclarationPageContext);
+  const { ContextualDeclarationHeader } = useContext(AstpDeclarationPageContext);
 
   const getEventSerie = trpc.getEventSerie.useQuery({
     id: eventSerieId,
@@ -73,13 +72,17 @@ export function AstpDeclarationPage({ params: { organizationId, eventSerieId } }
         }}
       >
         <Container>
-          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} eventsWrappers={eventsWrappers} currentDeclaration="astp" />
+          <ContextualDeclarationHeader
+            organizationId={organizationId}
+            eventSerie={eventSerie}
+            eventsWrappers={eventsWrappers}
+            currentDeclaration="astp"
+          />
         </Container>
       </Container>
       {eventsWrappers.length > 0 ? (
         <>
           <Container
-            maxWidth="lg"
             sx={{
               p: 1,
               mt: 3,

@@ -13,14 +13,13 @@ import typingImage from '@ad/src/assets/images/declaration/typing.svg';
 import { trpc } from '@ad/src/client/trpcClient';
 import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
-import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 
 export const CnmDeclarationPageContext = createContext({
-  ContextualEventsSalesOverview: EventsSalesOverview,
+  ContextualDeclarationHeader: DeclarationHeader,
 });
 
 export interface CnmDeclarationPageProps {
@@ -28,7 +27,7 @@ export interface CnmDeclarationPageProps {
 }
 
 export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }: CnmDeclarationPageProps) {
-  const { ContextualEventsSalesOverview } = useContext(CnmDeclarationPageContext);
+  const { ContextualDeclarationHeader } = useContext(CnmDeclarationPageContext);
 
   const getEventSerie = trpc.getEventSerie.useQuery({
     id: eventSerieId,
@@ -72,7 +71,7 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
         }}
       >
         <Container>
-          <DeclarationHeader
+          <ContextualDeclarationHeader
             organizationId={organizationId}
             eventSerie={eventSerie}
             eventsWrappers={eventsWrappers}
@@ -84,7 +83,6 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
       {eventsWrappers.length > 0 ? (
         <>
           <Container
-            maxWidth="lg"
             sx={{
               p: 1,
               mt: 3,
