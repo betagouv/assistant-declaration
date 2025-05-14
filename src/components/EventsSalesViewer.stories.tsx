@@ -1,6 +1,6 @@
 import Button from '@mui/material/Button';
 import { Meta, StoryFn } from '@storybook/react';
-import { within } from '@storybook/test';
+import { screen, userEvent, within } from '@storybook/test';
 import { useState } from 'react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
@@ -19,6 +19,18 @@ export default {
     parameters: {},
   }),
 } as Meta<ComponentType>;
+
+async function playOpenAndFindElement(canvasElement: HTMLElement): Promise<HTMLElement> {
+  const canvas = within(canvasElement);
+  const button = canvas.getByRole('button');
+
+  await userEvent.click(button);
+
+  const presentation = await screen.findByRole('presentation');
+  return await within(presentation).findByRole('textbox', {
+    name: /date/i,
+  });
+}
 
 const Template: StoryFn<ComponentType> = (args) => {
   const [open, setOpen] = useState<boolean>(args.open);
@@ -58,13 +70,10 @@ NormalStory.args = {
     eventSerie: eventsSeries[0],
     wrappers: eventsWrappers,
   },
-  open: true,
 };
 NormalStory.parameters = {};
 NormalStory.play = async ({ canvasElement }) => {
-  await within(canvasElement).findByRole('textbox', {
-    name: /date/i,
-  });
+  await playOpenAndFindElement(canvasElement);
 };
 
 export const Normal = prepareStory(NormalStory, {
@@ -79,7 +88,6 @@ export const Normal = prepareStory(NormalStory, {
 const reusableNormalStory = reusableTemplate.bind({});
 reusableNormalStory.args = {
   ...NormalStory.args,
-  open: false,
 };
 reusableNormalStory.parameters = {
   ...NormalStory.parameters,

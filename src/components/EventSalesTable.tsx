@@ -229,54 +229,57 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
   );
 
   return (
-    <div onKeyDown={handleKeyDown}>
-      <DataGrid
-        apiRef={apiRef}
-        rows={wrapper.sales}
-        getRowId={(row) => row.ticketCategory.id}
-        columns={columns}
-        hideFooter={true}
-        disableColumnFilter
-        disableColumnMenu
-        disableRowSelectionOnClick
-        editMode="row"
-        processRowUpdate={processRowUpdate}
-        onProcessRowUpdateError={handleProcessRowUpdateError}
-        onCellEditStart={(params, event) => {
-          // [WORKAROUND] As for number inputs outside the datagrid, there is the native issue of scrolling making the value changing
-          // So doing the same workaround to prevent scrolling when it is focused
-          // Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
-          const editCellElement = event.target as HTMLDivElement;
+    <>
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+      <div onKeyDown={handleKeyDown}>
+        <DataGrid
+          apiRef={apiRef}
+          rows={wrapper.sales}
+          getRowId={(row) => row.ticketCategory.id}
+          columns={columns}
+          hideFooter={true}
+          disableColumnFilter
+          disableColumnMenu
+          disableRowSelectionOnClick
+          editMode="row"
+          processRowUpdate={processRowUpdate}
+          onProcessRowUpdateError={handleProcessRowUpdateError}
+          onCellEditStart={(params, event) => {
+            // [WORKAROUND] As for number inputs outside the datagrid, there is the native issue of scrolling making the value changing
+            // So doing the same workaround to prevent scrolling when it is focused
+            // Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
+            const editCellElement = event.target as HTMLDivElement;
 
-          // At the time of the callback the input child is not yet created, so we have to wait for it
-          // Note: it appears in a few cases it does not work the first time... maybe we should delay a bit the "observe"?
-          const observer = new MutationObserver(() => {
-            const editCellInputElement = editCellElement.querySelector('input[type="number"]');
+            // At the time of the callback the input child is not yet created, so we have to wait for it
+            // Note: it appears in a few cases it does not work the first time... maybe we should delay a bit the "observe"?
+            const observer = new MutationObserver(() => {
+              const editCellInputElement = editCellElement.querySelector('input[type="number"]');
 
-            if (editCellInputElement) {
-              observer.disconnect();
+              if (editCellInputElement) {
+                observer.disconnect();
 
-              // Note: no need to remove the listener since it will after the focus is released due to the cell input element being deleted by `DataGrid`
-              editCellInputElement.addEventListener('wheel', (event) => {
-                (event.target as HTMLInputElement).blur();
-              });
-            }
-          });
+                // Note: no need to remove the listener since it will after the focus is released due to the cell input element being deleted by `DataGrid`
+                editCellInputElement.addEventListener('wheel', (event) => {
+                  (event.target as HTMLInputElement).blur();
+                });
+              }
+            });
 
-          // Start observing the cell element for child additions
-          observer.observe(editCellElement, { childList: true, subtree: true });
-        }}
-        autosizeOnMount={true}
-        autosizeOptions={autosizeOption}
-        disableVirtualization={true}
-        aria-label="tableau des ventes d'une représentation"
-        data-sentry-mask
-      />
-      {!!snackbarAlert && (
-        <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
-          {snackbarAlert}
-        </Snackbar>
-      )}
-    </div>
+            // Start observing the cell element for child additions
+            observer.observe(editCellElement, { childList: true, subtree: true });
+          }}
+          autosizeOnMount={true}
+          autosizeOptions={autosizeOption}
+          disableVirtualization={true}
+          aria-label="tableau des ventes d'une représentation"
+          data-sentry-mask
+        />
+        {!!snackbarAlert && (
+          <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
+            {snackbarAlert}
+          </Snackbar>
+        )}
+      </div>
+    </>
   );
 }

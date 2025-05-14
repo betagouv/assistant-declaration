@@ -112,7 +112,9 @@ export function AstpDeclarationPage({ params: { organizationId, eventSerieId } }
                     </Grid>
                     <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column', p: 3 }}>
                       <Box sx={{ display: 'flex', flexGrow: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'start' }}>
-                        <Typography variant="h4">Utilisez les données ci-dessus pour déclarer votre spectacle en ligne auprès de l'ASTP.</Typography>
+                        <Typography variant="h4">
+                          Utilisez les données ci-dessus pour déclarer votre spectacle en ligne auprès de l&apos;ASTP.
+                        </Typography>
                         <Button
                           component={NextLink}
                           href="https://dectanet.astp.asso.fr/mon-espace-declarant/declarer-mes-recettes"
