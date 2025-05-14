@@ -3,6 +3,7 @@ import { HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import type { DefaultColorScheme } from '@codegouvfr/react-dsfr/next-appdir';
 import { EventEmitter } from 'eventemitter3';
 
+import { HeaderHelpItem } from '@ad/src/components/HeaderHelpItem';
 import { HeaderOrganizationSwitchItem, HeaderOrganizationSwitchItemProps } from '@ad/src/components/HeaderOrganizationSwitchItem';
 import { HeaderUserItem } from '@ad/src/components/HeaderUserItem';
 import { TokenUserSchemaType } from '@ad/src/models/entities/user';
@@ -41,6 +42,22 @@ export const organizationSwichQuickAccessItem = (props: OrganizationSwitchQuickA
 export interface UserQuickAccessItemOptions {
   showDashboardMenuItem?: boolean;
 }
+
+export const helpQuickAccessItem = (): HeaderProps.QuickAccessItem => {
+  const eventEmitter = new EventEmitter();
+
+  // INFORMATION: this won't work on 5xx and 4xx error pages since there is an hydratation error due to Next.js (maybe fixed in the future)
+  // `Warning: validateDOMNesting(...): <body> cannot appear as a child of <div>.`
+  return {
+    iconId: 'fr-icon-questionnaire-line',
+    buttonProps: {
+      onClick: (event) => {
+        eventEmitter.emit('click', event);
+      },
+    },
+    text: <HeaderHelpItem eventEmitter={eventEmitter} />,
+  };
+};
 
 export const userQuickAccessItem = (user: TokenUserSchemaType, options?: UserQuickAccessItemOptions): HeaderProps.QuickAccessItem => {
   const eventEmitter = new EventEmitter();

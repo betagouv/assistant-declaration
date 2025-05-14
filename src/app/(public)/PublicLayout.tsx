@@ -7,14 +7,12 @@ import { PropsWithChildren } from 'react';
 import '@ad/src/app/(public)/layout.scss';
 import { ContentWrapper } from '@ad/src/components/ContentWrapper';
 import { FlashMessage } from '@ad/src/components/FlashMessage';
-import { useLiveChat } from '@ad/src/components/live-chat/useLiveChat';
 import { useSession } from '@ad/src/proxies/next-auth/react';
-import { commonFooterAttributes, commonHeaderAttributes, userQuickAccessItem } from '@ad/src/utils/dsfr';
+import { commonFooterAttributes, commonHeaderAttributes, helpQuickAccessItem, userQuickAccessItem } from '@ad/src/utils/dsfr';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export function PublicLayout(props: PropsWithChildren) {
   const sessionWrapper = useSession();
-  const { showLiveChat, isLiveChatLoading } = useLiveChat();
 
   let quickAccessItems: HeaderProps.QuickAccessItem[] = [
     {
@@ -24,15 +22,7 @@ export function PublicLayout(props: PropsWithChildren) {
       },
       text: 'À propos',
     },
-    {
-      iconId: 'fr-icon-questionnaire-line',
-      buttonProps: {
-        onClick: () => {
-          showLiveChat();
-        },
-      },
-      text: isLiveChatLoading ? 'Chargement...' : 'Aide',
-    },
+    helpQuickAccessItem(),
   ];
 
   if (sessionWrapper.status === 'authenticated') {
