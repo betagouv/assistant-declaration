@@ -1,14 +1,10 @@
 'use client';
 
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
-import { Header } from '@codegouvfr/react-dsfr/Header';
-import { HeaderProps } from '@codegouvfr/react-dsfr/Header';
+import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import { MainNavigationProps } from '@codegouvfr/react-dsfr/MainNavigation';
-import { MenuProps } from '@codegouvfr/react-dsfr/MainNavigation/Menu';
-import Badge from '@mui/material/Badge';
 import Grid from '@mui/material/Grid';
-import { useRouter } from 'next/navigation';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { PropsWithChildren, useEffect, useState } from 'react';
 
 import { trpc } from '@ad/src/client/trpcClient';
@@ -16,10 +12,15 @@ import { ContentWrapper } from '@ad/src/components/ContentWrapper';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { FlashMessage } from '@ad/src/components/FlashMessage';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
-import { useLiveChat } from '@ad/src/components/live-chat/useLiveChat';
 import { UserInterfaceSessionProvider } from '@ad/src/components/user-interface-session/UserInterfaceSessionProvider';
 import { signIn, useSession } from '@ad/src/proxies/next-auth/react';
-import { commonFooterAttributes, commonHeaderAttributes, organizationSwichQuickAccessItem, userQuickAccessItem } from '@ad/src/utils/dsfr';
+import {
+  commonFooterAttributes,
+  commonHeaderAttributes,
+  helpQuickAccessItem,
+  organizationSwichQuickAccessItem,
+  userQuickAccessItem,
+} from '@ad/src/utils/dsfr';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { hasPathnameThisMatch } from '@ad/src/utils/url';
@@ -37,8 +38,6 @@ export function PrivateLayout(props: PropsWithChildren) {
       signIn();
     }
   }, [logoutCommitted, router, sessionWrapper.status]);
-
-  const { showLiveChat } = useLiveChat();
 
   if (isLoading || sessionWrapper.status !== 'authenticated') {
     return <LoadingArea ariaLabelTarget="contenu" />;
@@ -64,18 +63,7 @@ export function PrivateLayout(props: PropsWithChildren) {
     return false;
   });
 
-  const quickAccessItems: HeaderProps.QuickAccessItem[] = [
-    {
-      iconId: 'fr-icon-questionnaire-line',
-      buttonProps: {
-        onClick: (event) => {
-          showLiveChat();
-        },
-      },
-      text: 'Aide',
-    },
-    userQuickAccessItem(sessionWrapper.data?.user),
-  ];
+  const quickAccessItems: HeaderProps.QuickAccessItem[] = [helpQuickAccessItem(), userQuickAccessItem(sessionWrapper.data?.user)];
 
   if (userInterfaceSession.collaboratorOf.length) {
     quickAccessItems.unshift(

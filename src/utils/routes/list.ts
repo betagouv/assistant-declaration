@@ -47,6 +47,13 @@ export const localizedRoutes = {
       fr: (p) => `/authentification/mot-de-passe/recuperer`,
     }
   ),
+  frequentlyAskedQuestions: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/frequently-asked-questions`,
+      fr: (p) => `/questions-frequentes`,
+    }
+  ),
   home: defineLocalizedRoute(
     {},
     {
@@ -179,6 +186,7 @@ export const routes = {
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.en),
     declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.en),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.en),
+    frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.en),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.en),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.en),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.en),
@@ -199,6 +207,7 @@ export const routes = {
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.fr),
     declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.fr),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.fr),
+    frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.fr),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.fr),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.fr),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.fr),
