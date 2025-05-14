@@ -5,14 +5,14 @@ import { Grading } from '@mui/icons-material';
 import { LoadingButton as Button } from '@mui/lab';
 import { Grid, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EventsSalesKeyFigures } from '@ad/src/components/EventsSalesKeyFigures';
 import { EventsSalesViewer } from '@ad/src/components/EventsSalesViewer';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
-
-import { EventsSalesKeyFigures } from './EventsSalesKeyFigures';
+import { useLocalStorageViewedTicketingModal } from '@ad/src/utils/ticketing';
 
 export const DeclarationHeaderContext = createContext({
   ContextualEventsSalesViewer: EventsSalesViewer,
@@ -34,8 +34,14 @@ export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, 
   const theme = useTheme();
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
 
-  // TODO: open first time, then save into localStorage
-  const [eventsSalesViewerOpen, setEventsSalesViewerOpen] = useState(false);
+  const [ticketingModalViewed, setTicketingModalViewed] = useLocalStorageViewedTicketingModal(eventSerie.id);
+  const [eventsSalesViewerOpen, setEventsSalesViewerOpen] = useState(!ticketingModalViewed);
+
+  useEffect(() => {
+    if (eventsSalesViewerOpen) {
+      setTicketingModalViewed();
+    }
+  }, [eventsSalesViewerOpen, setTicketingModalViewed]);
 
   return (
     <>

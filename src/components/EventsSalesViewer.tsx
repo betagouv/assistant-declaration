@@ -25,7 +25,7 @@ export interface EventsSalesViewerProps {
 
 export function EventsSalesViewer({ overview, open, onClose }: EventsSalesViewerProps) {
   const muiTheme = useTheme();
-  const mobileFormat = useMediaQuery(muiTheme.breakpoints.down('sm'));
+  const mobileFormat = useMediaQuery(muiTheme.breakpoints.down('md'));
 
   const { ContextualEventsSalesOverview } = useContext(EventsSalesViewerContext);
 

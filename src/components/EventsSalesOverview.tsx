@@ -40,7 +40,7 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
 
   return (
     <>
-      <Grid container spacing={1} sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 1 }}>
+      <Grid container spacing={1} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Grid item>
           <Typography component="div" variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
             Liste des représentations
