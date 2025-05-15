@@ -203,7 +203,8 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
       // TODO: get event /checking/stats
       // TODO: done...
       // TODO:
-      // TODO:
+      // TODO: NOTE for checkingStats it has a delay... not seeing newly created typetickets directly
+      // TODO: so maybe it's risky to rely on this page if any delay? not sure... we don't need realtime
 
       schemaEvents.push(
         LiteEventSchema.parse({

@@ -263,6 +263,66 @@ export const JsonEventSchema = applyTypedParsers(
 );
 export type JsonEventSchemaType = z.infer<typeof JsonEventSchema>;
 
+export const JsonTicketingStatsSchema = applyTypedParsers(
+  z
+    .object({
+      id: z.unknown().nullable(),
+      total_ticket: z.number().int().nonnegative(),
+      // total_ticket_online: z.number().int().nonnegative(),
+      // total_ticket_offline: z.number().int().nonnegative(),
+      total_ticket_cancel: z.number().int().nonnegative(),
+      // total_invitation: z.number().int().nonnegative(),
+      // total_ticketing_online: z.number().int().nonnegative(),
+      // total_ticketing_offline: z.number().int().nonnegative(),
+      total_ticketing: z.number().nonnegative(),
+      // total_store_online: z.number().int().nonnegative(),
+      // total_payment_online: z.number().int().nonnegative(),
+      // total_payment_offline: z.number().int().nonnegative(),
+      total_payment_refund: z.number().int().nonnegative(),
+      // total_sell_offline: z.number().int().nonnegative(),
+      // total_sell_online: z.number().int().nonnegative(),
+      // total_sell: z.number().int().nonnegative(),
+      total_com_ticketing: z.number().nonnegative(),
+      total_com_store_online: z.number().nonnegative(),
+      total_pre_refund: z.number().int().nonnegative(),
+      total_com_host: z.number().nonnegative(),
+      total_balance_online: z.number().nonnegative(),
+      type_tickets: z.array(
+        z.object({
+          id: z.number().int().nonnegative(),
+          name: z.string().min(1),
+          amount: z.number().nonnegative(),
+          // count_credit_card_without_promo: z.number().int().nonnegative(),
+          // count_credit_card_with_promo: z.number().int().nonnegative(),
+          // count_paypal_without_promo: z.number().int().nonnegative(),
+          // count_paypal_with_promo: z.number().int().nonnegative(),
+          // count_credit_card_alt_without_promo: z.number().int().nonnegative(),
+          // count_credit_card_alt_with_promo: z.number().int().nonnegative(),
+          // count_cheque_without_promo: z.number().int().nonnegative(),
+          // count_cheque_with_promo: z.number().int().nonnegative(),
+          // count_money_without_promo: z.number().int().nonnegative(),
+          // count_money_with_promo: z.number().int().nonnegative(),
+          // count_stocks_without_promo: z.number().int().nonnegative(),
+          // count_stocks_with_promo: z.number().int().nonnegative(),
+          // count_present_without_promo: z.number().int().nonnegative(),
+          // count_present_with_promo: z.number().int().nonnegative(),
+          // count_ticketoffice_without_promo: z.number().int().nonnegative(),
+          // count_ticketoffice_with_promo: z.number().int().nonnegative(),
+          count_total: z.number().int().nonnegative(),
+          count_total_without_promo: z.number().int().nonnegative(),
+          count_total_with_promo: z.number().int().nonnegative(),
+          sum_total: z.number().nonnegative(),
+          sum_total_online_without_promo: z.number().nonnegative(),
+          sum_total_online_with_promo: z.number().nonnegative(),
+          sum_total_offline_without_promo: z.number().int().nonnegative(),
+          sum_total_offline_with_promo: z.number().nonnegative(),
+        })
+      ),
+    })
+    .strip()
+);
+export type JsonTicketingStatsSchemaType = z.infer<typeof JsonTicketingStatsSchema>;
+
 export const JsonPagingCursorSchema = applyTypedParsers(
   z
     .object({
