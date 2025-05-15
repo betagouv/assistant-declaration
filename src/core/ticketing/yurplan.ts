@@ -1,10 +1,25 @@
+import { eachOfLimit } from 'async';
+import { fromUnixTime, isAfter, isBefore } from 'date-fns';
+
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
-import { LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
-import { JsonListOrganizationsResponseSchema, JsonLoginResponseSchema } from '@ad/src/models/entities/yurplan';
+import {
+  LiteEventSalesSchemaType,
+  LiteEventSchema,
+  LiteEventSchemaType,
+  LiteEventSerieWrapperSchemaType,
+  LiteTicketCategorySchemaType,
+} from '@ad/src/models/entities/event';
+import {
+  JsonListOrdersResponseSchema,
+  JsonListOrganizationsResponseSchema,
+  JsonLoginResponseSchema,
+  JsonOrderSchemaType,
+} from '@ad/src/models/entities/yurplan';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export class YurplanTicketingSystemClient implements TicketingSystemClient {
   public readonly baseUrl = 'https://api.yurplan.com/v1/token';
-  public readonly itemsPerPage = 30;
+  public readonly maximumItemsPerPage = 30;
   protected readonly defaultHeaders = new Headers({
     'Content-Type': 'application/json',
   });
@@ -87,7 +102,7 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
         method: 'GET',
         headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
         body: JSON.stringify({
-          range: `0-${this.itemsPerPage}`,
+          range: `0-${this.maximumItemsPerPage}`,
         }),
       });
 
@@ -117,28 +132,80 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
     // TODO: since the pagination is only 30 tickets per page, we could make a workaround for the first inialization
     // to consider all modified events during since the `fromDate`, it would save performance a bit...
     // We could also ask them to have a filter for events for "has modified ticket after date"
+    // Note: there is still a risk of pagination shift...
     while (true) {
-      // Get tickets modifications to know which events to synchronize (for the first time, or again)
-      const ordersResponse = await fetch(this.formatUrl(`/orgas/${organizationId}/orders`), {
+      const recentlyUpdatedOrdersResponse = await fetch(this.formatUrl(`/orgas/${organizationId}/recentlyUpdatedOrders`), {
         method: 'GET',
         headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
         body: JSON.stringify({
-          range: `0-${this.itemsPerPage}`,
+          range: `${(recentlyUpdatedOrdersCurrentPage - 1) * this.maximumItemsPerPage}-${
+            recentlyUpdatedOrdersCurrentPage * this.maximumItemsPerPage
+          }`, // 0-30, 30-60... (one side of the range is excluding)
           orderBy: 'updated_at', // It will sort DESC (so we can stop when we reach the `fromDate`)
         }),
       });
 
-      if (!ordersResponse.ok) {
-        const error = await ordersResponse.json();
+      if (!recentlyUpdatedOrdersResponse.ok) {
+        const error = await recentlyUpdatedOrdersResponse.json();
 
         throw error;
       }
 
-      const ordersDataJson = await ordersResponse.json();
-      const ordersData = JsonListOrganizationsResponseSchema.parse(ordersDataJson);
+      const recentlyUpdatedOrdersDataJson = await recentlyUpdatedOrdersResponse.json();
+      const recentlyUpdatedOrdersData = JsonListOrdersResponseSchema.parse(recentlyUpdatedOrdersDataJson);
+
+      // Make sure our local maximum pagination logic is correct
+      assert(this.maximumItemsPerPage === recentlyUpdatedOrdersData.paging.nb_per_page);
+
+      let pageOrdersInAfterFromDate = 0;
+      recentlyUpdatedOrdersData.results.forEach((order) => {
+        if (isAfter(fromUnixTime(order.updated_at), fromDate)) {
+          recentlyUpdatedOrders.push(order);
+          pageOrdersInAfterFromDate++;
+        }
+      });
+
+      // If we reached all recent orders until the `fromDate`, we can stop pagination
+      if (recentlyUpdatedOrdersData.results.length !== pageOrdersInAfterFromDate) {
+        break;
+      } else if (!recentlyUpdatedOrdersData.paging.cursors.next) {
+        break;
+      }
+
+      recentlyUpdatedOrdersCurrentPage++;
     }
 
+    // Since there is no API "before" filter we simulate it to be consistent across tests (despite getting more data over time)
+    const orders = toDate ? recentlyUpdatedOrders.filter((order) => isBefore(fromUnixTime(order.updated_at), toDate)) : recentlyUpdatedOrders;
+
+    // Retrieve eligible events
+    const uniqueEventsIds = [...new Set(orders.map((order) => order.event.id))];
+
     const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
+
+    // Get all data to be returned and compared with stored data we have
+    // Note: for now we do not parallelize to not flood the ticketing system
+    await eachOfLimit(uniqueEventsIds, 1, async (eventId) => {
+      const schemaEvents: LiteEventSchemaType[] = [];
+      const schemaTicketCategories: Map<LiteTicketCategorySchemaType['internalTicketingSystemId'], LiteTicketCategorySchemaType> = new Map();
+      const schemaEventSales: Map<
+        LiteEventSalesSchemaType['internalEventTicketingSystemId'] & LiteEventSalesSchemaType['internalTicketCategoryTicketingSystemId'],
+        LiteEventSalesSchemaType
+      > = new Map();
+
+      // It's important to note Yurplan is having only "1 event serie = 1 event" (there is no multiple representations for the same serie)
+      // We could have tried to merged them based on naming but it's kind of tricky before knowing well their customer usage of it
+
+      schemaEvents.push(
+        LiteEventSchema.parse({
+          internalTicketingSystemId: event.id.toString(),
+          startAt: event.startTime,
+          endAt: event.endTime,
+        })
+      );
+
+      let taxRate: number | null = null;
+    });
 
     return eventsSeriesWrappers;
   }

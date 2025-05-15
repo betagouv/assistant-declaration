@@ -11,6 +11,67 @@ import { applyTypedParsers } from '@ad/src/utils/zod';
 // This is the best way to make the production not breaking for unused fields during validation.
 //
 
+export const JsonOrderSchema = applyTypedParsers(
+  z
+    .object({
+      id: z.number().int().nonnegative(),
+      // user_id: z.number().int().nonnegative(),
+      tickets: z.array(
+        z.object({
+          id: z.number().int().nonnegative(),
+          // invited_by: z.unknown().nullable(),
+          // first_name: z.string().min(1).nullable(),
+          // last_name: z.string().min(1).nullable(),
+          // seat: z.unknown().nullable(),
+          // chip_number: z.unknown().nullable(),
+          // checking_informations: z.array(z.unknown()),
+          // owner: z.object({
+          //   email_address: z.string().transform(transformStringOrNull),
+          // }),
+          // user_id: z.number().int().nonnegative(),
+          status: z.number().int().nonnegative(),
+          buy_date: z.number().int().nonnegative(),
+          // section: z.unknown().nullable(),
+          // row: z.unknown().nullable(),
+          // count_checked: z.unknown().nullable(),
+          // user: z.unknown().nullable(),
+          payment: z.unknown().nullable(),
+          // type_ticket: z.unknown().nullable(),
+          // event_form: z.unknown().nullable(),
+          // ticket_sent: z.boolean(),
+          // owner_id: z.number().int().nonnegative().nullable(),
+          total: z.number().int().nonnegative(),
+          // token: z.string().min(1),
+          // identifier: z.string().uuid(),
+          // created_at: z.number().int().nonnegative(),
+          // updated_at: z.number().int().nonnegative(),
+        })
+      ),
+      promotion: z.unknown().nullable(),
+      event: z.object({
+        id: z.number().int().nonnegative(),
+        // name: z.string().min(1),
+      }),
+      // origin: z.number().int().nonnegative(),
+      // reference: z.string().min(1),
+      // type: z.number().int().nonnegative(),
+      // products: z.array(z.unknown()),
+      // event_form: z.unknown().nullable(),
+      // user: z.unknown().nullable(),
+      // owner: z.unknown().nullable(),
+      // token: z.unknown().nullable(),
+      amount: z.number().nonnegative(),
+      // identifier: z.string().uuid(),
+      // owner_id: z.number().int().nonnegative().nullable(),
+      status: z.number().int().nonnegative(),
+      // has_insurance: z.boolean(),
+      created_at: z.number().int().nonnegative(),
+      updated_at: z.number().int().nonnegative(),
+    })
+    .strip()
+);
+export type JsonOrderSchemaType = z.infer<typeof JsonOrderSchema>;
+
 export const JsonPagingCursorSchema = applyTypedParsers(
   z
     .object({
@@ -101,62 +162,6 @@ export const JsonListOrganizationsResponseSchema = JsonCollectionResponseSchema.
 export type JsonListOrganizationsResponseSchemaType = z.infer<typeof JsonListOrganizationsResponseSchema>;
 
 export const JsonListOrdersResponseSchema = JsonCollectionResponseSchema.extend({
-  results: z.array(
-    z.object({
-      id: z.number().int().nonnegative(),
-      // user_id: z.number().int().nonnegative(),
-      tickets: z.array(
-        z.object({
-          id: z.number().int().nonnegative(),
-          // invited_by: z.unknown().nullable(),
-          // first_name: z.string().min(1).nullable(),
-          // last_name: z.string().min(1).nullable(),
-          // seat: z.unknown().nullable(),
-          // chip_number: z.unknown().nullable(),
-          // checking_informations: z.array(z.unknown()),
-          // owner: z.object({
-          //   email_address: z.string().transform(transformStringOrNull),
-          // }),
-          // user_id: z.number().int().nonnegative(),
-          status: z.number().int().nonnegative(),
-          buy_date: z.number().int().nonnegative(),
-          // section: z.unknown().nullable(),
-          // row: z.unknown().nullable(),
-          // count_checked: z.unknown().nullable(),
-          // user: z.unknown().nullable(),
-          payment: z.unknown().nullable(),
-          // type_ticket: z.unknown().nullable(),
-          // event_form: z.unknown().nullable(),
-          // ticket_sent: z.boolean(),
-          // owner_id: z.number().int().nonnegative().nullable(),
-          total: z.number().int().nonnegative(),
-          // token: z.string().min(1),
-          // identifier: z.string().uuid(),
-          // created_at: z.number().int().nonnegative(),
-          // updated_at: z.number().int().nonnegative(),
-        })
-      ),
-      promotion: z.unknown().nullable(),
-      event: z.object({
-        id: z.number().int().nonnegative(),
-        // name: z.string().min(1),
-      }),
-      // origin: z.number().int().nonnegative(),
-      // reference: z.string().min(1),
-      // type: z.number().int().nonnegative(),
-      // products: z.array(z.unknown()),
-      // event_form: z.unknown().nullable(),
-      // user: z.unknown().nullable(),
-      // owner: z.unknown().nullable(),
-      // token: z.unknown().nullable(),
-      amount: z.number().nonnegative(),
-      // identifier: z.string().uuid(),
-      // owner_id: z.number().int().nonnegative().nullable(),
-      status: z.number().int().nonnegative(),
-      // has_insurance: z.boolean(),
-      created_at: z.number().int().nonnegative(),
-      updated_at: z.number().int().nonnegative(),
-    })
-  ),
+  results: z.array(JsonOrderSchema),
 }).strip();
 export type JsonListOrdersResponseSchemaType = z.infer<typeof JsonListOrdersResponseSchema>;
