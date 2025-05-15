@@ -196,6 +196,15 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
       // It's important to note Yurplan is having only "1 event serie = 1 event" (there is no multiple representations for the same serie)
       // We could have tried to merged them based on naming but it's kind of tricky before knowing well their customer usage of it
 
+      // TODO:
+      // TODO:
+      // TODO: get event
+      // TODO: get event typetickets (categories)
+      // TODO: get event /checking/stats
+      // TODO: done...
+      // TODO:
+      // TODO:
+
       schemaEvents.push(
         LiteEventSchema.parse({
           internalTicketingSystemId: event.id.toString(),
