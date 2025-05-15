@@ -26,6 +26,7 @@ import billetweb from '@ad/src/assets/images/ticketing/billetweb.jpg';
 import mapado from '@ad/src/assets/images/ticketing/mapado.jpg';
 import soticket from '@ad/src/assets/images/ticketing/soticket.jpg';
 import supersoniks from '@ad/src/assets/images/ticketing/supersoniks.jpg';
+import yurplan from '@ad/src/assets/images/ticketing/yurplan.jpg';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
 import { menuPaperProps } from '@ad/src/utils/menu';
@@ -88,6 +89,8 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
       return soticket;
     } else if (props.ticketingSystem.name === 'SUPERSONIKS') {
       return supersoniks;
+    } else if (props.ticketingSystem.name === 'YURPLAN') {
+      return yurplan;
     } else {
       return fallback;
     }

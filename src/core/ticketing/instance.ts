@@ -5,6 +5,7 @@ import { MockTicketingSystemClient, TicketingSystemClient } from '@ad/src/core/t
 import { MapadoTicketingSystemClient } from '@ad/src/core/ticketing/mapado';
 import { SoticketTicketingSystemClient } from '@ad/src/core/ticketing/soticket';
 import { SupersoniksTicketingSystemClient } from '@ad/src/core/ticketing/supersoniks';
+import { YurplanTicketingSystemClient } from '@ad/src/core/ticketing/yurplan';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export function getTicketingSystemClient(
@@ -42,6 +43,24 @@ export function getTicketingSystemClient(
         assert(ticketingSystem.apiSecretKey);
 
         ticketingSystemClient = new SupersoniksTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
+        break;
+      case 'YURPLAN':
+        assert(ticketingSystem.apiAccessKey);
+        assert(ticketingSystem.apiSecretKey);
+
+        // Credentials needed as a partner to access their API
+        const partnerClientId = process.env.YURPLAN_PARTNER_CLIENT_ID;
+        const partnerClientSecret = process.env.YURPLAN_PARTNER_CLIENT_SECRET;
+
+        assert(partnerClientId);
+        assert(partnerClientSecret);
+
+        ticketingSystemClient = new YurplanTicketingSystemClient(
+          partnerClientId,
+          partnerClientSecret,
+          ticketingSystem.apiAccessKey,
+          ticketingSystem.apiSecretKey
+        );
         break;
       default:
         throw new Error('unknown ticketing system');
