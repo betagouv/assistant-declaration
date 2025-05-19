@@ -12,6 +12,7 @@ import soticket from '@ad/src/assets/images/partners/billetweb.jpg';
 export const gridItemProps: GridProps = {
   xs: 6,
   sm: 4,
+  md: 3,
   sx: {
     display: 'flex',
     justifyContent: 'center',
@@ -30,12 +31,7 @@ export const imageProps: ImgHTMLAttributes<HTMLImageElement> = {
 export function Partners() {
   return (
     <Container sx={{ pt: 1, pb: { xs: 4, sm: 5, md: 6 } }}>
-      <Typography
-        component="h2"
-        variant="h4"
-        color={fr.colors.decisions.text.title.blueFrance.default}
-        sx={{ textAlign: 'center', mt: 1, mb: { xs: 2, sm: 4 } }}
-      >
+      <Typography component="h2" variant="h4" sx={{ textAlign: 'center', mt: 4, mb: { xs: 3, sm: 4 } }}>
         Les éditeurs de billetterie compatibles
       </Typography>
       <Box sx={{ minHeight: { xs: 236, sm: 144, md: 52 } }}>
