@@ -2,6 +2,9 @@
 
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
+import { ArrowForward } from '@mui/icons-material';
+import { Button } from '@mui/material';
+import NextLink from 'next/link';
 import { PropsWithChildren } from 'react';
 
 import '@ad/src/app/(public)/layout.scss';
@@ -33,11 +36,18 @@ export function PublicLayout(props: PropsWithChildren) {
     );
   } else {
     quickAccessItems.push({
-      iconId: 'fr-icon-lock-line',
+      iconId: undefined as any,
       linkProps: {
         href: linkRegistry.get('signIn', undefined),
+        style: {
+          padding: 0,
+        },
       },
-      text: 'Se connecter',
+      text: (
+        <Button component={NextLink} href={linkRegistry.get('signIn', undefined)} size="small" variant="contained" startIcon={<ArrowForward />}>
+          Accès outil
+        </Button>
+      ),
     });
   }
 

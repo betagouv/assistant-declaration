@@ -52,12 +52,7 @@ export function HeaderUserItem(props: PropsWithChildren<HeaderUserItemProps>) {
   return (
     <Box aria-label="options" aria-controls={open ? 'account-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined}>
       <Grid container direction="row" alignItems="center" spacing={1}>
-        <Grid item>
-          <Avatar fullName={`${props.user.firstname} ${props.user.lastname}`} />
-        </Grid>
-        <Grid item data-sentry-mask>
-          {props.user.firstname} {props.user.lastname}
-        </Grid>
+        <Grid item>Mon compte</Grid>
       </Grid>
       <FocusTrap open={open}>
         <Menu
@@ -84,7 +79,7 @@ export function HeaderUserItem(props: PropsWithChildren<HeaderUserItemProps>) {
             <ListItemIcon>
               <ManageAccountsIcon fontSize="small" />
             </ListItemIcon>
-            Mon compte
+            Profil utilisateur
           </MenuItem>
           <MenuItem onClick={logout}>
             <ListItemIcon>

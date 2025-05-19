@@ -1,13 +1,10 @@
-import Button from '@mui/lab/LoadingButton';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
-import NextLink from 'next/link';
 
 import style from '@ad/src/app/(public)/(home)/Introduction.module.scss';
 import hero from '@ad/src/assets/images/hero.png';
 import { IntroductionContainer } from '@ad/src/components/IntroductionContainer';
-import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export function Introduction() {
   return (
@@ -20,15 +17,15 @@ export function Introduction() {
             textAlign: { xs: 'center', md: 'left' },
           }}
         >
-          <Typography component="h1" variant="h2" sx={{ my: 2, maxWidth: 500 }}>
+          <Typography component="h1" variant="h2" sx={{ my: 2, maxWidth: 600 }}>
             Simplifiez vos déclarations de spectacles
           </Typography>
-          <Typography color="text.secondary" sx={{ mb: 3, maxWidth: 500 }}>
-            L&apos;Assistant déclaration collecte les données de billetteries afin de vous aider à réaliser vos déclarations SACEM, SACD, ASTP, CNM.
+          <Typography color="text.secondary" sx={{ mb: 2, maxWidth: 600 }}>
+            L&apos;Assistant pour les déclarations du spectacle aide les diffuseurs de spectacles à remplir les formalités SACEM, SACD, CNM ASTP.
           </Typography>
-          <Button component={NextLink} href={linkRegistry.get('signUp', undefined)} size="large" variant="contained" sx={{ mb: 3 }}>
-            Tester l&apos;assistant
-          </Button>
+          <Typography color="text.secondary" sx={{ maxWidth: 600 }}>
+            Ce service est en construction par le Ministère de la Culture, il évoluera d&apos;après les retours des utilisateurs.
+          </Typography>
         </Box>
       }
       right={
