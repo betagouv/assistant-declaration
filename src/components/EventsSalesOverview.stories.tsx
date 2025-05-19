@@ -40,9 +40,7 @@ NormalStory.parameters = {
   },
 };
 NormalStory.play = async ({ canvasElement }) => {
-  await within(canvasElement).findByRole('textbox', {
-    name: /date/i,
-  });
+  await within(canvasElement).findByText(/représentations/i);
 };
 
 export const Normal = prepareStory(NormalStory);

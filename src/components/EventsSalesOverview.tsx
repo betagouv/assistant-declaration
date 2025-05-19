@@ -29,7 +29,7 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
 
   const updateEventCategoryTickets = trpc.updateEventCategoryTickets.useMutation();
 
-  const [expandedAccordions, setExpandedAccordions] = useState<string[]>([]);
+  const [expandedAccordions, setExpandedAccordions] = useState<string[]>(() => wrappers.map((eW) => eW.event.id));
   const collapseAllAccordions = useCallback(() => setExpandedAccordions([]), []);
   const expandAllAccordions = useCallback(() => setExpandedAccordions(wrappers.map((eW) => eW.event.id)), [wrappers]);
 
@@ -287,9 +287,6 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
               </Accordion>
             );
           })}
-        </Grid>
-        <Grid item xs={12} sx={{ py: 3 }}>
-          <EventsSalesKeyFigures eventSerie={eventSerie} wrappers={wrappers} />
         </Grid>
       </Grid>
     </>

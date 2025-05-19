@@ -15,7 +15,7 @@ export function FrequentlyAskedQuestions() {
     >
       <Container>
         <Typography component="h2" variant="h4" sx={{ mt: 1, mb: { xs: 2, sm: 4 } }}>
-          Les questions-réponses pour en savoir plus
+          Foire aux questions | FAQ
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12}>

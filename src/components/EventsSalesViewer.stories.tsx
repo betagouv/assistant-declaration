@@ -7,6 +7,7 @@ import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { Normal as EventsSalesOverviewNormalStory } from '@ad/src/components/EventsSalesOverview.stories';
 import { EventsSalesViewer, EventsSalesViewerContext } from '@ad/src/components/EventsSalesViewer';
 import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 type ComponentType = typeof EventsSalesViewer;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -26,10 +27,11 @@ async function playOpenAndFindElement(canvasElement: HTMLElement): Promise<HTMLE
 
   await userEvent.click(button);
 
-  const presentation = await screen.findByRole('presentation');
-  return await within(presentation).findByRole('textbox', {
-    name: /date/i,
-  });
+  const presentation = (await screen.findAllByRole('presentation')).find((element) => element.classList.contains('MuiDrawer-root'));
+
+  assert(presentation);
+
+  return await within(presentation).findByText(/représentations/i);
 }
 
 const Template: StoryFn<ComponentType> = (args) => {

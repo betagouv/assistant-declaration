@@ -423,7 +423,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
             >
               <Grid item xs={12}>
                 <Typography gutterBottom variant="h6" component="div">
-                  Informations sur la structure
+                  Structure
                 </Typography>
                 <hr />
                 <Grid container spacing={2}>

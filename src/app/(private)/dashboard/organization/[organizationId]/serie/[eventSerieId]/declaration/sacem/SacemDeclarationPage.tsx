@@ -253,7 +253,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
             >
               <Grid item xs={12}>
                 <Typography gutterBottom variant="h6" component="div">
-                  Informations sur la structure
+                  Structure
                 </Typography>
                 <hr />
                 <Grid container spacing={2}>
@@ -464,7 +464,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
               </Grid>
               <Grid item xs={12}>
                 <Typography gutterBottom variant="h6" component="div">
-                  Informations sur le spectacle
+                  Spectacle
                 </Typography>
                 <hr />
                 <Grid container spacing={2}>
