@@ -30,9 +30,7 @@ NormalStory.args = {
 };
 NormalStory.parameters = {};
 NormalStory.play = async ({ canvasElement }) => {
-  await within(canvasElement).findByRole('button', {
-    name: /sacem/i,
-  });
+  await within(canvasElement).findByText(/feu/i);
 };
 
 export const Normal = prepareStory(NormalStory);
