@@ -24,7 +24,7 @@ export const imageProps: ImgHTMLAttributes<HTMLImageElement> = {
 };
 
 export function Partners() {
-  const { showLiveChat, isLiveChatLoading } = useLiveChat();
+  const { showLiveChat } = useLiveChat();
 
   return (
     <Container sx={{ pt: 1, pb: { xs: 4, sm: 5, md: 6 } }}>

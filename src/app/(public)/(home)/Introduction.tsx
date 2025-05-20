@@ -1,3 +1,4 @@
+import { useIsDark } from '@codegouvfr/react-dsfr/useIsDark';
 import { Box, Link, Typography } from '@mui/material';
 import Image from 'next/image';
 import NextLink from 'next/link';
@@ -22,6 +23,8 @@ export const imageProps: ImgHTMLAttributes<HTMLImageElement> = {
 };
 
 export function Introduction() {
+  const { isDark } = useIsDark();
+
   return (
     <IntroductionContainer
       left={
@@ -58,7 +61,7 @@ export function Introduction() {
                 },
               }}
             >
-              <Image src={billetweb} alt="logo de Billetweb" style={{ ...imageProps.style }} />
+              <Image src={billetweb} alt="logo de Billetweb" style={{ ...imageProps.style, filter: isDark ? 'invert(100%)' : undefined }} />
             </Link>
             <Link
               component={NextLink}
@@ -72,7 +75,7 @@ export function Introduction() {
                 },
               }}
             >
-              <Image src={mapado} alt="logo de Mapado" style={{ ...imageProps.style }} />
+              <Image src={mapado} alt="logo de Mapado" style={{ ...imageProps.style, filter: isDark ? 'invert(100%)' : undefined }} />
             </Link>
             <Link
               component={NextLink}
@@ -86,7 +89,7 @@ export function Introduction() {
                 },
               }}
             >
-              <Image src={supersoniks} alt="logo de Supersoniks" style={{ ...imageProps.style }} />
+              <Image src={supersoniks} alt="logo de Supersoniks" style={{ ...imageProps.style, filter: isDark ? 'invert(100%)' : undefined }} />
             </Link>
             <Link
               component={NextLink}
@@ -100,7 +103,7 @@ export function Introduction() {
                 },
               }}
             >
-              <Image src={soticket} alt="logo de SoTicket" style={{ ...imageProps.style }} />
+              <Image src={soticket} alt="logo de SoTicket" style={{ ...imageProps.style, filter: isDark ? 'invert(100%)' : undefined }} />
             </Link>
           </Box>
         </Box>
@@ -113,6 +116,7 @@ export function Introduction() {
           className={style.hero}
           style={{
             color: undefined, // [WORKAROUND] Ref: https://github.com/vercel/next.js/issues/61388#issuecomment-1988278891
+            filter: isDark ? 'invert(100%)' : undefined,
           }}
         />
       }
