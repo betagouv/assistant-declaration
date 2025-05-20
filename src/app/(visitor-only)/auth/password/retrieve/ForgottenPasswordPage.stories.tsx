@@ -5,6 +5,7 @@ import { playFindForm, playFindFormInMain } from '@ad/.storybook/testing';
 import { Normal as VisitorOnlyLayoutNormalStory } from '@ad/src/app/(visitor-only)/VisitorOnlyLayout.stories';
 import { ForgottenPasswordPage, ForgottenPasswordPageContext } from '@ad/src/app/(visitor-only)/auth/password/retrieve/ForgottenPasswordPage';
 import { Empty as RetrievePasswordFormEmptyStory } from '@ad/src/app/(visitor-only)/auth/password/retrieve/RetrievePasswordForm.stories';
+import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 type ComponentType = typeof ForgottenPasswordPage;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -40,6 +41,11 @@ const WithLayoutStory = Template.bind({});
 WithLayoutStory.args = {};
 WithLayoutStory.parameters = {
   layout: 'fullscreen',
+  nextjs: {
+    navigation: {
+      pathname: linkRegistry.get('forgottenPassword', undefined), // Prevent the sticky header
+    },
+  },
 };
 WithLayoutStory.play = async ({ canvasElement }) => {
   await playFindFormInMain(canvasElement);

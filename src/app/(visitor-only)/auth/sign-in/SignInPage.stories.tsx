@@ -5,6 +5,7 @@ import { playFindForm, playFindFormInMain } from '@ad/.storybook/testing';
 import { Normal as VisitorOnlyLayoutNormalStory } from '@ad/src/app/(visitor-only)/VisitorOnlyLayout.stories';
 import { Empty as SignInFormEmptyStory } from '@ad/src/app/(visitor-only)/auth/sign-in/SignInForm.stories';
 import { SignInPage, SignInPageContext } from '@ad/src/app/(visitor-only)/auth/sign-in/SignInPage';
+import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 type ComponentType = typeof SignInPage;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -40,6 +41,11 @@ const WithLayoutStory = Template.bind({});
 WithLayoutStory.args = {};
 WithLayoutStory.parameters = {
   layout: 'fullscreen',
+  nextjs: {
+    navigation: {
+      pathname: linkRegistry.get('signIn', undefined), // Prevent the sticky header
+    },
+  },
 };
 WithLayoutStory.play = async ({ canvasElement }) => {
   await playFindFormInMain(canvasElement);
