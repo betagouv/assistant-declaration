@@ -8,7 +8,6 @@ export function FrequentlyAskedQuestions() {
       maxWidth={false}
       disableGutters
       sx={{
-        bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
         pt: { xs: 4, md: 4 },
         pb: { xs: 4, md: 8 },
       }}
@@ -21,7 +20,9 @@ export function FrequentlyAskedQuestions() {
           <Grid item xs={12}>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>À quoi sert l&apos;assistant ?</Typography>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
+                  À quoi sert l&apos;assistant ?
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 L&apos;assistant aide les diffuseurs à réaliser les déclarations post-spectacles suivantes :
@@ -36,7 +37,7 @@ export function FrequentlyAskedQuestions() {
             </Accordion>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
                   J&apos;ai déjà un outil de suivi des mes spectacles pour faire mes déclarations (un fichier Excel par exemple), comment
                   l&apos;assistant peut-il m&apos;aider ?
                 </Typography>
@@ -50,7 +51,9 @@ export function FrequentlyAskedQuestions() {
             </Accordion>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>Comment puis-je être sûr que les données de l&apos;assistant sont fiables ?</Typography>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
+                  Comment puis-je être sûr que les données de l&apos;assistant sont fiables ?
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 Les données de l&apos;assistant sont le reflet des données de votre logiciel de billetterie. L&apos;assistant vous permet de vérifier,
@@ -65,7 +68,7 @@ export function FrequentlyAskedQuestions() {
             </Accordion>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
                   Est-ce que je peux utiliser l&apos;assistant pour remplir les formulaires SACEM, SACD, CNM, ASTP ?
                 </Typography>
               </AccordionSummary>
@@ -77,7 +80,7 @@ export function FrequentlyAskedQuestions() {
             </Accordion>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
                   Est-ce que l&apos;assistant me permet de filtrer la ou les déclaration(s) que je dois faire pour un spectacle donné ?
                 </Typography>
               </AccordionSummary>
@@ -91,7 +94,7 @@ export function FrequentlyAskedQuestions() {
             </Accordion>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
                   Je déclare via le site web de l&apos;organisme, comment puis-je utiliser l&apos;assistant ?
                 </Typography>
               </AccordionSummary>
@@ -102,13 +105,17 @@ export function FrequentlyAskedQuestions() {
             </Accordion>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>Est-ce que l&apos;assistant transmet automatiquement les données aux organismes ?</Typography>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
+                  Est-ce que l&apos;assistant transmet automatiquement les données aux organismes ?
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>A ce stade l&apos;assistant ne permet pas la télédéclaration aux organismes.</AccordionDetails>
             </Accordion>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>Est-ce que les organismes ont un accès direct à mes données ?</Typography>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
+                  Est-ce que les organismes ont un accès direct à mes données ?
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 Non, les données restent sous votre contrôle dans l&apos;assistant. Il n&apos;y a pas de transmission automatique de vos données aux
@@ -117,7 +124,9 @@ export function FrequentlyAskedQuestions() {
             </Accordion>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>Puis-je vérifier les données avant de les transmettre ?</Typography>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
+                  Puis-je vérifier les données avant de les transmettre ?
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 L&apos;assistant permet de vérifier la recette de billetterie pour un spectacle ainsi que de corriger ou ajouter des billets.
@@ -127,7 +136,9 @@ export function FrequentlyAskedQuestions() {
             </Accordion>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>Quels sont les systèmes de billetterie compatibles ?</Typography>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
+                  Quels sont les systèmes de billetterie compatibles ?
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 Ll&apos;assistant peut actuellement récupérer vos données de billetterie depuis :
@@ -141,7 +152,9 @@ export function FrequentlyAskedQuestions() {
             </Accordion>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>Est-ce que l&apos;assistant permet d&apos;envoyer un email aux organismes ?</Typography>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
+                  Est-ce que l&apos;assistant permet d&apos;envoyer un email aux organismes ?
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 Non, l&apos;assistant vous aide dans la complétion des formulaires PDF ou en ligne. L&apos;envoi d&apos;un email avec le formulaire
@@ -150,7 +163,9 @@ export function FrequentlyAskedQuestions() {
             </Accordion>
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography sx={{ fontWeight: 600 }}>Combien coûte l&apos;utilisation de l&apos;assistant pour les déclarations ?</Typography>
+                <Typography color="primary" sx={{ fontWeight: 600 }}>
+                  Combien coûte l&apos;utilisation de l&apos;assistant pour les déclarations ?
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>L&apos;utilisation de l&apos;assistant est gratuite.</AccordionDetails>
             </Accordion>

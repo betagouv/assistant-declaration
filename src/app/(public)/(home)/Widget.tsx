@@ -1,24 +1,56 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import { useIsDark } from '@codegouvfr/react-dsfr/useIsDark';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import * as React from 'react';
+import Image, { StaticImageData } from 'next/image';
 
-export function Widget({ children, title, icon }: { children: React.ReactNode; title: string; icon: React.ReactElement }) {
+export interface WidgetProps {
+  icon: StaticImageData;
+  title: string;
+  children: React.ReactNode;
+}
+
+export function Widget({ children, title, icon }: WidgetProps) {
+  const { isDark } = useIsDark();
+
   return (
-    <Paper variant="outlined" sx={{ height: '100%', px: 4, py: 3 }}>
-      <Typography component="div" variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
-        <Box
-          sx={{
-            display: 'inline-block',
-            color: fr.colors.decisions.text.title.blueFrance.default,
-            lineHeight: 0,
-            verticalAlign: 'middle',
-            mr: 1,
+    <Paper
+      variant="outlined"
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        bgcolor: fr.colors.decisions.background.alt.yellowTournesol.default,
+        textAlign: 'center',
+        px: 3,
+        py: 3,
+        border: 0,
+      }}
+    >
+      <Box
+        sx={{
+          width: '60%',
+          height: {
+            xs: 50,
+            sm: 100,
+            md: 150,
+          },
+          mx: 'auto',
+        }}
+      >
+        <Image
+          src={icon}
+          alt=""
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            filter: isDark ? 'invert(100%)' : undefined,
           }}
-        >
-          {icon}
-        </Box>
+        />
+      </Box>
+      <Typography component="div" variant="h6" fontWeight="bold" sx={{ mt: 2, mb: 3 }}>
         {title}
       </Typography>
       {children}

@@ -5,6 +5,7 @@ import { playFindAlert, playFindForm, playFindFormInMain } from '@ad/.storybook/
 import { Normal as VisitorOnlyLayoutNormalStory } from '@ad/src/app/(visitor-only)/VisitorOnlyLayout.stories';
 import { Empty as ResetPasswordFormEmptyStory } from '@ad/src/app/(visitor-only)/auth/password/reset/ResetPasswordForm.stories';
 import { ResetPasswordPage, ResetPasswordPageContext } from '@ad/src/app/(visitor-only)/auth/password/reset/ResetPasswordPage';
+import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 type ComponentType = typeof ResetPasswordPage;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -21,6 +22,7 @@ const tokenProvidedParameters = {
   nextjs: {
     navigation: {
       query: {
+        pathname: linkRegistry.get('resetPassword', { token: 'abc' }), // Prevent the sticky header
         token: 'abc',
       },
     },
