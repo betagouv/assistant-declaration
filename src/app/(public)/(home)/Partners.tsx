@@ -1,27 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import { Box, Container, GridProps, Link, Typography } from '@mui/material';
-import { ImgHTMLAttributes } from 'react';
+import { Box, Container, Link, Typography } from '@mui/material';
 
 import { useLiveChat } from '@ad/src/components/live-chat/useLiveChat';
-
-export const gridItemProps: GridProps = {
-  xs: 6,
-  sm: 4,
-  md: 3,
-  sx: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-};
-
-export const imageProps: ImgHTMLAttributes<HTMLImageElement> = {
-  style: {
-    width: 'auto',
-    maxHeight: '100px',
-    objectFit: 'contain',
-  },
-};
 
 export function Partners() {
   const { showLiveChat } = useLiveChat();
@@ -39,13 +19,16 @@ export function Partners() {
           py: 6,
         }}
       >
-        <Typography variant="h6">Vous êtes éditeur ?</Typography>
+        <Typography component="span" variant="h6">
+          Vous êtes éditeur ?
+        </Typography>
         <Typography variant="body1">
           <Link
             component="button"
             onClick={showLiveChat}
             underline="none"
             sx={{
+              top: -1, // Just due to the button among text, could use flex parent too
               '&::after': {
                 display: 'none !important',
               },

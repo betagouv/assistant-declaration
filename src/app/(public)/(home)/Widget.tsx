@@ -21,7 +21,7 @@ export function Widget({ children, title, icon }: WidgetProps) {
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        color: fr.colors.decisions.background.alt.yellowTournesol.default,
+        bgcolor: fr.colors.decisions.background.alt.yellowTournesol.default,
         textAlign: 'center',
         px: 3,
         py: 3,
@@ -41,10 +41,11 @@ export function Widget({ children, title, icon }: WidgetProps) {
       >
         <Image
           src={icon}
-          alt="logo de Billetweb"
+          alt=""
           style={{
             width: '100%',
             height: '100%',
+            objectFit: 'contain',
             filter: isDark ? 'invert(100%)' : undefined,
           }}
         />

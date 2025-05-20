@@ -13,12 +13,12 @@ export function QuickLinks() {
   const { showLiveChat, isLiveChatLoading } = useLiveChat();
 
   return (
-    <Container sx={{ py: { xs: 4, md: 8 } }}>
+    <Container sx={{ pt: { xs: 2, md: 4 }, pb: { xs: 4, md: 8 } }}>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6} md={4}>
           <Widget icon={delivery} title="Une démo ? Une question ? Un retour sur le service ?">
             <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-              N&apos;hésitez pas cela nous aidera à améliorer l'outil.
+              N&apos;hésitez pas cela nous aidera à améliorer l&apos;outil.
             </Typography>
             <Button
               onClick={showLiveChat}
@@ -50,7 +50,8 @@ export function QuickLinks() {
         <Grid item xs={12} sm={6} md={4}>
           <Widget icon={gesture} title="Participez à la co-construction">
             <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-              L'assistant évolue via une démarche itérative basée sur les retours des utilisateurs. Nous cherchons des testeurs pour co-construire.
+              L&apos;assistant évolue via une démarche itérative basée sur les retours des utilisateurs. Nous cherchons des testeurs pour
+              co-construire.
             </Typography>
             <Button
               onClick={showLiveChat}
