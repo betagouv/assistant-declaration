@@ -4,10 +4,10 @@ import Image from 'next/image';
 import NextLink from 'next/link';
 import { ImgHTMLAttributes } from 'react';
 
-import billetweb from '@ad/src/assets/images/partners/billetweb.jpg';
-import mapado from '@ad/src/assets/images/partners/billetweb.jpg';
-import supersoniks from '@ad/src/assets/images/partners/billetweb.jpg';
-import soticket from '@ad/src/assets/images/partners/billetweb.jpg';
+import billetweb from '@ad/src/assets/images/partners/billetweb.png';
+import mapado from '@ad/src/assets/images/partners/billetweb.png';
+import supersoniks from '@ad/src/assets/images/partners/billetweb.png';
+import soticket from '@ad/src/assets/images/partners/billetweb.png';
 
 export const gridItemProps: GridProps = {
   xs: 6,

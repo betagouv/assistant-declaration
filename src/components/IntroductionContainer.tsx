@@ -17,28 +17,30 @@ export function IntroductionContainer({
   rightSx?: BoxProps['sx'];
   containerMaxHeight?: any; // Tried to type `BoxProps['sx']['maxHeight']` but it's not working
 }) {
-  const containerMaxHeightToUse = containerMaxHeight || { xs: 500, sm: 600, xl: 700 };
+  const containerMaxHeightToUse = containerMaxHeight || { sm: 550, xl: 600 };
 
   return (
     <Box
       sx={{
+        bgcolor: fr.colors.decisions.background.actionLow.blueFrance.default,
         overflow: 'hidden',
-        borderBottom: `1px solid ${fr.colors.decisions.background.alt.grey.active}`,
       }}
     >
       <Container
         sx={{
           minHeight: Math.min(...Object.values<number>(containerMaxHeightToUse)),
-          height: 'calc(100vh - 120px)',
+          height: {
+            sm: 'calc(100vh - 120px)',
+          },
           maxHeight: containerMaxHeightToUse,
           transition: '0.3s',
         }}
       >
         <Grid container alignItems="center" wrap="nowrap" sx={{ height: '100%', mx: 'auto' }}>
-          <Grid item md={7} lg={6} sx={{ m: 'auto' }}>
+          <Grid item md={8} lg={8} sx={{ m: 'auto' }}>
             {left}
           </Grid>
-          <Grid item md={5} lg={6} sx={{ maxHeight: '100%', display: { xs: 'none', md: 'initial' } }}>
+          <Grid item md={4} lg={4} sx={{ maxHeight: '100%', display: { xs: 'none', md: 'initial' } }}>
             <Box
               ref={rightRef}
               id="introduction-container-right-area"
@@ -47,9 +49,8 @@ export function IntroductionContainer({
                 {
                   display: 'flex',
                   alignItems: 'center',
-                  px: '3vw',
+                  px: '2vw',
                   py: '20px',
-                  bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
                   minWidth: {
                     md: `${100 / (12 / 5)}vw`,
                     lg: `${100 / (12 / 6)}vw`,
