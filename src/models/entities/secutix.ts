@@ -22,6 +22,68 @@ export const JsonTranslatedStringSchema = applyTypedParsers(
 );
 export type JsonTranslatedStringSchemaType = z.infer<typeof JsonTranslatedStringSchema>;
 
+export const JsonAudienceSubcategorySchema = applyTypedParsers(
+  z.object({
+    id: z.number().int().nonnegative(),
+    code: z.string().min(1),
+    externalName: JsonTranslatedStringSchema,
+    // externalDescription: JsonTranslatedStringSchema,
+    audienceCategoryKind: z.enum(['FULL', 'REDUCED', 'FREE']),
+    requiredAudienceSubCategoryIds: z.array(z.number().int().nonnegative()),
+    crossSeatCategory: z.boolean(),
+  })
+);
+export type JsonAudienceSubcategorySchemaType = z.infer<typeof JsonAudienceSubcategorySchema>;
+
+export const JsonPriceLevelSchema = applyTypedParsers(
+  z.object({
+    id: z.number().int().nonnegative(),
+    code: z.string().min(1),
+    mainCategory: z.enum(['OCCASIONAL', 'SUBSCRIBER', 'INSIDE_SEASONTICKET', 'MEMBER', 'INVITED']),
+    // reduction: z.number().int().nonnegative(),
+  })
+);
+export type JsonPriceLevelSchemaType = z.infer<typeof JsonPriceLevelSchema>;
+
+export const JsonCompleteProductSchema = applyTypedParsers(
+  z.object({
+    id: z.number().int().nonnegative(),
+    code: z.string().min(1),
+    productFamilyType: z.enum(['SINGLE_ENTRY', 'SEASONTICKET', 'PASS', 'PACKAGE', 'MEMBERSHIP', 'SERVICE', 'GOODS', 'TRANSPORT', 'HOSPITALITY']),
+    state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']),
+    vatCodeId: z.number().int().nonnegative().optional(),
+    externalName: JsonTranslatedStringSchema,
+    event: z
+      .object({
+        performances: z.array(
+          z.object({
+            id: z.number().int().nonnegative(),
+            state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']),
+            start: z.coerce.date(),
+            duration: z.number().int().nonnegative().optional(),
+            seatCategories: z.array(
+              z.object({
+                id: z.number().int().nonnegative(),
+                code: z.string().min(1),
+                externalName: JsonTranslatedStringSchema,
+              })
+            ),
+            prices: z.array(
+              z.object({
+                seatCatId: z.number().int().nonnegative(),
+                audSubCatId: z.number().int().nonnegative(),
+                priceLevelId: z.number().int().nonnegative().optional(),
+                amount: z.number().int().nonnegative(), // 4000 for 4€
+              })
+            ),
+          })
+        ),
+      })
+      .optional(),
+  })
+);
+export type JsonCompleteProductSchemaType = z.infer<typeof JsonCompleteProductSchema>;
+
 export const JsonAuthResponseSchema = applyTypedParsers(
   z.object({
     token: z.string().min(1),
@@ -39,98 +101,43 @@ export type JsonSuccessResponseSchemaType = z.infer<typeof JsonSuccessResponseSc
 export const JsonIsCatalogServiceAliveResponseSchema = applyTypedParsers(JsonSuccessResponseSchema.extend({}));
 export type JsonIsCatalogServiceAliveResponseSchemaType = z.infer<typeof JsonIsCatalogServiceAliveResponseSchema>;
 
-export const JsonGetCatalogDetailedResponseSchema = applyTypedParsers(
-  z
-    .object({
-      statusCode: z.literal('in_progress'),
-    })
-    .or(
-      JsonSuccessResponseSchema.extend({
-        catalogData: z.object({
-          seasons: z.array(
-            z.object({
-              audienceCategories: z.array(
-                z.object({
-                  id: z.number().int().nonnegative(),
-                  code: z.string().min(1),
-                  mainCategory: z.enum(['OCCASIONAL', 'SUBSCRIBER', 'INSIDE_SEASONTICKET', 'MEMBER', 'INVITED']),
-                  secondaryCategory: z.enum(['INDIVIDUAL', 'COMMUNITY', 'GROUP', 'TAXED', 'FREE', 'PROMOTIONAL', 'ERROR']),
-                  externalName: JsonTranslatedStringSchema,
-                  audienceSubCategories: z.array(
-                    z.object({
-                      id: z.number().int().nonnegative(),
-                      code: z.string().min(1),
-                      externalName: JsonTranslatedStringSchema,
-                      // externalDescription: JsonTranslatedStringSchema,
-                      audienceCategoryKind: z.enum(['FULL', 'REDUCED', 'FREE']),
-                      requiredAudienceSubCategoryIds: z.array(z.number().int().nonnegative()),
-                      crossSeatCategory: z.boolean(),
-                    })
-                  ),
-                })
-              ),
-              priceLevels: z.array(
-                z.object({
-                  id: z.number().int().nonnegative(),
-                  code: z.string().min(1),
-                  mainCategory: z.enum(['OCCASIONAL', 'SUBSCRIBER', 'INSIDE_SEASONTICKET', 'MEMBER', 'INVITED']),
-                  // reduction: z.number().int().nonnegative(),
-                })
-              ),
-              products: z.array(
-                z.object({
-                  id: z.number().int().nonnegative(),
-                  code: z.string().min(1),
-                  productFamilyType: z.enum([
-                    'SINGLE_ENTRY',
-                    'SEASONTICKET',
-                    'PASS',
-                    'PACKAGE',
-                    'MEMBERSHIP',
-                    'SERVICE',
-                    'GOODS',
-                    'TRANSPORT',
-                    'HOSPITALITY',
-                  ]),
-                  state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']),
-                  vatCodeId: z.number().int().nonnegative().optional(),
-                  externalName: JsonTranslatedStringSchema,
-                  event: z
-                    .object({
-                      performances: z.array(
-                        z.object({
-                          id: z.number().int().nonnegative(),
-                          state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']),
-                          start: z.coerce.date(),
-                          duration: z.number().int().nonnegative().optional(),
-                          seatCategories: z.array(
-                            z.object({
-                              id: z.number().int().nonnegative(),
-                              code: z.string().min(1),
-                              externalName: JsonTranslatedStringSchema,
-                            })
-                          ),
-                          prices: z.array(
-                            z.object({
-                              seatCatId: z.number().int().nonnegative(),
-                              audSubCatId: z.number().int().nonnegative(),
-                              priceLevelId: z.number().int().nonnegative().optional(),
-                              amount: z.number().int().nonnegative(), // 4000 for 4€
-                            })
-                          ),
-                        })
-                      ),
-                    })
-                    .optional(),
-                })
-              ),
-            })
-          ),
-        }),
-      }).strip()
-    )
+export const JsonSearchProductsResponseSchema = applyTypedParsers(
+  JsonSuccessResponseSchema.extend({
+    products: z.array(JsonCompleteProductSchema),
+  }).strip()
 );
-export type JsonGetCatalogDetailedResponseSchemaType = z.infer<typeof JsonGetCatalogDetailedResponseSchema>;
+export type JsonSearchProductsResponseSchemaType = z.infer<typeof JsonSearchProductsResponseSchema>;
+
+export const JsonListSeasonsResponseSchema = applyTypedParsers(
+  JsonSuccessResponseSchema.extend({
+    seasons: z.array(
+      z.object({
+        id: z.number().int().nonnegative(),
+        code: z.string().min(1),
+        state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']),
+        start: z.coerce.date(),
+        end: z.coerce.date(),
+        externalName: JsonTranslatedStringSchema,
+        // The endpoint does not filled properties `priceLevels` and `audienceCategories` despite having them, so we have to additional requests (there is no granularity parameter as for products)
+      })
+    ),
+  }).strip()
+);
+export type JsonListSeasonsResponseSchemaType = z.infer<typeof JsonListSeasonsResponseSchema>;
+
+export const JsonListAudienceSubcategoriesResponseSchema = applyTypedParsers(
+  JsonSuccessResponseSchema.extend({
+    audienceSubCategories: z.array(JsonAudienceSubcategorySchema),
+  }).strip()
+);
+export type JsonListAudienceSubcategoriesResponseSchemaType = z.infer<typeof JsonListAudienceSubcategoriesResponseSchema>;
+
+export const JsonListPriceLevelsResponseSchema = applyTypedParsers(
+  JsonSuccessResponseSchema.extend({
+    priceLevels: z.array(JsonPriceLevelSchema),
+  }).strip()
+);
+export type JsonListPriceLevelsResponseSchemaType = z.infer<typeof JsonListPriceLevelsResponseSchema>;
 
 export const JsonGetPosConfigResponseSchema = applyTypedParsers(
   JsonSuccessResponseSchema.extend({
