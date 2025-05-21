@@ -70,7 +70,7 @@ export const JsonCompleteProductSchema = applyTypedParsers(
             ),
             prices: z.array(
               z.object({
-                institutionSeatCatId: z.number().int().nonnegative(),
+                seatCatId: z.number().int().nonnegative().optional(),
                 audSubCatId: z.number().int().nonnegative(),
                 priceLevelId: z.number().int().nonnegative().optional(),
                 amount: z.number().int().nonnegative(), // 4000 for 4€

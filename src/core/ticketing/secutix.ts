@@ -403,7 +403,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
 
           for (const performance of product.event.performances) {
             for (const price of performance.prices) {
-              const threePartsTicketCategoryId = `${price.priceLevelId ?? 0}_${price.institutionSeatCatId}_${price.audSubCatId}`;
+              const threePartsTicketCategoryId = `${price.priceLevelId ?? 0}_${price.seatCatId ?? 0}_${price.audSubCatId}`;
 
               const priceComboAmount = uniquePriceCombos.get(threePartsTicketCategoryId);
 
@@ -443,7 +443,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
             // Reference the ticket categories to be bound to tickets after
             for (const price of performance.prices) {
               // Unique ID to be retrieved
-              const threePartsTicketCategoryId = `${price.priceLevelId ?? 0}_${price.institutionSeatCatId}_${price.audSubCatId}`;
+              const threePartsTicketCategoryId = `${price.priceLevelId ?? 0}_${price.seatCatId ?? 0}_${price.audSubCatId}`;
               let uniqueTicketCategoryId = threePartsTicketCategoryId;
 
               // If there is the same combo with a different amount we need to differentiate them and we chose to always suffix them (even the first one)
@@ -455,19 +455,6 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
               let ticketCategory = schemaTicketCategories.get(uniqueTicketCategoryId);
 
               if (!ticketCategory) {
-                const seatCategory = performance.seatCategories.find((seatCategory) => {
-                  return seatCategory.id === price.institutionSeatCatId;
-                });
-
-                assert(seatCategory);
-
-                const seatCategoryExternalNameTranslation = seatCategory.externalName.translations.find((translation) => {
-                  // For now only consider the french entry or default to the internal code
-                  return translation.locale === 'fr';
-                });
-
-                const seatCategoryName: string = seatCategoryExternalNameTranslation ? seatCategoryExternalNameTranslation.value : seatCategory.code;
-
                 const audienceSubcategory = existingAudienceSubcategories.get(price.audSubCatId);
 
                 assert(audienceSubcategory);
@@ -481,7 +468,29 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
                   ? audienceSubcategoryExternalNameTranslation.value
                   : audienceSubcategory.code;
 
-                let ticketCategoryName = `${seatCategoryName} - ${audienceSubcategoryName}`;
+                // This is the base of the name, to which we will preprend other information if available
+                let ticketCategoryName = audienceSubcategoryName;
+
+                // If any price level we concatenate
+                if (price.seatCatId !== undefined) {
+                  const seatCategory = performance.seatCategories.find((seatCategory) => {
+                    return seatCategory.id === price.seatCatId;
+                  });
+
+                  assert(seatCategory);
+
+                  const seatCategoryExternalNameTranslation = seatCategory.externalName.translations.find((translation) => {
+                    // For now only consider the french entry or default to the internal code
+                    return translation.locale === 'fr';
+                  });
+
+                  const seatCategoryName: string = seatCategoryExternalNameTranslation
+                    ? seatCategoryExternalNameTranslation.value
+                    : seatCategory.code;
+
+                  // There is no "external name" for the price level, but the code should be readable enough to be understood
+                  ticketCategoryName = `${seatCategoryName} - ${ticketCategoryName}`;
+                }
 
                 // If any price level we concatenate
                 if (price.priceLevelId !== undefined) {
