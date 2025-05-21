@@ -58,7 +58,7 @@ export const JsonCompleteProductSchema = applyTypedParsers(
         performances: z.array(
           z.object({
             id: z.number().int().nonnegative(),
-            state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']),
+            // state: z.enum(['PREPARING', 'VALIDATED', 'RUNNING', 'SUSPENDED', 'CANCELED', 'CLOSED', 'CANCELED_CLOSED']), // Existing with the endpoint `getCatalogDetailed` but not with `searchProductsByCriteria`
             start: z.coerce.date(),
             duration: z.number().int().nonnegative().optional(),
             seatCategories: z.array(
@@ -70,7 +70,7 @@ export const JsonCompleteProductSchema = applyTypedParsers(
             ),
             prices: z.array(
               z.object({
-                seatCatId: z.number().int().nonnegative(),
+                institutionSeatCatId: z.number().int().nonnegative(),
                 audSubCatId: z.number().int().nonnegative(),
                 priceLevelId: z.number().int().nonnegative().optional(),
                 amount: z.number().int().nonnegative(), // 4000 for 4€

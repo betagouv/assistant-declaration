@@ -1,8 +1,8 @@
 import { eachOfLimit } from 'async';
-import { addDays, addSeconds, addYears, isAfter, isBefore, secondsToMilliseconds, set, subMonths } from 'date-fns';
+import { addDays, addSeconds, addYears, isAfter, isBefore, set, subMonths } from 'date-fns';
 
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
-import { foreignTaxRateOnPriceError, secutixDataBeingPreparedError } from '@ad/src/models/entities/errors';
+import { foreignTaxRateOnPriceError } from '@ad/src/models/entities/errors';
 import {
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
@@ -155,9 +155,10 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
     // We filter seasons that are older than the oldest possible `fromDate` since there is no reason to retrieve their products (there is no date filter on products search)
     const oldestPossibleFromDate = subMonths(new Date(), 14); // It's 13 months, but to be sure we add a margin
 
-    const seasonsIds = seasonsData.seasons.filter((season) => {
+    const seasons = seasonsData.seasons.filter((season) => {
       return isAfter(season.end, oldestPossibleFromDate);
     });
+    const seasonsIds = seasons.map((season) => season.id);
 
     // Then search for all products
     // Note: the pagination is not very verbose so we assume the maximum is 100 after testing
@@ -177,7 +178,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
             seasonIds: seasonsIds, // Reduce at the maximum what we fetch
             productFamilyTypes: ['SINGLE_ENTRY'], // This should target only events
           },
-          granularity: 'COMPLETTE', // Needed to have VAT info, performances...
+          granularity: 'COMPLETE', // Needed to have VAT info, performances...
           minIndex: (productsCurrentPage - 1) * searchProductsMaximumItemsPerPage,
           nbMaxResults: searchProductsMaximumItemsPerPage,
         }),
@@ -402,7 +403,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
 
           for (const performance of product.event.performances) {
             for (const price of performance.prices) {
-              const threePartsTicketCategoryId = `${price.priceLevelId ?? 0}_${price.seatCatId}_${price.audSubCatId}`;
+              const threePartsTicketCategoryId = `${price.priceLevelId ?? 0}_${price.institutionSeatCatId}_${price.audSubCatId}`;
 
               const priceComboAmount = uniquePriceCombos.get(threePartsTicketCategoryId);
 
@@ -418,10 +419,11 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
           }
 
           for (const performance of product.event.performances) {
-            // Only synchronize events that are not considered as cancelled
-            if (product.state === 'CANCELED' || product.state === 'CANCELED_CLOSED') {
-              continue;
-            }
+            // Weird but `state` property is no longer existing when using `searchProductsByCriteria` instead of through `getCatalogDetailed`
+            // // Only synchronize events that are not considered as cancelled
+            // if (performance.state === 'CANCELED' || performance.state === 'CANCELED_CLOSED') {
+            //   continue;
+            // }
 
             schemaEvents.push(
               LiteEventSchema.parse({
@@ -441,7 +443,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
             // Reference the ticket categories to be bound to tickets after
             for (const price of performance.prices) {
               // Unique ID to be retrieved
-              const threePartsTicketCategoryId = `${price.priceLevelId ?? 0}_${price.seatCatId}_${price.audSubCatId}`;
+              const threePartsTicketCategoryId = `${price.priceLevelId ?? 0}_${price.institutionSeatCatId}_${price.audSubCatId}`;
               let uniqueTicketCategoryId = threePartsTicketCategoryId;
 
               // If there is the same combo with a different amount we need to differentiate them and we chose to always suffix them (even the first one)
@@ -454,7 +456,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
 
               if (!ticketCategory) {
                 const seatCategory = performance.seatCategories.find((seatCategory) => {
-                  return seatCategory.id === price.seatCatId;
+                  return seatCategory.id === price.institutionSeatCatId;
                 });
 
                 assert(seatCategory);
