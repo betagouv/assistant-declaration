@@ -1,8 +1,9 @@
 import { eachOfLimit } from 'async';
-import { addDays, addSeconds, addYears, isAfter, isBefore, set, subMonths } from 'date-fns';
+import Bottleneck from 'bottleneck';
+import { addDays, addSeconds, addYears, isAfter, isBefore, minutesToMilliseconds, set, subMonths } from 'date-fns';
 
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
-import { foreignTaxRateOnPriceError } from '@ad/src/models/entities/errors';
+import { foreignTaxRateOnPriceError, secutixRateLimitExceededError } from '@ad/src/models/entities/errors';
 import {
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
@@ -34,7 +35,15 @@ import { sleep } from '@ad/src/utils/sleep';
 export class SecutixTicketingSystemClient implements TicketingSystemClient {
   protected domainName: string;
   protected usingTestEnvironnement: boolean = false;
-  protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;
+  protected requestsPerMinuteLimit = 70; // See below limiter
+  protected requestsPerMinuteLimiter = new Bottleneck({
+    // The Secutix documentation says it's 180 requests per minute maximum, but when testing it seems to be 90
+    // So setting 70 to have a margin in case of other services for this institution want to use the API
+    reservoir: this.requestsPerMinuteLimit,
+    reservoirRefreshAmount: this.requestsPerMinuteLimit,
+    reservoirRefreshInterval: minutesToMilliseconds(1), // refresh every minute
+    maxConcurrent: 5, // in case of parallel products processing, limit concurrent requests
+  });
   protected readonly defaultHeaders = new Headers({
     'Content-Type': 'application/json',
   });
@@ -71,6 +80,10 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
     return url.toString();
   }
 
+  protected async rateLimitedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+    return await this.requestsPerMinuteLimiter.schedule(() => fetch(input, init));
+  }
+
   public formatHeadersWithAuthToken(inputHeaders: Headers, accessToken: string): Headers {
     const headers = new Headers(inputHeaders);
     headers.set('Authorization', `Bearer ${accessToken}`);
@@ -78,10 +91,23 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
     return headers;
   }
 
+  protected async handleRequestError(response: Response) {
+    if (response.status === 509 || response.status === 429) {
+      // Bandwidth Limit Exceeded / Too Many Requests
+      // The requests per minute limit is shared across the instition, differents users may have different operators
+      // within the same institution so despite our local rate limiting in case of concurrent synchronization it will trigger those errors
+      throw secutixRateLimitExceededError;
+    } else {
+      const error = await response.text();
+
+      throw error;
+    }
+  }
+
   public async login(): Promise<string> {
     // Since we have a few operations and the token lives for a short time, we don't manage exactly the token lifecycle
     // and just regenerate a new one for each method process
-    const authResponse = await fetch(this.formatUrl(`/v1/auth`), {
+    const authResponse = await this.rateLimitedFetch(this.formatUrl(`/v1/auth`), {
       method: 'POST',
       headers: this.defaultHeaders,
       body: JSON.stringify({
@@ -92,9 +118,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
     });
 
     if (!authResponse.ok) {
-      const error = await authResponse.text();
-
-      throw error;
+      await this.handleRequestError(authResponse);
     }
 
     const authDataJson = await authResponse.json();
@@ -108,16 +132,14 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
       // We fetch the minimum of information since it's just to test the connection
       const accessToken = await this.login();
 
-      const healthcheckResponse = await fetch(this.formatUrl(`/catalogService/v1_33/isCatalogServiceAlive`), {
+      const healthcheckResponse = await this.rateLimitedFetch(this.formatUrl(`/catalogService/v1_33/isCatalogServiceAlive`), {
         method: 'POST',
         headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
         body: JSON.stringify({}),
       });
 
       if (!healthcheckResponse.ok) {
-        const error = await healthcheckResponse.text();
-
-        throw error;
+        await this.handleRequestError(healthcheckResponse);
       }
 
       const healthcheckDataJson = await healthcheckResponse.json();
@@ -137,16 +159,14 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
     // from other seasons into `searchProductsCriteria`. So we first look at `listSeasons` that is the only endpoint reliable on this
     // to then filter by seasons on other endpoints
     // Note: seasons properties `priceLevels` and `audienceCategories` are arrays never filled up by this endpoint, so we retrieve them later
-    const seasonsResponse = await fetch(this.formatUrl(`/setupService/v1_33/listSeasons`), {
+    const seasonsResponse = await this.rateLimitedFetch(this.formatUrl(`/setupService/v1_33/listSeasons`), {
       method: 'POST',
       headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
       body: JSON.stringify({}),
     });
 
     if (!seasonsResponse.ok) {
-      const error = await seasonsResponse.text();
-
-      throw error;
+      await this.handleRequestError(seasonsResponse);
     }
 
     const seasonsDataJson = await seasonsResponse.json();
@@ -170,7 +190,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
 
     // Note: there is still a risk of pagination shift if products are added (due to not having a cursor pagination)...
     while (true) {
-      const productsResponse = await fetch(this.formatUrl(`/setupService/v1_33/searchProductsByCriteria`), {
+      const productsResponse = await this.rateLimitedFetch(this.formatUrl(`/setupService/v1_33/searchProductsByCriteria`), {
         method: 'POST',
         headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
         body: JSON.stringify({
@@ -185,9 +205,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
       });
 
       if (!productsResponse.ok) {
-        const error = await productsResponse.text();
-
-        throw error;
+        await this.handleRequestError(productsResponse);
       }
 
       const productsDataJson = await productsResponse.json();
@@ -224,16 +242,14 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
     const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
 
     if (existingProducts.size > 0) {
-      const pointOfSaleResponse = await fetch(this.formatUrl(`/catalogService/v1_33/getPOSConfig`), {
+      const pointOfSaleResponse = await this.rateLimitedFetch(this.formatUrl(`/catalogService/v1_33/getPOSConfig`), {
         method: 'POST',
         headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
         body: JSON.stringify({}),
       });
 
       if (!pointOfSaleResponse.ok) {
-        const error = await pointOfSaleResponse.text();
-
-        throw error;
+        await this.handleRequestError(pointOfSaleResponse);
       }
 
       const pointOfSaleDataJson = await pointOfSaleResponse.json();
@@ -242,7 +258,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
       const pointOfSaleId = pointOfSaleData.posConfigData.posId;
 
       // Amont existing products (event serie), look which one had tickets modified since then to only focus on them
-      const recentlyPurchasedProductsResponse = await fetch(this.formatUrl(`/availabilityService/v1_33/getUpdatedAvailabilities`), {
+      const recentlyPurchasedProductsResponse = await this.rateLimitedFetch(this.formatUrl(`/availabilityService/v1_33/getUpdatedAvailabilities`), {
         method: 'POST',
         headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
         body: JSON.stringify({
@@ -253,9 +269,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
       });
 
       if (!recentlyPurchasedProductsResponse.ok) {
-        const error = await recentlyPurchasedProductsResponse.text();
-
-        throw error;
+        await this.handleRequestError(recentlyPurchasedProductsResponse);
       }
 
       const recentlyPurchasedProductsDataJson = await recentlyPurchasedProductsResponse.json();
@@ -276,16 +290,14 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
         // Since there is at least a product to synchronize we retrieve global settings for the compute
 
         // Fetch possible tax rates
-        const vatCodesResponse = await fetch(this.formatUrl(`/setupService/v1_33/listVatCodes`), {
+        const vatCodesResponse = await this.rateLimitedFetch(this.formatUrl(`/setupService/v1_33/listVatCodes`), {
           method: 'POST',
           headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
           body: JSON.stringify({}),
         });
 
         if (!vatCodesResponse.ok) {
-          const error = await vatCodesResponse.text();
-
-          throw error;
+          await this.handleRequestError(vatCodesResponse);
         }
 
         const vatCodesDataJson = await vatCodesResponse.json();
@@ -295,7 +307,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
         const existingAudienceSubcategories = new Map<number, JsonAudienceSubcategorySchemaType>();
 
         for (const seasonId of seasonsIds) {
-          const audienceSubcategoriesResponse = await fetch(this.formatUrl(`/setupService/v1_33/listAudienceSubCategories`), {
+          const audienceSubcategoriesResponse = await this.rateLimitedFetch(this.formatUrl(`/setupService/v1_33/listAudienceSubCategories`), {
             method: 'POST',
             headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
             body: JSON.stringify({
@@ -304,9 +316,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
           });
 
           if (!audienceSubcategoriesResponse.ok) {
-            const error = await audienceSubcategoriesResponse.text();
-
-            throw error;
+            await this.handleRequestError(audienceSubcategoriesResponse);
           }
 
           const audienceSubcategoriesDataJson = await audienceSubcategoriesResponse.json();
@@ -321,7 +331,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
         const existingPriceLevels = new Map<number, JsonPriceLevelSchemaType>();
 
         for (const seasonId of seasonsIds) {
-          const priceLevelsResponse = await fetch(this.formatUrl(`/setupService/v1_33/listPriceLevels`), {
+          const priceLevelsResponse = await this.rateLimitedFetch(this.formatUrl(`/setupService/v1_33/listPriceLevels`), {
             method: 'POST',
             headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
             body: JSON.stringify({
@@ -330,9 +340,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
           });
 
           if (!priceLevelsResponse.ok) {
-            const error = await priceLevelsResponse.text();
-
-            throw error;
+            await this.handleRequestError(priceLevelsResponse);
           }
 
           const priceLevelsDataJson = await priceLevelsResponse.json();
@@ -370,7 +378,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
           > = new Map();
 
           // Fetch all tickets at once for this serie
-          const productTicketsResponse = await fetch(this.formatUrl(`/externalOrderHistoryService/v1_33/listTicketsByCriteria`), {
+          const productTicketsResponse = await this.rateLimitedFetch(this.formatUrl(`/externalOrderHistoryService/v1_33/listTicketsByCriteria`), {
             method: 'POST',
             headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
             body: JSON.stringify({
@@ -389,9 +397,7 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
           });
 
           if (!productTicketsResponse.ok) {
-            const error = await productTicketsResponse.text();
-
-            throw error;
+            await this.handleRequestError(productTicketsResponse);
           }
 
           const productTicketsDataJson = await productTicketsResponse.json();
