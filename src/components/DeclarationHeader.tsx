@@ -81,7 +81,7 @@ export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, 
                   },
                 }}
               >
-                Ajuster la billetterie
+                Éditer la billetterie
               </Button>
               <ContextualEventsSalesViewer
                 overview={{
