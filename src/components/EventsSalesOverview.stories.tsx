@@ -40,7 +40,7 @@ NormalStory.parameters = {
   },
 };
 NormalStory.play = async ({ canvasElement }) => {
-  await within(canvasElement).findByText(/représentations/i);
+  await within(canvasElement).findByText(/données/i);
 };
 
 export const Normal = prepareStory(NormalStory);

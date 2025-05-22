@@ -31,7 +31,7 @@ async function playOpenAndFindElement(canvasElement: HTMLElement): Promise<HTMLE
 
   assert(presentation);
 
-  return await within(presentation).findByText(/représentations/i);
+  return await within(presentation).findByText(/données/i);
 }
 
 const Template: StoryFn<ComponentType> = (args) => {

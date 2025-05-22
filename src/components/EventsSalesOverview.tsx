@@ -6,9 +6,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { LoadingButton as Button } from '@mui/lab';
 import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
+import Image from 'next/image';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import repairingImage from '@ad/src/assets/images/declaration/repairing.svg';
 import { trpc } from '@ad/src/client/trpcClient';
 import { ClipboardTicketingEventsSales } from '@ad/src/components/ClipboardTicketingEventsSales';
 import { ClipboardTrigger } from '@ad/src/components/ClipboardTrigger';
@@ -40,34 +42,23 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
 
   return (
     <>
-      <Grid container spacing={1} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Grid item>
-          <Typography component="div" variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-            Liste des représentations
-            {triggerEventsSalesCopy && (
-              <ClipboardTrigger
-                onCopy={() => {
-                  setTriggerEventsSalesCopy(false);
-
-                  push(['trackEvent', 'declaration', 'copyEventsSales', 'scope', eventsWrappersToCopy.length > 1 ? 'all' : 'one']);
-                }}
-              >
-                <ClipboardTicketingEventsSales eventSerieName={eventSerie.name} eventsWrappers={eventsWrappersToCopy} />
-              </ClipboardTrigger>
-            )}
-            <Tooltip title={'Copier le tableau des ventes de toutes les représentations pour Excel, Word...'} sx={{ ml: 1 }}>
-              <IconButton
-                onClick={async () => {
-                  setEventsWrappersToCopy(wrappers);
-                  setTriggerEventsSalesCopy(true);
-                }}
-              >
-                <ContentCopy fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Typography>
-          <Typography component="div" variant="body2">
-            Les valeurs associées aux tickets sont modifiables pour ajuster les totaux à déclarer.
+      <Grid container sx={{ display: 'flex', alignItems: 'center' }}>
+        <Grid item xs={12}>
+          <Image
+            src={repairingImage}
+            alt=""
+            priority={true}
+            style={{
+              width: '100%',
+              maxHeight: 250,
+              objectFit: 'contain',
+              color: undefined, // [WORKAROUND] Ref: https://github.com/vercel/next.js/issues/61388#issuecomment-1988278891
+            }}
+          />
+          <Typography component="div" variant="h3" sx={{ textAlign: 'center' }}>
+            Vérifiez les données pour
+            <br />
+            <span style={{ fontWeight: 'normal' }}>{eventSerie.name}</span>
           </Typography>
         </Grid>
         <Grid item sx={{ ml: 'auto' }}>
@@ -81,8 +72,31 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
             </Button>
           )}
         </Grid>
+        <Grid item sx={{}}>
+          {triggerEventsSalesCopy && (
+            <ClipboardTrigger
+              onCopy={() => {
+                setTriggerEventsSalesCopy(false);
+
+                push(['trackEvent', 'declaration', 'copyEventsSales', 'scope', eventsWrappersToCopy.length > 1 ? 'all' : 'one']);
+              }}
+            >
+              <ClipboardTicketingEventsSales eventSerieName={eventSerie.name} eventsWrappers={eventsWrappersToCopy} />
+            </ClipboardTrigger>
+          )}
+          <Tooltip title={'Copier le tableau des ventes de toutes les représentations pour Excel, Word...'} sx={{ ml: 1 }}>
+            <IconButton
+              onClick={async () => {
+                setEventsWrappersToCopy(wrappers);
+                setTriggerEventsSalesCopy(true);
+              }}
+            >
+              <ContentCopy fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Grid>
       </Grid>
-      <Grid container spacing={2} justifyContent="center" sx={{ pt: 3 }}>
+      <Grid container spacing={2} justifyContent="center" sx={{ pt: 1 }}>
         <Grid item xs={12} sx={{ py: 2 }}>
           {wrappers.map((eventsWrapper) => {
             return (

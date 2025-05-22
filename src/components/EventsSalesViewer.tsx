@@ -70,7 +70,8 @@ export function EventsSalesViewer({ overview, open, onClose }: EventsSalesViewer
         sx={{
           bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
           flexGrow: 1, // For the background to go to the bottom
-          p: 4,
+          px: 4,
+          py: 2,
         }}
       >
         <Grid item xs={12}>
