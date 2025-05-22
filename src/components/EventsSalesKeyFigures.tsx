@@ -138,77 +138,40 @@ export function EventsSalesKeyFigures({ wrappers, eventSerie, roundValuesForCopy
           </Grid>
         )}
         <Grid item xs={12}>
-          <Box
-            sx={{
-              bgcolor: fr.colors.decisions.background.default.grey.default,
-              borderRadius: '8px',
-              py: minimal ? 2 : 3,
-              px: minimal ? 2 : 3,
-            }}
+          <Grid
+            container
+            spacing={minimal ? 1 : 2}
+            sx={
+              minimal
+                ? {
+                    '.MuiInput-input': {
+                      fontSize: '0.9rem',
+                      pb: '0 !important',
+                    },
+                  }
+                : {}
+            }
           >
-            <Grid
-              container
-              spacing={minimal ? 1 : 2}
-              sx={
-                minimal
-                  ? {
-                      '.MuiInput-input': {
-                        fontSize: '0.9rem',
-                        pb: '0 !important',
-                      },
-                    }
-                  : {}
-              }
-            >
-              {(!minimal || !mdUp) && (
-                // On desktop it would display 3 columns for 10 items which takes "a lot of space" for the 4th row
-                // We prefer moving the date elsewhere to have something more consistent
-                <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
-                  <TextField
-                    label="Date"
-                    value={`${t('date.short', { date: eventSerie.startAt })}  →  ${t('date.short', {
-                      date: eventSerie.endAt,
-                    })}`}
-                    slotProps={{
-                      input: {
-                        disableUnderline: true,
-                        onClick: async () => {
-                          await copyValue(
-                            `${t('date.short', { date: eventSerie.startAt })} - ${t('date.short', {
-                              date: eventSerie.endAt,
-                            })}`
-                          );
-
-                          push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'date']);
-                        },
-                      },
-                      htmlInput: {
-                        readOnly: true,
-                      },
-                    }}
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                    sx={{
-                      input: { cursor: 'pointer' },
-                      '.MuiFormLabel-root': { cursor: 'pointer' },
-                    }}
-                  />
-                </Grid>
-              )}
+            {(!minimal || !mdUp) && (
+              // On desktop it would display 3 columns for 10 items which takes "a lot of space" for the 4th row
+              // We prefer moving the date elsewhere to have something more consistent
               <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
                 <TextField
-                  label={minimal ? 'Représentations' : 'Nombre de représentations'}
-                  value={t('number.default', {
-                    number: wrappers.length,
-                  })}
+                  label="Date"
+                  value={`${t('date.short', { date: eventSerie.startAt })}  →  ${t('date.short', {
+                    date: eventSerie.endAt,
+                  })}`}
                   slotProps={{
                     input: {
                       disableUnderline: true,
                       onClick: async () => {
-                        await copyValue(wrappers.length.toString());
+                        await copyValue(
+                          `${t('date.short', { date: eventSerie.startAt })} - ${t('date.short', {
+                            date: eventSerie.endAt,
+                          })}`
+                        );
 
-                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'eventsCount']);
+                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'date']);
                       },
                     },
                     htmlInput: {
@@ -224,232 +187,260 @@ export function EventsSalesKeyFigures({ wrappers, eventSerie, roundValuesForCopy
                   }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
-                <TextField
-                  label={minimal ? 'Billetterie HT' : 'Recette de billetterie HT'}
-                  value={t('currency.amount', {
-                    amount: totalExcludingTaxesAmount,
-                  })}
-                  slotProps={{
-                    input: {
-                      disableUnderline: true,
-                      onClick: async () => {
-                        await copyValue(t('number.defaultWithNoGrouping', { number: totalExcludingTaxesAmountForCopy }), true);
+            )}
+            <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
+              <TextField
+                label={minimal ? 'Représentations' : 'Nombre de représentations'}
+                value={t('number.default', {
+                  number: wrappers.length,
+                })}
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    onClick: async () => {
+                      await copyValue(wrappers.length.toString());
 
-                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalExcludingTaxesAmount']);
-                      },
+                      push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'eventsCount']);
                     },
-                    htmlInput: {
-                      readOnly: true,
-                    },
-                  }}
-                  variant="standard"
-                  size="small"
-                  fullWidth
-                  sx={{
-                    input: { cursor: 'pointer' },
-                    '.MuiFormLabel-root': { cursor: 'pointer' },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
-                <TextField
-                  label={minimal ? 'Billetterie TTC' : 'Recette de billetterie TTC'}
-                  value={t('currency.amount', {
-                    amount: totalIncludingTaxesAmount,
-                  })}
-                  slotProps={{
-                    input: {
-                      disableUnderline: true,
-                      onClick: async () => {
-                        await copyValue(t('number.defaultWithNoGrouping', { number: totalIncludingTaxesAmountForCopy }), true);
-
-                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalIncludingTaxesAmount']);
-                      },
-                    },
-                    htmlInput: {
-                      readOnly: true,
-                    },
-                  }}
-                  variant="standard"
-                  size="small"
-                  fullWidth
-                  sx={{
-                    input: { cursor: 'pointer' },
-                    '.MuiFormLabel-root': { cursor: 'pointer' },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
-                <TextField
-                  label="Taux de TVA"
-                  value={t('number.percent', {
-                    percentage: eventSerie.taxRate,
-                  })}
-                  slotProps={{
-                    input: {
-                      disableUnderline: true,
-                      onClick: async () => {
-                        await copyValue(t('number.defaultWithNoGrouping', { number: 100 * eventSerie.taxRate }));
-
-                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'taxRate']);
-                      },
-                    },
-                    htmlInput: {
-                      readOnly: true,
-                    },
-                  }}
-                  variant="standard"
-                  size="small"
-                  fullWidth
-                  sx={{
-                    input: { cursor: 'pointer' },
-                    '.MuiFormLabel-root': { cursor: 'pointer' },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
-                <TextField
-                  label="Montant de TVA"
-                  value={t('currency.amount', {
-                    amount: totalTaxesAmount,
-                  })}
-                  slotProps={{
-                    input: {
-                      disableUnderline: true,
-                      onClick: async () => {
-                        await copyValue(t('number.defaultWithNoGrouping', { number: totalTaxesAmountForCopy }), true);
-
-                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalTaxAmount']);
-                      },
-                    },
-                    htmlInput: {
-                      readOnly: true,
-                    },
-                  }}
-                  variant="standard"
-                  size="small"
-                  fullWidth
-                  sx={{
-                    input: { cursor: 'pointer' },
-                    '.MuiFormLabel-root': { cursor: 'pointer' },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
-                <TextField
-                  label={minimal ? 'Entrées payantes' : "Nombre d'entrées payantes"}
-                  value={t('number.default', {
-                    number: paidTickets,
-                  })}
-                  slotProps={{
-                    input: {
-                      disableUnderline: true,
-                      onClick: async () => {
-                        await copyValue(paidTickets.toString());
-
-                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'paidTickets']);
-                      },
-                    },
-                    htmlInput: {
-                      readOnly: true,
-                    },
-                  }}
-                  variant="standard"
-                  size="small"
-                  fullWidth
-                  sx={{
-                    input: { cursor: 'pointer' },
-                    '.MuiFormLabel-root': { cursor: 'pointer' },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
-                <TextField
-                  label={minimal ? 'Entrées gratuites' : "Nombre d'entrées gratuites"}
-                  value={t('number.default', {
-                    number: freeTickets,
-                  })}
-                  slotProps={{
-                    input: {
-                      disableUnderline: true,
-                      onClick: async () => {
-                        await copyValue(freeTickets.toString());
-
-                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'freeTickets']);
-                      },
-                    },
-                    htmlInput: {
-                      readOnly: true,
-                    },
-                  }}
-                  variant="standard"
-                  size="small"
-                  fullWidth
-                  sx={{
-                    input: { cursor: 'pointer' },
-                    '.MuiFormLabel-root': { cursor: 'pointer' },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
-                <TextField
-                  label={minimal ? "Total d'entrées" : "Nombre total d'entrées"}
-                  value={t('number.default', {
-                    number: freeTickets + paidTickets,
-                  })}
-                  slotProps={{
-                    input: {
-                      disableUnderline: true,
-                      onClick: async () => {
-                        await copyValue((freeTickets + paidTickets).toString());
-
-                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'ticketsCount']);
-                      },
-                    },
-                    htmlInput: {
-                      readOnly: true,
-                    },
-                  }}
-                  variant="standard"
-                  size="small"
-                  fullWidth
-                  sx={{
-                    input: { cursor: 'pointer' },
-                    '.MuiFormLabel-root': { cursor: 'pointer' },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
-                <TextField
-                  label={minimal ? 'Billet moyen TTC' : 'Tarif moyen du billet TTC'}
-                  value={t('currency.amount', {
-                    amount: averageTicketPrice,
-                  })}
-                  slotProps={{
-                    input: {
-                      disableUnderline: true,
-                      onClick: async () => {
-                        await copyValue(t('number.defaultWithNoGrouping', { number: averageTicketPriceForCopy }), true);
-
-                        push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'averageTicketPrice']);
-                      },
-                    },
-                    htmlInput: {
-                      readOnly: true,
-                    },
-                  }}
-                  variant="standard"
-                  size="small"
-                  fullWidth
-                  sx={{
-                    input: { cursor: 'pointer' },
-                    '.MuiFormLabel-root': { cursor: 'pointer' },
-                  }}
-                />
-              </Grid>
+                  },
+                  htmlInput: {
+                    readOnly: true,
+                  },
+                }}
+                variant="standard"
+                size="small"
+                fullWidth
+                sx={{
+                  input: { cursor: 'pointer' },
+                  '.MuiFormLabel-root': { cursor: 'pointer' },
+                }}
+              />
             </Grid>
-          </Box>
+            <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
+              <TextField
+                label={minimal ? 'Billetterie HT' : 'Recette de billetterie HT'}
+                value={t('currency.amount', {
+                  amount: totalExcludingTaxesAmount,
+                })}
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    onClick: async () => {
+                      await copyValue(t('number.defaultWithNoGrouping', { number: totalExcludingTaxesAmountForCopy }), true);
+
+                      push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalExcludingTaxesAmount']);
+                    },
+                  },
+                  htmlInput: {
+                    readOnly: true,
+                  },
+                }}
+                variant="standard"
+                size="small"
+                fullWidth
+                sx={{
+                  input: { cursor: 'pointer' },
+                  '.MuiFormLabel-root': { cursor: 'pointer' },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
+              <TextField
+                label={minimal ? 'Billetterie TTC' : 'Recette de billetterie TTC'}
+                value={t('currency.amount', {
+                  amount: totalIncludingTaxesAmount,
+                })}
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    onClick: async () => {
+                      await copyValue(t('number.defaultWithNoGrouping', { number: totalIncludingTaxesAmountForCopy }), true);
+
+                      push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalIncludingTaxesAmount']);
+                    },
+                  },
+                  htmlInput: {
+                    readOnly: true,
+                  },
+                }}
+                variant="standard"
+                size="small"
+                fullWidth
+                sx={{
+                  input: { cursor: 'pointer' },
+                  '.MuiFormLabel-root': { cursor: 'pointer' },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
+              <TextField
+                label="Taux de TVA"
+                value={t('number.percent', {
+                  percentage: eventSerie.taxRate,
+                })}
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    onClick: async () => {
+                      await copyValue(t('number.defaultWithNoGrouping', { number: 100 * eventSerie.taxRate }));
+
+                      push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'taxRate']);
+                    },
+                  },
+                  htmlInput: {
+                    readOnly: true,
+                  },
+                }}
+                variant="standard"
+                size="small"
+                fullWidth
+                sx={{
+                  input: { cursor: 'pointer' },
+                  '.MuiFormLabel-root': { cursor: 'pointer' },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
+              <TextField
+                label="Montant de TVA"
+                value={t('currency.amount', {
+                  amount: totalTaxesAmount,
+                })}
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    onClick: async () => {
+                      await copyValue(t('number.defaultWithNoGrouping', { number: totalTaxesAmountForCopy }), true);
+
+                      push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'totalTaxAmount']);
+                    },
+                  },
+                  htmlInput: {
+                    readOnly: true,
+                  },
+                }}
+                variant="standard"
+                size="small"
+                fullWidth
+                sx={{
+                  input: { cursor: 'pointer' },
+                  '.MuiFormLabel-root': { cursor: 'pointer' },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
+              <TextField
+                label={minimal ? 'Entrées payantes' : "Nombre d'entrées payantes"}
+                value={t('number.default', {
+                  number: paidTickets,
+                })}
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    onClick: async () => {
+                      await copyValue(paidTickets.toString());
+
+                      push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'paidTickets']);
+                    },
+                  },
+                  htmlInput: {
+                    readOnly: true,
+                  },
+                }}
+                variant="standard"
+                size="small"
+                fullWidth
+                sx={{
+                  input: { cursor: 'pointer' },
+                  '.MuiFormLabel-root': { cursor: 'pointer' },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
+              <TextField
+                label={minimal ? 'Entrées gratuites' : "Nombre d'entrées gratuites"}
+                value={t('number.default', {
+                  number: freeTickets,
+                })}
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    onClick: async () => {
+                      await copyValue(freeTickets.toString());
+
+                      push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'freeTickets']);
+                    },
+                  },
+                  htmlInput: {
+                    readOnly: true,
+                  },
+                }}
+                variant="standard"
+                size="small"
+                fullWidth
+                sx={{
+                  input: { cursor: 'pointer' },
+                  '.MuiFormLabel-root': { cursor: 'pointer' },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
+              <TextField
+                label={minimal ? "Total d'entrées" : "Nombre total d'entrées"}
+                value={t('number.default', {
+                  number: freeTickets + paidTickets,
+                })}
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    onClick: async () => {
+                      await copyValue((freeTickets + paidTickets).toString());
+
+                      push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'ticketsCount']);
+                    },
+                  },
+                  htmlInput: {
+                    readOnly: true,
+                  },
+                }}
+                variant="standard"
+                size="small"
+                fullWidth
+                sx={{
+                  input: { cursor: 'pointer' },
+                  '.MuiFormLabel-root': { cursor: 'pointer' },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={minimal ? 4 : 6}>
+              <TextField
+                label={minimal ? 'Billet moyen TTC' : 'Tarif moyen du billet TTC'}
+                value={t('currency.amount', {
+                  amount: averageTicketPrice,
+                })}
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    onClick: async () => {
+                      await copyValue(t('number.defaultWithNoGrouping', { number: averageTicketPriceForCopy }), true);
+
+                      push(['trackEvent', 'declaration', 'copyKeyFigureValue', 'key', 'averageTicketPrice']);
+                    },
+                  },
+                  htmlInput: {
+                    readOnly: true,
+                  },
+                }}
+                variant="standard"
+                size="small"
+                fullWidth
+                sx={{
+                  input: { cursor: 'pointer' },
+                  '.MuiFormLabel-root': { cursor: 'pointer' },
+                }}
+              />
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
       {!!snackbarAlert && (
