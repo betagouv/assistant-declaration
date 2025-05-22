@@ -1,3 +1,4 @@
+import { fr } from '@codegouvfr/react-dsfr';
 import { ArrowForward } from '@mui/icons-material';
 import { Box, CardContent, Chip, Link, Tooltip, Typography } from '@mui/material';
 import Card from '@mui/material/Card';
@@ -35,7 +36,7 @@ export function EventSerieCard(props: EventSerieCardProps) {
         <CardContent sx={{ p: '0 !important' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-              <Typography component="div" variant="h5" data-sentry-mask>
+              <Typography component="div" variant="h5" color="primary" data-sentry-mask>
                 {props.wrapper.serie.name}
               </Typography>
               <Tooltip
@@ -65,7 +66,7 @@ export function EventSerieCard(props: EventSerieCardProps) {
                 />
               </Tooltip>
             </Box>
-            <ArrowForward sx={{ color: 'primary', ml: 'auto' }} />
+            <ArrowForward sx={{ color: fr.colors.decisions.text.actionHigh.blueFrance.default, ml: 'auto' }} />
           </Box>
         </CardContent>
       </Card>
