@@ -593,18 +593,8 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                       />
                     </Tooltip>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Box
-                      sx={{
-                        bgcolor: fr.colors.decisions.background.alt.greenEmeraude.default,
-                        borderRadius: '8px',
-                        py: { xs: 2, md: 3 },
-                        px: { xs: 1, md: 2 },
-                        mt: 1,
-                      }}
-                    >
-                      <SacemRevenuesTable control={control} trigger={trigger} errors={errors.revenues} />
-                    </Box>
+                  <Grid item xs={12} sx={{ mt: 1 }}>
+                    <SacemRevenuesTable control={control} trigger={trigger} errors={errors.revenues} />
                   </Grid>
                 </Grid>
               </Grid>
@@ -614,18 +604,8 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                 </Typography>
                 <hr />
                 <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Box
-                      sx={{
-                        bgcolor: fr.colors.decisions.background.alt.redMarianne.default,
-                        borderRadius: '8px',
-                        py: { xs: 2, md: 3 },
-                        px: { xs: 1, md: 2 },
-                        mt: 1,
-                      }}
-                    >
-                      <SacemExpensesTable control={control} trigger={trigger} errors={errors.expenses} />
-                    </Box>
+                  <Grid item xs={12} sx={{ mt: 1 }}>
+                    <SacemExpensesTable control={control} trigger={trigger} errors={errors.expenses} />
                   </Grid>
                 </Grid>
               </Grid>

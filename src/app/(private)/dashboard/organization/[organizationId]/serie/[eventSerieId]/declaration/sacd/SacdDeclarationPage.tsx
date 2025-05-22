@@ -820,18 +820,8 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                 </Typography>
                 <hr />
                 <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Box
-                      sx={{
-                        bgcolor: fr.colors.decisions.background.alt.redMarianne.default,
-                        borderRadius: '8px',
-                        py: { xs: 2, md: 3 },
-                        px: { xs: 1, md: 2 },
-                        mt: 1,
-                      }}
-                    >
-                      <SacdAccountingEntriesTable control={control} trigger={trigger} errors={errors.accountingEntries} />
-                    </Box>
+                  <Grid item xs={12} sx={{ mt: 1 }}>
+                    <SacdAccountingEntriesTable control={control} trigger={trigger} errors={errors.accountingEntries} />
                   </Grid>
                 </Grid>
               </Grid>
