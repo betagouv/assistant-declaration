@@ -19,6 +19,19 @@ export const { MuiDsfrThemeProvider } = createMuiDsfrThemeProvider({
           // TODO: remove once the issue is addressed: https://github.com/mui/material-ui/issues/31185
           styleOverrides: { root: { paddingTop: `1rem !important` } },
         },
+        MuiButton: {
+          styleOverrides: {
+            // Remove the shadow
+            root: {
+              boxShadow: 'none',
+              '&:hover': {
+                boxShadow: 'none',
+              },
+              // For whatever reason having just en empty `styleOverrides` will make buttons using uppercase, not canceling this
+              textTransform: 'none',
+            },
+          },
+        },
       },
     };
   },
