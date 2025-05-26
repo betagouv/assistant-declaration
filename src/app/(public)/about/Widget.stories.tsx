@@ -2,7 +2,7 @@ import { Typography } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { Widget } from '@ad/src/app/(public)/(home)/Widget';
+import { Widget } from '@ad/src/app/(public)/about/Widget';
 import computer from '@ad/src/assets/images/home/computer.svg';
 
 type ComponentType = typeof Widget;

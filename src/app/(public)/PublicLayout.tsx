@@ -21,16 +21,16 @@ export function PublicLayout(props: PropsWithChildren) {
 
   let quickAccessItems: HeaderProps.QuickAccessItem[] = [
     {
-      iconId: 'fr-icon-home-4-line',
+      iconId: 'fr-icon-file-text-line',
       linkProps: {
-        href: linkRegistry.get('home', undefined),
+        href: linkRegistry.get('about', undefined),
       },
       text: 'À propos',
     },
     helpQuickAccessItem(),
   ];
 
-  const stickyMenu = useMemo(() => pathname === linkRegistry.get('home', undefined), [pathname]);
+  const stickyMenu = useMemo(() => pathname === linkRegistry.get('about', undefined), [pathname]);
 
   if (sessionWrapper.status === 'authenticated') {
     quickAccessItems.push(

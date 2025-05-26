@@ -4,7 +4,7 @@ import Image from 'next/image';
 import NextLink from 'next/link';
 import { ImgHTMLAttributes } from 'react';
 
-import style from '@ad/src/app/(public)/(home)/Introduction.module.scss';
+import style from '@ad/src/app/(public)/about/Introduction.module.scss';
 import hero from '@ad/src/assets/images/hero.svg';
 import billetweb from '@ad/src/assets/images/partners/billetweb.png';
 import mapado from '@ad/src/assets/images/partners/mapado.png';

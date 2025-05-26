@@ -19,7 +19,9 @@ export const brandTop = (
 );
 
 export const homeLinkProps = {
-  href: '/',
+  // TODO: as for other items, waiting for the following to be solved https://github.com/zilch/type-route/issues/125
+  // href: linkRegistry.get('dashboard', undefined),
+  href: '/dashboard',
   title: 'À propos - Assistant déclaration',
 };
 
