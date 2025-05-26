@@ -26,7 +26,7 @@ export function KeyReasons() {
           <Typography component="div" variant="h3" sx={{ mb: 2 }}>
             Pourquoi un Assistant pour les déclarations du spectacle ?
           </Typography>
-          <Typography variant="body1">
+          <Typography component="div" variant="body1">
             <span style={{ fontWeight: 'bold' }}>Pour gagner du temps :</span> chaque mois, vous devez déclarer plusieurs fois les mêmes informations
             auprès des organismes. L&apos;Assistant a pour objectif de simplifier cette tâche.
             <br />
