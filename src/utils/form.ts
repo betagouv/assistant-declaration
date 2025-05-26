@@ -1,4 +1,4 @@
-import { TypographyProps } from '@mui/material/Typography';
+import { TypographyProps } from '@mui/material';
 import { RegisterOptions } from 'react-hook-form';
 
 export function forceHtmlRadioOutputToBeBoolean(value: string | null): boolean | null {

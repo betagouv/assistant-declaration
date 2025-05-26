@@ -1,5 +1,5 @@
 import { Notice } from '@codegouvfr/react-dsfr/Notice';
-import Link from '@mui/material/Link';
+import { Link } from '@mui/material';
 import NextLink from 'next/link';
 
 export interface FlashMessageProps {

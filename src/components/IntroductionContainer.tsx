@@ -1,7 +1,5 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import Box, { BoxProps } from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
+import { Box, BoxProps, Container, Grid } from '@mui/material';
 import * as React from 'react';
 
 export function IntroductionContainer({

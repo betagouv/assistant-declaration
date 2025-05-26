@@ -1,6 +1,5 @@
 import { DevTool } from '@hookform/devtools';
-import Alert from '@mui/material/Alert';
-import Grid from '@mui/material/Grid';
+import { Alert, Grid } from '@mui/material';
 import * as Sentry from '@sentry/nextjs';
 import { Mutex } from 'locks';
 import { CSSProperties, FormEventHandler, MutableRefObject, PropsWithChildren, useMemo, useRef, useState } from 'react';

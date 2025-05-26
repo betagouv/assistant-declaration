@@ -1,8 +1,6 @@
 'use client';
 
-import Alert from '@mui/material/Alert';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
+import { Alert, Grid, Typography } from '@mui/material';
 import { createContext, useContext, useState } from 'react';
 
 import { RetrievePasswordForm } from '@ad/src/app/(visitor-only)/auth/password/retrieve/RetrievePasswordForm';

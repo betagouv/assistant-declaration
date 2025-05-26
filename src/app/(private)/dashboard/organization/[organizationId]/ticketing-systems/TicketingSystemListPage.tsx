@@ -1,9 +1,7 @@
 'use client';
 
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
+import { AddCircleOutline } from '@mui/icons-material';
+import { Button, Grid, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { useCallback } from 'react';
@@ -70,7 +68,7 @@ export function TicketingSystemListPage({ params: { organizationId } }: Ticketin
               href={linkRegistry.get('ticketingSystemConnection', { organizationId: organizationId })}
               size="large"
               variant="contained"
-              startIcon={<AddCircleOutlineIcon />}
+              startIcon={<AddCircleOutline />}
             >
               Connecter une billetterie
             </Button>

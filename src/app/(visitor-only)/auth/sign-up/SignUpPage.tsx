@@ -2,9 +2,7 @@
 
 import { fr } from '@codegouvfr/react-dsfr';
 import humanCooperation from '@gouvfr/dsfr/dist/artwork/pictograms/environment/human-cooperation.svg';
-import { Alert } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
+import { Alert, Grid, Typography } from '@mui/material';
 import Image from 'next/image';
 import { createContext, useContext, useState } from 'react';
 

@@ -1,9 +1,7 @@
 'use client';
 
-import Button from '@mui/lab/LoadingButton';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
+import { LoadingButton as Button } from '@mui/lab';
+import { Container, Grid, Typography } from '@mui/material';
 import NextLink from 'next/link';
 import { redirect } from 'next/navigation';
 

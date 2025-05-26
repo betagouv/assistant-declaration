@@ -1,13 +1,7 @@
 'use client';
 
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import LogoutIcon from '@mui/icons-material/Logout';
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
+import { Dashboard, Logout, ManageAccounts } from '@mui/icons-material';
+import { Box, Grid, ListItemIcon, Menu, MenuItem } from '@mui/material';
 import FocusTrap from '@mui/material/Unstable_TrapFocus';
 import { EventEmitter } from 'eventemitter3';
 import NextLink from 'next/link';
@@ -70,20 +64,20 @@ export function HeaderUserItem(props: PropsWithChildren<HeaderUserItemProps>) {
           {props.showDashboardMenuItem === true && (
             <MenuItem component={NextLink} href={linkRegistry.get('dashboard', undefined)}>
               <ListItemIcon>
-                <DashboardIcon fontSize="small" />
+                <Dashboard fontSize="small" />
               </ListItemIcon>
               Tableau de bord
             </MenuItem>
           )}
           <MenuItem component={NextLink} href={linkRegistry.get('accountSettings', undefined)}>
             <ListItemIcon>
-              <ManageAccountsIcon fontSize="small" />
+              <ManageAccounts fontSize="small" />
             </ListItemIcon>
             Profil utilisateur
           </MenuItem>
           <MenuItem onClick={logout}>
             <ListItemIcon>
-              <LogoutIcon fontSize="small" />
+              <Logout fontSize="small" />
             </ListItemIcon>
             Se déconnecter
           </MenuItem>

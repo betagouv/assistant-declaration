@@ -2,10 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import Button from '@mui/lab/LoadingButton';
-import { Alert, IconButton, InputAdornment, Link } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import TextField from '@mui/material/TextField';
+import { LoadingButton as Button } from '@mui/lab';
+import { Alert, Grid, IconButton, InputAdornment, Link, TextField } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { useMemo, useState } from 'react';

@@ -1,6 +1,5 @@
-import ReplayIcon from '@mui/icons-material/Replay';
-import Alert, { AlertProps } from '@mui/material/Alert';
-import Button from '@mui/material/Button';
+import { Replay } from '@mui/icons-material';
+import { Alert, AlertProps, Button } from '@mui/material';
 import { TRPCClientErrorLike } from '@trpc/client';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -117,7 +116,7 @@ export function ErrorAlert(props: ErrorAlertProps) {
             size="large"
             variant="contained"
             color="error"
-            startIcon={<ReplayIcon />}
+            startIcon={<Replay />}
             sx={{
               display: 'flex',
               mt: 2,

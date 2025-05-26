@@ -1,5 +1,5 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import CloseIcon from '@mui/icons-material/Close';
+import { Close } from '@mui/icons-material';
 import { AppBar, Drawer, Grid, IconButton, Toolbar, Typography, alpha, useMediaQuery, useTheme } from '@mui/material';
 import { createContext, useContext } from 'react';
 
@@ -60,7 +60,7 @@ export function EventsSalesViewer({ overview, open, onClose }: EventsSalesViewer
             Détails de la billetterie
           </Typography>
           <IconButton onClick={onClose} size="small" edge="start" aria-label="fermer la visualisation">
-            <CloseIcon />
+            <Close />
           </IconButton>
         </Toolbar>
       </AppBar>

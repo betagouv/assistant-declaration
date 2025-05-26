@@ -1,7 +1,7 @@
 import { Delete } from '@mui/icons-material';
 import { Autocomplete, Box, Button, IconButton, InputBaseComponentProps, TextField, Typography } from '@mui/material';
 import { GridAutosizeOptions, type GridColDef, useGridApiRef, useGridRootProps } from '@mui/x-data-grid';
-import { DataGrid } from '@mui/x-data-grid/DataGrid';
+import { DataGrid } from '@mui/x-data-grid';
 import { parse, toSeconds } from 'iso8601-duration';
 import debounce from 'lodash.debounce';
 import { KeyboardEventHandler, forwardRef, useCallback, useEffect, useMemo, useState } from 'react';

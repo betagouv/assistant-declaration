@@ -1,6 +1,6 @@
 import { Box, Tooltip } from '@mui/material';
 import { GridAutosizeOptions, type GridColDef, useGridApiRef } from '@mui/x-data-grid';
-import { DataGrid } from '@mui/x-data-grid/DataGrid';
+import { DataGrid } from '@mui/x-data-grid';
 import debounce from 'lodash.debounce';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
