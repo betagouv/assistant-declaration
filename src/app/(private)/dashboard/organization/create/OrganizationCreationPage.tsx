@@ -1,7 +1,6 @@
 'use client';
 
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
+import { Grid, Typography } from '@mui/material';
 import { createContext, useContext } from 'react';
 
 import { CreateOrganizationForm } from '@ad/src/app/(private)/dashboard/organization/create/CreateOrganizationForm';

@@ -1,7 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { ArrowForward } from '@mui/icons-material';
 import { Box, CardContent, Chip, Link, Tooltip, Typography } from '@mui/material';
-import Card from '@mui/material/Card';
+import { Card } from '@mui/material';
 import { isSameDay } from 'date-fns';
 import NextLink from 'next/link';
 import { useMemo } from 'react';

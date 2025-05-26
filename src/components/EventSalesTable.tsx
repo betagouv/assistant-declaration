@@ -1,6 +1,6 @@
-import { Alert, Snackbar, Tooltip, Typography } from '@mui/material';
+import { Alert, Snackbar, Tooltip } from '@mui/material';
 import { GridAutosizeOptions, type GridColDef, type GridRowModel, useGridApiRef } from '@mui/x-data-grid';
-import { DataGrid } from '@mui/x-data-grid/DataGrid';
+import { DataGrid } from '@mui/x-data-grid';
 import debounce from 'lodash.debounce';
 import { KeyboardEventHandler, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';

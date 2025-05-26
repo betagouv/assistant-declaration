@@ -1,17 +1,12 @@
 'use client';
 
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
+import { Box, Grid, Menu, MenuItem } from '@mui/material';
 import FocusTrap from '@mui/material/Unstable_TrapFocus';
 import { EventEmitter } from 'eventemitter3';
 import NextLink from 'next/link';
 import { PropsWithChildren, useEffect, useState } from 'react';
 
-import { Avatar } from '@ad/src/components/Avatar';
 import { UserInterfaceOrganizationSchemaType } from '@ad/src/models/entities/ui';
-import { logout } from '@ad/src/utils/auth';
 import { menuPaperProps } from '@ad/src/utils/menu';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 

@@ -1,9 +1,7 @@
 'use client';
 
 import { fr } from '@codegouvfr/react-dsfr';
-import { Alert, Box, Button, Link, Typography } from '@mui/material';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
+import { Alert, Box, Button, Container, Grid, Link, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import NextLink from 'next/link';

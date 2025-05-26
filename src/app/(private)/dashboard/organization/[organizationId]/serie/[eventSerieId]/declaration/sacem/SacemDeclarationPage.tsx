@@ -2,13 +2,9 @@
 
 import { fr } from '@codegouvfr/react-dsfr';
 import { zodResolver } from '@hookform/resolvers/zod';
-import DownloadIcon from '@mui/icons-material/Download';
-import SaveIcon from '@mui/icons-material/Save';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Download, Save, Visibility } from '@mui/icons-material';
 import { LoadingButton as Button } from '@mui/lab';
-import { Alert, Autocomplete, Box, Link, TextField, Tooltip, Typography } from '@mui/material';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
+import { Alert, Autocomplete, Box, Container, Grid, Link, TextField, Tooltip, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
@@ -662,7 +658,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                         variant="contained"
                         color="warning"
                         fullWidth
-                        startIcon={<SaveIcon />}
+                        startIcon={<Save />}
                       >
                         Enregistrer les modifications en cours
                       </Button>
@@ -685,7 +681,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                           size="large"
                           variant="contained"
                           fullWidth
-                          startIcon={<DownloadIcon />}
+                          startIcon={<Download />}
                           sx={{
                             '&::after': {
                               display: 'none !important',
@@ -709,7 +705,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                           size="large"
                           variant="contained"
                           fullWidth
-                          startIcon={<VisibilityIcon />}
+                          startIcon={<Visibility />}
                           sx={{
                             '&::after': {
                               display: 'none !important',

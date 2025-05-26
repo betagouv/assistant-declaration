@@ -2,7 +2,7 @@
 
 import { fr } from '@codegouvfr/react-dsfr';
 import { ContentCopy } from '@mui/icons-material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { ExpandMore } from '@mui/icons-material';
 import { LoadingButton as Button } from '@mui/lab';
 import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
@@ -113,7 +113,7 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
                 sx={{ boxShadow: 'none' }}
               >
                 <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
+                  expandIcon={<ExpandMore />}
                   sx={{
                     '& > .MuiAccordionSummary-content': {
                       gap: 1,

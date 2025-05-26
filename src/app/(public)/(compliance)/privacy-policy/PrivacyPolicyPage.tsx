@@ -1,4 +1,4 @@
-import Container from '@mui/material/Container';
+import { Container } from '@mui/material';
 
 import statementContent from '@ad/src/app/(public)/(compliance)/privacy-policy/content.transformed.html';
 

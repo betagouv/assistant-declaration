@@ -1,8 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { useIsDark } from '@codegouvfr/react-dsfr/useIsDark';
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
+import { Box, Paper, Typography } from '@mui/material';
 import Image, { StaticImageData } from 'next/image';
 
 export interface WidgetProps {

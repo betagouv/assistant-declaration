@@ -1,4 +1,4 @@
-import MuiAvatar from '@mui/material/Avatar';
+import { Avatar as MuiAvatar } from '@mui/material';
 import { useMemo } from 'react';
 
 function extractInitials(fullName: string): string {

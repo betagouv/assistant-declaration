@@ -1,10 +1,5 @@
-import Button from '@mui/lab/LoadingButton';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Grid from '@mui/material/Grid';
+import { LoadingButton as Button } from '@mui/lab';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid } from '@mui/material';
 import React, { useRef, useState } from 'react';
 
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';

@@ -1,6 +1,6 @@
 'use client';
 
-import Grid from '@mui/material/Grid';
+import { Grid } from '@mui/material';
 
 import { FrequentlyAskedQuestions } from '@ad/src/app/(public)/frequently-asked-questions/FrequentlyAskedQuestions';
 

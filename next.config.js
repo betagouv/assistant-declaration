@@ -62,6 +62,15 @@ const moduleExports = async () => {
       silenceDeprecations: ['legacy-js-api'], // Needed until `sass` v2
     },
     experimental: {
+      optimizePackageImports: [
+        '@mui/material',
+        '@mui/icons-material',
+        '@mui/lab',
+        '@mui/x-data-grid',
+        '@mui/x-date-pickers',
+        'date-fns',
+        'react-use',
+      ],
       outputFileTracingIncludes: {
         '*': ['./src/prisma/migrations/**/*', './src/prisma/schema.prisma', './start-and-wait-to-init.sh'], // Migration and start files are required when doing automatic migration before starting the application
       },

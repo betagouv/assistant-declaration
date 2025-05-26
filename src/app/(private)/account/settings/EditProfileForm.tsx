@@ -1,9 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import Button from '@mui/lab/LoadingButton';
-import Grid from '@mui/material/Grid';
-import TextField from '@mui/material/TextField';
+import { LoadingButton as Button } from '@mui/lab';
+import { Grid, TextField } from '@mui/material';
 import { useForm } from 'react-hook-form';
 
 import { trpc } from '@ad/src/client/trpcClient';

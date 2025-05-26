@@ -1,13 +1,9 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import Button from '@mui/lab/LoadingButton';
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import TextField from '@mui/material/TextField';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { LoadingButton as Button } from '@mui/lab';
+import { Grid, IconButton, InputAdornment, TextField } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -62,7 +58,7 @@ export function ResetPasswordForm({ prefill }: { prefill?: ResetPasswordPrefillS
                   onClick={handleClickShowPassword}
                   onMouseDown={handleMouseDownPassword}
                 >
-                  {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                  {showPassword ? <Visibility /> : <VisibilityOff />}
                 </IconButton>
               </InputAdornment>
             ),

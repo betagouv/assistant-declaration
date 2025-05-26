@@ -1,7 +1,6 @@
 'use client';
 
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
+import { Grid, Typography } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { createContext, useContext } from 'react';
 

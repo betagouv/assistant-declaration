@@ -3,7 +3,7 @@
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import { MainNavigationProps } from '@codegouvfr/react-dsfr/MainNavigation';
-import Grid from '@mui/material/Grid';
+import { Grid } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
 import { PropsWithChildren, useEffect, useState } from 'react';
 
