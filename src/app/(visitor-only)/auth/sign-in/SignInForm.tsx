@@ -1,20 +1,22 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import Button from '@mui/lab/LoadingButton';
-import Alert from '@mui/material/Alert';
-import Checkbox from '@mui/material/Checkbox';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormHelperText from '@mui/material/FormHelperText';
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import Link from '@mui/material/Link';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { LoadingButton as Button } from '@mui/lab';
+import {
+  Alert,
+  Checkbox,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  FormHelperText,
+  Grid,
+  IconButton,
+  InputAdornment,
+  Link,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { Mutex } from 'locks';
 import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -222,14 +224,14 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
                   onClick={handleClickShowPassword}
                   onMouseDown={handleMouseDownPassword}
                 >
-                  {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                  {showPassword ? <Visibility /> : <VisibilityOff />}
                 </IconButton>
               </InputAdornment>
             ),
           }}
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} sx={{ display: 'none' }}>
         <FormControl error={!!errors.rememberMe}>
           {/* TODO: really manage "rememberMe" */}
           <FormControlLabel label="Rester connecté" control={<Checkbox {...register('rememberMe')} defaultChecked />} />
@@ -249,12 +251,24 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
         </Typography>
       </Grid>
       <Grid item xs={12}>
-        <Typography color="textSecondary" variant="body2">
-          Vous n&apos;avez pas encore de compte ?&nbsp;
-          <Link component={NextLink} href={linkRegistry.get('signUp', undefined)} variant="subtitle2" underline="none">
-            S&apos;inscrire
-          </Link>
+        <Divider variant="fullWidth" sx={{ p: 0, my: 1 }} />
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant="h4" sx={{ mb: 2 }}>
+          Vous n&apos;avez pas de compte ?
         </Typography>
+        <Button
+          component={NextLink}
+          href={linkRegistry.get('signUp', undefined)}
+          size="large"
+          variant="outlined"
+          fullWidth
+          sx={{
+            backgroundImage: 'none !important',
+          }}
+        >
+          Se connecter
+        </Button>
       </Grid>
     </BaseForm>
   );
