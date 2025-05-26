@@ -116,6 +116,7 @@ export function Introduction() {
           className={style.hero}
           style={{
             color: undefined, // [WORKAROUND] Ref: https://github.com/vercel/next.js/issues/61388#issuecomment-1988278891
+            height: 'auto',
             filter: isDark ? 'invert(100%)' : undefined,
           }}
         />
