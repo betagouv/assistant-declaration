@@ -48,7 +48,7 @@ export function Introduction() {
           <Typography variant="body2" color="text.tertiary" sx={{ mb: 2, maxWidth: 600 }}>
             Les éditeurs de billetterie déjà compatibles :
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: { sm: 'center', md: 'flex-start' } }}>
             <Link
               component={NextLink}
               href="https://www.billetweb.fr"

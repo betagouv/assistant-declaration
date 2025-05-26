@@ -10,7 +10,7 @@ export function KeyReasons() {
   return (
     <Container sx={{ py: { xs: 4, sm: 5, md: 6 } }}>
       <Grid container spacing={2} sx={{ pt: 3 }}>
-        <Grid item xs={12} md={4} lg={5} sx={{ maxHeight: { xs: 150, sm: 'unset' } }}>
+        <Grid item xs={12} md={4} lg={5} sx={{ maxHeight: { xs: 150, md: 'unset' } }}>
           <Image
             src={clockIsTicking}
             alt=""
@@ -23,8 +23,8 @@ export function KeyReasons() {
           />
         </Grid>
         <Grid item xs={12} md={8} lg={7}>
-          <Typography component="span" variant="h3" sx={{ mb: 2 }}>
-            Pourquoi un Assitant pour les déclarations du spectacle ?
+          <Typography component="div" variant="h3" sx={{ mb: 2 }}>
+            Pourquoi un Assistant pour les déclarations du spectacle ?
           </Typography>
           <Typography variant="body1">
             <span style={{ fontWeight: 'bold' }}>Pour gagner du temps :</span> chaque mois, vous devez déclarer plusieurs fois les mêmes informations
