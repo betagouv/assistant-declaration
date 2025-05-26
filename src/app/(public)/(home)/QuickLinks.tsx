@@ -14,7 +14,7 @@ export function QuickLinks() {
 
   return (
     <Container sx={{ pt: { xs: 2, md: 4 }, pb: { xs: 4, md: 8 } }}>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
         <Grid item xs={12} sm={6} md={4}>
           <Widget icon={delivery} title="Une démo ? Une question ? Un retour sur le service ?">
             <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
@@ -54,8 +54,9 @@ export function QuickLinks() {
               co-construire.
             </Typography>
             <Button
-              onClick={showLiveChat}
-              loading={isLiveChatLoading}
+              component={NextLink}
+              href="https://atelier-numerique.notion.site/1fb47c72862480c193c8e7aa3734564b"
+              target="_blank"
               size="medium"
               variant="contained"
               sx={{ width: 'fit-content', mt: 'auto', mx: 'auto', mb: 4 }}
