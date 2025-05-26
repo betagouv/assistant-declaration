@@ -80,6 +80,16 @@ const moduleExports = async () => {
       },
       swcPlugins: [['next-superjson-plugin', { excluded: [] }]],
     },
+    async redirects() {
+      return [
+        {
+          // Since the landing page has been considered as another page to let the sign in page as primary, we use a redirect to not move all the logic (token flow...)
+          source: '/',
+          destination: '/dashboard',
+          permanent: false, // May impact the SEO not being permanent, but the choice about the root would be too risky
+        },
+      ];
+    },
     async rewrites() {
       return [
         ...generateRewrites('en', localizedRoutes),

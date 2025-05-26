@@ -1,7 +1,7 @@
 import { Meta, StoryFn } from '@storybook/react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { Introduction } from '@ad/src/app/(public)/(home)/Introduction';
+import { Introduction } from '@ad/src/app/(public)/about/Introduction';
 
 type ComponentType = typeof Introduction;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();

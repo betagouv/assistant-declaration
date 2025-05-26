@@ -2,16 +2,13 @@ import { LoadingButton as Button } from '@mui/lab';
 import { Container, Grid, Typography } from '@mui/material';
 import NextLink from 'next/link';
 
-import { Widget } from '@ad/src/app/(public)/(home)/Widget';
+import { Widget } from '@ad/src/app/(public)/about/Widget';
 import computer from '@ad/src/assets/images/home/computer.svg';
 import delivery from '@ad/src/assets/images/home/delivery.svg';
 import gesture from '@ad/src/assets/images/home/gesture.svg';
-import { useLiveChat } from '@ad/src/components/live-chat/useLiveChat';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export function QuickLinks() {
-  const { showLiveChat, isLiveChatLoading } = useLiveChat();
-
   return (
     <Container sx={{ pt: { xs: 2, md: 4 }, pb: { xs: 4, md: 8 } }}>
       <Grid container spacing={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
@@ -21,8 +18,8 @@ export function QuickLinks() {
               N&apos;hésitez pas cela nous aidera à améliorer l&apos;outil.
             </Typography>
             <Button
-              onClick={showLiveChat}
-              loading={isLiveChatLoading}
+              component={NextLink}
+              href="mailto:contact@assistant-declaration.beta.gouv.fr"
               size="medium"
               variant="contained"
               sx={{ width: 'fit-content', mt: 'auto', mx: 'auto', mb: 4 }}

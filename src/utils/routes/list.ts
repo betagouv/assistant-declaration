@@ -5,6 +5,13 @@ import { createRouter, defineRoute, param } from 'type-route';
 import { Lang, defineLocalizedRoute } from './common';
 
 export const localizedRoutes = {
+  about: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/about`,
+      fr: (p) => `/a-propros`,
+    }
+  ),
   accessibility: defineLocalizedRoute(
     {},
     {
@@ -57,6 +64,7 @@ export const localizedRoutes = {
   home: defineLocalizedRoute(
     {},
     {
+      // We chose to make it direct to either the sign in page or the dashboard, it's managed at the Next.js layer
       en: (p) => `/`,
       fr: (p) => `/`,
     }
@@ -180,6 +188,7 @@ function createLocalizedRouter<RouteDefs extends { [routeName in keyof typeof lo
 
 export const routes = {
   en: createLocalizedRouter({
+    about: defineRoute(localizedRoutes.about.params, localizedRoutes.about.paths.en),
     accessibility: defineRoute(localizedRoutes.accessibility.params, localizedRoutes.accessibility.paths.en),
     accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.en),
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.en),
@@ -201,6 +210,7 @@ export const routes = {
     ticketingSystemList: defineRoute(localizedRoutes.ticketingSystemList.params, localizedRoutes.ticketingSystemList.paths.en),
   }).routes,
   fr: createLocalizedRouter({
+    about: defineRoute(localizedRoutes.about.params, localizedRoutes.about.paths.fr),
     accessibility: defineRoute(localizedRoutes.accessibility.params, localizedRoutes.accessibility.paths.fr),
     accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.fr),
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.fr),
