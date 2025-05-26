@@ -48,7 +48,7 @@ export function PublicLayout(props: PropsWithChildren) {
         },
       },
       text: (
-        <Button component={NextLink} href={linkRegistry.get('signIn', undefined)} size="small" variant="contained" startIcon={<ArrowForward />}>
+        <Button component="span" size="small" variant="contained" startIcon={<ArrowForward />}>
           Accès outil
         </Button>
       ),
