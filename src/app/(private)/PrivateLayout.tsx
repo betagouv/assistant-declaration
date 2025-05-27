@@ -63,7 +63,17 @@ export function PrivateLayout(props: PropsWithChildren) {
     return false;
   });
 
-  const quickAccessItems: HeaderProps.QuickAccessItem[] = [helpQuickAccessItem(), userQuickAccessItem(sessionWrapper.data?.user)];
+  const quickAccessItems: HeaderProps.QuickAccessItem[] = [
+    {
+      iconId: 'fr-icon-file-text-line',
+      linkProps: {
+        href: linkRegistry.get('about', undefined),
+      },
+      text: 'À propos',
+    },
+    helpQuickAccessItem(),
+    userQuickAccessItem(sessionWrapper.data?.user),
+  ];
 
   if (userInterfaceSession.collaboratorOf.length) {
     quickAccessItems.unshift(
