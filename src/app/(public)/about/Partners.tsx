@@ -26,9 +26,9 @@ export function Partners() {
           <Link
             component="button"
             onClick={showLiveChat}
-            underline="none"
             sx={{
               top: -1, // Just due to the button among text, could use flex parent too
+              textUnderlineOffset: 3,
               '&::after': {
                 display: 'none !important',
               },

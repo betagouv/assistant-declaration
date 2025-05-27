@@ -55,7 +55,7 @@ export function SignInPage() {
               L&apos;Assistant déclaration collecte les données de billetterie afin de simplifier vos déclarations SACEM, SACD, ASTP, CNM.
             </Typography>
             <Typography component="div" variant="body1">
-              <Link component={NextLink} href={linkRegistry.get('home', undefined)} variant="body1" underline="none">
+              <Link component={NextLink} href={linkRegistry.get('about', undefined)} variant="body1" underline="none">
                 <span className={fr.cx('fr-icon--sm', 'fr-icon-arrow-right-line')} style={{ marginRight: 5 }} />
                 En savoir plus
               </Link>

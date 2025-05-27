@@ -267,7 +267,7 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
             backgroundImage: 'none !important',
           }}
         >
-          Se connecter
+          Créer un compte
         </Button>
       </Grid>
     </BaseForm>

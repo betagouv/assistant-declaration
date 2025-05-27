@@ -24,7 +24,7 @@ export function QuickLinks() {
               variant="contained"
               sx={{ width: 'fit-content', mt: 'auto', mx: 'auto', mb: 4 }}
             >
-              Nous contacter
+              Contactez-nous
             </Button>
           </Widget>
         </Grid>
@@ -40,14 +40,14 @@ export function QuickLinks() {
               variant="contained"
               sx={{ width: 'fit-content', mt: 'auto', mx: 'auto', mb: 4 }}
             >
-              Accéder à l&apos;outil
+              Accédez à l&apos;outil
             </Button>
           </Widget>
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <Widget icon={gesture} title="Participez à la co-construction">
             <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-              L&apos;assistant évolue via une démarche itérative basée sur les retours des utilisateurs. Nous cherchons des testeurs pour
+              L&apos;Assistant évolue via une démarche itérative basée sur les retours des utilisateurs. Nous cherchons des testeurs pour
               co-construire.
             </Typography>
             <Button
@@ -58,7 +58,7 @@ export function QuickLinks() {
               variant="contained"
               sx={{ width: 'fit-content', mt: 'auto', mx: 'auto', mb: 4 }}
             >
-              Participer
+              Participez
             </Button>
           </Widget>
         </Grid>

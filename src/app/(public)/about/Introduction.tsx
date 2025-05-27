@@ -1,5 +1,6 @@
+import { fr } from '@codegouvfr/react-dsfr';
 import { useIsDark } from '@codegouvfr/react-dsfr/useIsDark';
-import { Box, Link, Typography } from '@mui/material';
+import { Box, Link, Typography, useMediaQuery, useTheme } from '@mui/material';
 import Image from 'next/image';
 import NextLink from 'next/link';
 import { ImgHTMLAttributes } from 'react';
@@ -24,6 +25,8 @@ export const imageProps: ImgHTMLAttributes<HTMLImageElement> = {
 
 export function Introduction() {
   const { isDark } = useIsDark();
+  const theme = useTheme();
+  const mdUp = useMediaQuery(theme.breakpoints.up('md'));
 
   return (
     <IntroductionContainer
@@ -33,22 +36,34 @@ export function Introduction() {
             pl: 4,
             pr: 4,
             py: 3,
-            textAlign: { xs: 'center', md: 'left' },
           }}
         >
           <Typography component="h1" variant="h2" sx={{ my: 2, maxWidth: 600 }}>
             Simplifiez vos déclarations de spectacles
           </Typography>
-          <Typography color="text.secondary" sx={{ mb: 2, maxWidth: 600 }}>
-            L&apos;Assistant pour les déclarations du spectacle aide les diffuseurs de spectacles à remplir les formalités SACEM, SACD, CNM et ASTP.
-          </Typography>
+          {!mdUp && (
+            <Image
+              src={hero}
+              alt=""
+              priority={true}
+              className={style.hero}
+              style={{
+                color: undefined, // [WORKAROUND] Ref: https://github.com/vercel/next.js/issues/61388#issuecomment-1988278891
+                height: 'auto',
+                maxHeight: 200,
+                filter: isDark ? 'invert(100%)' : undefined,
+              }}
+            />
+          )}
           <Typography color="text.secondary" sx={{ mb: 4, maxWidth: 600 }}>
+            L&apos;Assistant pour les déclarations du spectacle aide les diffuseurs de spectacles à remplir les formalités SACEM, SACD, CNM et ASTP.
+            <br />
             Il réutilise les données de billetterie pour simplifier la saisie des informations attendues par les organismes.
           </Typography>
-          <Typography variant="body2" color="text.tertiary" sx={{ mb: 2, maxWidth: 600 }}>
-            Les éditeurs de billetterie déjà compatibles :
+          <Typography sx={{ color: fr.colors.decisions.text.mention.grey.default, mb: 2, maxWidth: 600 }}>
+            Les systèmes de billetterie déjà connectés :
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: { sm: 'center', md: 'flex-start' } }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 2 }}>
             <Link
               component={NextLink}
               href="https://www.billetweb.fr"

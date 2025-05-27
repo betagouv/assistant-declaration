@@ -61,6 +61,7 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
             <span style={{ fontWeight: 'normal' }}>{eventSerie.name}</span>
           </Typography>
         </Grid>
+        {/*
         <Grid item sx={{ ml: 'auto' }}>
           {expandedAccordions.length === wrappers.length ? (
             <Button variant="text" onClick={() => collapseAllAccordions()}>
@@ -72,7 +73,8 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
             </Button>
           )}
         </Grid>
-        <Grid item sx={{}}>
+         */}
+        <Grid item sx={{ ml: 'auto' }}>
           {triggerEventsSalesCopy && (
             <ClipboardTrigger
               onCopy={() => {

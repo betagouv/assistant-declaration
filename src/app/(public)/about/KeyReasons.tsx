@@ -10,7 +10,7 @@ export function KeyReasons() {
   return (
     <Container sx={{ py: { xs: 4, sm: 5, md: 6 } }}>
       <Grid container spacing={2} sx={{ pt: 3 }}>
-        <Grid item xs={12} md={4} lg={5} sx={{ maxHeight: { xs: 150, md: 'unset' } }}>
+        <Grid item xs={12} md={4} lg={5} sx={{ maxHeight: { xs: 200, md: 'unset' } }}>
           <Image
             src={clockIsTicking}
             alt=""
@@ -18,6 +18,7 @@ export function KeyReasons() {
               width: '100%',
               height: '100%',
               objectFit: 'contain',
+              objectPosition: 'left',
               filter: isDark ? 'invert(100%)' : undefined,
             }}
           />
@@ -33,8 +34,8 @@ export function KeyReasons() {
             <br />
             Dans sa version actuelle, l&apos;Assistant :
             <ol style={{ fontWeight: 'bold' }}>
-              <li>Récupère automatiquement vos données ;</li>
-              <li>Pré-remplit vos formulaires ;</li>
+              <li>Récupère automatiquement vos données,</li>
+              <li>Pré-remplit vos formulaires,</li>
               <li>Accélère vos démarches de déclaration.</li>
             </ol>
             <br />
