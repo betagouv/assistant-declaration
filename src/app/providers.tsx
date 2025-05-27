@@ -2,8 +2,8 @@
 
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
+import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { PropsWithChildren, createContext, useContext } from 'react';
 import { I18nextProvider } from 'react-i18next';
 

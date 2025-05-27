@@ -5,6 +5,7 @@ import { playFindAlert, playFindForm, playFindFormInMain } from '@ad/.storybook/
 import { Normal as VisitorOnlyLayoutNormalStory } from '@ad/src/app/(visitor-only)/VisitorOnlyLayout.stories';
 import { Empty as SignUpFormEmptyStory } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpForm.stories';
 import { SignUpPage, SignUpPageContext } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpPage';
+import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 type ComponentType = typeof SignUpPage;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -26,6 +27,7 @@ const defaultMswParameters = {
 const tokenProvidedParameters = {
   nextjs: {
     navigation: {
+      pathname: linkRegistry.get('signUp', undefined), // Prevent the sticky header
       query: {},
     },
   },

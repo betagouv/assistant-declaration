@@ -2,58 +2,58 @@
 
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
-import { PropsWithChildren } from 'react';
+import { ArrowForward } from '@mui/icons-material';
+import { Button } from '@mui/material';
+import { usePathname } from 'next/navigation';
+import { PropsWithChildren, useMemo } from 'react';
 
 import '@ad/src/app/(public)/layout.scss';
 import { ContentWrapper } from '@ad/src/components/ContentWrapper';
 import { FlashMessage } from '@ad/src/components/FlashMessage';
-import { useLiveChat } from '@ad/src/components/live-chat/useLiveChat';
 import { useSession } from '@ad/src/proxies/next-auth/react';
-import { commonFooterAttributes, commonHeaderAttributes, userQuickAccessItem } from '@ad/src/utils/dsfr';
+import { commonFooterAttributes, commonHeaderAttributes, helpQuickAccessItem } from '@ad/src/utils/dsfr';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export function PublicLayout(props: PropsWithChildren) {
   const sessionWrapper = useSession();
-  const { showLiveChat, isLiveChatLoading } = useLiveChat();
+  const pathname = usePathname();
 
   let quickAccessItems: HeaderProps.QuickAccessItem[] = [
     {
-      iconId: 'fr-icon-home-4-line',
+      iconId: 'fr-icon-file-text-line',
       linkProps: {
-        href: linkRegistry.get('home', undefined),
+        href: linkRegistry.get('about', undefined),
       },
       text: 'À propos',
     },
-    {
-      iconId: 'fr-icon-questionnaire-line',
-      buttonProps: {
-        onClick: () => {
-          showLiveChat();
-        },
-      },
-      text: isLiveChatLoading ? 'Chargement...' : 'Aide',
-    },
+    helpQuickAccessItem(),
   ];
 
-  if (sessionWrapper.status === 'authenticated') {
-    quickAccessItems.push(
-      userQuickAccessItem(sessionWrapper.data?.user, {
-        showDashboardMenuItem: true,
-      })
-    );
-  } else {
-    quickAccessItems.push({
-      iconId: 'fr-icon-lock-line',
-      linkProps: {
-        href: linkRegistry.get('signIn', undefined),
+  const stickyMenu = useMemo(() => pathname === linkRegistry.get('about', undefined), [pathname]);
+
+  quickAccessItems.push({
+    iconId: undefined as any,
+    linkProps: {
+      href: sessionWrapper.status === 'authenticated' ? linkRegistry.get('dashboard', undefined) : linkRegistry.get('signIn', undefined),
+      style: {
+        padding: 0,
       },
-      text: 'Se connecter',
-    });
-  }
+    },
+    text: (
+      <Button component="span" size="small" variant="contained" startIcon={<ArrowForward />}>
+        Accès outil
+      </Button>
+    ),
+  });
 
   return (
     <>
-      <Header {...commonHeaderAttributes} quickAccessItems={quickAccessItems} navigation={[]} />
+      <Header
+        {...commonHeaderAttributes}
+        quickAccessItems={quickAccessItems}
+        navigation={[]}
+        style={stickyMenu ? { position: 'sticky', top: 0, zIndex: 1000 } : {}}
+      />
       <FlashMessage appMode={process.env.NEXT_PUBLIC_APP_MODE} nodeEnv={process.env.NODE_ENV} />
       <ContentWrapper>{props.children}</ContentWrapper>
       <Footer {...commonFooterAttributes} />

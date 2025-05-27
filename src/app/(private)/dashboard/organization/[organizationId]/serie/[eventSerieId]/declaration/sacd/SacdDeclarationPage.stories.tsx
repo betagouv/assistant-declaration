@@ -7,7 +7,7 @@ import {
   SacdDeclarationPage,
   SacdDeclarationPageContext,
 } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacd/SacdDeclarationPage';
-import { Normal as EventsSalesOverviewNormalStory } from '@ad/src/components/EventsSalesOverview.stories';
+import { Normal as DeclarationHeaderNormalStory } from '@ad/src/components/DeclarationHeader.stories';
 import { sacdDeclarations, sacdDeclarationsWrappers } from '@ad/src/fixtures/declaration/sacd';
 import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
@@ -84,7 +84,7 @@ export const Normal = prepareStory(NormalStory, {
   childrenContext: {
     context: SacdDeclarationPageContext,
     value: {
-      ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
+      ContextualDeclarationHeader: DeclarationHeaderNormalStory,
     },
   },
 });
@@ -115,7 +115,7 @@ export const NotFound = prepareStory(NotFoundStory, {
   childrenContext: {
     context: SacdDeclarationPageContext,
     value: {
-      ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
+      ContextualDeclarationHeader: DeclarationHeaderNormalStory,
     },
   },
 });
@@ -137,7 +137,7 @@ export const WithLayout = prepareStory(WithLayoutStory, {
   childrenContext: {
     context: SacdDeclarationPageContext,
     value: {
-      ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
+      ContextualDeclarationHeader: DeclarationHeaderNormalStory,
     },
   },
 });

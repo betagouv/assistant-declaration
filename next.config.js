@@ -62,6 +62,15 @@ const moduleExports = async () => {
       silenceDeprecations: ['legacy-js-api'], // Needed until `sass` v2
     },
     experimental: {
+      optimizePackageImports: [
+        '@mui/material',
+        '@mui/icons-material',
+        '@mui/lab',
+        '@mui/x-data-grid',
+        '@mui/x-date-pickers',
+        'date-fns',
+        'react-use',
+      ],
       outputFileTracingIncludes: {
         '*': ['./src/prisma/migrations/**/*', './src/prisma/schema.prisma', './start-and-wait-to-init.sh'], // Migration and start files are required when doing automatic migration before starting the application
       },
@@ -70,6 +79,16 @@ const moduleExports = async () => {
         '*': ['./scripts/**/*'], // Note that folders starting with a dot are already ignored after verification
       },
       swcPlugins: [['next-superjson-plugin', { excluded: [] }]],
+    },
+    async redirects() {
+      return [
+        {
+          // Since the landing page has been considered as another page to let the sign in page as primary, we use a redirect to not move all the logic (token flow...)
+          source: '/',
+          destination: '/dashboard',
+          permanent: false, // May impact the SEO not being permanent, but the choice about the root would be too risky
+        },
+      ];
     },
     async rewrites() {
       return [

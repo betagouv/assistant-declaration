@@ -1,15 +1,17 @@
 'use client';
 
 import { fr } from '@codegouvfr/react-dsfr';
-import locationFrance from '@gouvfr/dsfr/dist/artwork/pictograms/map/location-france.svg';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
+import { useIsDark } from '@codegouvfr/react-dsfr/useIsDark';
+import { Grid, Link, Typography } from '@mui/material';
 import Image from 'next/image';
+import NextLink from 'next/link';
 import { createContext, useContext } from 'react';
 
 import { SignInForm } from '@ad/src/app/(visitor-only)/auth/sign-in/SignInForm';
+import assistant from '@ad/src/assets/images/sign-in/assistant.svg';
 import { formTitleProps } from '@ad/src/utils/form';
 import { centeredFormContainerGridProps } from '@ad/src/utils/grid';
+import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export const SignInPageContext = createContext({
   ContextualSignInForm: SignInForm,
@@ -17,21 +19,14 @@ export const SignInPageContext = createContext({
 
 export function SignInPage() {
   const { ContextualSignInForm } = useContext(SignInPageContext);
+  const { isDark } = useIsDark();
 
   return (
     <Grid container>
-      <Grid item xs={12} lg={6} sx={{ display: 'flex', justifyContent: 'center' }}>
-        <Grid container {...centeredFormContainerGridProps}>
-          <Typography component="h1" {...formTitleProps}>
-            Connexion
-          </Typography>
-          <ContextualSignInForm />
-        </Grid>
-      </Grid>
       <Grid
         item
         xs={12}
-        lg={6}
+        lg={7}
         container
         direction={'column'}
         sx={{
@@ -42,26 +37,68 @@ export function SignInPage() {
           justifyContent: 'center',
         }}
       >
-        <Image
-          src={locationFrance}
-          alt=""
-          priority={true}
-          style={{
-            backgroundColor: '#f5f5fe', // [WORKAROUND] Simple hack since DSFR does not provide pictograms in dark mode
-            width: '90%',
-            height: 'auto',
-            maxHeight: 250,
-            objectFit: 'contain',
+        <Grid
+          container
+          spacing={1}
+          sx={{
+            maxWidth: 800,
+            alignItems: 'center',
+            ml: 'auto',
+            flexGrow: 1,
           }}
-        />
-        <Typography component="div" variant="body1" sx={{ pt: '40px' }}>
-          <Typography sx={{ fontWeight: 'bold', textAlign: 'center' }}>D&apos;autres salles de spectacle utilisent la plateforme !</Typography>
-          <br />
-          <p>
-            Donc si vous rencontrez des difficultés ou avez des idées d&apos;évolution, n&apos;hésitez pas à les partager avec le support disponible
-            depuis le menu de votre compte. Cela permettra à l&apos;ensemble de la communauté d&apos;en bénéficier.
-          </p>
-        </Typography>
+        >
+          <Grid item xs={12} md={6} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+            <Typography component="div" variant="h2">
+              Simplifiez vos déclarations de spectacle
+            </Typography>
+            <Typography component="div" variant="body1" sx={{ my: { xs: 1, md: 3 } }}>
+              L&apos;Assistant déclaration collecte les données de billetterie afin de simplifier vos déclarations SACEM, SACD, ASTP, CNM.
+            </Typography>
+            <Typography component="div" variant="body1">
+              <Link component={NextLink} href={linkRegistry.get('about', undefined)} variant="body1" underline="none">
+                <span className={fr.cx('fr-icon--sm', 'fr-icon-arrow-right-line')} style={{ marginRight: 5 }} />
+                En savoir plus
+              </Link>
+            </Typography>
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              height: '100%',
+              maxHeight: { xs: 200, md: 400 },
+            }}
+          >
+            <Image
+              src={assistant}
+              alt=""
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                filter: isDark ? 'invert(100%)' : undefined,
+              }}
+            />
+          </Grid>
+        </Grid>
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        lg={5}
+        sx={{
+          display: 'flex',
+        }}
+      >
+        <Grid container {...centeredFormContainerGridProps}>
+          <Typography component="h1" {...formTitleProps}>
+            Créer un compte
+          </Typography>
+          <ContextualSignInForm />
+        </Grid>
       </Grid>
     </Grid>
   );

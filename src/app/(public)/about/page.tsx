@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 
-import { HomePage } from '@ad/src/app/(public)/(home)/HomePage';
+import { AboutPage } from '@ad/src/app/(public)/about/AboutPage';
 import { formatPageTitle } from '@ad/src/utils/page';
 
 export const metadata: Metadata = {
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <HomePage />;
+  return <AboutPage />;
 }

@@ -1,17 +1,16 @@
 'use client';
 
 import { fr } from '@codegouvfr/react-dsfr';
-import { Alert, Link, Typography } from '@mui/material';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
+import { Alert, Box, Button, Container, Grid, Link, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
+import Image from 'next/image';
 import NextLink from 'next/link';
 import { createContext, useContext } from 'react';
 
+import typingImage from '@ad/src/assets/images/declaration/typing.svg';
 import { trpc } from '@ad/src/client/trpcClient';
 import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
-import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
@@ -19,7 +18,7 @@ import { AggregatedQueries } from '@ad/src/utils/trpc';
 import { getBaseUrl } from '@ad/src/utils/url';
 
 export const AstpDeclarationPageContext = createContext({
-  ContextualEventsSalesOverview: EventsSalesOverview,
+  ContextualDeclarationHeader: DeclarationHeader,
 });
 
 export interface AstpDeclarationPageProps {
@@ -27,7 +26,7 @@ export interface AstpDeclarationPageProps {
 }
 
 export function AstpDeclarationPage({ params: { organizationId, eventSerieId } }: AstpDeclarationPageProps) {
-  const { ContextualEventsSalesOverview } = useContext(AstpDeclarationPageContext);
+  const { ContextualDeclarationHeader } = useContext(AstpDeclarationPageContext);
 
   const getEventSerie = trpc.getEventSerie.useQuery({
     id: eventSerieId,
@@ -71,24 +70,92 @@ export function AstpDeclarationPage({ params: { organizationId, eventSerieId } }
         }}
       >
         <Container>
-          <DeclarationHeader organizationId={organizationId} eventSerie={eventSerie} currentDeclaration="astp" />
+          <ContextualDeclarationHeader
+            organizationId={organizationId}
+            eventSerie={eventSerie}
+            eventsWrappers={eventsWrappers}
+            currentDeclaration="astp"
+          />
         </Container>
       </Container>
       {eventsWrappers.length > 0 ? (
         <>
           <Container
             sx={{
-              bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
-              borderRadius: '8px',
-              pt: { xs: 1, md: 1 },
-              pb: { xs: 1, md: 1 },
+              p: 1,
               mt: 3,
             }}
           >
-            <ContextualEventsSalesOverview wrappers={eventsWrappers} eventSerie={eventSerie} />
-          </Container>
-          <Container sx={{ pt: 2 }}>
             <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Box
+                  sx={{
+                    bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
+                    borderRadius: '8px',
+                  }}
+                >
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6} sx={{ px: 3, display: { xs: 'none', md: 'block' } }}>
+                      <Image
+                        src={typingImage}
+                        alt=""
+                        priority={true}
+                        style={{
+                          width: '100%',
+                          maxHeight: 350,
+                          objectFit: 'contain',
+                          color: undefined, // [WORKAROUND] Ref: https://github.com/vercel/next.js/issues/61388#issuecomment-1988278891
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column', p: 3 }}>
+                      <Box sx={{ display: 'flex', flexGrow: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'start' }}>
+                        <Typography variant="h4">
+                          Utilisez les données ci-dessus pour déclarer votre spectacle en ligne auprès de l&apos;ASTP.
+                        </Typography>
+                        <Button
+                          component={NextLink}
+                          href="https://dectanet.astp.asso.fr/mon-espace-declarant/declarer-mes-recettes"
+                          target="_blank"
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'openOfficialWebsite', 'type', DeclarationTypeSchema.Values.ASTP]);
+                          }}
+                          size="large"
+                          variant="contained"
+                          sx={{
+                            mt: 3,
+                            '&::after': {
+                              display: 'none !important',
+                            },
+                          }}
+                        >
+                          Commencer la déclaration
+                        </Button>
+                      </Box>
+                      <Typography variant="body2" sx={{ mt: 3, fontStyle: 'italic' }}>
+                        Si vous préférez, il est aussi possible de reporter manuellement les données sur le PDF fourni par l&apos;ASTP (
+                        <Link
+                          component={NextLink}
+                          href={`${getBaseUrl()}/assets/templates/declaration/astp.pdf`}
+                          target="_blank"
+                          onClick={() => {
+                            push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.ASTP]);
+                          }}
+                          underline="none"
+                          sx={{
+                            '&::after': {
+                              display: 'none !important',
+                            },
+                          }}
+                        >
+                          téléchargeable ici
+                        </Link>
+                        ).
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Grid>
               <Grid item xs={12}>
                 <Alert severity="warning">
                   Notre service n&apos;effectue pas de télétransmission.{' '}
@@ -96,53 +163,6 @@ export function AstpDeclarationPage({ params: { organizationId, eventSerieId } }
                     Il vous incombe de transmettre votre déclaration à votre interlocuteur ASTP compétent. Et de vous assurer de l&apos;exactitude des
                     informations saisies.
                   </Typography>
-                </Alert>
-              </Grid>
-              <Grid item xs={12}>
-                <Alert severity="info">
-                  Pour déclarer, vous pouvez :
-                  <ol>
-                    <li>
-                      Vous rendre{' '}
-                      <Link
-                        component={NextLink}
-                        href="https://dectanet.astp.asso.fr/mon-espace-declarant/declarer-mes-recettes"
-                        target="_blank"
-                        onClick={() => {
-                          push(['trackEvent', 'declaration', 'openOfficialWebsite', 'type', DeclarationTypeSchema.Values.ASTP]);
-                        }}
-                        underline="none"
-                        sx={{
-                          '&::after': {
-                            display: 'none !important',
-                          },
-                        }}
-                      >
-                        sur le formulaire en ligne ASTP
-                      </Link>{' '}
-                      ;
-                    </li>
-                    <li>
-                      Reporter manuellement les données sur le PDF fourni par l&apos;ASTP (
-                      <Link
-                        component={NextLink}
-                        href={`${getBaseUrl()}/assets/templates/declaration/astp.pdf`}
-                        target="_blank"
-                        onClick={() => {
-                          push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.ASTP]);
-                        }}
-                        underline="none"
-                        sx={{
-                          '&::after': {
-                            display: 'none !important',
-                          },
-                        }}
-                      >
-                        téléchargeable ici
-                      </Link>
-                      ).
-                    </li>
-                  </ol>
                 </Alert>
               </Grid>
             </Grid>

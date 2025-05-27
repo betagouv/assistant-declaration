@@ -1,9 +1,8 @@
 'use client';
 
+import { Sync } from '@mui/icons-material';
 import { LoadingButton as Button } from '@mui/lab';
-import { Alert, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
+import { Alert, Container, Grid, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import { isAfter, isBefore, subHours, subMonths } from 'date-fns';
 import NextLink from 'next/link';
@@ -188,158 +187,156 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
     >
       {ticketingSystems.length > 0 ? (
         <>
-          <Grid item xs={12} sx={{ pb: 1 }}>
-            <Typography component="h1" variant="h4">
-              Vos spectacles
-            </Typography>
-            <Typography component="p" variant="body1">
-              Sélectionnez un spectacle à déclarer
-            </Typography>
-          </Grid>
-          <Grid container spacing={2} justifyContent="center" sx={{ pt: 3 }}>
-            <>
-              {lastSynchronizationAt !== null ? (
-                <>
-                  {lastSynchronizationTooOld ? (
-                    <Grid item xs={12} sx={{ py: 2 }}>
-                      <Alert severity="warning">
-                        La dernière synchronisation date d&apos;{t('date.ago', { date: lastSynchronizationAt })}. Il est fortement recommandé de
-                        resynchroniser vos données avant de faire une déclaration.
-                      </Alert>
-                    </Grid>
-                  ) : (
-                    <Grid item xs={12} sx={{ py: 2 }}>
-                      <Alert severity="info">
-                        Vous avez synchronisé vos données de billeterie {t('date.relative', { date: lastSynchronizationAt })}.
-                      </Alert>
-                    </Grid>
-                  )}
-                  {synchronizeDataFromTicketingSystems.error && (
-                    <Grid item xs={12} sx={{ py: 2 }}>
-                      <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />
-                    </Grid>
-                  )}
-                  <Grid item xs={12} sx={{ pt: 1, pb: 2 }}>
-                    <Grid container spacing={1} alignContent="flex-start">
-                      <Grid item>
-                        <ToggleButtonGroup
-                          color="primary"
-                          value={listFilter}
-                          exclusive
-                          onChange={(event, newValue) => {
-                            if (newValue !== null) {
-                              setListFilter(newValue);
-                            }
-                          }}
-                          aria-label="filtre"
-                          sx={{
-                            flexWrap: 'wrap',
-                            button: {
-                              textTransform: 'none',
-                            },
-                          }}
-                        >
-                          <ToggleButton value={ListFilter.ALL}>Tous</ToggleButton>
-                          <ToggleButton value={ListFilter.ARCHIVED_ONLY}>Archivés</ToggleButton>
-                          <ToggleButton value={ListFilter.ENDED_ONLY}>Terminés</ToggleButton>
-                          <ToggleButton value={ListFilter.CURRENT_ONLY}>En cours</ToggleButton>
-                          <ToggleButton value={ListFilter.FUTURE_ONLY}>À venir</ToggleButton>
-                        </ToggleButtonGroup>
-                      </Grid>
-                      <Grid item sx={{ ml: 'auto' }}>
-                        <Button
-                          onClick={async () => {
-                            await synchronizeDataFromTicketingSystemsTrigger({
-                              organizationId: organization.id,
-                            });
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={3} sx={{ pb: 1 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Typography component="h1" variant="h4">
+                    Spectacles
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography component="p" variant="body1">
+                    Synchronisez vos données, puis sélectionnez le spectacle à déclarer.
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid item sx={{ ml: { md: 'auto' } }}>
+                    <Button
+                      onClick={async () => {
+                        await synchronizeDataFromTicketingSystemsTrigger({
+                          organizationId: organization.id,
+                        });
 
-                            push(['trackEvent', 'ticketing', 'synchronize']);
-                          }}
-                          loading={synchronizeDataFromTicketingSystems.loading}
-                          size="large"
-                          variant="contained"
-                        >
-                          Synchroniser les données
-                        </Button>
-                      </Grid>
-                    </Grid>
+                        push(['trackEvent', 'ticketing', 'synchronize']);
+                      }}
+                      loading={synchronizeDataFromTicketingSystems.loading}
+                      size="large"
+                      variant="contained"
+                      startIcon={<Sync />}
+                    >
+                      Synchroniser
+                    </Button>
                   </Grid>
-                  {filteredEventsSeriesWrappers.length > 0 ? (
-                    <Grid item xs={12} sx={{ py: 2 }}>
-                      <Grid container spacing={2} justifyContent="center" alignItems="center">
-                        {filteredEventsSeriesWrappers.map((eventsSeriesWrapper) => {
-                          return (
-                            <Grid key={eventsSeriesWrapper.serie.id} item xs={12} lg={8} sx={{ mx: 'auto' }}>
-                              <EventSerieCard
-                                wrapper={eventsSeriesWrapper}
-                                sacemDeclarationLink={linkRegistry.get('declaration', {
-                                  organizationId: organizationId,
-                                  eventSerieId: eventsSeriesWrapper.serie.id,
-                                  declarationType: 'sacem',
-                                })}
-                                sacdDeclarationLink={linkRegistry.get('declaration', {
-                                  organizationId: organizationId,
-                                  eventSerieId: eventsSeriesWrapper.serie.id,
-                                  declarationType: 'sacd',
-                                })}
-                                astpDeclarationLink={linkRegistry.get('declaration', {
-                                  organizationId: organizationId,
-                                  eventSerieId: eventsSeriesWrapper.serie.id,
-                                  declarationType: 'astp',
-                                })}
-                                cnmDeclarationLink={linkRegistry.get('declaration', {
-                                  organizationId: organizationId,
-                                  eventSerieId: eventsSeriesWrapper.serie.id,
-                                  declarationType: 'cnm',
-                                })}
-                              />
-                            </Grid>
-                          );
-                        })}
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={12} md={9}>
+              <Grid container spacing={2} justifyContent="center">
+                <>
+                  {lastSynchronizationAt !== null ? (
+                    <>
+                      {lastSynchronizationTooOld ? (
+                        <Grid item xs={12} sx={{ pb: 1 }}>
+                          <Alert severity="warning">
+                            La dernière synchronisation date d&apos;{t('date.ago', { date: lastSynchronizationAt })}. Il est fortement recommandé de
+                            resynchroniser vos données avant de faire une déclaration.
+                          </Alert>
+                        </Grid>
+                      ) : (
+                        <Grid item xs={12} sx={{ pb: 1 }}>
+                          <Alert severity="info">
+                            Vous avez synchronisé vos données de billeterie {t('date.relative', { date: lastSynchronizationAt })}.
+                          </Alert>
+                        </Grid>
+                      )}
+                      {synchronizeDataFromTicketingSystems.error && (
+                        <Grid item xs={12} sx={{ pb: 1 }}>
+                          <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />
+                        </Grid>
+                      )}
+                      <Grid item xs={12} sx={{ py: 1 }}>
+                        <Grid container spacing={1} alignContent="flex-start">
+                          <Grid item>
+                            <ToggleButtonGroup
+                              color="primary"
+                              value={listFilter}
+                              exclusive
+                              onChange={(event, newValue) => {
+                                if (newValue !== null) {
+                                  setListFilter(newValue);
+                                }
+                              }}
+                              aria-label="filtre"
+                              sx={{
+                                flexWrap: 'wrap',
+                                button: {
+                                  textTransform: 'none',
+                                },
+                              }}
+                            >
+                              <ToggleButton value={ListFilter.ALL}>Tous</ToggleButton>
+                              <ToggleButton value={ListFilter.ARCHIVED_ONLY}>Archivés</ToggleButton>
+                              <ToggleButton value={ListFilter.ENDED_ONLY}>Terminés</ToggleButton>
+                              <ToggleButton value={ListFilter.CURRENT_ONLY}>En cours</ToggleButton>
+                              <ToggleButton value={ListFilter.FUTURE_ONLY}>À venir</ToggleButton>
+                            </ToggleButtonGroup>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                    </Grid>
+                      {filteredEventsSeriesWrappers.length > 0 ? (
+                        <Grid item xs={12} sx={{ py: 2 }}>
+                          <Grid container spacing={2} justifyContent="center" alignItems="center">
+                            {filteredEventsSeriesWrappers.map((eventsSeriesWrapper) => {
+                              return (
+                                <Grid key={eventsSeriesWrapper.serie.id} item xs={12}>
+                                  <EventSerieCard
+                                    wrapper={eventsSeriesWrapper}
+                                    sacemDeclarationLink={linkRegistry.get('declaration', {
+                                      organizationId: organizationId,
+                                      eventSerieId: eventsSeriesWrapper.serie.id,
+                                      declarationType: 'sacem',
+                                    })}
+                                    sacdDeclarationLink={linkRegistry.get('declaration', {
+                                      organizationId: organizationId,
+                                      eventSerieId: eventsSeriesWrapper.serie.id,
+                                      declarationType: 'sacd',
+                                    })}
+                                    astpDeclarationLink={linkRegistry.get('declaration', {
+                                      organizationId: organizationId,
+                                      eventSerieId: eventsSeriesWrapper.serie.id,
+                                      declarationType: 'astp',
+                                    })}
+                                    cnmDeclarationLink={linkRegistry.get('declaration', {
+                                      organizationId: organizationId,
+                                      eventSerieId: eventsSeriesWrapper.serie.id,
+                                      declarationType: 'cnm',
+                                    })}
+                                  />
+                                </Grid>
+                              );
+                            })}
+                          </Grid>
+                        </Grid>
+                      ) : (
+                        <Grid item xs={12} sx={{ py: 2 }}>
+                          {eventsSeriesWrappers.length === 0
+                            ? `Aucun spectacle n'a été trouvé dans votre billetterie.`
+                            : `Aucun spectacle n'a été trouvé dans votre billetterie avec le filtre choisi.`}
+                        </Grid>
+                      )}
+                    </>
                   ) : (
-                    <Grid item xs={12} sx={{ py: 2 }}>
-                      {eventsSeriesWrappers.length === 0
-                        ? `Aucun spectacle n'a été trouvé dans votre billetterie.`
-                        : `Aucun spectacle n'a été trouvé dans votre billetterie avec le filtre choisi.`}
-                    </Grid>
+                    <>
+                      <Grid item xs={12} sx={{ pt: 2, pb: 1 }}>
+                        <Alert severity="warning">
+                          Veuillez synchroniser les données de votre billetterie pour débuter vos déclarations.{' '}
+                          <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 600 }}>
+                            À noter que pour la première synchronisation cette opération peut durer quelques minutes en fonction de la quantité de
+                            spectacles à retrouver.
+                          </Typography>
+                        </Alert>
+                      </Grid>
+                      {synchronizeDataFromTicketingSystems.error && (
+                        <Grid item xs={12} sx={{ py: 1 }}>
+                          <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />
+                        </Grid>
+                      )}
+                    </>
                   )}
                 </>
-              ) : (
-                <>
-                  <Grid item xs={12} sx={{ pt: 2, pb: 1 }}>
-                    <Alert severity="warning">
-                      Veuillez synchroniser les données de votre billetterie pour débuter vos déclarations.{' '}
-                      <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 600 }}>
-                        À noter que pour la première synchronisation cette opération peut durer quelques minutes en fonction de la quantité de
-                        spectacles à retrouver.
-                      </Typography>
-                    </Alert>
-                  </Grid>
-                  {synchronizeDataFromTicketingSystems.error && (
-                    <Grid item xs={12} sx={{ py: 1 }}>
-                      <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />
-                    </Grid>
-                  )}
-                  <Button
-                    onClick={async () => {
-                      await synchronizeDataFromTicketingSystemsTrigger({
-                        organizationId: organization.id,
-                      });
-
-                      push(['trackEvent', 'ticketing', 'synchronize']);
-                    }}
-                    loading={synchronizeDataFromTicketingSystems.loading}
-                    size="large"
-                    variant="contained"
-                    sx={{ mt: 2 }}
-                  >
-                    Synchroniser les données
-                  </Button>
-                </>
-              )}
-            </>
+              </Grid>
+            </Grid>
           </Grid>
         </>
       ) : (

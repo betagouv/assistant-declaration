@@ -1,21 +1,21 @@
 import { Meta, StoryFn } from '@storybook/react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { Introduction } from '@ad/src/app/(public)/(home)/Introduction';
+import { QuickLinks } from '@ad/src/app/(public)/about/QuickLinks';
 
-type ComponentType = typeof Introduction;
+type ComponentType = typeof QuickLinks;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Components/Home/Introduction',
-  component: Introduction,
+  title: 'Components/Home/QuickLinks',
+  component: QuickLinks,
   ...generateMetaDefault({
     parameters: {},
   }),
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <Introduction />;
+  return <QuickLinks />;
 };
 
 const NormalStory = Template.bind({});

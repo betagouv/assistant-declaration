@@ -254,7 +254,7 @@ export function StandardLayout(props: PropsWithChildren<StandardLayoutProps>) {
             <View style={layoutStyles.headerDescription}>
               <Link src={linkRegistry.get('home', undefined, { absolute: true })} style={layoutStyles.headerDescriptionLink}>
                 <Text style={layoutStyles.headerTitle}>Assistant déclaration</Text>
-                <Text style={layoutStyles.headerSubtitle}>À destination des entrepreneurs du spectacle vivant</Text>
+                <Text style={layoutStyles.headerSubtitle}>Pour les entrepreneurs du spectacle vivant</Text>
               </Link>
             </View>
           </View>

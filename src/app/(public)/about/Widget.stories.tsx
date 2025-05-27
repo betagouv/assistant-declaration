@@ -1,9 +1,9 @@
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import Typography from '@mui/material/Typography';
+import { Typography } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { Widget } from '@ad/src/app/(public)/(home)/Widget';
+import { Widget } from '@ad/src/app/(public)/about/Widget';
+import computer from '@ad/src/assets/images/home/computer.svg';
 
 type ComponentType = typeof Widget;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -22,7 +22,7 @@ const Template: StoryFn<ComponentType> = (args) => {
 
 const NormalStory = Template.bind({});
 NormalStory.args = {
-  icon: <VisibilityIcon fontSize="small" color="primary" />,
+  icon: computer,
   title: 'Rerum iste veritatis',
   children: (
     <>

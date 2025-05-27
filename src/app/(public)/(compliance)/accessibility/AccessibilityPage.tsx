@@ -1,6 +1,5 @@
 // The `generated-statement.html` file has been generated on https://betagouv.github.io/a11y-generateur-declaration/
-import Alert from '@mui/material/Alert';
-import Container from '@mui/material/Container';
+import { Alert, Container } from '@mui/material';
 
 import statementContent from '@ad/src/app/(public)/(compliance)/accessibility/generated-statement.html';
 

@@ -3,6 +3,7 @@ import { HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import type { DefaultColorScheme } from '@codegouvfr/react-dsfr/next-appdir';
 import { EventEmitter } from 'eventemitter3';
 
+import { HeaderHelpItem } from '@ad/src/components/HeaderHelpItem';
 import { HeaderOrganizationSwitchItem, HeaderOrganizationSwitchItemProps } from '@ad/src/components/HeaderOrganizationSwitchItem';
 import { HeaderUserItem } from '@ad/src/components/HeaderUserItem';
 import { TokenUserSchemaType } from '@ad/src/models/entities/user';
@@ -18,7 +19,9 @@ export const brandTop = (
 );
 
 export const homeLinkProps = {
-  href: '/',
+  // TODO: as for other items, waiting for the following to be solved https://github.com/zilch/type-route/issues/125
+  // href: linkRegistry.get('dashboard', undefined),
+  href: '/dashboard',
   title: 'À propos - Assistant déclaration',
 };
 
@@ -42,13 +45,29 @@ export interface UserQuickAccessItemOptions {
   showDashboardMenuItem?: boolean;
 }
 
+export const helpQuickAccessItem = (): HeaderProps.QuickAccessItem => {
+  const eventEmitter = new EventEmitter();
+
+  // INFORMATION: this won't work on 5xx and 4xx error pages since there is an hydratation error due to Next.js (maybe fixed in the future)
+  // `Warning: validateDOMNesting(...): <body> cannot appear as a child of <div>.`
+  return {
+    iconId: 'fr-icon-questionnaire-line',
+    buttonProps: {
+      onClick: (event) => {
+        eventEmitter.emit('click', event);
+      },
+    },
+    text: <HeaderHelpItem eventEmitter={eventEmitter} />,
+  };
+};
+
 export const userQuickAccessItem = (user: TokenUserSchemaType, options?: UserQuickAccessItemOptions): HeaderProps.QuickAccessItem => {
   const eventEmitter = new EventEmitter();
 
   // INFORMATION: this won't work on 5xx and 4xx error pages since there is an hydratation error due to Next.js (maybe fixed in the future)
   // `Warning: validateDOMNesting(...): <body> cannot appear as a child of <div>.`
   return {
-    iconId: undefined as any,
+    iconId: 'fr-icon-account-circle-fill',
     buttonProps: {
       onClick: (event) => {
         eventEmitter.emit('click', event);
@@ -62,7 +81,7 @@ export const commonHeaderAttributes = {
   brandTop: brandTop,
   homeLinkProps: homeLinkProps,
   serviceTitle: 'Assistant déclaration',
-  serviceTagline: 'À destination des entrepreneurs du spectacle vivant',
+  serviceTagline: 'Pour les entrepreneurs du spectacle vivant',
 };
 
 export const commonFooterAttributes = {

@@ -5,6 +5,13 @@ import { createRouter, defineRoute, param } from 'type-route';
 import { Lang, defineLocalizedRoute } from './common';
 
 export const localizedRoutes = {
+  about: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/about`,
+      fr: (p) => `/a-propros`,
+    }
+  ),
   accessibility: defineLocalizedRoute(
     {},
     {
@@ -47,9 +54,17 @@ export const localizedRoutes = {
       fr: (p) => `/authentification/mot-de-passe/recuperer`,
     }
   ),
+  frequentlyAskedQuestions: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/frequently-asked-questions`,
+      fr: (p) => `/questions-frequentes`,
+    }
+  ),
   home: defineLocalizedRoute(
     {},
     {
+      // We chose to make it direct to either the sign in page or the dashboard, it's managed at the Next.js layer
       en: (p) => `/`,
       fr: (p) => `/`,
     }
@@ -173,12 +188,14 @@ function createLocalizedRouter<RouteDefs extends { [routeName in keyof typeof lo
 
 export const routes = {
   en: createLocalizedRouter({
+    about: defineRoute(localizedRoutes.about.params, localizedRoutes.about.paths.en),
     accessibility: defineRoute(localizedRoutes.accessibility.params, localizedRoutes.accessibility.paths.en),
     accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.en),
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.en),
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.en),
     declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.en),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.en),
+    frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.en),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.en),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.en),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.en),
@@ -193,12 +210,14 @@ export const routes = {
     ticketingSystemList: defineRoute(localizedRoutes.ticketingSystemList.params, localizedRoutes.ticketingSystemList.paths.en),
   }).routes,
   fr: createLocalizedRouter({
+    about: defineRoute(localizedRoutes.about.params, localizedRoutes.about.paths.fr),
     accessibility: defineRoute(localizedRoutes.accessibility.params, localizedRoutes.accessibility.paths.fr),
     accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.fr),
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.fr),
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.fr),
     declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.fr),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.fr),
+    frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.fr),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.fr),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.fr),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.fr),

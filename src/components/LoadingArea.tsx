@@ -1,5 +1,4 @@
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
+import { Box, CircularProgress } from '@mui/material';
 import * as React from 'react';
 
 export interface LoadingAreaProps {

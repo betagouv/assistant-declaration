@@ -1,20 +1,47 @@
 'use client';
 
 import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
-import { Grid, Typography } from '@mui/material';
+import { Grading } from '@mui/icons-material';
+import { LoadingButton as Button } from '@mui/lab';
+import { Grid, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { EventSerieSchemaType } from '@ad/src/models/entities/event';
+import { EventsSalesKeyFigures } from '@ad/src/components/EventsSalesKeyFigures';
+import { EventsSalesViewer } from '@ad/src/components/EventsSalesViewer';
+import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
+import { useLocalStorageViewedTicketingModal } from '@ad/src/proxies/ticketing';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
+
+export const DeclarationHeaderContext = createContext({
+  ContextualEventsSalesViewer: EventsSalesViewer,
+});
 
 export interface DeclarationHeaderProps {
   organizationId: string;
   eventSerie: EventSerieSchemaType;
+  eventsWrappers: EventWrapperSchemaType[];
   currentDeclaration: 'sacem' | 'sacd' | 'astp' | 'cnm';
+  roundValuesForCopy?: boolean;
 }
 
-export function DeclarationHeader({ organizationId, eventSerie, currentDeclaration }: DeclarationHeaderProps) {
+export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, currentDeclaration, roundValuesForCopy }: DeclarationHeaderProps) {
+  const { t } = useTranslation('common');
   const router = useRouter();
+  const { ContextualEventsSalesViewer } = useContext(DeclarationHeaderContext);
+
+  const theme = useTheme();
+  const mdUp = useMediaQuery(theme.breakpoints.up('md'));
+
+  const [ticketingModalViewed, setTicketingModalViewed] = useLocalStorageViewedTicketingModal(eventSerie.id);
+  const [eventsSalesViewerOpen, setEventsSalesViewerOpen] = useState(!ticketingModalViewed);
+
+  useEffect(() => {
+    if (eventsSalesViewerOpen) {
+      setTicketingModalViewed();
+    }
+  }, [eventsSalesViewerOpen, setTicketingModalViewed]);
 
   return (
     <>
@@ -22,16 +49,57 @@ export function DeclarationHeader({ organizationId, eventSerie, currentDeclarati
         item
         xs={12}
         sx={{
-          pt: { xs: 3, md: 5 },
-          pb: { xs: 3, md: 4 },
+          pt: { xs: 3, md: 3 },
+          pb: { xs: 3, md: 2 },
         }}
       >
-        <Typography component="h1" variant="h4" data-sentry-mask>
-          {eventSerie.name}
-        </Typography>
-        <Typography component="p" variant="body1">
-          Vérifiez et corrigez les données avant de déclarer
-        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} lg={4} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
+            <Typography component="h1" variant="h4" data-sentry-mask>
+              {eventSerie.name}
+            </Typography>
+            {mdUp && (
+              <Typography component="p" variant="subtitle1" sx={{ fontWeight: 300 }}>
+                {t('date.short', { date: eventSerie.startAt })} →{' '}
+                {t('date.short', {
+                  date: eventSerie.endAt,
+                })}
+              </Typography>
+            )}
+            <Typography component="p" variant="body1">
+              <Button
+                onClick={() => {
+                  setEventsSalesViewerOpen(true);
+                }}
+                size="small"
+                variant="contained"
+                startIcon={<Grading />}
+                sx={{
+                  mt: 1,
+                  '&::after': {
+                    display: 'none !important',
+                  },
+                }}
+              >
+                Éditer la billetterie
+              </Button>
+              <ContextualEventsSalesViewer
+                overview={{
+                  wrappers: eventsWrappers,
+                  eventSerie: eventSerie,
+                  roundValuesForCopy: roundValuesForCopy,
+                }}
+                open={eventsSalesViewerOpen}
+                onClose={() => {
+                  setEventsSalesViewerOpen(false);
+                }}
+              />
+            </Typography>
+          </Grid>
+          <Grid item xs={12} lg={8}>
+            <EventsSalesKeyFigures eventSerie={eventSerie} wrappers={eventsWrappers} minimal={true} />
+          </Grid>
+        </Grid>
       </Grid>
       <Grid
         item

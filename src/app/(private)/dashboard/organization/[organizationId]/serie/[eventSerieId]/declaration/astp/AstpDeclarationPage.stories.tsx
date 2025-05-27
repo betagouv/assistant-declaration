@@ -7,7 +7,7 @@ import {
   AstpDeclarationPage,
   AstpDeclarationPageContext,
 } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/astp/AstpDeclarationPage';
-import { Normal as EventsSalesOverviewNormalStory } from '@ad/src/components/EventsSalesOverview.stories';
+import { Normal as DeclarationHeaderNormalStory } from '@ad/src/components/DeclarationHeader.stories';
 import { eventCategoryTickets, eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
@@ -76,7 +76,7 @@ export const Normal = prepareStory(NormalStory, {
   childrenContext: {
     context: AstpDeclarationPageContext,
     value: {
-      ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
+      ContextualDeclarationHeader: DeclarationHeaderNormalStory,
     },
   },
 });
@@ -107,7 +107,7 @@ export const NotFound = prepareStory(NotFoundStory, {
   childrenContext: {
     context: AstpDeclarationPageContext,
     value: {
-      ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
+      ContextualDeclarationHeader: DeclarationHeaderNormalStory,
     },
   },
 });
@@ -129,7 +129,7 @@ export const WithLayout = prepareStory(WithLayoutStory, {
   childrenContext: {
     context: AstpDeclarationPageContext,
     value: {
-      ContextualEventsSalesOverview: EventsSalesOverviewNormalStory,
+      ContextualDeclarationHeader: DeclarationHeaderNormalStory,
     },
   },
 });

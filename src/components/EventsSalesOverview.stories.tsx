@@ -40,21 +40,7 @@ NormalStory.parameters = {
   },
 };
 NormalStory.play = async ({ canvasElement }) => {
-  await within(canvasElement).findByRole('textbox', {
-    name: /date/i,
-  });
+  await within(canvasElement).findByText(/données/i);
 };
 
 export const Normal = prepareStory(NormalStory);
-
-const WithRoundedValuesOnCopyStory = Template.bind({});
-WithRoundedValuesOnCopyStory.args = {
-  ...NormalStory.args,
-  roundValuesForCopy: true,
-};
-WithRoundedValuesOnCopyStory.parameters = {
-  ...NormalStory.parameters,
-};
-WithRoundedValuesOnCopyStory.play = NormalStory.play;
-
-export const WithRoundedValuesOnCopy = prepareStory(WithRoundedValuesOnCopyStory);

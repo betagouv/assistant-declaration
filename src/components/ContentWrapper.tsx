@@ -1,4 +1,4 @@
-import Box from '@mui/material/Box';
+import { Box } from '@mui/material';
 import { PropsWithChildren } from 'react';
 
 export function ContentWrapper(props: PropsWithChildren) {
