@@ -95,7 +95,7 @@ export function SignInPage() {
       >
         <Grid container {...centeredFormContainerGridProps}>
           <Typography component="h1" {...formTitleProps}>
-            Créer un compte
+            Se connecter
           </Typography>
           <ContextualSignInForm />
         </Grid>
