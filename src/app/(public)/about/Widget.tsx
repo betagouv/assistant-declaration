@@ -30,8 +30,8 @@ export function Widget({ children, title, icon }: WidgetProps) {
         sx={{
           width: '60%',
           height: {
-            xs: 50,
-            sm: 100,
+            xs: 120,
+            sm: 130,
             md: 150,
           },
           mx: 'auto',

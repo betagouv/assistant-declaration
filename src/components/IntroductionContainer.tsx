@@ -15,7 +15,7 @@ export function IntroductionContainer({
   rightSx?: BoxProps['sx'];
   containerMaxHeight?: any; // Tried to type `BoxProps['sx']['maxHeight']` but it's not working
 }) {
-  const containerMaxHeightToUse = containerMaxHeight || { sm: 550, xl: 600 };
+  const containerMaxHeightToUse = containerMaxHeight || 550;
 
   return (
     <Box
@@ -28,39 +28,21 @@ export function IntroductionContainer({
         sx={{
           minHeight: Math.min(...Object.values<number>(containerMaxHeightToUse)),
           height: {
-            sm: 'calc(100vh - 120px)',
+            md: 'calc(100vh - 120px)',
           },
-          maxHeight: containerMaxHeightToUse,
+          maxHeight: {
+            md: containerMaxHeightToUse,
+            xl: containerMaxHeightToUse + 50,
+          },
           transition: '0.3s',
         }}
       >
         <Grid container alignItems="center" wrap="nowrap" sx={{ height: '100%', mx: 'auto' }}>
-          <Grid item md={8} lg={8} sx={{ m: 'auto' }}>
+          <Grid item md={7} lg={7} sx={{ m: 'auto' }}>
             {left}
           </Grid>
-          <Grid item md={4} lg={4} sx={{ maxHeight: '100%', display: { xs: 'none', md: 'initial' } }}>
-            <Box
-              ref={rightRef}
-              id="introduction-container-right-area"
-              aria-hidden="true"
-              sx={[
-                {
-                  display: 'flex',
-                  alignItems: 'center',
-                  px: '2vw',
-                  py: '20px',
-                  minWidth: {
-                    md: `${100 / (12 / 5)}vw`,
-                    lg: `${100 / (12 / 6)}vw`,
-                  },
-                  minHeight: Math.min(...Object.values<number>(containerMaxHeightToUse)),
-                  height: 'calc(100vh - 120px)',
-                  maxHeight: containerMaxHeightToUse,
-                  transition: 'max-height 0.3s',
-                },
-                ...(Array.isArray(rightSx) ? rightSx : [rightSx]),
-              ]}
-            >
+          <Grid item md={5} lg={5} sx={{ maxHeight: '100%', display: { xs: 'none', md: 'initial' } }}>
+            <Box ref={rightRef} id="introduction-container-right-area" aria-hidden="true">
               {right}
             </Box>
           </Grid>

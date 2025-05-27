@@ -83,7 +83,7 @@ export function StandardLayout(props: PropsWithChildren<StandardLayoutProps>) {
                   Assistant déclaration
                 </MjmlText>
                 <MjmlText fontSize={16} paddingTop={2}>
-                  À destination des entrepreneurs du spectacle vivant
+                  Pour les entrepreneurs du spectacle vivant
                 </MjmlText>
               </MjmlColumn>
             </MjmlGroup>

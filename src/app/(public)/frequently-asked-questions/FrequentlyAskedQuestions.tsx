@@ -17,7 +17,21 @@ export function FrequentlyAskedQuestions() {
           Foire aux questions | FAQ
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid
+            item
+            xs={12}
+            sx={{
+              '& .MuiAccordion-heading svg': {
+                fill: fr.colors.decisions.text.actionHigh.blueFrance.default,
+              },
+              '& .MuiPaper-root::before': {
+                display: 'none',
+              },
+              '& .MuiPaper-root': {
+                borderTop: `solid 1px ${fr.colors.decisions.border.default.grey.default}`,
+              },
+            }}
+          >
             <Accordion sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMore />}>
                 <Typography color="primary" sx={{ fontWeight: 600 }}>

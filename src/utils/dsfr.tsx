@@ -81,7 +81,7 @@ export const commonHeaderAttributes = {
   brandTop: brandTop,
   homeLinkProps: homeLinkProps,
   serviceTitle: 'Assistant déclaration',
-  serviceTagline: 'À destination des entrepreneurs du spectacle vivant',
+  serviceTagline: 'Pour les entrepreneurs du spectacle vivant',
 };
 
 export const commonFooterAttributes = {
