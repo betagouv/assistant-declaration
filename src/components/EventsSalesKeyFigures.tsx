@@ -85,16 +85,16 @@ export function EventsSalesKeyFigures({ wrappers, eventSerie, roundValuesForCopy
   const handleCloseSnackbar = useCallback(() => setSnackbarAlert(null), [setSnackbarAlert]);
 
   const copyValue = useCallback(
-    async (value: string, roundedValue?: boolean) => {
+    async (value: string, valueCanBeRounded?: boolean) => {
       await navigator.clipboard.writeText(value);
 
       setSnackbarAlert(
         <Alert severity="success" onClose={handleCloseSnackbar}>
-          {roundedValue ? `La valeur arrondie a été copiée` : `La valeur a été copiée`}
+          {valueCanBeRounded && roundValuesForCopy ? `La valeur arrondie a été copiée` : `La valeur a été copiée`}
         </Alert>
       );
     },
-    [setSnackbarAlert, handleCloseSnackbar]
+    [setSnackbarAlert, handleCloseSnackbar, roundValuesForCopy]
   );
 
   return (
