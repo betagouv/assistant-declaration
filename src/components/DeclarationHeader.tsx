@@ -97,7 +97,7 @@ export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, 
             </Typography>
           </Grid>
           <Grid item xs={12} lg={8}>
-            <EventsSalesKeyFigures eventSerie={eventSerie} wrappers={eventsWrappers} minimal={true} />
+            <EventsSalesKeyFigures eventSerie={eventSerie} wrappers={eventsWrappers} roundValuesForCopy={roundValuesForCopy} minimal={true} />
           </Grid>
         </Grid>
       </Grid>
