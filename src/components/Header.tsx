@@ -14,6 +14,8 @@ import { SearchButton } from '@codegouvfr/react-dsfr/SearchBar/SearchButton';
 import { getLink } from '@codegouvfr/react-dsfr/link';
 import { cx } from '@codegouvfr/react-dsfr/tools/cx';
 import { setBrandTopAndHomeLinkProps } from '@codegouvfr/react-dsfr/zz_internal/brandTopAndHomeLinkProps';
+import { ArrowForward } from '@mui/icons-material';
+import { Button } from '@mui/material';
 import { usePathname } from 'next/navigation';
 import { cloneElement, forwardRef, memo } from 'react';
 import type { Equals } from 'tsafe';
@@ -153,7 +155,11 @@ export const Header = memo(
       );
     } else {
       customMobileMenu.push({
-        content: 'Accès outil',
+        content: (
+          <Button component="span" size="medium" variant="contained" startIcon={<ArrowForward />} fullWidth sx={{ maxWidth: 300 }}>
+            Accès outil
+          </Button>
+        ),
         href: linkRegistry.get('dashboard', undefined),
       });
     }
@@ -341,43 +347,47 @@ export const Header = memo(
                 >
                   {t('close')}
                 </button>
-                {/* <div className={cx(fr.cx('fr-header__menu-links'), classes.menuLinks)}>{getQuickAccessNode('mobile')}</div> */}
+                <div className={cx(fr.cx('fr-header__menu-links'), classes.menuLinks)}>{/* {getQuickAccessNode('mobile')} */}</div>
 
                 {/* CUSTOM MENU FOR MOBILE - START */}
 
                 <nav className={fr.cx('fr-nav')} id="navigation" role="navigation" aria-label="Menu principal" data-fr-js-navigation="true">
                   <ul className={fr.cx('fr-nav__list')}>
-                    {customMobileMenu.map((item) => (
-                      <li className={fr.cx('fr-nav__item')} data-fr-js-navigation-item="true">
+                    {customMobileMenu.map((item, i) => (
+                      <li key={i} className={fr.cx('fr-nav__item')} data-fr-js-navigation-item="true">
                         {'subitems' in item ? (
                           <>
                             <button
                               className={fr.cx('fr-nav__btn')}
                               aria-expanded="true"
-                              aria-controls="menu-program"
+                              aria-controls={`menu-list-${i}`}
                               data-fr-js-collapse-button="true"
                             >
                               {item.content}
                             </button>
                             <div
                               className={fr.cx('fr-collapse', 'fr-menu', 'fr-collapse--expanded')}
-                              id="menu-program"
-                              data-fr-js-collapse="true"
-                              // style="--collapse: -164px; --collapse-max-height: none;"
+                              id={`menu-help-${i}`}
+                              // data-fr-js-collapse={!item.open}
                             >
                               <ul className={fr.cx('fr-menu__list')}>
-                                {item.subitems.map((subitem) => {
+                                {item.subitems.map((subitem, u) => {
                                   if ('href' in subitem) {
                                     return (
-                                      <li>
-                                        <a className={fr.cx('fr-nav__link')} href="/approche" target="_self">
+                                      <li key={u}>
+                                        <a
+                                          className={fr.cx('fr-nav__link')}
+                                          href={subitem.href}
+                                          target="_self"
+                                          aria-current={hasPathnameThisMatch(pathname, subitem.href)}
+                                        >
                                           {subitem.name}
                                         </a>
                                       </li>
                                     );
                                   } else {
                                     return (
-                                      <li>
+                                      <li key={u}>
                                         <button className={fr.cx('fr-nav__link')} onClick={subitem.onClick}>
                                           {subitem.name}
                                         </button>
@@ -391,11 +401,17 @@ export const Header = memo(
                         ) : (
                           <>
                             {'href' in item ? (
-                              <a className={fr.cx('fr-nav__link')} href={item.href}>
+                              <a
+                                key={i}
+                                className={fr.cx('fr-nav__link')}
+                                href={item.href}
+                                target="_self"
+                                aria-current={hasPathnameThisMatch(pathname, item.href)}
+                              >
                                 {item.content}
                               </a>
                             ) : (
-                              <button className={fr.cx('fr-nav__link')} onClick={item.onClick}>
+                              <button key={i} className={fr.cx('fr-nav__link')} onClick={item.onClick}>
                                 {item.content}
                               </button>
                             )}
@@ -405,45 +421,6 @@ export const Header = memo(
                     ))}
                   </ul>
                 </nav>
-
-                {/* <nav
-                  id="navigation-866"
-                  role="navigation"
-                  aria-label="Menu principal"
-                  className={fr.cx('fr-nav')}
-                  data-fr-js-navigation="true"
-                  data-fr-js-navigation-actionee="true"
-                >
-                  <ul className={fr.cx('fr-nav__list')}>
-                    <li className={fr.cx('fr-nav__item')} data-fr-js-navigation-item="true">
-                      <a
-                        id="nav__link-prise-en-main-et-perimetre"
-                        href={linkRegistry.get('about', undefined)}
-                        target="_self"
-                        aria-controls="modal-header__menu"
-                        className={fr.cx('fr-nav__link')}
-                        data-fr-js-modal-button="true"
-                        data-fr-js-navigation-link-actionee="true"
-                      >
-                        À propos
-                      </a>
-                    </li>
-                    <li className={fr.cx('fr-nav__item')} data-fr-js-navigation-item="true">
-                      <a
-                        id="nav__link-fondamentaux"
-                        aria-current={hasPathnameThisMatch(pathname, organizationLink)}
-                        href="/fondamentaux"
-                        target="_self"
-                        aria-controls="modal-header__menu"
-                        className={fr.cx('fr-nav__link')}
-                        data-fr-js-modal-button="true"
-                        data-fr-js-navigation-link-actionee="true"
-                      >
-                        Fondamentaux
-                      </a>
-                    </li>
-                  </ul>
-                </nav> */}
 
                 {/* CUSTOM MENU FOR MOBILE - END */}
 
