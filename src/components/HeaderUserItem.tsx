@@ -1,22 +1,22 @@
 'use client';
 
-import { Dashboard, Logout, ManageAccounts } from '@mui/icons-material';
-import { Box, Grid, ListItemIcon, Menu, MenuItem } from '@mui/material';
+import { Logout } from '@mui/icons-material';
+import { Box, Button, Grid, Popover } from '@mui/material';
 import FocusTrap from '@mui/material/Unstable_TrapFocus';
 import { EventEmitter } from 'eventemitter3';
-import NextLink from 'next/link';
 import { PropsWithChildren, useEffect, useState } from 'react';
 
-import { Avatar } from '@ad/src/components/Avatar';
+import { CustomDsfrNav } from '@ad/src/components/CustomDsfrNav';
+import { UserInterfaceOrganizationSchemaType } from '@ad/src/models/entities/ui';
 import { TokenUserSchemaType } from '@ad/src/models/entities/user';
 import { logout } from '@ad/src/utils/auth';
-import { menuPaperProps } from '@ad/src/utils/menu';
+import { CustomMenuItem, menuPaperProps } from '@ad/src/utils/menu';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export interface HeaderUserItemProps {
   user: TokenUserSchemaType;
   eventEmitter: EventEmitter;
-  showDashboardMenuItem?: boolean;
+  currentOrganization: UserInterfaceOrganizationSchemaType | null;
 }
 
 export function HeaderUserItem(props: PropsWithChildren<HeaderUserItemProps>) {
@@ -43,13 +43,44 @@ export function HeaderUserItem(props: PropsWithChildren<HeaderUserItemProps>) {
     };
   }, [props.eventEmitter, open]);
 
+  const customUserMenu: CustomMenuItem[] = [
+    {
+      content: 'Profil utilisateur',
+      href: linkRegistry.get('accountSettings', undefined),
+    },
+    ...(props.currentOrganization
+      ? [
+          {
+            content: 'Spectacles',
+            href: linkRegistry.get('organization', {
+              organizationId: props.currentOrganization.id,
+            }),
+          },
+          {
+            content: 'Billetteries',
+            href: linkRegistry.get('ticketingSystemList', {
+              organizationId: props.currentOrganization.id,
+            }),
+          },
+        ]
+      : []),
+    {
+      content: (
+        <Button component="span" size="medium" variant="outlined" startIcon={<Logout />} fullWidth sx={{ maxWidth: 300 }}>
+          Se déconnecter
+        </Button>
+      ),
+      onClick: logout,
+    },
+  ];
+
   return (
     <Box aria-label="options" aria-controls={open ? 'account-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined}>
       <Grid container direction="row" alignItems="center" spacing={1}>
         <Grid item>Mon compte</Grid>
       </Grid>
       <FocusTrap open={open}>
-        <Menu
+        <Popover
           anchorEl={anchorEl}
           id="account-menu"
           open={open}
@@ -61,27 +92,18 @@ export function HeaderUserItem(props: PropsWithChildren<HeaderUserItemProps>) {
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           sx={{ zIndex: 2000 }} // Needed to be displayed over the navbar on mobile devices
         >
-          {props.showDashboardMenuItem === true && (
-            <MenuItem component={NextLink} href={linkRegistry.get('dashboard', undefined)}>
-              <ListItemIcon>
-                <Dashboard fontSize="small" />
-              </ListItemIcon>
-              Tableau de bord
-            </MenuItem>
-          )}
-          <MenuItem component={NextLink} href={linkRegistry.get('accountSettings', undefined)}>
-            <ListItemIcon>
-              <ManageAccounts fontSize="small" />
-            </ListItemIcon>
-            Profil utilisateur
-          </MenuItem>
-          <MenuItem onClick={logout}>
-            <ListItemIcon>
-              <Logout fontSize="small" />
-            </ListItemIcon>
-            Se déconnecter
-          </MenuItem>
-        </Menu>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              // '& .fr-nav__link': {
+              //   width: '100% !important',
+              // },
+            }}
+          >
+            <CustomDsfrNav menu={customUserMenu} id="fr-header-custom-desktop-user-navigation" ariaLabel="Menu du compte" />
+          </Box>
+        </Popover>
       </FocusTrap>
     </Box>
   );

@@ -4,8 +4,8 @@ import type { DefaultColorScheme } from '@codegouvfr/react-dsfr/next-appdir';
 import { EventEmitter } from 'eventemitter3';
 
 import { HeaderHelpItem } from '@ad/src/components/HeaderHelpItem';
-import { HeaderOrganizationSwitchItem, HeaderOrganizationSwitchItemProps } from '@ad/src/components/HeaderOrganizationSwitchItem';
 import { HeaderUserItem } from '@ad/src/components/HeaderUserItem';
+import { UserInterfaceOrganizationSchemaType } from '@ad/src/models/entities/ui';
 import { TokenUserSchemaType } from '@ad/src/models/entities/user';
 
 export const defaultColorScheme: DefaultColorScheme = 'system';
@@ -25,26 +25,6 @@ export const homeLinkProps = {
   title: 'À propos - Assistant déclaration',
 };
 
-export interface OrganizationSwitchQuickAccessItemOptions extends Omit<HeaderOrganizationSwitchItemProps, 'eventEmitter'> {}
-
-export const organizationSwichQuickAccessItem = (props: OrganizationSwitchQuickAccessItemOptions): HeaderProps.QuickAccessItem => {
-  const eventEmitter = new EventEmitter();
-
-  return {
-    iconId: undefined as any,
-    buttonProps: {
-      onClick: (event) => {
-        eventEmitter.emit('click', event);
-      },
-    },
-    text: <HeaderOrganizationSwitchItem eventEmitter={eventEmitter} {...props} />,
-  };
-};
-
-export interface UserQuickAccessItemOptions {
-  showDashboardMenuItem?: boolean;
-}
-
 export const helpQuickAccessItem = (): HeaderProps.QuickAccessItem => {
   const eventEmitter = new EventEmitter();
 
@@ -61,7 +41,10 @@ export const helpQuickAccessItem = (): HeaderProps.QuickAccessItem => {
   };
 };
 
-export const userQuickAccessItem = (user: TokenUserSchemaType, options?: UserQuickAccessItemOptions): HeaderProps.QuickAccessItem => {
+export const userQuickAccessItem = (
+  user: TokenUserSchemaType,
+  currentOrganization: UserInterfaceOrganizationSchemaType | null
+): HeaderProps.QuickAccessItem => {
   const eventEmitter = new EventEmitter();
 
   // INFORMATION: this won't work on 5xx and 4xx error pages since there is an hydratation error due to Next.js (maybe fixed in the future)
@@ -73,7 +56,7 @@ export const userQuickAccessItem = (user: TokenUserSchemaType, options?: UserQui
         eventEmitter.emit('click', event);
       },
     },
-    text: <HeaderUserItem user={user} eventEmitter={eventEmitter} showDashboardMenuItem={options?.showDashboardMenuItem} />,
+    text: <HeaderUserItem user={user} currentOrganization={currentOrganization} eventEmitter={eventEmitter} />,
   };
 };
 

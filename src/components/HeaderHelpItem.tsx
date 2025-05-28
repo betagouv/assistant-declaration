@@ -1,14 +1,13 @@
 'use client';
 
-import { ContactMail, FormatListBulleted } from '@mui/icons-material';
-import { Box, Grid, ListItemIcon, Menu, MenuItem } from '@mui/material';
+import { Box, Grid, Popover } from '@mui/material';
 import FocusTrap from '@mui/material/Unstable_TrapFocus';
 import { EventEmitter } from 'eventemitter3';
-import NextLink from 'next/link';
 import { PropsWithChildren, useEffect, useState } from 'react';
 
+import { CustomDsfrNav } from '@ad/src/components/CustomDsfrNav';
 import { useLiveChat } from '@ad/src/components/live-chat/useLiveChat';
-import { menuPaperProps } from '@ad/src/utils/menu';
+import { CustomMenuItem, menuPaperProps } from '@ad/src/utils/menu';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export interface HeaderHelpItemProps {
@@ -41,13 +40,28 @@ export function HeaderHelpItem(props: PropsWithChildren<HeaderHelpItemProps>) {
     };
   }, [props.eventEmitter, open]);
 
+  const customHelpMenu: CustomMenuItem[] = [
+    {
+      content: 'FAQ',
+      href: linkRegistry.get('frequentlyAskedQuestions', undefined),
+    },
+    {
+      content: 'Messagerie',
+      onClick: showLiveChat,
+    },
+    {
+      content: 'Contact',
+      href: 'mailto:contact@assistant-declaration.beta.gouv.fr',
+    },
+  ];
+
   return (
     <Box aria-label="options" aria-controls={open ? 'help-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined}>
       <Grid container direction="row" alignItems="center" spacing={1}>
         <Grid item>Aide</Grid>
       </Grid>
       <FocusTrap open={open}>
-        <Menu
+        <Popover
           anchorEl={anchorEl}
           id="help-menu"
           open={open}
@@ -59,19 +73,15 @@ export function HeaderHelpItem(props: PropsWithChildren<HeaderHelpItemProps>) {
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           sx={{ zIndex: 2000 }} // Needed to be displayed over the navbar on mobile devices
         >
-          <MenuItem onClick={showLiveChat}>
-            <ListItemIcon>
-              <ContactMail fontSize="small" />
-            </ListItemIcon>
-            Messagerie
-          </MenuItem>
-          <MenuItem component={NextLink} href={linkRegistry.get('frequentlyAskedQuestions', undefined)}>
-            <ListItemIcon>
-              <FormatListBulleted fontSize="small" />
-            </ListItemIcon>
-            Questions fréquentes
-          </MenuItem>
-        </Menu>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <CustomDsfrNav menu={customHelpMenu} id="fr-header-custom-desktop-help-navigation" ariaLabel="Menu d'aide" />
+          </Box>
+        </Popover>
       </FocusTrap>
     </Box>
   );
