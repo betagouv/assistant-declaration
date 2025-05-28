@@ -1,7 +1,7 @@
 'use client';
 
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
-import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
+import { HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import { MainNavigationProps } from '@codegouvfr/react-dsfr/MainNavigation';
 import { Grid } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
@@ -11,6 +11,7 @@ import { trpc } from '@ad/src/client/trpcClient';
 import { ContentWrapper } from '@ad/src/components/ContentWrapper';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { FlashMessage } from '@ad/src/components/FlashMessage';
+import { Header } from '@ad/src/components/Header';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { UserInterfaceSessionProvider } from '@ad/src/components/user-interface-session/UserInterfaceSessionProvider';
 import { signIn, useSession } from '@ad/src/proxies/next-auth/react';
@@ -127,7 +128,7 @@ export function PrivateLayout(props: PropsWithChildren) {
   return (
     <>
       <UserInterfaceSessionProvider session={userInterfaceSession}>
-        <Header {...commonHeaderAttributes} quickAccessItems={quickAccessItems} navigation={navigation} />
+        <Header {...commonHeaderAttributes} quickAccessItems={quickAccessItems} navigation={navigation} currentOrganization={currentOrganization} />
         <FlashMessage appMode={process.env.NEXT_PUBLIC_APP_MODE} nodeEnv={process.env.NODE_ENV} />
         <ContentWrapper>{props.children}</ContentWrapper>
         <Footer {...commonFooterAttributes} />
