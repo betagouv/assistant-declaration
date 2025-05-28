@@ -61,22 +61,6 @@ export type CustomMenuItem = {
     }
 );
 
-function hasSubitems(item: CustomMenuItem): item is CustomMenuItem & {
-  subitems: ({
-    name: string;
-  } & CustomMenuItemActions)[];
-} {
-  return 'subitems' in item && Array.isArray(item.subitems);
-}
-
-// function hasItemHref(item: { content: string } & CustomMenuItemActions): item is { content: string } & CustomMenuItemHrefAction {
-//   return typeof (item as any).href === 'string';
-// }
-
-// function hasSubitemHref(subitem: { name: string } & CustomMenuItemActions): subitem is { name: string } & CustomMenuItemHrefAction {
-//   return typeof (subitem as any).href === 'string';
-// }
-
 /** @see <https://components.react-dsfr.codegouv.studio/?path=/docs/components-header> */
 export const Header = memo(
   forwardRef<
@@ -365,7 +349,7 @@ export const Header = memo(
                   <ul className={fr.cx('fr-nav__list')}>
                     {customMobileMenu.map((item) => (
                       <li className={fr.cx('fr-nav__item')} data-fr-js-navigation-item="true">
-                        {hasSubitems(item) ? (
+                        {'subitems' in item ? (
                           <>
                             <button
                               className={fr.cx('fr-nav__btn')}
