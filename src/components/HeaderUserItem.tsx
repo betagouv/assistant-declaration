@@ -81,6 +81,7 @@ export function HeaderUserItem(props: PropsWithChildren<HeaderUserItemProps>) {
       </Grid>
       <FocusTrap open={open}>
         <Popover
+          role="menu"
           anchorEl={anchorEl}
           id="account-menu"
           open={open}

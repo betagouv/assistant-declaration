@@ -54,7 +54,7 @@ ClickedStory.play = async ({ canvasElement }) => {
   await userEvent.click(button);
 
   const dialog = await screen.findByRole('menu');
-  await within(dialog).findByRole('menuitem', {
+  await within(dialog).findByRole('button', {
     name: /messagerie/i,
   });
 };

@@ -62,6 +62,7 @@ export function HeaderHelpItem(props: PropsWithChildren<HeaderHelpItemProps>) {
       </Grid>
       <FocusTrap open={open}>
         <Popover
+          role="menu"
           anchorEl={anchorEl}
           id="help-menu"
           open={open}
