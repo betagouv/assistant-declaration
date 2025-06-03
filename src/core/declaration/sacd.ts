@@ -1,12 +1,19 @@
 import crypto from 'crypto';
 import { format } from 'date-fns';
 import { default as libphonenumber } from 'google-libphonenumber';
+import { create } from 'xmlbuilder2';
 
 import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { useServerTranslation } from '@ad/src/i18n';
 import { SacdAccountingCategorySchema, SacdDeclarationSchemaType, SacdProductionTypeSchema } from '@ad/src/models/entities/declaration/sacd';
+import { sacdDeclarationUnsuccessfulError } from '@ad/src/models/entities/errors';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
-import { JsonHelloWorldResponseSchema, JsonLoginResponseSchema } from '@ad/src/models/entities/sacd';
+import {
+  JsonDeclarationParameterSchemaType,
+  JsonDeclareResponseSchema,
+  JsonHelloWorldResponseSchema,
+  JsonLoginResponseSchema,
+} from '@ad/src/models/entities/sacd';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { convertInputModelToGooglePhoneNumber } from '@ad/src/utils/phone';
 
@@ -61,7 +68,7 @@ export class SacdClient {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.text();
 
       throw error;
     }
@@ -85,7 +92,7 @@ export class SacdClient {
     const response = await fetch(`${this.baseUrl}/ticketing/logout?${queryParams.toString}`, {});
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.text();
 
       throw error;
     }
@@ -110,25 +117,13 @@ export class SacdClient {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.text();
 
       throw error;
     }
 
     const responseJson = await response.json();
     const responseObject = JsonHelloWorldResponseSchema.parse(responseJson);
-  }
-
-  protected formatString(value: string) {
-    return value.slice(0, 128); // 128 chars max according to their documentation
-  }
-
-  protected formatDate(date: Date) {
-    return format(date, 'yyyy/MM/dd');
-  }
-
-  protected formatTime(date: Date) {
-    return format(date, 'HH:mm');
   }
 
   public async declare(
@@ -140,192 +135,236 @@ export class SacdClient {
     assert(this.authToken);
     assert(wrappers.length > 0);
 
-    const { t } = useServerTranslation('common');
-
     const queryParams = new URLSearchParams({
       key: this.consumerKey,
       token: this.getAccessToken(),
     });
 
     const bodyParams = new URLSearchParams(this.commonBodyParams);
-    bodyParams.append('parameters[dec_ref]', declarantId);
-    bodyParams.append('parameters[dec_systeme]', 'ASSISTANT_DECLARATION');
-    bodyParams.append('parameters[dec_date]', this.formatDate(new Date()));
-    bodyParams.append('parameters[dec_nb]', wrappers.length.toString());
 
-    // Order events for the ease when debugging
-    const sortedWrappers = wrappers.sort((a, b) => a.event.startAt.getTime() - b.event.startAt.getTime());
+    const response = await fetch(`${this.baseUrl}/ticketing/broker/ExploitFileTransmitETicketingDeclarationWS?${queryParams.toString}`, {
+      body: bodyParams.toString(),
+    });
 
-    // After contacting the SACD support they said amounts scoped to the event serie should be filled only once
-    // on the first event of the serie (maybe they have case of people splitting them per event but we don't)
-    let eventSerieSpecificsFilled = false;
+    if (!response.ok) {
+      const error = await response.text();
 
-    for (const wrapper of sortedWrappers) {
-      let totalIncludingTaxesAmount: number = 0;
-      let paidTickets: number = 0;
-      let freeTickets: number = 0;
+      throw error;
+    }
 
-      for (const eventSale of wrapper.sales) {
-        const total = eventSale.eventCategoryTickets.totalOverride ?? eventSale.eventCategoryTickets.total;
-        const price = eventSale.eventCategoryTickets.priceOverride ?? eventSale.ticketCategory.price;
+    // The received response is XML
+    const responseXml = await response.text();
+    const responseJson = create(responseXml).end({ format: 'object' });
+    const responseObject = JsonDeclareResponseSchema.parse(responseJson);
 
-        if (price === 0) {
-          freeTickets += total;
-        } else {
-          paidTickets += total;
-        }
+    // SACD may consider the declaration as partially successful so we have to check the status of each event
+    // to be sure... Since we have no way for the user to correct the errors, we just notify him he has to
+    // reach the SACD operator to investigate
+    const warnings: string[] = [];
+    const errors: string[] = [];
 
-        totalIncludingTaxesAmount += total * price;
-      }
-
-      bodyParams.append('parameters[rep_ref_dec]', wrapper.event.id);
-      bodyParams.append('parameters[rep_devise]', 'EUR'); // When synchronizing events series we refuse other currency so it's safe to be hardcoded for now
-      bodyParams.append('parameters[rep_statut]', 'DEF');
-      bodyParams.append('parameters[rep_version]', '1');
-      bodyParams.append('parameters[rep_titre]', this.formatString(eventSerie.name));
-      bodyParams.append('parameters[rep_date_debut]', this.formatDate(wrapper.event.startAt));
-      bodyParams.append('parameters[rep_date_fin]', this.formatDate(wrapper.event.endAt));
-      bodyParams.append('parameters[rep_nb]', '1');
-      bodyParams.append('parameters[rep_horaire]', this.formatTime(wrapper.event.startAt));
-
-      bodyParams.append(
-        'parameters[rep_mt_billets]',
-        getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate).toString()
-      );
-      bodyParams.append('parameters[rep_tx_tva_billets]', (100 * eventSerie.taxRate).toString()); // Providing 5.5% as 5.5 instead of 0.055
-      bodyParams.append(
-        'parameters[rep_mt_tva_billets]',
-        getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate).toString()
-      );
-      bodyParams.append('parameters[rep_nb_billets_pay]', paidTickets.toString());
-      bodyParams.append('parameters[rep_nb_billets_exo]', freeTickets.toString());
-
-      if (!eventSerieSpecificsFilled) {
-        eventSerieSpecificsFilled = true;
-
-        const saleOfRights = declaration.accountingEntries.find(
-          (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.SALE_OF_RIGHTS
-        );
-        const saleOfRightsTaxRate = saleOfRights?.taxRate ?? 0;
-
-        bodyParams.append(
-          'parameters[rep_mt_cession]',
-          saleOfRights ? getExcludingTaxesAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate).toString() : '0'
-        );
-        bodyParams.append('parameters[rep_tx_tva_cession]', (100 * saleOfRightsTaxRate).toString()); // Providing 5.5% as 5.5 instead of 0.055
-        bodyParams.append(
-          'parameters[rep_mt_tva_cession]',
-          saleOfRights ? getTaxAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate).toString() : '0'
-        );
-
-        const introductionFees = declaration.accountingEntries.find(
-          (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.INTRODUCTION_FEES
-        );
-        const introductionFeesTaxRate = introductionFees?.taxRate ?? 0;
-
-        bodyParams.append(
-          'parameters[rep_mt_frais]',
-          introductionFees
-            ? getExcludingTaxesAmountFromIncludingTaxesAmount(introductionFees.includingTaxesAmount, introductionFeesTaxRate).toString()
-            : '0'
-        );
-
-        const coproductionContribution = declaration.accountingEntries.find(
-          (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.COPRODUCTION_CONTRIBUTION
-        );
-        const coproductionContributionTaxRate = coproductionContribution?.taxRate ?? 0;
-
-        bodyParams.append(
-          'parameters[rep_mt_apports_coprod]',
-          coproductionContribution
-            ? getExcludingTaxesAmountFromIncludingTaxesAmount(
-                coproductionContribution.includingTaxesAmount,
-                coproductionContributionTaxRate
-              ).toString()
-            : '0'
-        );
-
-        const revenueGuarantee = declaration.accountingEntries.find(
-          (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.REVENUE_GUARANTEE
-        );
-        const revenueGuaranteeTaxRate = revenueGuarantee?.taxRate ?? 0;
-
-        bodyParams.append(
-          'parameters[rep_mt_garantie_rec]',
-          revenueGuarantee
-            ? getExcludingTaxesAmountFromIncludingTaxesAmount(revenueGuarantee.includingTaxesAmount, revenueGuaranteeTaxRate).toString()
-            : '0'
-        );
-
-        // // The budget is not something we are collecting from declarants
-        // bodyParams.append(
-        //   'parameters[rep_mt_depenses]',
-        //   'TODO'
-        // );
-
-        const other = declaration.accountingEntries.find(
-          (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.INTRODUCTION_FEES
-        );
-        const otherTaxRate = other?.taxRate ?? 0;
-
-        bodyParams.append(
-          'parameters[rep_mt_autres]',
-          other ? getExcludingTaxesAmountFromIncludingTaxesAmount(other.includingTaxesAmount, otherTaxRate).toString() : '0'
-        );
-      }
-
-      bodyParams.append('parameters[expl_nat]', declaration.productionType === SacdProductionTypeSchema.Values.AMATEUR ? 'AMA' : 'PRO');
-
-      // bodyParams.append('parameters[expl_type_ref]', 'TODOOOOOOOO');
-      // bodyParams.append('parameters[expl_ref]', 'TODOOOOOOOO');
-
-      // TODO: SACD confirmed it must be per event whereas we did the audience global to the event serie, it should be changed
-      // Note: they have not defined values so giving them french translations we have
-      const repPublicTranslation = t(`model.sacdDeclaration.audience.enum.${declaration.audience}`);
-
-      bodyParams.append('parameters[rep_public]', this.formatString(repPublicTranslation));
-
-      bodyParams.append('parameters[salle_nom]', this.formatString(declaration.placeName));
-      bodyParams.append('parameters[salle_jauge]', declaration.placeCapacity.toString());
-
-      // TODO: should this be for the event or for the event serie?
-      bodyParams.append('parameters[salle_prix_moyen]', declaration.averageTicketPrice.toString());
-
-      bodyParams.append('parameters[diff_nom]', this.formatString(declaration.organizer.name));
-      // bodyParams.append('parameters[diff_type_ref]', 'TODOOOOOOOO');
-      // bodyParams.append('parameters[diff_ref]', 'TODOOOOOOOO');
-      bodyParams.append('parameters[diff_adresse_1]', this.formatString(declaration.organizer.headquartersAddress.street));
-      bodyParams.append('parameters[diff_code_postal]', this.formatString(declaration.organizer.headquartersAddress.postalCode));
-      bodyParams.append('parameters[diff_ville]', this.formatString(declaration.organizer.headquartersAddress.city));
-      bodyParams.append('parameters[diff_pays]', this.formatString(declaration.organizer.headquartersAddress.countryCode)); // Not translating the country for now
-      bodyParams.append(
-        'parameters[diff_tel]',
-        this.formatString(
-          phoneNumberUtil.format(convertInputModelToGooglePhoneNumber(declaration.organizer.phone), libphonenumber.PhoneNumberFormat.NATIONAL)
-        )
-      );
-      bodyParams.append('parameters[diff_mel]', this.formatString(declaration.organizer.email));
-      bodyParams.append('parameters[diff_tva]', this.formatString(declaration.organizer.europeanVatId));
-
-      // should tva be 0.055 or 5.5 ?
-      // should globlal info be on each rep? seems like duplicates
-      // clarifier "représentations du groupe" c'est le groupe de déclarations donc ? ...
-
-      // TODO:
-      // TODO:
-      // TODO: is it PARAMETERS OR XML to transfer, not clear!
-      // TODO: a priori XML ...
-      // TODO:
-
-      const response = await fetch(`${this.baseUrl}/ticketing/broker/xxxxxxx?${queryParams.toString}`, {
-        body: bodyParams.toString(),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-
-        throw error;
+    for (const representation of responseObject.Declaration.Representations.Representation) {
+      if (representation.statut === 'KO') {
+        errors.push(representation.message || 'unknown');
+      } else if (representation.statut === 'WARNING') {
+        warnings.push(representation.message || 'unknown');
       }
     }
+
+    // TODO: errors and warnings could be saved into database so we know about things to investigate
+    if (errors.length > 0) {
+      throw sacdDeclarationUnsuccessfulError;
+    }
   }
+}
+
+function formatString(value: string) {
+  return value.slice(0, 128); // 128 chars max according to their documentation
+}
+
+function formatDate(date: Date) {
+  return format(date, 'yyyy/MM/dd');
+}
+
+function formatTime(date: Date) {
+  return format(date, 'HH:mm');
+}
+
+export function prepareDeclarationParameter(
+  declarantId: string,
+  eventSerie: EventSerieSchemaType,
+  wrappers: EventWrapperSchemaType[],
+  declaration: SacdDeclarationSchemaType
+): string {
+  const { t } = useServerTranslation('common');
+
+  const declarationParameter: JsonDeclarationParameterSchemaType = {
+    Declaration: {
+      Header: {
+        dec_ref: declarantId,
+        dec_systeme: 'ASSISTANT_DECLARATION',
+        dec_date: formatDate(new Date()),
+        dec_nb: wrappers.length,
+      },
+      Representations: {
+        Representation: [],
+      },
+    },
+  };
+
+  // Order events for the ease when debugging
+  const sortedWrappers = wrappers.sort((a, b) => a.event.startAt.getTime() - b.event.startAt.getTime());
+
+  // After contacting the SACD support they said amounts scoped to the event serie should be filled only once
+  // on the first event of the serie (maybe they have case of people splitting them per event but we don't)
+  let eventSerieSpecificsFilled = false;
+
+  for (const wrapper of sortedWrappers) {
+    let totalIncludingTaxesAmount: number = 0;
+    let paidTickets: number = 0;
+    let freeTickets: number = 0;
+
+    for (const eventSale of wrapper.sales) {
+      const total = eventSale.eventCategoryTickets.totalOverride ?? eventSale.eventCategoryTickets.total;
+      const price = eventSale.eventCategoryTickets.priceOverride ?? eventSale.ticketCategory.price;
+
+      if (price === 0) {
+        freeTickets += total;
+      } else {
+        paidTickets += total;
+      }
+
+      totalIncludingTaxesAmount += total * price;
+    }
+
+    // TODO: SACD confirmed it must be per event whereas we did the audience global to the event serie, it should be changed
+    // Note: they have not defined values so giving them french translations we have
+    const repPublicTranslation = t(`model.sacdDeclaration.audience.enum.${declaration.audience}`);
+
+    const declarationParameterRepresentation: JsonDeclarationParameterSchemaType['Declaration']['Representations']['Representation'][0] = {
+      rep_ref_dec: formatString(`${eventSerie.id}_${wrapper.event.id}`),
+      rep_devise: 'EUR', // When synchronizing events series we refuse other currency so it's safe to be hardcoded for now
+      rep_statut: 'DEF',
+      rep_version: '1',
+      rep_titre: formatString(eventSerie.name),
+      rep_date_debut: formatDate(wrapper.event.startAt),
+      rep_date_fin: formatDate(wrapper.event.endAt),
+      rep_nb: 1, // Since each event has a separate entity
+      rep_horaire: formatTime(wrapper.event.startAt),
+      Billetterie: {
+        rep_mt_billets: getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
+        rep_tx_tva_billets: 100 * eventSerie.taxRate, // Providing 5.5% as 5.5 instead of 0.055
+        rep_mt_tva_billets: getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
+        rep_nb_billets_pay: paidTickets,
+        rep_nb_billets_exo: freeTickets,
+      },
+      Exploitation: {
+        expl_nat: declaration.productionType === SacdProductionTypeSchema.Values.AMATEUR ? 'AMA' : 'PRO',
+        rep_public: formatString(repPublicTranslation),
+        // expl_type_ref: 'TODO',
+        // expl_ref: formatString('TODO'),
+      },
+      Salle: {
+        salle_nom: formatString(declaration.placeName),
+        salle_jauge: declaration.placeCapacity,
+        // TODO: should this be for the event or for the event serie?
+        // Also, they seem to want it to be the total of tarifs devided by the capacity... so skipping it for now
+        // salle_prix_moyen: totalIncludingTaxesAmount / (freeTickets + paidTickets),
+      },
+      Diffuseur: {
+        diff_nom: formatString(declaration.organizer.name),
+        // diff_type_ref: 'TODO',
+        // diff_ref: formatString('TODO'),
+        diff_adresse_1: formatString(declaration.organizer.headquartersAddress.street),
+        diff_code_postal: formatString(declaration.organizer.headquartersAddress.postalCode),
+        diff_ville: formatString(declaration.organizer.headquartersAddress.city),
+        diff_pays: formatString(declaration.organizer.headquartersAddress.countryCode), // Not translating the country for now
+        diff_tel: formatString(
+          phoneNumberUtil.format(convertInputModelToGooglePhoneNumber(declaration.organizer.phone), libphonenumber.PhoneNumberFormat.NATIONAL)
+        ),
+        diff_mel: formatString(declaration.organizer.email),
+        diff_tva: formatString(declaration.organizer.europeanVatId),
+      },
+      Producteur: {
+        prod_nom: formatString(declaration.producer.name),
+        // prod_type_ref: 'TODO',
+        // prod_ref: formatString('TODO'),
+        prod_adresse_1: formatString(declaration.producer.headquartersAddress.street),
+        prod_code_postal: formatString(declaration.producer.headquartersAddress.postalCode),
+        prod_ville: formatString(declaration.producer.headquartersAddress.city),
+        prod_pays: formatString(declaration.producer.headquartersAddress.countryCode), // Not translating the country for now
+        prod_tel: formatString(
+          phoneNumberUtil.format(convertInputModelToGooglePhoneNumber(declaration.producer.phone), libphonenumber.PhoneNumberFormat.NATIONAL)
+        ),
+        prod_mel: formatString(declaration.producer.email),
+        prod_tva: formatString(declaration.producer.europeanVatId),
+      },
+    };
+
+    if (!eventSerieSpecificsFilled) {
+      eventSerieSpecificsFilled = true;
+
+      const saleOfRights = declaration.accountingEntries.find(
+        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.SALE_OF_RIGHTS
+      );
+      const saleOfRightsTaxRate = saleOfRights?.taxRate ?? 0;
+
+      declarationParameterRepresentation.Exploitation.rep_mt_cession = saleOfRights
+        ? getExcludingTaxesAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate)
+        : 0;
+      declarationParameterRepresentation.Exploitation.rep_tx_tva_cession = 100 * saleOfRightsTaxRate; // Providing 5.5% as 5.5 instead of 0.055
+      declarationParameterRepresentation.Exploitation.rep_mt_tva_cession = saleOfRights
+        ? getTaxAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate)
+        : 0;
+
+      const introductionFees = declaration.accountingEntries.find(
+        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.INTRODUCTION_FEES
+      );
+      const introductionFeesTaxRate = introductionFees?.taxRate ?? 0;
+
+      declarationParameterRepresentation.Exploitation.rep_mt_frais = introductionFees
+        ? getExcludingTaxesAmountFromIncludingTaxesAmount(introductionFees.includingTaxesAmount, introductionFeesTaxRate)
+        : 0;
+
+      const coproductionContribution = declaration.accountingEntries.find(
+        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.COPRODUCTION_CONTRIBUTION
+      );
+      const coproductionContributionTaxRate = coproductionContribution?.taxRate ?? 0;
+
+      declarationParameterRepresentation.Exploitation.rep_mt_apports_coprod = coproductionContribution
+        ? getExcludingTaxesAmountFromIncludingTaxesAmount(coproductionContribution.includingTaxesAmount, coproductionContributionTaxRate)
+        : 0;
+
+      const revenueGuarantee = declaration.accountingEntries.find(
+        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.REVENUE_GUARANTEE
+      );
+      const revenueGuaranteeTaxRate = revenueGuarantee?.taxRate ?? 0;
+
+      declarationParameterRepresentation.Exploitation.rep_mt_garantie_rec = revenueGuarantee
+        ? getExcludingTaxesAmountFromIncludingTaxesAmount(revenueGuarantee.includingTaxesAmount, revenueGuaranteeTaxRate)
+        : 0;
+
+      // // The budget is not something we are collecting from declarants
+      // declarationParameterRepresentation.Exploitation.rep_mt_depenses = 'TODO';
+
+      const other = declaration.accountingEntries.find(
+        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.INTRODUCTION_FEES
+      );
+      const otherTaxRate = other?.taxRate ?? 0;
+
+      declarationParameterRepresentation.Exploitation.rep_mt_autres = other
+        ? getExcludingTaxesAmountFromIncludingTaxesAmount(other.includingTaxesAmount, otherTaxRate)
+        : 0;
+    }
+
+    declarationParameter.Declaration.Representations.push(declarationParameterRepresentation);
+  }
+
+  const xml: string = create({
+    declarationParameter,
+  }).end({
+    prettyPrint: true,
+  });
+
+  return xml;
 }
