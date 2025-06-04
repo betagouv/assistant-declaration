@@ -140,9 +140,14 @@ export class SacdClient {
       token: this.getAccessToken(),
     });
 
+    const declarationParameter = prepareDeclarationParameter(declarantId, eventSerie, wrappers, declaration);
+
     const bodyParams = new URLSearchParams(this.commonBodyParams);
+    bodyParams.append('parameters[Declaration]', declarationParameter);
 
     const response = await fetch(`${this.baseUrl}/ticketing/broker/ExploitFileTransmitETicketingDeclarationWS?${queryParams.toString}`, {
+      method: 'POST',
+      headers: this.commonPostHeaders,
       body: bodyParams.toString(),
     });
 

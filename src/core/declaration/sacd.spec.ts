@@ -39,7 +39,7 @@ describeWhenManual('SacdClient', () => {
   );
 
   it(
-    'should test a declaration submission',
+    'should submit a declaration',
     async () => {
       await client.declare('TODO', eventsSeries[0], eventsWrappers, sacdDeclarations[0]);
     },
