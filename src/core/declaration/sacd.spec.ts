@@ -3,8 +3,9 @@
  */
 import { secondsToMilliseconds, set } from 'date-fns';
 
-import { SacdClient } from '@ad/src/core/declaration/sacd';
+import { SacdClient, prepareDeclarationParameter } from '@ad/src/core/declaration/sacd';
 import { sacdDeclarations } from '@ad/src/fixtures/declaration/sacd';
+import declarationParameterXml from '@ad/src/fixtures/declaration/sacd-declaration-parameter.xml';
 import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 
 const describeWhenManual = process.env.TEST_MANUAL === 'true' ? describe : describe.skip;
@@ -41,6 +42,18 @@ describeWhenManual('SacdClient', () => {
     'should test a declaration submission',
     async () => {
       await client.declare('TODO', eventsSeries[0], eventsWrappers, sacdDeclarations[0]);
+    },
+    secondsToMilliseconds(30)
+  );
+});
+
+describe('prepareDeclarationParameter', () => {
+  it(
+    'should transform entities to the right formatted xml parameter',
+    async () => {
+      const xml = prepareDeclarationParameter('TODO', eventsSeries[0], eventsWrappers, sacdDeclarations[0]);
+
+      expect(xml).toBe(declarationParameterXml);
     },
     secondsToMilliseconds(30)
   );

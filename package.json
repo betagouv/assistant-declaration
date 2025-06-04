@@ -170,6 +170,7 @@
     "@hey-api/openapi-ts": "^0.63.0",
     "@hookform/devtools": "^4.3.0",
     "@octokit/rest": "^19.0.5",
+    "@prettier/plugin-xml": "^3.4.1",
     "@sentry/cli": "^2.21.2",
     "@storybook/addon-a11y": "^8.4.6",
     "@storybook/addon-actions": "^8.4.6",

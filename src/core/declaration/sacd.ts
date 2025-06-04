@@ -182,6 +182,10 @@ function formatString(value: string) {
   return value.slice(0, 128); // 128 chars max according to their documentation
 }
 
+function formatAmountNumber(value: number) {
+  return Math.round(value * 100) / 100; // Avoid having more than 2 decimals
+}
+
 function formatDate(date: Date) {
   return format(date, 'yyyy/MM/dd');
 }
@@ -252,9 +256,9 @@ export function prepareDeclarationParameter(
       rep_nb: 1, // Since each event has a separate entity
       rep_horaire: formatTime(wrapper.event.startAt),
       Billetterie: {
-        rep_mt_billets: getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
+        rep_mt_billets: formatAmountNumber(getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate)),
         rep_tx_tva_billets: 100 * eventSerie.taxRate, // Providing 5.5% as 5.5 instead of 0.055
-        rep_mt_tva_billets: getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate),
+        rep_mt_tva_billets: formatAmountNumber(getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate)),
         rep_nb_billets_pay: paidTickets,
         rep_nb_billets_exo: freeTickets,
       },
@@ -309,60 +313,64 @@ export function prepareDeclarationParameter(
       );
       const saleOfRightsTaxRate = saleOfRights?.taxRate ?? 0;
 
-      declarationParameterRepresentation.Exploitation.rep_mt_cession = saleOfRights
-        ? getExcludingTaxesAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate)
-        : 0;
+      declarationParameterRepresentation.Exploitation.rep_mt_cession = formatAmountNumber(
+        saleOfRights ? getExcludingTaxesAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate) : 0
+      );
       declarationParameterRepresentation.Exploitation.rep_tx_tva_cession = 100 * saleOfRightsTaxRate; // Providing 5.5% as 5.5 instead of 0.055
-      declarationParameterRepresentation.Exploitation.rep_mt_tva_cession = saleOfRights
-        ? getTaxAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate)
-        : 0;
+      declarationParameterRepresentation.Exploitation.rep_mt_tva_cession = formatAmountNumber(
+        saleOfRights ? getTaxAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate) : 0
+      );
 
       const introductionFees = declaration.accountingEntries.find(
         (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.INTRODUCTION_FEES
       );
       const introductionFeesTaxRate = introductionFees?.taxRate ?? 0;
 
-      declarationParameterRepresentation.Exploitation.rep_mt_frais = introductionFees
-        ? getExcludingTaxesAmountFromIncludingTaxesAmount(introductionFees.includingTaxesAmount, introductionFeesTaxRate)
-        : 0;
+      declarationParameterRepresentation.Exploitation.rep_mt_frais = formatAmountNumber(
+        introductionFees ? getExcludingTaxesAmountFromIncludingTaxesAmount(introductionFees.includingTaxesAmount, introductionFeesTaxRate) : 0
+      );
 
       const coproductionContribution = declaration.accountingEntries.find(
         (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.COPRODUCTION_CONTRIBUTION
       );
       const coproductionContributionTaxRate = coproductionContribution?.taxRate ?? 0;
 
-      declarationParameterRepresentation.Exploitation.rep_mt_apports_coprod = coproductionContribution
-        ? getExcludingTaxesAmountFromIncludingTaxesAmount(coproductionContribution.includingTaxesAmount, coproductionContributionTaxRate)
-        : 0;
+      declarationParameterRepresentation.Exploitation.rep_mt_apports_coprod = formatAmountNumber(
+        coproductionContribution
+          ? getExcludingTaxesAmountFromIncludingTaxesAmount(coproductionContribution.includingTaxesAmount, coproductionContributionTaxRate)
+          : 0
+      );
 
       const revenueGuarantee = declaration.accountingEntries.find(
         (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.REVENUE_GUARANTEE
       );
       const revenueGuaranteeTaxRate = revenueGuarantee?.taxRate ?? 0;
 
-      declarationParameterRepresentation.Exploitation.rep_mt_garantie_rec = revenueGuarantee
-        ? getExcludingTaxesAmountFromIncludingTaxesAmount(revenueGuarantee.includingTaxesAmount, revenueGuaranteeTaxRate)
-        : 0;
+      declarationParameterRepresentation.Exploitation.rep_mt_garantie_rec = formatAmountNumber(
+        revenueGuarantee ? getExcludingTaxesAmountFromIncludingTaxesAmount(revenueGuarantee.includingTaxesAmount, revenueGuaranteeTaxRate) : 0
+      );
 
       // // The budget is not something we are collecting from declarants
       // declarationParameterRepresentation.Exploitation.rep_mt_depenses = 'TODO';
 
-      const other = declaration.accountingEntries.find(
-        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.INTRODUCTION_FEES
-      );
+      const other = declaration.accountingEntries.find((accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.OTHER);
       const otherTaxRate = other?.taxRate ?? 0;
 
-      declarationParameterRepresentation.Exploitation.rep_mt_autres = other
-        ? getExcludingTaxesAmountFromIncludingTaxesAmount(other.includingTaxesAmount, otherTaxRate)
-        : 0;
+      declarationParameterRepresentation.Exploitation.rep_mt_autres = formatAmountNumber(
+        other ? getExcludingTaxesAmountFromIncludingTaxesAmount(other.includingTaxesAmount, otherTaxRate) : 0
+      );
     }
 
-    declarationParameter.Declaration.Representations.push(declarationParameterRepresentation);
+    declarationParameter.Declaration.Representations.Representation.push(declarationParameterRepresentation);
   }
 
-  const xml: string = create({
-    declarationParameter,
-  }).end({
+  const xml: string = create(
+    {
+      encoding: 'utf-8',
+      version: '1.0',
+    },
+    declarationParameter
+  ).end({
     prettyPrint: true,
   });
 
