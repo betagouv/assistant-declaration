@@ -6,11 +6,12 @@ import { create } from 'xmlbuilder2';
 import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { useServerTranslation } from '@ad/src/i18n';
 import { SacdAccountingCategorySchema, SacdDeclarationSchemaType, SacdProductionTypeSchema } from '@ad/src/models/entities/declaration/sacd';
-import { sacdDeclarationUnsuccessfulError } from '@ad/src/models/entities/errors';
+import { sacdDeclarationIncorrectDeclarantError, sacdDeclarationUnsuccessfulError } from '@ad/src/models/entities/errors';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import {
   JsonDeclarationParameterSchemaType,
   JsonDeclareResponseSchema,
+  JsonErrorResponseSchema,
   JsonHelloWorldResponseSchema,
   JsonLoginResponseSchema,
 } from '@ad/src/models/entities/sacd';
@@ -89,7 +90,7 @@ export class SacdClient {
       token: this.getAccessToken(),
     });
 
-    const response = await fetch(`${this.baseUrl}/ticketing/logout?${queryParams.toString}`, {});
+    const response = await fetch(`${this.baseUrl}/ticketing/logout?${queryParams.toString()}`, {});
 
     if (!response.ok) {
       const error = await response.text();
@@ -145,7 +146,7 @@ export class SacdClient {
     const bodyParams = new URLSearchParams(this.commonBodyParams);
     bodyParams.append('parameters[Declaration]', declarationParameter);
 
-    const response = await fetch(`${this.baseUrl}/ticketing/broker/ExploitFileTransmitETicketingDeclarationWS?${queryParams.toString}`, {
+    const response = await fetch(`${this.baseUrl}/ticketing/broker/ExploitFileTransmitETicketingDeclarationWS?${queryParams.toString()}`, {
       method: 'POST',
       headers: this.commonPostHeaders,
       body: bodyParams.toString(),
@@ -157,9 +158,24 @@ export class SacdClient {
       throw error;
     }
 
-    // The received response is XML
-    const responseXml = await response.text();
-    const responseJson = create(responseXml).end({ format: 'object' });
+    const responseText = await response.text();
+
+    // For some reasons they may return JSON error despite a success status code, so instead of
+    // assuming it's directly XML we simply check the content
+    if (responseText.trim().startsWith('{')) {
+      const responseJson = JSON.parse(responseText);
+      const errorObject = JsonErrorResponseSchema.parse(responseJson);
+
+      if (errorObject.Error.Code === 'ERR_WS_DEC_REF') {
+        throw sacdDeclarationIncorrectDeclarantError;
+      } else {
+        // By default consider the raw error
+        throw new Error(JSON.stringify(errorObject));
+      }
+    }
+
+    // The content should be XML otherwise
+    const responseJson = create(responseText).end({ format: 'object' });
     const responseObject = JsonDeclareResponseSchema.parse(responseJson);
 
     // SACD may consider the declaration as partially successful so we have to check the status of each event
