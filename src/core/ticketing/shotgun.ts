@@ -196,7 +196,9 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
     }
 
     // In case there is a switch between the pagination of future events and past ones
-    assert(wantedEvents.length === uniqueEventsIdsToSynchronize.length);
+    // In staging we had the case where tickets were pointing to non-existing events...
+    // That's maybe due to deleted events even if it's weird, so we cannot assume a count match
+    // assert(wantedEvents.length === uniqueEventsIdsToSynchronize.length);
 
     const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
 
@@ -280,6 +282,18 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
       }
 
       for (const ticket of eventTickets) {
+        // Now since internally we manage a unique tax rate per event serie, we make sure all prices are using the same
+        // [IMPORTANT] We gather this info before filtering by status, because the rare case of an event with no valid ticket (likely a future event)
+        // we would have the tax rate as `null`, which we consider as an error
+        if (taxRate === null) {
+          taxRate = ticket.vat_rate;
+        } else if (taxRate !== ticket.vat_rate) {
+          // throw new Error(`an event serie should have the same tax rate for all dates and prices`)
+
+          // [WORKAROUND] Until we decide the right way to do, just keep a tax rate none null
+          taxRate = Math.max(taxRate, ticket.vat_rate);
+        }
+
         // Note: `resold` means another ticket has been issued to replace this one, so skipping it too
         if (ticket.ticket_status !== 'valid') {
           continue;
@@ -311,16 +325,6 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
           );
         } else {
           eventSales.total += 1;
-        }
-
-        // Now since internally we manage a unique tax rate per event serie, we make sure all prices are using the same
-        if (taxRate === null) {
-          taxRate = ticket.vat_rate;
-        } else if (taxRate !== ticket.vat_rate) {
-          // throw new Error(`an event serie should have the same tax rate for all dates and prices`)
-
-          // [WORKAROUND] Until we decide the right way to do, just keep a tax rate none null
-          taxRate = Math.max(taxRate, ticket.vat_rate);
         }
       }
 
