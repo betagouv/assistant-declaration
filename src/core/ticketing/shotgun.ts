@@ -229,9 +229,12 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
         // Note: `deal.price` already excludes `deal.organizer_fees` and `deal.user_fees` (confirmed by their support)
         const price = deal.price;
 
+        // It seems the subcategory is often used for `Cat. 1`...
+        const ticketCategoryName = deal.subcategory ? `${deal.name} - ${deal.subcategory.name}` : deal.name;
+
         const ticketCategory = LiteTicketCategorySchema.parse({
           internalTicketingSystemId: deal.product_id.toString(),
-          name: deal.name,
+          name: ticketCategoryName,
           description: deal.description,
           price: price,
         });
