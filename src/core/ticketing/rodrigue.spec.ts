@@ -9,7 +9,12 @@ const describeWhenManual = process.env.TEST_MANUAL === 'true' ? describe : descr
 const itWhenManual = process.env.TEST_MANUAL === 'true' ? it : it.skip;
 
 describeWhenManual('RodrigueTicketingSystemClient', () => {
-  const client = new RodrigueTicketingSystemClient(process.env.TEST_SEETICKETS_ACCESS_KEY || '', process.env.TEST_SEETICKETS_SECRET_KEY || '');
+  const client = new RodrigueTicketingSystemClient(
+    process.env.TEST_RODRIGUE_PARTNER_NAME || '',
+    process.env.TEST_RODRIGUE_PARTNER_SECRET_KEY || '',
+    process.env.TEST_SEETICKETS_ACCESS_KEY || '',
+    process.env.TEST_SEETICKETS_SECRET_KEY || ''
+  );
 
   describe('getEventsSeries()', () => {
     it(
