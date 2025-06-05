@@ -9,6 +9,7 @@ export const ticketingSystemRequiresApiAccessKey: Record<TicketingSystemNameSche
   MAPADO: false,
   SOTICKET: true,
   SUPERSONIKS: true,
+  RODRIGUE: true,
 };
 
 export interface TicketingSystemClient {

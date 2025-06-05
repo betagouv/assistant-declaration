@@ -160,6 +160,7 @@ enum TicketingSystemName {
   MAPADO
   SOTICKET
   SUPERSONIKS
+  RODRIGUE
 }
 
 model TicketingSystem {

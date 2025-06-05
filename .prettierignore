@@ -10,6 +10,7 @@
 /public/mockServiceWorker.js
 /src/client/mapado/
 /src/client/supersoniks/
+/src/client/rodrigue/
 /src/prisma/migrations/migration_lock.toml
 /src/server/trpc-next-layout/**/*.ts
 /src/server/trpc-next-layout/**/*.tsx
