@@ -650,7 +650,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
               >
                 <Grid container spacing={2} sx={{ alignItems: 'center', pb: 2 }}>
                   {isDirty || !sacemDeclarationWrapper.declaration ? (
-                    <Grid item xs>
+                    <Grid item xs={12} sm={8} md={6} sx={{ mx: 'auto' }}>
                       <Button
                         type="submit"
                         loading={fillSacemDeclaration.isLoading}
@@ -665,7 +665,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                     </Grid>
                   ) : (
                     <>
-                      <Grid item xs>
+                      <Grid item xs={12} sm={8} md={6} sx={{ mx: 'auto' }}>
                         <Button
                           component={NextLink}
                           href={linkRegistry.get('declarationPdf', {
@@ -688,31 +688,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                             },
                           }}
                         >
-                          Télécharger la déclaration
-                        </Button>
-                      </Grid>
-                      <Grid item xs>
-                        <Button
-                          component={NextLink}
-                          href={linkRegistry.get('declarationPdf', {
-                            eventSerieId: eventSerie.id,
-                            type: DeclarationTypeSchema.Values.SACEM,
-                          })}
-                          target="_blank"
-                          onClick={() => {
-                            push(['trackEvent', 'declaration', 'preview', 'type', DeclarationTypeSchema.Values.SACEM]);
-                          }}
-                          size="large"
-                          variant="contained"
-                          fullWidth
-                          startIcon={<Visibility />}
-                          sx={{
-                            '&::after': {
-                              display: 'none !important',
-                            },
-                          }}
-                        >
-                          Visualiser la déclaration
+                          Générer la déclaration
                         </Button>
                       </Grid>
                     </>
