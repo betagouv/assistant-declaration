@@ -3,17 +3,24 @@ import { fromUnixTime, isAfter, isBefore } from 'date-fns';
 
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
 import {
+  LiteEventSalesSchema,
   LiteEventSalesSchemaType,
   LiteEventSchema,
   LiteEventSchemaType,
+  LiteEventSerieSchema,
   LiteEventSerieWrapperSchemaType,
+  LiteTicketCategorySchema,
   LiteTicketCategorySchemaType,
 } from '@ad/src/models/entities/event';
 import {
+  JsonGetEventResponseSchema,
+  JsonListCheckingStatsResponseSchema,
   JsonListOrdersResponseSchema,
   JsonListOrganizationsResponseSchema,
+  JsonListTypeTicketsResponseSchema,
   JsonLoginResponseSchema,
   JsonOrderSchemaType,
+  JsonTypeTicketSchemaType,
 } from '@ad/src/models/entities/yurplan';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
@@ -78,7 +85,7 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
     });
 
     if (!organizationsResponse.ok) {
-      const error = await organizationsResponse.json();
+      const error = await organizationsResponse.text();
 
       throw error;
     }
@@ -107,7 +114,7 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
       });
 
       if (!eventsResponse.ok) {
-        const error = await eventsResponse.json();
+        const error = await eventsResponse.text();
 
         throw error;
       }
@@ -146,7 +153,7 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
       });
 
       if (!recentlyUpdatedOrdersResponse.ok) {
-        const error = await recentlyUpdatedOrdersResponse.json();
+        const error = await recentlyUpdatedOrdersResponse.text();
 
         throw error;
       }
@@ -195,26 +202,150 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
 
       // It's important to note Yurplan is having only "1 event serie = 1 event" (there is no multiple representations for the same serie)
       // We could have tried to merged them based on naming but it's kind of tricky before knowing well their customer usage of it
+      const eventResponse = await fetch(this.formatUrl(`/events/${eventId}`), {
+        method: 'GET',
+        headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
+      });
 
-      // TODO:
-      // TODO:
-      // TODO: get event
-      // TODO: get event typetickets (categories)
-      // TODO: get event /checking/stats
-      // TODO: done...
-      // TODO:
-      // TODO: NOTE for checkingStats it has a delay... not seeing newly created typetickets directly
-      // TODO: so maybe it's risky to rely on this page if any delay? not sure... we don't need realtime
+      if (!eventResponse.ok) {
+        const error = await eventResponse.text();
+
+        throw error;
+      }
+
+      const eventDataJson = await eventResponse.json();
+      const eventData = JsonGetEventResponseSchema.parse(eventDataJson);
+
+      const startDate = fromUnixTime(eventData.results.begin);
+      const endDate = fromUnixTime(eventData.results.end);
 
       schemaEvents.push(
         LiteEventSchema.parse({
-          internalTicketingSystemId: event.id.toString(),
-          startAt: event.startTime,
-          endAt: event.endTime,
+          internalTicketingSystemId: eventData.results.id.toString(),
+          startAt: startDate,
+          endAt: endDate,
         })
       );
 
+      // Retrieve ticket categories
+      const typeTickets: JsonTypeTicketSchemaType[] = [];
+
+      let typeTicketsCurrentPage: number = 1;
+
+      // Note: there is still a risk of pagination shift but with a low probability for ticket categories
+      while (true) {
+        const typeTicketsResponse = await fetch(this.formatUrl(`/events/${eventId}/typetickets`), {
+          method: 'GET',
+          headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
+          body: JSON.stringify({
+            range: `${(typeTicketsCurrentPage - 1) * this.maximumItemsPerPage}-${typeTicketsCurrentPage * this.maximumItemsPerPage}`, // 0-30, 30-60... (one side of the range is excluding)
+            orderBy: 'updated_at', // It will sort DESC
+          }),
+        });
+
+        if (!typeTicketsResponse.ok) {
+          const error = await typeTicketsResponse.text();
+
+          throw error;
+        }
+
+        const typeTicketsDataJson = await typeTicketsResponse.json();
+        const typeTicketsData = JsonListTypeTicketsResponseSchema.parse(typeTicketsDataJson);
+
+        // Make sure our local maximum pagination logic is correct
+        assert(this.maximumItemsPerPage === typeTicketsData.paging.nb_per_page);
+
+        typeTickets.push(...typeTicketsData.results);
+
+        // If we reached all recent orders until the `fromDate`, we can stop pagination
+        if (!typeTicketsData.paging.cursors.next) {
+          break;
+        }
+
+        typeTicketsCurrentPage++;
+      }
+
       let taxRate: number | null = null;
+
+      for (const typeTicket of typeTickets) {
+        let ticketCategoryName = typeTicket.name;
+
+        if (typeTicket.category) {
+          ticketCategoryName = `${ticketCategoryName} - ${typeTicket.category.label}`;
+        }
+
+        const ticketCategory = LiteTicketCategorySchema.parse({
+          internalTicketingSystemId: typeTicket.id.toString(),
+          name: ticketCategoryName,
+          description: null,
+          price: typeTicket.amount,
+        });
+
+        schemaTicketCategories.set(ticketCategory.internalTicketingSystemId, ticketCategory);
+
+        // Now since internally we manage a unique tax rate per event serie, we make sure all prices are using the same
+        if (taxRate === null) {
+          taxRate = typeTicket.vat_rate;
+        } else if (taxRate !== typeTicket.vat_rate) {
+          // throw new Error(`an event serie should have the same tax rate for all dates and prices`)
+
+          // [WORKAROUND] Until we decide the right way to do, just keep a tax rate none null
+          taxRate = Math.max(taxRate, typeTicket.vat_rate);
+        }
+      }
+
+      // Here we get the sum of sold/given tickets for each ticket category
+      // Notes:
+      // - the endpoint `/events/$ID/checking/stats` has a delay, when testing validating a ticket we are not seeing it directly
+      // through this endpoint. Maybe it's risky but we do not need realtime, but it would be great to know the delay of refresh
+      // - the endpoint `/events/$ID/ticketing/stats` is similar
+      // - the other solution would have been to use the `/events/$ID/tickets` endpoint but since the pagination limit is not that high
+      // it would be more ressources intensive for their servers, so as of now taking the risk of "cold data"
+      const checkingStatsResponse = await fetch(this.formatUrl(`/events/${eventId}/checking/stats`), {
+        method: 'GET',
+        headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
+      });
+
+      if (!checkingStatsResponse.ok) {
+        const error = await checkingStatsResponse.text();
+
+        throw error;
+      }
+
+      const checkingStatsDataJson = await checkingStatsResponse.json();
+      const checkingStatsData = JsonListCheckingStatsResponseSchema.parse(checkingStatsDataJson);
+
+      for (const ticketTypeStats of checkingStatsData.results) {
+        const ticketCategory = schemaTicketCategories.get(ticketTypeStats.id.toString());
+
+        assert(ticketCategory);
+
+        const uniqueId = `${eventId}_${ticketCategory.internalTicketingSystemId}`;
+
+        schemaEventSales.set(
+          uniqueId,
+          LiteEventSalesSchema.parse({
+            internalEventTicketingSystemId: eventId.toString(),
+            internalTicketCategoryTicketingSystemId: ticketCategory.internalTicketingSystemId,
+            total: ticketTypeStats.total_ticket,
+          })
+        );
+      }
+
+      assert(taxRate !== null);
+
+      eventsSeriesWrappers.push({
+        serie: LiteEventSerieSchema.parse({
+          internalTicketingSystemId: eventId.toString(),
+          name: eventData.results.name,
+          startAt: startDate,
+          endAt: endDate,
+          taxRate: taxRate,
+        }),
+        events: schemaEvents,
+        ticketCategories: Array.from(schemaTicketCategories.values()),
+        sales: Array.from(schemaEventSales.values()),
+      });
     });
 
     return eventsSeriesWrappers;

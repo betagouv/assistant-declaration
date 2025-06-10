@@ -263,6 +263,18 @@ export const JsonEventSchema = applyTypedParsers(
 );
 export type JsonEventSchemaType = z.infer<typeof JsonEventSchema>;
 
+export const JsonCheckingStatsSchema = applyTypedParsers(
+  z
+    .object({
+      id: JsonTypeTicketSchema.shape.id,
+      total_ticket: z.number().int().nonnegative(),
+      total_ticket_checked: z.number().int().nonnegative(),
+      name: JsonTypeTicketSchema.shape.name,
+    })
+    .strip()
+);
+export type JsonCheckingStatsSchemaType = z.infer<typeof JsonCheckingStatsSchema>;
+
 export const JsonTicketingStatsSchema = applyTypedParsers(
   z
     .object({
@@ -385,6 +397,16 @@ export const JsonListTypeTicketsResponseSchema = JsonCollectionResponseSchema.ex
   results: z.array(JsonTypeTicketSchema),
 }).strip();
 export type JsonListTypeTicketsResponseSchemaType = z.infer<typeof JsonListTypeTicketsResponseSchema>;
+
+export const JsonListCheckingStatsResponseSchema = JsonCollectionResponseSchema.extend({
+  results: z.array(JsonCheckingStatsSchema),
+}).strip();
+export type JsonListCheckingStatsResponseSchemaType = z.infer<typeof JsonListCheckingStatsResponseSchema>;
+
+export const JsonListTicketingStatsResponseSchema = JsonCollectionResponseSchema.extend({
+  results: z.array(JsonTicketingStatsSchema),
+}).strip();
+export type JsonListTicketingStatsResponseSchemaType = z.infer<typeof JsonListTicketingStatsResponseSchema>;
 
 export const JsonGetEventResponseSchema = JsonCollectionResponseSchema.extend({
   results: JsonEventSchema,
