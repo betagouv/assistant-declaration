@@ -338,7 +338,7 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
           LiteEventSalesSchema.parse({
             internalEventTicketingSystemId: eventId.toString(),
             internalTicketCategoryTicketingSystemId: ticketCategory.internalTicketingSystemId,
-            total: ticketTypeStats.total_ticket,
+            total: ticketTypeStats.total_ticket, // After tests the `total_ticket` will decrease if some tickets are canceled
           })
         );
       }
