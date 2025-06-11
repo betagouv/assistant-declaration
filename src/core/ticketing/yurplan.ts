@@ -25,7 +25,7 @@ import {
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export class YurplanTicketingSystemClient implements TicketingSystemClient {
-  public readonly baseUrl = 'https://api.yurplan.com/v1/token';
+  public readonly baseUrl = 'https://api.yurplan.com/v1';
   public readonly maximumItemsPerPage = 30;
   protected readonly defaultHeaders = new Headers({
     'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
     formData.append('password', this.secretKey);
     formData.append('scope', 'pro');
 
-    const loginResponse = await fetch(this.formatUrl(`/token`, {}), { method: 'POST', body: formData });
+    const loginResponse = await fetch(this.formatUrl(`/token`), { method: 'POST', body: formData });
 
     if (!loginResponse.ok) {
       const error = await loginResponse.text();
@@ -76,13 +76,18 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
     const loginData = JsonLoginResponseSchema.parse(loginDataJson);
     const accessToken = loginData.results.access_token;
 
-    const organizationsResponse = await fetch(this.formatUrl(`/me/orgas`), {
-      method: 'GET',
-      headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
-      body: JSON.stringify({
+    const organizationsResponse = await fetch(
+      // We wanted to use `/me/orgas` but it returns an empty list so defaulting to the other endpoint
+      // hoping it has the expected scope
+      this.formatUrl(`/orgas`, {
         range: `0-2`, // Just looking if more than 1 organization
+        orderBy: 'updated_at', // It will sort DESC
       }),
-    });
+      {
+        method: 'GET',
+        headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
+      }
+    );
 
     if (!organizationsResponse.ok) {
       const error = await organizationsResponse.text();
@@ -105,13 +110,15 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
       // We fetch the minimum of information since it's just to test the connection
       const { accessToken, organizationId } = await this.login();
 
-      const eventsResponse = await fetch(this.formatUrl(`/orgas/${organizationId}/events`), {
-        method: 'GET',
-        headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
-        body: JSON.stringify({
+      const eventsResponse = await fetch(
+        this.formatUrl(`/orgas/${organizationId}/events`, {
           range: `0-${this.maximumItemsPerPage}`,
         }),
-      });
+        {
+          method: 'GET',
+          headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
+        }
+      );
 
       if (!eventsResponse.ok) {
         const error = await eventsResponse.text();
@@ -141,16 +148,18 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
     // We could also ask them to have a filter for events for "has modified ticket after date"
     // Note: there is still a risk of pagination shift...
     while (true) {
-      const recentlyUpdatedOrdersResponse = await fetch(this.formatUrl(`/orgas/${organizationId}/recentlyUpdatedOrders`), {
-        method: 'GET',
-        headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
-        body: JSON.stringify({
+      const recentlyUpdatedOrdersResponse = await fetch(
+        this.formatUrl(`/orgas/${organizationId}/recentlyUpdatedOrders`, {
           range: `${(recentlyUpdatedOrdersCurrentPage - 1) * this.maximumItemsPerPage}-${
             recentlyUpdatedOrdersCurrentPage * this.maximumItemsPerPage
           }`, // 0-30, 30-60... (one side of the range is excluding)
           orderBy: 'updated_at', // It will sort DESC (so we can stop when we reach the `fromDate`)
         }),
-      });
+        {
+          method: 'GET',
+          headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
+        }
+      );
 
       if (!recentlyUpdatedOrdersResponse.ok) {
         const error = await recentlyUpdatedOrdersResponse.text();
@@ -234,14 +243,16 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
 
       // Note: there is still a risk of pagination shift but with a low probability for ticket categories
       while (true) {
-        const typeTicketsResponse = await fetch(this.formatUrl(`/events/${eventId}/typetickets`), {
-          method: 'GET',
-          headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
-          body: JSON.stringify({
+        const typeTicketsResponse = await fetch(
+          this.formatUrl(`/events/${eventId}/typetickets`, {
             range: `${(typeTicketsCurrentPage - 1) * this.maximumItemsPerPage}-${typeTicketsCurrentPage * this.maximumItemsPerPage}`, // 0-30, 30-60... (one side of the range is excluding)
             orderBy: 'updated_at', // It will sort DESC
           }),
-        });
+          {
+            method: 'GET',
+            headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
+          }
+        );
 
         if (!typeTicketsResponse.ok) {
           const error = await typeTicketsResponse.text();
