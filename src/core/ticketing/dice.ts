@@ -30,6 +30,12 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
   public async getEventsSeries(fromDate: Date, toDate?: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
     const events = await this.graphqlSdk.GetEvents();
 
+    // getOrders + getReturns (to see events) + getAdjustments (to see events)
+    // or maybe... "ticketTransfer" but not sure if that's what we are looking for! (transfert de tickets ? ou "émission de tickets" ils veulent dire ?)
+    // et ticketTransfer gère p-e pas quand le ticket est "retourné"...
+
+    // getEvents(ids) with tickettypes inside...
+
     // TODO:
     return [];
   }

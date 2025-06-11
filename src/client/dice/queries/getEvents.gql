@@ -1,11 +1,8 @@
-query GetEvents($first: Int = 50, $after: String) {
+#import "./fragments/pageInfoFragment.gql"
+
+query GetEvents($first: Int = 50, $after: String, $ids: [ID!]!) {
   viewer {
-    events(first: $first, after: $after) {
-      totalCount
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
+    events(first: $first, after: $after, where: { id: { in: $ids } }) {
       edges {
         node {
           id
@@ -14,8 +11,13 @@ query GetEvents($first: Int = 50, $after: String) {
           startDatetime
           endDatetime
           description
+          currency
         }
       }
+      pageInfo {
+        ...PageInfoFields
+      }
+      totalCount
     }
   }
 }
