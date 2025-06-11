@@ -128,10 +128,12 @@ export const JsonTypeTicketSchema = applyTypedParsers(
         id: z.number().int().nonnegative(),
         event_id: z.number().int().nonnegative(),
       }),
-      category: z.object({
-        id: z.number().int().nonnegative(),
-        label: z.string().min(1),
-      }),
+      category: z
+        .object({
+          id: z.number().int().nonnegative(),
+          label: z.string().min(1),
+        })
+        .nullable(),
       name: z.string().min(1),
       amount: z.number().nonnegative(),
       is_free: z.boolean(),
@@ -369,6 +371,11 @@ export const JsonLoginResponseSchema = JsonResponseBaseSchema.extend({
 }).strip();
 export type JsonLoginResponseSchemaType = z.infer<typeof JsonLoginResponseSchema>;
 
+export const JsonGetEventResponseSchema = JsonResponseBaseSchema.extend({
+  results: JsonEventSchema,
+}).strip();
+export type JsonGetEventResponseSchemaType = z.infer<typeof JsonGetEventResponseSchema>;
+
 export const JsonCollectionResponseSchema = JsonResponseBaseSchema.extend({
   count: z.number().int().nonnegative(),
   paging: z.object({
@@ -400,15 +407,12 @@ export type JsonListTypeTicketsResponseSchemaType = z.infer<typeof JsonListTypeT
 
 export const JsonListCheckingStatsResponseSchema = JsonCollectionResponseSchema.extend({
   results: z.array(JsonCheckingStatsSchema),
+  paging: z.undefined(), // they do not manage pagination for this endpoint returning a list
 }).strip();
 export type JsonListCheckingStatsResponseSchemaType = z.infer<typeof JsonListCheckingStatsResponseSchema>;
 
 export const JsonListTicketingStatsResponseSchema = JsonCollectionResponseSchema.extend({
   results: z.array(JsonTicketingStatsSchema),
+  paging: z.undefined(), // they do not manage pagination for this endpoint returning a list
 }).strip();
 export type JsonListTicketingStatsResponseSchemaType = z.infer<typeof JsonListTicketingStatsResponseSchema>;
-
-export const JsonGetEventResponseSchema = JsonCollectionResponseSchema.extend({
-  results: JsonEventSchema,
-}).strip();
-export type JsonGetEventResponseSchemaType = z.infer<typeof JsonGetEventResponseSchema>;

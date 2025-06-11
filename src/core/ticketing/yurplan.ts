@@ -148,8 +148,8 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
     // We could also ask them to have a filter for events for "has modified ticket after date"
     // Note: there is still a risk of pagination shift...
     while (true) {
-      const recentlyUpdatedOrdersResponse = await fetch(
-        this.formatUrl(`/orgas/${organizationId}/recentlyUpdatedOrders`, {
+      const ordersResponse = await fetch(
+        this.formatUrl(`/orgas/${organizationId}/orders`, {
           range: `${(recentlyUpdatedOrdersCurrentPage - 1) * this.maximumItemsPerPage}-${
             recentlyUpdatedOrdersCurrentPage * this.maximumItemsPerPage
           }`, // 0-30, 30-60... (one side of the range is excluding)
@@ -161,20 +161,20 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
         }
       );
 
-      if (!recentlyUpdatedOrdersResponse.ok) {
-        const error = await recentlyUpdatedOrdersResponse.text();
+      if (!ordersResponse.ok) {
+        const error = await ordersResponse.text();
 
         throw error;
       }
 
-      const recentlyUpdatedOrdersDataJson = await recentlyUpdatedOrdersResponse.json();
-      const recentlyUpdatedOrdersData = JsonListOrdersResponseSchema.parse(recentlyUpdatedOrdersDataJson);
+      const ordersDataJson = await ordersResponse.json();
+      const ordersData = JsonListOrdersResponseSchema.parse(ordersDataJson);
 
       // Make sure our local maximum pagination logic is correct
-      assert(this.maximumItemsPerPage === recentlyUpdatedOrdersData.paging.nb_per_page);
+      assert(this.maximumItemsPerPage === ordersData.paging.nb_per_page);
 
       let pageOrdersInAfterFromDate = 0;
-      recentlyUpdatedOrdersData.results.forEach((order) => {
+      ordersData.results.forEach((order) => {
         if (isAfter(fromUnixTime(order.updated_at), fromDate)) {
           recentlyUpdatedOrders.push(order);
           pageOrdersInAfterFromDate++;
@@ -182,9 +182,9 @@ export class YurplanTicketingSystemClient implements TicketingSystemClient {
       });
 
       // If we reached all recent orders until the `fromDate`, we can stop pagination
-      if (recentlyUpdatedOrdersData.results.length !== pageOrdersInAfterFromDate) {
+      if (ordersData.results.length !== pageOrdersInAfterFromDate) {
         break;
-      } else if (!recentlyUpdatedOrdersData.paging.cursors.next) {
+      } else if (!ordersData.paging.cursors.next) {
         break;
       }
 
