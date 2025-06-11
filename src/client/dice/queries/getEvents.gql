@@ -1,0 +1,21 @@
+query GetEvents($first: Int = 50, $after: String) {
+  viewer {
+    events(first: $first, after: $after) {
+      totalCount
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      edges {
+        node {
+          id
+          name
+          state
+          startDatetime
+          endDatetime
+          description
+        }
+      }
+    }
+  }
+}
