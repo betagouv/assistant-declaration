@@ -253,7 +253,7 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
           for (const categoryTicket of categoryTickets) {
             assert(categoryTicket?.node?.fullPrice && categoryTicket.node.fullPrice !== null);
 
-            if (categoryTicket.node.fullPrice !== ticketType.price) {
+            if (categoryTicket.node.fullPrice !== ticketType.faceValue) {
               throw new Error(`ticket ${categoryTicket.node.id} should have the same price than the ticket type ${ticketType.id}`);
             }
 
