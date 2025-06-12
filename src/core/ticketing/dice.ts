@@ -89,8 +89,8 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
       const recentOrders = await this.graphqlSdk.GetOrders({
         first: this.itemsPerPageToAvoidPagination,
         after: null,
-        fromDate: fromDate,
-        toDate: toDate,
+        fromDate: fromDate.toISOString(),
+        toDate: toDate ? toDate.toISOString() : null,
       });
 
       assert(recentOrders.viewer?.orders?.edges);
@@ -99,8 +99,8 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
       const recentReturns = await this.graphqlSdk.GetReturns({
         first: this.itemsPerPageToAvoidPagination,
         after: null,
-        fromDate: fromDate,
-        toDate: toDate,
+        fromDate: fromDate.toISOString(),
+        toDate: toDate ? toDate.toISOString() : null,
       });
 
       assert(recentReturns.viewer?.returns?.edges);
@@ -109,8 +109,8 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
       const recentTicketTransfers = await this.graphqlSdk.GetTicketTransfers({
         first: this.itemsPerPageToAvoidPagination,
         after: null,
-        fromDate: fromDate,
-        toDate: toDate,
+        fromDate: fromDate.toISOString(),
+        toDate: toDate ? toDate.toISOString() : null,
       });
 
       assert(recentTicketTransfers.viewer?.ticketTransfers?.edges);
@@ -158,8 +158,13 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
       // Note: for now we do not parallelize to not flood the ticketing system
       await eachOfLimit(events.viewer.events.edges, 1, async (event) => {
         assert(event?.node);
-        assert(event?.node.products);
-        assert(event?.node.name);
+        assert(event.node.products);
+        assert(event.node.name);
+        assert(event.node.startDatetime);
+        assert(event.node.endDatetime);
+
+        const startDate = new Date(event.node.startDatetime);
+        const endDate = new Date(event.node.endDatetime);
 
         const schemaEvents: LiteEventSchemaType[] = [];
         const schemaTicketCategories: Map<LiteTicketCategorySchemaType['internalTicketingSystemId'], LiteTicketCategorySchemaType> = new Map();
@@ -173,8 +178,8 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
         schemaEvents.push(
           LiteEventSchema.parse({
             internalTicketingSystemId: event.node.id.toString(),
-            startAt: event.node.startDatetime,
-            endAt: event.node.endDatetime,
+            startAt: startDate,
+            endAt: endDate,
           })
         );
 
@@ -233,8 +238,8 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
           serie: LiteEventSerieSchema.parse({
             internalTicketingSystemId: event.node.id.toString(),
             name: event.node.name,
-            startAt: event.node.startDatetime,
-            endAt: event.node.endDatetime,
+            startAt: startDate,
+            endAt: endDate,
             taxRate: taxRate,
           }),
           events: schemaEvents,

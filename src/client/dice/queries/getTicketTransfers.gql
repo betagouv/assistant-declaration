@@ -2,7 +2,7 @@
 
 query GetTicketTransfers($first: Int = 50, $after: String, $fromDate: Datetime!, $toDate: Datetime) {
   viewer {
-    ticketTransfers(first: $first, after: $after, where: { transferredAt: { gte: $fromDate, lte: $toDate, null: false } }) {
+    ticketTransfers(first: $first, after: $after, where: { transferredAt: { gte: $fromDate, lte: $toDate } }) {
       edges {
         node {
           id

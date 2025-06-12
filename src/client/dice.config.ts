@@ -14,7 +14,11 @@ generate(
       'src/client/dice/generated/graphql.ts': {
         plugins: ['typescript', 'typescript-operations', 'typescript-graphql-request'],
         config: {
+          strictScalars: true,
           avoidOptionals: true,
+          scalars: {
+            Datetime: 'string',
+          },
         },
       },
     },

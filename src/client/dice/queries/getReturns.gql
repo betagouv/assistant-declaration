@@ -2,7 +2,7 @@
 
 query GetReturns($first: Int = 50, $after: String, $fromDate: Datetime!, $toDate: Datetime) {
   viewer {
-    returns(first: $first, after: $after, where: { returnedAt: { gte: $fromDate, lte: $toDate, null: false } }) {
+    returns(first: $first, after: $after, where: { returnedAt: { gte: $fromDate, lte: $toDate } }) {
       edges {
         node {
           id

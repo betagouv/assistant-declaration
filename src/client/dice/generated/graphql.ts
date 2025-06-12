@@ -15,7 +15,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  Datetime: { input: any; output: any; }
+  Datetime: { input: string; output: string; }
 };
 
 export type Address = {
@@ -1043,7 +1043,7 @@ export type GetEventsQueryVariables = Exact<{
 }>;
 
 
-export type GetEventsQuery = { __typename?: 'RootQueryType', viewer: { __typename?: 'Viewer', events: { __typename?: 'EventConnection', totalCount: number | null, edges: Array<{ __typename?: 'EventEdge', node: { __typename?: 'Event', id: string, name: string | null, state: EventState | null, startDatetime: any | null, endDatetime: any | null, description: string | null, currency: EventCostCurrency | null, products: Array<{ __typename?: 'Product', ticketTypes: Array<{ __typename?: 'TicketType', id: string | null, name: string | null, description: string | null, totalTicketAllocationQty: number | null, archived: boolean | null, price: number | null } | null> | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string | null, hasNextPage: boolean } } | null } | null };
+export type GetEventsQuery = { __typename?: 'RootQueryType', viewer: { __typename?: 'Viewer', events: { __typename?: 'EventConnection', totalCount: number | null, edges: Array<{ __typename?: 'EventEdge', node: { __typename?: 'Event', id: string, name: string | null, state: EventState | null, startDatetime: string | null, endDatetime: string | null, description: string | null, currency: EventCostCurrency | null, products: Array<{ __typename?: 'Product', ticketTypes: Array<{ __typename?: 'TicketType', id: string | null, name: string | null, description: string | null, totalTicketAllocationQty: number | null, archived: boolean | null, price: number | null } | null> | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string | null, hasNextPage: boolean } } | null } | null };
 
 export type GetOrdersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1053,7 +1053,7 @@ export type GetOrdersQueryVariables = Exact<{
 }>;
 
 
-export type GetOrdersQuery = { __typename?: 'RootQueryType', viewer: { __typename?: 'Viewer', orders: { __typename?: 'OrderConnection', totalCount: number | null, edges: Array<{ __typename?: 'OrderEdge', node: { __typename?: 'Order', id: string, purchasedAt: any | null, event: { __typename?: 'Event', id: string } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string | null, hasNextPage: boolean } } | null } | null };
+export type GetOrdersQuery = { __typename?: 'RootQueryType', viewer: { __typename?: 'Viewer', orders: { __typename?: 'OrderConnection', totalCount: number | null, edges: Array<{ __typename?: 'OrderEdge', node: { __typename?: 'Order', id: string, purchasedAt: string | null, event: { __typename?: 'Event', id: string } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string | null, hasNextPage: boolean } } | null } | null };
 
 export type GetReturnsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1063,7 +1063,7 @@ export type GetReturnsQueryVariables = Exact<{
 }>;
 
 
-export type GetReturnsQuery = { __typename?: 'RootQueryType', viewer: { __typename?: 'Viewer', returns: { __typename?: 'ReturnConnection', totalCount: number | null, edges: Array<{ __typename?: 'ReturnEdge', node: { __typename?: 'Return', id: string, returnedAt: any | null, order: { __typename?: 'Order', event: { __typename?: 'Event', id: string } | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string | null, hasNextPage: boolean } } | null } | null };
+export type GetReturnsQuery = { __typename?: 'RootQueryType', viewer: { __typename?: 'Viewer', returns: { __typename?: 'ReturnConnection', totalCount: number | null, edges: Array<{ __typename?: 'ReturnEdge', node: { __typename?: 'Return', id: string, returnedAt: string | null, order: { __typename?: 'Order', event: { __typename?: 'Event', id: string } | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string | null, hasNextPage: boolean } } | null } | null };
 
 export type GetTicketTransfersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1073,7 +1073,7 @@ export type GetTicketTransfersQueryVariables = Exact<{
 }>;
 
 
-export type GetTicketTransfersQuery = { __typename?: 'RootQueryType', viewer: { __typename?: 'Viewer', ticketTransfers: { __typename?: 'TicketTransferConnection', totalCount: number | null, edges: Array<{ __typename?: 'TicketTransferEdge', node: { __typename?: 'TicketTransfer', id: string, transferredAt: any | null, orders: Array<{ __typename?: 'Order', event: { __typename?: 'Event', id: string } | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string | null, hasNextPage: boolean } } | null } | null };
+export type GetTicketTransfersQuery = { __typename?: 'RootQueryType', viewer: { __typename?: 'Viewer', ticketTransfers: { __typename?: 'TicketTransferConnection', totalCount: number | null, edges: Array<{ __typename?: 'TicketTransferEdge', node: { __typename?: 'TicketTransfer', id: string, transferredAt: string | null, orders: Array<{ __typename?: 'Order', event: { __typename?: 'Event', id: string } | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string | null, hasNextPage: boolean } } | null } | null };
 
 export type GetTicketsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1129,7 +1129,7 @@ export const GetOrdersDocument = gql`
     orders(
       first: $first
       after: $after
-      where: {purchasedAt: {gte: $fromDate, lte: $toDate, null: false}}
+      where: {purchasedAt: {gte: $fromDate, lte: $toDate}}
     ) {
       edges {
         node {
@@ -1154,7 +1154,7 @@ export const GetReturnsDocument = gql`
     returns(
       first: $first
       after: $after
-      where: {returnedAt: {gte: $fromDate, lte: $toDate, null: false}}
+      where: {returnedAt: {gte: $fromDate, lte: $toDate}}
     ) {
       edges {
         node {
@@ -1181,7 +1181,7 @@ export const GetTicketTransfersDocument = gql`
     ticketTransfers(
       first: $first
       after: $after
-      where: {transferredAt: {gte: $fromDate, lte: $toDate, null: false}}
+      where: {transferredAt: {gte: $fromDate, lte: $toDate}}
     ) {
       edges {
         node {
