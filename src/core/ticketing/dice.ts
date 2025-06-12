@@ -166,7 +166,7 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
         //   return;
         // }
 
-        assert(event.node.products);
+        assert(event.node.ticketTypes);
         assert(event.node.name);
         assert(event.node.startDatetime);
         assert(event.node.endDatetime);
@@ -193,51 +193,76 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
 
         let taxRate: number | null = null;
 
-        for (const product of event.node.products) {
-          assert(product?.ticketTypes);
+        // Get all tickets to be bound to ticket types
+        const tickets = await this.graphqlSdk.GetTickets({
+          first: this.itemsPerPageToAvoidPagination,
+          after: null,
+          eventId: event.node.id,
+        });
 
-          for (const ticketType of product.ticketTypes) {
-            assert(ticketType);
-            assert(ticketType.id);
-            assert(ticketType.name);
-            assert(ticketType.description);
-            assert(ticketType.price !== null);
-            assert(ticketType.totalTicketAllocationQty !== null);
+        assert(tickets.viewer?.tickets?.edges);
+        this.assertCollectionResponseValid(tickets.viewer.tickets);
 
-            const ticketCategoryId = ticketType.id;
+        // At start we wanted to list `node.products.ticketTypes` but it seems `ticketTypes` can exist without any product
+        // so directly fetching `node.ticketTypes`
+        for (const ticketType of event.node.ticketTypes) {
+          assert(ticketType);
+          assert(ticketType.id);
+          assert(ticketType.name);
+          assert(ticketType.description);
+          assert(ticketType.price !== null);
 
-            if (schemaTicketCategories.has(ticketCategoryId)) {
-              throw new Error(`investigate the case of a ticket type being into multiple products`);
-            }
+          const ticketCategoryId = ticketType.id;
 
-            const ticketCategory = LiteTicketCategorySchema.parse({
-              internalTicketingSystemId: ticketCategoryId,
-              name: ticketType.name,
-              description: ticketType.description,
-              price: ticketType.price / 100, // Dice exposes cents amounts
-            });
+          if (schemaTicketCategories.has(ticketCategoryId)) {
+            throw new Error(`investigate the case of a ticket type being into multiple products`);
+          }
 
-            schemaTicketCategories.set(ticketCategoryId, ticketCategory);
+          const ticketCategory = LiteTicketCategorySchema.parse({
+            internalTicketingSystemId: ticketCategoryId,
+            name: ticketType.name,
+            description: ticketType.description,
+            price: ticketType.price / 100, // Dice exposes cents amounts
+          });
 
-            const uniqueSalesId = `${event.node.id}_${ticketCategory.internalTicketingSystemId}`;
+          schemaTicketCategories.set(ticketCategoryId, ticketCategory);
 
+          const categoryTickets = tickets.viewer.tickets.edges.filter((ticket) => {
+            assert(ticket?.node?.ticketType);
+
+            return ticket.node.ticketType.id === ticketType.id;
+          });
+
+          const uniqueSalesId = `${event.node.id}_${ticketCategory.internalTicketingSystemId}`;
+          const eventSales = schemaEventSales.get(uniqueSalesId);
+
+          if (!eventSales) {
             schemaEventSales.set(
               uniqueSalesId,
               LiteEventSalesSchema.parse({
                 internalEventTicketingSystemId: event.node.id,
                 internalTicketCategoryTicketingSystemId: ticketCategory.internalTicketingSystemId,
-                total: ticketType.totalTicketAllocationQty,
+                total: categoryTickets.length,
               })
             );
+          } else {
+            throw new Error(`event sales should not exist since just once event per serie`);
           }
 
-          // TODO:
-          // TODO:
-          // TODO: not sure yet how to retrieve the tax rate? (there is a SALES_TAX amount but only through each tickets?)
-          // TODO: also, should number of sales be through `ticketType.totalTicketAllocationQty` or by browser all tickets?
-          // TODO: ... to test
-          // TODO:
-          // TODO:
+          // We go through all tickets just to make sure they are identical in term of pricing
+          for (const categoryTicket of categoryTickets) {
+            assert(categoryTicket?.node?.fullPrice && categoryTicket.node.fullPrice !== null);
+
+            if (categoryTicket.node.fullPrice !== ticketType.price) {
+              throw new Error(`ticket ${categoryTicket.node.id} should have the same price than the ticket type ${ticketType.id}`);
+            }
+
+            // TODO:
+            // TODO:
+            // TODO: not sure yet how to retrieve the tax rate? (there should be a SALES_TAX amount on tickets but it's never filled...)
+            // TODO:
+            // TODO:
+          }
         }
 
         assert(taxRate !== null);

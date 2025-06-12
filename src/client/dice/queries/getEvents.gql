@@ -12,15 +12,12 @@ query GetEvents($first: Int = 50, $after: String, $ids: [ID!]!) {
           endDatetime
           description
           currency
-          products {
-            ticketTypes {
-              id
-              name
-              description
-              totalTicketAllocationQty
-              archived
-              price
-            }
+          ticketTypes {
+            id
+            name
+            description
+            archived
+            price
           }
         }
       }
