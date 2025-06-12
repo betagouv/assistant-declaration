@@ -158,6 +158,14 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
       // Note: for now we do not parallelize to not flood the ticketing system
       await eachOfLimit(events.viewer.events.edges, 1, async (event) => {
         assert(event?.node);
+        assert(event.node.state);
+
+        // We should finally not filter based on state here because the events we target are bound to tickets, so it has a real existence
+        // // It seems we should consider all states once Dice has validated the event (`APPROVED`, `ARCHIVED`, `CANCELLED`)
+        // if (['DRAFT', 'DECLINED', 'SUBMITTED', 'REVIEW'].includes(event.node.state)) {
+        //   return;
+        // }
+
         assert(event.node.products);
         assert(event.node.name);
         assert(event.node.startDatetime);
@@ -177,7 +185,7 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
         // We could have tried to merged them based on naming but it's kind of tricky before knowing well their customer usage of it
         schemaEvents.push(
           LiteEventSchema.parse({
-            internalTicketingSystemId: event.node.id.toString(),
+            internalTicketingSystemId: event.node.id,
             startAt: startDate,
             endAt: endDate,
           })
@@ -196,7 +204,7 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
             assert(ticketType.price !== null);
             assert(ticketType.totalTicketAllocationQty !== null);
 
-            const ticketCategoryId = ticketType.id.toString();
+            const ticketCategoryId = ticketType.id;
 
             if (schemaTicketCategories.has(ticketCategoryId)) {
               throw new Error(`investigate the case of a ticket type being into multiple products`);
@@ -216,7 +224,7 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
             schemaEventSales.set(
               uniqueSalesId,
               LiteEventSalesSchema.parse({
-                internalEventTicketingSystemId: event.node.id.toString(),
+                internalEventTicketingSystemId: event.node.id,
                 internalTicketCategoryTicketingSystemId: ticketCategory.internalTicketingSystemId,
                 total: ticketType.totalTicketAllocationQty,
               })
@@ -236,7 +244,7 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
 
         eventsSeriesWrappers.push({
           serie: LiteEventSerieSchema.parse({
-            internalTicketingSystemId: event.node.id.toString(),
+            internalTicketingSystemId: event.node.id,
             name: event.node.name,
             startAt: startDate,
             endAt: endDate,
