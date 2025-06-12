@@ -17,6 +17,7 @@ query GetEvents($first: Int = 50, $after: String, $ids: [ID!]!) {
             name
             description
             archived
+            faceValue
             price
           }
         }

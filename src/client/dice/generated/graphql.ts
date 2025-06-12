@@ -1043,7 +1043,7 @@ export type GetEventsQueryVariables = Exact<{
 }>;
 
 
-export type GetEventsQuery = { __typename?: 'RootQueryType', viewer: { __typename?: 'Viewer', events: { __typename?: 'EventConnection', totalCount: number | null, edges: Array<{ __typename?: 'EventEdge', node: { __typename?: 'Event', id: string, name: string | null, state: EventState | null, startDatetime: string | null, endDatetime: string | null, description: string | null, currency: EventCostCurrency | null, ticketTypes: Array<{ __typename?: 'TicketType', id: string | null, name: string | null, description: string | null, archived: boolean | null, price: number | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string | null, hasNextPage: boolean } } | null } | null };
+export type GetEventsQuery = { __typename?: 'RootQueryType', viewer: { __typename?: 'Viewer', events: { __typename?: 'EventConnection', totalCount: number | null, edges: Array<{ __typename?: 'EventEdge', node: { __typename?: 'Event', id: string, name: string | null, state: EventState | null, startDatetime: string | null, endDatetime: string | null, description: string | null, currency: EventCostCurrency | null, ticketTypes: Array<{ __typename?: 'TicketType', id: string | null, name: string | null, description: string | null, archived: boolean | null, faceValue: number | null, price: number | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string | null, hasNextPage: boolean } } | null } | null };
 
 export type GetOrdersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1108,6 +1108,7 @@ export const GetEventsDocument = gql`
             name
             description
             archived
+            faceValue
             price
           }
         }

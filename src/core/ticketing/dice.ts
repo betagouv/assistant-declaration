@@ -222,7 +222,7 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
             internalTicketingSystemId: ticketCategoryId,
             name: ticketType.name,
             description: ticketType.description,
-            price: ticketType.price / 100, // Dice exposes cents amounts
+            price: ticketType.faceValue / 100, // Dice exposes cents amounts
           });
 
           schemaTicketCategories.set(ticketCategoryId, ticketCategory);
