@@ -1,4 +1,5 @@
 import { eachOfLimit } from 'async';
+import { addYears } from 'date-fns';
 import { GraphQLClient } from 'graphql-request';
 
 import { getSdk } from '@ad/src/client/dice/generated/graphql';
@@ -42,7 +43,18 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
 
   public async testConnection(): Promise<boolean> {
     try {
-      // TODO:
+      // We fetch the minimum of information since it's just to test the connection, so using a period range that would return no statement
+      const futureDate = addYears(new Date(), 2);
+
+      const orders = await this.graphqlSdk.GetOrders({
+        first: this.itemsPerPageToAvoidPagination,
+        after: null,
+        fromDate: futureDate,
+        toDate: futureDate,
+      });
+
+      assert(orders.viewer?.orders?.edges);
+      this.assertCollectionResponseValid(orders.viewer.orders);
 
       return true;
     } catch (error) {
