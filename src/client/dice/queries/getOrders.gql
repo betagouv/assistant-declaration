@@ -1,14 +1,8 @@
 #import "./fragments/pageInfoFragment.gql"
 
-query GetOrders($first: Int = 50, $after: String, fromDate: Date!, toDate: Date) {
+query GetOrders($first: Int = 50, $after: String, $fromDate: Datetime!, $toDate: Datetime) {
   viewer {
-    orders(first: $first, after: $after, where: {
-      purchasedAt: {
-        gte: $fromDate,
-        lte: $toDate,
-        null: false
-      }
-    }) {
+    orders(first: $first, after: $after, where: { purchasedAt: { gte: $fromDate, lte: $toDate, null: false } }) {
       edges {
         node {
           id

@@ -1034,24 +1034,66 @@ export type ViewerTicketsArgs = {
   where?: InputMaybe<TicketWhereInput>;
 };
 
+export type PageInfoFieldsFragment = { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean };
+
 export type GetEventsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
+  ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
 }>;
 
 
-export type GetEventsQuery = { __typename?: 'RootQueryType', viewer?: { __typename?: 'Viewer', events?: { __typename?: 'EventConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean }, edges?: Array<{ __typename?: 'EventEdge', node?: { __typename?: 'Event', id: string, name?: string | null, state?: EventState | null, startDatetime?: any | null, endDatetime?: any | null, description?: string | null } | null } | null> | null } | null } | null };
+export type GetEventsQuery = { __typename?: 'RootQueryType', viewer?: { __typename?: 'Viewer', events?: { __typename?: 'EventConnection', totalCount?: number | null, edges?: Array<{ __typename?: 'EventEdge', node?: { __typename?: 'Event', id: string, name?: string | null, state?: EventState | null, startDatetime?: any | null, endDatetime?: any | null, description?: string | null, currency?: EventCostCurrency | null, products?: Array<{ __typename?: 'Product', ticketTypes?: Array<{ __typename?: 'TicketType', id?: string | null, name?: string | null, description?: string | null, totalTicketAllocationQty?: number | null, archived?: boolean | null, price?: number | null } | null> | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } | null } | null };
+
+export type GetOrdersQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  fromDate: Scalars['Datetime']['input'];
+  toDate?: InputMaybe<Scalars['Datetime']['input']>;
+}>;
 
 
+export type GetOrdersQuery = { __typename?: 'RootQueryType', viewer?: { __typename?: 'Viewer', orders?: { __typename?: 'OrderConnection', totalCount?: number | null, edges?: Array<{ __typename?: 'OrderEdge', node?: { __typename?: 'Order', id: string, purchasedAt?: any | null, event?: { __typename?: 'Event', id: string } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } | null } | null };
+
+export type GetReturnsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  fromDate: Scalars['Datetime']['input'];
+  toDate?: InputMaybe<Scalars['Datetime']['input']>;
+}>;
+
+
+export type GetReturnsQuery = { __typename?: 'RootQueryType', viewer?: { __typename?: 'Viewer', returns?: { __typename?: 'ReturnConnection', totalCount?: number | null, edges?: Array<{ __typename?: 'ReturnEdge', node?: { __typename?: 'Return', id: string, returnedAt?: any | null, order?: { __typename?: 'Order', event?: { __typename?: 'Event', id: string } | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } | null } | null };
+
+export type GetTicketTransfersQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  fromDate: Scalars['Datetime']['input'];
+  toDate?: InputMaybe<Scalars['Datetime']['input']>;
+}>;
+
+
+export type GetTicketTransfersQuery = { __typename?: 'RootQueryType', viewer?: { __typename?: 'Viewer', ticketTransfers?: { __typename?: 'TicketTransferConnection', totalCount?: number | null, edges?: Array<{ __typename?: 'TicketTransferEdge', node?: { __typename?: 'TicketTransfer', id: string, transferredAt?: any | null, orders?: Array<{ __typename?: 'Order', event?: { __typename?: 'Event', id: string } | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } | null } | null };
+
+export type GetTicketsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  eventId: Scalars['ID']['input'];
+}>;
+
+
+export type GetTicketsQuery = { __typename?: 'RootQueryType', viewer?: { __typename?: 'Viewer', tickets?: { __typename?: 'TicketConnection', totalCount?: number | null, edges?: Array<{ __typename?: 'TicketEdge', node?: { __typename?: 'Ticket', id: string, fullPrice?: number | null, ticketType?: { __typename?: 'TicketType', id?: string | null } | null, fees?: Array<{ __typename?: 'TicketFee', category?: TicketFeeCategory | null, promoter?: number | null, dice?: number | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } | null } | null };
+
+export const PageInfoFieldsFragmentDoc = gql`
+    fragment PageInfoFields on PageInfo {
+  endCursor
+  hasNextPage
+}
+    `;
 export const GetEventsDocument = gql`
-    query GetEvents($first: Int = 50, $after: String) {
+    query GetEvents($first: Int = 50, $after: String, $ids: [ID!]!) {
   viewer {
-    events(first: $first, after: $after) {
-      totalCount
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
+    events(first: $first, after: $after, where: {id: {in: $ids}}) {
       edges {
         node {
           id
@@ -1060,12 +1102,132 @@ export const GetEventsDocument = gql`
           startDatetime
           endDatetime
           description
+          currency
+          products {
+            ticketTypes {
+              id
+              name
+              description
+              totalTicketAllocationQty
+              archived
+              price
+            }
+          }
         }
       }
+      pageInfo {
+        ...PageInfoFields
+      }
+      totalCount
     }
   }
 }
-    `;
+    ${PageInfoFieldsFragmentDoc}`;
+export const GetOrdersDocument = gql`
+    query GetOrders($first: Int = 50, $after: String, $fromDate: Datetime!, $toDate: Datetime) {
+  viewer {
+    orders(
+      first: $first
+      after: $after
+      where: {purchasedAt: {gte: $fromDate, lte: $toDate, null: false}}
+    ) {
+      edges {
+        node {
+          id
+          purchasedAt
+          event {
+            id
+          }
+        }
+      }
+      pageInfo {
+        ...PageInfoFields
+      }
+      totalCount
+    }
+  }
+}
+    ${PageInfoFieldsFragmentDoc}`;
+export const GetReturnsDocument = gql`
+    query GetReturns($first: Int = 50, $after: String, $fromDate: Datetime!, $toDate: Datetime) {
+  viewer {
+    returns(
+      first: $first
+      after: $after
+      where: {returnedAt: {gte: $fromDate, lte: $toDate, null: false}}
+    ) {
+      edges {
+        node {
+          id
+          returnedAt
+          order {
+            event {
+              id
+            }
+          }
+        }
+      }
+      pageInfo {
+        ...PageInfoFields
+      }
+      totalCount
+    }
+  }
+}
+    ${PageInfoFieldsFragmentDoc}`;
+export const GetTicketTransfersDocument = gql`
+    query GetTicketTransfers($first: Int = 50, $after: String, $fromDate: Datetime!, $toDate: Datetime) {
+  viewer {
+    ticketTransfers(
+      first: $first
+      after: $after
+      where: {transferredAt: {gte: $fromDate, lte: $toDate, null: false}}
+    ) {
+      edges {
+        node {
+          id
+          transferredAt
+          orders {
+            event {
+              id
+            }
+          }
+        }
+      }
+      pageInfo {
+        ...PageInfoFields
+      }
+      totalCount
+    }
+  }
+}
+    ${PageInfoFieldsFragmentDoc}`;
+export const GetTicketsDocument = gql`
+    query GetTickets($first: Int = 50, $after: String, $eventId: ID!) {
+  viewer {
+    tickets(first: $first, after: $after, where: {eventId: {eq: $eventId}}) {
+      edges {
+        node {
+          id
+          fullPrice
+          ticketType {
+            id
+          }
+          fees {
+            category
+            promoter
+            dice
+          }
+        }
+      }
+      pageInfo {
+        ...PageInfoFields
+      }
+      totalCount
+    }
+  }
+}
+    ${PageInfoFieldsFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -1074,8 +1236,20 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
-    GetEvents(variables?: GetEventsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetEventsQuery> {
+    GetEvents(variables: GetEventsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetEventsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetEventsQuery>({ document: GetEventsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetEvents', 'query', variables);
+    },
+    GetOrders(variables: GetOrdersQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetOrdersQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetOrdersQuery>({ document: GetOrdersDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetOrders', 'query', variables);
+    },
+    GetReturns(variables: GetReturnsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetReturnsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetReturnsQuery>({ document: GetReturnsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetReturns', 'query', variables);
+    },
+    GetTicketTransfers(variables: GetTicketTransfersQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetTicketTransfersQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetTicketTransfersQuery>({ document: GetTicketTransfersDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetTicketTransfers', 'query', variables);
+    },
+    GetTickets(variables: GetTicketsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetTicketsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetTicketsQuery>({ document: GetTicketsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetTickets', 'query', variables);
     }
   };
 }

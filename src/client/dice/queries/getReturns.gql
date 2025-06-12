@@ -1,0 +1,23 @@
+#import "./fragments/pageInfoFragment.gql"
+
+query GetReturns($first: Int = 50, $after: String, $fromDate: Datetime!, $toDate: Datetime) {
+  viewer {
+    returns(first: $first, after: $after, where: { returnedAt: { gte: $fromDate, lte: $toDate, null: false } }) {
+      edges {
+        node {
+          id
+          returnedAt
+          order {
+            event {
+              id
+            }
+          }
+        }
+      }
+      pageInfo {
+        ...PageInfoFields
+      }
+      totalCount
+    }
+  }
+}

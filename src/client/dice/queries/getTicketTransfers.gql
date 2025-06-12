@@ -1,0 +1,23 @@
+#import "./fragments/pageInfoFragment.gql"
+
+query GetTicketTransfers($first: Int = 50, $after: String, $fromDate: Datetime!, $toDate: Datetime) {
+  viewer {
+    ticketTransfers(first: $first, after: $after, where: { transferredAt: { gte: $fromDate, lte: $toDate, null: false } }) {
+      edges {
+        node {
+          id
+          transferredAt
+          orders {
+            event {
+              id
+            }
+          }
+        }
+      }
+      pageInfo {
+        ...PageInfoFields
+      }
+      totalCount
+    }
+  }
+}

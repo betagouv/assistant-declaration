@@ -1,0 +1,26 @@
+#import "./fragments/pageInfoFragment.gql"
+
+query GetTickets($first: Int = 50, $after: String, $eventId: ID!) {
+  viewer {
+    tickets(first: $first, after: $after, where: { eventId: { eq: $eventId } }) {
+      edges {
+        node {
+          id
+          fullPrice
+          ticketType {
+            id
+          }
+          fees {
+            category
+            promoter
+            dice
+          }
+        }
+      }
+      pageInfo {
+        ...PageInfoFields
+      }
+      totalCount
+    }
+  }
+}
