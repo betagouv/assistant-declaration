@@ -53,8 +53,8 @@ export type Artist = {
 };
 
 export type ClaimTicketsInput = {
-  fanId: InputMaybe<Scalars['ID']['input']>;
-  fanSecureToken: InputMaybe<Scalars['String']['input']>;
+  fanId?: InputMaybe<Scalars['ID']['input']>;
+  fanSecureToken?: InputMaybe<Scalars['String']['input']>;
   ticketIds: Array<InputMaybe<Scalars['ID']['input']>>;
 };
 
@@ -70,12 +70,12 @@ export type ClaimTicketsPayload = {
 
 export type EqBooleanInput = {
   /** Equal to */
-  eq: InputMaybe<Scalars['Boolean']['input']>;
+  eq?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type EqStringInput = {
   /** Equal to */
-  eq: InputMaybe<Scalars['String']['input']>;
+  eq?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Event = Node & {
@@ -129,19 +129,19 @@ export type Event = Node & {
 
 
 export type EventExtrasArgs = {
-  after: InputMaybe<Scalars['String']['input']>;
-  before: InputMaybe<Scalars['String']['input']>;
-  first: InputMaybe<Scalars['Int']['input']>;
-  last: InputMaybe<Scalars['Int']['input']>;
-  where: InputMaybe<ExtraWhereInput>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<ExtraWhereInput>;
 };
 
 
 export type EventTicketsArgs = {
-  after: InputMaybe<Scalars['String']['input']>;
-  before: InputMaybe<Scalars['String']['input']>;
-  first: InputMaybe<Scalars['Int']['input']>;
-  last: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type EventConnection = {
@@ -302,12 +302,12 @@ export enum EventState {
 }
 
 export type EventWhereInput = {
-  endDatetime: InputMaybe<OperatorsDateInput>;
-  genre: InputMaybe<OperatorsIdInput>;
-  id: InputMaybe<OperatorsIdInput>;
-  startDatetime: InputMaybe<OperatorsDateInput>;
-  state: InputMaybe<OperatorsEventStateInput>;
-  updatedAt: InputMaybe<OperatorsDateInput>;
+  endDatetime?: InputMaybe<OperatorsDateInput>;
+  genre?: InputMaybe<OperatorsIdInput>;
+  id?: InputMaybe<OperatorsIdInput>;
+  startDatetime?: InputMaybe<OperatorsDateInput>;
+  state?: InputMaybe<OperatorsEventStateInput>;
+  updatedAt?: InputMaybe<OperatorsDateInput>;
 };
 
 export type Extra = Node & {
@@ -352,10 +352,10 @@ export type ExtraEdge = {
 };
 
 export type ExtraWhereInput = {
-  eventId: InputMaybe<OperatorsIdInput>;
-  hasSeparateAccessBarcode: InputMaybe<EqBooleanInput>;
-  id: InputMaybe<OperatorsIdInput>;
-  productId: InputMaybe<OperatorsIdInput>;
+  eventId?: InputMaybe<OperatorsIdInput>;
+  hasSeparateAccessBarcode?: InputMaybe<EqBooleanInput>;
+  id?: InputMaybe<OperatorsIdInput>;
+  productId?: InputMaybe<OperatorsIdInput>;
 };
 
 export type Fan = {
@@ -423,14 +423,14 @@ export type GenreType = Node & {
 
 
 export type GenreTypeGenresArgs = {
-  after: InputMaybe<Scalars['String']['input']>;
-  before: InputMaybe<Scalars['String']['input']>;
-  first: InputMaybe<Scalars['Int']['input']>;
-  last: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type GenreTypeWhereInput = {
-  name: InputMaybe<OperatorsStringInput>;
+  name?: InputMaybe<OperatorsStringInput>;
 };
 
 export type GenreTypesConnection = {
@@ -461,52 +461,52 @@ export type Node = {
 
 export type OperatorsDateInput = {
   /** Between the provided datetimes */
-  between: InputMaybe<Array<InputMaybe<Scalars['Datetime']['input']>>>;
+  between?: InputMaybe<Array<InputMaybe<Scalars['Datetime']['input']>>>;
   /** Greater than */
-  gt: InputMaybe<Scalars['Datetime']['input']>;
+  gt?: InputMaybe<Scalars['Datetime']['input']>;
   /** Greater or equal to */
-  gte: InputMaybe<Scalars['Datetime']['input']>;
+  gte?: InputMaybe<Scalars['Datetime']['input']>;
   /** Less than */
-  lt: InputMaybe<Scalars['Datetime']['input']>;
+  lt?: InputMaybe<Scalars['Datetime']['input']>;
   /** Less or equal to */
-  lte: InputMaybe<Scalars['Datetime']['input']>;
+  lte?: InputMaybe<Scalars['Datetime']['input']>;
   /** Not between the provided datetimes */
-  notBetween: InputMaybe<Array<InputMaybe<Scalars['Datetime']['input']>>>;
+  notBetween?: InputMaybe<Array<InputMaybe<Scalars['Datetime']['input']>>>;
   /** Is null */
-  null: InputMaybe<Scalars['Boolean']['input']>;
+  null?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type OperatorsEventStateInput = {
   /** Equal to */
-  eq: InputMaybe<EventState>;
+  eq?: InputMaybe<EventState>;
   /** In the list of provided values */
-  in: InputMaybe<Array<InputMaybe<EventState>>>;
+  in?: InputMaybe<Array<InputMaybe<EventState>>>;
   /** Not equal to */
-  ne: InputMaybe<EventState>;
+  ne?: InputMaybe<EventState>;
   /** Not in the list of provided values */
-  notIn: InputMaybe<Array<InputMaybe<EventState>>>;
+  notIn?: InputMaybe<Array<InputMaybe<EventState>>>;
 };
 
 export type OperatorsIdInput = {
   /** Equal to */
-  eq: InputMaybe<Scalars['ID']['input']>;
+  eq?: InputMaybe<Scalars['ID']['input']>;
   /** In the list of provided ids */
-  in: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   /** Not equal to */
-  ne: InputMaybe<Scalars['ID']['input']>;
+  ne?: InputMaybe<Scalars['ID']['input']>;
   /** Not in the list of provided ids */
-  notIn: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
 };
 
 export type OperatorsStringInput = {
   /** Equal to */
-  eq: InputMaybe<Scalars['String']['input']>;
+  eq?: InputMaybe<Scalars['String']['input']>;
   /** In the list of provided values */
-  in: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** Not equal to */
-  ne: InputMaybe<Scalars['String']['input']>;
+  ne?: InputMaybe<Scalars['String']['input']>;
   /** Not in the list of provided values */
-  notIn: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 export type Order = Node & {
@@ -559,9 +559,9 @@ export type OrderEdge = {
 };
 
 export type OrderWhereInput = {
-  eventId: InputMaybe<OperatorsIdInput>;
-  id: InputMaybe<OperatorsIdInput>;
-  purchasedAt: InputMaybe<OperatorsDateInput>;
+  eventId?: InputMaybe<OperatorsIdInput>;
+  id?: InputMaybe<OperatorsIdInput>;
+  purchasedAt?: InputMaybe<OperatorsDateInput>;
 };
 
 export type PageInfo = {
@@ -641,9 +641,9 @@ export type ReturnEdge = {
 };
 
 export type ReturnWhereInput = {
-  eventId: InputMaybe<OperatorsIdInput>;
-  id: InputMaybe<OperatorsIdInput>;
-  returnedAt: InputMaybe<OperatorsDateInput>;
+  eventId?: InputMaybe<OperatorsIdInput>;
+  id?: InputMaybe<OperatorsIdInput>;
+  returnedAt?: InputMaybe<OperatorsDateInput>;
 };
 
 export type RootMutationType = {
@@ -715,7 +715,7 @@ export type Ticket = Node & {
 
 
 export type TicketExtrasArgs = {
-  where: InputMaybe<TicketExtraWhereInput>;
+  where?: InputMaybe<TicketExtraWhereInput>;
 };
 
 export type TicketConnection = {
@@ -732,8 +732,8 @@ export type TicketEdge = {
 };
 
 export type TicketExtraWhereInput = {
-  hasSeparateAccessBarcode: InputMaybe<EqBooleanInput>;
-  productId: InputMaybe<OperatorsIdInput>;
+  hasSeparateAccessBarcode?: InputMaybe<EqBooleanInput>;
+  productId?: InputMaybe<OperatorsIdInput>;
 };
 
 export type TicketFee = {
@@ -790,9 +790,9 @@ export type TicketTransferEdge = {
 };
 
 export type TicketTransferWhereInput = {
-  eventId: InputMaybe<OperatorsIdInput>;
-  id: InputMaybe<OperatorsIdInput>;
-  transferredAt: InputMaybe<OperatorsDateInput>;
+  eventId?: InputMaybe<OperatorsIdInput>;
+  id?: InputMaybe<OperatorsIdInput>;
+  transferredAt?: InputMaybe<OperatorsDateInput>;
 };
 
 export type TicketType = {
@@ -822,12 +822,12 @@ export type TicketType = {
 };
 
 export type TicketWhereInput = {
-  claimAllowed: InputMaybe<EqBooleanInput>;
-  eventId: InputMaybe<OperatorsIdInput>;
-  fanPhoneNumber: InputMaybe<EqStringInput>;
-  fanSecureToken: InputMaybe<EqStringInput>;
-  id: InputMaybe<OperatorsIdInput>;
-  ticketTypeId: InputMaybe<OperatorsIdInput>;
+  claimAllowed?: InputMaybe<EqBooleanInput>;
+  eventId?: InputMaybe<OperatorsIdInput>;
+  fanPhoneNumber?: InputMaybe<EqStringInput>;
+  fanSecureToken?: InputMaybe<EqStringInput>;
+  id?: InputMaybe<OperatorsIdInput>;
+  ticketTypeId?: InputMaybe<OperatorsIdInput>;
 };
 
 /**
@@ -967,78 +967,78 @@ export type Viewer = Node & {
 
 /** The currently authenticated partner. */
 export type ViewerEventsArgs = {
-  after: InputMaybe<Scalars['String']['input']>;
-  before: InputMaybe<Scalars['String']['input']>;
-  first: InputMaybe<Scalars['Int']['input']>;
-  last: InputMaybe<Scalars['Int']['input']>;
-  where: InputMaybe<EventWhereInput>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<EventWhereInput>;
 };
 
 
 /** The currently authenticated partner. */
 export type ViewerExtrasArgs = {
-  after: InputMaybe<Scalars['String']['input']>;
-  before: InputMaybe<Scalars['String']['input']>;
-  first: InputMaybe<Scalars['Int']['input']>;
-  last: InputMaybe<Scalars['Int']['input']>;
-  where: InputMaybe<ExtraWhereInput>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<ExtraWhereInput>;
 };
 
 
 /** The currently authenticated partner. */
 export type ViewerGenreTypesArgs = {
-  after: InputMaybe<Scalars['String']['input']>;
-  before: InputMaybe<Scalars['String']['input']>;
-  first: InputMaybe<Scalars['Int']['input']>;
-  last: InputMaybe<Scalars['Int']['input']>;
-  where: InputMaybe<GenreTypeWhereInput>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<GenreTypeWhereInput>;
 };
 
 
 /** The currently authenticated partner. */
 export type ViewerOrdersArgs = {
-  after: InputMaybe<Scalars['String']['input']>;
-  before: InputMaybe<Scalars['String']['input']>;
-  first: InputMaybe<Scalars['Int']['input']>;
-  last: InputMaybe<Scalars['Int']['input']>;
-  where: InputMaybe<OrderWhereInput>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<OrderWhereInput>;
 };
 
 
 /** The currently authenticated partner. */
 export type ViewerReturnsArgs = {
-  after: InputMaybe<Scalars['String']['input']>;
-  before: InputMaybe<Scalars['String']['input']>;
-  first: InputMaybe<Scalars['Int']['input']>;
-  last: InputMaybe<Scalars['Int']['input']>;
-  where: InputMaybe<ReturnWhereInput>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<ReturnWhereInput>;
 };
 
 
 /** The currently authenticated partner. */
 export type ViewerTicketTransfersArgs = {
-  after: InputMaybe<Scalars['String']['input']>;
-  before: InputMaybe<Scalars['String']['input']>;
-  first: InputMaybe<Scalars['Int']['input']>;
-  last: InputMaybe<Scalars['Int']['input']>;
-  where: InputMaybe<TicketTransferWhereInput>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<TicketTransferWhereInput>;
 };
 
 
 /** The currently authenticated partner. */
 export type ViewerTicketsArgs = {
-  after: InputMaybe<Scalars['String']['input']>;
-  before: InputMaybe<Scalars['String']['input']>;
-  first: InputMaybe<Scalars['Int']['input']>;
-  last: InputMaybe<Scalars['Int']['input']>;
-  where: InputMaybe<TicketWhereInput>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<TicketWhereInput>;
 };
 
 export type PageInfoFieldsFragment = { __typename?: 'PageInfo', endCursor: string | null, hasNextPage: boolean };
 
 export type GetEventsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
-  after: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
   ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
 }>;
 
@@ -1047,9 +1047,9 @@ export type GetEventsQuery = { __typename?: 'RootQueryType', viewer: { __typenam
 
 export type GetOrdersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
-  after: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
   fromDate: Scalars['Datetime']['input'];
-  toDate: InputMaybe<Scalars['Datetime']['input']>;
+  toDate?: InputMaybe<Scalars['Datetime']['input']>;
 }>;
 
 
@@ -1057,9 +1057,9 @@ export type GetOrdersQuery = { __typename?: 'RootQueryType', viewer: { __typenam
 
 export type GetReturnsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
-  after: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
   fromDate: Scalars['Datetime']['input'];
-  toDate: InputMaybe<Scalars['Datetime']['input']>;
+  toDate?: InputMaybe<Scalars['Datetime']['input']>;
 }>;
 
 
@@ -1067,9 +1067,9 @@ export type GetReturnsQuery = { __typename?: 'RootQueryType', viewer: { __typena
 
 export type GetTicketTransfersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
-  after: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
   fromDate: Scalars['Datetime']['input'];
-  toDate: InputMaybe<Scalars['Datetime']['input']>;
+  toDate?: InputMaybe<Scalars['Datetime']['input']>;
 }>;
 
 
@@ -1077,7 +1077,7 @@ export type GetTicketTransfersQuery = { __typename?: 'RootQueryType', viewer: { 
 
 export type GetTicketsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
-  after: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
   eventId: Scalars['ID']['input'];
 }>;
 

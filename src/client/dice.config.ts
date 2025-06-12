@@ -15,9 +15,14 @@ generate(
         plugins: ['typescript', 'typescript-operations', 'typescript-graphql-request'],
         config: {
           strictScalars: true,
-          avoidOptionals: true,
           scalars: {
             Datetime: 'string',
+          },
+          avoidOptionals: {
+            field: true,
+            inputValue: false,
+            object: false,
+            defaultValue: false,
           },
         },
       },

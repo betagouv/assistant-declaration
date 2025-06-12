@@ -70,8 +70,8 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
       const orders = await this.graphqlSdk.GetOrders({
         first: this.itemsPerPageToAvoidPagination,
         after: null,
-        fromDate: futureDate,
-        toDate: futureDate,
+        fromDate: futureDate.toISOString(),
+        toDate: futureDate.toISOString(),
       });
 
       assert(orders.viewer?.orders?.edges);
@@ -90,7 +90,7 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
         first: this.itemsPerPageToAvoidPagination,
         after: null,
         fromDate: fromDate.toISOString(),
-        toDate: toDate ? toDate.toISOString() : null,
+        toDate: toDate ? toDate.toISOString() : undefined, // Setting `null` is making the server throwing an error
       });
 
       assert(recentOrders.viewer?.orders?.edges);
@@ -100,7 +100,7 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
         first: this.itemsPerPageToAvoidPagination,
         after: null,
         fromDate: fromDate.toISOString(),
-        toDate: toDate ? toDate.toISOString() : null,
+        toDate: toDate ? toDate.toISOString() : undefined, // Setting `null` is making the server throwing an error
       });
 
       assert(recentReturns.viewer?.returns?.edges);
@@ -110,7 +110,7 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
         first: this.itemsPerPageToAvoidPagination,
         after: null,
         fromDate: fromDate.toISOString(),
-        toDate: toDate ? toDate.toISOString() : null,
+        toDate: toDate ? toDate.toISOString() : undefined, // Setting `null` is making the server throwing an error
       });
 
       assert(recentTicketTransfers.viewer?.ticketTransfers?.edges);

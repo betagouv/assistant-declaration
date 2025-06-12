@@ -18,7 +18,8 @@ describeWhenManual('DiceTicketingSystemClient', () => {
         const fromDate = set(new Date(0), { year: 2024, month: 11, date: 18 });
         const toDate = set(new Date(0), { year: 2024, month: 12, date: 1 });
 
-        const wrappers = await client.getEventsSeries(fromDate, toDate);
+        // const wrappers = await client.testConnection();
+        const wrappers = await client.getEventsSeries(fromDate);
 
         expect(wrappers.length).toBeGreaterThanOrEqual(3);
       },
