@@ -89,11 +89,11 @@ export const Header = memo(
             href: linkRegistry.get('frequentlyAskedQuestions', undefined),
           },
           {
-            name: 'Messagerie',
+            name: 'Messagerie instantanée',
             onClick: showLiveChat,
           },
           {
-            name: 'Contact',
+            name: 'Contact courriel',
             href: 'mailto:contact@assistant-declaration.beta.gouv.fr',
           },
         ],

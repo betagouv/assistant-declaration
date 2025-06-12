@@ -46,11 +46,11 @@ export function HeaderHelpItem(props: PropsWithChildren<HeaderHelpItemProps>) {
       href: linkRegistry.get('frequentlyAskedQuestions', undefined),
     },
     {
-      content: 'Messagerie',
+      content: 'Messagerie instantanée',
       onClick: showLiveChat,
     },
     {
-      content: 'Contact',
+      content: 'Contact courriel',
       href: 'mailto:contact@assistant-declaration.beta.gouv.fr',
     },
   ];
