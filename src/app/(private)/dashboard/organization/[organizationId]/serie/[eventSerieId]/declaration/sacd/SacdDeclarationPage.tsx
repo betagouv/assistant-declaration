@@ -721,19 +721,8 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                       }}
                     />
                   </Grid>
-                  <Grid item xs={12}>
-                    <Box
-                      sx={{
-                        bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
-                        borderRadius: '8px',
-                        py: { xs: 2, md: 3 },
-                        px: { xs: 1, md: 2 },
-                        mt: 1,
-                        mb: 2,
-                      }}
-                    >
-                      <SacdTicketingEntriesTable wrappers={eventsWrappers} audience={watch('audience')} taxRate={eventSerie.taxRate} />
-                    </Box>
+                  <Grid item xs={12} sx={{ mt: 1, mb: 2 }}>
+                    <SacdTicketingEntriesTable wrappers={eventsWrappers} audience={watch('audience')} taxRate={eventSerie.taxRate} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Tooltip
@@ -936,23 +925,13 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                 </Typography>
                 <hr />
                 <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Box
-                      sx={{
-                        bgcolor: fr.colors.decisions.background.alt.yellowMoutarde.default,
-                        borderRadius: '8px',
-                        py: { xs: 2, md: 3 },
-                        px: { xs: 1, md: 2 },
-                        mt: 1,
-                      }}
-                    >
-                      <SacdPerformedWorksTable
-                        control={control}
-                        trigger={trigger}
-                        placeholder={sacdDeclarationWrapper.placeholder.performedWorksOptions}
-                        errors={errors.performedWorks}
-                      />
-                    </Box>
+                  <Grid item xs={12} sx={{ mt: 1 }}>
+                    <SacdPerformedWorksTable
+                      control={control}
+                      trigger={trigger}
+                      placeholder={sacdDeclarationWrapper.placeholder.performedWorksOptions}
+                      errors={errors.performedWorks}
+                    />
                   </Grid>
                 </Grid>
               </Grid>
