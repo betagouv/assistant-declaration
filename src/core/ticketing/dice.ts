@@ -16,12 +16,33 @@ import {
 } from '@ad/src/models/entities/event';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
+const debugGraphqlRequests = false;
+
+const loggingFetch = async (url: RequestInfo, init?: RequestInit) => {
+  console.log('[GraphQL REQUEST]');
+  console.log('URL:', url);
+  console.log('Method:', init?.method);
+  console.log('Headers:', init?.headers);
+  console.log('Body:', init?.body); // This contains the raw JSON with query & variables
+
+  const response = await fetch(url, init);
+
+  const clone = response.clone(); // To read it without consuming the stream
+  const text = await clone.text();
+
+  console.log('[GraphQL RESPONSE]');
+  console.log(text);
+
+  return response;
+};
+
 export class DiceTicketingSystemClient implements TicketingSystemClient {
   protected graphqlSdk: ReturnType<typeof getSdk>;
   protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;
 
   constructor(secretKey: string) {
     const graphqlClient = new GraphQLClient('https://partners-endpoint.dice.fm/graphql', {
+      fetch: debugGraphqlRequests ? (loggingFetch as any) : fetch,
       headers: {
         Authorization: `Bearer ${secretKey}`,
       },
@@ -224,11 +245,11 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
 
       return eventsSeriesWrappers;
     } catch (error) {
-      // if (error instanceof ClientError) {
-      //   // Here to help debugging what has been sent since the stringified error caught above would not have the full detail
-      //   console.log(error);
-      //   console.log(JSON.stringify(error.response));
-      // }
+      if (debugGraphqlRequests && error instanceof ClientError) {
+        // Here to help debugging what has been sent since the stringified error caught above would not have the full detail
+        console.log(error);
+        console.log(JSON.stringify(error.response));
+      }
 
       throw error;
     }
