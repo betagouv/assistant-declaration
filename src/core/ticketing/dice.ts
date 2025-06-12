@@ -224,11 +224,11 @@ export class DiceTicketingSystemClient implements TicketingSystemClient {
 
       return eventsSeriesWrappers;
     } catch (error) {
-      if (error instanceof ClientError) {
-        // Here to help debugging what has been sent since the stringified error caught above would not have the full detail
-        console.log(error);
-        console.log(JSON.stringify(error.response));
-      }
+      // if (error instanceof ClientError) {
+      //   // Here to help debugging what has been sent since the stringified error caught above would not have the full detail
+      //   console.log(error);
+      //   console.log(JSON.stringify(error.response));
+      // }
 
       throw error;
     }
