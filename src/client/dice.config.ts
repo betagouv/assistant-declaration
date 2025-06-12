@@ -13,6 +13,9 @@ generate(
     generates: {
       'src/client/dice/generated/graphql.ts': {
         plugins: ['typescript', 'typescript-operations', 'typescript-graphql-request'],
+        config: {
+          avoidOptionals: true,
+        },
       },
     },
   },
