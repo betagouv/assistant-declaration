@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Declaration>
   <Header>
-    <dec_ref>TODO</dec_ref>
+    <dec_ref>712790</dec_ref>
     <dec_systeme>ASSISTANT_DECLARATION</dec_systeme>
-    <dec_date>2025/06/04</dec_date>
+    <dec_date>2025/02/18</dec_date>
     <dec_nb>3</dec_nb>
   </Header>
   <Representations>

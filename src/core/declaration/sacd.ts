@@ -219,7 +219,8 @@ export function prepareDeclarationParameter(
   declarantId: string,
   eventSerie: EventSerieSchemaType,
   wrappers: EventWrapperSchemaType[],
-  declaration: SacdDeclarationSchemaType
+  declaration: SacdDeclarationSchemaType,
+  declarationAt?: Date,
 ): string {
   const { t } = useServerTranslation('common');
 
@@ -228,7 +229,7 @@ export function prepareDeclarationParameter(
       Header: {
         dec_ref: declarantId,
         dec_systeme: 'ASSISTANT_DECLARATION',
-        dec_date: formatDate(new Date()),
+        dec_date: formatDate(declarationAt ?? new Date()),
         dec_nb: wrappers.length,
       },
       Representations: {

@@ -51,9 +51,11 @@ describe('prepareDeclarationParameter', () => {
   it(
     'should transform entities to the right formatted xml parameter',
     async () => {
-      const xml = prepareDeclarationParameter('TODO', eventsSeries[0], eventsWrappers, sacdDeclarations[0]);
+      const declarationAt = set(new Date(0), { year: 2025, month: 1, date: 18 });
 
-      expect(xml).toBe(declarationParameterXml);
+      const xml = prepareDeclarationParameter('712790', eventsSeries[0], eventsWrappers, sacdDeclarations[0], declarationAt);
+
+      expect(xml).toBe(declarationParameterXml.replace('encoding="utf-8" ?>', 'encoding="utf-8"?>').trim());
     },
     secondsToMilliseconds(30)
   );
