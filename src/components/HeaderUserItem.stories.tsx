@@ -5,6 +5,7 @@ import { EventEmitter } from 'eventemitter3';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { HeaderUserItem } from '@ad/src/components/HeaderUserItem';
+import { collaboratorOfSample } from '@ad/src/fixtures/ui';
 
 type ComponentType = typeof HeaderUserItem;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -41,6 +42,7 @@ UnclickedStory.args = {
     firstname: 'Jean',
     lastname: 'Derrien',
   },
+  currentOrganization: collaboratorOfSample[0],
 };
 UnclickedStory.play = async ({ canvasElement }) => {
   await within(canvasElement).findByRole('button');
@@ -61,8 +63,8 @@ ClickedStory.play = async ({ canvasElement }) => {
   await userEvent.click(button);
 
   const dialog = await screen.findByRole('menu');
-  await within(dialog).findByRole('menuitem', {
-    name: /déconnecter/i,
+  await within(dialog).findByRole('link', {
+    name: /profil/i,
   });
 };
 
