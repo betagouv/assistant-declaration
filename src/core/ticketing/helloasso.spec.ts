@@ -9,7 +9,12 @@ const describeWhenManual = process.env.TEST_MANUAL === 'true' ? describe : descr
 const itWhenManual = process.env.TEST_MANUAL === 'true' ? it : it.skip;
 
 describeWhenManual('HelloassoTicketingSystemClient', () => {
-  const client = new HelloassoTicketingSystemClient(process.env.TEST_HELLOASSO_ACCESS_KEY || '', process.env.TEST_HELLOASSO_SECRET_KEY || '');
+  const useTestEnvironment = true;
+  const client = new HelloassoTicketingSystemClient(
+    process.env.TEST_HELLOASSO_ACCESS_KEY || '',
+    process.env.TEST_HELLOASSO_SECRET_KEY || '',
+    useTestEnvironment
+  );
 
   describe('getEventsSeries()', () => {
     it(
