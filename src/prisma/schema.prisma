@@ -155,6 +155,7 @@ model Organization {
 
 enum TicketingSystemName {
   BILLETWEB
+  HELLOASSO
   MAPADO
   SOTICKET
   SUPERSONIKS
