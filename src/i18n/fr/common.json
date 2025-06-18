@@ -368,6 +368,7 @@
     "ticketingSystemName": {
       "enum": {
         "BILLETWEB": "Billetweb",
+        "HELLOASSO": "HelloAsso",
         "MAPADO": "Mapado",
         "SOTICKET": "SoTicket",
         "SUPERSONIKS": "Supersoniks"

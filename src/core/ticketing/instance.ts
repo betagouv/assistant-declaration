@@ -26,6 +26,12 @@ export function getTicketingSystemClient(
 
         ticketingSystemClient = new BilletwebTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
         break;
+      case 'HELLOASSO':
+        assert(ticketingSystem.apiAccessKey);
+        assert(ticketingSystem.apiSecretKey);
+
+        ticketingSystemClient = new HelloassoTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
+        break;
       case 'MAPADO':
         assert(ticketingSystem.apiSecretKey);
 
