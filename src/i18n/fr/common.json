@@ -33,6 +33,7 @@
       "expiredConfirmationToken": "le lien de confirmation a expiré, veuillez contacter notre support",
       "fileNotFound": "aucun fichier n'a été trouvé",
       "foreignTaxRateOnPrice": "nous ne gérons actuellement pas les spectacles joués en France qui ont le taux de TVA d'un pays étranger. Veuillez contacter notre support afin de nous décrire votre spécificité, pour que nous puissions améliorer notre plateforme",
+      "helloassoMissingTier": "malheureusement nous n'arrivons pas à récupérer l'un des tarifs de vos événements auprès de HelloAsso. Veuillez contacter notre support pour que l'on puisse investiguer cette anomalie",
       "internalServerError": "une erreur interne est survenue, veuillez retenter",
       "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",
       "invalidVerificationToken": "l'opération que vous essayez de réaliser a été refusée",
@@ -321,6 +322,7 @@
     "ticketingSystemName": {
       "enum": {
         "BILLETWEB": "Billetweb",
+        "HELLOASSO": "HelloAsso",
         "MAPADO": "Mapado",
         "SOTICKET": "SoTicket",
         "SUPERSONIKS": "Supersoniks"

@@ -18,7 +18,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['src/client/mapado/*.ts', 'src/client/supersoniks/*.ts'],
+      files: ['src/client/helloasso/*.ts', 'src/client/mapado/*.ts', 'src/client/supersoniks/*.ts'],
       rules: {
         'no-prototype-builtins': 'off',
         'no-undef': 'off',

@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 
 import fallback from '@ad/public/assets/images/logo.png';
 import billetweb from '@ad/src/assets/images/ticketing/billetweb.jpg';
+import helloasso from '@ad/src/assets/images/ticketing/helloasso.jpg';
 import mapado from '@ad/src/assets/images/ticketing/mapado.jpg';
 import soticket from '@ad/src/assets/images/ticketing/soticket.jpg';
 import supersoniks from '@ad/src/assets/images/ticketing/supersoniks.jpg';
@@ -78,6 +79,8 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
   const logo = useMemo(() => {
     if (props.ticketingSystem.name === 'BILLETWEB') {
       return billetweb;
+    } else if (props.ticketingSystem.name === 'HELLOASSO') {
+      return helloasso;
     } else if (props.ticketingSystem.name === 'MAPADO') {
       return mapado;
     } else if (props.ticketingSystem.name === 'SOTICKET') {
