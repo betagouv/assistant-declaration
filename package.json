@@ -173,7 +173,7 @@
   "devDependencies": {
     "@chromatic-com/storybook": "^4.0.1",
     "@glen/jest-raw-loader": "^2.0.0",
-    "@hey-api/openapi-ts": "^0.63.0",
+    "@hey-api/openapi-ts": "^0.76.0",
     "@hookform/devtools": "^4.4.0",
     "@octokit/rest": "^19.0.5",
     "@prettier/plugin-xml": "^3.4.1",
