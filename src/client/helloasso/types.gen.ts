@@ -291,6 +291,7 @@ export type HelloAssoApiV5ModelsCommonPlaceModel = {
 };
 
 /**
+ * ResultsWithPaginationModel<PartnerOrganizationModel>
  * ResultsWithPaginationModel class
  */
 export type ResultsWithPaginationModelPartnerOrganizationModel = {
@@ -302,6 +303,7 @@ export type ResultsWithPaginationModelPartnerOrganizationModel = {
 };
 
 /**
+ * ResultsWithPaginationModel<SynchronizableFormModel>
  * ResultsWithPaginationModel class
  */
 export type ResultsWithPaginationModelSynchronizableFormModel = {
@@ -313,6 +315,7 @@ export type ResultsWithPaginationModelSynchronizableFormModel = {
 };
 
 /**
+ * ResultsWithPaginationModel<SynchronizableOrganizationModel>
  * ResultsWithPaginationModel class
  */
 export type ResultsWithPaginationModelSynchronizableOrganizationModel = {
@@ -324,6 +327,7 @@ export type ResultsWithPaginationModelSynchronizableOrganizationModel = {
 };
 
 /**
+ * ResultsWithPaginationModel<FormLightModel>
  * ResultsWithPaginationModel class
  */
 export type ResultsWithPaginationModelFormLightModel = {
@@ -335,6 +339,7 @@ export type ResultsWithPaginationModelFormLightModel = {
 };
 
 /**
+ * ResultsWithPaginationModel<PublicPaymentModel>
  * ResultsWithPaginationModel class
  */
 export type ResultsWithPaginationModelPublicPaymentModel = {
@@ -346,6 +351,7 @@ export type ResultsWithPaginationModelPublicPaymentModel = {
 };
 
 /**
+ * ResultsWithPaginationModel<Item>
  * ResultsWithPaginationModel class
  */
 export type ResultsWithPaginationModelItem = {
@@ -357,6 +363,7 @@ export type ResultsWithPaginationModelItem = {
 };
 
 /**
+ * ResultsWithPaginationModel<Order>
  * ResultsWithPaginationModel class
  */
 export type ResultsWithPaginationModelOrder = {
@@ -368,6 +375,7 @@ export type ResultsWithPaginationModelOrder = {
 };
 
 /**
+ * ResultsWithPaginationModel<Payment>
  * ResultsWithPaginationModel class
  */
 export type ResultsWithPaginationModelPayment = {
@@ -708,7 +716,7 @@ export type HelloAssoApiV5ModelsEnumsTierType = 'Donation' | 'Payment' | 'Regist
  * A custom field can be assigned to a Tier or an ExtraOption
  * It is used to give extra information during the reservation of a tier
  */
-export type HelloAssoApiV5ModelsFormsCustomFieldPublicModel = {
+export type HelloAssoApiV5ModelsFormsCustomFieldPublicModelReadable = {
     /**
      * Id of the customField
      */
@@ -729,13 +737,21 @@ export type HelloAssoApiV5ModelsFormsCustomFieldPublicModel = {
 };
 
 /**
+ * A custom field can be assigned to a Tier or an ExtraOption
+ * It is used to give extra information during the reservation of a tier
+ */
+export type HelloAssoApiV5ModelsFormsCustomFieldPublicModelWritable = {
+    type?: HelloAssoApiV5ModelsEnumsFieldType;
+};
+
+/**
  * ExtraOptionFullModel
  */
-export type HelloAssoApiV5ModelsFormsExtraOptionPublicModel = {
+export type HelloAssoApiV5ModelsFormsExtraOptionPublicModelReadable = {
     /**
      * List of custom fields to be filled by the user
      */
-    customFields?: Array<HelloAssoApiV5ModelsFormsCustomFieldPublicModel> | null;
+    customFields?: Array<HelloAssoApiV5ModelsFormsCustomFieldPublicModelReadable> | null;
     /**
      * Id
      */
@@ -761,6 +777,37 @@ export type HelloAssoApiV5ModelsFormsExtraOptionPublicModel = {
      * Additional option is required/mandatory
      */
     readonly isRequired?: boolean;
+};
+
+/**
+ * ExtraOptionFullModel
+ */
+export type HelloAssoApiV5ModelsFormsExtraOptionPublicModelWritable = {
+    /**
+     * List of custom fields to be filled by the user
+     */
+    customFields?: Array<HelloAssoApiV5ModelsFormsCustomFieldPublicModelWritable> | null;
+    /**
+     * Id
+     */
+    id?: number;
+    /**
+     * Price of the extraOption, can be free
+     */
+    price?: number;
+    /**
+     * Vat rate if applicable
+     * Amount have to be 0.10 for 10%
+     */
+    vatRate?: number;
+    /**
+     * The name of the option
+     */
+    label?: string | null;
+    /**
+     * The description of the option
+     */
+    description?: string | null;
 };
 
 /**
@@ -852,7 +899,7 @@ export type HelloAssoApiV5ModelsFormsFormLightModel = {
 /**
  * FormPublicModel class
  */
-export type HelloAssoApiV5ModelsFormsFormPublicModel = {
+export type HelloAssoApiV5ModelsFormsFormPublicModelReadable = {
     /**
      * Organization Logo
      */
@@ -864,7 +911,110 @@ export type HelloAssoApiV5ModelsFormsFormPublicModel = {
     /**
      * Tiers
      */
-    tiers?: Array<HelloAssoApiV5ModelsFormsTierPublicModel> | null;
+    tiers?: Array<HelloAssoApiV5ModelsFormsTierPublicModelReadable> | null;
+    /**
+     * Activity type of the event eg. "Atelier(s) / Stage(s)" matching one of the provided type values <a href="index#!/Values/Values_Get"> provided here</a> or a custom value is allowed.
+     */
+    activityType?: string | null;
+    /**
+     * Activity type identifier
+     */
+    activityTypeId?: number;
+    place?: HelloAssoApiV5ModelsCommonPlaceModel;
+    /**
+     * The datetime (Inclusive) at which the sales end.
+     * If null the orders will be available until the end of the campaign.
+     */
+    saleEndDate?: string | null;
+    /**
+     * The datetime (Inclusive) at which the users can start placing orders.
+     * If null the orders will be available as soon as the campaign is published.
+     */
+    saleStartDate?: string | null;
+    validityType?: HelloAssoApiV5ModelsEnumsMembershipValidityType;
+    /**
+     * A message customized by the organization administrator.
+     */
+    personalizedMessage?: string | null;
+    banner?: HelloAssoApiV5ModelsCommonDocumentModel;
+    /**
+     * Currency
+     */
+    currency?: string | null;
+    /**
+     * Short description (one line)
+     */
+    description?: string | null;
+    /**
+     * The datetime of the activity start
+     */
+    startDate?: string | null;
+    /**
+     * The datetime of the activity end
+     */
+    endDate?: string | null;
+    logo?: HelloAssoApiV5ModelsCommonDocumentModel;
+    meta?: HelloAssoApiV5ModelsCommonMetaModel;
+    state?: HelloAssoApiV5ModelsEnumsFormState;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Private Title
+     */
+    privateTitle?: string | null;
+    /**
+     * Url of the widget button
+     */
+    widgetButtonUrl?: string | null;
+    /**
+     * Url of the form widget
+     */
+    widgetFullUrl?: string | null;
+    /**
+     * Url of the horizontal vignette widget
+     */
+    widgetVignetteHorizontalUrl?: string | null;
+    /**
+     * Url of the vertical vignette widget
+     */
+    widgetVignetteVerticalUrl?: string | null;
+    /**
+     * Url of the counter widget
+     */
+    widgetCounterUrl?: string | null;
+    /**
+     * The form slug
+     */
+    formSlug?: string | null;
+    formType?: HelloAssoApiV5ModelsEnumsFormType;
+    /**
+     * The form url
+     */
+    url?: string | null;
+    /**
+     * The organization slug
+     */
+    organizationSlug?: string | null;
+};
+
+/**
+ * FormPublicModel class
+ */
+export type HelloAssoApiV5ModelsFormsFormPublicModelWritable = {
+    /**
+     * Organization Logo
+     */
+    organizationLogo?: string | null;
+    /**
+     * Organization Name
+     */
+    organizationName?: string | null;
+    /**
+     * Tiers
+     */
+    tiers?: Array<HelloAssoApiV5ModelsFormsTierPublicModelWritable> | null;
     /**
      * Activity type of the event eg. "Atelier(s) / Stage(s)" matching one of the provided type values <a href="index#!/Values/Values_Get"> provided here</a> or a custom value is allowed.
      */
@@ -1098,6 +1248,10 @@ export type HelloAssoApiV5ModelsFormsFormQuickCreateRequest = {
      */
     allowIndividualPayer?: boolean;
     /**
+     * The form display version (only for donation).
+     */
+    displayVersion?: number | null;
+    /**
      * Indicates the maximum available entries for the whole form. Null means unlimited entries.
      */
     maxEntries?: number | null;
@@ -1125,15 +1279,86 @@ export type HelloAssoApiV5ModelsFormsTierLightModel = {
 /**
  * TierPublicModel class
  */
-export type HelloAssoApiV5ModelsFormsTierPublicModel = {
+export type HelloAssoApiV5ModelsFormsTierPublicModelReadable = {
     /**
      * List of custom fields to be filled by the user
      */
-    customFields?: Array<HelloAssoApiV5ModelsFormsCustomFieldPublicModel> | null;
+    customFields?: Array<HelloAssoApiV5ModelsFormsCustomFieldPublicModelReadable> | null;
     /**
      * List of available extra options to buy along the tier
      */
-    extraOptions?: Array<HelloAssoApiV5ModelsFormsExtraOptionPublicModel> | null;
+    extraOptions?: Array<HelloAssoApiV5ModelsFormsExtraOptionPublicModelReadable> | null;
+    /**
+     * id
+     */
+    id?: number;
+    /**
+     * label
+     */
+    label?: string | null;
+    /**
+     * description
+     */
+    description?: string | null;
+    tierType?: HelloAssoApiV5ModelsEnumsTierType;
+    /**
+     * the Price in cents
+     * if price equals 0 then it is free or there is a MinAmount
+     */
+    price?: number | null;
+    /**
+     * Vat rate if applicable
+     * Amount have to be 0.10 for 10%
+     */
+    vatRate?: number;
+    /**
+     * If set, it means the payment is free to choose, according to the specified minAmount in cents
+     */
+    minAmount?: number | null;
+    paymentFrequency?: HelloAssoApiV5ModelsEnumsPaymentFrequencyType;
+    /**
+     * Max quantity buyable in this cart
+     */
+    maxPerUser?: number | null;
+    meta?: HelloAssoApiV5ModelsCommonMetaModel;
+    /**
+     * The datetime (Inclusive) at which the users can start buying this tier.
+     * If null the tier will be available at the start of the event.
+     */
+    saleStartDate?: string | null;
+    /**
+     * The datetime (Inclusive) at which the tier is no longer available.
+     * If null the tier will be available until the end of the event.
+     */
+    saleEndDate?: string | null;
+    /**
+     * Whether this is eligible to a deduction
+     */
+    isEligibleTaxReceipt?: boolean;
+    /**
+     * Terms of tier
+     */
+    terms?: Array<HelloAssoApiV5ModelsFormsTermModel> | null;
+    picture?: HelloAssoApiV5ModelsCommonDocumentModel;
+    /**
+     * True means this tier must be paid in the initial payment, false means it can be paid in payment with installments
+     * Null when the form payment terms are disabled or not compatible with the related form
+     */
+    isExcludedFromFormPaymentTerms?: boolean | null;
+};
+
+/**
+ * TierPublicModel class
+ */
+export type HelloAssoApiV5ModelsFormsTierPublicModelWritable = {
+    /**
+     * List of custom fields to be filled by the user
+     */
+    customFields?: Array<HelloAssoApiV5ModelsFormsCustomFieldPublicModelWritable> | null;
+    /**
+     * List of available extra options to buy along the tier
+     */
+    extraOptions?: Array<HelloAssoApiV5ModelsFormsExtraOptionPublicModelWritable> | null;
     /**
      * id
      */
@@ -1472,6 +1697,7 @@ export type HelloAssoApiV5ModelsPaymentPublicPaymentModel = {
     installmentNumber?: number | null;
     meta?: HelloAssoApiV5ModelsCommonMetaModel;
     /**
+     * List<RefundOperationLightModel>
      * The refund operations for the specific payment.
      */
     refundOperations?: Array<HelloAssoApiV5ModelsStatisticsRefundOperationLightModel> | null;
@@ -1716,6 +1942,7 @@ export type HelloAssoApiV5ModelsStatisticsItemPayment = {
     meta?: HelloAssoApiV5ModelsCommonMetaModel;
     paymentOffLineMean?: HelloAssoApiV5ModelsEnumsPaymentMeans;
     /**
+     * List<RefundOperationLightModel>
      * The refund operations information for the specific payment.
      */
     refundOperations?: Array<HelloAssoApiV5ModelsStatisticsRefundOperationLightModel> | null;
@@ -1967,6 +2194,7 @@ export type HelloAssoApiV5ModelsStatisticsOrderPayment = {
     meta?: HelloAssoApiV5ModelsCommonMetaModel;
     paymentOffLineMean?: HelloAssoApiV5ModelsEnumsPaymentMeans;
     /**
+     * List<RefundOperationLightModel>
      * The refund operations information for the specific payment.
      */
     refundOperations?: Array<HelloAssoApiV5ModelsStatisticsRefundOperationLightModel> | null;
@@ -2048,6 +2276,7 @@ export type HelloAssoApiV5ModelsStatisticsPayment = {
     meta?: HelloAssoApiV5ModelsCommonMetaModel;
     paymentOffLineMean?: HelloAssoApiV5ModelsEnumsPaymentMeans;
     /**
+     * List<RefundOperationLightModel>
      * The refund operations information for the specific payment.
      */
     refundOperations?: Array<HelloAssoApiV5ModelsStatisticsRefundOperationLightModel> | null;
@@ -2099,6 +2328,7 @@ export type HelloAssoApiV5ModelsStatisticsPaymentDetail = {
     meta?: HelloAssoApiV5ModelsCommonMetaModel;
     paymentOffLineMean?: HelloAssoApiV5ModelsEnumsPaymentMeans;
     /**
+     * List<RefundOperationLightModel>
      * The refund operations information for the specific payment.
      */
     refundOperations?: Array<HelloAssoApiV5ModelsStatisticsRefundOperationLightModel> | null;
@@ -2253,9 +2483,14 @@ export type HelloAssoModelsAccountsOrganizationLegalInformationsFiscalReceiptSig
     fileUrl?: string | null;
 };
 
-export type HelloAssoModelsAccountsOrganizationLegalInformationsOrganizationLegalInformationConfiguration = {
+export type HelloAssoModelsAccountsOrganizationLegalInformationsOrganizationLegalInformationConfigurationReadable = {
     readonly legalStructureId?: number;
     readonly isHelloAssoFiscalReceiptTransmitter?: boolean | null;
+    isColucheLawEnabled?: boolean;
+    isIfiEnabled?: boolean;
+};
+
+export type HelloAssoModelsAccountsOrganizationLegalInformationsOrganizationLegalInformationConfigurationWritable = {
     isColucheLawEnabled?: boolean;
     isIfiEnabled?: boolean;
 };
@@ -2485,7 +2720,7 @@ export type GetOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugPublicRes
     /**
      * Success
      */
-    200: HelloAssoApiV5ModelsFormsFormPublicModel;
+    200: HelloAssoApiV5ModelsFormsFormPublicModelReadable;
 };
 
 export type GetOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugPublicResponse = GetOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugPublicResponses[keyof GetOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugPublicResponses];
@@ -2500,6 +2735,7 @@ export type GetOrganizationsByOrganizationSlugFormTypesData = {
     };
     query?: {
         /**
+         * List<FormState>
          * List of Form States to filter with. If none specified, it won't filter results.
          *
          * Available values:
@@ -2543,6 +2779,7 @@ export type GetOrganizationsByOrganizationSlugFormsData = {
     };
     query?: {
         /**
+         * List<FormState>
          * States to filter
          *
          * Available values:
@@ -2553,6 +2790,7 @@ export type GetOrganizationsByOrganizationSlugFormsData = {
          */
         states?: Array<HelloAssoApiV5ModelsEnumsFormState>;
         /**
+         * List<FormType>
          * Types to filter
          */
         formTypes?: Array<HelloAssoApiV5ModelsEnumsFormType>;
@@ -2671,10 +2909,12 @@ export type GetOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugItemsData
          */
         continuationToken?: string;
         /**
+         * List<TierType>
          * The type of tiers
          */
         tierTypes?: Array<HelloAssoApiV5ModelsEnumsTierType>;
         /**
+         * List<ItemState>
          * The item states
          *
          * Available values:
@@ -2760,10 +3000,12 @@ export type GetOrganizationsByOrganizationSlugItemsData = {
          */
         continuationToken?: string;
         /**
+         * List<TierType>
          * The type of tiers Donation, Payment, Registration, Membership, MonthlyDonation, MonthlyPayment, OfflineDonation, Contribution, Bonus
          */
         tierTypes?: Array<HelloAssoApiV5ModelsEnumsTierType>;
         /**
+         * List<ItemState>
          * The item states
          *
          * Available values:
@@ -2955,6 +3197,7 @@ export type GetOrganizationsByOrganizationSlugOrdersData = {
          */
         continuationToken?: string;
         /**
+         * List<FormType>
          * The type of the form CrowdFunding, Membership, Event, Donation, PaymentForm, Checkout, Shop
          */
         formTypes?: Array<HelloAssoApiV5ModelsEnumsFormType>;
@@ -3048,6 +3291,7 @@ export type GetOrganizationsLegalInformationsLegalStructuresErrors = {
 
 export type GetOrganizationsLegalInformationsLegalStructuresResponses = {
     /**
+     * List<OrganizationLegalStructuresModel>
      * Success
      */
     200: Array<HelloAssoApiV5ModelsOrganizationLegalInformationsOrganizationLegalStructuresModel>;
@@ -3081,6 +3325,7 @@ export type GetOrganizationsLegalInformationsTaxInformationTextsErrors = {
 
 export type GetOrganizationsLegalInformationsTaxInformationTextsResponses = {
     /**
+     * List<TaxInformationText>
      * Success
      */
     200: Array<HelloAssoModelsAccountsOrganizationLegalInformationsTaxInformationText>;
@@ -3116,7 +3361,7 @@ export type GetOrganizationsLegalInformationsByOrganizationSlugConfigurationResp
     /**
      * Success
      */
-    200: HelloAssoModelsAccountsOrganizationLegalInformationsOrganizationLegalInformationConfiguration;
+    200: HelloAssoModelsAccountsOrganizationLegalInformationsOrganizationLegalInformationConfigurationReadable;
 };
 
 export type GetOrganizationsLegalInformationsByOrganizationSlugConfigurationResponse = GetOrganizationsLegalInformationsByOrganizationSlugConfigurationResponses[keyof GetOrganizationsLegalInformationsByOrganizationSlugConfigurationResponses];
@@ -3475,6 +3720,7 @@ export type GetOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugPaymentsD
          */
         continuationToken?: string;
         /**
+         * List<PaymentState>
          * Filter results by states of payments
          *
          * Available values:
@@ -3559,6 +3805,7 @@ export type GetOrganizationsByOrganizationSlugPaymentsData = {
          */
         continuationToken?: string;
         /**
+         * List<PaymentState>
          * The payment states
          *
          * Available values:
@@ -3682,6 +3929,7 @@ export type GetOrganizationsByOrganizationSlugPaymentsSearchData = {
          */
         continuationToken?: string;
         /**
+         * List<FormType>
          * The form type CrowdFunding, Membership, Event, Donation, PaymentForm, Checkout, Shop
          */
         formTypes?: Array<HelloAssoApiV5ModelsEnumsFormType>;
@@ -3690,6 +3938,7 @@ export type GetOrganizationsByOrganizationSlugPaymentsSearchData = {
          */
         formType?: HelloAssoApiV5ModelsEnumsFormType;
         /**
+         * List<PaymentState>
          * Filter results by states of payments
          *
          * Available values:
@@ -4053,3 +4302,7 @@ export type GetValuesCompanyLegalStatusResponses = {
 };
 
 export type GetValuesCompanyLegalStatusResponse = GetValuesCompanyLegalStatusResponses[keyof GetValuesCompanyLegalStatusResponses];
+
+export type ClientOptions = {
+    baseUrl: 'https://api.helloasso.com/v5' | (string & {});
+};
