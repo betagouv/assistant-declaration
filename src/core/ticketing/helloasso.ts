@@ -1,4 +1,3 @@
-import { Client, createClient, createConfig } from '@hey-api/client-fetch';
 import { eachOfLimit } from 'async';
 import Bottleneck from 'bottleneck';
 import { addYears, hoursToMilliseconds, minutesToMilliseconds, secondsToMilliseconds } from 'date-fns';
@@ -9,6 +8,7 @@ import {
   getOrganizationsByOrganizationSlugOrders,
   getUsersMeOrganizations,
 } from '@ad/src/client/helloasso';
+import { Client, createClient, createConfig } from '@ad/src/client/helloasso/client';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
 import { LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
