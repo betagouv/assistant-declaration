@@ -1,6 +1,7 @@
 import { Client, createClient, createConfig } from '@hey-api/client-fetch';
 import { eachOfLimit } from 'async';
-import { addYears } from 'date-fns';
+import Bottleneck from 'bottleneck';
+import { addYears, hoursToMilliseconds, minutesToMilliseconds, secondsToMilliseconds } from 'date-fns';
 import { ClientCredentials } from 'simple-oauth2';
 
 import {
@@ -18,6 +19,10 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
   protected readonly client: Client;
   protected readonly authClient: ClientCredentials;
   protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;
+  protected requestsPer10SecondsLimit = 10;
+  protected requestsPer10MinutesLimit = 10;
+  protected requestsPerHourLimit = 50;
+  protected requestsLimiter: Bottleneck;
 
   constructor(accessKey: string, secretKey: string, useTestEnvironment: boolean) {
     this.baseUrl = useTestEnvironment ? 'https://api.helloasso-sandbox.com' : 'https://api.helloasso.com';
@@ -25,6 +30,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
     this.client = createClient(
       createConfig({
         baseUrl: this.baseUrl,
+        fetch: this.rateLimitedFetch,
       })
     );
 
@@ -38,6 +44,36 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         tokenPath: '/oauth2/token',
       },
     });
+
+    // HelloAsso requires multiple rate limit conditions when fetching their API
+    this.requestsLimiter = new Bottleneck({
+      reservoir: this.requestsPer10SecondsLimit,
+      reservoirRefreshAmount: this.requestsPer10SecondsLimit,
+      reservoirRefreshInterval: secondsToMilliseconds(10),
+    })
+      .chain(
+        new Bottleneck({
+          reservoir: this.requestsPer10MinutesLimit,
+          reservoirRefreshAmount: this.requestsPer10MinutesLimit,
+          reservoirRefreshInterval: minutesToMilliseconds(10),
+        })
+      )
+      .chain(
+        new Bottleneck({
+          reservoir: this.requestsPerHourLimit,
+          reservoirRefreshAmount: this.requestsPerHourLimit,
+          reservoirRefreshInterval: hoursToMilliseconds(1),
+        })
+      )
+      .chain(
+        new Bottleneck({
+          maxConcurrent: 5, // in case of parallel forms processing, limit concurrent requests
+        })
+      );
+  }
+
+  protected async rateLimitedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+    return await this.requestsLimiter.schedule(() => fetch(input, init));
   }
 
   protected assertCollectionResponseValid<
@@ -202,9 +238,6 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
 
       const form = formResult as any;
     });
-
-    // TODO: 10 calls every 10 seconds...
-    // so we need the lib of the other day
 
     return [];
   }
