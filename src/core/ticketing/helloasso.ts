@@ -40,23 +40,37 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
     });
   }
 
-  protected assertCollectionResponseValid(collectionResult: {
-    data?: {
-      data?: Array<any> | null;
-      pagination?: {
-        pageSize?: number;
-        totalCount?: number;
+  protected assertCollectionResponseValid<
+    E extends any,
+    R extends {
+      data?: {
+        data?: Array<E> | null;
+        pagination?: {
+          pageSize?: number;
+          totalCount?: number;
+        };
+      };
+    },
+  >(
+    collectionResult: R
+  ): asserts collectionResult is R & {
+    // [WORKAROUND] We had to do this because with type narrowing the parent was not considering subproperties filled
+    data: {
+      data: Array<E>;
+      pagination: {
+        pageSize: number;
+        totalCount: number;
       };
     };
-  }) {
+  } {
     if (
       !collectionResult.data ||
       !collectionResult.data.data ||
-      !Array.isArray(collectionResult.data.data)
-      // !collectionResult.data.pagination?.pageSize ||
-      // collectionResult.data.pagination.totalCount === undefined ||
-      // collectionResult.data.pagination.pageSize !== this.itemsPerPageToAvoidPagination ||
-      // collectionResult.data.pagination.totalCount > this.itemsPerPageToAvoidPagination
+      !Array.isArray(collectionResult.data.data) ||
+      !collectionResult.data.pagination?.pageSize ||
+      collectionResult.data.pagination.totalCount === undefined ||
+      collectionResult.data.pagination.pageSize !== this.itemsPerPageToAvoidPagination ||
+      collectionResult.data.pagination.totalCount > this.itemsPerPageToAvoidPagination
     ) {
       throw new Error('avoiding pagination has failed fetching all items');
     }
@@ -154,63 +168,16 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       throw recentOrdersResult.error;
     }
 
-    // TODO
-    // TODO
-    // TODO
-    // TODO
-    // why using assertCollectionResponseValid
-    // is not adjusting type by default? whereas it works here... makes no sense
-    //
-    // function needs to extends the form ?
-    //
-    //
-
-    // recentOrdersResult.data?.data;
-
-    if (
-      !recentOrdersResult.data ||
-      !recentOrdersResult.data.data ||
-      !Array.isArray(recentOrdersResult.data.data)
-      // !recentOrdersResult.data.pagination?.pageSize ||
-      // recentOrdersResult.data.pagination.totalCount === undefined ||
-      // recentOrdersResult.data.pagination.pageSize !== this.itemsPerPageToAvoidPagination ||
-      // recentOrdersResult.data.pagination.totalCount > this.itemsPerPageToAvoidPagination
-    ) {
-      throw new Error('avoiding pagination has failed fetching all items');
-    }
-
-    // recentOrdersResult.data.data[0];
-
-    // if (recentOrdersResult.data && Array.isArray(recentOrdersResult.data.data)) {
-    //   //
-    //   recentOrdersResult.data.data;
-    // }
-
-    // tried everything... phoque typings :D
-
-    // TEST
-    // TEST
-    // TEST
-    // TEST probably due to not using generics?
-    // TEST
-    // TEST
-    // TEST
-
     this.assertCollectionResponseValid(recentOrdersResult);
 
-    // TODO: test
-    // TODO: test
-    recentOrdersResult.data.data;
-    // TODO: test
-    // TODO: test
-    // TODO: test
-
-    const recentOrders = recentOrdersResult.data;
+    const recentOrders = recentOrdersResult.data.data;
 
     // Since there is no filter in the query we make sure keeping only items (sales) for events (form type)
     const formsSlugsToSynchronize: string[] = [];
 
     for (const recentOrder of recentOrders) {
+      assert(recentOrder.formSlug);
+
       formsSlugsToSynchronize.push(recentOrder.formSlug);
     }
 
