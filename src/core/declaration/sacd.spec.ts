@@ -22,7 +22,7 @@ describeWhenManual('SacdClient', () => {
 
   beforeAll(async () => {
     await client.login();
-  }, secondsToMilliseconds(10));
+  }, secondsToMilliseconds(20));
 
   afterAll(async () => {
     if (client.loggedIn()) {
@@ -41,7 +41,7 @@ describeWhenManual('SacdClient', () => {
   it(
     'should submit a declaration',
     async () => {
-      await client.declare('TODO', eventsSeries[0], eventsWrappers, sacdDeclarations[0]);
+      await client.declare('712790', eventsSeries[0], eventsWrappers, sacdDeclarations[0]);
     },
     secondsToMilliseconds(30)
   );

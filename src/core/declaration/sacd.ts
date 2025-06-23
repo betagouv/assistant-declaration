@@ -220,7 +220,7 @@ export function prepareDeclarationParameter(
   eventSerie: EventSerieSchemaType,
   wrappers: EventWrapperSchemaType[],
   declaration: SacdDeclarationSchemaType,
-  declarationAt?: Date,
+  declarationAt?: Date
 ): string {
   const { t } = useServerTranslation('common');
 

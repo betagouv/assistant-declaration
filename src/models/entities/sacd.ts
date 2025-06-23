@@ -105,7 +105,7 @@ export const JsonDeclareResponseSchema = z
     Declaration: z.object({
       Header: z.object({
         dec_ref: z.string(),
-        dec_nb: z.number().int(),
+        dec_nb: z.coerce.number().int(),
         sacd_date: z.string(),
       }),
       Representations: z.object({
@@ -114,7 +114,7 @@ export const JsonDeclareResponseSchema = z
             rep_ref_dec: z.string().optional(),
             numero: z.string(),
             statut: z.enum(['KO', 'OK', 'WARNING']),
-            champ: z.string(),
+            champ: z.string().optional(),
             message: z.string().optional(),
           })
         ),
