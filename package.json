@@ -123,6 +123,7 @@
     "async-mutex": "^0.5.0",
     "axe-playwright": "^2.0.3",
     "bcrypt": "^5.1.1",
+    "bottleneck": "^2.19.5",
     "chalk": "^5.3.0",
     "content-disposition": "^0.5.4",
     "country-data": "^0.0.31",
