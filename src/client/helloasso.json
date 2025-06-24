@@ -4614,6 +4614,7 @@
       },
       "HelloAsso.Api.V5.Models.Forms.FormPublicModel": {
         "type": "object",
+        "required": ["formSlug", "startDate", "endDate", "title", "currency", "tiers"],
         "properties": {
           "organizationLogo": {
             "type": "string",
@@ -5009,6 +5010,7 @@
       },
       "HelloAsso.Api.V5.Models.Forms.TierPublicModel": {
         "type": "object",
+        "required": ["id", "label", "tierType", "price", "vatRate", "paymentFrequency"],
         "properties": {
           "customFields": {
             "type": "array",
