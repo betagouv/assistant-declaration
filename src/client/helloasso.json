@@ -3584,6 +3584,7 @@
       },
       "HelloAsso.Api.V5.Models.Common.PaginationModel": {
         "type": "object",
+        "required": ["pageSize", "totalCount", "pageIndex", "totalPages", "continuationToken"],
         "properties": {
           "pageSize": {
             "type": "integer",
@@ -3768,6 +3769,7 @@
       "ResultsWithPaginationModel_Order": {
         "title": "ResultsWithPaginationModel<Order>",
         "type": "object",
+        "required": ["data", "pagination"],
         "properties": {
           "data": {
             "type": "array",
