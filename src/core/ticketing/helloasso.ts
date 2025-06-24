@@ -1,8 +1,9 @@
 import { eachOfLimit } from 'async';
 import Bottleneck from 'bottleneck';
-import { addYears, hoursToMilliseconds, minutesToMilliseconds, secondsToMilliseconds } from 'date-fns';
+import { addDays, addYears, hoursToMilliseconds, minutesToMilliseconds, secondsToMilliseconds, set } from 'date-fns';
 import { ClientCredentials } from 'simple-oauth2';
 
+import { HelloAssoApiV5ModelsStatisticsOrder } from '@ad/src/client/helloasso';
 import { Client, createClient, createConfig } from '@ad/src/client/helloasso/client';
 import {
   getOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugPublic,
@@ -14,6 +15,7 @@ import {
   LiteEventSalesSchemaType,
   LiteEventSchema,
   LiteEventSchemaType,
+  LiteEventSerieSchema,
   LiteEventSerieWrapperSchemaType,
   LiteTicketCategorySchemaType,
 } from '@ad/src/models/entities/event';
@@ -25,7 +27,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
   protected usingTestEnvironnement = false;
   protected readonly client: Client;
   protected readonly authClient: ClientCredentials;
-  protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;
+  protected readonly maximumItemsPerPage: number = 100; // That's the limit required by the API after test
   protected requestsPer10SecondsLimit = 10;
   protected requestsPer10MinutesLimit = 10;
   protected requestsPerHourLimit = 50;
@@ -89,18 +91,17 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       pagination: {
         pageSize: number;
         totalCount: number;
+        pageIndex: number;
+        totalPages: number;
+        continuationToken: string | null;
       };
     },
     R extends {
       data?: E;
     },
   >(collectionResult: R): asserts collectionResult is R & { data: E } {
-    if (
-      !collectionResult.data ||
-      collectionResult.data.pagination.pageSize !== this.itemsPerPageToAvoidPagination ||
-      collectionResult.data.pagination.totalCount > this.itemsPerPageToAvoidPagination
-    ) {
-      throw new Error('avoiding pagination has failed fetching all items');
+    if (!collectionResult.data || collectionResult.data.pagination.pageSize !== this.maximumItemsPerPage) {
+      throw new Error('something seems wrong with pagination result');
     }
   }
 
@@ -153,8 +154,8 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
           organizationSlug: organizationSlug,
         },
         query: {
-          from: futureDate.toString(),
-          to: futureDate.toString(),
+          from: futureDate.toISOString(),
+          to: futureDate.toISOString(),
           pageSize: 1,
         },
       });
@@ -172,32 +173,46 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
   public async getEventsSeries(fromDate: Date, toDate?: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
     const { accessToken, organizationSlug } = await this.login();
 
-    const recentOrdersResult = await getOrganizationsByOrganizationSlugOrders({
-      client: this.client,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      path: {
-        organizationSlug: organizationSlug,
-      },
-      query: {
-        formTypes: ['Event'],
-        from: fromDate.toString(),
-        ...(toDate ? { to: toDate.toString() } : {}),
-        pageSize: this.itemsPerPageToAvoidPagination,
-        sortOrder: 'Desc', // No `sortField` to choose updated property
-        withCount: true,
-      },
-    });
+    // Get tickets modifications to know which events to synchronize (for the first time, or again)
+    const recentOrders: HelloAssoApiV5ModelsStatisticsOrder[] = [];
 
-    if (recentOrdersResult.error) {
-      throw recentOrdersResult.error;
+    let recentOrdersCurrentCursor: string | null = null;
+
+    while (true) {
+      const recentOrdersResult = await getOrganizationsByOrganizationSlugOrders({
+        client: this.client,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        path: {
+          organizationSlug: organizationSlug,
+        },
+        query: {
+          formTypes: ['Event'],
+          from: fromDate.toISOString(),
+          ...(toDate ? { to: toDate.toISOString() } : {}),
+          pageSize: this.maximumItemsPerPage,
+          sortOrder: 'Desc', // No `sortField` to choose updated property
+          withCount: true,
+        },
+      });
+
+      if (recentOrdersResult.error) {
+        throw recentOrdersResult.error;
+      }
+
+      this.assertCollectionResponseValid(recentOrdersResult);
+      assert(recentOrdersResult.data.data);
+
+      recentOrders.push(...recentOrdersResult.data.data);
+
+      if (!recentOrdersResult.data.pagination.continuationToken) {
+        break;
+      }
+
+      // Adjust to fetch the next page
+      recentOrdersCurrentCursor = recentOrdersResult.data.pagination.continuationToken;
     }
-
-    this.assertCollectionResponseValid(recentOrdersResult);
-    assert(recentOrdersResult.data.data);
-
-    const recentOrders = recentOrdersResult.data.data;
 
     // Since there is no filter in the query we make sure keeping only items (sales) for events (form type)
     const formsSlugsToSynchronize: string[] = [];
@@ -207,6 +222,8 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
 
       formsSlugsToSynchronize.push(recentOrder.formSlug);
     }
+
+    const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
 
     // Get all data to be returned and compared with stored data we have
     // Note: for now we do not parallelize to not flood the ticketing system
@@ -227,9 +244,54 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         throw formResult.error;
       }
 
-      const form = formResult as any;
+      console.log(JSON.stringify(formResult));
+      throw 5555;
+
+      assert(formResult.data);
+
+      const schemaEvents: LiteEventSchemaType[] = [];
+      const schemaTicketCategories: LiteTicketCategorySchemaType[] = [];
+      const schemaEventSales: Map<
+        LiteEventSalesSchemaType['internalEventTicketingSystemId'] & LiteEventSalesSchemaType['internalTicketCategoryTicketingSystemId'],
+        LiteEventSalesSchemaType
+      > = new Map();
+
+      assert(formResult.data.startDate);
+
+      const startDate = new Date(formResult.data.startDate);
+
+      let endDate: Date;
+      if (formResult.data.endDate !== null) {
+        endDate = new Date(formResult.data.endDate);
+      } else {
+        // Doing as ticketing system Mapado that is setting by default the end date to the end of the night
+        endDate = set(addDays(startDate, 1), { hours: 5, minutes: 0, seconds: 0, milliseconds: 0 });
+      }
+
+      // It's important to note Shotgun is having only "1 event serie = 1 event" (there is no multiple representations for the same serie)
+      // We could have tried to merged them based on naming but it's kind of tricky before knowing well their customer usage of it
+      schemaEvents.push(
+        LiteEventSchema.parse({
+          internalTicketingSystemId: formResult.data.formSlug,
+          startAt: startDate,
+          endAt: endDate,
+        })
+      );
+
+      eventsSeriesWrappers.push({
+        serie: LiteEventSerieSchema.parse({
+          internalTicketingSystemId: formResult.data.formSlug,
+          name: formResult.data.label,
+          startAt: startDate,
+          endAt: endDate,
+          // taxRate: formResult.data.,
+        }),
+        events: schemaEvents,
+        ticketCategories: Array.from(schemaTicketCategories.values()),
+        sales: Array.from(schemaEventSales.values()),
+      });
     });
 
-    return [];
+    return eventsSeriesWrappers;
   }
 }
