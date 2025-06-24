@@ -32,12 +32,12 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
   protected requestsLimiter: Bottleneck;
 
   constructor(accessKey: string, secretKey: string, useTestEnvironment: boolean) {
-    this.baseUrl = useTestEnvironment ? 'https://api.helloasso-sandbox.com' : 'https://api.helloasso.com';
+    this.baseUrl = useTestEnvironment ? 'https://api.helloasso-sandbox.com/v5' : 'https://api.helloasso.com/v5';
 
     this.client = createClient(
       createConfig({
         baseUrl: this.baseUrl,
-        fetch: this.rateLimitedFetch,
+        fetch: this.rateLimitedFetch.bind(this),
       })
     );
 
