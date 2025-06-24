@@ -911,7 +911,7 @@ export type HelloAssoApiV5ModelsFormsFormPublicModelReadable = {
     /**
      * Tiers
      */
-    tiers?: Array<HelloAssoApiV5ModelsFormsTierPublicModelReadable> | null;
+    tiers: Array<HelloAssoApiV5ModelsFormsTierPublicModelReadable> | null;
     /**
      * Activity type of the event eg. "Atelier(s) / Stage(s)" matching one of the provided type values <a href="index#!/Values/Values_Get"> provided here</a> or a custom value is allowed.
      */
@@ -940,7 +940,7 @@ export type HelloAssoApiV5ModelsFormsFormPublicModelReadable = {
     /**
      * Currency
      */
-    currency?: string | null;
+    currency: string | null;
     /**
      * Short description (one line)
      */
@@ -948,18 +948,18 @@ export type HelloAssoApiV5ModelsFormsFormPublicModelReadable = {
     /**
      * The datetime of the activity start
      */
-    startDate?: string | null;
+    startDate: string | null;
     /**
      * The datetime of the activity end
      */
-    endDate?: string | null;
+    endDate: string | null;
     logo?: HelloAssoApiV5ModelsCommonDocumentModel;
     meta?: HelloAssoApiV5ModelsCommonMetaModel;
     state?: HelloAssoApiV5ModelsEnumsFormState;
     /**
      * Title
      */
-    title?: string | null;
+    title: string | null;
     /**
      * Private Title
      */
@@ -987,7 +987,7 @@ export type HelloAssoApiV5ModelsFormsFormPublicModelReadable = {
     /**
      * The form slug
      */
-    formSlug?: string | null;
+    formSlug: string | null;
     formType?: HelloAssoApiV5ModelsEnumsFormType;
     /**
      * The form url
@@ -1014,7 +1014,7 @@ export type HelloAssoApiV5ModelsFormsFormPublicModelWritable = {
     /**
      * Tiers
      */
-    tiers?: Array<HelloAssoApiV5ModelsFormsTierPublicModelWritable> | null;
+    tiers: Array<HelloAssoApiV5ModelsFormsTierPublicModelWritable> | null;
     /**
      * Activity type of the event eg. "Atelier(s) / Stage(s)" matching one of the provided type values <a href="index#!/Values/Values_Get"> provided here</a> or a custom value is allowed.
      */
@@ -1043,7 +1043,7 @@ export type HelloAssoApiV5ModelsFormsFormPublicModelWritable = {
     /**
      * Currency
      */
-    currency?: string | null;
+    currency: string | null;
     /**
      * Short description (one line)
      */
@@ -1051,18 +1051,18 @@ export type HelloAssoApiV5ModelsFormsFormPublicModelWritable = {
     /**
      * The datetime of the activity start
      */
-    startDate?: string | null;
+    startDate: string | null;
     /**
      * The datetime of the activity end
      */
-    endDate?: string | null;
+    endDate: string | null;
     logo?: HelloAssoApiV5ModelsCommonDocumentModel;
     meta?: HelloAssoApiV5ModelsCommonMetaModel;
     state?: HelloAssoApiV5ModelsEnumsFormState;
     /**
      * Title
      */
-    title?: string | null;
+    title: string | null;
     /**
      * Private Title
      */
@@ -1090,7 +1090,7 @@ export type HelloAssoApiV5ModelsFormsFormPublicModelWritable = {
     /**
      * The form slug
      */
-    formSlug?: string | null;
+    formSlug: string | null;
     formType?: HelloAssoApiV5ModelsEnumsFormType;
     /**
      * The form url
@@ -1291,31 +1291,31 @@ export type HelloAssoApiV5ModelsFormsTierPublicModelReadable = {
     /**
      * id
      */
-    id?: number;
+    id: number;
     /**
      * label
      */
-    label?: string | null;
+    label: string | null;
     /**
      * description
      */
     description?: string | null;
-    tierType?: HelloAssoApiV5ModelsEnumsTierType;
+    tierType: HelloAssoApiV5ModelsEnumsTierType;
     /**
      * the Price in cents
      * if price equals 0 then it is free or there is a MinAmount
      */
-    price?: number | null;
+    price: number | null;
     /**
      * Vat rate if applicable
      * Amount have to be 0.10 for 10%
      */
-    vatRate?: number;
+    vatRate: number;
     /**
      * If set, it means the payment is free to choose, according to the specified minAmount in cents
      */
     minAmount?: number | null;
-    paymentFrequency?: HelloAssoApiV5ModelsEnumsPaymentFrequencyType;
+    paymentFrequency: HelloAssoApiV5ModelsEnumsPaymentFrequencyType;
     /**
      * Max quantity buyable in this cart
      */
@@ -1362,31 +1362,31 @@ export type HelloAssoApiV5ModelsFormsTierPublicModelWritable = {
     /**
      * id
      */
-    id?: number;
+    id: number;
     /**
      * label
      */
-    label?: string | null;
+    label: string | null;
     /**
      * description
      */
     description?: string | null;
-    tierType?: HelloAssoApiV5ModelsEnumsTierType;
+    tierType: HelloAssoApiV5ModelsEnumsTierType;
     /**
      * the Price in cents
      * if price equals 0 then it is free or there is a MinAmount
      */
-    price?: number | null;
+    price: number | null;
     /**
      * Vat rate if applicable
      * Amount have to be 0.10 for 10%
      */
-    vatRate?: number;
+    vatRate: number;
     /**
      * If set, it means the payment is free to choose, according to the specified minAmount in cents
      */
     minAmount?: number | null;
-    paymentFrequency?: HelloAssoApiV5ModelsEnumsPaymentFrequencyType;
+    paymentFrequency: HelloAssoApiV5ModelsEnumsPaymentFrequencyType;
     /**
      * Max quantity buyable in this cart
      */

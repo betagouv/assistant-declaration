@@ -6,6 +6,7 @@ import { ClientCredentials } from 'simple-oauth2';
 import { HelloAssoApiV5ModelsStatisticsOrder } from '@ad/src/client/helloasso';
 import { Client, createClient, createConfig } from '@ad/src/client/helloasso/client';
 import {
+  getOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugItems,
   getOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugPublic,
   getOrganizationsByOrganizationSlugOrders,
   getUsersMeOrganizations,
@@ -17,6 +18,7 @@ import {
   LiteEventSchemaType,
   LiteEventSerieSchema,
   LiteEventSerieWrapperSchemaType,
+  LiteTicketCategorySchema,
   LiteTicketCategorySchemaType,
 } from '@ad/src/models/entities/event';
 import { JsonTokenSchema } from '@ad/src/models/entities/helloasso';
@@ -204,6 +206,9 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       this.assertCollectionResponseValid(recentOrdersResult);
       assert(recentOrdersResult.data.data);
 
+      // console.log(4444444444);
+      // console.log(recentOrdersResult.data.data);
+
       recentOrders.push(...recentOrdersResult.data.data);
 
       if (!recentOrdersResult.data.pagination.continuationToken) {
@@ -244,18 +249,18 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         throw formResult.error;
       }
 
-      console.log(JSON.stringify(formResult));
-      throw 5555;
-
       assert(formResult.data);
 
       const schemaEvents: LiteEventSchemaType[] = [];
-      const schemaTicketCategories: LiteTicketCategorySchemaType[] = [];
+      const schemaTicketCategories: Map<LiteTicketCategorySchemaType['internalTicketingSystemId'], LiteTicketCategorySchemaType> = new Map();
       const schemaEventSales: Map<
         LiteEventSalesSchemaType['internalEventTicketingSystemId'] & LiteEventSalesSchemaType['internalTicketCategoryTicketingSystemId'],
         LiteEventSalesSchemaType
       > = new Map();
 
+      assert(formResult.data.formSlug);
+      assert(formResult.data.title);
+      assert(formResult.data.currency === 'EUR');
       assert(formResult.data.startDate);
 
       const startDate = new Date(formResult.data.startDate);
@@ -278,13 +283,99 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         })
       );
 
+      let taxRate: number | null = null;
+
+      if (formResult.data.tiers) {
+        for (const tier of formResult.data.tiers) {
+          if (tier.tierType !== 'Registration') {
+            // It seems other types should be ignored to only keep ones related to events
+            continue;
+          }
+
+          const ticketCategory = LiteTicketCategorySchema.parse({
+            internalTicketingSystemId: tier.id.toString(),
+            name: tier.label ?? `Tarif n°${tier.id}`,
+            description: null,
+            price: tier.price !== null ? tier.price / 100 : 0, // 2000 is 20€
+          });
+
+          schemaTicketCategories.set(ticketCategory.internalTicketingSystemId, ticketCategory);
+
+          const tierVatRate = tier.vatRate / 100; // Receiving 5.50 for 5.5%
+
+          // TODO: for now we manage a unique tax rate per event serie whereas it should be by ticket category
+          if (taxRate === null) {
+          } else if (taxRate !== tierVatRate) {
+            // throw new Error(`an event serie should have the same tax rate for all categories`)
+
+            // [WORKAROUND] Until we decide the right way to do, just keep a tax rate none null
+            taxRate = Math.max(taxRate, tierVatRate);
+          }
+        }
+      }
+
+      // TODO: should be tested
+
+      // Get tickets modifications to know which events to synchronize (for the first time, or again)
+      const soldItems: HelloAssoApiV5ModelsStatisticsOrder[] = [];
+
+      let soldItemsCurrentCursor: string | null = null;
+
+      while (true) {
+        const soldItemsResult = await getOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugItems({
+          client: this.client,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          path: {
+            organizationSlug: organizationSlug,
+            formType: 'Event',
+            formSlug: formSlug,
+          },
+          query: {
+            tierTypes: ['Registration'],
+            itemStates: ['Processed', 'Registered'],
+            pageSize: this.maximumItemsPerPage,
+            sortField: 'CreationDate',
+            sortOrder: 'Desc', // No `sortField` to choose updated property
+            withCount: true,
+          },
+        });
+
+        if (soldItemsResult.error) {
+          throw soldItemsResult.error;
+        }
+
+        this.assertCollectionResponseValid(soldItemsResult);
+        assert(soldItemsResult.data.data);
+
+        // console.log(4444444444);
+        // console.log(soldItemsResult.data.data);
+
+        soldItems.push(...soldItemsResult.data.data);
+
+        if (!soldItemsResult.data.pagination.continuationToken) {
+          break;
+        }
+
+        // Adjust to fetch the next page
+        soldItemsCurrentCursor = soldItemsResult.data.pagination.continuationToken;
+      }
+
+      // TODO:
+      // TODO: we should then be able to retrieve the total for each tier?
+      // TODO: or maybe we had to get orders from form? needs data to test it...
+      // TODO:
+
+      assert(taxRate !== null);
+
       eventsSeriesWrappers.push({
         serie: LiteEventSerieSchema.parse({
           internalTicketingSystemId: formResult.data.formSlug,
-          name: formResult.data.label,
+          name: formResult.data.title,
           startAt: startDate,
           endAt: endDate,
-          // taxRate: formResult.data.,
+          taxRate: taxRate,
         }),
         events: schemaEvents,
         ticketCategories: Array.from(schemaTicketCategories.values()),
