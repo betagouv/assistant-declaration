@@ -244,23 +244,23 @@ export type HelloAssoApiV5ModelsCommonPaginationModel = {
     /**
      * Page size
      */
-    pageSize?: number;
+    pageSize: number;
     /**
      * Total number of results available
      */
-    totalCount?: number;
+    totalCount: number;
     /**
      * Current page index
      */
-    pageIndex?: number;
+    pageIndex: number;
     /**
      * Total number of pages of results with current page size
      */
-    totalPages?: number;
+    totalPages: number;
     /**
      * Continuation Token to get next results
      */
-    continuationToken?: string | null;
+    continuationToken: string | null;
 };
 
 /**
@@ -370,8 +370,8 @@ export type ResultsWithPaginationModelOrder = {
     /**
      * Data property
      */
-    data?: Array<HelloAssoApiV5ModelsStatisticsOrder> | null;
-    pagination?: HelloAssoApiV5ModelsCommonPaginationModel;
+    data: Array<HelloAssoApiV5ModelsStatisticsOrder> | null;
+    pagination: HelloAssoApiV5ModelsCommonPaginationModel;
 };
 
 /**
@@ -1949,47 +1949,47 @@ export type HelloAssoApiV5ModelsStatisticsItemPayment = {
 };
 
 export type HelloAssoApiV5ModelsStatisticsOrder = {
-    payer?: HelloAssoApiV5ModelsStatisticsPayer;
+    payer: HelloAssoApiV5ModelsStatisticsPayer;
     /**
      * All items of the order
      */
-    items?: Array<HelloAssoApiV5ModelsStatisticsOrderItem> | null;
+    items: Array<HelloAssoApiV5ModelsStatisticsOrderItem> | null;
     /**
      * All payments of the order
      */
-    payments?: Array<HelloAssoApiV5ModelsStatisticsOrderPayment> | null;
-    amount?: HelloAssoApiV5ModelsStatisticsOrderAmountModel;
+    payments: Array<HelloAssoApiV5ModelsStatisticsOrderPayment> | null;
+    amount: HelloAssoApiV5ModelsStatisticsOrderAmountModel;
     /**
      * The ID of the Order
      */
-    id?: number;
+    id: number;
     /**
      * Order creation date
      */
-    date?: string;
+    date: string;
     /**
      * FormSlug (lowercase name of the form without special characters)
      */
-    formSlug?: string | null;
-    formType?: HelloAssoApiV5ModelsEnumsFormType;
+    formSlug: string | null;
+    formType: HelloAssoApiV5ModelsEnumsFormType;
     /**
      * The organization name.
      */
-    organizationName?: string | null;
+    organizationName: string | null;
     /**
      * OrganizationSlug (lowercase name of the organization without special characters)
      */
-    organizationSlug?: string | null;
-    organizationType?: HelloAssoApiV5ModelsEnumsOrganizationType;
+    organizationSlug: string | null;
+    organizationType: HelloAssoApiV5ModelsEnumsOrganizationType;
     /**
      * Whether or not the organization is subject to the coluche law
      */
-    organizationIsUnderColucheLaw?: boolean;
+    organizationIsUnderColucheLaw: boolean;
     /**
      * Checkout intent Id if available
      */
-    checkoutIntentId?: number | null;
-    meta?: HelloAssoApiV5ModelsCommonMetaModel;
+    checkoutIntentId: number | null;
+    meta: HelloAssoApiV5ModelsCommonMetaModel;
 };
 
 export type HelloAssoApiV5ModelsStatisticsOrderAmountModel = {

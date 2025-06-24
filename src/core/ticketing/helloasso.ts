@@ -3,14 +3,21 @@ import Bottleneck from 'bottleneck';
 import { addYears, hoursToMilliseconds, minutesToMilliseconds, secondsToMilliseconds } from 'date-fns';
 import { ClientCredentials } from 'simple-oauth2';
 
+import { Client, createClient, createConfig } from '@ad/src/client/helloasso/client';
 import {
   getOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugPublic,
   getOrganizationsByOrganizationSlugOrders,
   getUsersMeOrganizations,
-} from '@ad/src/client/helloasso';
-import { Client, createClient, createConfig } from '@ad/src/client/helloasso/client';
+} from '@ad/src/client/helloasso/sdk.gen';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
-import { LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
+import {
+  LiteEventSalesSchemaType,
+  LiteEventSchema,
+  LiteEventSchemaType,
+  LiteEventSerieWrapperSchemaType,
+  LiteTicketCategorySchemaType,
+} from '@ad/src/models/entities/event';
+import { JsonTokenSchema } from '@ad/src/models/entities/helloasso';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export class HelloassoTicketingSystemClient implements TicketingSystemClient {
@@ -77,34 +84,19 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
   }
 
   protected assertCollectionResponseValid<
-    E extends any,
-    R extends {
-      data?: {
-        data?: Array<E> | null;
-        pagination?: {
-          pageSize?: number;
-          totalCount?: number;
-        };
-      };
-    },
-  >(
-    collectionResult: R
-  ): asserts collectionResult is R & {
-    // [WORKAROUND] We had to do this because with type narrowing the parent was not considering subproperties filled
-    data: {
-      data: Array<E>;
+    E extends {
+      data: Array<any> | null;
       pagination: {
         pageSize: number;
         totalCount: number;
       };
-    };
-  } {
+    },
+    R extends {
+      data?: E;
+    },
+  >(collectionResult: R): asserts collectionResult is R & { data: E } {
     if (
       !collectionResult.data ||
-      !collectionResult.data.data ||
-      !Array.isArray(collectionResult.data.data) ||
-      !collectionResult.data.pagination?.pageSize ||
-      collectionResult.data.pagination.totalCount === undefined ||
       collectionResult.data.pagination.pageSize !== this.itemsPerPageToAvoidPagination ||
       collectionResult.data.pagination.totalCount > this.itemsPerPageToAvoidPagination
     ) {
@@ -113,18 +105,16 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
   }
 
   public async login(): Promise<{ accessToken: string; organizationSlug: string }> {
-    const token = await this.authClient.getToken({
+    const tokenResult = await this.authClient.getToken({
       scope: '',
     });
 
-    assert(typeof token.token === 'string');
-
-    const accessToken = token.token;
+    const token = JsonTokenSchema.parse(tokenResult.token);
 
     const organizationsResult = await getUsersMeOrganizations({
       client: this.client,
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${token.access_token}`,
       },
     });
 
@@ -141,7 +131,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
     assert(organizationsResult.data[0].organizationSlug);
 
     return {
-      accessToken: accessToken,
+      accessToken: token.access_token,
       organizationSlug: organizationsResult.data[0].organizationSlug,
     };
   }
@@ -205,6 +195,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
     }
 
     this.assertCollectionResponseValid(recentOrdersResult);
+    assert(recentOrdersResult.data.data);
 
     const recentOrders = recentOrdersResult.data.data;
 
