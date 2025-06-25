@@ -130,6 +130,7 @@ const generateNextConfig = async (): Promise<NextConfig> => {
       //   test: /\.(txt|html)$/i,
       //   use: 'raw-loader',
       // });
+
       // This is needed when using Sentry with Next.js (ref: https://github.com/getsentry/sentry-javascript/issues/12077)
       config.ignoreWarnings = [
         {
@@ -149,7 +150,7 @@ const generateNextConfig = async (): Promise<NextConfig> => {
 
   const sentryWebpackPluginOptions: SentryBuildOptions = {
     unstable_sentryWebpackPluginOptions: {
-      disable: !uploadToSentry,
+      disable: !uploadToSentry, // Does not seem to disable it fully
     },
     debug: false,
     silent: false,
@@ -170,6 +171,7 @@ const generateNextConfig = async (): Promise<NextConfig> => {
     },
     widenClientFileUpload: false, // Avoid including Next.js and its dependencies code
     sourcemaps: {
+      disable: process.env.NODE_ENV === 'development',
       deleteSourcemapsAfterUpload: mode === 'prod',
     },
     // tunnelRoute: '/monitoring', // Helpful to avoid adblockers, but requires Sentry SaaS
