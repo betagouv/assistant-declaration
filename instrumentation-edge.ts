@@ -9,7 +9,6 @@ Sentry.init({
   environment: environment,
   debug: false,
   release: release,
-  autoSessionTracking: true,
   integrations,
   beforeSend: beforeSend,
 });

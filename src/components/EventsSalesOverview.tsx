@@ -3,8 +3,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { ContentCopy } from '@mui/icons-material';
 import { ExpandMore } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Chip, Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
@@ -127,7 +126,9 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
                     {capitalizeFirstLetter(t('date.longWithTime', { date: eventsWrapper.event.startAt }))}
                     <Tooltip title={'Copier le tableau des ventes de cette représentation pour Excel, Word...'} sx={{ ml: 1 }}>
                       <IconButton
-                        onClick={async (event) => {
+                        component="span"
+                        role="button" // Needed to avoid nested buttons due to the accordion header
+                        onClick={(event) => {
                           setEventsWrappersToCopy([eventsWrapper]);
                           setTriggerEventsSalesCopy(true);
 

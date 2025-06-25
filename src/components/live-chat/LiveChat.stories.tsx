@@ -39,7 +39,7 @@ const NormalStory = Template.bind({});
 NormalStory.args = {};
 NormalStory.parameters = {};
 NormalStory.decorators = [
-  (Story: StoryFn) => {
+  (Story) => {
     return (
       <LiveChatProvider>
         <Story />

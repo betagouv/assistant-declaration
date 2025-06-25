@@ -1,5 +1,5 @@
 import { Meta, StoryFn } from '@storybook/react';
-import { within } from '@storybook/test';
+import { within } from 'storybook/test';
 
 import { visitorSessionContext } from '@ad/.storybook/auth';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';

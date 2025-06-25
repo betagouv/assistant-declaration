@@ -10,7 +10,7 @@ export type CustomMenuItemOnClickAction = {
 export type CustomMenuItemActions = CustomMenuItemOnClickAction | CustomMenuItemHrefAction;
 
 export type CustomMenuItem = {
-  content: string | JSX.Element;
+  content: string | React.JSX.Element;
   icon?: FrIconClassName | RiIconClassName;
 } & (
   | CustomMenuItemActions

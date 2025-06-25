@@ -1,5 +1,4 @@
-import { StoryFn } from '@storybook/react';
-import React from 'react';
+import { PartialStoryFn } from 'storybook/internal/types';
 
 import styles from '@ad/.storybook/email.module.scss';
 import { StorybookRendererLayout } from '@ad/src/components/emails/layouts/StorybookRenderer';
@@ -13,7 +12,7 @@ export const commonEmailsParameters = {
   testRunner: { disable: true },
 };
 
-export function withEmailRenderer(Story: StoryFn) {
+export function withEmailRenderer(Story: PartialStoryFn) {
   return (
     <StorybookRendererLayout>
       <Story />
@@ -22,7 +21,7 @@ export function withEmailRenderer(Story: StoryFn) {
 }
 
 export function withEmailClientOverviewFactory(subject: string) {
-  const EmailClientOverview = (Story: StoryFn) => {
+  const EmailClientOverview = (Story: PartialStoryFn) => {
     const HtmlVersion = Story;
     const PlaintextVersion = convertComponentEmailToText(<Story />);
 

@@ -1,17 +1,15 @@
-import { DsfrHead } from '@codegouvfr/react-dsfr/next-appdir/DsfrHead';
-import { DsfrProvider } from '@codegouvfr/react-dsfr/next-appdir/DsfrProvider';
-import { getHtmlAttributes } from '@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes';
-import { DocsContainerProps } from '@storybook/addon-docs';
+import MuiDsfrThemeProvider from '@codegouvfr/react-dsfr/mui';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import { DocsContainerProps } from '@storybook/addon-docs/blocks';
 import { withLinks } from '@storybook/addon-links';
-import { Renderer } from '@storybook/core/types';
 import type { Preview } from '@storybook/react';
-import { configure as testingConfigure } from '@storybook/test';
-import { themes } from '@storybook/theming';
 import { withMockAuth } from '@tomfreudenberg/next-auth-mock/storybook';
 import { passthrough } from 'msw';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import React, { PropsWithChildren, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
+import { configure as testingConfigure } from 'storybook/test';
+import { themes } from 'storybook/theming';
 
 import { MockProvider } from '@ad/.storybook/MockProvider';
 import { ThemedDocsContainer } from '@ad/.storybook/ThemedDocsContainer';
@@ -19,17 +17,17 @@ import { ThemedDocsContainer } from '@ad/.storybook/ThemedDocsContainer';
 import { disableGlobalDsfrStyle } from '@ad/.storybook/helpers';
 import '@ad/.storybook/layout.scss';
 import { withDisablingTestRunner } from '@ad/.storybook/testing';
-import { MuiDsfrThemeProvider } from '@ad/src/app/MuiDsfrThemeProvider';
 // import { useDarkMode } from 'storybook-dark-mode';
-import { StartDsfr } from '@ad/src/app/StartDsfr';
 import { Providers } from '@ad/src/app/providers';
 import '@ad/src/assets/fonts/index.css';
+import { DsfrProvider, StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
+import { DsfrHead, getHtmlAttributes } from '@ad/src/dsfr-bootstrap/server-only-index';
 import { i18n } from '@ad/src/i18n';
 
 // const channel = addons.getChannel();
 
 // [WORKAROUND] Since `react-dsfr` no longer passes the color scheme through `DsfrProvider` and `DsfrHead` we call this function to avoid an assert error
-getHtmlAttributes({ defaultColorScheme: 'light' });
+getHtmlAttributes({ lang: 'fr' });
 
 if (window.matchMedia) {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
@@ -81,7 +79,7 @@ const preview: Preview = {
       light: { ...themes.light },
     },
     docs: {
-      container: (props: PropsWithChildren<DocsContainerProps<Renderer>>) => {
+      container: (props: PropsWithChildren<DocsContainerProps>) => {
         // const [isDark, setDark] = React.useState();
 
         //
@@ -176,17 +174,19 @@ const preview: Preview = {
         // We provide the client provider to mock tRPC calls
         return (
           <>
-            <StartDsfr />
+            <StartDsfrOnHydration />
             <DsfrHead />
-            <DsfrProvider>
-              <MuiDsfrThemeProvider>
-                <MockProvider>
-                  <Providers>
-                    <Story />
-                  </Providers>
-                </MockProvider>
-              </MuiDsfrThemeProvider>
-            </DsfrProvider>
+            <AppRouterCacheProvider>
+              <DsfrProvider lang={locale}>
+                <MuiDsfrThemeProvider>
+                  <MockProvider>
+                    <Providers>
+                      <Story />
+                    </Providers>
+                  </MockProvider>
+                </MuiDsfrThemeProvider>
+              </DsfrProvider>
+            </AppRouterCacheProvider>
           </>
         );
       }

@@ -1,6 +1,6 @@
 import { Button, Typography } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
-import { screen, userEvent, within } from '@storybook/test';
+import { screen, userEvent, within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { ConfirmationDialog } from '@ad/src/components/ConfirmationDialog';

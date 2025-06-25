@@ -15,23 +15,22 @@ const config: StorybookConfig = {
     '@storybook/addon-a11y',
     '@storybook/addon-coverage',
     '@storybook/addon-designs',
-    '@storybook/addon-essentials',
-    '@storybook/addon-interactions',
+    '@storybook/addon-docs',
     '@storybook/addon-links',
-    '@storybook/addon-measure',
-    '@storybook/addon-viewport',
-    'storybook-dark-mode',
+    'storybook/viewport',
+    '@vueless/storybook-dark-mode',
     '@chromatic-com/storybook',
   ],
-  features: {},
+  features: {
+    experimentalRSC: true,
+  },
   framework: {
     name: '@storybook/nextjs',
     options: {
       // https://github.com/storybookjs/storybook/tree/next/code/frameworks/nextjs
       nextConfigPath: path.resolve(__dirname, '../next.config.js'),
       builder: {
-        // TODO: waiting for https://github.com/storybookjs/storybook/pull/29654 to be fixed to enable and improve performance
-        fsCache: false,
+        fsCache: true,
       },
     },
   },
@@ -124,9 +123,6 @@ const config: StorybookConfig = {
     return config;
   },
   docs: {},
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-  },
 };
 
 export default config;

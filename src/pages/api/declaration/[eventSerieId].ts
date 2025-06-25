@@ -268,7 +268,7 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
     throw organizationCollaboratorRoleRequiredError;
   }
 
-  let jsxDocument: JSX.Element;
+  let jsxDocument: React.JSX.Element;
   let filename: string;
   if (input.type === DeclarationTypeSchema.Values.SACEM) {
     const existingDeclaration = eventSerie.EventSerieDeclaration.find((eSD) => {

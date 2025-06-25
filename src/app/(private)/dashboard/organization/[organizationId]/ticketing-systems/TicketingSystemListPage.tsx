@@ -49,7 +49,7 @@ export function TicketingSystemListPage({ params: { organizationId } }: Ticketin
         <ErrorAlert errors={aggregatedQueries.errors} refetchs={aggregatedQueries.refetchs} />
       </Grid>
     );
-  } else if (aggregatedQueries.isLoading) {
+  } else if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="page" />;
   }
 

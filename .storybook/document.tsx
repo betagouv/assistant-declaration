@@ -1,12 +1,11 @@
 import { usePDF } from '@react-pdf/renderer';
-import { StoryFn } from '@storybook/react';
-import React from 'react';
+import { PartialStoryFn } from 'storybook/internal/types';
 
 export const commonDocumentsParameters = {
   layout: 'fullscreen',
 };
 
-export function WithDocumentRenderer(Story: StoryFn) {
+export function WithDocumentRenderer(Story: PartialStoryFn) {
   const [instance, updateInstance] = usePDF({
     document: (
       <>

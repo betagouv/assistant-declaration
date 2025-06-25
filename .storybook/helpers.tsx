@@ -1,8 +1,9 @@
-import { ArgTypes, Controls, Description, PRIMARY_STORY, Primary, Stories, Subtitle, Title } from '@storybook/addon-docs';
+import { ArgTypes, Controls, Description, PRIMARY_STORY, Primary, Stories, Subtitle, Title } from '@storybook/addon-docs/blocks';
 import { Meta, StoryFn } from '@storybook/react';
+import { PartialStoryFn } from 'storybook/internal/types';
 
 // Helper to get props type of a component
-export type ComponentProps<F extends (props: any) => JSX.Element> = F extends (...args: infer A) => any ? Partial<A[0]> : never;
+export type ComponentProps<F extends (props: any) => React.JSX.Element> = F extends (...args: infer A) => any ? Partial<A[0]> : never;
 
 // This helper is required because `react-dsfr` manages global styles that was leaking
 // on our other stories like email stories. It's due to importing the `DsfrHead` so there is no
@@ -146,25 +147,26 @@ export function prepareStory<ComponentType, ContextValueType extends MatchingCon
       story.parameters.nextAuthMock = { ...options.layoutStory.parameters.nextAuthMock, ...story.parameters.nextAuthMock };
     }
 
-    const LayoutStory = options.layoutStory;
+    const layoutStory = options.layoutStory;
+    const LayoutStory = layoutStory as PartialStoryFn; // For whatever reason `StoryFn` is no longer working
 
     story.decorators.push((Story, context) => {
       return (
-        <LayoutStory {...LayoutStory.args}>
+        <LayoutStory {...layoutStory.args}>
           <Story />
         </LayoutStory>
       );
     });
 
     // It we detect some network mocking from the layout story, make sure to reuse it
-    if (LayoutStory.parameters?.msw) {
+    if (layoutStory.parameters?.msw) {
       if (!story.parameters.msw) {
         story.parameters.msw = {
           handlers: [],
         };
       }
 
-      story.parameters.msw.handlers = [...LayoutStory.parameters.msw.handlers, ...story.parameters.msw.handlers];
+      story.parameters.msw.handlers = [...layoutStory.parameters.msw.handlers, ...story.parameters.msw.handlers];
     }
   }
 
@@ -180,7 +182,7 @@ export function prepareStory<ComponentType, ContextValueType extends MatchingCon
 
         if (child.decorators || child.args || child.decorators || child.args) {
           const childStory = child as StoryFn<any>;
-          const ChildStory = childStory;
+          const ChildStory = childStory as PartialStoryFn;
 
           // It we detect some network mocking from the child story, make sure to reuse it
           if (childStory.parameters?.msw) {

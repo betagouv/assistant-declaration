@@ -13,7 +13,7 @@ export const convertHtmlEmailToText = compile({
   ],
 });
 
-export function convertComponentEmailToText(component: ReactElement) {
+export function convertComponentEmailToText(component: React.JSX.Element) {
   const html = renderToStaticMarkup(component);
 
   return convertHtmlEmailToText(html);
