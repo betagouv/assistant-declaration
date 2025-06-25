@@ -3,7 +3,7 @@ import { DsfrHead } from '@codegouvfr/react-dsfr/next-appdir/DsfrHead';
 import { DsfrProvider } from '@codegouvfr/react-dsfr/next-appdir/DsfrProvider';
 import { getHtmlAttributes } from '@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes';
 import { Metadata } from 'next';
-import { headers } from 'next/headers';
+import { type UnsafeUnwrappedHeaders, headers } from 'next/headers';
 import Link from 'next/link';
 import { PropsWithChildren } from 'react';
 
@@ -25,7 +25,7 @@ export interface RootLayoutProps {
 // getHtmlAttributes({ defaultColorScheme: 'system' });
 
 function MainStructure(props: PropsWithChildren) {
-  const nonce = headers().get('x-nonce') || undefined;
+  const nonce = (headers() as unknown as UnsafeUnwrappedHeaders).get('x-nonce') || undefined;
 
   return (
     <>
