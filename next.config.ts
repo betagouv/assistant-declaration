@@ -130,6 +130,12 @@ const generateNextConfig = async (): Promise<NextConfig> => {
       //   test: /\.(txt|html)$/i,
       //   use: 'raw-loader',
       // });
+      // This is needed when using Sentry with Next.js (ref: https://github.com/getsentry/sentry-javascript/issues/12077)
+      config.ignoreWarnings = [
+        {
+          module: /@opentelemetry\/instrumentation/,
+        },
+      ];
 
       return config;
     },
