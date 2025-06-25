@@ -7,8 +7,8 @@ import path from 'path';
 import { getCommitSha, getHumanVersion, getTechnicalVersion } from '@ad/src/utils/app-version.js';
 import { generateRewrites, localizedRoutes } from '@ad/src/utils/routes/list';
 import { getBaseUrl } from '@ad/src/utils/url';
+
 // import { applyRawQueryParserOnNextjsCssModule } from '@ad/src/utils/webpack.js';
-import { commonPackages } from '@ad/transpilePackages';
 
 const withBundleAnalyzer = BundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -39,7 +39,6 @@ const generateNextConfig = async (): Promise<NextConfig> => {
     typescript: {
       ignoreBuildErrors: true, // Skip since already done in a specific step of our CI/CD
     },
-    transpilePackages: commonPackages,
     sassOptions: {
       silenceDeprecations: ['legacy-js-api'], // Needed until `sass` v2
     },
