@@ -1,46 +1,31 @@
-const path = require('path');
-const tsImport = require('ts-import');
+import BundleAnalyzer from '@next/bundle-analyzer';
+import { SentryBuildOptions, withSentryConfig } from '@sentry/nextjs';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import type { NextConfig } from 'next';
+import path from 'path';
 
-const { commonPackages } = require('./transpilePackages');
+import { i18n } from '@ad/next-i18next.config';
+import { getCommitSha, getHumanVersion, getTechnicalVersion } from '@ad/src/utils/app-version.js';
+import { generateRewrites, localizedRoutes } from '@ad/src/utils/routes/list';
+import { getBaseUrl } from '@ad/src/utils/url';
+import { applyRawQueryParserOnNextjsCssModule } from '@ad/src/utils/webpack.js';
+import { commonPackages } from '@ad/transpilePackages';
 
-const tsImportLoadOptions = {
-  mode: tsImport.LoadMode.Compile,
-  compilerOptions: {
-    paths: {
-      // [IMPORTANT] Paths are not working, we modified inside files to use relative ones where needed
-      '@ad/*': ['./*'],
-    },
-  },
-};
-
-const { generateRewrites, localizedRoutes } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/routes/list.ts`), tsImportLoadOptions);
-const { getBaseUrl } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/url.ts`), tsImportLoadOptions);
-const { applyRawQueryParserOnNextjsCssModule } = tsImport.loadSync(path.resolve(__dirname, `./src/utils/webpack.ts`), tsImportLoadOptions);
-
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
+const withBundleAnalyzer = BundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
-const { withSentryConfig } = require('@sentry/nextjs');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const gitRevision = require('git-rev-sync');
-const { getCommitSha, getHumanVersion, getTechnicalVersion } = require('./src/utils/app-version.js');
-const { i18n } = require('./next-i18next.config');
 
 const mode = process.env.APP_MODE || 'test';
 
 const baseUrl = new URL(getBaseUrl());
 
-// TODO: once Next supports `next.config.js` we can set types like `ServerRuntimeConfig` and `PublicRuntimeConfig` below
-const moduleExports = async () => {
+const generateNextConfig = async (): Promise<NextConfig> => {
   const appHumanVersion = await getHumanVersion();
 
-  /**
-   * @type {import('next').NextConfig}
-   */
-  let standardModuleExports = {
+  let standardModuleExports: NextConfig = {
     reactStrictMode: true,
     swcMinify: true,
-    output: process.env.NEXTJS_BUILD_OUTPUT_MODE ? process.env.NEXTJS_BUILD_OUTPUT_MODE : 'standalone', // To debug locally the `next start` comment this line (it will avoid trying to mess with the assembling folders logic of standalone mode)
+    output: process.env.NEXTJS_BUILD_OUTPUT_MODE ? (process.env.NEXTJS_BUILD_OUTPUT_MODE as 'standalone' | 'export') : 'standalone', // To debug locally the `next start` comment this line (it will avoid trying to mess with the assembling folders logic of standalone mode)
     env: {
       // Those will replace `process.env.*` with hardcoded values (useful when the value is calculated during the build time)
       SENTRY_RELEASE_TAG: appHumanVersion,
@@ -61,6 +46,13 @@ const moduleExports = async () => {
     sassOptions: {
       silenceDeprecations: ['legacy-js-api'], // Needed until `sass` v2
     },
+    outputFileTracingIncludes: {
+      '*': ['./src/prisma/migrations/**/*', './src/prisma/schema.prisma', './start-and-wait-to-init.sh'], // Migration and start files are required when doing automatic migration before starting the application
+    },
+    // It should have been the new `outputFileTracingExcludes` property but it's messing with the Next.js core (ref: https://github.com/vercel/next.js/issues/62331)
+    outputFileTracingExcludes: {
+      '*': ['./scripts/**/*'], // Note that folders starting with a dot are already ignored after verification
+    },
     experimental: {
       optimizePackageImports: [
         '@mui/material',
@@ -71,13 +63,6 @@ const moduleExports = async () => {
         'date-fns',
         'react-use',
       ],
-      outputFileTracingIncludes: {
-        '*': ['./src/prisma/migrations/**/*', './src/prisma/schema.prisma', './start-and-wait-to-init.sh'], // Migration and start files are required when doing automatic migration before starting the application
-      },
-      // It should have been the new `outputFileTracingExcludes` property but it's messing with the Next.js core (ref: https://github.com/vercel/next.js/issues/62331)
-      outputFileTracingExcludes: {
-        '*': ['./scripts/**/*'], // Note that folders starting with a dot are already ignored after verification
-      },
       swcPlugins: [['next-superjson-plugin', { excluded: [] }]],
     },
     async redirects() {
@@ -106,7 +91,7 @@ const moduleExports = async () => {
     images: {
       remotePatterns: [
         {
-          protocol: baseUrl.protocol.slice(0, -1),
+          protocol: baseUrl.protocol.slice(0, -1) as 'http' | 'https',
           hostname: baseUrl.hostname,
         },
         {
@@ -159,39 +144,35 @@ const moduleExports = async () => {
 
   const uploadToSentry = process.env.SENTRY_RELEASE_UPLOAD === 'true' && process.env.NODE_ENV === 'production';
 
-  /**
-   * @type {import('@sentry/nextjs').SentryBuildOptions}
-   */
-  const sentryWebpackPluginOptions = {
-    dryRun: !uploadToSentry,
-    debug: false,
-    telemetry: false,
-    silent: false,
-    release: appHumanVersion,
-    setCommits: {
-      // TODO: get error: caused by: sentry reported an error: You do not have permission to perform this action. (http status: 403)
-      // Possible ref: https://github.com/getsentry/sentry-cli/issues/1388#issuecomment-1306137835
-      // Note: not able to bind our repository to our on-premise Sentry as specified in the article... leaving it manual for now (no commit details...)
-      auto: false,
-      commit: getCommitSha(),
-      // auto: true,
+  const sentryWebpackPluginOptions: SentryBuildOptions = {
+    unstable_sentryWebpackPluginOptions: {
+      disable: !uploadToSentry,
     },
-    deploy: {
-      env: mode,
+    debug: false,
+    silent: false,
+    release: {
+      name: appHumanVersion,
+      setCommits: {
+        // TODO: get error: caused by: sentry reported an error: You do not have permission to perform this action. (http status: 403)
+        // Possible ref: https://github.com/getsentry/sentry-cli/issues/1388#issuecomment-1306137835
+        // Note: not able to bind our repository to our on-premise Sentry as specified in the article... leaving it manual for now (no commit details...)
+        auto: false,
+        repo: 'betagouv/assistant-declaration',
+        commit: getCommitSha(),
+        // auto: true,
+      },
+      deploy: {
+        env: mode,
+      },
     },
     hideSourceMaps: mode === 'prod', // Do not serve sourcemaps in `prod`
+    // tunnelRoute: '/monitoring', // Helpful to avoid adblockers, but requires Sentry SaaS
     // disableServerWebpackPlugin: true, // TODO
     // disableClientWebpackPlugin: true, // TODO
+    disableLogger: false,
   };
 
-  return withBundleAnalyzer(
-    withSentryConfig(standardModuleExports, sentryWebpackPluginOptions, {
-      transpileClientSDK: true,
-      // tunnelRoute: '/monitoring', // Helpful to avoid adblockers, but requires Sentry SaaS
-      hideSourceMaps: false,
-      disableLogger: false,
-    })
-  );
+  return withBundleAnalyzer(withSentryConfig(standardModuleExports, sentryWebpackPluginOptions));
 };
 
-module.exports = moduleExports;
+export default generateNextConfig;
