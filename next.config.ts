@@ -4,7 +4,6 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import type { NextConfig } from 'next';
 import path from 'path';
 
-import { i18n } from '@ad/next-i18next.config';
 import { getCommitSha, getHumanVersion, getTechnicalVersion } from '@ad/src/utils/app-version.js';
 import { generateRewrites, localizedRoutes } from '@ad/src/utils/routes/list';
 import { getBaseUrl } from '@ad/src/utils/url';
@@ -24,7 +23,6 @@ const generateNextConfig = async (): Promise<NextConfig> => {
 
   let standardModuleExports: NextConfig = {
     reactStrictMode: true,
-    swcMinify: true,
     output: process.env.NEXTJS_BUILD_OUTPUT_MODE ? (process.env.NEXTJS_BUILD_OUTPUT_MODE as 'standalone' | 'export') : 'standalone', // To debug locally the `next start` comment this line (it will avoid trying to mess with the assembling folders logic of standalone mode)
     env: {
       // Those will replace `process.env.*` with hardcoded values (useful when the value is calculated during the build time)
@@ -35,7 +33,6 @@ const generateNextConfig = async (): Promise<NextConfig> => {
       appMode: mode,
       appVersion: appHumanVersion,
     },
-    i18n: i18n,
     eslint: {
       ignoreDuringBuilds: true, // Skip since already done in a specific step of our CI/CD
     },
@@ -63,7 +60,7 @@ const generateNextConfig = async (): Promise<NextConfig> => {
         'date-fns',
         'react-use',
       ],
-      swcPlugins: [['next-superjson-plugin', { excluded: [] }]],
+      swcPlugins: [['superjson-next', { router: 'PAGE' }]],
     },
     async redirects() {
       return [
@@ -165,7 +162,10 @@ const generateNextConfig = async (): Promise<NextConfig> => {
         env: mode,
       },
     },
-    hideSourceMaps: mode === 'prod', // Do not serve sourcemaps in `prod`
+    widenClientFileUpload: false, // Avoid including Next.js and its dependencies code
+    sourcemaps: {
+      deleteSourcemapsAfterUpload: mode === 'prod',
+    },
     // tunnelRoute: '/monitoring', // Helpful to avoid adblockers, but requires Sentry SaaS
     // disableServerWebpackPlugin: true, // TODO
     // disableClientWebpackPlugin: true, // TODO

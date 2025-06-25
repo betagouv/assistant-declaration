@@ -23,7 +23,6 @@ Sentry.init({
   environment: environment,
   debug: false,
   release: release,
-  autoSessionTracking: true,
   integrations,
   replaysSessionSampleRate: 1.0,
   replaysOnErrorSampleRate: 1.0,
@@ -31,3 +30,5 @@ Sentry.init({
   transportOptions: {},
   beforeSend: beforeSend,
 });
+
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
