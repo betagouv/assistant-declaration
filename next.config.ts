@@ -2,6 +2,7 @@ import BundleAnalyzer from '@next/bundle-analyzer';
 import { SentryBuildOptions, withSentryConfig } from '@sentry/nextjs';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import type { NextConfig } from 'next';
+import withRspack from 'next-rspack';
 import path from 'path';
 
 import { getCommitSha, getHumanVersion, getTechnicalVersion } from '@ad/src/utils/app-version.js';
@@ -182,4 +183,4 @@ const generateNextConfig = async (): Promise<NextConfig> => {
   return withBundleAnalyzer(withSentryConfig(standardModuleExports, sentryWebpackPluginOptions));
 };
 
-export default generateNextConfig;
+export default withRspack(generateNextConfig);
