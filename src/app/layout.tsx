@@ -42,7 +42,7 @@ export async function RootLayout(props: PropsWithChildren<RootLayoutProps>) {
       <body>
         <DsfrProvider lang={lang}>
           Coucou toi LOL
-          {/* {props.children} */}
+          {props.children}
           {/* <MuiDsfrThemeProvider>
             <Providers nonce={nonce}>
               <SentryClientProvider>

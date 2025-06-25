@@ -7,7 +7,7 @@ import path from 'path';
 import { getCommitSha, getHumanVersion, getTechnicalVersion } from '@ad/src/utils/app-version.js';
 import { generateRewrites, localizedRoutes } from '@ad/src/utils/routes/list';
 import { getBaseUrl } from '@ad/src/utils/url';
-import { applyRawQueryParserOnNextjsCssModule } from '@ad/src/utils/webpack.js';
+// import { applyRawQueryParserOnNextjsCssModule } from '@ad/src/utils/webpack.js';
 import { commonPackages } from '@ad/transpilePackages';
 
 const withBundleAnalyzer = BundleAnalyzer({
@@ -62,16 +62,16 @@ const generateNextConfig = async (): Promise<NextConfig> => {
       ],
       swcPlugins: [['superjson-next', { router: 'PAGE' }]],
     },
-    async redirects() {
-      return [
-        {
-          // Since the landing page has been considered as another page to let the sign in page as primary, we use a redirect to not move all the logic (token flow...)
-          source: '/',
-          destination: '/dashboard',
-          permanent: false, // May impact the SEO not being permanent, but the choice about the root would be too risky
-        },
-      ];
-    },
+    // async redirects() {
+    //   return [
+    //     {
+    //       // Since the landing page has been considered as another page to let the sign in page as primary, we use a redirect to not move all the logic (token flow...)
+    //       source: '/',
+    //       destination: '/dashboard',
+    //       permanent: false, // May impact the SEO not being permanent, but the choice about the root would be too risky
+    //     },
+    //   ];
+    // },
     async rewrites() {
       return [
         ...generateRewrites('en', localizedRoutes),
@@ -98,38 +98,38 @@ const generateNextConfig = async (): Promise<NextConfig> => {
       ],
     },
     webpack: (config, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }) => {
-      // Expose all DSFR fonts as static at the root
-      config.plugins.push(
-        new CopyWebpackPlugin({
-          patterns: [
-            {
-              from: path.dirname(require.resolve('@gouvfr/dsfr/dist/fonts/Marianne-Bold.woff2')),
-              to: path.resolve(__dirname, './public/assets/fonts/'),
-            },
-            {
-              from: path.dirname(require.resolve('@fontsource/dancing-script/files/dancing-script-latin-400-normal.woff2')),
-              to: path.resolve(__dirname, './public/assets/fonts/'),
-            },
-            {
-              from: require.resolve('./src/assets/fonts/index.css'),
-              to: path.resolve(__dirname, './public/assets/fonts/'),
-            },
-          ],
-        })
-      );
+      // // Expose all DSFR fonts as static at the root
+      // config.plugins.push(
+      //   new CopyWebpackPlugin({
+      //     patterns: [
+      //       {
+      //         from: path.dirname(require.resolve('@gouvfr/dsfr/dist/fonts/Marianne-Bold.woff2')),
+      //         to: path.resolve(__dirname, './public/assets/fonts/'),
+      //       },
+      //       {
+      //         from: path.dirname(require.resolve('@fontsource/dancing-script/files/dancing-script-latin-400-normal.woff2')),
+      //         to: path.resolve(__dirname, './public/assets/fonts/'),
+      //       },
+      //       {
+      //         from: require.resolve('./src/assets/fonts/index.css'),
+      //         to: path.resolve(__dirname, './public/assets/fonts/'),
+      //       },
+      //     ],
+      //   })
+      // );
 
-      // Inject a style loader when we want to use `foo.scss?raw` for backend processing (like emails)
-      applyRawQueryParserOnNextjsCssModule(config.module.rules);
+      // // Inject a style loader when we want to use `foo.scss?raw` for backend processing (like emails)
+      // // applyRawQueryParserOnNextjsCssModule(config.module.rules);
 
       config.module.rules.push({
         test: /\.woff2$/,
         type: 'asset/resource',
       });
 
-      config.module.rules.push({
-        test: /\.(txt|html)$/i,
-        use: 'raw-loader',
-      });
+      // config.module.rules.push({
+      //   test: /\.(txt|html)$/i,
+      //   use: 'raw-loader',
+      // });
 
       return config;
     },
