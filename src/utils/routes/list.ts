@@ -1,8 +1,6 @@
 import { createRouter, defineRoute, param } from 'type-route';
 
-// `ts-import` paths as `compilerOptions` are not working, we modified the import below to use a relative one
-// import { Lang, defineLocalizedRoute } from '@ad/src/utils/routes/common';
-import { Lang, defineLocalizedRoute } from './common';
+import { Lang, defineLocalizedRoute } from '@ad/src/utils/routes/common';
 
 export const localizedRoutes = {
   about: defineLocalizedRoute(

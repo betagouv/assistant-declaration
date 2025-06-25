@@ -5,11 +5,10 @@ import type { NextConfig } from 'next';
 import withRspack from 'next-rspack';
 import path from 'path';
 
-import { getCommitSha, getHumanVersion, getTechnicalVersion } from '@ad/src/utils/app-version.js';
+import { getCommitSha, getHumanVersion, getTechnicalVersion } from '@ad/src/utils/app-version';
 import { generateRewrites, localizedRoutes } from '@ad/src/utils/routes/list';
 import { getBaseUrl } from '@ad/src/utils/url';
-
-// import { applyRawQueryParserOnNextjsCssModule } from '@ad/src/utils/webpack.js';
+import { applyRawQueryParserOnNextjsCssModule } from '@ad/src/utils/webpack';
 
 const withBundleAnalyzer = BundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -118,8 +117,8 @@ const generateNextConfig = async (): Promise<NextConfig> => {
         })
       );
 
-      // // Inject a style loader when we want to use `foo.scss?raw` for backend processing (like emails)
-      // // applyRawQueryParserOnNextjsCssModule(config.module.rules);
+      // Inject a style loader when we want to use `foo.scss?raw` for backend processing (like emails)
+      applyRawQueryParserOnNextjsCssModule(config.module.rules);
 
       config.module.rules.push({
         test: /\.woff2$/,

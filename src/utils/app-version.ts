@@ -1,12 +1,12 @@
-const { Octokit } = require('@octokit/rest');
-const gitRevision = require('git-rev-sync');
-const parseGithubUrl = require('parse-github-url');
+import { Octokit } from '@octokit/rest';
+import gitRevision from 'git-rev-sync';
+import parseGithubUrl from 'parse-github-url';
 
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN || undefined, // If not specified it uses public shared quota based on IP
 });
 
-function getRepositoryInformation() {
+export function getRepositoryInformation() {
   // TODO: it appears when using `npm` the `process.env.npm_package_repository_url` variable won't be set
   // so using a fallback instead...
   const repoInfo = parseGithubUrl(process.env.npm_package_repository_url || 'https://github.com/betagouv/assistant-declaration');
@@ -18,7 +18,7 @@ function getRepositoryInformation() {
   return repoInfo;
 }
 
-function getFallbackCommitSha() {
+export function getFallbackCommitSha() {
   // Heroku/Scalingo remove the `.git` folder so during the build time we are unable to use `git-rev-sync`
   // we work around this by doing GET requests since they at least provide `$SOURCE_VERSION` that equals the commit SHA
   // during the build phase, and `$CONTAINER_VERSION` during the runtime phase (that should be most of the time the commit SHA).
@@ -30,7 +30,7 @@ function getFallbackCommitSha() {
   return commitSha;
 }
 
-function getCommitSha() {
+export function getCommitSha() {
   let commitSha;
   try {
     commitSha = gitRevision.long();
@@ -41,7 +41,7 @@ function getCommitSha() {
   return commitSha;
 }
 
-async function getFallbackCommitInformation() {
+export async function getFallbackCommitInformation() {
   const commitSha = getFallbackCommitSha();
   const repoInfo = getRepositoryInformation();
 
@@ -54,7 +54,7 @@ async function getFallbackCommitInformation() {
   return result.data;
 }
 
-async function getFallbackCommitTag() {
+export async function getFallbackCommitTag() {
   const commitSha = getFallbackCommitSha();
   const repoInfo = getRepositoryInformation();
 
@@ -75,7 +75,7 @@ async function getFallbackCommitTag() {
   return commitSha;
 }
 
-async function getCommitTag() {
+export async function getCommitTag() {
   let tag;
   try {
     tag = gitRevision.tag();
@@ -86,7 +86,7 @@ async function getCommitTag() {
   return tag;
 }
 
-async function getGitRevisionDate() {
+export async function getGitRevisionDate() {
   let date;
   try {
     date = gitRevision.date();
@@ -98,7 +98,7 @@ async function getGitRevisionDate() {
   return date.toISOString().split('.')[0].replace(/\D/g, ''); // Remove milliseconds and keep only digits
 }
 
-async function getHumanVersion() {
+export async function getHumanVersion() {
   const commitSha = getCommitSha();
   const tag = await getCommitTag();
 
@@ -110,21 +110,9 @@ async function getHumanVersion() {
   }
 }
 
-async function getTechnicalVersion() {
+export async function getTechnicalVersion() {
   const commitSha = getCommitSha();
   const revisionDate = await getGitRevisionDate();
 
   return `v${process.env.npm_package_version}-${revisionDate}-${commitSha.substring(0, 12)}`;
 }
-
-module.exports = {
-  getFallbackCommitSha,
-  getCommitSha,
-  getRepositoryInformation,
-  getFallbackCommitInformation,
-  getFallbackCommitTag,
-  getCommitTag,
-  getGitRevisionDate,
-  getHumanVersion,
-  getTechnicalVersion,
-};
