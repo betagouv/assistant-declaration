@@ -8,13 +8,10 @@ import Link from 'next/link';
 import { PropsWithChildren } from 'react';
 
 import { Matomo } from '@ad/src/app/Matomo';
-import { MuiDsfrThemeProvider } from '@ad/src/app/MuiDsfrThemeProvider';
-import { SentryClientProvider } from '@ad/src/app/SentryClientProvider';
 import { StartDsfr } from '@ad/src/app/StartDsfr';
 import '@ad/src/app/layout.scss';
-import { Providers } from '@ad/src/app/providers';
-import { LiveChatProvider } from '@ad/src/components/live-chat/LiveChatProvider';
-import { defaultColorScheme } from '@ad/src/utils/dsfr';
+
+// import { defaultColorScheme } from '@ad/src/utils/dsfr';
 
 export const metadata: Metadata = {
   title: 'Assistant déclaration',
@@ -24,8 +21,8 @@ export interface RootLayoutProps {
   workaroundForNextJsPages?: boolean;
 }
 
-// [WORKAROUND] Since `react-dsfr` no longer passes the color scheme through `DsfrProvider` and `DsfrHead` we call this function to avoid an assert error in case of `workaroundForNextJsPages: true` usage
-getHtmlAttributes({ defaultColorScheme });
+// // [WORKAROUND] Since `react-dsfr` no longer passes the color scheme through `DsfrProvider` and `DsfrHead` we call this function to avoid an assert error in case of `workaroundForNextJsPages: true` usage
+// getHtmlAttributes({ defaultColorScheme: 'system' });
 
 function MainStructure(props: PropsWithChildren) {
   const nonce = headers().get('x-nonce') || undefined;
@@ -39,13 +36,15 @@ function MainStructure(props: PropsWithChildren) {
       </head>
       <body>
         <DsfrProvider>
-          <MuiDsfrThemeProvider>
+          Coucou toi LOL
+          {/* {props.children} */}
+          {/* <MuiDsfrThemeProvider>
             <Providers nonce={nonce}>
               <SentryClientProvider>
                 <LiveChatProvider>{props.children}</LiveChatProvider>
               </SentryClientProvider>
             </Providers>
-          </MuiDsfrThemeProvider>
+          </MuiDsfrThemeProvider> */}
           <Display />
         </DsfrProvider>
         <Matomo nonce={nonce} />
@@ -63,7 +62,7 @@ export function RootLayout(props: PropsWithChildren<RootLayoutProps>) {
   }
 
   return (
-    <html lang="fr" {...getHtmlAttributes({ defaultColorScheme })}>
+    <html lang="fr" {...getHtmlAttributes({ defaultColorScheme: 'system' })}>
       <MainStructure {...props} />
     </html>
   );

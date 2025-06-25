@@ -3,7 +3,7 @@
 import { startReactDsfr } from '@codegouvfr/react-dsfr/next-appdir';
 import Link from 'next/link';
 
-import { defaultColorScheme } from '@ad/src/utils/dsfr';
+// import { defaultColorScheme } from '@ad/src/utils/dsfr';
 
 declare module '@codegouvfr/react-dsfr/next-appdir' {
   interface RegisterLink {
@@ -11,7 +11,7 @@ declare module '@codegouvfr/react-dsfr/next-appdir' {
   }
 }
 
-startReactDsfr({ defaultColorScheme, Link, doCheckNonce: true });
+startReactDsfr({ defaultColorScheme: 'system', Link, doCheckNonce: true });
 
 export function StartDsfr() {
   return null;
