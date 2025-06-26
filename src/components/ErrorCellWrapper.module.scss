@@ -1,0 +1,15 @@
+.erroredRow {
+  // [WORKAROUND] We are using `outline` because:
+  // - `border` is modifying the element size, messing with the layout of the table
+  // - `box-shadow` does not modify the layout but the top "border" is has 1px less than others
+  outline: 2px solid var(--border-plain-error);
+  outline-offset: -2px; // Needed otherwise hidden by other rows
+  // border: 2px solid var(--border-plain-error);
+  // box-shadow: 0px 0px 0px 2px var(--border-plain-error) inset;
+}
+
+.erroredTable {
+  // Some errors are more global so the table needs the highlight
+  outline: 2px solid var(--border-plain-error);
+  // outline-offset: -2px; // Needed otherwise hidden by other rows
+}
