@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 
 import { DashboardPage } from '@ad/src/app/(private)/dashboard/DashboardPage';
+import { StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
 import { formatPageTitle } from '@ad/src/utils/page';
 
 export const metadata: Metadata = {
@@ -8,5 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DashboardPage />;
+  return (
+    <>
+      <StartDsfrOnHydration />
+      <DashboardPage />;
+    </>
+  );
 }

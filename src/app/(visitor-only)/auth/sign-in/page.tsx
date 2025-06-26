@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 
 import { SignInPage } from '@ad/src/app/(visitor-only)/auth/sign-in/SignInPage';
+import { StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
 import { formatPageTitle } from '@ad/src/utils/page';
 
 export const metadata: Metadata = {
@@ -8,5 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <SignInPage />;
+  return (
+    <>
+      <StartDsfrOnHydration />
+      <SignInPage />;
+    </>
+  );
 }
