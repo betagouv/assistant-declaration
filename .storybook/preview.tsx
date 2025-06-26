@@ -5,13 +5,13 @@ import { DocsContainerProps } from '@storybook/addon-docs';
 import { withLinks } from '@storybook/addon-links';
 import { Renderer } from '@storybook/core/types';
 import type { Preview } from '@storybook/react';
-import { configure as testingConfigure } from '@storybook/test';
-import { themes } from '@storybook/theming';
 import { withMockAuth } from '@tomfreudenberg/next-auth-mock/storybook';
 import { passthrough } from 'msw';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import React, { PropsWithChildren, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
+import { configure as testingConfigure } from 'storybook/test';
+import { themes } from 'storybook/theming';
 
 import { MockProvider } from '@ad/.storybook/MockProvider';
 import { ThemedDocsContainer } from '@ad/.storybook/ThemedDocsContainer';

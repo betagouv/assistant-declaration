@@ -1,7 +1,7 @@
 import { DocsContainer as BaseContainer, DocsContainerProps } from '@storybook/addon-docs';
 import { Renderer } from '@storybook/core/types';
-import { themes } from '@storybook/theming';
 import React, { PropsWithChildren, useEffect, useState } from 'react';
+import { themes } from 'storybook/theming';
 
 function isDarkInStorage(): boolean {
   const themeString = localStorage.getItem('sb-addon-themes-3');
