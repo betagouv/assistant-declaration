@@ -1,4 +1,5 @@
 import BundleAnalyzer from '@next/bundle-analyzer';
+import { rspack } from '@rspack/core';
 import { SentryBuildOptions, withSentryConfig } from '@sentry/nextjs';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import type { NextConfig } from 'next';
@@ -99,7 +100,7 @@ const generateNextConfig = async (): Promise<NextConfig> => {
     webpack: (config, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }) => {
       // Expose all DSFR fonts as static at the root
       config.plugins.push(
-        new CopyWebpackPlugin({
+        new rspack.CopyRspackPlugin({
           patterns: [
             {
               from: path.dirname(require.resolve('@gouvfr/dsfr/dist/fonts/Marianne-Bold.woff2')),
