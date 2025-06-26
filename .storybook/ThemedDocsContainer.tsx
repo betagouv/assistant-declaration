@@ -1,5 +1,4 @@
 import { DocsContainer as BaseContainer, DocsContainerProps } from '@storybook/addon-docs/blocks';
-import { Renderer } from '@storybook/core/types';
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { themes } from 'storybook/theming';
 
