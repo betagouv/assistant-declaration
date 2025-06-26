@@ -1,6 +1,6 @@
+import { TestRunnerConfig, getStoryContext } from '@storybook/test-runner';
 import { checkA11y, configureAxe, injectAxe } from 'axe-playwright';
 import { Page } from 'playwright';
-import { TestRunnerConfig, getStoryContext } from 'storybook/test-runner';
 
 const defaultTimeToWaitAfterChangingThemeMs = process.env.TIME_TO_WAIT_AFTER_CHANGING_THEME_MS
   ? parseInt(process.env.TIME_TO_WAIT_AFTER_CHANGING_THEME_MS, 10)

@@ -1,4 +1,4 @@
-import { ArgTypes, Controls, Description, PRIMARY_STORY, Primary, Stories, Subtitle, Title } from '@storybook/addon-docs';
+import { ArgTypes, Controls, Description, PRIMARY_STORY, Primary, Stories, Subtitle, Title } from '@storybook/addon-docs/blocks';
 import { Meta, StoryFn } from '@storybook/react';
 
 // Helper to get props type of a component

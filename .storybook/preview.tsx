@@ -1,7 +1,7 @@
 import { DsfrHead } from '@codegouvfr/react-dsfr/next-appdir/DsfrHead';
 import { DsfrProvider } from '@codegouvfr/react-dsfr/next-appdir/DsfrProvider';
 import { getHtmlAttributes } from '@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes';
-import { DocsContainerProps } from '@storybook/addon-docs';
+import { DocsContainerProps } from '@storybook/addon-docs/blocks';
 import { withLinks } from '@storybook/addon-links';
 import { Renderer } from '@storybook/core/types';
 import type { Preview } from '@storybook/react';
@@ -81,7 +81,7 @@ const preview: Preview = {
       light: { ...themes.light },
     },
     docs: {
-      container: (props: PropsWithChildren<DocsContainerProps<Renderer>>) => {
+      container: (props: PropsWithChildren<DocsContainerProps>) => {
         // const [isDark, setDark] = React.useState();
 
         //

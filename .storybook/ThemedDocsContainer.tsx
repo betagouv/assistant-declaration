@@ -1,4 +1,4 @@
-import { DocsContainer as BaseContainer, DocsContainerProps } from '@storybook/addon-docs';
+import { DocsContainer as BaseContainer, DocsContainerProps } from '@storybook/addon-docs/blocks';
 import { Renderer } from '@storybook/core/types';
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { themes } from 'storybook/theming';
@@ -15,7 +15,7 @@ function isDarkInStorage(): boolean {
   return false;
 }
 
-export const ThemedDocsContainer = ({ children, context }: PropsWithChildren<DocsContainerProps<Renderer>>) => {
+export const ThemedDocsContainer = ({ children, context }: PropsWithChildren<DocsContainerProps>) => {
   // The following is a workaround, I explained with in https://github.com/hipstersmoothie/storybook-dark-mode/issues/127#issuecomment-1369228348
 
   const [isDark, setIsDark] = useState(isDarkInStorage());
