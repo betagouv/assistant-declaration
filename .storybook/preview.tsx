@@ -21,10 +21,13 @@ import { withDisablingTestRunner } from '@ad/.storybook/testing';
 import { Providers } from '@ad/src/app/providers';
 import '@ad/src/assets/fonts/index.css';
 import { DsfrProvider, StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
-import { DsfrHead } from '@ad/src/dsfr-bootstrap/server-only-index';
+import { DsfrHead, getHtmlAttributes } from '@ad/src/dsfr-bootstrap/server-only-index';
 import { i18n } from '@ad/src/i18n';
 
 // const channel = addons.getChannel();
+
+// [WORKAROUND] Since `react-dsfr` no longer passes the color scheme through `DsfrProvider` and `DsfrHead` we call this function to avoid an assert error
+getHtmlAttributes({ lang: 'fr' });
 
 if (window.matchMedia) {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {

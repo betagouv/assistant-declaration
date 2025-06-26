@@ -20,15 +20,16 @@ const config: StorybookConfig = {
     '@vueless/storybook-dark-mode',
     '@chromatic-com/storybook',
   ],
-  features: {},
+  features: {
+    experimentalRSC: true,
+  },
   framework: {
     name: '@storybook/nextjs',
     options: {
       // https://github.com/storybookjs/storybook/tree/next/code/frameworks/nextjs
       nextConfigPath: path.resolve(__dirname, '../next.config.js'),
       builder: {
-        // TODO: waiting for https://github.com/storybookjs/storybook/pull/29654 to be fixed to enable and improve performance
-        fsCache: false,
+        fsCache: true,
       },
     },
   },
