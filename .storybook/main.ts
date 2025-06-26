@@ -15,6 +15,7 @@ const config: StorybookConfig = {
     '@storybook/addon-a11y',
     '@storybook/addon-coverage',
     '@storybook/addon-designs',
+    '@storybook/addon-docs',
     '@storybook/addon-links',
     'storybook/viewport',
     '@vueless/storybook-dark-mode',
