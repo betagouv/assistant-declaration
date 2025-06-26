@@ -17,7 +17,7 @@ const config: StorybookConfig = {
     '@storybook/addon-designs',
     '@storybook/addon-links',
     'storybook/viewport',
-    'storybook-dark-mode',
+    '@vueless/storybook-dark-mode',
     '@chromatic-com/storybook',
   ],
   features: {},

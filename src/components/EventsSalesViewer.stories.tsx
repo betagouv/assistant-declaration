@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
-import { screen, userEvent, within } from '@storybook/test';
 import { useState } from 'react';
+import { screen, userEvent, within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { Normal as EventsSalesOverviewNormalStory } from '@ad/src/components/EventsSalesOverview.stories';

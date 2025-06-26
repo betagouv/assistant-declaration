@@ -1,6 +1,6 @@
 import { Meta, StoryFn } from '@storybook/react';
-import { within } from '@storybook/test';
 import { useForm } from 'react-hook-form';
+import { within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
