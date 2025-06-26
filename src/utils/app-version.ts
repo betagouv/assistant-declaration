@@ -2,6 +2,8 @@ import { Octokit } from '@octokit/rest';
 import gitRevision from 'git-rev-sync';
 import parseGithubUrl from 'parse-github-url';
 
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
+
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN || undefined, // If not specified it uses public shared quota based on IP
 });
@@ -45,6 +47,9 @@ export async function getFallbackCommitInformation() {
   const commitSha = getFallbackCommitSha();
   const repoInfo = getRepositoryInformation();
 
+  assert(repoInfo.owner);
+  assert(repoInfo.name);
+
   const result = await octokit.rest.repos.getCommit({
     owner: repoInfo.owner,
     repo: repoInfo.name,
@@ -57,6 +62,9 @@ export async function getFallbackCommitInformation() {
 export async function getFallbackCommitTag() {
   const commitSha = getFallbackCommitSha();
   const repoInfo = getRepositoryInformation();
+
+  assert(repoInfo.owner);
+  assert(repoInfo.name);
 
   const result = await octokit.rest.repos.listTags({
     owner: repoInfo.owner,
@@ -92,6 +100,9 @@ export async function getGitRevisionDate() {
     date = gitRevision.date();
   } catch (err) {
     const commitInfo = await getFallbackCommitInformation();
+
+    assert(commitInfo.commit.author?.date);
+
     date = new Date(commitInfo.commit.author.date);
   }
 

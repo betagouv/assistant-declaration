@@ -25,39 +25,42 @@ export async function RootLayout(props: PropsWithChildren<RootLayoutProps>) {
   const nonce = requestHeaders.get('x-nonce') || undefined;
 
   return (
-    <html {...getHtmlAttributes({ lang })}>
-      <head>
-        <DsfrHead
-          nonce={nonce}
-          preloadFonts={[
-            //"Marianne-Light",
-            //"Marianne-Light_Italic",
-            'Marianne-Regular',
-            //"Marianne-Regular_Italic",
-            'Marianne-Medium',
-            //"Marianne-Medium_Italic",
-            'Marianne-Bold',
-            //"Marianne-Bold_Italic",
-            //"Spectral-Regular",
-            //"Spectral-ExtraBold"
-          ]}
-        />
-      </head>
-      <body>
-        <AppRouterCacheProvider>
-          <DsfrProvider lang={lang}>
-            <MuiDsfrThemeProvider>
-              <Providers nonce={nonce}>
-                <SentryClientProvider>
-                  <LiveChatProvider>{props.children}</LiveChatProvider>
-                </SentryClientProvider>
-              </Providers>
-            </MuiDsfrThemeProvider>
-          </DsfrProvider>
-        </AppRouterCacheProvider>
-        <Matomo nonce={nonce} />
-      </body>
-    </html>
+    <>
+      {/* eslint-disable-next-line jsx-a11y/html-has-lang */}
+      <html {...getHtmlAttributes({ lang })}>
+        <head>
+          <DsfrHead
+            nonce={nonce}
+            preloadFonts={[
+              //"Marianne-Light",
+              //"Marianne-Light_Italic",
+              'Marianne-Regular',
+              //"Marianne-Regular_Italic",
+              'Marianne-Medium',
+              //"Marianne-Medium_Italic",
+              'Marianne-Bold',
+              //"Marianne-Bold_Italic",
+              //"Spectral-Regular",
+              //"Spectral-ExtraBold"
+            ]}
+          />
+        </head>
+        <body>
+          <AppRouterCacheProvider>
+            <DsfrProvider lang={lang}>
+              <MuiDsfrThemeProvider>
+                <Providers nonce={nonce}>
+                  <SentryClientProvider>
+                    <LiveChatProvider>{props.children}</LiveChatProvider>
+                  </SentryClientProvider>
+                </Providers>
+              </MuiDsfrThemeProvider>
+            </DsfrProvider>
+          </AppRouterCacheProvider>
+          <Matomo nonce={nonce} />
+        </body>
+      </html>
+    </>
   );
 }
 
