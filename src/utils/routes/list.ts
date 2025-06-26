@@ -1,6 +1,8 @@
 import { createRouter, defineRoute, param } from 'type-route';
 
-import { Lang, defineLocalizedRoute } from '@ad/src/utils/routes/common';
+// For whatever reason when using TypeScript version of `next.config.ts`
+// it has to be a relative path otherwise it says `MODULE_NOT_FOUND`...
+import { Lang, defineLocalizedRoute } from './common';
 
 export const localizedRoutes = {
   about: defineLocalizedRoute(
