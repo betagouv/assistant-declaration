@@ -81,7 +81,7 @@ export function EventsSalesKeyFigures({ wrappers, eventSerie, roundValuesForCopy
     }
   }, [totalIncludingTaxesAmount, totalExcludingTaxesAmount, totalTaxesAmount, averageTicketPrice, roundValuesForCopy]);
 
-  const [snackbarAlert, setSnackbarAlert] = useState<JSX.Element | null>(null);
+  const [snackbarAlert, setSnackbarAlert] = useState<React.JSX.Element | null>(null);
   const handleCloseSnackbar = useCallback(() => setSnackbarAlert(null), [setSnackbarAlert]);
 
   const copyValue = useCallback(

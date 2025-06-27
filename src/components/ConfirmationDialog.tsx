@@ -7,7 +7,7 @@ import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 export interface ConfirmationDialogProps {
   open: boolean;
   title?: string;
-  description?: string | JSX.Element;
+  description?: string | React.JSX.Element;
   onConfirm: () => Promise<void>;
   onCancel?: () => Promise<void>;
   onClose: () => void;

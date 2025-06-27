@@ -22,8 +22,8 @@ export interface ErrorPageProps {
   title: string;
   technicalTitle: string;
   summary: string;
-  description: () => JSX.Element;
-  buttons: (() => JSX.Element)[];
+  description: () => React.JSX.Element;
+  buttons: (() => React.JSX.Element)[];
 }
 
 export function ErrorPage(props: ErrorPageProps) {

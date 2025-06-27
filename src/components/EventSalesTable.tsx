@@ -167,7 +167,7 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
     },
   ]);
 
-  const [snackbarAlert, setSnackbarAlert] = useState<JSX.Element | null>(null);
+  const [snackbarAlert, setSnackbarAlert] = useState<React.JSX.Element | null>(null);
   const handleCloseSnackbar = useCallback(() => setSnackbarAlert(null), []);
 
   const processRowUpdate = useCallback(

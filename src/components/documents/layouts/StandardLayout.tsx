@@ -236,7 +236,7 @@ Font.registerHyphenationCallback((word) => [word]); // Disable hyphenation
 
 export interface StandardLayoutProps {
   title: string;
-  header?: JSX.Element;
+  header?: React.JSX.Element;
 }
 
 export function StandardLayout(props: PropsWithChildren<StandardLayoutProps>) {

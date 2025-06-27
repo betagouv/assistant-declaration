@@ -4,7 +4,7 @@ import { ErrorPage, error404Props } from '@ad/src/components/ErrorPage';
 import { areMocksGloballyEnabled } from '@ad/src/utils/environment';
 
 // The real `notFound` returns never but it prevents us from displaying an error page
-type NotFound = () => never | JSX.Element;
+type NotFound = () => never | React.JSX.Element;
 
 const mock_notFound: NotFound = function () {
   console.log(`"notFound" mock has been called`);

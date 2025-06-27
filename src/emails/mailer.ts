@@ -58,7 +58,7 @@ export interface SendOptions {
   sender?: string;
   recipients: string[];
   subject: string;
-  emailComponent: JSX.Element;
+  emailComponent: React.JSX.Element;
   attachments?: Attachment[];
 }
 
