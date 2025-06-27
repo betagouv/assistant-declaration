@@ -40,7 +40,7 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
 
   const aggregatedQueries = new AggregatedQueries(getEventSerie, listEvents);
 
-  if (aggregatedQueries.isLoading) {
+  if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
     return (

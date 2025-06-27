@@ -17,9 +17,9 @@ export interface DashboardPageProps {}
 export function DashboardPage(props: DashboardPageProps) {
   const { showLiveChat, isLiveChatLoading } = useLiveChat();
 
-  const { data, error, isLoading, refetch } = trpc.getInterfaceSession.useQuery({});
+  const { data, error, isPending, refetch } = trpc.getInterfaceSession.useQuery({});
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (error) {
     return (

@@ -44,7 +44,7 @@ export function RetrievePasswordForm(props: RetrievePasswordFormProps) {
         <TextField type="email" label="Email" {...register('email')} error={!!errors.email} helperText={errors?.email?.message} fullWidth />
       </Grid>
       <Grid item xs={12}>
-        <Button type="submit" loading={requestNewPassword.isLoading} size="large" variant="contained" fullWidth>
+        <Button type="submit" loading={requestNewPassword.isPending} size="large" variant="contained" fullWidth>
           Valider
         </Button>
       </Grid>

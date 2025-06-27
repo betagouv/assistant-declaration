@@ -3,17 +3,18 @@ import {
   AnyProcedure,
   AnyQueryProcedure,
   AnyRouter,
-  DataTransformer,
   inferProcedureInput,
   inferProcedureOutput,
   inferRouterContext,
-  MaybePromise,
-  ProcedureRouterRecord,
 } from "@trpc/server";
-import { createRecursiveProxy } from "@trpc/server/shared";
 import { getRequestStorage } from "./localStorage";
 
 import { dehydrate, QueryClient } from "@tanstack/query-core";
+import { createRecursiveProxy, DataTransformer, MaybePromise } from "@trpc/server/unstable-core-do-not-import";
+
+export interface ProcedureRouterRecord {
+  [key: string]: AnyProcedure | AnyRouter;
+}
 
 interface CreateTRPCNextLayoutOptions<TRouter extends AnyRouter> {
   router: TRouter;

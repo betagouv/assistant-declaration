@@ -67,7 +67,7 @@ export function ResetPasswordForm({ prefill }: { prefill?: ResetPasswordPrefillS
         <PasswordFieldHinter password={watch('password')} headline={`Le nouveau mot de passe doit contenir :`} />
       </Grid>
       <Grid item xs={12}>
-        <Button type="submit" loading={resetPassword.isLoading} size="large" variant="contained" fullWidth>
+        <Button type="submit" loading={resetPassword.isPending} size="large" variant="contained" fullWidth>
           Mettre à jour
         </Button>
       </Grid>

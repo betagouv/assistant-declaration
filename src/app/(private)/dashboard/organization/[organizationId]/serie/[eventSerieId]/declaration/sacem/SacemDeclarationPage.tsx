@@ -155,7 +155,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
     }
   }, [getSacemDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId, getValues, setValue]);
 
-  if (aggregatedQueries.isLoading) {
+  if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
     return (
@@ -653,7 +653,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                     <Grid item xs={12} sm={8} md={6} sx={{ mx: 'auto' }}>
                       <Button
                         type="submit"
-                        loading={fillSacemDeclaration.isLoading}
+                        loading={fillSacemDeclaration.isPending}
                         size="large"
                         variant="contained"
                         color="warning"

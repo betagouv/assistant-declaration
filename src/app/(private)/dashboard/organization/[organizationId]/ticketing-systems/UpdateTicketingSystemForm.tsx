@@ -127,7 +127,7 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
         </Alert>
       </Grid>
       <Grid item xs={12}>
-        <Button type="submit" loading={updateTicketingSystem.isLoading} size="large" variant="contained" fullWidth>
+        <Button type="submit" loading={updateTicketingSystem.isPending} size="large" variant="contained" fullWidth>
           Tester et enregistrer
         </Button>
       </Grid>

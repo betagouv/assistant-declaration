@@ -14,7 +14,7 @@ export interface ConfirmationDialogProps {
 }
 
 export const ConfirmationDialog = (props: ConfirmationDialogProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isPending, setIsLoading] = useState<boolean>(false);
   const [actionError, setActionError] = useState<Error | null>(null);
   const dialogContentRef = useRef<HTMLDivElement | null>(null); // This is used to scroll to the error messages
 
@@ -28,7 +28,7 @@ export const ConfirmationDialog = (props: ConfirmationDialogProps) => {
       fullWidth
       open={props.open}
       onClose={() => {
-        if (isLoading) {
+        if (isPending) {
           // Prevent closing if the user just confirms an action
           return;
         }
@@ -60,7 +60,7 @@ export const ConfirmationDialog = (props: ConfirmationDialogProps) => {
 
             closeCallback();
           }}
-          disabled={isLoading}
+          disabled={isPending}
         >
           Annuler
         </Button>
@@ -85,7 +85,7 @@ export const ConfirmationDialog = (props: ConfirmationDialogProps) => {
               setIsLoading(false);
             }
           }}
-          loading={isLoading}
+          loading={isPending}
           variant="contained"
         >
           Confirmer

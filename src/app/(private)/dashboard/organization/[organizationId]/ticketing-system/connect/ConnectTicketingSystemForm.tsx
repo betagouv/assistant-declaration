@@ -198,7 +198,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
             </Alert>
           </Grid>
           <Grid item xs={12}>
-            <Button type="submit" loading={connectTicketingSystem.isLoading} size="large" variant="contained" fullWidth>
+            <Button type="submit" loading={connectTicketingSystem.isPending} size="large" variant="contained" fullWidth>
               Tester et connecter
             </Button>
           </Grid>

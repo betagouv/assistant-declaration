@@ -50,7 +50,7 @@ export function EditProfileForm(props: EditProfileFormProps) {
         <TextField type="lastname" label="Nom" {...register('lastname')} error={!!errors.lastname} helperText={errors?.lastname?.message} fullWidth />
       </Grid>
       <Grid item xs={12}>
-        <Button type="submit" loading={updateProfile.isLoading} size="large" variant="contained" fullWidth>
+        <Button type="submit" loading={updateProfile.isPending} size="large" variant="contained" fullWidth>
           Mettre à jour
         </Button>
       </Grid>

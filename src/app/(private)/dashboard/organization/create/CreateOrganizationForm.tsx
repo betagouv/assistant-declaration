@@ -82,7 +82,7 @@ export function CreateOrganizationForm(props: CreateOrganizationFormProps) {
         />
       </Grid>
       <Grid item xs={12}>
-        <Button type="submit" loading={createOrganization.isLoading} size="large" variant="contained" startIcon={<Save />} fullWidth>
+        <Button type="submit" loading={createOrganization.isPending} size="large" variant="contained" startIcon={<Save />} fullWidth>
           Sauvegarder
         </Button>
       </Grid>

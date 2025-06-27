@@ -1,7 +1,7 @@
 "use client";
 
-import { DehydratedState, Hydrate } from "@tanstack/react-query";
-import { DataTransformer } from "@trpc/server";
+import { DehydratedState, HydrationBoundary } from "@tanstack/react-query";
+import { DataTransformer } from "@trpc/server/unstable-core-do-not-import";
 import { useMemo } from "react";
 
 export function createHydrateClient(opts: { transformer?: DataTransformer }) {
@@ -17,6 +17,6 @@ export function createHydrateClient(opts: { transformer?: DataTransformer }) {
       }
       return state;
     }, [state]);
-    return <Hydrate state={transformedState}>{children}</Hydrate>;
+    return <HydrationBoundary state={transformedState}>{children}</HydrationBoundary>;
   };
 }

@@ -25,7 +25,7 @@ export function PrivateLayout(props: PropsWithChildren) {
   const sessionWrapper = useSession();
   const [logoutCommitted, setLogoutCommitted] = useState(false);
 
-  const { data, error, isLoading, refetch } = trpc.getInterfaceSession.useQuery({});
+  const { data, error, isPending, refetch } = trpc.getInterfaceSession.useQuery({});
 
   useEffect(() => {
     if (sessionWrapper.status === 'unauthenticated' && !logoutCommitted) {
@@ -81,7 +81,7 @@ export function PrivateLayout(props: PropsWithChildren) {
     ];
   }, [sessionWrapper.data, currentOrganization]);
 
-  if (isLoading || sessionWrapper.status !== 'authenticated') {
+  if (isPending || sessionWrapper.status !== 'authenticated') {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (error) {
     return (

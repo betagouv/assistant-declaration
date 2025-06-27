@@ -163,7 +163,7 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
     return lastSynchronizationAt ? isBefore(lastSynchronizationAt, thresholdDate) : true;
   }, [lastSynchronizationAt]);
 
-  if (aggregatedQueries.isLoading) {
+  if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
     return (

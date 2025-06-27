@@ -1,5 +1,5 @@
 import { TRPCClientErrorLike } from '@trpc/client';
-import { UseTRPCQueryResult } from '@trpc/react-query/dist/shared';
+import { UseTRPCQueryResult } from '@trpc/react-query/src/shared/hooks/types';
 import { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 
 import type { AppRouter } from '@ad/src/server/app-router';
@@ -26,11 +26,7 @@ export class AggregatedQueries {
     return this.queries.map((query) => query.refetch);
   }
 
-  public get isLoading(): boolean {
-    return this.queries.filter((query) => query.isLoading).length > 0;
-  }
-
-  public get isInitialLoading(): boolean {
-    return this.queries.filter((query) => query.isInitialLoading).length > 0;
+  public get isPending(): boolean {
+    return this.queries.filter((query) => query.isPending).length > 0;
   }
 }
