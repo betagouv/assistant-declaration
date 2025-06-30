@@ -126,7 +126,9 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
                     {capitalizeFirstLetter(t('date.longWithTime', { date: eventsWrapper.event.startAt }))}
                     <Tooltip title={'Copier le tableau des ventes de cette représentation pour Excel, Word...'} sx={{ ml: 1 }}>
                       <IconButton
-                        onClick={async (event) => {
+                        component="span"
+                        role="button" // Needed to avoid nested buttons due to the accordion header
+                        onClick={(event) => {
                           setEventsWrappersToCopy([eventsWrapper]);
                           setTriggerEventsSalesCopy(true);
 
