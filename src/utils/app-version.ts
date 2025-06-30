@@ -2,7 +2,9 @@ import { Octokit } from '@octokit/rest';
 import gitRevision from 'git-rev-sync';
 import parseGithubUrl from 'parse-github-url';
 
-import { workaroundAssert as assert } from '@ad/src/utils/assert';
+// For whatever reason when using TypeScript version of `next.config.ts`
+// it has to be a relative path otherwise it says `MODULE_NOT_FOUND`...
+import { workaroundAssert as assert } from './assert';
 
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN || undefined, // If not specified it uses public shared quota based on IP

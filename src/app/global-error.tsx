@@ -3,8 +3,8 @@
 import * as Sentry from '@sentry/nextjs';
 import { useEffect } from 'react';
 
-// import { PublicLayout } from '@ad/src/app/(public)/PublicLayout';
-// import { ErrorPage, error500Props } from '@ad/src/components/ErrorPage';
+import { ErrorLayout } from '@ad/src/app/error-layout';
+import { StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
 
 export function Error500({ error, reset }: { error: Error; reset: () => void }) {
   // Report to Sentry as unexpected
@@ -14,10 +14,8 @@ export function Error500({ error, reset }: { error: Error; reset: () => void }) 
 
   return (
     <>
-      <div>THIS IS AN ERROR 500</div>
-      {/* <PublicLayout>
-        <ErrorPage {...error500Props} />
-      </PublicLayout> */}
+      {/* <StartDsfrOnHydration /> */}
+      <ErrorLayout code={500} />
     </>
   );
 }
