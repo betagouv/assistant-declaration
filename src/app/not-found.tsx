@@ -1,9 +1,7 @@
-'use server';
-
 import { ErrorLayout } from '@ad/src/app/error-layout';
 import { StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
 
-export async function Error404({ error, reset }: { error: Error; reset: () => void }) {
+export function Error404({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <>
       <StartDsfrOnHydration />

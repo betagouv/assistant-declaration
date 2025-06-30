@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: formatPageTitle(`Réinitialisation de mot de passe`),
 };
 
-export default function Page() {
+export default async function Page() {
   return (
     <>
       <StartDsfrOnHydration />

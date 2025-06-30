@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: formatPageTitle(`Politique de confidentialité`),
 };
 
-export default function Page() {
+export default async function Page() {
   return (
     <>
       <StartDsfrOnHydration />

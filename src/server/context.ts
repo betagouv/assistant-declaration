@@ -1,8 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import type * as trpcNext from '@trpc/server/adapters/next';
-import { Session } from 'next-auth';
+import type { CreateNextContextOptions } from '@trpc/server/adapters/next';
+import type { CreateWSSContextFnOptions } from '@trpc/server/adapters/ws';
+import { IncomingMessage } from 'http';
+import { NextApiRequest } from 'next';
+import { getServerSession } from 'next-auth';
 
-import { auth } from '@ad/src/pages/api/auth/[...nextauth]';
+import { nextAuthOptions } from '@ad/src/pages/api/auth/[...nextauth]';
 
 export interface User {
   id: string;
@@ -10,38 +12,22 @@ export interface User {
   name: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface CreateContextOptions {
-  session: Session | null;
-  user: User | null;
-}
+export async function createContext(opts: CreateNextContextOptions | CreateWSSContextFnOptions) {
+  // [WORKAROUND] Since we upgraded to Next.js v14 it expects cookies property (not available onto IncomingMessage)
+  if (!('cookies' in opts.req)) {
+    (opts.req as any).cookies = {};
+  }
 
-/**
- * Inner function for `createContext` where we create the context.
- * This is useful for testing when we don't want to mock Next.js' request/response
- */
-export async function createContextInner(_opts: CreateContextOptions) {
-  console.log(55555555);
-  console.log(_opts);
+  // Not RSC
+  const session = await getServerSession(
+    opts.req as NextApiRequest | (IncomingMessage & { cookies: Partial<Record<string, string>> }),
+    opts.res,
+    nextAuthOptions
+  );
 
   return {
-    session: _opts.session,
-    user: _opts.user,
+    user: session?.user,
   };
-}
-
-export async function createContext(opts: trpcNext.CreateNextContextOptions) {
-  const session = await auth();
-
-  console.log(44444);
-  console.log(session);
-
-  // for API-response caching see https://trpc.io/docs/v11/caching
-
-  return await createContextInner({
-    session: session,
-    user: session.user, // TODO: ...
-  });
 }
 
 export type Context = Awaited<ReturnType<typeof createContext>>;

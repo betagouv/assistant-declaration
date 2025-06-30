@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: formatPageTitle(`À propos`),
 };
 
-export default function Page() {
+export default async function Page() {
   return (
     <>
       <StartDsfrOnHydration />

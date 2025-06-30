@@ -5,10 +5,10 @@ import { StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
 import { formatPageTitle } from '@ad/src/utils/page';
 
 export const metadata: Metadata = {
-  title: formatPageTitle(`Questions-réponses`),
+  title: formatPageTitle(`FAQ`),
 };
 
-export default function Page() {
+export default async function Page() {
   return (
     <>
       <StartDsfrOnHydration />

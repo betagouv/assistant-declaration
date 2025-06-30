@@ -144,8 +144,4 @@ export const nextAuthOptions: NextAuthOptions = {
 
 export const handler = NextAuth(nextAuthOptions);
 
-export const { auth: uncachedAuth, handlers } = handler;
-
-export const auth = cache(uncachedAuth);
-
 export default apiHandlerWrapper(handler);

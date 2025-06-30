@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: formatPageTitle(`Tableau de bord`),
 };
 
-export default function Page() {
+export default async function Page() {
   return (
     <>
       <StartDsfrOnHydration />

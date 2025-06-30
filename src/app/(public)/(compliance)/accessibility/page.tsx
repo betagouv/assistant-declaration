@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: formatPageTitle(`Déclaration d'accessibilité`),
 };
 
-export default function Page() {
+export default async function Page() {
   return (
     <>
       <StartDsfrOnHydration />
