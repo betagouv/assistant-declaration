@@ -2,8 +2,7 @@
 
 import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
 import { Grading } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
-import { Grid, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Button, Grid, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';

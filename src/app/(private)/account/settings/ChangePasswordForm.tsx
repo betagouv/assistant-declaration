@@ -2,8 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
-import { Grid, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Button, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 

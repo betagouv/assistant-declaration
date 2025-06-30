@@ -3,11 +3,11 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Download, Save, Visibility } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
 import {
   Alert,
   Autocomplete,
   Box,
+  Button,
   Container,
   FormControl,
   FormControlLabel,

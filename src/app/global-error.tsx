@@ -14,6 +14,7 @@ export function Error500({ error, reset }: { error: Error; reset: () => void }) 
 
   return (
     <>
+      {/* TODO: `global-error.tsx` cannot be a RSC so it seems react-dsfr is not properly initialized */}
       {/* <StartDsfrOnHydration /> */}
       <ErrorLayout code={500} />
     </>

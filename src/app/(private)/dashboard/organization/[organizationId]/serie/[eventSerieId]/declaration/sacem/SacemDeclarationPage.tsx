@@ -3,8 +3,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Download, Save, Visibility } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
-import { Alert, Autocomplete, Box, Container, Grid, Link, TextField, Tooltip, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Container, Grid, Link, TextField, Tooltip, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';

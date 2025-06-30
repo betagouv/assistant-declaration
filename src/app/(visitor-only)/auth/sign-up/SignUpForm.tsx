@@ -2,8 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
 import {
+  Button,
   Checkbox,
   FormControl,
   FormControlLabel,

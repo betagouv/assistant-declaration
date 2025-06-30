@@ -3,8 +3,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { ContentCopy } from '@mui/icons-material';
 import { ExpandMore } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Chip, Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';

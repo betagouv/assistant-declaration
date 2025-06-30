@@ -1,5 +1,4 @@
-import { LoadingButton as Button } from '@mui/lab';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid } from '@mui/material';
 import { TRPCClientErrorLike } from '@trpc/client';
 import { useRef } from 'react';
 

@@ -3,8 +3,7 @@
 // import { fr } from '@codegouvfr/react-dsfr';
 import ovoidSprite from '@gouvfr/dsfr/dist/artwork/background/ovoid.svg';
 import technicalErrorSprite from '@gouvfr/dsfr/dist/artwork/pictograms/system/technical-error.svg';
-import { LoadingButton as Button } from '@mui/lab';
-import { Grid } from '@mui/material';
+import { Button, Grid } from '@mui/material';
 import NextLink from 'next/link';
 import React from 'react';
 

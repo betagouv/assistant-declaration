@@ -1,8 +1,7 @@
 'use client';
 
 import { Sync } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
-import { Alert, Container, Grid, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Alert, Button, Container, Grid, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import { isAfter, isBefore, subHours, subMonths } from 'date-fns';
 import NextLink from 'next/link';
