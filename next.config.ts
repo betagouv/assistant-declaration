@@ -100,7 +100,8 @@ const generateNextConfig = async (): Promise<NextConfig> => {
     webpack: (config, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }) => {
       // Expose all DSFR fonts as static at the root
       config.plugins.push(
-        new rspack.CopyRspackPlugin({
+        new CopyWebpackPlugin({
+          // new rspack.CopyRspackPlugin({
           patterns: [
             {
               from: path.dirname(require.resolve('@gouvfr/dsfr/dist/fonts/Marianne-Bold.woff2')),
@@ -183,4 +184,8 @@ const generateNextConfig = async (): Promise<NextConfig> => {
   return withBundleAnalyzer(withSentryConfig(standardModuleExports, sentryWebpackPluginOptions));
 };
 
-export default withRspack(generateNextConfig);
+// [WORKAROUND] RsPack not yet fully compatible
+// Ref: https://github.com/vercel/next.js/discussions/77800 (search for "Failed to get stats due to error: ignore.test is not a function, are you trying to access the stats from the previous compilation")
+// ... it seems to not come from Sentry plugin (ref: https://github.com/getsentry/sentry-javascript/issues/16027) because we tried commenting intrumentation and the Sentry wrapper...
+export default generateNextConfig;
+// export default withRspack(generateNextConfig);

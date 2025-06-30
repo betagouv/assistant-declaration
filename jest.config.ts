@@ -4,8 +4,6 @@ import nextJest from 'next/jest';
 import path from 'path';
 import { pathsToModuleNameMapper } from 'ts-jest';
 
-import { additionalJestPackages, commonPackages, formatTransformIgnorePatterns } from './transpilePackages';
-
 const createJestConfig = nextJest({
   dir: './',
 });
@@ -61,11 +59,6 @@ const asyncConfig = createJestConfig(customJestConfig);
 
 const defaultExport = async () => {
   const config = await asyncConfig();
-
-  config.transformIgnorePatterns = formatTransformIgnorePatterns(
-    [...commonPackages, ...additionalJestPackages],
-    customJestConfig.transformIgnorePatterns ?? []
-  );
 
   // Since the order over other mappers matters, we cannnot use it directly inside `moduleNameMapper` because it's appended over Next.js default configuration and not preprended
   // So we make sure it's added as keys before (since JavaScript object keys are not sorted)
