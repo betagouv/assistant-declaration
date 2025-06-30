@@ -3,7 +3,7 @@ import { Alert, AlertProps, Button } from '@mui/material';
 import { TRPCClientErrorLike } from '@trpc/client';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import z from 'zod';
+import z, { ZodIssue } from 'zod';
 
 import { formatMessageFromIssue } from '@ad/src/i18n';
 import { CustomError, internalServerErrorError, unexpectedErrorError } from '@ad/src/models/entities/errors';
@@ -30,15 +30,15 @@ export function ErrorAlert(props: ErrorAlertProps) {
       if (error instanceof Error && error.name === 'TRPCClientError') {
         const trpcError = error as unknown as TRPCClientErrorLike<AppRouter>;
 
-        if (trpcError.data?.zodError) {
+        if (trpcError.data && 'zodError' in trpcError.data) {
           // Format to benefit from all the typings
-          const zodError = new z.ZodError(trpcError.data?.zodError);
+          const zodError = new z.ZodError(trpcError.data.zodError as ZodIssue[]);
 
           for (const issue of zodError.issues) {
             // As fallback display the error message from the server, should be good enough but can be in another language
             errs.push(formatMessageFromIssue(issue) || issue.message);
           }
-        } else if (trpcError.data?.customError) {
+        } else if (trpcError.data && 'customError' in trpcError.data) {
           const customErrorPayload = trpcError.data.customError as CustomError;
           const customError = new CustomError(customErrorPayload.code, customErrorPayload.message);
 

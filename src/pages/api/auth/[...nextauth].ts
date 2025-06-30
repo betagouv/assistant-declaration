@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import NextAuth from 'next-auth';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { cache } from 'react';
 
 import { authCredentialsRequiredError, authFatalError, authNoCredentialsMatchError, userNotConfirmedError } from '@ad/src/models/entities/errors';
 import { TokenUserSchema, TokenUserSchemaType } from '@ad/src/models/entities/user';
@@ -142,5 +143,9 @@ export const nextAuthOptions: NextAuthOptions = {
 };
 
 export const handler = NextAuth(nextAuthOptions);
+
+export const { auth: uncachedAuth, handlers } = handler;
+
+export const auth = cache(uncachedAuth);
 
 export default apiHandlerWrapper(handler);
