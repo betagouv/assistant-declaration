@@ -51,7 +51,7 @@ export function QuickLinks() {
             </Typography>
             <Button
               component={NextLink}
-              href="https://atelier-numerique.notion.site/1fb47c72862480c193c8e7aa3734564b"
+              href="https://atelier-numerique.notion.site/21447c728624818e8a49d9af2058d985"
               target="_blank"
               size="medium"
               variant="contained"
