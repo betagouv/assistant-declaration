@@ -1,5 +1,4 @@
 import { TRPCError, initTRPC } from '@trpc/server';
-import { headers } from 'next/headers';
 import superjson from 'superjson';
 import { ZodError } from 'zod';
 
@@ -82,17 +81,3 @@ export const isAuthed = t.middleware(({ next, ctx }) => {
 });
 
 export const privateProcedure = t.procedure.use(isAuthed);
-
-export const createAction = experimental_createServerActionHandler(t, {
-  async createContext() {
-    const session = await auth();
-
-    return {
-      session,
-      headers: {
-        // Pass the cookie header to the API
-        cookies: (await headers()).get('cookie') ?? '',
-      },
-    };
-  },
-});
