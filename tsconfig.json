@@ -4,7 +4,8 @@
     "target": "esnext",
     "module": "esnext",
     "strict": true,
-    "moduleResolution": "node",
+    "allowImportingTsExtensions": true,
+    "moduleResolution": "bundler",
     "paths": {
       "@ad/*": [
         "./*"
@@ -59,7 +60,8 @@
     "**/*.tsx",
     ".storybook/**/*.ts",
     ".storybook/**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "next-env.d.ts"
   ],
   "exclude": [
     "node_modules",

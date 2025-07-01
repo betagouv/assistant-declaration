@@ -1,5 +1,4 @@
-import { LoadingButton as Button } from '@mui/lab';
-import { Box, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 import Image from 'next/image';
 

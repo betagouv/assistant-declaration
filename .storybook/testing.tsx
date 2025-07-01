@@ -1,6 +1,6 @@
 import { Decorator } from '@storybook/react';
-import { within } from '@storybook/test';
 import React from 'react';
+import { within } from 'storybook/test';
 
 export const userAgentNameToBeDetected = 'StorybookTestRunner';
 

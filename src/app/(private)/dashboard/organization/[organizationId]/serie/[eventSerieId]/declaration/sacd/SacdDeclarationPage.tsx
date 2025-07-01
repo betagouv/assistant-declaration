@@ -3,11 +3,11 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Download, Save, Visibility } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
 import {
   Alert,
   Autocomplete,
   Box,
+  Button,
   Container,
   FormControl,
   FormControlLabel,
@@ -285,7 +285,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
     }
   }, [getSacdDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
 
-  if (aggregatedQueries.isLoading) {
+  if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
     return (
@@ -983,7 +983,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                     <Grid item xs={12} sm={8} md={6} sx={{ mx: 'auto' }}>
                       <Button
                         type="submit"
-                        loading={fillSacdDeclaration.isLoading}
+                        loading={fillSacdDeclaration.isPending}
                         size="large"
                         variant="contained"
                         color="warning"

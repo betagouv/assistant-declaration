@@ -2,8 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
-import { Grid, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Button, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -102,7 +101,7 @@ export function ChangePasswordForm(props: ChangePasswordFormProps) {
         <PasswordFieldHinter password={watch('newPassword')} headline={`Le nouveau mot de passe doit contenir :`} />
       </Grid>
       <Grid item xs={12}>
-        <Button type="submit" loading={changePassword.isLoading} size="large" variant="contained" fullWidth>
+        <Button type="submit" loading={changePassword.isPending} size="large" variant="contained" fullWidth>
           Changer
         </Button>
       </Grid>

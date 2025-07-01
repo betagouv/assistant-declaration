@@ -1,12 +1,18 @@
 import { Metadata } from 'next';
 
 import { FrequentlyAskedQuestionsPage } from '@ad/src/app/(public)/frequently-asked-questions/FrequentlyAskedQuestionsPage';
+import { StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
 import { formatPageTitle } from '@ad/src/utils/page';
 
 export const metadata: Metadata = {
-  title: formatPageTitle(`Questions-réponses`),
+  title: formatPageTitle(`FAQ`),
 };
 
-export default function Page() {
-  return <FrequentlyAskedQuestionsPage />;
+export default async function Page() {
+  return (
+    <>
+      <StartDsfrOnHydration />
+      <FrequentlyAskedQuestionsPage />;
+    </>
+  );
 }

@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
-import { within } from '@storybook/test';
 import { useForm } from 'react-hook-form';
+import { within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { SacdOrganizationFields } from '@ad/src/components/SacdOrganizationFields';

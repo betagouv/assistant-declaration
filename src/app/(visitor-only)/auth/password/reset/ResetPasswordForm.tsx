@@ -2,8 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
-import { Grid, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Button, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -67,7 +66,7 @@ export function ResetPasswordForm({ prefill }: { prefill?: ResetPasswordPrefillS
         <PasswordFieldHinter password={watch('password')} headline={`Le nouveau mot de passe doit contenir :`} />
       </Grid>
       <Grid item xs={12}>
-        <Button type="submit" loading={resetPassword.isLoading} size="large" variant="contained" fullWidth>
+        <Button type="submit" loading={resetPassword.isPending} size="large" variant="contained" fullWidth>
           Mettre à jour
         </Button>
       </Grid>

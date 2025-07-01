@@ -1,5 +1,4 @@
-import { LoadingButton as Button } from '@mui/lab';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid } from '@mui/material';
 import { TRPCClientErrorLike } from '@trpc/client';
 import { useRef } from 'react';
 
@@ -9,7 +8,7 @@ import { AppRouter } from '@ad/src/server/app-router';
 export interface ErrorDialogProps {
   open: boolean;
   title?: string;
-  description?: string | JSX.Element;
+  description?: string | React.JSX.Element;
   error: TRPCClientErrorLike<AppRouter> | Error; // Error can be from the network (tRPC most of the time) or local
   onClose: () => void;
 }

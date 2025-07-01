@@ -8,12 +8,7 @@ import { apiHandlerWrapper } from '@ad/src/utils/api';
 
 export const handler = createNextApiHandler({
   router: appRouter,
-  createContext(opts) {
-    return createContext({
-      type: 'api',
-      ...opts,
-    });
-  },
+  createContext,
   onError({ error, input, ctx }) {
     // This is called before the tRPC `errorFormatter` middleware
     // ---

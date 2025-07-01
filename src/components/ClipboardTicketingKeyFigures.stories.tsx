@@ -1,8 +1,8 @@
 import { Button } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
-import { within } from '@storybook/test';
 import { set } from 'date-fns';
 import { useState } from 'react';
+import { within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { ClipboardTicketingKeyFigures } from '@ad/src/components/ClipboardTicketingKeyFigures';

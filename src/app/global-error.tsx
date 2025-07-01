@@ -1,19 +1,22 @@
 'use client';
 
 import * as Sentry from '@sentry/nextjs';
+import { useEffect } from 'react';
 
-import { PublicLayout } from '@ad/src/app/(public)/PublicLayout';
-import { ErrorPage, error500Props } from '@ad/src/components/ErrorPage';
+import { ErrorLayout } from '@ad/src/app/error-layout';
+import { StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
 
 export function Error500({ error, reset }: { error: Error; reset: () => void }) {
   // Report to Sentry as unexpected
-  Sentry.captureException(error);
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
 
   return (
     <>
-      <PublicLayout>
-        <ErrorPage {...error500Props} />
-      </PublicLayout>
+      {/* TODO: `global-error.tsx` cannot be a RSC so it seems react-dsfr is not properly initialized */}
+      {/* <StartDsfrOnHydration /> */}
+      <ErrorLayout code={500} />
     </>
   );
 }

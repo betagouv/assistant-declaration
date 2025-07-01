@@ -1,14 +1,11 @@
 import { headerFooterDisplayItem } from '@codegouvfr/react-dsfr/Display';
 import { HeaderProps } from '@codegouvfr/react-dsfr/Header';
-import type { DefaultColorScheme } from '@codegouvfr/react-dsfr/next-appdir';
 import { EventEmitter } from 'eventemitter3';
 
 import { HeaderHelpItem } from '@ad/src/components/HeaderHelpItem';
 import { HeaderUserItem } from '@ad/src/components/HeaderUserItem';
 import { UserInterfaceOrganizationSchemaType } from '@ad/src/models/entities/ui';
 import { TokenUserSchemaType } from '@ad/src/models/entities/user';
-
-export const defaultColorScheme: DefaultColorScheme = 'system';
 
 export const brandTop = (
   <>

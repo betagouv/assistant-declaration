@@ -2,8 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Save } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
-import { Grid, TextField } from '@mui/material';
+import { Button, Grid, TextField } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -82,7 +81,7 @@ export function CreateOrganizationForm(props: CreateOrganizationFormProps) {
         />
       </Grid>
       <Grid item xs={12}>
-        <Button type="submit" loading={createOrganization.isLoading} size="large" variant="contained" startIcon={<Save />} fullWidth>
+        <Button type="submit" loading={createOrganization.isPending} size="large" variant="contained" startIcon={<Save />} fullWidth>
           Sauvegarder
         </Button>
       </Grid>

@@ -2,8 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { LoadingButton as Button } from '@mui/lab';
-import { Alert, Grid, IconButton, InputAdornment, Link, MenuItem, TextField } from '@mui/material';
+import { Alert, Button, Grid, IconButton, InputAdornment, Link, MenuItem, TextField } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -198,7 +197,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
             </Alert>
           </Grid>
           <Grid item xs={12}>
-            <Button type="submit" loading={connectTicketingSystem.isLoading} size="large" variant="contained" fullWidth>
+            <Button type="submit" loading={connectTicketingSystem.isPending} size="large" variant="contained" fullWidth>
               Tester et connecter
             </Button>
           </Grid>

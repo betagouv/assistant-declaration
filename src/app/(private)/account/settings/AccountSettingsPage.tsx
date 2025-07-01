@@ -1,6 +1,7 @@
 'use client';
 
-import { Grid, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 import { createContext, useContext } from 'react';
 
 import { ChangePasswordForm } from '@ad/src/app/(private)/account/settings/ChangePasswordForm';
@@ -20,9 +21,9 @@ export const AccountSettingsPageContext = createContext({
 export function AccountSettingsPage() {
   const { ContextualEditProfileForm, ContextualChangePasswordForm } = useContext(AccountSettingsPageContext);
 
-  const { data, error, isLoading, refetch } = trpc.getProfile.useQuery({});
+  const { data, error, isPending, refetch } = trpc.getProfile.useQuery({});
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (error) {
     return (
@@ -32,7 +33,7 @@ export function AccountSettingsPage() {
     );
   }
 
-  const profile = data.user;
+  const profile = data!.user;
 
   return (
     <Grid container {...centeredContainerGridProps} spacing={5} alignContent="flex-start">

@@ -1,5 +1,4 @@
-import { LoadingButton as Button } from '@mui/lab';
-import { Container, Grid, Typography } from '@mui/material';
+import { Button, Container, Grid, Typography } from '@mui/material';
 import NextLink from 'next/link';
 
 import { Widget } from '@ad/src/app/(public)/about/Widget';
@@ -52,7 +51,7 @@ export function QuickLinks() {
             </Typography>
             <Button
               component={NextLink}
-              href="https://atelier-numerique.notion.site/1fb47c72862480c193c8e7aa3734564b"
+              href="https://atelier-numerique.notion.site/21447c728624818e8a49d9af2058d985"
               target="_blank"
               size="medium"
               variant="contained"

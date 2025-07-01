@@ -14,7 +14,7 @@ export const LiveChatProvider = ({ children }: PropsWithChildren) => {
   // Just using more below a vanilla frontend look up on search params
   // const searchParams = useSearchParams();
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isPending, setIsLoading] = useState<boolean>(false);
 
   const showLiveChat = useCallback(async () => {
     // Even if it failed retrieving information for this user, let the user contact the support
@@ -51,7 +51,7 @@ export const LiveChatProvider = ({ children }: PropsWithChildren) => {
       <LiveChatContext.Provider
         value={{
           showLiveChat: showLiveChat,
-          isLiveChatLoading: isLoading,
+          isLiveChatLoading: isPending,
         }}
       >
         {children}
