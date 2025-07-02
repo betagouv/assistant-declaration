@@ -62,7 +62,7 @@ export interface PhoneFieldProps extends Omit<StandardTextFieldProps, 'value' | 
   onBlur: TextFieldProps['onBlur'];
 }
 
-export function PhoneField({ onGlobalChange, initialPhoneNumber, numberOptions, onBlur, ...props }: PhoneFieldProps) {
+export function PhoneField({ onGlobalChange, initialPhoneNumber, numberOptions, onBlur, disabled, ...props }: PhoneFieldProps) {
   const [countryCallingCode, setCountryCallingCode] = useState<CountryCallingCode>(countryCallingCodes[0]);
   const [numberFormattedValue, setNumberFormattedValue] = useState<string>('');
   const [initialPhoneNumberProcessedAtLeastOnce, setInitialPhoneNumberProcessedAtLeastOnce] = useState<boolean>(false);
@@ -185,6 +185,7 @@ export function PhoneField({ onGlobalChange, initialPhoneNumber, numberOptions, 
   return (
     <>
       <Autocomplete
+        disabled={disabled}
         options={formattedNumberOptions}
         freeSolo
         value={numberFormattedValue}
@@ -202,6 +203,7 @@ export function PhoneField({ onGlobalChange, initialPhoneNumber, numberOptions, 
                     <InputAdornment position="start" sx={{ alignItems: 'stretch' }}>
                       <>
                         <Button
+                          disabled={disabled}
                           onClick={handleClick}
                           aria-label="options"
                           aria-controls={open ? 'phone-calling-code-menu' : undefined}

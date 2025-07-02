@@ -28,6 +28,7 @@ const mswCommonParameters = [
     path: ['getEventSerie'],
     response: {
       eventSerie: eventsSeries[0],
+      partialDeclarations: [],
     },
   }),
   getTRPCMock({

@@ -1,8 +1,17 @@
 import z from 'zod';
 
+import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { SacdDeclarationOrganizationInputSchema, SacdDeclarationSchema } from '@ad/src/models/entities/declaration/sacd';
 import { SacemDeclarationSchema } from '@ad/src/models/entities/declaration/sacem';
 import { EventSerieSchema } from '@ad/src/models/entities/event';
+
+export const TransmitDeclarationSchema = z
+  .object({
+    eventSerieId: SacemDeclarationSchema.shape.eventSerieId,
+    type: DeclarationTypeSchema,
+  })
+  .strict();
+export type TransmitDeclarationSchemaType = z.infer<typeof TransmitDeclarationSchema>;
 
 export const GetSacemDeclarationSchema = z
   .object({

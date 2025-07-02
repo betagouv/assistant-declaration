@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { AddressInputSchema, AddressSchema } from '@ad/src/models/entities/address';
+import { DeclarationSchema } from '@ad/src/models/entities/declaration';
 import { duplicateEntryCategoryLabelError } from '@ad/src/models/entities/errors';
 import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 import { EventSerieSchema } from '@ad/src/models/entities/event';
@@ -159,6 +160,7 @@ export const SacdDeclarationSchema = applyTypedParsers(
       organizationName: OrganizationSchema.shape.name,
       eventSerieName: EventSerieSchema.shape.name,
       averageTicketPrice: z.number().nonnegative(),
+      transmittedAt: DeclarationSchema.shape.transmittedAt,
     })
     .strict()
 );

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Declaration>
+  <Header>
+    <dec_ref>712790</dec_ref>
+    <dec_systeme>ASSISTANT_DECLARATION</dec_systeme>
+    <dec_date>2025/02/18</dec_date>
+    <dec_nb>3</dec_nb>
+  </Header>
+  <Representations>
+    <Representation>
+      <rep_ref_dec>d79cb3ba-745e-5d9a-8903-4a02327a7e01_e79cb3ba-745e-5d9a-8903-4a02327a7e01</rep_ref_dec>
+      <rep_devise>EUR</rep_devise>
+      <rep_statut>DEF</rep_statut>
+      <rep_version>1</rep_version>
+      <rep_titre>Le cracheur de feu</rep_titre>
+      <rep_date_debut>2024/12/01</rep_date_debut>
+      <rep_date_fin>2024/12/20</rep_date_fin>
+      <rep_nb>1</rep_nb>
+      <rep_horaire>11:00</rep_horaire>
+      <Billetterie>
+        <rep_mt_billets>441.71</rep_mt_billets>
+        <rep_tx_tva_billets>5.5</rep_tx_tva_billets>
+        <rep_mt_tva_billets>24.29</rep_mt_tva_billets>
+        <rep_nb_billets_pay>49</rep_nb_billets_pay>
+        <rep_nb_billets_exo>0</rep_nb_billets_exo>
+      </Billetterie>
+      <Exploitation>
+        <expl_nat>PRO</expl_nat>
+        <rep_public>Tout public</rep_public>
+        <rep_mt_cession>0</rep_mt_cession>
+        <rep_tx_tva_cession>5.5</rep_tx_tva_cession>
+        <rep_mt_tva_cession>0</rep_mt_tva_cession>
+        <rep_mt_frais>1973.33</rep_mt_frais>
+        <rep_mt_apports_coprod>0</rep_mt_apports_coprod>
+        <rep_mt_garantie_rec>0</rep_mt_garantie_rec>
+        <rep_mt_autres>775</rep_mt_autres>
+      </Exploitation>
+      <Salle>
+        <salle_nom>Salle Hermione</salle_nom>
+        <salle_jauge>230</salle_jauge>
+      </Salle>
+      <Diffuseur>
+        <diff_nom>Diffuseur France</diff_nom>
+        <diff_adresse_1>31 rue des Abbesses</diff_adresse_1>
+        <diff_code_postal>75018</diff_code_postal>
+        <diff_ville>Paris</diff_ville>
+        <diff_pays>FR</diff_pays>
+        <diff_tel>06 00 11 22 31</diff_tel>
+        <diff_mel>aaa@aaa.fr</diff_mel>
+        <diff_tva>FR123456112</diff_tva>
+      </Diffuseur>
+      <Producteur>
+        <prod_nom>Les spectacles d'Antan</prod_nom>
+        <prod_adresse_1>95 rue Saint-Antoine</prod_adresse_1>
+        <prod_code_postal>35000</prod_code_postal>
+        <prod_ville>Rennes</prod_ville>
+        <prod_pays>FR</prod_pays>
+        <prod_tel>06 00 11 22 32</prod_tel>
+        <prod_mel>bbb@bbb.fr</prod_mel>
+        <prod_tva>FR123456122</prod_tva>
+      </Producteur>
+    </Representation>
+    <Representation>
+      <rep_ref_dec>d79cb3ba-745e-5d9a-8903-4a02327a7e01_e79cb3ba-745e-5d9a-8903-4a02327a7e02</rep_ref_dec>
+      <rep_devise>EUR</rep_devise>
+      <rep_statut>DEF</rep_statut>
+      <rep_version>1</rep_version>
+      <rep_titre>Le cracheur de feu</rep_titre>
+      <rep_date_debut>2024/12/02</rep_date_debut>
+      <rep_date_fin>2024/12/02</rep_date_fin>
+      <rep_nb>1</rep_nb>
+      <rep_horaire>15:00</rep_horaire>
+      <Billetterie>
+        <rep_mt_billets>682.46</rep_mt_billets>
+        <rep_tx_tva_billets>5.5</rep_tx_tva_billets>
+        <rep_mt_tva_billets>37.54</rep_mt_tva_billets>
+        <rep_nb_billets_pay>36</rep_nb_billets_pay>
+        <rep_nb_billets_exo>0</rep_nb_billets_exo>
+      </Billetterie>
+      <Exploitation>
+        <expl_nat>PRO</expl_nat>
+        <rep_public>Tout public</rep_public>
+      </Exploitation>
+      <Salle>
+        <salle_nom>Salle Hermione</salle_nom>
+        <salle_jauge>230</salle_jauge>
+      </Salle>
+      <Diffuseur>
+        <diff_nom>Diffuseur France</diff_nom>
+        <diff_adresse_1>31 rue des Abbesses</diff_adresse_1>
+        <diff_code_postal>75018</diff_code_postal>
+        <diff_ville>Paris</diff_ville>
+        <diff_pays>FR</diff_pays>
+        <diff_tel>06 00 11 22 31</diff_tel>
+        <diff_mel>aaa@aaa.fr</diff_mel>
+        <diff_tva>FR123456112</diff_tva>
+      </Diffuseur>
+      <Producteur>
+        <prod_nom>Les spectacles d'Antan</prod_nom>
+        <prod_adresse_1>95 rue Saint-Antoine</prod_adresse_1>
+        <prod_code_postal>35000</prod_code_postal>
+        <prod_ville>Rennes</prod_ville>
+        <prod_pays>FR</prod_pays>
+        <prod_tel>06 00 11 22 32</prod_tel>
+        <prod_mel>bbb@bbb.fr</prod_mel>
+        <prod_tva>FR123456122</prod_tva>
+      </Producteur>
+    </Representation>
+    <Representation>
+      <rep_ref_dec>d79cb3ba-745e-5d9a-8903-4a02327a7e01_e79cb3ba-745e-5d9a-8903-4a02327a7e03</rep_ref_dec>
+      <rep_devise>EUR</rep_devise>
+      <rep_statut>DEF</rep_statut>
+      <rep_version>1</rep_version>
+      <rep_titre>Le cracheur de feu</rep_titre>
+      <rep_date_debut>2024/12/10</rep_date_debut>
+      <rep_date_fin>2024/12/15</rep_date_fin>
+      <rep_nb>1</rep_nb>
+      <rep_horaire>21:30</rep_horaire>
+      <Billetterie>
+        <rep_mt_billets>789.57</rep_mt_billets>
+        <rep_tx_tva_billets>5.5</rep_tx_tva_billets>
+        <rep_mt_tva_billets>43.43</rep_mt_tva_billets>
+        <rep_nb_billets_pay>72</rep_nb_billets_pay>
+        <rep_nb_billets_exo>0</rep_nb_billets_exo>
+      </Billetterie>
+      <Exploitation>
+        <expl_nat>PRO</expl_nat>
+        <rep_public>Tout public</rep_public>
+      </Exploitation>
+      <Salle>
+        <salle_nom>Salle Hermione</salle_nom>
+        <salle_jauge>230</salle_jauge>
+      </Salle>
+      <Diffuseur>
+        <diff_nom>Diffuseur France</diff_nom>
+        <diff_adresse_1>31 rue des Abbesses</diff_adresse_1>
+        <diff_code_postal>75018</diff_code_postal>
+        <diff_ville>Paris</diff_ville>
+        <diff_pays>FR</diff_pays>
+        <diff_tel>06 00 11 22 31</diff_tel>
+        <diff_mel>aaa@aaa.fr</diff_mel>
+        <diff_tva>FR123456112</diff_tva>
+      </Diffuseur>
+      <Producteur>
+        <prod_nom>Les spectacles d'Antan</prod_nom>
+        <prod_adresse_1>95 rue Saint-Antoine</prod_adresse_1>
+        <prod_code_postal>35000</prod_code_postal>
+        <prod_ville>Rennes</prod_ville>
+        <prod_pays>FR</prod_pays>
+        <prod_tel>06 00 11 22 32</prod_tel>
+        <prod_mel>bbb@bbb.fr</prod_mel>
+        <prod_tva>FR123456122</prod_tva>
+      </Producteur>
+    </Representation>
+  </Representations>
+</Declaration>

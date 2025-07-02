@@ -57,6 +57,7 @@ export const eventsSeriesWrappers: EventSerieWrapperSchemaType[] = [
       {
         type: DeclarationTypeSchema.Values.SACEM,
         status: DeclarationStatusSchema.Values.PROCESSED,
+        transmittedAt: null,
       },
     ],
   }),
@@ -70,6 +71,7 @@ export const eventsSeriesWrappers: EventSerieWrapperSchemaType[] = [
       {
         type: DeclarationTypeSchema.Values.SACEM,
         status: DeclarationStatusSchema.Values.PENDING,
+        transmittedAt: new Date('December 31, 2024 10:00:00 UTC'),
       },
     ],
   }),

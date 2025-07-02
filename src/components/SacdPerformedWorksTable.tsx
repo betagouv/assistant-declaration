@@ -72,9 +72,10 @@ export interface SacdPerformedWorksTableProps {
   trigger: UseFormTrigger<FillSacdDeclarationSchemaType>;
   placeholder: SacdDeclarationWrapperSchemaType['placeholder']['performedWorksOptions'];
   errors: FieldErrors<FillSacdDeclarationSchemaType>['performedWorks'];
+  readonly?: boolean;
 }
 
-export function SacdPerformedWorksTable({ control, trigger, placeholder, errors }: SacdPerformedWorksTableProps) {
+export function SacdPerformedWorksTable({ control, trigger, placeholder, errors, readonly }: SacdPerformedWorksTableProps) {
   const { t } = useTranslation('common');
 
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
@@ -383,10 +384,21 @@ export function SacdPerformedWorksTable({ control, trigger, placeholder, errors 
         getRowId={(row) => `${row.data.category}_${row.data.name}`}
         getRowHeight={() => 'auto'}
         columns={columns}
-        editMode="row"
-        isCellEditable={(params) => {
-          return true;
+        initialState={{
+          columns: {
+            columnVisibilityModel: {
+              actions: !readonly,
+            },
+          },
         }}
+        editMode="row"
+        isCellEditable={
+          readonly
+            ? () => false
+            : (params) => {
+                return true;
+              }
+        }
         processRowUpdate={(newRow, oldRow, params) => {
           // If the name has been changed we need to make sure it does not exist already to keep the uniqueness of fields
           if (newRow.data.name !== oldRow.data.name) {
@@ -479,40 +491,42 @@ export function SacdPerformedWorksTable({ control, trigger, placeholder, errors 
           {errors.message}
         </Typography>
       )}
-      <Button
-        onClick={() => {
-          // Each row must have a unique key for DataGrid (implicitly a unique category precision for "other performedWorks")
-          let name = `Œuvre représentée ${fields.length + 1}`;
+      {!readonly && (
+        <Button
+          onClick={() => {
+            // Each row must have a unique key for DataGrid (implicitly a unique category precision for "other performedWorks")
+            let name = `Œuvre représentée ${fields.length + 1}`;
 
-          while (true) {
-            const anotherRowWithThisLabel = fields.find((item) => {
-              return item.name === name;
-            });
+            while (true) {
+              const anotherRowWithThisLabel = fields.find((item) => {
+                return item.name === name;
+              });
 
-            if (anotherRowWithThisLabel) {
-              // Renaming since that's the easiest solution here...
-              name = `${name} bis`;
-            } else {
-              break;
+              if (anotherRowWithThisLabel) {
+                // Renaming since that's the easiest solution here...
+                name = `${name} bis`;
+              } else {
+                break;
+              }
             }
-          }
 
-          append({
-            category: '',
-            name: name,
-            contributors: [],
-            durationSeconds: 0,
-          });
-        }}
-        size="medium"
-        variant="outlined"
-        sx={{
-          alignSelf: 'self-end',
-          mt: 1,
-        }}
-      >
-        Ajouter une œuvre représentée
-      </Button>
+            append({
+              category: '',
+              name: name,
+              contributors: [],
+              durationSeconds: 0,
+            });
+          }}
+          size="medium"
+          variant="outlined"
+          sx={{
+            alignSelf: 'self-end',
+            mt: 1,
+          }}
+        >
+          Ajouter une œuvre représentée
+        </Button>
+      )}
     </Box>
   );
 }

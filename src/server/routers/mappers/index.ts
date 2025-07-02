@@ -357,7 +357,7 @@ export function sacdDeclarationPrismaToModel(
     };
     SacdDeclarationAccountingEntry: Pick<SacdDeclarationAccountingEntry, 'category' | 'categoryPrecision' | 'taxRate' | 'amount'>[];
     SacdDeclarationPerformedWork: Pick<SacdDeclarationPerformedWork, 'category' | 'name' | 'contributors' | 'durationSeconds'>[];
-  }
+  } & Pick<EventSerieDeclaration, 'transmittedAt'>
 ): SacdDeclarationSchemaType {
   // Reuse data from the placeholder since this one is used until the form is submitted
   const { accountingEntries, ...computedPlaceholder } = sacdPlaceholderDeclarationPrismaToModel(eventSerie);
@@ -400,6 +400,7 @@ export function sacdDeclarationPrismaToModel(
       };
     }),
     ...computedPlaceholder,
+    transmittedAt: sacdDeclaration.transmittedAt,
   };
 }
 

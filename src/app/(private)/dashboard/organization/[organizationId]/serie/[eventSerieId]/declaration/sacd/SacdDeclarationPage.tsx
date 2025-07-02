@@ -2,11 +2,9 @@
 
 import { fr } from '@codegouvfr/react-dsfr';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Download, Save, Visibility } from '@mui/icons-material';
+import { CheckCircle, Download, ForwardToInbox, Save } from '@mui/icons-material';
 import {
-  Alert,
   Autocomplete,
-  Box,
   Button,
   Container,
   FormControl,
@@ -14,7 +12,6 @@ import {
   FormHelperText,
   FormLabel,
   Grid,
-  Link,
   MenuItem,
   Radio,
   RadioGroup,
@@ -24,13 +21,11 @@ import {
 } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import diff from 'microdiff';
-import Image from 'next/image';
 import NextLink from 'next/link';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import typingImage from '@ad/src/assets/images/declaration/typing.svg';
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
@@ -40,6 +35,7 @@ import { SacdAccountingEntriesTable } from '@ad/src/components/SacdAccountingEnt
 import { SacdOrganizationFields } from '@ad/src/components/SacdOrganizationFields';
 import { SacdPerformedWorksTable } from '@ad/src/components/SacdPerformedWorksTable';
 import { SacdTicketingEntriesTable } from '@ad/src/components/SacdTicketingEntriesTable';
+import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
 import { sacdOrganizationPlaceholderToOrganizationInput } from '@ad/src/core/declaration';
 import { FillSacdDeclarationSchema, FillSacdDeclarationSchemaType } from '@ad/src/models/actions/declaration';
@@ -48,7 +44,6 @@ import { SacdAudienceSchema, SacdProductionTypeSchema } from '@ad/src/models/ent
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
-import { getBaseUrl } from '@ad/src/utils/url';
 
 export const SacdDeclarationPageContext = createContext({
   ContextualDeclarationHeader: DeclarationHeader,
@@ -62,7 +57,10 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
   const { t } = useTranslation('common');
   const { ContextualDeclarationHeader } = useContext(SacdDeclarationPageContext);
 
+  const { showConfirmationDialog } = useSingletonConfirmationDialog();
+
   const fillSacdDeclaration = trpc.fillSacdDeclaration.useMutation();
+  const transmitDeclaration = trpc.transmitDeclaration.useMutation();
 
   const getEventSerie = trpc.getEventSerie.useQuery({
     id: eventSerieId,
@@ -285,6 +283,18 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
     }
   }, [getSacdDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
 
+  const { transmittedDeclarations } = useMemo(() => {
+    return {
+      transmittedDeclarations: getEventSerie.data?.partialDeclarations.filter((pD) => pD.transmittedAt !== null).map((pD) => pD.type) ?? [],
+    };
+  }, [getEventSerie]);
+
+  const { alreadyDeclared } = useMemo(() => {
+    return {
+      alreadyDeclared: (getSacdDeclaration.data?.sacdDeclarationWrapper.declaration?.transmittedAt || null) !== null,
+    };
+  }, [getSacdDeclaration]);
+
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
@@ -320,97 +330,13 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
             eventSerie={eventSerie}
             eventsWrappers={eventsWrappers}
             currentDeclaration="sacd"
+            transmittedDeclarations={transmittedDeclarations}
+            readonly={alreadyDeclared}
           />
         </Container>
       </Container>
       {eventsWrappers.length > 0 ? (
         <>
-          <Container
-            sx={{
-              p: 1,
-              mt: 3,
-            }}
-          >
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Box
-                  sx={{
-                    bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
-                    borderRadius: '8px',
-                  }}
-                >
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6} sx={{ px: 3, display: { xs: 'none', md: 'block' } }}>
-                      <Image
-                        src={typingImage}
-                        alt=""
-                        priority={true}
-                        style={{
-                          width: '100%',
-                          maxHeight: 350,
-                          objectFit: 'contain',
-                          color: undefined, // [WORKAROUND] Ref: https://github.com/vercel/next.js/issues/61388#issuecomment-1988278891
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column', p: 3 }}>
-                      <Box sx={{ display: 'flex', flexGrow: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'start' }}>
-                        <Typography variant="h4">Utilisez les données ci-dessus pour déclarer votre spectacle en ligne auprès de la SACD.</Typography>
-                        <Button
-                          component={NextLink}
-                          href="https://moncompte.sacd.fr/nea/main/mon-accueil"
-                          target="_blank"
-                          onClick={() => {
-                            push(['trackEvent', 'declaration', 'openOfficialWebsite', 'type', DeclarationTypeSchema.Values.SACD]);
-                          }}
-                          size="large"
-                          variant="contained"
-                          sx={{
-                            mt: 3,
-                            '&::after': {
-                              display: 'none !important',
-                            },
-                          }}
-                        >
-                          Commencer la déclaration
-                        </Button>
-                      </Box>
-                      <Typography variant="body2" sx={{ mt: 3, fontStyle: 'italic' }}>
-                        Si vous préférez, le formulaire ci-dessous vous permet de générer un PDF à transmettre à la SACD. Vous pouvez aussi remplir
-                        manuellement le leur (
-                        <Link
-                          component={NextLink}
-                          href={`${getBaseUrl()}/assets/templates/declaration/sacd.pdf`}
-                          target="_blank"
-                          onClick={() => {
-                            push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.SACD]);
-                          }}
-                          underline="none"
-                          sx={{
-                            '&::after': {
-                              display: 'none !important',
-                            },
-                          }}
-                        >
-                          téléchargeable ici
-                        </Link>
-                        ).
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Grid>
-              <Grid item xs={12}>
-                <Alert severity="warning">
-                  Notre service n&apos;effectue pas de télétransmission.{' '}
-                  <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 'bold' }}>
-                    Il vous incombe de transmettre votre déclaration à votre interlocuteur SACD compétent. Et de vous assurer de l&apos;exactitude des
-                    informations saisies.
-                  </Typography>
-                </Alert>
-              </Grid>
-            </Grid>
-          </Container>
           <Container sx={{ pt: 2 }}>
             <BaseForm
               handleSubmit={preHandleSubmit}
@@ -428,7 +354,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                   <Grid item xs={12} sm={6}>
                     <Tooltip
                       // TODO: should be editable from the account
-                      title={'Cet intitulé a été configuré par notre équipe au moment de votre inscription'}
+                      title={alreadyDeclared ? '' : 'Cet intitulé a été configuré par notre équipe au moment de votre inscription'}
                     >
                       <TextField
                         disabled
@@ -446,6 +372,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             options={sacdDeclarationWrapper.placeholder.clientId}
                             freeSolo
                             onBlur={onBlur}
@@ -484,6 +411,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             options={sacdDeclarationWrapper.placeholder.officialHeadquartersId}
                             freeSolo
                             onBlur={onBlur}
@@ -523,6 +451,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             options={sacdDeclarationWrapper.placeholder.productionOperationId}
                             freeSolo
                             onBlur={onBlur}
@@ -563,6 +492,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                           <TextField
                             select
                             {...field}
+                            disabled={alreadyDeclared}
                             label="Nature de l'exploitation"
                             error={!!error}
                             helperText={error?.message}
@@ -581,7 +511,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Tooltip title={'Cet intitulé est non modifiable car il provient de votre système de billetterie'}>
+                    <Tooltip title={alreadyDeclared ? '' : 'Cet intitulé est non modifiable car il provient de votre système de billetterie'}>
                       <TextField disabled label="Titre du spectacle" value={eventSerie.name} fullWidth />
                     </Tooltip>
                   </Grid>
@@ -601,6 +531,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             options={sacdDeclarationWrapper.placeholder.placeName}
                             freeSolo
                             onBlur={onBlur}
@@ -632,6 +563,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             options={sacdDeclarationWrapper.placeholder.placePostalCode}
                             freeSolo
                             onBlur={onBlur}
@@ -663,6 +595,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             options={sacdDeclarationWrapper.placeholder.placeCity}
                             freeSolo
                             onBlur={onBlur}
@@ -704,6 +637,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                           <TextField
                             select
                             {...field}
+                            disabled={alreadyDeclared}
                             label="Nature des représentations"
                             error={!!error}
                             helperText={error?.message}
@@ -727,7 +661,9 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                   <Grid item xs={12} sm={6}>
                     <Tooltip
                       title={
-                        'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
+                        alreadyDeclared
+                          ? ''
+                          : 'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
                       }
                     >
                       <TextField
@@ -748,6 +684,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             // [WORKAROUND] We had issue for `value` and some errors on changes when dealing with number
                             // So only using numbers for the underlying `TextField`
                             options={sacdDeclarationWrapper.placeholder.placeCapacity.map((capacity) => {
@@ -808,7 +745,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                 <hr />
                 <Grid container spacing={2}>
                   <Grid item xs={12} sx={{ mt: 1 }}>
-                    <SacdAccountingEntriesTable control={control} trigger={trigger} errors={errors.accountingEntries} />
+                    <SacdAccountingEntriesTable control={control} trigger={trigger} errors={errors.accountingEntries} readonly={alreadyDeclared} />
                   </Grid>
                 </Grid>
               </Grid>
@@ -823,6 +760,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                     organizationType="organizer"
                     placeholder={sacdDeclarationWrapper.placeholder.organizer}
                     errors={errors.organizer}
+                    readonly={alreadyDeclared}
                   />
                 </Grid>
               </Grid>
@@ -834,6 +772,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
                     <FormControl
+                      disabled={alreadyDeclared}
                       error={
                         (producerSameThanOrganizer === null && !!errors?.producer?.message) ||
                         (producerSameThanOrganizer === true && !!errors?.organizer)
@@ -868,6 +807,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                       organizationType="producer"
                       placeholder={sacdDeclarationWrapper.placeholder.producer}
                       errors={errors.producer}
+                      readonly={alreadyDeclared}
                     />
                   )}
                 </Grid>
@@ -880,6 +820,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
                     <FormControl
+                      disabled={alreadyDeclared}
                       error={
                         (rightsFeesManagerSameThan === null && !!errors?.rightsFeesManager?.message) ||
                         (rightsFeesManagerSameThan === 'organizer' && !!errors?.organizer) ||
@@ -915,6 +856,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                       organizationType="rightsFeesManager"
                       placeholder={sacdDeclarationWrapper.placeholder.rightsFeesManager}
                       errors={errors.rightsFeesManager}
+                      readonly={alreadyDeclared}
                     />
                   )}
                 </Grid>
@@ -931,6 +873,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                       trigger={trigger}
                       placeholder={sacdDeclarationWrapper.placeholder.performedWorksOptions}
                       errors={errors.performedWorks}
+                      readonly={alreadyDeclared}
                     />
                   </Grid>
                 </Grid>
@@ -943,6 +886,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                   render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                     return (
                       <Autocomplete
+                        disabled={alreadyDeclared}
                         options={sacdDeclarationWrapper.placeholder.declarationPlace}
                         freeSolo
                         onBlur={onBlur}
@@ -995,7 +939,7 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                     </Grid>
                   ) : (
                     <>
-                      <Grid item xs={12} sm={8} md={6} sx={{ mx: 'auto' }}>
+                      <Grid item xs>
                         <Button
                           component={NextLink}
                           href={linkRegistry.get('declarationPdf', {
@@ -1018,8 +962,51 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                             },
                           }}
                         >
-                          Générer la déclaration
+                          Télécharger la déclaration
                         </Button>
+                      </Grid>
+                      <Grid item xs>
+                        {alreadyDeclared ? (
+                          <Button disabled={true} size="large" variant="contained" fullWidth startIcon={<CheckCircle />}>
+                            Télédéclaration le {t('date.shortWithTime', { date: sacdDeclarationWrapper.declaration.transmittedAt })}
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => {
+                              showConfirmationDialog({
+                                description: (
+                                  <>
+                                    Êtes-vous sûr de vouloir transmettre ces informations à la SACD pour le spectacle{' '}
+                                    <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
+                                      {eventSerie.name}
+                                    </Typography>{' '}
+                                    ?
+                                    <br />
+                                    <br />
+                                    <Typography component="span" variant="body2" sx={{ fontStyle: 'italic' }}>
+                                      Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou
+                                      amendement de la déclaration, il faudra directement contacter votre interlocuteur SACD.
+                                    </Typography>
+                                  </>
+                                ),
+                                onConfirm: async () => {
+                                  const result = await transmitDeclaration.mutateAsync({
+                                    eventSerieId: eventSerieId,
+                                    type: DeclarationTypeSchema.Values.SACD,
+                                  });
+
+                                  push(['trackEvent', 'declaration', 'transmit', 'type', DeclarationTypeSchema.Values.SACD]);
+                                },
+                              });
+                            }}
+                            size="large"
+                            variant="contained"
+                            fullWidth
+                            startIcon={<ForwardToInbox />}
+                          >
+                            Télédéclarer
+                          </Button>
+                        )}
                       </Grid>
                     </>
                   )}

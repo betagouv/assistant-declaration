@@ -274,9 +274,12 @@ enum EventSerieDeclarationStatus {
 }
 
 model EventSerieDeclaration {
-  id           String                      @id @default(uuid()) @db.Uuid
-  eventSerieId String                      @db.Uuid
-  status       EventSerieDeclarationStatus @default(PENDING)
+  id                      String                      @id @default(uuid()) @db.Uuid
+  eventSerieId            String                      @db.Uuid
+  status                  EventSerieDeclarationStatus @default(PENDING)
+  transmittedAt           DateTime?
+  lastTransmissionError   String?
+  lastTransmissionErrorAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

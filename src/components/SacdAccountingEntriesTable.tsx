@@ -30,9 +30,10 @@ export interface SacdAccountingEntriesTableProps {
   control: Control<FillSacdDeclarationSchemaType, any>;
   trigger: UseFormTrigger<FillSacdDeclarationSchemaType>;
   errors: FieldErrors<FillSacdDeclarationSchemaType>['accountingEntries'];
+  readonly?: boolean;
 }
 
-export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAccountingEntriesTableProps) {
+export function SacdAccountingEntriesTable({ control, trigger, errors, readonly }: SacdAccountingEntriesTableProps) {
   const { t } = useTranslation('common');
 
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
@@ -279,53 +280,66 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <FormControl
-        sx={{
-          flexDirection: 'row',
-          justifyContent: 'end',
-          alignItems: 'center',
-          // There is no way to modify easily all children font size and radio buttons size so just hacking a bit with scaling the whole
-          transform: 'scale(0.8)',
-          transformOrigin: 'center right',
-        }}
-      >
-        <FormLabel
-          id="editable-amount-group-label"
+      {!readonly && (
+        <FormControl
           sx={{
-            mr: 2,
+            flexDirection: 'row',
+            justifyContent: 'end',
+            alignItems: 'center',
+            // There is no way to modify easily all children font size and radio buttons size so just hacking a bit with scaling the whole
+            transform: 'scale(0.8)',
+            transformOrigin: 'center right',
           }}
         >
-          Montants modifiables :
-        </FormLabel>
-        <RadioGroup
-          row
-          value={editableAmount}
-          onChange={(event) => {
-            setEditableAmount(event.target.value as EditableAmountSwitch);
-          }}
-          aria-labelledby="editable-amount-group-label"
-        >
-          <FormControlLabel value="excludingTaxes" control={<Radio />} label="HT" />
-          <FormControlLabel value="includingTaxes" control={<Radio />} label="TTC" />
-        </RadioGroup>
-      </FormControl>
+          <FormLabel
+            id="editable-amount-group-label"
+            sx={{
+              mr: 2,
+            }}
+          >
+            Montants modifiables :
+          </FormLabel>
+          <RadioGroup
+            row
+            value={editableAmount}
+            onChange={(event) => {
+              setEditableAmount(event.target.value as EditableAmountSwitch);
+            }}
+            aria-labelledby="editable-amount-group-label"
+          >
+            <FormControlLabel value="excludingTaxes" control={<Radio />} label="HT" />
+            <FormControlLabel value="includingTaxes" control={<Radio />} label="TTC" />
+          </RadioGroup>
+        </FormControl>
+      )}
       <DataGrid
         apiRef={apiRef}
         rows={rowsWithErrorLogic}
         getRowId={(row) => `${row.data.category}_${row.data.categoryPrecision || ''}`}
         columns={columns}
-        editMode="row"
-        isCellEditable={(params) => {
-          if (
-            params.field === `${rowTypedNameof('data')}.${entryTypedNameof('category')}` &&
-            params.row.data.category !== SacdAccountingCategorySchema.Values.OTHER
-          ) {
-            // If not a custom expense the category field cannot be edited
-            return false;
-          }
-
-          return true;
+        initialState={{
+          columns: {
+            columnVisibilityModel: {
+              actions: !readonly,
+            },
+          },
         }}
+        editMode="row"
+        isCellEditable={
+          readonly
+            ? () => false
+            : (params) => {
+                if (
+                  params.field === `${rowTypedNameof('data')}.${entryTypedNameof('category')}` &&
+                  params.row.data.category !== SacdAccountingCategorySchema.Values.OTHER
+                ) {
+                  // If not a custom expense the category field cannot be edited
+                  return false;
+                }
+
+                return true;
+              }
+        }
         processRowUpdate={(newRow, oldRow, params) => {
           // If the category has been changed we need to make sure it does not exist already to keep the uniqueness of fields
           if (newRow.data.category === SacdAccountingCategorySchema.Values.OTHER && newRow.data.categoryPrecision !== oldRow.data.categoryPrecision) {
@@ -411,44 +425,46 @@ export function SacdAccountingEntriesTable({ control, trigger, errors }: SacdAcc
           {errors.message}
         </Typography>
       )}
-      <Button
-        onClick={() => {
-          // Each row must have a unique key for DataGrid (implicitly a unique category precision for "other accountingEntries")
-          let categoryPrecision = `${t(`model.sacdDeclaration.accountingCategory.enum.OTHER`)} ${
-            fields.filter((row) => {
-              return row.category === SacdAccountingCategorySchema.Values.OTHER;
-            }).length + 1
-          }`;
+      {!readonly && (
+        <Button
+          onClick={() => {
+            // Each row must have a unique key for DataGrid (implicitly a unique category precision for "other accountingEntries")
+            let categoryPrecision = `${t(`model.sacdDeclaration.accountingCategory.enum.OTHER`)} ${
+              fields.filter((row) => {
+                return row.category === SacdAccountingCategorySchema.Values.OTHER;
+              }).length + 1
+            }`;
 
-          while (true) {
-            const anotherRowWithThisLabel = fields.find((item) => {
-              return item.category === SacdAccountingCategorySchema.Values.OTHER && item.categoryPrecision === categoryPrecision;
-            });
+            while (true) {
+              const anotherRowWithThisLabel = fields.find((item) => {
+                return item.category === SacdAccountingCategorySchema.Values.OTHER && item.categoryPrecision === categoryPrecision;
+              });
 
-            if (anotherRowWithThisLabel) {
-              // Renaming since that's the easiest solution here...
-              categoryPrecision = `${categoryPrecision} bis`;
-            } else {
-              break;
+              if (anotherRowWithThisLabel) {
+                // Renaming since that's the easiest solution here...
+                categoryPrecision = `${categoryPrecision} bis`;
+              } else {
+                break;
+              }
             }
-          }
 
-          append({
-            category: SacdAccountingCategorySchema.Values.OTHER,
-            categoryPrecision: categoryPrecision,
-            taxRate: 0.2,
-            includingTaxesAmount: 0,
-          });
-        }}
-        size="medium"
-        variant="outlined"
-        sx={{
-          alignSelf: 'self-end',
-          mt: 1,
-        }}
-      >
-        Ajouter une autre somme versée
-      </Button>
+            append({
+              category: SacdAccountingCategorySchema.Values.OTHER,
+              categoryPrecision: categoryPrecision,
+              taxRate: 0.2,
+              includingTaxesAmount: 0,
+            });
+          }}
+          size="medium"
+          variant="outlined"
+          sx={{
+            alignSelf: 'self-end',
+            mt: 1,
+          }}
+        >
+          Ajouter une autre somme versée
+        </Button>
+      )}
     </Box>
   );
 }
