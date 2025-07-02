@@ -179,3 +179,4 @@ export const duplicateEntryCategoryLabelError = new BusinessError(
   'duplicateEntryCategoryLabel',
   t('errors.validation.accountingEntries.duplicateEntryCategoryLabel')
 );
+export const sacdDeclarationUnsuccessfulError = new BusinessError('sacdDeclarationUnsuccessful', t('errors.custom.sacdDeclarationUnsuccessful'));
