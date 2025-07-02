@@ -383,7 +383,12 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
             headers: this.formatHeadersWithAuthToken(this.defaultHeaders, accessToken),
             body: JSON.stringify({
               ticketFilterCriteria: {
-                pointOfSalesId: pointOfSaleId,
+                // [WORKAROUND] Whereas the endpoint `getUpdatedAvailabilities` requires specifying the parameter `pointOfSalesId`
+                // Here if we do it, it will return an empty list for `ticketSummaries`. That's maybe a weird technical condition on their backend side because
+                // the product is definitely part of the `pointOfSaleId` we are passing since we used this pair above for `getUpdatedAvailabilities`
+                // Since the risk is limited we are fine we commenting this
+                //
+                // pointOfSalesId: pointOfSaleId,
                 productId: product.id,
                 // Dates range are mandatory so using a safe margin
                 startDate: set(new Date(0), { year: 2010, month: 1, date: 1 }).toISOString(),

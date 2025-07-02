@@ -181,6 +181,7 @@ export const JsonListTicketsByCriteriaResponseSchema = applyTypedParsers(
     truncated: z.literal(false), // Didn't get the case where it's true but make sure we don't miss anything
     ticketSummaries: z.array(
       z.object({
+        ticketId: z.number().int().nonnegative(), // Used for debug to retrieve them in the list
         ticketState: z.enum(['CANCELLED', 'VALID', 'NOT_PRINTED', 'INVALIDATED']),
         performanceId: z.number().int().nonnegative(),
         seatCategoryId: z.number().int().nonnegative(),
