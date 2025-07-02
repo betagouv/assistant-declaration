@@ -538,8 +538,9 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
             }
 
             for (const ticket of performanceTickets) {
-              // Do not consider a cancelled ticket
-              if (ticket.ticketState === 'CANCELLED') {
+              // Do not consider a cancelled ticket, nor a invalidated one
+              // Note: an invalidated may have been replaced with a new one
+              if (['CANCELLED', 'INVALIDATED'].includes(ticket.ticketState)) {
                 continue;
               }
 
