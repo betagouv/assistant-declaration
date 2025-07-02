@@ -6,7 +6,7 @@ import { Download, Save, Visibility } from '@mui/icons-material';
 import { Alert, Autocomplete, Box, Button, Container, Grid, Link, TextField, Tooltip, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -154,6 +154,12 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
     }
   }, [getSacemDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId, getValues, setValue]);
 
+  const { transmittedDeclarations } = useMemo(() => {
+    return {
+      transmittedDeclarations: getEventSerie.data?.partialDeclarations.filter((pD) => pD.transmittedAt !== null).map((pD) => pD.type) ?? [],
+    };
+  }, [getEventSerie]);
+
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
@@ -189,6 +195,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
             eventSerie={eventSerie}
             eventsWrappers={eventsWrappers}
             currentDeclaration="sacem"
+            transmittedDeclarations={transmittedDeclarations}
           />
         </Container>
       </Container>

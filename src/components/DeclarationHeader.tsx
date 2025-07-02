@@ -1,7 +1,7 @@
 'use client';
 
 import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
-import { Grading } from '@mui/icons-material';
+import { CheckCircle, Grading } from '@mui/icons-material';
 import { Button, Grid, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState } from 'react';
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { EventsSalesKeyFigures } from '@ad/src/components/EventsSalesKeyFigures';
 import { EventsSalesViewer } from '@ad/src/components/EventsSalesViewer';
+import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { useLocalStorageViewedTicketingModal } from '@ad/src/proxies/ticketing';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
@@ -22,10 +23,20 @@ export interface DeclarationHeaderProps {
   eventSerie: EventSerieSchemaType;
   eventsWrappers: EventWrapperSchemaType[];
   currentDeclaration: 'sacem' | 'sacd' | 'astp' | 'cnm';
+  transmittedDeclarations: DeclarationTypeSchemaType[];
   roundValuesForCopy?: boolean;
+  readonly?: boolean;
 }
 
-export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, currentDeclaration, roundValuesForCopy }: DeclarationHeaderProps) {
+export function DeclarationHeader({
+  organizationId,
+  eventSerie,
+  eventsWrappers,
+  currentDeclaration,
+  transmittedDeclarations,
+  roundValuesForCopy,
+  readonly,
+}: DeclarationHeaderProps) {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { ContextualEventsSalesViewer } = useContext(DeclarationHeaderContext);
@@ -80,18 +91,20 @@ export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, 
                   },
                 }}
               >
-                Éditer la billetterie
+                {readonly ? `Voir la billetterie` : `Éditer la billetterie`}
               </Button>
               <ContextualEventsSalesViewer
                 overview={{
                   wrappers: eventsWrappers,
                   eventSerie: eventSerie,
                   roundValuesForCopy: roundValuesForCopy,
+                  readonly: readonly,
                 }}
                 open={eventsSalesViewerOpen}
                 onClose={() => {
                   setEventsSalesViewerOpen(false);
                 }}
+                readonly={readonly}
               />
             </Typography>
           </Grid>
@@ -123,10 +136,19 @@ export function DeclarationHeader({ organizationId, eventSerie, eventsWrappers, 
         <Tabs
           selectedTabId={currentDeclaration}
           tabs={[
-            { tabId: 'sacem', label: 'SACEM' },
-            { tabId: 'sacd', label: 'SACD' },
-            { tabId: 'astp', label: 'ASTP' },
-            { tabId: 'cnm', label: 'CNM' },
+            {
+              tabId: 'sacem',
+              label: <>{transmittedDeclarations.includes(DeclarationTypeSchema.Values.SACEM) && <CheckCircle sx={{ mr: 1 }} />}SACEM</>,
+            },
+            {
+              tabId: 'sacd',
+              label: <>{transmittedDeclarations.includes(DeclarationTypeSchema.Values.SACD) && <CheckCircle sx={{ mr: 1 }} />}SACD</>,
+            },
+            {
+              tabId: 'astp',
+              label: <>{transmittedDeclarations.includes(DeclarationTypeSchema.Values.ASTP) && <CheckCircle sx={{ mr: 1 }} />}ASTP</>,
+            },
+            { tabId: 'cnm', label: <>{transmittedDeclarations.includes(DeclarationTypeSchema.Values.CNM) && <CheckCircle sx={{ mr: 1 }} />}CNM</> },
           ]}
           onTabChange={(tabId) => {
             if (tabId !== currentDeclaration) {

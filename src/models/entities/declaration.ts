@@ -9,6 +9,7 @@ export const DeclarationSchema = applyTypedParsers(
       id: z.string().uuid(),
       eventSerieId: z.string().uuid(),
       status: DeclarationStatusSchema,
+      transmittedAt: z.date().nullable(),
     })
     .strict()
 );

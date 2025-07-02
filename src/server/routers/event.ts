@@ -9,6 +9,7 @@ import {
 } from '@ad/src/models/actions/event';
 import { DeclarationStatusSchema } from '@ad/src/models/entities/common';
 import {
+  cannotMutateTicketingDataOnceDeclaredError,
   collaboratorCanOnlySeeOrganizationEventsSeriesError,
   eventCategoryTicketsNotFoundError,
   eventSerieNotFoundError,
@@ -66,6 +67,13 @@ export const eventRouter = router({
 
     return {
       eventSerie: eventSeriePrismaToModel(eventSerie),
+      partialDeclarations: eventSerie.EventSerieDeclaration.map((declaration) => {
+        return {
+          type: declarationTypePrismaToModel(declaration),
+          status: DeclarationStatusSchema.parse(declaration.status),
+          transmittedAt: declaration.transmittedAt,
+        };
+      }),
     };
   }),
   listEventsSeries: privateProcedure.input(ListEventsSeriesSchema).query(async ({ ctx, input }) => {
@@ -116,6 +124,7 @@ export const eventRouter = router({
             return {
               type: declarationTypePrismaToModel(declaration),
               status: DeclarationStatusSchema.parse(declaration.status),
+              transmittedAt: declaration.transmittedAt,
             };
           }),
         };
@@ -216,6 +225,11 @@ export const eventRouter = router({
                       organizationId: true,
                     },
                   },
+                  EventSerieDeclaration: {
+                    select: {
+                      transmittedAt: true,
+                    },
+                  },
                 },
               },
             },
@@ -230,6 +244,10 @@ export const eventRouter = router({
       // Before returning, make sure the caller has rights on this authority ;)
       if (!(await isUserACollaboratorPartOfOrganization(eventCategoryTickets.event.eventSerie.ticketingSystem.organizationId, ctx.user.id))) {
         throw organizationCollaboratorRoleRequiredError;
+      }
+
+      if (eventCategoryTickets.event.eventSerie.EventSerieDeclaration.some((eSD) => eSD.transmittedAt !== null)) {
+        throw cannotMutateTicketingDataOnceDeclaredError;
       }
 
       updatedEventCategoryTickets = await prisma.eventCategoryTickets.update({
@@ -261,6 +279,11 @@ export const eventRouter = router({
               organizationId: true,
             },
           },
+          EventSerieDeclaration: {
+            select: {
+              transmittedAt: true,
+            },
+          },
         },
       });
 
@@ -271,6 +294,10 @@ export const eventRouter = router({
       // Before returning, make sure the caller has rights on this authority ;)
       if (!(await isUserACollaboratorPartOfOrganization(eventSerie.ticketingSystem.organizationId, ctx.user.id))) {
         throw organizationCollaboratorRoleRequiredError;
+      }
+
+      if (eventSerie.EventSerieDeclaration.some((eSD) => eSD.transmittedAt !== null)) {
+        throw cannotMutateTicketingDataOnceDeclaredError;
       }
 
       // We make sure there is not an existing entry for this event and category

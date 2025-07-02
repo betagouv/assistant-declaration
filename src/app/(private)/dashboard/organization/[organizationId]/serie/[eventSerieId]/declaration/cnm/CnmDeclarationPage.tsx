@@ -5,7 +5,7 @@ import { Alert, Box, Button, Container, Grid, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import NextLink from 'next/link';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 import typingImage from '@ad/src/assets/images/declaration/typing.svg';
 import { trpc } from '@ad/src/client/trpcClient';
@@ -39,6 +39,12 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
   });
 
   const aggregatedQueries = new AggregatedQueries(getEventSerie, listEvents);
+
+  const { transmittedDeclarations } = useMemo(() => {
+    return {
+      transmittedDeclarations: getEventSerie.data?.partialDeclarations.filter((pD) => pD.transmittedAt !== null).map((pD) => pD.type) ?? [],
+    };
+  }, [getEventSerie]);
 
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
@@ -75,6 +81,7 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
             eventsWrappers={eventsWrappers}
             roundValuesForCopy={true}
             currentDeclaration="cnm"
+            transmittedDeclarations={transmittedDeclarations}
           />
         </Container>
       </Container>

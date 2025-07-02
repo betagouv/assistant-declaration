@@ -168,9 +168,17 @@ export const supersoniksAccessKeyInvalidDomainNameError = new BusinessError(
 export const eventSerieNotFoundError = new BusinessError('eventSerieNotFound', t('errors.custom.eventSerieNotFound'));
 
 // Event category tickets
+export const cannotMutateTicketingDataOnceDeclaredError = new BusinessError(
+  'cannotMutateTicketingDataOnceDeclared',
+  t('errors.custom.cannotMutateTicketingDataOnceDeclared')
+);
 export const eventCategoryTicketsNotFoundError = new BusinessError('eventCategoryTicketsNotFound', t('errors.custom.eventCategoryTicketsNotFound'));
 
 // Declaration
+export const transmittedDeclarationCannotBeUpdatedError = new BusinessError(
+  'transmittedDeclarationCannotBeUpdated',
+  t('errors.custom.transmittedDeclarationCannotBeUpdated')
+);
 export const duplicateFluxEntryCategoryLabelError = new BusinessError(
   'duplicateFluxEntryCategoryLabel',
   t('errors.validation.accountingEntries.duplicateFluxEntryCategoryLabel')
@@ -179,3 +187,8 @@ export const duplicateEntryCategoryLabelError = new BusinessError(
   'duplicateEntryCategoryLabel',
   t('errors.validation.accountingEntries.duplicateEntryCategoryLabel')
 );
+export const sacdDeclarationIncorrectDeclarantError = new BusinessError(
+  'sacdDeclarationIncorrectDeclarant',
+  t('errors.custom.sacdDeclarationIncorrectDeclarant')
+);
+export const sacdDeclarationUnsuccessfulError = new BusinessError('sacdDeclarationUnsuccessful', t('errors.custom.sacdDeclarationUnsuccessful'));

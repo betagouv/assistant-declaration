@@ -2,11 +2,13 @@ import { EventSerieDeclarationStatus, PhoneType, Prisma } from '@prisma/client';
 import diff from 'microdiff';
 
 import { ensureMinimumSacdAccountingItems, ensureMinimumSacemExpenseItems, ensureMinimumSacemRevenueItems } from '@ad/src/core/declaration';
+import { getSacdClient } from '@ad/src/core/declaration/sacd';
 import {
   FillSacdDeclarationSchema,
   FillSacemDeclarationSchema,
   GetSacdDeclarationSchema,
   GetSacemDeclarationSchema,
+  TransmitDeclarationSchema,
 } from '@ad/src/models/actions/declaration';
 import {
   LiteSacdDeclarationAccountingEntrySchemaType,
@@ -21,13 +23,23 @@ import {
   LiteSacemDeclarationAccountingEntrySchemaType,
   SacemDeclarationWrapperSchemaType,
 } from '@ad/src/models/entities/declaration/sacem';
-import { eventSerieNotFoundError, organizationCollaboratorRoleRequiredError } from '@ad/src/models/entities/errors';
+import {
+  BusinessError,
+  eventSerieNotFoundError,
+  organizationCollaboratorRoleRequiredError,
+  transmittedDeclarationCannotBeUpdatedError,
+} from '@ad/src/models/entities/errors';
+import { EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { prisma } from '@ad/src/prisma/client';
 import {
+  eventCategoryTicketsPrismaToModel,
+  eventPrismaToModel,
+  eventSeriePrismaToModel,
   sacdDeclarationPrismaToModel,
   sacdPlaceholderDeclarationPrismaToModel,
   sacemDeclarationPrismaToModel,
   sacemPlaceholderDeclarationPrismaToModel,
+  ticketCategoryPrismaToModel,
 } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
@@ -35,6 +47,268 @@ import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { getDiff } from '@ad/src/utils/comparaison';
 
 export const declarationRouter = router({
+  transmitDeclaration: privateProcedure.input(TransmitDeclarationSchema).mutation(async ({ ctx, input }) => {
+    if (!['SACD'].includes(input.type)) {
+      throw new Error(`cannot transmit declaration of this type`);
+    }
+
+    const eventSerie = await prisma.eventSerie.findUnique({
+      where: {
+        id: input.eventSerieId,
+      },
+      select: {
+        id: true,
+        internalTicketingSystemId: true,
+        ticketingSystemId: true,
+        name: true,
+        startAt: true,
+        endAt: true,
+        taxRate: true,
+        createdAt: true,
+        updatedAt: true,
+        ticketingSystem: {
+          select: {
+            organization: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        EventSerieDeclaration: {
+          select: {
+            id: true,
+            transmittedAt: true,
+            EventSerieSacdDeclaration: {
+              select: {
+                id: true,
+                clientId: true,
+                officialHeadquartersId: true,
+                productionOperationId: true,
+                productionType: true,
+                placeName: true,
+                placePostalCode: true,
+                placeCity: true,
+                audience: true,
+                placeCapacity: true,
+                declarationPlace: true,
+                organizer: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phoneId: true,
+                    officialHeadquartersId: true,
+                    europeanVatId: true,
+                    headquartersAddress: {
+                      select: {
+                        id: true,
+                        street: true,
+                        city: true,
+                        postalCode: true,
+                        countryCode: true,
+                        subdivision: true,
+                      },
+                    },
+                    phone: {
+                      select: {
+                        id: true,
+                        callingCode: true,
+                        countryCode: true,
+                        number: true,
+                      },
+                    },
+                  },
+                },
+                producer: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phoneId: true,
+                    officialHeadquartersId: true,
+                    europeanVatId: true,
+                    headquartersAddress: {
+                      select: {
+                        id: true,
+                        street: true,
+                        city: true,
+                        postalCode: true,
+                        countryCode: true,
+                        subdivision: true,
+                      },
+                    },
+                    phone: {
+                      select: {
+                        id: true,
+                        callingCode: true,
+                        countryCode: true,
+                        number: true,
+                      },
+                    },
+                  },
+                },
+                rightsFeesManager: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phoneId: true,
+                    officialHeadquartersId: true,
+                    europeanVatId: true,
+                    headquartersAddress: {
+                      select: {
+                        id: true,
+                        street: true,
+                        city: true,
+                        postalCode: true,
+                        countryCode: true,
+                        subdivision: true,
+                      },
+                    },
+                    phone: {
+                      select: {
+                        id: true,
+                        callingCode: true,
+                        countryCode: true,
+                        number: true,
+                      },
+                    },
+                  },
+                },
+                SacdDeclarationAccountingEntry: {
+                  select: {
+                    category: true,
+                    categoryPrecision: true,
+                    taxRate: true,
+                    amount: true,
+                  },
+                },
+                SacdDeclarationPerformedWork: {
+                  select: {
+                    category: true,
+                    name: true,
+                    contributors: true,
+                    durationSeconds: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        Event: {
+          select: {
+            id: true,
+            eventSerieId: true,
+            internalTicketingSystemId: true,
+            startAt: true,
+            endAt: true,
+            createdAt: true,
+            updatedAt: true,
+            EventCategoryTickets: {
+              select: {
+                id: true,
+                eventId: true,
+                categoryId: true,
+                total: true,
+                totalOverride: true,
+                priceOverride: true,
+                createdAt: true,
+                updatedAt: true,
+                category: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!eventSerie) {
+      throw eventSerieNotFoundError;
+    }
+
+    // Before processing the declaration, make sure the caller has rights on this authority ;)
+    if (!(await isUserACollaboratorPartOfOrganization(eventSerie.ticketingSystem.organization.id, ctx.user.id))) {
+      throw organizationCollaboratorRoleRequiredError;
+    }
+
+    const eventSerieModel = eventSeriePrismaToModel(eventSerie);
+    const wrappersModel = eventSerie.Event.map((event): EventWrapperSchemaType => {
+      return {
+        event: eventPrismaToModel(event),
+        sales: event.EventCategoryTickets.map((eventCategoryTickets) => {
+          return {
+            ticketCategory: ticketCategoryPrismaToModel(eventCategoryTickets.category),
+            eventCategoryTickets: eventCategoryTicketsPrismaToModel(eventCategoryTickets),
+          };
+        }),
+      };
+    });
+
+    let declarationId: string | null = null;
+
+    try {
+      switch (input.type) {
+        case 'SACD':
+          const declaration = eventSerie.EventSerieDeclaration.find((eSD) => eSD.EventSerieSacdDeclaration !== null);
+
+          if (!declaration) {
+            throw new Error(`no sacd declaration exists for this event serie`);
+          }
+
+          declarationId = declaration.id;
+
+          const declarationModel = sacdDeclarationPrismaToModel(eventSerie, {
+            ...declaration.EventSerieSacdDeclaration!,
+            transmittedAt: declaration.transmittedAt,
+          });
+
+          const sacdClient = getSacdClient(ctx.user.id);
+
+          // Since not tracking token expiration we log in again (but we could improve that)
+          await sacdClient.login();
+
+          await sacdClient.declare(declarationModel.clientId, eventSerieModel, wrappersModel, declarationModel);
+
+          // If successful mark the declaration as transmitted
+          await prisma.eventSerieDeclaration.update({
+            where: {
+              id: declaration.id,
+            },
+            data: {
+              status: EventSerieDeclarationStatus.PROCESSED,
+              transmittedAt: new Date(),
+              lastTransmissionError: null,
+              lastTransmissionErrorAt: null,
+            },
+          });
+
+          break;
+        default:
+          throw new Error('declaration type to transmit not supported');
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        if (declarationId) {
+          // Keep track of errors to help debugging
+          await prisma.eventSerieDeclaration.update({
+            where: {
+              id: declarationId,
+            },
+            data: {
+              lastTransmissionError: error instanceof BusinessError ? error.code : error.message,
+              lastTransmissionErrorAt: new Date(),
+            },
+          });
+        }
+      }
+
+      throw error;
+    }
+
+    return undefined;
+  }),
   getSacemDeclaration: privateProcedure.input(GetSacemDeclarationSchema).query(async ({ ctx, input }) => {
     const eventSerie = await prisma.eventSerie.findUnique({
       where: {
@@ -476,6 +750,9 @@ export const declarationRouter = router({
             create: {
               status: EventSerieDeclarationStatus.PENDING,
               eventSerieId: eventSerie.id,
+              transmittedAt: null,
+              lastTransmissionError: null,
+              lastTransmissionErrorAt: null,
             },
           },
           SacemDeclarationAccountingEntry: {
@@ -579,6 +856,7 @@ export const declarationRouter = router({
         EventSerieDeclaration: {
           select: {
             id: true,
+            transmittedAt: true,
             EventSerieSacdDeclaration: {
               select: {
                 id: true,
@@ -1098,7 +1376,12 @@ export const declarationRouter = router({
     // Note: the generated properties calculation is done 2 times but we are fine with that for now
     return {
       sacdDeclarationWrapper: {
-        declaration: existingDeclaration ? sacdDeclarationPrismaToModel(eventSerie, existingDeclaration.EventSerieSacdDeclaration!) : null,
+        declaration: existingDeclaration
+          ? sacdDeclarationPrismaToModel(eventSerie, {
+              ...existingDeclaration.EventSerieSacdDeclaration!,
+              transmittedAt: existingDeclaration.transmittedAt,
+            })
+          : null,
         placeholder: placeholder,
       } satisfies SacdDeclarationWrapperSchemaType,
     };
@@ -1118,6 +1401,7 @@ export const declarationRouter = router({
         EventSerieDeclaration: {
           select: {
             id: true,
+            transmittedAt: true,
             EventSerieSacdDeclaration: {
               select: {
                 id: true,
@@ -1206,6 +1490,10 @@ export const declarationRouter = router({
     let sacdDeclaration;
 
     if (existingDeclaration) {
+      if (existingDeclaration.transmittedAt) {
+        throw transmittedDeclarationCannotBeUpdatedError;
+      }
+
       assert(existingDeclaration.EventSerieSacdDeclaration);
 
       const sacdDeclarationId = existingDeclaration.EventSerieSacdDeclaration.id;
@@ -1522,6 +1810,7 @@ export const declarationRouter = router({
           eventSerieDeclaration: {
             select: {
               id: true,
+              transmittedAt: true,
               eventSerie: {
                 select: {
                   id: true,
@@ -1728,6 +2017,7 @@ export const declarationRouter = router({
             create: {
               status: EventSerieDeclarationStatus.PENDING,
               eventSerieId: eventSerie.id,
+              transmittedAt: null,
             },
           },
           SacdDeclarationAccountingEntry: {
@@ -1850,6 +2140,7 @@ export const declarationRouter = router({
           eventSerieDeclaration: {
             select: {
               id: true,
+              transmittedAt: true,
               eventSerie: {
                 select: {
                   id: true,
@@ -1907,7 +2198,10 @@ export const declarationRouter = router({
     }
 
     return {
-      sacdDeclaration: sacdDeclarationPrismaToModel(sacdDeclaration.eventSerieDeclaration.eventSerie, sacdDeclaration),
+      sacdDeclaration: sacdDeclarationPrismaToModel(sacdDeclaration.eventSerieDeclaration.eventSerie, {
+        ...sacdDeclaration,
+        transmittedAt: sacdDeclaration.eventSerieDeclaration.transmittedAt,
+      }),
     };
   }),
 });

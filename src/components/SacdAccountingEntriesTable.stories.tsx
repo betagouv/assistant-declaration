@@ -36,3 +36,17 @@ NormalStory.play = async ({ canvasElement }) => {
 };
 
 export const Normal = prepareStory(NormalStory);
+
+const ReadonlyStory = Template.bind({});
+ReadonlyStory.args = {
+  ...NormalStory.args,
+  readonly: true,
+};
+ReadonlyStory.parameters = {
+  ...NormalStory.parameters,
+};
+ReadonlyStory.play = async ({ canvasElement }) => {
+  await within(canvasElement).findByRole('grid');
+};
+
+export const Readonly = prepareStory(ReadonlyStory);

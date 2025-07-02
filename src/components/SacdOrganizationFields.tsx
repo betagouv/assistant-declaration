@@ -12,6 +12,7 @@ export interface SacdOrganizationFieldsProps<T extends 'organizer' | 'producer' 
   organizationType: T;
   placeholder: SacdDeclarationOrganizationPlaceholderSchemaType;
   errors: FieldErrors<FillSacdDeclarationSchemaType>[T];
+  readonly?: boolean;
 }
 
 export function SacdOrganizationFields<T extends 'organizer' | 'producer' | 'rightsFeesManager'>({
@@ -19,6 +20,7 @@ export function SacdOrganizationFields<T extends 'organizer' | 'producer' | 'rig
   organizationType,
   placeholder,
   errors,
+  readonly,
 }: SacdOrganizationFieldsProps<T>) {
   const { t } = useTranslation('common');
 
@@ -32,6 +34,7 @@ export function SacdOrganizationFields<T extends 'organizer' | 'producer' | 'rig
           render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
             return (
               <Autocomplete
+                disabled={readonly}
                 options={placeholder.name}
                 freeSolo
                 onBlur={onBlur}
@@ -61,6 +64,7 @@ export function SacdOrganizationFields<T extends 'organizer' | 'producer' | 'rig
           render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
             return (
               <Autocomplete
+                disabled={readonly}
                 options={placeholder.headquartersAddress.street}
                 freeSolo
                 onBlur={onBlur}
@@ -92,6 +96,7 @@ export function SacdOrganizationFields<T extends 'organizer' | 'producer' | 'rig
           render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
             return (
               <Autocomplete
+                disabled={readonly}
                 options={placeholder.headquartersAddress.postalCode}
                 freeSolo
                 onBlur={onBlur}
@@ -123,6 +128,7 @@ export function SacdOrganizationFields<T extends 'organizer' | 'producer' | 'rig
           render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
             return (
               <Autocomplete
+                disabled={readonly}
                 options={placeholder.headquartersAddress.city}
                 freeSolo
                 onBlur={onBlur}
@@ -152,6 +158,7 @@ export function SacdOrganizationFields<T extends 'organizer' | 'producer' | 'rig
           render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
             return (
               <Autocomplete
+                disabled={readonly}
                 options={placeholder.email}
                 freeSolo
                 onBlur={onBlur}
@@ -199,6 +206,7 @@ export function SacdOrganizationFields<T extends 'organizer' | 'producer' | 'rig
 
             return (
               <PhoneField
+                disabled={readonly}
                 initialPhoneNumber={defaultValue}
                 numberOptions={placeholder.phone.number}
                 onGlobalChange={onChange}
@@ -219,6 +227,7 @@ export function SacdOrganizationFields<T extends 'organizer' | 'producer' | 'rig
           render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
             return (
               <Autocomplete
+                disabled={readonly}
                 options={placeholder.officialHeadquartersId}
                 freeSolo
                 onBlur={onBlur}
@@ -250,6 +259,7 @@ export function SacdOrganizationFields<T extends 'organizer' | 'producer' | 'rig
           render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
             return (
               <Autocomplete
+                disabled={readonly}
                 options={placeholder.europeanVatId}
                 freeSolo
                 onBlur={onBlur}

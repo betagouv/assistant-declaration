@@ -21,9 +21,10 @@ export interface EventsSalesViewerProps {
   overview: EventsSalesOverviewProps;
   open: boolean;
   onClose?: () => void;
+  readonly?: boolean;
 }
 
-export function EventsSalesViewer({ overview, open, onClose }: EventsSalesViewerProps) {
+export function EventsSalesViewer({ overview, open, onClose, readonly }: EventsSalesViewerProps) {
   const muiTheme = useTheme();
   const mobileFormat = useMediaQuery(muiTheme.breakpoints.down('md'));
 
@@ -75,7 +76,7 @@ export function EventsSalesViewer({ overview, open, onClose }: EventsSalesViewer
         }}
       >
         <Grid item xs={12}>
-          <ContextualEventsSalesOverview wrappers={overview.wrappers} eventSerie={overview.eventSerie} />
+          <ContextualEventsSalesOverview wrappers={overview.wrappers} eventSerie={overview.eventSerie} readonly={readonly} />
         </Grid>
       </Grid>
     </Drawer>

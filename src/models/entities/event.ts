@@ -1,6 +1,7 @@
 import z from 'zod';
 
 import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
+import { DeclarationSchema } from '@ad/src/models/entities/declaration';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
 export const LiteEventSerieSchema = applyTypedParsers(
@@ -88,6 +89,7 @@ export const EventSerieWrapperSchema = applyTypedParsers(
         z.object({
           type: DeclarationTypeSchema,
           status: DeclarationStatusSchema,
+          transmittedAt: DeclarationSchema.shape.transmittedAt,
         })
       ),
     })

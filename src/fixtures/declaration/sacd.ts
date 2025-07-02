@@ -142,6 +142,7 @@ export const sacdDeclarations: SacdDeclarationSchemaType[] = [
       },
     ]),
     performedWorks: [sacdDeclarationPerformedWorks[0], sacdDeclarationPerformedWorks[1], sacdDeclarationPerformedWorks[2]],
+    transmittedAt: null,
   }),
   SacdDeclarationSchema.parse({
     id: 'd79cb3ba-745e-5d9a-8903-4a02327a7e02',
@@ -183,6 +184,7 @@ export const sacdDeclarations: SacdDeclarationSchemaType[] = [
       },
     ]),
     performedWorks: [sacdDeclarationPerformedWorks[1]],
+    transmittedAt: null,
   }),
   SacdDeclarationSchema.parse({
     id: 'd79cb3ba-745e-5d9a-8903-4a02327a7e03',
@@ -212,6 +214,7 @@ export const sacdDeclarations: SacdDeclarationSchemaType[] = [
       },
     ]),
     performedWorks: [],
+    transmittedAt: new Date('December 31, 2024 10:00:00 UTC'),
   }),
 ];
 

@@ -23,9 +23,10 @@ export interface EventsSalesOverviewProps {
   wrappers: EventWrapperSchemaType[];
   eventSerie: EventSerieSchemaType;
   roundValuesForCopy?: boolean; // Some organisms to declare are expected integers
+  readonly?: boolean;
 }
 
-export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }: EventsSalesOverviewProps) {
+export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy, readonly }: EventsSalesOverviewProps) {
   const { t } = useTranslation('common');
 
   const updateEventCategoryTickets = trpc.updateEventCategoryTickets.useMutation();
@@ -55,7 +56,7 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
             }}
           />
           <Typography component="div" variant="h3" sx={{ textAlign: 'center' }}>
-            Vérifiez les données pour
+            {readonly ? `Voici les données pour` : `Vérifiez les données pour`}
             <br />
             <span style={{ fontWeight: 'normal' }}>{eventSerie.name}</span>
           </Typography>
@@ -296,6 +297,7 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy }
 
                         push(['trackEvent', 'declaration', 'updateEventSales']);
                       }}
+                      readonly={readonly}
                     />
                   ) : (
                     <>Aucune catégorie de ticket pour cette représentation n&apos;a été trouvée.</>
