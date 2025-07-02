@@ -544,9 +544,15 @@ export class SecutixTicketingSystemClient implements TicketingSystemClient {
                 continue;
               }
 
+              const seatCategoryExists = performance.seatCategories.some((seatCategory) => seatCategory.id === ticket.seatCategoryId);
+              const priceLevelExists = ticket.priceLevelId !== undefined ? existingPriceLevels.has(ticket.priceLevelId) : false;
+
+              const workaroundTicketSeatCategoryId = seatCategoryExists ? ticket.seatCategoryId : 0;
+              const workaroundTicketPriceLevelId = priceLevelExists ? ticket.priceLevelId : 0;
+
               // Since with Secutix a same pricing category (= subcategory) can be of multiple variations (= categories)
               // We make sure to concatenate them so they match our own data model
-              let uniqueTicketCategoryId = `${ticket.priceLevelId ?? 0}_${ticket.seatCategoryId}_${ticket.audienceSubCategoryId}`;
+              let uniqueTicketCategoryId = `${workaroundTicketPriceLevelId ?? 0}_${workaroundTicketSeatCategoryId}_${ticket.audienceSubCategoryId}`;
 
               if (duplicatedPriceCombos.has(uniqueTicketCategoryId)) {
                 uniqueTicketCategoryId = `${uniqueTicketCategoryId}_${ticket.price}`;
