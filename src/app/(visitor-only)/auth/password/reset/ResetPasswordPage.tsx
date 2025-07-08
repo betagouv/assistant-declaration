@@ -2,17 +2,13 @@
 
 import { Grid, Typography } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
-import { createContext, useContext } from 'react';
+import { useContext } from 'react';
 
-import { ResetPasswordForm } from '@ad/src/app/(visitor-only)/auth/password/reset/ResetPasswordForm';
+import { ResetPasswordPageContext } from '@ad/src/app/(visitor-only)/auth/password/reset/ResetPasswordPageContext';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { ResetPasswordPrefillSchema } from '@ad/src/models/actions/auth';
 import { formTitleProps } from '@ad/src/utils/form';
 import { centeredAlertContainerGridProps, centeredFormContainerGridProps } from '@ad/src/utils/grid';
-
-export const ResetPasswordPageContext = createContext({
-  ContextualResetPasswordForm: ResetPasswordForm,
-});
 
 export function ResetPasswordPage() {
   const { ContextualResetPasswordForm } = useContext(ResetPasswordPageContext);

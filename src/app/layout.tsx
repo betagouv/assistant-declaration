@@ -5,9 +5,9 @@ import { PropsWithChildren } from 'react';
 
 import { Matomo } from '@ad/src/app/Matomo';
 import { MuiDsfrThemeProvider } from '@ad/src/app/MuiDsfrThemeProvider';
+import { Providers } from '@ad/src/app/Providers';
 import { SentryClientProvider } from '@ad/src/app/SentryClientProvider';
 import '@ad/src/app/layout.scss';
-import { Providers } from '@ad/src/app/providers';
 import { LiveChatProvider } from '@ad/src/components/live-chat/LiveChatProvider';
 import { DsfrProvider } from '@ad/src/dsfr-bootstrap';
 import { DsfrHead, getHtmlAttributes } from '@ad/src/dsfr-bootstrap/server-only-index';

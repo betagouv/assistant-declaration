@@ -25,7 +25,7 @@ import { getBaseUrl } from '@ad/src/utils/url';
 
 const textDecoder = new TextDecoder();
 
-export enum ListFilter {
+enum ListFilter {
   ALL = 1,
   ARCHIVED_ONLY,
   ENDED_ONLY,

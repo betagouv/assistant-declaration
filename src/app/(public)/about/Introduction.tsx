@@ -13,7 +13,7 @@ import soticket from '@ad/src/assets/images/partners/soticket.png';
 import supersoniks from '@ad/src/assets/images/partners/supersoniks.png';
 import { IntroductionContainer } from '@ad/src/components/IntroductionContainer';
 
-export const imageProps: ImgHTMLAttributes<HTMLImageElement> = {
+const imageProps: ImgHTMLAttributes<HTMLImageElement> = {
   style: {
     width: 'auto',
     height: '100%',

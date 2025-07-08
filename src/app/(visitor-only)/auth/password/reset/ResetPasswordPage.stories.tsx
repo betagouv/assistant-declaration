@@ -1,10 +1,11 @@
 import { Meta, StoryFn } from '@storybook/react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { playFindAlert, playFindForm, playFindFormInMain } from '@ad/.storybook/testing';
+import { playFindForm, playFindFormInMain } from '@ad/.storybook/testing';
 import { Normal as VisitorOnlyLayoutNormalStory } from '@ad/src/app/(visitor-only)/VisitorOnlyLayout.stories';
 import { Empty as ResetPasswordFormEmptyStory } from '@ad/src/app/(visitor-only)/auth/password/reset/ResetPasswordForm.stories';
-import { ResetPasswordPage, ResetPasswordPageContext } from '@ad/src/app/(visitor-only)/auth/password/reset/ResetPasswordPage';
+import { ResetPasswordPage } from '@ad/src/app/(visitor-only)/auth/password/reset/ResetPasswordPage';
+import { ResetPasswordPageContext } from '@ad/src/app/(visitor-only)/auth/password/reset/ResetPasswordPageContext';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 type ComponentType = typeof ResetPasswordPage;

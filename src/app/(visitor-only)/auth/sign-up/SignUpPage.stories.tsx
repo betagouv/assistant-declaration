@@ -1,10 +1,11 @@
 import { Meta, StoryFn } from '@storybook/react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { playFindAlert, playFindForm, playFindFormInMain } from '@ad/.storybook/testing';
+import { playFindForm, playFindFormInMain } from '@ad/.storybook/testing';
 import { Normal as VisitorOnlyLayoutNormalStory } from '@ad/src/app/(visitor-only)/VisitorOnlyLayout.stories';
 import { Empty as SignUpFormEmptyStory } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpForm.stories';
-import { SignUpPage, SignUpPageContext } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpPage';
+import { SignUpPage } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpPage';
+import { SignUpPageContext } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpPageContext';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 type ComponentType = typeof SignUpPage;

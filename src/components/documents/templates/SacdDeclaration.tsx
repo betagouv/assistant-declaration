@@ -5,7 +5,8 @@ import { Image, Link, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { default as libphonenumber } from 'google-libphonenumber';
 import diff from 'microdiff';
 
-import { StandardLayout, layoutStyles, styles } from '@ad/src/components/documents/layouts/StandardLayout';
+import { StandardLayout } from '@ad/src/components/documents/layouts/StandardLayout';
+import { layoutStyles, styles } from '@ad/src/components/documents/layouts/standard';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { EventWrapperSchemaType } from '@ad/src/models/entities/event';
@@ -16,7 +17,7 @@ import { getBaseUrl } from '@ad/src/utils/url';
 
 const phoneNumberUtil = libphonenumber.PhoneNumberUtil.getInstance();
 
-export const sacdStyles = StyleSheet.create({
+const sacdStyles = StyleSheet.create({
   header: {
     ...layoutStyles.header,
     paddingBottom: '3vw',

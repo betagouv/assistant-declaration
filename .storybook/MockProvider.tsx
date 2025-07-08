@@ -2,7 +2,7 @@
 
 import React, { PropsWithChildren } from 'react';
 
-import { ProvidersContext } from '@ad/src/app/providers';
+import { ProvidersContext } from '@ad/src/app/ProvidersContext';
 
 export function MockProvider(props: PropsWithChildren) {
   return (

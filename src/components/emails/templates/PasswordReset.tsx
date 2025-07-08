@@ -1,10 +1,7 @@
 import { MjmlButton, MjmlText } from '@faire/mjml-react';
 
 import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
-
-export function formatTitle() {
-  return `Mot de passe réinitialisé`;
-}
+import { titles } from '@ad/src/components/emails/templates/common';
 
 export interface PasswordResetEmailProps {
   firstname: string;
@@ -12,7 +9,7 @@ export interface PasswordResetEmailProps {
 }
 
 export function PasswordResetEmail(props: PasswordResetEmailProps) {
-  const title = formatTitle();
+  const title = titles.PasswordResetEmail;
 
   return (
     <StandardLayout title={title}>

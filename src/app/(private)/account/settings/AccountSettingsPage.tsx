@@ -2,21 +2,15 @@
 
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import { createContext, useContext } from 'react';
+import { useContext } from 'react';
 
-import { ChangePasswordForm } from '@ad/src/app/(private)/account/settings/ChangePasswordForm';
-import { EditProfileForm } from '@ad/src/app/(private)/account/settings/EditProfileForm';
+import { AccountSettingsPageContext } from '@ad/src/app/(private)/account/settings/AccountSettingsPageContext';
 import { trpc } from '@ad/src/client/trpcClient';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { UpdateProfilePrefillSchema } from '@ad/src/models/actions/user';
 import { formTitleProps } from '@ad/src/utils/form';
 import { centeredAlertContainerGridProps, centeredContainerGridProps } from '@ad/src/utils/grid';
-
-export const AccountSettingsPageContext = createContext({
-  ContextualEditProfileForm: EditProfileForm,
-  ContextualChangePasswordForm: ChangePasswordForm,
-});
 
 export function AccountSettingsPage() {
   const { ContextualEditProfileForm, ContextualChangePasswordForm } = useContext(AccountSettingsPageContext);

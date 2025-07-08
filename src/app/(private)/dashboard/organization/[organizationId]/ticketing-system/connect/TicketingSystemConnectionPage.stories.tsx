@@ -4,10 +4,8 @@ import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindForm, playFindFormInMain } from '@ad/.storybook/testing';
 import { AsNewUser as PrivateLayoutAsNewUserStory } from '@ad/src/app/(private)/PrivateLayout.stories';
 import { Empty as ConnectTicketingSystemFormEmptyStory } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-system/connect/ConnectTicketingSystemForm.stories';
-import {
-  TicketingSystemConnectionPage,
-  TicketingSystemConnectionPageContext,
-} from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-system/connect/TicketingSystemConnectionPage';
+import { TicketingSystemConnectionPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-system/connect/TicketingSystemConnectionPage';
+import { TicketingSystemConnectionPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-system/connect/TicketingSystemConnectionPageContext';
 import { organizations } from '@ad/src/fixtures/organization';
 
 type ComponentType = typeof TicketingSystemConnectionPage;

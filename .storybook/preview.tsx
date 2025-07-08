@@ -18,7 +18,7 @@ import { disableGlobalDsfrStyle } from '@ad/.storybook/helpers';
 import '@ad/.storybook/layout.scss';
 import { withDisablingTestRunner } from '@ad/.storybook/testing';
 // import { useDarkMode } from 'storybook-dark-mode';
-import { Providers } from '@ad/src/app/providers';
+import { Providers } from '@ad/src/app/Providers';
 import '@ad/src/assets/fonts/index.css';
 import { DsfrProvider, StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
 import { DsfrHead, getHtmlAttributes } from '@ad/src/dsfr-bootstrap/server-only-index';

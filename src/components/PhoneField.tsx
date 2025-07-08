@@ -46,7 +46,7 @@ function createCustomTextMaskInput(numberMask: string) {
   });
 }
 
-export function getDefaultPhoneValue(): PhoneInputSchemaType {
+function getDefaultPhoneValue(): PhoneInputSchemaType {
   return {
     callingCode: '+33',
     countryCode: 'FR',

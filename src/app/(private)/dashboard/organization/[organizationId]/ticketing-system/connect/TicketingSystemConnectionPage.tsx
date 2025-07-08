@@ -1,15 +1,11 @@
 'use client';
 
 import { Grid, Typography } from '@mui/material';
-import { createContext, useContext } from 'react';
+import { useContext } from 'react';
 
-import { ConnectTicketingSystemForm } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-system/connect/ConnectTicketingSystemForm';
+import { TicketingSystemConnectionPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-system/connect/TicketingSystemConnectionPageContext';
 import { formTitleProps } from '@ad/src/utils/form';
 import { centeredFormContainerGridProps } from '@ad/src/utils/grid';
-
-export const TicketingSystemConnectionPageContext = createContext({
-  ContextualConnectTicketingSystemForm: ConnectTicketingSystemForm,
-});
 
 export interface TicketingSystemConnectionPageProps {
   params: { organizationId: string };

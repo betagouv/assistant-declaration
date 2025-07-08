@@ -1,10 +1,7 @@
 import { MjmlButton, MjmlText } from '@faire/mjml-react';
 
 import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
-
-export function formatTitle() {
-  return `Bienvenue !`;
-}
+import { titles } from '@ad/src/components/emails/templates/common';
 
 export interface WelcomeOrganizationCollaboratorEmailProps {
   firstname: string;
@@ -12,7 +9,7 @@ export interface WelcomeOrganizationCollaboratorEmailProps {
 }
 
 export function WelcomeOrganizationCollaboratorEmail(props: WelcomeOrganizationCollaboratorEmailProps) {
-  const title = formatTitle();
+  const title = titles.WelcomeOrganizationCollaboratorEmail;
 
   return (
     <StandardLayout title={title}>

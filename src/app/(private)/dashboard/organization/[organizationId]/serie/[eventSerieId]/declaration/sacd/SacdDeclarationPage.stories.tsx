@@ -3,10 +3,8 @@ import { Meta, StoryFn } from '@storybook/react';
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindMainTitle } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
-import {
-  SacdDeclarationPage,
-  SacdDeclarationPageContext,
-} from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacd/SacdDeclarationPage';
+import { SacdDeclarationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacd/SacdDeclarationPage';
+import { SacdDeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacd/SacdDeclarationPageContext';
 import { Normal as DeclarationHeaderNormalStory } from '@ad/src/components/DeclarationHeader.stories';
 import { sacdDeclarations, sacdDeclarationsWrappers } from '@ad/src/fixtures/declaration/sacd';
 import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';

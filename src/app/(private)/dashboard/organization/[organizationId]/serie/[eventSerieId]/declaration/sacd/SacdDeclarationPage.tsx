@@ -22,13 +22,13 @@ import {
 import { push } from '@socialgouv/matomo-next';
 import diff from 'microdiff';
 import NextLink from 'next/link';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { SacdDeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacd/SacdDeclarationPageContext';
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
-import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SacdAccountingEntriesTable } from '@ad/src/components/SacdAccountingEntriesTable';
@@ -44,10 +44,6 @@ import { SacdAudienceSchema, SacdProductionTypeSchema } from '@ad/src/models/ent
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
-
-export const SacdDeclarationPageContext = createContext({
-  ContextualDeclarationHeader: DeclarationHeader,
-});
 
 export interface SacdDeclarationPageProps {
   params: { organizationId: string; eventSerieId: string };

@@ -1,6 +1,6 @@
 'use client';
 
-import { AdminPanelSettings, MoreVert, NotInterested, PersonRemove } from '@mui/icons-material';
+import { AdminPanelSettings, MoreVert, NotInterested } from '@mui/icons-material';
 import {
   Card,
   CardContent,
@@ -17,22 +17,18 @@ import {
   Typography,
 } from '@mui/material';
 import Image from 'next/image';
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import fallback from '@ad/public/assets/images/logo.png';
-import { UpdateTicketingSystemForm } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-systems/UpdateTicketingSystemForm';
 import billetweb from '@ad/src/assets/images/ticketing/billetweb.jpg';
 import mapado from '@ad/src/assets/images/ticketing/mapado.jpg';
 import soticket from '@ad/src/assets/images/ticketing/soticket.jpg';
 import supersoniks from '@ad/src/assets/images/ticketing/supersoniks.jpg';
+import { TicketingSystemCardContext } from '@ad/src/components/TicketingSystemCardContext';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
 import { menuPaperProps } from '@ad/src/utils/menu';
-
-export const TicketingSystemCardContext = createContext({
-  ContextualUpdateTicketingSystemForm: UpdateTicketingSystemForm,
-});
 
 export interface TicketingSystemCardProps {
   ticketingSystem: TicketingSystemSchemaType;

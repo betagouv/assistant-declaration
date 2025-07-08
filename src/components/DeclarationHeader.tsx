@@ -2,21 +2,17 @@
 
 import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
 import { CheckCircle, Grading } from '@mui/icons-material';
-import { Button, Grid, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Button, Grid, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { DeclarationHeaderContext } from '@ad/src/components/DeclarationHeaderContext';
 import { EventsSalesKeyFigures } from '@ad/src/components/EventsSalesKeyFigures';
-import { EventsSalesViewer } from '@ad/src/components/EventsSalesViewer';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { useLocalStorageViewedTicketingModal } from '@ad/src/proxies/ticketing';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
-
-export const DeclarationHeaderContext = createContext({
-  ContextualEventsSalesViewer: EventsSalesViewer,
-});
 
 export interface DeclarationHeaderProps {
   organizationId: string;

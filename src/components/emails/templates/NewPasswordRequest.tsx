@@ -1,10 +1,7 @@
 import { MjmlButton, MjmlText } from '@faire/mjml-react';
 
 import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
-
-export function formatTitle() {
-  return `Renouvellement de mot de passe`;
-}
+import { titles } from '@ad/src/components/emails/templates/common';
 
 export interface NewPasswordRequestEmailProps {
   firstname: string;
@@ -12,10 +9,10 @@ export interface NewPasswordRequestEmailProps {
 }
 
 export function NewPasswordRequestEmail(props: NewPasswordRequestEmailProps) {
-  const title = formatTitle();
+  const title = titles.NewPasswordRequestEmail;
 
   return (
-    <StandardLayout title={title}>
+    <StandardLayout title={titles.NewPasswordRequestEmail}>
       <MjmlText>
         <h1>{title}</h1>
         <p>Bonjour {props.firstname},</p>

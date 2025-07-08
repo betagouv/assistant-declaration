@@ -2,17 +2,17 @@
 
 import { fr } from '@codegouvfr/react-dsfr';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Download, Save, Visibility } from '@mui/icons-material';
+import { Download, Save } from '@mui/icons-material';
 import { Alert, Autocomplete, Box, Button, Container, Grid, Link, TextField, Tooltip, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { SacemDeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacem/SacemDeclarationPageContext';
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
-import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
@@ -24,10 +24,6 @@ import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 import { getBaseUrl } from '@ad/src/utils/url';
-
-export const SacemDeclarationPageContext = createContext({
-  ContextualDeclarationHeader: DeclarationHeader,
-});
 
 export interface SacemDeclarationPageProps {
   params: { organizationId: string; eventSerieId: string };
