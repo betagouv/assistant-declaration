@@ -1,9 +1,12 @@
 import { Meta, StoryFn } from '@storybook/react';
 
-import { commonEmailsParameters, withEmailClientOverviewFactory, withEmailRenderer } from '@ad/.storybook/email';
+import { WithEmailClientOverviewFactory } from '@ad/.storybook/WithEmailClientOverviewFactory';
+import { WithEmailRenderer } from '@ad/.storybook/WithEmailRenderer';
+import { commonEmailsParameters } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
-import { UserDeletedEmail, formatTitle } from '@ad/src/components/emails/templates/UserDeleted';
+import { UserDeletedEmail } from '@ad/src/components/emails/templates/UserDeleted';
+import { titles } from '@ad/src/components/emails/templates/common';
 
 type ComponentType = typeof UserDeletedEmail;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -31,7 +34,7 @@ const NormalStory = Template.bind({});
 NormalStory.args = {
   firstname: 'Thomas',
 };
-NormalStory.decorators = [withEmailRenderer];
+NormalStory.decorators = [WithEmailRenderer];
 NormalStory.play = async ({ canvasElement }) => {
   await playFindEmailStructure(canvasElement);
 };
@@ -42,7 +45,7 @@ const ClientOverviewStory = Template.bind({});
 ClientOverviewStory.args = {
   ...NormalStory.args,
 };
-ClientOverviewStory.decorators = [withEmailRenderer, withEmailClientOverviewFactory(formatTitle())];
+ClientOverviewStory.decorators = [WithEmailRenderer, WithEmailClientOverviewFactory(titles.UserDeletedEmail)];
 ClientOverviewStory.play = async ({ canvasElement }) => {
   await playFindEmailStructure(canvasElement);
 };

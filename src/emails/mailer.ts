@@ -4,32 +4,16 @@ import nodemailer, { Transporter } from 'nodemailer';
 import type { Options as MailOptions } from 'nodemailer/lib/mailer/index';
 import { Readable } from 'stream';
 
-import {
-  NewPasswordRequestEmail,
-  formatTitle as NewPasswordRequestEmailFormatTitle,
-  NewPasswordRequestEmailProps,
-} from '@ad/src/components/emails/templates/NewPasswordRequest';
-import {
-  PasswordChangedEmail,
-  formatTitle as PasswordChangedEmailFormatTitle,
-  PasswordChangedEmailProps,
-} from '@ad/src/components/emails/templates/PasswordChanged';
-import {
-  PasswordResetEmail,
-  formatTitle as PasswordResetEmailFormatTitle,
-  PasswordResetEmailProps,
-} from '@ad/src/components/emails/templates/PasswordReset';
-import {
-  SignUpConfirmationEmail,
-  formatTitle as SignUpConfirmationEmailFormatTitle,
-  SignUpConfirmationEmailProps,
-} from '@ad/src/components/emails/templates/SignUpConfirmation';
-import { UserDeletedEmail, formatTitle as UserDeletedEmailFormatTitle, UserDeletedEmailProps } from '@ad/src/components/emails/templates/UserDeleted';
+import { NewPasswordRequestEmail, NewPasswordRequestEmailProps } from '@ad/src/components/emails/templates/NewPasswordRequest';
+import { PasswordChangedEmail, PasswordChangedEmailProps } from '@ad/src/components/emails/templates/PasswordChanged';
+import { PasswordResetEmail, PasswordResetEmailProps } from '@ad/src/components/emails/templates/PasswordReset';
+import { SignUpConfirmationEmail, SignUpConfirmationEmailProps } from '@ad/src/components/emails/templates/SignUpConfirmation';
+import { UserDeletedEmail, UserDeletedEmailProps } from '@ad/src/components/emails/templates/UserDeleted';
 import {
   WelcomeOrganizationCollaboratorEmail,
-  formatTitle as WelcomeOrganizationCollaboratorEmailFormatTitle,
   WelcomeOrganizationCollaboratorEmailProps,
 } from '@ad/src/components/emails/templates/WelcomeOrganizationCollaborator';
+import { titles } from '@ad/src/components/emails/templates/common';
 import { convertHtmlEmailToText } from '@ad/src/utils/email/helpers';
 
 export interface EmailServerSettings {
@@ -167,7 +151,7 @@ export class Mailer {
   public async sendSignUpConfirmation(parameters: SignUpConfirmationEmailProps & { recipient: string }) {
     await this.send({
       recipients: [parameters.recipient],
-      subject: SignUpConfirmationEmailFormatTitle(),
+      subject: titles.SignUpConfirmationEmail,
       emailComponent: SignUpConfirmationEmail(parameters),
     });
   }
@@ -175,7 +159,7 @@ export class Mailer {
   public async sendNewPasswordRequest(parameters: NewPasswordRequestEmailProps & { recipient: string }) {
     await this.send({
       recipients: [parameters.recipient],
-      subject: NewPasswordRequestEmailFormatTitle(),
+      subject: titles.NewPasswordRequestEmail,
       emailComponent: NewPasswordRequestEmail(parameters),
     });
   }
@@ -183,7 +167,7 @@ export class Mailer {
   public async sendPasswordChanged(parameters: PasswordChangedEmailProps & { recipient: string }) {
     await this.send({
       recipients: [parameters.recipient],
-      subject: PasswordChangedEmailFormatTitle(),
+      subject: titles.PasswordChangedEmail,
       emailComponent: PasswordChangedEmail(parameters),
     });
   }
@@ -191,7 +175,7 @@ export class Mailer {
   public async sendPasswordReset(parameters: PasswordResetEmailProps & { recipient: string }) {
     await this.send({
       recipients: [parameters.recipient],
-      subject: PasswordResetEmailFormatTitle(),
+      subject: titles.PasswordResetEmail,
       emailComponent: PasswordResetEmail(parameters),
     });
   }
@@ -199,7 +183,7 @@ export class Mailer {
   public async sendUserDeleted(parameters: UserDeletedEmailProps & { recipient: string }) {
     await this.send({
       recipients: [parameters.recipient],
-      subject: UserDeletedEmailFormatTitle(),
+      subject: titles.UserDeletedEmail,
       emailComponent: UserDeletedEmail(parameters),
     });
   }
@@ -207,7 +191,7 @@ export class Mailer {
   public async sendWelcomeOrganizationCollaborator(parameters: WelcomeOrganizationCollaboratorEmailProps & { recipient: string }) {
     await this.send({
       recipients: [parameters.recipient],
-      subject: WelcomeOrganizationCollaboratorEmailFormatTitle(),
+      subject: titles.WelcomeOrganizationCollaboratorEmail,
       emailComponent: WelcomeOrganizationCollaboratorEmail(parameters),
     });
   }

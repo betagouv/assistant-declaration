@@ -1,8 +1,8 @@
 import { MjmlButton, MjmlText } from '@faire/mjml-react';
 import { Meta, StoryFn } from '@storybook/react';
-import { within } from 'storybook/test';
 
-import { commonEmailsParameters, withEmailRenderer } from '@ad/.storybook/email';
+import { WithEmailRenderer } from '@ad/.storybook/WithEmailRenderer';
+import { commonEmailsParameters } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
 import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
@@ -31,7 +31,7 @@ const Template: StoryFn<ComponentType> = (args) => {
 
 const EmptyStory = Template.bind({});
 EmptyStory.args = {};
-EmptyStory.decorators = [withEmailRenderer];
+EmptyStory.decorators = [WithEmailRenderer];
 EmptyStory.play = async ({ canvasElement }) => {
   await playFindEmailStructure(canvasElement);
 };
@@ -60,7 +60,7 @@ LoremStory.args = {
     </>
   ),
 };
-LoremStory.decorators = [withEmailRenderer];
+LoremStory.decorators = [WithEmailRenderer];
 LoremStory.play = async ({ canvasElement }) => {
   await playFindEmailStructure(canvasElement);
 };

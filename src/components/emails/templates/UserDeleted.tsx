@@ -1,17 +1,14 @@
 import { MjmlText } from '@faire/mjml-react';
 
 import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
-
-export function formatTitle() {
-  return `Compte désactivé`;
-}
+import { titles } from '@ad/src/components/emails/templates/common';
 
 export interface UserDeletedEmailProps {
   firstname: string;
 }
 
 export function UserDeletedEmail(props: UserDeletedEmailProps) {
-  const title = formatTitle();
+  const title = titles.UserDeletedEmail;
 
   return (
     <StandardLayout title={title}>

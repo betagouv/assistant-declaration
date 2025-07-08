@@ -27,7 +27,7 @@ const isStorybookEnvironment: boolean = process.env.STORYBOOK_ENVIRONMENT === 't
 
 const emailCssWithAdjustedUrls = isStorybookEnvironment ? emailCss : emailCss.replace(/\/assets\//g, `${getBaseUrl()}/assets/`);
 
-export const quotedReplyMarkerClass: string = 'quoted-reply-marker';
+const quotedReplyMarkerClass: string = 'quoted-reply-marker';
 
 export interface StandardLayoutProps {
   title: string;

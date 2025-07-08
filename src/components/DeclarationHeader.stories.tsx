@@ -2,7 +2,8 @@ import { Meta, StoryFn } from '@storybook/react';
 import { within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { DeclarationHeader, DeclarationHeaderContext } from '@ad/src/components/DeclarationHeader';
+import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
+import { DeclarationHeaderContext } from '@ad/src/components/DeclarationHeaderContext';
 import { reusableNormal as EventsSalesViewerNormalStory } from '@ad/src/components/EventsSalesViewer.stories';
 import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';

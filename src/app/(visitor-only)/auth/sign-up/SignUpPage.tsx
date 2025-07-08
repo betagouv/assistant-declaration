@@ -4,15 +4,11 @@ import { fr } from '@codegouvfr/react-dsfr';
 import humanCooperation from '@gouvfr/dsfr/dist/artwork/pictograms/environment/human-cooperation.svg';
 import { Alert, Grid, Typography } from '@mui/material';
 import Image from 'next/image';
-import { createContext, useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 
-import { SignUpForm } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpForm';
+import { SignUpPageContext } from '@ad/src/app/(visitor-only)/auth/sign-up/SignUpPageContext';
 import { formTitleProps } from '@ad/src/utils/form';
 import { centeredFormContainerGridProps } from '@ad/src/utils/grid';
-
-export const SignUpPageContext = createContext({
-  ContextualSignUpForm: SignUpForm,
-});
 
 export function SignUpPage() {
   const { ContextualSignUpForm } = useContext(SignUpPageContext);

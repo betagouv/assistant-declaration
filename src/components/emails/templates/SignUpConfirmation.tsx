@@ -1,10 +1,7 @@
 import { MjmlButton, MjmlText } from '@faire/mjml-react';
 
 import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
-
-export function formatTitle() {
-  return `Inscription en attente de confirmation`;
-}
+import { titles } from '@ad/src/components/emails/templates/common';
 
 export interface SignUpConfirmationEmailProps {
   firstname: string;
@@ -12,7 +9,7 @@ export interface SignUpConfirmationEmailProps {
 }
 
 export function SignUpConfirmationEmail(props: SignUpConfirmationEmailProps) {
-  const title = formatTitle();
+  const title = titles.SignUpConfirmationEmail;
 
   return (
     <StandardLayout title={title}>

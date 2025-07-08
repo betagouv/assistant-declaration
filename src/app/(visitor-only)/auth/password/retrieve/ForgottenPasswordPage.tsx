@@ -1,15 +1,11 @@
 'use client';
 
 import { Alert, Grid, Typography } from '@mui/material';
-import { createContext, useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 
-import { RetrievePasswordForm } from '@ad/src/app/(visitor-only)/auth/password/retrieve/RetrievePasswordForm';
+import { ForgottenPasswordPageContext } from '@ad/src/app/(visitor-only)/auth/password/retrieve/ForgottenPasswordPageContext';
 import { formTitleProps } from '@ad/src/utils/form';
 import { centeredFormContainerGridProps } from '@ad/src/utils/grid';
-
-export const ForgottenPasswordPageContext = createContext({
-  ContextualRetrievePasswordForm: RetrievePasswordForm,
-});
 
 export function ForgottenPasswordPage() {
   const { ContextualRetrievePasswordForm } = useContext(ForgottenPasswordPageContext);

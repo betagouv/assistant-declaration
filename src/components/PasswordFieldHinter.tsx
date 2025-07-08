@@ -1,9 +1,8 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import { CheckBox, CheckBoxOutlineBlank } from '@mui/icons-material';
 import { Grid, Typography } from '@mui/material';
 import { useMemo } from 'react';
 import { z } from 'zod';
 
+import { PasswordFieldHinterItem } from '@ad/src/components/PasswordFieldHinterItem';
 import {
   passwordRequiresANumericError,
   passwordRequiresASpecialCharactersError,
@@ -12,26 +11,6 @@ import {
 } from '@ad/src/models/entities/errors';
 import { UserPasswordSchema } from '@ad/src/models/entities/user';
 import { ulComponentResetStyles } from '@ad/src/utils/grid';
-
-export interface PasswordFieldHinterItemProps {
-  text: string;
-  valid: boolean;
-}
-
-export function PasswordFieldHinterItem(props: PasswordFieldHinterItemProps) {
-  return (
-    <>
-      <Grid item component="li" xs={12} sx={{ display: 'flex', alignItems: 'center' }}>
-        {props.valid ? (
-          <CheckBox fontSize="small" sx={{ color: fr.colors.decisions.text.actionHigh.blueFrance.default, mr: 1 }} />
-        ) : (
-          <CheckBoxOutlineBlank fontSize="small" sx={{ color: fr.colors.decisions.text.actionHigh.blueFrance.default, mr: 1 }} />
-        )}
-        {props.text}
-      </Grid>
-    </>
-  );
-}
 
 export interface PasswordFieldHinterProps {
   password: string;

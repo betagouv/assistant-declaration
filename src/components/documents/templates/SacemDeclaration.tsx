@@ -2,14 +2,15 @@ import { Table, TableCell, TableHeader, TableRow } from '@ag-media/react-pdf-tab
 // import { fr } from '@codegouvfr/react-dsfr';
 import { Image, Link, StyleSheet, Text, View } from '@react-pdf/renderer';
 
-import { StandardLayout, layoutStyles, styles } from '@ad/src/components/documents/layouts/StandardLayout';
+import { StandardLayout } from '@ad/src/components/documents/layouts/StandardLayout';
+import { layoutStyles, styles } from '@ad/src/components/documents/layouts/standard';
 import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import { escapeFormattedNumberForPdf } from '@ad/src/utils/pdf';
 import { getBaseUrl } from '@ad/src/utils/url';
 
-export const sacemStyles = StyleSheet.create({
+const sacemStyles = StyleSheet.create({
   header: {
     ...layoutStyles.header,
     paddingBottom: '3vw',

@@ -1,17 +1,14 @@
 import { MjmlText } from '@faire/mjml-react';
 
 import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
-
-export function formatTitle() {
-  return `Mot de passe mis à jour`;
-}
+import { titles } from '@ad/src/components/emails/templates/common';
 
 export interface PasswordChangedEmailProps {
   firstname: string;
 }
 
 export function PasswordChangedEmail(props: PasswordChangedEmailProps) {
-  const title = formatTitle();
+  const title = titles.PasswordChangedEmail;
 
   return (
     <StandardLayout title={title}>

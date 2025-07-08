@@ -4,10 +4,8 @@ import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindForm, playFindFormInMain } from '@ad/.storybook/testing';
 import { AsNewUser as PrivateLayoutAsNewUserStory } from '@ad/src/app/(private)/PrivateLayout.stories';
 import { Empty as CreateOrganizationFormEmptyStory } from '@ad/src/app/(private)/dashboard/organization/create/CreateOrganizationForm.stories';
-import {
-  OrganizationCreationPage,
-  OrganizationCreationPageContext,
-} from '@ad/src/app/(private)/dashboard/organization/create/OrganizationCreationPage';
+import { OrganizationCreationPage } from '@ad/src/app/(private)/dashboard/organization/create/OrganizationCreationPage';
+import { OrganizationCreationPageContext } from '@ad/src/app/(private)/dashboard/organization/create/OrganizationCreationPageContext';
 
 type ComponentType = typeof OrganizationCreationPage;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();

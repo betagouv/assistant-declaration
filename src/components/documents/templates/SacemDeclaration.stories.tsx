@@ -1,6 +1,7 @@
 import { Meta, StoryFn } from '@storybook/react';
 
-import { WithDocumentRenderer, commonDocumentsParameters } from '@ad/.storybook/document';
+import { WithDocumentRenderer } from '@ad/.storybook/WithDocumentRenderer';
+import { commonDocumentsParameters } from '@ad/.storybook/document';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindDocumentStructure } from '@ad/.storybook/testing';
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
