@@ -27,7 +27,6 @@ export const defaultSacemAccountingTaxRates: Record<keyof typeof AccountingCateg
 };
 
 export const defaultSacdAccountingTaxRates: Record<keyof typeof SacdAccountingCategorySchema.Values, number> = {
-  GLOBAL: 0.055,
   SALE_OF_RIGHTS: 0.055,
   INTRODUCTION_FEES: 0.055,
   COPRODUCTION_CONTRIBUTION: 0.055,
@@ -52,7 +51,6 @@ const expenseSortOrder: AccountingCategorySchemaType[] = [
 ];
 
 const sacdEntrySortOrder: SacdAccountingCategorySchemaType[] = [
-  SacdAccountingCategorySchema.Values.GLOBAL,
   SacdAccountingCategorySchema.Values.SALE_OF_RIGHTS,
   SacdAccountingCategorySchema.Values.INTRODUCTION_FEES,
   SacdAccountingCategorySchema.Values.COPRODUCTION_CONTRIBUTION,
@@ -75,7 +73,6 @@ const expenseCategoriesToHave: AccountingCategorySchemaType[] = [
 ];
 
 const sacdEntryCategoriesToHave: SacdAccountingCategorySchemaType[] = [
-  SacdAccountingCategorySchema.Values.GLOBAL,
   SacdAccountingCategorySchema.Values.SALE_OF_RIGHTS,
   SacdAccountingCategorySchema.Values.INTRODUCTION_FEES,
   SacdAccountingCategorySchema.Values.COPRODUCTION_CONTRIBUTION,
@@ -182,20 +179,13 @@ export function sacdOrganizationPlaceholderToOrganizationInput(
   // Since this data comes from registered declarations, the existing index for a field should also exist for other fields
   return {
     name: placeholder.name[0] ?? undefined,
-    email: placeholder.email[0] ?? undefined,
     officialHeadquartersId: placeholder.officialHeadquartersId[0] ?? undefined,
-    europeanVatId: placeholder.europeanVatId[0] ?? undefined,
     headquartersAddress: {
       street: placeholder.headquartersAddress.street[0] ?? undefined,
       city: placeholder.headquartersAddress.city[0] ?? undefined,
       postalCode: placeholder.headquartersAddress.postalCode[0] ?? undefined,
       countryCode: placeholder.headquartersAddress.countryCode[0] ?? undefined,
       subdivision: placeholder.headquartersAddress.subdivision[0] ?? undefined,
-    },
-    phone: {
-      callingCode: placeholder.phone.callingCode[0] ?? undefined,
-      countryCode: placeholder.phone.countryCode[0] ?? undefined,
-      number: placeholder.phone.number[0] ?? undefined,
     },
   };
 }

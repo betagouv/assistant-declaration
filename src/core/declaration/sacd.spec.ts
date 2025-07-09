@@ -55,7 +55,9 @@ describe('prepareDeclarationParameter', () => {
 
       const xml = prepareDeclarationParameter('712790', eventsSeries[0], eventsWrappers, sacdDeclarations[0], declarationAt);
 
-      expect(xml).toBe(declarationParameterXml.replace('encoding="utf-8" ?>', 'encoding="utf-8"?>').trim());
+      expect(xml).toBe(
+        declarationParameterXml.replace('encoding="utf-8" ?>', 'encoding="utf-8"?>').replaceAll('<Exploitation />', '<Exploitation/>').trim()
+      );
     },
     secondsToMilliseconds(30)
   );

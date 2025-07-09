@@ -1,5 +1,4 @@
-import { EventSerieDeclarationStatus, PhoneType, Prisma } from '@prisma/client';
-import diff from 'microdiff';
+import { EventSerieDeclarationStatus, Prisma } from '@prisma/client';
 
 import { ensureMinimumSacdAccountingItems, ensureMinimumSacemExpenseItems, ensureMinimumSacemRevenueItems } from '@ad/src/core/declaration';
 import { getSacdClient } from '@ad/src/core/declaration/sacd';
@@ -10,13 +9,7 @@ import {
   GetSacemDeclarationSchema,
   TransmitDeclarationSchema,
 } from '@ad/src/models/actions/declaration';
-import {
-  LiteSacdDeclarationAccountingEntrySchemaType,
-  LiteSacdDeclarationPerformedWorkSchemaType,
-  SacdAudienceSchema,
-  SacdDeclarationWrapperSchemaType,
-  SacdProductionTypeSchema,
-} from '@ad/src/models/entities/declaration/sacd';
+import { LiteSacdDeclarationAccountingEntrySchemaType, SacdDeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import {
   AccountingCategorySchema,
   AccountingFluxSchema,
@@ -84,51 +77,15 @@ export const declarationRouter = router({
               select: {
                 id: true,
                 clientId: true,
-                officialHeadquartersId: true,
-                productionOperationId: true,
-                productionType: true,
                 placeName: true,
+                placeStreet: true,
                 placePostalCode: true,
                 placeCity: true,
-                audience: true,
-                placeCapacity: true,
-                declarationPlace: true,
-                organizer: {
-                  select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    phoneId: true,
-                    officialHeadquartersId: true,
-                    europeanVatId: true,
-                    headquartersAddress: {
-                      select: {
-                        id: true,
-                        street: true,
-                        city: true,
-                        postalCode: true,
-                        countryCode: true,
-                        subdivision: true,
-                      },
-                    },
-                    phone: {
-                      select: {
-                        id: true,
-                        callingCode: true,
-                        countryCode: true,
-                        number: true,
-                      },
-                    },
-                  },
-                },
                 producer: {
                   select: {
                     id: true,
                     name: true,
-                    email: true,
-                    phoneId: true,
                     officialHeadquartersId: true,
-                    europeanVatId: true,
                     headquartersAddress: {
                       select: {
                         id: true,
@@ -137,42 +94,6 @@ export const declarationRouter = router({
                         postalCode: true,
                         countryCode: true,
                         subdivision: true,
-                      },
-                    },
-                    phone: {
-                      select: {
-                        id: true,
-                        callingCode: true,
-                        countryCode: true,
-                        number: true,
-                      },
-                    },
-                  },
-                },
-                rightsFeesManager: {
-                  select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    phoneId: true,
-                    officialHeadquartersId: true,
-                    europeanVatId: true,
-                    headquartersAddress: {
-                      select: {
-                        id: true,
-                        street: true,
-                        city: true,
-                        postalCode: true,
-                        countryCode: true,
-                        subdivision: true,
-                      },
-                    },
-                    phone: {
-                      select: {
-                        id: true,
-                        callingCode: true,
-                        countryCode: true,
-                        number: true,
                       },
                     },
                   },
@@ -183,14 +104,6 @@ export const declarationRouter = router({
                     categoryPrecision: true,
                     taxRate: true,
                     amount: true,
-                  },
-                },
-                SacdDeclarationPerformedWork: {
-                  select: {
-                    category: true,
-                    name: true,
-                    contributors: true,
-                    durationSeconds: true,
                   },
                 },
               },
@@ -861,51 +774,15 @@ export const declarationRouter = router({
               select: {
                 id: true,
                 clientId: true,
-                officialHeadquartersId: true,
-                productionOperationId: true,
-                productionType: true,
                 placeName: true,
+                placeStreet: true,
                 placePostalCode: true,
                 placeCity: true,
-                audience: true,
-                placeCapacity: true,
-                declarationPlace: true,
-                organizer: {
-                  select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    phoneId: true,
-                    officialHeadquartersId: true,
-                    europeanVatId: true,
-                    headquartersAddress: {
-                      select: {
-                        id: true,
-                        street: true,
-                        city: true,
-                        postalCode: true,
-                        countryCode: true,
-                        subdivision: true,
-                      },
-                    },
-                    phone: {
-                      select: {
-                        id: true,
-                        callingCode: true,
-                        countryCode: true,
-                        number: true,
-                      },
-                    },
-                  },
-                },
                 producer: {
                   select: {
                     id: true,
                     name: true,
-                    email: true,
-                    phoneId: true,
                     officialHeadquartersId: true,
-                    europeanVatId: true,
                     headquartersAddress: {
                       select: {
                         id: true,
@@ -914,42 +791,6 @@ export const declarationRouter = router({
                         postalCode: true,
                         countryCode: true,
                         subdivision: true,
-                      },
-                    },
-                    phone: {
-                      select: {
-                        id: true,
-                        callingCode: true,
-                        countryCode: true,
-                        number: true,
-                      },
-                    },
-                  },
-                },
-                rightsFeesManager: {
-                  select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    phoneId: true,
-                    officialHeadquartersId: true,
-                    europeanVatId: true,
-                    headquartersAddress: {
-                      select: {
-                        id: true,
-                        street: true,
-                        city: true,
-                        postalCode: true,
-                        countryCode: true,
-                        subdivision: true,
-                      },
-                    },
-                    phone: {
-                      select: {
-                        id: true,
-                        callingCode: true,
-                        countryCode: true,
-                        number: true,
                       },
                     },
                   },
@@ -960,14 +801,6 @@ export const declarationRouter = router({
                     categoryPrecision: true,
                     taxRate: true,
                     amount: true,
-                  },
-                },
-                SacdDeclarationPerformedWork: {
-                  select: {
-                    category: true,
-                    name: true,
-                    contributors: true,
-                    durationSeconds: true,
                   },
                 },
               },
@@ -1016,47 +849,14 @@ export const declarationRouter = router({
       },
       select: {
         clientId: true,
-        officialHeadquartersId: true,
-        productionOperationId: true,
-        productionType: true,
         placeName: true,
+        placeStreet: true,
         placePostalCode: true,
         placeCity: true,
-        audience: true,
-        placeCapacity: true,
-        declarationPlace: true,
-        organizer: {
-          select: {
-            name: true,
-            email: true,
-            phoneId: true,
-            officialHeadquartersId: true,
-            europeanVatId: true,
-            headquartersAddress: {
-              select: {
-                street: true,
-                city: true,
-                postalCode: true,
-                countryCode: true,
-                subdivision: true,
-              },
-            },
-            phone: {
-              select: {
-                callingCode: true,
-                countryCode: true,
-                number: true,
-              },
-            },
-          },
-        },
         producer: {
           select: {
             name: true,
-            email: true,
-            phoneId: true,
             officialHeadquartersId: true,
-            europeanVatId: true,
             headquartersAddress: {
               select: {
                 street: true,
@@ -1064,38 +864,6 @@ export const declarationRouter = router({
                 postalCode: true,
                 countryCode: true,
                 subdivision: true,
-              },
-            },
-            phone: {
-              select: {
-                callingCode: true,
-                countryCode: true,
-                number: true,
-              },
-            },
-          },
-        },
-        rightsFeesManager: {
-          select: {
-            name: true,
-            email: true,
-            phoneId: true,
-            officialHeadquartersId: true,
-            europeanVatId: true,
-            headquartersAddress: {
-              select: {
-                street: true,
-                city: true,
-                postalCode: true,
-                countryCode: true,
-                subdivision: true,
-              },
-            },
-            phone: {
-              select: {
-                callingCode: true,
-                countryCode: true,
-                number: true,
               },
             },
           },
@@ -1108,27 +876,8 @@ export const declarationRouter = router({
             amount: true,
           },
         },
-        SacdDeclarationPerformedWork: {
-          select: {
-            category: true,
-            name: true,
-            contributors: true,
-            durationSeconds: true,
-          },
-        },
       },
-      distinct: [
-        'clientId',
-        'officialHeadquartersId',
-        'productionOperationId',
-        'productionType',
-        'placeName',
-        'placePostalCode',
-        'placeCity',
-        'audience',
-        'placeCapacity',
-        'declarationPlace',
-      ], // At least the distinct may remove duplicates for the whole chain
+      distinct: ['clientId', 'placeName', 'placeStreet', 'placePostalCode', 'placeCity'], // At least the distinct may remove duplicates for the whole chain
       // Get only a few of the last declarations since it should representative
       orderBy: {
         updatedAt: 'desc',
@@ -1141,73 +890,23 @@ export const declarationRouter = router({
     const placeholder: SacdDeclarationWrapperSchemaType['placeholder'] = {
       ...computedPlaceholder,
       clientId: [],
-      officialHeadquartersId: [],
-      productionOperationId: [],
-      productionType: SacdProductionTypeSchema.Values.PROFESSIONAL,
       placeName: [],
+      placeStreet: [],
       placePostalCode: [],
       placeCity: [],
-      audience: SacdAudienceSchema.Values.ALL,
-      placeCapacity: [],
-      declarationPlace: [],
       accountingEntries: ensureMinimumSacdAccountingItems(accountingEntries),
-      performedWorks: [],
-      organizer: {
-        name: [],
-        email: [],
-        officialHeadquartersId: [],
-        europeanVatId: [],
-        headquartersAddress: {
-          street: [],
-          city: [],
-          postalCode: [],
-          countryCode: [],
-          subdivision: [],
-        },
-        phone: {
-          callingCode: [],
-          countryCode: [],
-          number: [],
-        },
-      },
       producer: {
         name: [],
-        email: [],
         officialHeadquartersId: [],
-        europeanVatId: [],
         headquartersAddress: {
           street: [],
           city: [],
           postalCode: [],
           countryCode: [],
           subdivision: [],
-        },
-        phone: {
-          callingCode: [],
-          countryCode: [],
-          number: [],
-        },
-      },
-      rightsFeesManager: {
-        name: [],
-        email: [],
-        officialHeadquartersId: [],
-        europeanVatId: [],
-        headquartersAddress: {
-          street: [],
-          city: [],
-          postalCode: [],
-          countryCode: [],
-          subdivision: [],
-        },
-        phone: {
-          callingCode: [],
-          countryCode: [],
-          number: [],
         },
       },
       accountingEntriesOptions: {
-        global: { taxRate: [], amount: [] },
         saleOfRights: { taxRate: [], amount: [] },
         introductionFees: { taxRate: [], amount: [] },
         coproductionContribution: { taxRate: [], amount: [] },
@@ -1215,61 +914,20 @@ export const declarationRouter = router({
         other: { taxRate: [], amount: [] },
         otherCategories: [],
       },
-      performedWorksOptions: {
-        category: [],
-        name: [],
-        contributors: [],
-        durationSeconds: [],
-      },
     };
 
     // Fill with unique values
     for (const previousDeclaration of previousDeclarations) {
       if (!placeholder.clientId.includes(previousDeclaration.clientId)) placeholder.clientId.push(previousDeclaration.clientId);
-      if (!placeholder.officialHeadquartersId.includes(previousDeclaration.officialHeadquartersId))
-        placeholder.officialHeadquartersId.push(previousDeclaration.officialHeadquartersId);
-      if (!placeholder.productionOperationId.includes(previousDeclaration.productionOperationId))
-        placeholder.productionOperationId.push(previousDeclaration.productionOperationId);
       if (!placeholder.placeName.includes(previousDeclaration.placeName)) placeholder.placeName.push(previousDeclaration.placeName);
+      if (!placeholder.placeStreet.includes(previousDeclaration.placeStreet)) placeholder.placeStreet.push(previousDeclaration.placeStreet);
       if (!placeholder.placePostalCode.includes(previousDeclaration.placePostalCode))
         placeholder.placePostalCode.push(previousDeclaration.placePostalCode);
       if (!placeholder.placeCity.includes(previousDeclaration.placeCity)) placeholder.placeCity.push(previousDeclaration.placeCity);
-      if (!placeholder.placeCapacity.includes(previousDeclaration.placeCapacity)) placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
-      if (!placeholder.declarationPlace.includes(previousDeclaration.declarationPlace))
-        placeholder.declarationPlace.push(previousDeclaration.declarationPlace);
-
-      if (!placeholder.organizer.name.includes(previousDeclaration.organizer.name))
-        placeholder.organizer.name.push(previousDeclaration.organizer.name);
-      if (!placeholder.organizer.email.includes(previousDeclaration.organizer.email))
-        placeholder.organizer.email.push(previousDeclaration.organizer.email);
-      if (!placeholder.organizer.officialHeadquartersId.includes(previousDeclaration.organizer.officialHeadquartersId))
-        placeholder.organizer.officialHeadquartersId.push(previousDeclaration.organizer.officialHeadquartersId);
-      if (!placeholder.organizer.europeanVatId.includes(previousDeclaration.organizer.europeanVatId))
-        placeholder.organizer.europeanVatId.push(previousDeclaration.organizer.europeanVatId);
-      if (!placeholder.organizer.headquartersAddress.street.includes(previousDeclaration.organizer.headquartersAddress.street))
-        placeholder.organizer.headquartersAddress.street.push(previousDeclaration.organizer.headquartersAddress.street);
-      if (!placeholder.organizer.headquartersAddress.city.includes(previousDeclaration.organizer.headquartersAddress.city))
-        placeholder.organizer.headquartersAddress.city.push(previousDeclaration.organizer.headquartersAddress.city);
-      if (!placeholder.organizer.headquartersAddress.postalCode.includes(previousDeclaration.organizer.headquartersAddress.postalCode))
-        placeholder.organizer.headquartersAddress.postalCode.push(previousDeclaration.organizer.headquartersAddress.postalCode);
-      if (!placeholder.organizer.headquartersAddress.countryCode.includes(previousDeclaration.organizer.headquartersAddress.countryCode))
-        placeholder.organizer.headquartersAddress.countryCode.push(previousDeclaration.organizer.headquartersAddress.countryCode);
-      if (!placeholder.organizer.headquartersAddress.subdivision.includes(previousDeclaration.organizer.headquartersAddress.subdivision))
-        placeholder.organizer.headquartersAddress.subdivision.push(previousDeclaration.organizer.headquartersAddress.subdivision);
-      if (!placeholder.organizer.phone.callingCode.includes(previousDeclaration.organizer.phone.callingCode))
-        placeholder.organizer.phone.callingCode.push(previousDeclaration.organizer.phone.callingCode);
-      if (!placeholder.organizer.phone.countryCode.includes(previousDeclaration.organizer.phone.countryCode))
-        placeholder.organizer.phone.countryCode.push(previousDeclaration.organizer.phone.countryCode);
-      if (!placeholder.organizer.phone.number.includes(previousDeclaration.organizer.phone.number))
-        placeholder.organizer.phone.number.push(previousDeclaration.organizer.phone.number);
 
       if (!placeholder.producer.name.includes(previousDeclaration.producer.name)) placeholder.producer.name.push(previousDeclaration.producer.name);
-      if (!placeholder.producer.email.includes(previousDeclaration.producer.email))
-        placeholder.producer.email.push(previousDeclaration.producer.email);
       if (!placeholder.producer.officialHeadquartersId.includes(previousDeclaration.producer.officialHeadquartersId))
         placeholder.producer.officialHeadquartersId.push(previousDeclaration.producer.officialHeadquartersId);
-      if (!placeholder.producer.europeanVatId.includes(previousDeclaration.producer.europeanVatId))
-        placeholder.producer.europeanVatId.push(previousDeclaration.producer.europeanVatId);
       if (!placeholder.producer.headquartersAddress.street.includes(previousDeclaration.producer.headquartersAddress.street))
         placeholder.producer.headquartersAddress.street.push(previousDeclaration.producer.headquartersAddress.street);
       if (!placeholder.producer.headquartersAddress.city.includes(previousDeclaration.producer.headquartersAddress.city))
@@ -1280,43 +938,6 @@ export const declarationRouter = router({
         placeholder.producer.headquartersAddress.countryCode.push(previousDeclaration.producer.headquartersAddress.countryCode);
       if (!placeholder.producer.headquartersAddress.subdivision.includes(previousDeclaration.producer.headquartersAddress.subdivision))
         placeholder.producer.headquartersAddress.subdivision.push(previousDeclaration.producer.headquartersAddress.subdivision);
-      if (!placeholder.producer.phone.callingCode.includes(previousDeclaration.producer.phone.callingCode))
-        placeholder.producer.phone.callingCode.push(previousDeclaration.producer.phone.callingCode);
-      if (!placeholder.producer.phone.countryCode.includes(previousDeclaration.producer.phone.countryCode))
-        placeholder.producer.phone.countryCode.push(previousDeclaration.producer.phone.countryCode);
-      if (!placeholder.producer.phone.number.includes(previousDeclaration.producer.phone.number))
-        placeholder.producer.phone.number.push(previousDeclaration.producer.phone.number);
-
-      if (!placeholder.rightsFeesManager.name.includes(previousDeclaration.rightsFeesManager.name))
-        placeholder.rightsFeesManager.name.push(previousDeclaration.rightsFeesManager.name);
-      if (!placeholder.rightsFeesManager.email.includes(previousDeclaration.rightsFeesManager.email))
-        placeholder.rightsFeesManager.email.push(previousDeclaration.rightsFeesManager.email);
-      if (!placeholder.rightsFeesManager.officialHeadquartersId.includes(previousDeclaration.rightsFeesManager.officialHeadquartersId))
-        placeholder.rightsFeesManager.officialHeadquartersId.push(previousDeclaration.rightsFeesManager.officialHeadquartersId);
-      if (!placeholder.rightsFeesManager.europeanVatId.includes(previousDeclaration.rightsFeesManager.europeanVatId))
-        placeholder.rightsFeesManager.europeanVatId.push(previousDeclaration.rightsFeesManager.europeanVatId);
-      if (!placeholder.rightsFeesManager.headquartersAddress.street.includes(previousDeclaration.rightsFeesManager.headquartersAddress.street))
-        placeholder.rightsFeesManager.headquartersAddress.street.push(previousDeclaration.rightsFeesManager.headquartersAddress.street);
-      if (!placeholder.rightsFeesManager.headquartersAddress.city.includes(previousDeclaration.rightsFeesManager.headquartersAddress.city))
-        placeholder.rightsFeesManager.headquartersAddress.city.push(previousDeclaration.rightsFeesManager.headquartersAddress.city);
-      if (
-        !placeholder.rightsFeesManager.headquartersAddress.postalCode.includes(previousDeclaration.rightsFeesManager.headquartersAddress.postalCode)
-      )
-        placeholder.rightsFeesManager.headquartersAddress.postalCode.push(previousDeclaration.rightsFeesManager.headquartersAddress.postalCode);
-      if (
-        !placeholder.rightsFeesManager.headquartersAddress.countryCode.includes(previousDeclaration.rightsFeesManager.headquartersAddress.countryCode)
-      )
-        placeholder.rightsFeesManager.headquartersAddress.countryCode.push(previousDeclaration.rightsFeesManager.headquartersAddress.countryCode);
-      if (
-        !placeholder.rightsFeesManager.headquartersAddress.subdivision.includes(previousDeclaration.rightsFeesManager.headquartersAddress.subdivision)
-      )
-        placeholder.rightsFeesManager.headquartersAddress.subdivision.push(previousDeclaration.rightsFeesManager.headquartersAddress.subdivision);
-      if (!placeholder.rightsFeesManager.phone.callingCode.includes(previousDeclaration.rightsFeesManager.phone.callingCode))
-        placeholder.rightsFeesManager.phone.callingCode.push(previousDeclaration.rightsFeesManager.phone.callingCode);
-      if (!placeholder.rightsFeesManager.phone.countryCode.includes(previousDeclaration.rightsFeesManager.phone.countryCode))
-        placeholder.rightsFeesManager.phone.countryCode.push(previousDeclaration.rightsFeesManager.phone.countryCode);
-      if (!placeholder.rightsFeesManager.phone.number.includes(previousDeclaration.rightsFeesManager.phone.number))
-        placeholder.rightsFeesManager.phone.number.push(previousDeclaration.rightsFeesManager.phone.number);
 
       for (const accountingEntry of previousDeclaration.SacdDeclarationAccountingEntry) {
         // Amounts are specific to each series so there is no need of filling them as placeholders
@@ -1325,10 +946,6 @@ export const declarationRouter = router({
           const taxRate = accountingEntry.taxRate.toNumber();
 
           switch (accountingEntry.category) {
-            case 'GLOBAL':
-              if (!placeholder.accountingEntriesOptions.global.taxRate.includes(taxRate))
-                placeholder.accountingEntriesOptions.global.taxRate.push(taxRate);
-              break;
             case 'SALE_OF_RIGHTS':
               if (!placeholder.accountingEntriesOptions.saleOfRights.taxRate.includes(taxRate))
                 placeholder.accountingEntriesOptions.saleOfRights.taxRate.push(taxRate);
@@ -1355,18 +972,6 @@ export const declarationRouter = router({
                 placeholder.accountingEntriesOptions.other.taxRate.push(taxRate);
               break;
           }
-        }
-      }
-
-      for (const performedWork of previousDeclaration.SacdDeclarationPerformedWork) {
-        if (!placeholder.performedWorksOptions.category.includes(performedWork.category))
-          placeholder.performedWorksOptions.category.push(performedWork.category);
-        if (!placeholder.performedWorksOptions.name.includes(performedWork.name)) placeholder.performedWorksOptions.name.push(performedWork.name);
-        if (!placeholder.performedWorksOptions.durationSeconds.includes(performedWork.durationSeconds))
-          placeholder.performedWorksOptions.durationSeconds.push(performedWork.durationSeconds);
-
-        for (const contributor of performedWork.contributors) {
-          if (!placeholder.performedWorksOptions.contributors.includes(contributor)) placeholder.performedWorksOptions.contributors.push(contributor);
         }
       }
     }
@@ -1405,17 +1010,7 @@ export const declarationRouter = router({
             EventSerieSacdDeclaration: {
               select: {
                 id: true,
-                organizer: {
-                  select: {
-                    id: true,
-                  },
-                },
                 producer: {
-                  select: {
-                    id: true,
-                  },
-                },
-                rightsFeesManager: {
                   select: {
                     id: true,
                   },
@@ -1427,15 +1022,6 @@ export const declarationRouter = router({
                     categoryPrecision: true,
                     taxRate: true,
                     amount: true,
-                  },
-                },
-                SacdDeclarationPerformedWork: {
-                  select: {
-                    id: true,
-                    category: true,
-                    name: true,
-                    contributors: true,
-                    durationSeconds: true,
                   },
                 },
               },
@@ -1470,20 +1056,6 @@ export const declarationRouter = router({
       });
     }
 
-    const submittedLitePerformedWorks = new Map<
-      string, // It's a mix of multiple fields to make sure we have a unique key
-      LiteSacdDeclarationPerformedWorkSchemaType
-    >();
-
-    for (const performedWork of input.performedWorks) {
-      submittedLitePerformedWorks.set(`${performedWork.category}_${performedWork.name}`, {
-        category: performedWork.category,
-        name: performedWork.name,
-        contributors: performedWork.contributors,
-        durationSeconds: performedWork.durationSeconds,
-      });
-    }
-
     // We have to handle both update and creation since it's implicitely linked to an event serie
     // [WORKAROUND] `upsert` cannot be used to `where` not accepting undefined values (the zero UUID could be a bit at risk so using `create+update`)
     // Ref: https://github.com/prisma/prisma/issues/5233
@@ -1499,7 +1071,6 @@ export const declarationRouter = router({
       const sacdDeclarationId = existingDeclaration.EventSerieSacdDeclaration.id;
 
       const storedLiteAccountingEntries: typeof submittedLiteAccountingEntries = new Map();
-      const storedLitePerformedWorks: typeof submittedLitePerformedWorks = new Map();
 
       for (const accountingEntry of existingDeclaration.EventSerieSacdDeclaration!.SacdDeclarationAccountingEntry) {
         storedLiteAccountingEntries.set(`${accountingEntry.category}_${accountingEntry.categoryPrecision}`, {
@@ -1510,93 +1081,7 @@ export const declarationRouter = router({
         });
       }
 
-      for (const performedWork of existingDeclaration.EventSerieSacdDeclaration!.SacdDeclarationPerformedWork) {
-        storedLitePerformedWorks.set(`${performedWork.category}_${performedWork.name}`, {
-          category: performedWork.category,
-          name: performedWork.name,
-          contributors: performedWork.contributors,
-          durationSeconds: performedWork.durationSeconds,
-        });
-      }
-
       const accountingEntriesDiffResult = getDiff(storedLiteAccountingEntries, submittedLiteAccountingEntries);
-      const performedWorksDiffResult = getDiff(storedLitePerformedWorks, submittedLitePerformedWorks);
-
-      // We want to compare declaration organizations to avoid duplicating data in the database
-      // Note: we consider the organizer object the base for reference so the association won't change for simplicity
-      const organizerProducerDiff = diff(input.organizer, input.producer);
-      const producerRightsFeesManagerDiff = diff(input.producer, input.rightsFeesManager);
-      const organizerRightsFeesManagerDiff = diff(input.organizer, input.rightsFeesManager);
-
-      const organizerId = existingDeclaration.EventSerieSacdDeclaration.organizer.id;
-
-      let producerId: string;
-      if (organizerProducerDiff.length === 0) {
-        producerId = organizerId;
-      } else {
-        const producer = await prisma.sacdDeclarationOrganization.create({
-          data: {
-            name: input.producer.name,
-            email: input.producer.email,
-            officialHeadquartersId: input.producer.officialHeadquartersId,
-            europeanVatId: input.producer.europeanVatId,
-            headquartersAddress: {
-              create: {
-                street: input.producer.headquartersAddress.street,
-                city: input.producer.headquartersAddress.city,
-                postalCode: input.producer.headquartersAddress.postalCode,
-                countryCode: input.producer.headquartersAddress.countryCode,
-                subdivision: input.producer.headquartersAddress.subdivision,
-              },
-            },
-            phone: {
-              create: {
-                phoneType: PhoneType.UNSPECIFIED,
-                callingCode: input.producer.phone.callingCode,
-                countryCode: input.producer.phone.countryCode,
-                number: input.producer.phone.number,
-              },
-            },
-          },
-        });
-
-        producerId = producer.id;
-      }
-
-      let rightsFeesManagerId: string;
-      if (organizerRightsFeesManagerDiff.length === 0) {
-        rightsFeesManagerId = organizerId;
-      } else if (producerRightsFeesManagerDiff.length === 0) {
-        rightsFeesManagerId = producerId;
-      } else {
-        const rightsFeesManager = await prisma.sacdDeclarationOrganization.create({
-          data: {
-            name: input.rightsFeesManager.name,
-            email: input.rightsFeesManager.email,
-            officialHeadquartersId: input.rightsFeesManager.officialHeadquartersId,
-            europeanVatId: input.rightsFeesManager.europeanVatId,
-            headquartersAddress: {
-              create: {
-                street: input.rightsFeesManager.headquartersAddress.street,
-                city: input.rightsFeesManager.headquartersAddress.city,
-                postalCode: input.rightsFeesManager.headquartersAddress.postalCode,
-                countryCode: input.rightsFeesManager.headquartersAddress.countryCode,
-                subdivision: input.rightsFeesManager.headquartersAddress.subdivision,
-              },
-            },
-            phone: {
-              create: {
-                phoneType: PhoneType.UNSPECIFIED,
-                callingCode: input.rightsFeesManager.phone.callingCode,
-                countryCode: input.rightsFeesManager.phone.countryCode,
-                number: input.rightsFeesManager.phone.number,
-              },
-            },
-          },
-        });
-
-        rightsFeesManagerId = rightsFeesManager.id;
-      }
 
       // Nullable field cannot be used as part of the unique compound... so we need to perform association mutations without unique constraints
       // Ref: https://github.com/prisma/prisma/issues/3197
@@ -1606,48 +1091,23 @@ export const declarationRouter = router({
         },
         data: {
           clientId: input.clientId,
-          officialHeadquartersId: input.officialHeadquartersId,
-          productionOperationId: input.productionOperationId,
-          productionType: input.productionType,
           placeName: input.placeName,
+          placeStreet: input.placeStreet,
           placePostalCode: input.placePostalCode,
           placeCity: input.placeCity,
-          audience: input.audience,
-          placeCapacity: input.placeCapacity,
-          declarationPlace: input.declarationPlace,
-          organizer: {
+          producer: {
             update: {
-              name: input.organizer.name,
-              email: input.organizer.email,
-              officialHeadquartersId: input.organizer.officialHeadquartersId,
-              europeanVatId: input.organizer.europeanVatId,
+              name: input.producer.name,
+              officialHeadquartersId: input.producer.officialHeadquartersId,
               headquartersAddress: {
                 update: {
-                  street: input.organizer.headquartersAddress.street,
-                  city: input.organizer.headquartersAddress.city,
-                  postalCode: input.organizer.headquartersAddress.postalCode,
-                  countryCode: input.organizer.headquartersAddress.countryCode,
-                  subdivision: input.organizer.headquartersAddress.subdivision,
+                  street: input.producer.headquartersAddress.street,
+                  city: input.producer.headquartersAddress.city,
+                  postalCode: input.producer.headquartersAddress.postalCode,
+                  countryCode: input.producer.headquartersAddress.countryCode,
+                  subdivision: input.producer.headquartersAddress.subdivision,
                 },
               },
-              phone: {
-                update: {
-                  phoneType: PhoneType.UNSPECIFIED,
-                  callingCode: input.organizer.phone.callingCode,
-                  countryCode: input.organizer.phone.countryCode,
-                  number: input.organizer.phone.number,
-                },
-              },
-            },
-          },
-          producer: {
-            connect: {
-              id: producerId,
-            },
-          },
-          rightsFeesManager: {
-            connect: {
-              id: rightsFeesManagerId,
             },
           },
           SacdDeclarationAccountingEntry: {
@@ -1680,85 +1140,19 @@ export const declarationRouter = router({
               } satisfies Prisma.SacdDeclarationAccountingEntryUpdateManyWithWhereWithoutSacdDeclarationInput;
             }),
           },
-          SacdDeclarationPerformedWork: {
-            deleteMany: performedWorksDiffResult.removed.map((removedPerformedWork) => {
-              return {
-                sacdDeclarationId: sacdDeclarationId,
-                category: removedPerformedWork.category,
-                name: removedPerformedWork.name,
-              } satisfies Prisma.SacdDeclarationPerformedWorkScalarWhereInput;
-            }),
-            create: performedWorksDiffResult.added.map((addedPerformedWork) => {
-              return {
-                category: addedPerformedWork.category,
-                name: addedPerformedWork.name,
-                contributors: addedPerformedWork.contributors,
-                durationSeconds: addedPerformedWork.durationSeconds,
-              } satisfies Prisma.SacdDeclarationPerformedWorkCreateWithoutSacdDeclarationInput;
-            }),
-            updateMany: performedWorksDiffResult.updated.map((updatedPerformedWork) => {
-              return {
-                where: {
-                  sacdDeclarationId: sacdDeclarationId,
-                  category: updatedPerformedWork.category,
-                  name: updatedPerformedWork.name,
-                },
-                data: {
-                  contributors: updatedPerformedWork.contributors,
-                  durationSeconds: updatedPerformedWork.durationSeconds,
-                },
-              } satisfies Prisma.SacdDeclarationPerformedWorkUpdateManyWithWhereWithoutSacdDeclarationInput;
-            }),
-          },
         },
         select: {
           id: true,
           clientId: true,
-          officialHeadquartersId: true,
-          productionOperationId: true,
-          productionType: true,
           placeName: true,
+          placeStreet: true,
           placePostalCode: true,
           placeCity: true,
-          audience: true,
-          placeCapacity: true,
-          declarationPlace: true,
-          organizer: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              phoneId: true,
-              officialHeadquartersId: true,
-              europeanVatId: true,
-              headquartersAddress: {
-                select: {
-                  id: true,
-                  street: true,
-                  city: true,
-                  postalCode: true,
-                  countryCode: true,
-                  subdivision: true,
-                },
-              },
-              phone: {
-                select: {
-                  id: true,
-                  callingCode: true,
-                  countryCode: true,
-                  number: true,
-                },
-              },
-            },
-          },
           producer: {
             select: {
               id: true,
               name: true,
-              email: true,
-              phoneId: true,
               officialHeadquartersId: true,
-              europeanVatId: true,
               headquartersAddress: {
                 select: {
                   id: true,
@@ -1767,42 +1161,6 @@ export const declarationRouter = router({
                   postalCode: true,
                   countryCode: true,
                   subdivision: true,
-                },
-              },
-              phone: {
-                select: {
-                  id: true,
-                  callingCode: true,
-                  countryCode: true,
-                  number: true,
-                },
-              },
-            },
-          },
-          rightsFeesManager: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              phoneId: true,
-              officialHeadquartersId: true,
-              europeanVatId: true,
-              headquartersAddress: {
-                select: {
-                  id: true,
-                  street: true,
-                  city: true,
-                  postalCode: true,
-                  countryCode: true,
-                  subdivision: true,
-                },
-              },
-              phone: {
-                select: {
-                  id: true,
-                  callingCode: true,
-                  countryCode: true,
-                  number: true,
                 },
               },
             },
@@ -1855,162 +1213,45 @@ export const declarationRouter = router({
               amount: true,
             },
           },
-          SacdDeclarationPerformedWork: {
-            select: {
-              category: true,
-              name: true,
-              contributors: true,
-              durationSeconds: true,
-            },
-          },
         },
       });
-
-      // Delete old objects to avoid orphans
-      // Notes:
-      // - We make sure it's not used by another one
-      // - They must be deleted once the declaration has been updated to not have remaining foreign key
-      if (
-        producerId !== existingDeclaration.EventSerieSacdDeclaration.producer.id &&
-        existingDeclaration.EventSerieSacdDeclaration.producer.id !== organizerId
-      ) {
-        await prisma.sacdDeclarationOrganization.delete({ where: { id: existingDeclaration.EventSerieSacdDeclaration.producer.id } });
-      }
-
-      if (
-        rightsFeesManagerId !== existingDeclaration.EventSerieSacdDeclaration.rightsFeesManager.id &&
-        existingDeclaration.EventSerieSacdDeclaration.rightsFeesManager.id !== organizerId &&
-        existingDeclaration.EventSerieSacdDeclaration.rightsFeesManager.id !== producerId &&
-        // Also make sure it has not been deleted by the previous condition
-        existingDeclaration.EventSerieSacdDeclaration.rightsFeesManager.id !== existingDeclaration.EventSerieSacdDeclaration.producer.id
-      ) {
-        await prisma.sacdDeclarationOrganization.delete({ where: { id: existingDeclaration.EventSerieSacdDeclaration.rightsFeesManager.id } });
-      }
     } else {
-      // We want to compare declaration organizations to avoid duplicating data in the database
-      const organizerProducerDiff = diff(input.organizer, input.producer);
-      const producerRightsFeesManagerDiff = diff(input.producer, input.rightsFeesManager);
-      const organizerRightsFeesManagerDiff = diff(input.organizer, input.rightsFeesManager);
-
-      const organizer = await prisma.sacdDeclarationOrganization.create({
+      const producer = await prisma.sacdDeclarationOrganization.create({
         data: {
-          name: input.organizer.name,
-          email: input.organizer.email,
-          officialHeadquartersId: input.organizer.officialHeadquartersId,
-          europeanVatId: input.organizer.europeanVatId,
+          name: input.producer.name,
+          officialHeadquartersId: input.producer.officialHeadquartersId,
           headquartersAddress: {
             create: {
-              street: input.organizer.headquartersAddress.street,
-              city: input.organizer.headquartersAddress.city,
-              postalCode: input.organizer.headquartersAddress.postalCode,
-              countryCode: input.organizer.headquartersAddress.countryCode,
-              subdivision: input.organizer.headquartersAddress.subdivision,
-            },
-          },
-          phone: {
-            create: {
-              phoneType: PhoneType.UNSPECIFIED,
-              callingCode: input.organizer.phone.callingCode,
-              countryCode: input.organizer.phone.countryCode,
-              number: input.organizer.phone.number,
+              street: input.producer.headquartersAddress.street,
+              city: input.producer.headquartersAddress.city,
+              postalCode: input.producer.headquartersAddress.postalCode,
+              countryCode: input.producer.headquartersAddress.countryCode,
+              subdivision: input.producer.headquartersAddress.subdivision,
             },
           },
         },
       });
-
-      let producerId: string;
-      if (organizerProducerDiff.length === 0) {
-        producerId = organizer.id;
-      } else {
-        const producer = await prisma.sacdDeclarationOrganization.create({
-          data: {
-            name: input.producer.name,
-            email: input.producer.email,
-            officialHeadquartersId: input.producer.officialHeadquartersId,
-            europeanVatId: input.producer.europeanVatId,
-            headquartersAddress: {
-              create: {
-                street: input.producer.headquartersAddress.street,
-                city: input.producer.headquartersAddress.city,
-                postalCode: input.producer.headquartersAddress.postalCode,
-                countryCode: input.producer.headquartersAddress.countryCode,
-                subdivision: input.producer.headquartersAddress.subdivision,
-              },
-            },
-            phone: {
-              create: {
-                phoneType: PhoneType.UNSPECIFIED,
-                callingCode: input.producer.phone.callingCode,
-                countryCode: input.producer.phone.countryCode,
-                number: input.producer.phone.number,
-              },
-            },
-          },
-        });
-
-        producerId = producer.id;
-      }
-
-      let rightsFeesManagerId: string;
-      if (organizerRightsFeesManagerDiff.length === 0) {
-        rightsFeesManagerId = organizer.id;
-      } else if (producerRightsFeesManagerDiff.length === 0) {
-        rightsFeesManagerId = producerId;
-      } else {
-        const rightsFeesManager = await prisma.sacdDeclarationOrganization.create({
-          data: {
-            name: input.rightsFeesManager.name,
-            email: input.rightsFeesManager.email,
-            officialHeadquartersId: input.rightsFeesManager.officialHeadquartersId,
-            europeanVatId: input.rightsFeesManager.europeanVatId,
-            headquartersAddress: {
-              create: {
-                street: input.rightsFeesManager.headquartersAddress.street,
-                city: input.rightsFeesManager.headquartersAddress.city,
-                postalCode: input.rightsFeesManager.headquartersAddress.postalCode,
-                countryCode: input.rightsFeesManager.headquartersAddress.countryCode,
-                subdivision: input.rightsFeesManager.headquartersAddress.subdivision,
-              },
-            },
-            phone: {
-              create: {
-                phoneType: PhoneType.UNSPECIFIED,
-                callingCode: input.rightsFeesManager.phone.callingCode,
-                countryCode: input.rightsFeesManager.phone.countryCode,
-                number: input.rightsFeesManager.phone.number,
-              },
-            },
-          },
-        });
-
-        rightsFeesManagerId = rightsFeesManager.id;
-      }
 
       sacdDeclaration = await prisma.eventSerieSacdDeclaration.create({
         data: {
           clientId: input.clientId,
-          officialHeadquartersId: input.officialHeadquartersId,
-          productionOperationId: input.productionOperationId,
-          productionType: input.productionType,
           placeName: input.placeName,
+          placeStreet: input.placeStreet,
           placePostalCode: input.placePostalCode,
           placeCity: input.placeCity,
-          audience: input.audience,
-          placeCapacity: input.placeCapacity,
-          declarationPlace: input.declarationPlace,
-          organizer: {
-            connect: {
-              id: organizer.id,
-            },
-          },
           producer: {
-            connect: {
-              id: producerId,
-            },
-          },
-          rightsFeesManager: {
-            connect: {
-              id: rightsFeesManagerId,
+            create: {
+              name: input.producer.name,
+              officialHeadquartersId: input.producer.officialHeadquartersId,
+              headquartersAddress: {
+                create: {
+                  street: input.producer.headquartersAddress.street,
+                  city: input.producer.headquartersAddress.city,
+                  postalCode: input.producer.headquartersAddress.postalCode,
+                  countryCode: input.producer.headquartersAddress.countryCode,
+                  subdivision: input.producer.headquartersAddress.subdivision,
+                },
+              },
             },
           },
           eventSerieDeclaration: {
@@ -2030,65 +1271,19 @@ export const declarationRouter = router({
               };
             }),
           },
-          SacdDeclarationPerformedWork: {
-            create: Array.from(submittedLitePerformedWorks).map(([_, performedWork]) => {
-              return {
-                category: performedWork.category,
-                name: performedWork.name,
-                contributors: performedWork.contributors,
-                durationSeconds: performedWork.durationSeconds,
-              };
-            }),
-          },
         },
         select: {
           id: true,
           clientId: true,
-          officialHeadquartersId: true,
-          productionOperationId: true,
-          productionType: true,
           placeName: true,
+          placeStreet: true,
           placePostalCode: true,
           placeCity: true,
-          audience: true,
-          placeCapacity: true,
-          declarationPlace: true,
-          organizer: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              phoneId: true,
-              officialHeadquartersId: true,
-              europeanVatId: true,
-              headquartersAddress: {
-                select: {
-                  id: true,
-                  street: true,
-                  city: true,
-                  postalCode: true,
-                  countryCode: true,
-                  subdivision: true,
-                },
-              },
-              phone: {
-                select: {
-                  id: true,
-                  callingCode: true,
-                  countryCode: true,
-                  number: true,
-                },
-              },
-            },
-          },
           producer: {
             select: {
               id: true,
               name: true,
-              email: true,
-              phoneId: true,
               officialHeadquartersId: true,
-              europeanVatId: true,
               headquartersAddress: {
                 select: {
                   id: true,
@@ -2097,42 +1292,6 @@ export const declarationRouter = router({
                   postalCode: true,
                   countryCode: true,
                   subdivision: true,
-                },
-              },
-              phone: {
-                select: {
-                  id: true,
-                  callingCode: true,
-                  countryCode: true,
-                  number: true,
-                },
-              },
-            },
-          },
-          rightsFeesManager: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              phoneId: true,
-              officialHeadquartersId: true,
-              europeanVatId: true,
-              headquartersAddress: {
-                select: {
-                  id: true,
-                  street: true,
-                  city: true,
-                  postalCode: true,
-                  countryCode: true,
-                  subdivision: true,
-                },
-              },
-              phone: {
-                select: {
-                  id: true,
-                  callingCode: true,
-                  countryCode: true,
-                  number: true,
                 },
               },
             },
@@ -2183,14 +1342,6 @@ export const declarationRouter = router({
               categoryPrecision: true,
               taxRate: true,
               amount: true,
-            },
-          },
-          SacdDeclarationPerformedWork: {
-            select: {
-              category: true,
-              name: true,
-              contributors: true,
-              durationSeconds: true,
             },
           },
         },

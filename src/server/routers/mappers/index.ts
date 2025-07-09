@@ -10,7 +10,6 @@ import {
   Phone,
   SacdDeclarationAccountingEntry,
   SacdDeclarationOrganization,
-  SacdDeclarationPerformedWork,
   SacemDeclarationAccountingEntry,
   TicketCategory,
   TicketingSystem,
@@ -329,34 +328,11 @@ export function sacdDeclarationPrismaToModel(
       })[];
     }[];
   },
-  sacdDeclaration: Pick<
-    EventSerieSacdDeclaration,
-    | 'id'
-    | 'clientId'
-    | 'officialHeadquartersId'
-    | 'productionOperationId'
-    | 'productionType'
-    | 'placeName'
-    | 'placePostalCode'
-    | 'placeCity'
-    | 'audience'
-    | 'placeCapacity'
-    | 'declarationPlace'
-  > & {
-    organizer: Pick<SacdDeclarationOrganization, 'name' | 'email' | 'phoneId' | 'officialHeadquartersId' | 'europeanVatId'> & {
+  sacdDeclaration: Pick<EventSerieSacdDeclaration, 'id' | 'clientId' | 'placeName' | 'placeStreet' | 'placePostalCode' | 'placeCity'> & {
+    producer: Pick<SacdDeclarationOrganization, 'name' | 'officialHeadquartersId'> & {
       headquartersAddress: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
-      phone: Pick<Phone, 'id' | 'callingCode' | 'countryCode' | 'number'>;
-    };
-    producer: Pick<SacdDeclarationOrganization, 'name' | 'email' | 'phoneId' | 'officialHeadquartersId' | 'europeanVatId'> & {
-      headquartersAddress: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
-      phone: Pick<Phone, 'id' | 'callingCode' | 'countryCode' | 'number'>;
-    };
-    rightsFeesManager: Pick<SacdDeclarationOrganization, 'name' | 'email' | 'phoneId' | 'officialHeadquartersId' | 'europeanVatId'> & {
-      headquartersAddress: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
-      phone: Pick<Phone, 'id' | 'callingCode' | 'countryCode' | 'number'>;
     };
     SacdDeclarationAccountingEntry: Pick<SacdDeclarationAccountingEntry, 'category' | 'categoryPrecision' | 'taxRate' | 'amount'>[];
-    SacdDeclarationPerformedWork: Pick<SacdDeclarationPerformedWork, 'category' | 'name' | 'contributors' | 'durationSeconds'>[];
   } & Pick<EventSerieDeclaration, 'transmittedAt'>
 ): SacdDeclarationSchemaType {
   // Reuse data from the placeholder since this one is used until the form is submitted
@@ -378,44 +354,25 @@ export function sacdDeclarationPrismaToModel(
     id: sacdDeclaration.id,
     eventSerieId: eventSerie.id,
     clientId: sacdDeclaration.clientId,
-    officialHeadquartersId: sacdDeclaration.officialHeadquartersId,
-    productionOperationId: sacdDeclaration.productionOperationId,
-    productionType: sacdDeclaration.productionType,
     placeName: sacdDeclaration.placeName,
+    placeStreet: sacdDeclaration.placeStreet,
     placePostalCode: sacdDeclaration.placePostalCode,
     placeCity: sacdDeclaration.placeCity,
-    audience: sacdDeclaration.audience,
-    placeCapacity: sacdDeclaration.placeCapacity,
-    declarationPlace: sacdDeclaration.declarationPlace,
-    organizer: sacdDeclarationOrganizationPrismaToModel(sacdDeclaration.organizer),
     producer: sacdDeclarationOrganizationPrismaToModel(sacdDeclaration.producer),
-    rightsFeesManager: sacdDeclarationOrganizationPrismaToModel(sacdDeclaration.rightsFeesManager),
     accountingEntries: ensureMinimumSacdAccountingItems(accountingEntries),
-    performedWorks: sacdDeclaration.SacdDeclarationPerformedWork.map((performedWork) => {
-      return {
-        category: performedWork.category,
-        name: performedWork.name,
-        contributors: performedWork.contributors,
-        durationSeconds: performedWork.durationSeconds,
-      };
-    }),
     ...computedPlaceholder,
     transmittedAt: sacdDeclaration.transmittedAt,
   };
 }
 
 export function sacdDeclarationOrganizationPrismaToModel(
-  organization: Pick<SacdDeclarationOrganization, 'name' | 'email' | 'officialHeadquartersId' | 'europeanVatId'> & {
+  organization: Pick<SacdDeclarationOrganization, 'name' | 'officialHeadquartersId'> & {
     headquartersAddress: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
-    phone: Pick<Phone, 'id' | 'callingCode' | 'countryCode' | 'number'>;
   }
 ): SacdDeclarationOrganizationSchemaType {
   return {
     name: organization.name,
-    email: organization.email,
     officialHeadquartersId: organization.officialHeadquartersId,
-    europeanVatId: organization.europeanVatId,
     headquartersAddress: addressPrismaToModel(organization.headquartersAddress),
-    phone: phonePrismaToModel(organization.phone),
   };
 }

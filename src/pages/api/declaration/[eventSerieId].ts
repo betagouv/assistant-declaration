@@ -123,51 +123,15 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
                   select: {
                     id: true,
                     clientId: true,
-                    officialHeadquartersId: true,
-                    productionOperationId: true,
-                    productionType: true,
                     placeName: true,
+                    placeStreet: true,
                     placePostalCode: true,
                     placeCity: true,
-                    audience: true,
-                    placeCapacity: true,
-                    declarationPlace: true,
-                    organizer: {
-                      select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        phoneId: true,
-                        officialHeadquartersId: true,
-                        europeanVatId: true,
-                        headquartersAddress: {
-                          select: {
-                            id: true,
-                            street: true,
-                            city: true,
-                            postalCode: true,
-                            countryCode: true,
-                            subdivision: true,
-                          },
-                        },
-                        phone: {
-                          select: {
-                            id: true,
-                            callingCode: true,
-                            countryCode: true,
-                            number: true,
-                          },
-                        },
-                      },
-                    },
                     producer: {
                       select: {
                         id: true,
                         name: true,
-                        email: true,
-                        phoneId: true,
                         officialHeadquartersId: true,
-                        europeanVatId: true,
                         headquartersAddress: {
                           select: {
                             id: true,
@@ -176,42 +140,6 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
                             postalCode: true,
                             countryCode: true,
                             subdivision: true,
-                          },
-                        },
-                        phone: {
-                          select: {
-                            id: true,
-                            callingCode: true,
-                            countryCode: true,
-                            number: true,
-                          },
-                        },
-                      },
-                    },
-                    rightsFeesManager: {
-                      select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        phoneId: true,
-                        officialHeadquartersId: true,
-                        europeanVatId: true,
-                        headquartersAddress: {
-                          select: {
-                            id: true,
-                            street: true,
-                            city: true,
-                            postalCode: true,
-                            countryCode: true,
-                            subdivision: true,
-                          },
-                        },
-                        phone: {
-                          select: {
-                            id: true,
-                            callingCode: true,
-                            countryCode: true,
-                            number: true,
                           },
                         },
                       },
@@ -222,14 +150,6 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
                         categoryPrecision: true,
                         taxRate: true,
                         amount: true,
-                      },
-                    },
-                    SacdDeclarationPerformedWork: {
-                      select: {
-                        category: true,
-                        name: true,
-                        contributors: true,
-                        durationSeconds: true,
                       },
                     },
                   },

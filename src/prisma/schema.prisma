@@ -82,8 +82,6 @@ model Phone {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-
-  SacdDeclarationOrganization SacdDeclarationOrganization[]
 }
 
 enum UserStatus {
@@ -364,19 +362,13 @@ model SacdDeclarationOrganization {
   // Fields from the SACD form
   name                   String
   headquartersAddressId  String @db.Uuid
-  email                  String
-  phoneId                String @db.Uuid
   officialHeadquartersId String
-  europeanVatId          String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  headquartersAddress               Address                     @relation(fields: [headquartersAddressId], references: [id])
-  phone                             Phone                       @relation(fields: [phoneId], references: [id])
-  DeclarationWhereOrganizer         EventSerieSacdDeclaration[] @relation("DeclarationWhereOrganizer")
-  DeclarationWhereProducer          EventSerieSacdDeclaration[] @relation("DeclarationWhereProducer")
-  DeclarationWhereRightsFeesManager EventSerieSacdDeclaration[] @relation("DeclarationWhereRightsFeesManager")
+  headquartersAddress      Address                     @relation(fields: [headquartersAddressId], references: [id])
+  DeclarationWhereProducer EventSerieSacdDeclaration[] @relation("DeclarationWhereProducer")
 }
 
 model EventSerieSacdDeclaration {
@@ -384,33 +376,22 @@ model EventSerieSacdDeclaration {
   eventSerieDeclarationId String @unique @db.Uuid
 
   // Fields from the SACD form
-  clientId               String
-  officialHeadquartersId String
-  productionOperationId  String
-  productionType         EventSerieSacdDeclarationProductionType
-  placeName              String
-  placePostalCode        String
-  placeCity              String
-  audience               EventSerieSacdDeclarationAudience
-  placeCapacity          Int
-  organizerId            String                                  @db.Uuid
-  producerId             String                                  @db.Uuid
-  rightsFeesManagerId    String                                  @db.Uuid
-  declarationPlace       String
+  clientId        String
+  placeName       String
+  placeStreet     String @default("-")
+  placePostalCode String
+  placeCity       String
+  producerId      String @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
   eventSerieDeclaration          EventSerieDeclaration            @relation(fields: [eventSerieDeclarationId], references: [id], onDelete: Cascade)
-  organizer                      SacdDeclarationOrganization      @relation("DeclarationWhereOrganizer", fields: [organizerId], references: [id])
   producer                       SacdDeclarationOrganization      @relation("DeclarationWhereProducer", fields: [producerId], references: [id])
-  rightsFeesManager              SacdDeclarationOrganization      @relation("DeclarationWhereRightsFeesManager", fields: [rightsFeesManagerId], references: [id])
   SacdDeclarationAccountingEntry SacdDeclarationAccountingEntry[]
-  SacdDeclarationPerformedWork   SacdDeclarationPerformedWork[]
 }
 
 enum SacdAccountingCategory {
-  GLOBAL
   SALE_OF_RIGHTS
   INTRODUCTION_FEES
   COPRODUCTION_CONTRIBUTION
@@ -432,20 +413,4 @@ model SacdDeclarationAccountingEntry {
   sacdDeclaration EventSerieSacdDeclaration @relation(fields: [sacdDeclarationId], references: [id], onDelete: Cascade)
 
   @@unique([sacdDeclarationId, category, categoryPrecision])
-}
-
-model SacdDeclarationPerformedWork {
-  id                String   @id @default(uuid()) @db.Uuid
-  sacdDeclarationId String   @db.Uuid
-  category          String
-  name              String
-  contributors      String[]
-  durationSeconds   Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  sacdDeclaration EventSerieSacdDeclaration @relation(fields: [sacdDeclarationId], references: [id], onDelete: Cascade)
-
-  @@unique([sacdDeclarationId, category, name])
 }

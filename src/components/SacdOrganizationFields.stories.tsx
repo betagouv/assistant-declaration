@@ -22,21 +22,15 @@ export default {
 const Template: StoryFn<ComponentType> = (args) => {
   const { control } = useForm<FillSacdDeclarationSchemaType>({
     defaultValues: {
-      organizer: {
-        ...sacdDeclarations[0].organizer,
+      producer: {
+        ...sacdDeclarations[0].producer,
         headquartersAddress: {
           // To not have the "id" key
-          street: sacdDeclarations[0].organizer.headquartersAddress.street,
-          city: sacdDeclarations[0].organizer.headquartersAddress.city,
-          postalCode: sacdDeclarations[0].organizer.headquartersAddress.postalCode,
-          countryCode: sacdDeclarations[0].organizer.headquartersAddress.countryCode,
-          subdivision: sacdDeclarations[0].organizer.headquartersAddress.subdivision,
-        },
-        phone: {
-          // To not have the "id" key
-          callingCode: sacdDeclarations[0].organizer.phone.callingCode,
-          countryCode: sacdDeclarations[0].organizer.phone.countryCode,
-          number: sacdDeclarations[0].organizer.phone.number,
+          street: sacdDeclarations[0].producer.headquartersAddress.street,
+          city: sacdDeclarations[0].producer.headquartersAddress.city,
+          postalCode: sacdDeclarations[0].producer.headquartersAddress.postalCode,
+          countryCode: sacdDeclarations[0].producer.headquartersAddress.countryCode,
+          subdivision: sacdDeclarations[0].producer.headquartersAddress.subdivision,
         },
       },
     },
@@ -51,8 +45,8 @@ const Template: StoryFn<ComponentType> = (args) => {
 
 const NormalStory = Template.bind({});
 NormalStory.args = {
-  organizationType: 'organizer',
-  placeholder: sacdDeclarationsWrappers[0].placeholder.organizer,
+  organizationType: 'producer',
+  placeholder: sacdDeclarationsWrappers[0].placeholder.producer,
 };
 NormalStory.parameters = {};
 NormalStory.play = async ({ canvasElement }) => {
