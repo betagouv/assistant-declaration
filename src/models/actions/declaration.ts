@@ -56,20 +56,12 @@ export const FillSacdDeclarationSchema = z
   .object({
     eventSerieId: SacdDeclarationSchema.shape.eventSerieId,
     clientId: SacdDeclarationSchema.shape.clientId,
-    officialHeadquartersId: SacdDeclarationSchema.shape.officialHeadquartersId,
-    productionOperationId: SacdDeclarationSchema.shape.productionOperationId,
-    productionType: SacdDeclarationSchema.shape.productionType,
     placeName: SacdDeclarationSchema.shape.placeName,
+    placeStreet: SacdDeclarationSchema.shape.placeStreet,
     placePostalCode: SacdDeclarationSchema.shape.placePostalCode,
     placeCity: SacdDeclarationSchema.shape.placeCity,
-    audience: SacdDeclarationSchema.shape.audience,
-    placeCapacity: SacdDeclarationSchema.shape.placeCapacity,
     accountingEntries: SacdDeclarationSchema.shape.accountingEntries,
-    organizer: SacdDeclarationOrganizationInputSchema,
     producer: SacdDeclarationOrganizationInputSchema,
-    rightsFeesManager: SacdDeclarationOrganizationInputSchema,
-    performedWorks: SacdDeclarationSchema.shape.performedWorks,
-    declarationPlace: SacdDeclarationSchema.shape.declarationPlace,
   })
   .strict();
 export type FillSacdDeclarationSchemaType = z.infer<typeof FillSacdDeclarationSchema>;

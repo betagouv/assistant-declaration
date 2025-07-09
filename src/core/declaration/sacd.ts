@@ -1,11 +1,10 @@
 import crypto from 'crypto';
 import { format } from 'date-fns';
-import { default as libphonenumber } from 'google-libphonenumber';
 import { create } from 'xmlbuilder2';
 
 import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { getServerTranslation } from '@ad/src/i18n';
-import { SacdAccountingCategorySchema, SacdDeclarationSchemaType, SacdProductionTypeSchema } from '@ad/src/models/entities/declaration/sacd';
+import { SacdAccountingCategorySchema, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { sacdDeclarationIncorrectDeclarantError, sacdDeclarationUnsuccessfulError } from '@ad/src/models/entities/errors';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import {
@@ -16,10 +15,7 @@ import {
   JsonLoginResponseSchema,
 } from '@ad/src/models/entities/sacd';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
-import { convertInputModelToGooglePhoneNumber } from '@ad/src/utils/phone';
 import { sleep } from '@ad/src/utils/sleep';
-
-const phoneNumberUtil = libphonenumber.PhoneNumberUtil.getInstance();
 
 export interface SacdClientInterface {
   login(): Promise<void>;
@@ -293,10 +289,6 @@ export function prepareDeclarationParameter(
       totalIncludingTaxesAmount += total * price;
     }
 
-    // TODO: SACD confirmed it must be per event whereas we did the audience global to the event serie, it should be changed
-    // Note: they have not defined values so giving them french translations we have
-    const repPublicTranslation = t(`model.sacdDeclaration.audience.enum.${declaration.audience}`);
-
     const declarationParameterRepresentation: JsonDeclarationParameterSchemaType['Declaration']['Representations']['Representation'][0] = {
       rep_ref_dec: formatString(`${eventSerie.id}_${wrapper.event.id}`),
       rep_devise: 'EUR', // When synchronizing events series we refuse other currency so it's safe to be hardcoded for now
@@ -315,31 +307,22 @@ export function prepareDeclarationParameter(
         rep_nb_billets_exo: freeTickets,
       },
       Exploitation: {
-        expl_nat: declaration.productionType === SacdProductionTypeSchema.Values.AMATEUR ? 'AMA' : 'PRO',
-        rep_public: formatString(repPublicTranslation),
         // expl_type_ref: 'TODO',
         // expl_ref: formatString('TODO'),
       },
       Salle: {
         salle_nom: formatString(declaration.placeName),
-        salle_jauge: declaration.placeCapacity,
+        // salle_jauge: 'TODO',
         // TODO: should this be for the event or for the event serie?
         // Also, they seem to want it to be the total of tarifs devided by the capacity... so skipping it for now
         // salle_prix_moyen: totalIncludingTaxesAmount / (freeTickets + paidTickets),
       },
       Diffuseur: {
-        diff_nom: formatString(declaration.organizer.name),
+        diff_nom: formatString(declaration.organizationName),
         // diff_type_ref: 'TODO',
         // diff_ref: formatString('TODO'),
-        diff_adresse_1: formatString(declaration.organizer.headquartersAddress.street),
-        diff_code_postal: formatString(declaration.organizer.headquartersAddress.postalCode),
-        diff_ville: formatString(declaration.organizer.headquartersAddress.city),
-        diff_pays: formatString(declaration.organizer.headquartersAddress.countryCode), // Not translating the country for now
-        diff_tel: formatString(
-          phoneNumberUtil.format(convertInputModelToGooglePhoneNumber(declaration.organizer.phone), libphonenumber.PhoneNumberFormat.NATIONAL)
-        ),
-        diff_mel: formatString(declaration.organizer.email),
-        diff_tva: formatString(declaration.organizer.europeanVatId),
+        diff_ville: formatString(declaration.placeCity),
+        diff_pays: 'FR', // Not translating the country for now
       },
       Producteur: {
         prod_nom: formatString(declaration.producer.name),
@@ -349,11 +332,6 @@ export function prepareDeclarationParameter(
         prod_code_postal: formatString(declaration.producer.headquartersAddress.postalCode),
         prod_ville: formatString(declaration.producer.headquartersAddress.city),
         prod_pays: formatString(declaration.producer.headquartersAddress.countryCode), // Not translating the country for now
-        prod_tel: formatString(
-          phoneNumberUtil.format(convertInputModelToGooglePhoneNumber(declaration.producer.phone), libphonenumber.PhoneNumberFormat.NATIONAL)
-        ),
-        prod_mel: formatString(declaration.producer.email),
-        prod_tva: formatString(declaration.producer.europeanVatId),
       },
     };
 

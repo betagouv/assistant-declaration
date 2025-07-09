@@ -25,8 +25,6 @@
         <rep_nb_billets_exo>0</rep_nb_billets_exo>
       </Billetterie>
       <Exploitation>
-        <expl_nat>PRO</expl_nat>
-        <rep_public>Tout public</rep_public>
         <rep_mt_cession>0</rep_mt_cession>
         <rep_tx_tva_cession>5.5</rep_tx_tva_cession>
         <rep_mt_tva_cession>0</rep_mt_tva_cession>
@@ -37,17 +35,11 @@
       </Exploitation>
       <Salle>
         <salle_nom>Salle Hermione</salle_nom>
-        <salle_jauge>230</salle_jauge>
       </Salle>
       <Diffuseur>
-        <diff_nom>Diffuseur France</diff_nom>
-        <diff_adresse_1>31 rue des Abbesses</diff_adresse_1>
-        <diff_code_postal>75018</diff_code_postal>
-        <diff_ville>Paris</diff_ville>
+        <diff_nom>La Comédie-Française</diff_nom>
+        <diff_ville>Bordeaux</diff_ville>
         <diff_pays>FR</diff_pays>
-        <diff_tel>06 00 11 22 31</diff_tel>
-        <diff_mel>aaa@aaa.fr</diff_mel>
-        <diff_tva>FR123456112</diff_tva>
       </Diffuseur>
       <Producteur>
         <prod_nom>Les spectacles d'Antan</prod_nom>
@@ -55,9 +47,6 @@
         <prod_code_postal>35000</prod_code_postal>
         <prod_ville>Rennes</prod_ville>
         <prod_pays>FR</prod_pays>
-        <prod_tel>06 00 11 22 32</prod_tel>
-        <prod_mel>bbb@bbb.fr</prod_mel>
-        <prod_tva>FR123456122</prod_tva>
       </Producteur>
     </Representation>
     <Representation>
@@ -77,23 +66,14 @@
         <rep_nb_billets_pay>36</rep_nb_billets_pay>
         <rep_nb_billets_exo>0</rep_nb_billets_exo>
       </Billetterie>
-      <Exploitation>
-        <expl_nat>PRO</expl_nat>
-        <rep_public>Tout public</rep_public>
-      </Exploitation>
+      <Exploitation />
       <Salle>
         <salle_nom>Salle Hermione</salle_nom>
-        <salle_jauge>230</salle_jauge>
       </Salle>
       <Diffuseur>
-        <diff_nom>Diffuseur France</diff_nom>
-        <diff_adresse_1>31 rue des Abbesses</diff_adresse_1>
-        <diff_code_postal>75018</diff_code_postal>
-        <diff_ville>Paris</diff_ville>
+        <diff_nom>La Comédie-Française</diff_nom>
+        <diff_ville>Bordeaux</diff_ville>
         <diff_pays>FR</diff_pays>
-        <diff_tel>06 00 11 22 31</diff_tel>
-        <diff_mel>aaa@aaa.fr</diff_mel>
-        <diff_tva>FR123456112</diff_tva>
       </Diffuseur>
       <Producteur>
         <prod_nom>Les spectacles d'Antan</prod_nom>
@@ -101,9 +81,6 @@
         <prod_code_postal>35000</prod_code_postal>
         <prod_ville>Rennes</prod_ville>
         <prod_pays>FR</prod_pays>
-        <prod_tel>06 00 11 22 32</prod_tel>
-        <prod_mel>bbb@bbb.fr</prod_mel>
-        <prod_tva>FR123456122</prod_tva>
       </Producteur>
     </Representation>
     <Representation>
@@ -123,23 +100,14 @@
         <rep_nb_billets_pay>72</rep_nb_billets_pay>
         <rep_nb_billets_exo>0</rep_nb_billets_exo>
       </Billetterie>
-      <Exploitation>
-        <expl_nat>PRO</expl_nat>
-        <rep_public>Tout public</rep_public>
-      </Exploitation>
+      <Exploitation />
       <Salle>
         <salle_nom>Salle Hermione</salle_nom>
-        <salle_jauge>230</salle_jauge>
       </Salle>
       <Diffuseur>
-        <diff_nom>Diffuseur France</diff_nom>
-        <diff_adresse_1>31 rue des Abbesses</diff_adresse_1>
-        <diff_code_postal>75018</diff_code_postal>
-        <diff_ville>Paris</diff_ville>
+        <diff_nom>La Comédie-Française</diff_nom>
+        <diff_ville>Bordeaux</diff_ville>
         <diff_pays>FR</diff_pays>
-        <diff_tel>06 00 11 22 31</diff_tel>
-        <diff_mel>aaa@aaa.fr</diff_mel>
-        <diff_tva>FR123456112</diff_tva>
       </Diffuseur>
       <Producteur>
         <prod_nom>Les spectacles d'Antan</prod_nom>
@@ -147,9 +115,6 @@
         <prod_code_postal>35000</prod_code_postal>
         <prod_ville>Rennes</prod_ville>
         <prod_pays>FR</prod_pays>
-        <prod_tel>06 00 11 22 32</prod_tel>
-        <prod_mel>bbb@bbb.fr</prod_mel>
-        <prod_tva>FR123456122</prod_tva>
       </Producteur>
     </Representation>
   </Representations>

@@ -81,6 +81,8 @@
     "openapi-ts": "openapi-ts",
     "patch-package": "patch-package",
     "playwright": "playwright",
+    "prisma": "dotenv-run-script .env.test -- prisma:unsecure",
+    "prisma:unsecure": "prisma",
     "tsx": "tsx",
     "jest": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest"
   },

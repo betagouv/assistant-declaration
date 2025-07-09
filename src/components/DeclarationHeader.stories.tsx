@@ -7,6 +7,7 @@ import { DeclarationHeaderContext } from '@ad/src/components/DeclarationHeaderCo
 import { reusableNormal as EventsSalesViewerNormalStory } from '@ad/src/components/EventsSalesViewer.stories';
 import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
+import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 
 type ComponentType = typeof DeclarationHeader;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -33,6 +34,7 @@ NormalStory.args = {
   eventSerie: eventsSeries[0],
   eventsWrappers: eventsWrappers,
   currentDeclaration: 'sacem',
+  transmittedDeclarations: [DeclarationTypeSchema.Values.SACD],
 };
 NormalStory.play = async ({ canvasElement }) => {
   await playFindElement(canvasElement);
