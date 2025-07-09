@@ -30,7 +30,7 @@ export function ErrorAlert(props: ErrorAlertProps) {
       if (error instanceof Error && error.name === 'TRPCClientError') {
         const trpcError = error as unknown as TRPCClientErrorLike<AppRouter>;
 
-        if (trpcError.data && 'zodError' in trpcError.data) {
+        if (trpcError.data && 'zodError' in trpcError.data && Array.isArray(trpcError.data.zodError)) {
           // Format to benefit from all the typings
           const zodError = new z.ZodError(trpcError.data.zodError as ZodIssue[]);
 
@@ -38,7 +38,7 @@ export function ErrorAlert(props: ErrorAlertProps) {
             // As fallback display the error message from the server, should be good enough but can be in another language
             errs.push(formatMessageFromIssue(issue) || issue.message);
           }
-        } else if (trpcError.data && 'customError' in trpcError.data) {
+        } else if (trpcError.data && 'customError' in trpcError.data && trpcError.data.customError !== null) {
           const customErrorPayload = trpcError.data.customError as CustomError;
           const customError = new CustomError(customErrorPayload.code, customErrorPayload.message);
 
