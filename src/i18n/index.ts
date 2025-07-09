@@ -1,5 +1,5 @@
 import { type Locale, formatDate, formatDistance, formatDuration, formatRelative, isDate } from 'date-fns';
-// import utcToZonedTime from 'date-fns-tz/utcToZonedTime';
+import { toZonedTime } from 'date-fns-tz';
 import { fr as frDateLocale } from 'date-fns/locale/fr';
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
@@ -45,12 +45,11 @@ i18next.use(LanguageDetector).init(
         if (!!format && !!lng) {
           if (isDate(value)) {
             if (options) {
-              // TODO: `date-fns-tz/utcToZonedTime` is not compatible for now with `date-fns` v3
-              // // If specified we shift the date from UTC (with its offset marker)
-              // // to the right time without any offset marker (useful to format on server-side)
-              // if (options.timezone) {
-              //   value = utcToZonedTime(value, options.timezone);
-              // }
+              // If specified we shift the date from UTC (with its offset marker)
+              // to the right time without any offset marker (useful to format on server-side)
+              if (options.timezone) {
+                value = toZonedTime(value, options.timezone);
+              }
             }
 
             const locale = dateFnsLocales[lng];

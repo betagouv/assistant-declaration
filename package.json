@@ -129,6 +129,7 @@
     "crisp-sdk-web": "^1.0.25",
     "cssnano": "^7.0.6",
     "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "eventemitter3": "^5.0.1",
     "google-libphonenumber": "^3.2.40",
     "html-to-text": "^9.0.5",

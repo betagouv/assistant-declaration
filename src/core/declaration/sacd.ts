@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { create } from 'xmlbuilder2';
 
 import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
@@ -16,6 +16,8 @@ import {
 } from '@ad/src/models/entities/sacd';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { sleep } from '@ad/src/utils/sleep';
+
+const sacdApiTimezone = 'Europe/Paris';
 
 export interface SacdClientInterface {
   login(): Promise<void>;
@@ -234,11 +236,13 @@ function formatAmountNumber(value: number) {
 }
 
 function formatDate(date: Date) {
-  return format(date, 'yyyy/MM/dd');
+  // Use France timezone since they seem to expect local time
+  return formatInTimeZone(date, sacdApiTimezone, 'yyyy/MM/dd');
 }
 
 function formatTime(date: Date) {
-  return format(date, 'HH:mm');
+  // Use France timezone since they seem to expect local time
+  return formatInTimeZone(date, sacdApiTimezone, 'HH:mm');
 }
 
 export function prepareDeclarationParameter(
