@@ -212,7 +212,11 @@ export class SacdClient implements SacdClientInterface {
     const warnings: string[] = [];
     const errors: string[] = [];
 
-    for (const representation of responseObject.Declaration.Representations.Representation) {
+    const representations = Array.isArray(responseObject.Declaration.Representations.Representation)
+      ? responseObject.Declaration.Representations.Representation
+      : [responseObject.Declaration.Representations.Representation];
+
+    for (const representation of representations) {
       if (representation.statut === 'KO') {
         errors.push(representation.message || 'unknown');
       } else if (representation.statut === 'WARNING') {

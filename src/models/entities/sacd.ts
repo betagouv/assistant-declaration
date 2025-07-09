@@ -100,6 +100,17 @@ export const JsonDeclarationParameterSchema = applyTypedParsers(
 );
 export type JsonDeclarationParameterSchemaType = z.infer<typeof JsonDeclarationParameterSchema>;
 
+export const JsonRepresentationSchema = z
+  .object({
+    rep_ref_dec: z.string().optional(),
+    numero: z.string(),
+    statut: z.enum(['KO', 'OK', 'WARNING']),
+    champ: z.string().optional(),
+    message: z.string().optional(),
+  })
+  .strip();
+export type JsonRepresentationSchemaType = z.infer<typeof JsonRepresentationSchema>;
+
 export const JsonDeclareResponseSchema = z
   .object({
     Declaration: z.object({
@@ -109,15 +120,7 @@ export const JsonDeclareResponseSchema = z
         sacd_date: z.string(),
       }),
       Representations: z.object({
-        Representation: z.array(
-          z.object({
-            rep_ref_dec: z.string().optional(),
-            numero: z.string(),
-            statut: z.enum(['KO', 'OK', 'WARNING']),
-            champ: z.string().optional(),
-            message: z.string().optional(),
-          })
-        ),
+        Representation: z.array(JsonRepresentationSchema).or(JsonRepresentationSchema), // If there is only 1 item it won't be an array
       }),
     }),
   })
