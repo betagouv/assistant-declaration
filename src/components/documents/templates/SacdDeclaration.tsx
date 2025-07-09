@@ -1,5 +1,5 @@
 import { Table, TableCell, TableHeader, TableRow } from '@ag-media/react-pdf-table';
-import { fr } from '@codegouvfr/react-dsfr';
+// import { fr } from '@codegouvfr/react-dsfr';
 import addressFormatter from '@fragaria/address-formatter';
 import { Image, Link, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { default as libphonenumber } from 'google-libphonenumber';
@@ -32,8 +32,20 @@ export interface SacdDeclarationDocumentProps {
 
 export function SacdDeclarationDocument(props: SacdDeclarationDocumentProps) {
   const { t } = useServerTranslation('common');
-  const theme = fr.colors.getHex({ isDark: false });
   const title = `Déclaration SACD - ${props.sacdDeclaration.eventSerieName}`;
+
+  // // [WORKAROUND] After upgrading to Next.js v15 we wanted to avoid transpiling the entire `react-dsfr`
+  // // This was needed only for the `pages` directory, so since just using a few hexadecimals, for now we prefer to hardcode them
+  // // until the library is fully compatible, or if we switch over handlers into the app dir
+  // const theme = fr.colors.getHex({ isDark: false });
+  const theme = {
+    decisions: {
+      background: {
+        default: { grey: { default: '#ffffff' } },
+        alt: { blueFrance: { default: '#f5f5fe' } },
+      },
+    },
+  };
 
   // To avoid duplicating data on the PDF
   const organizerProducerDiff = diff(props.sacdDeclaration.organizer, props.sacdDeclaration.producer);
