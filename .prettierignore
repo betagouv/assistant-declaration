@@ -15,5 +15,7 @@
 /src/server/trpc-next-layout/**/*.tsx
 /src/**/*.docx
 /src/**/*.transformed.html
+/src/**/*.svg
 /package-lock.json
+/services_diagram.drawio.svg
 /tsconfig.json
