@@ -39,11 +39,11 @@ export function getSacdClient(userId: string): SacdClientInterface {
     return new MockSacdClient();
   } else {
     return new SacdClient(
-      process.env.TEST_SACD_API_CONSUMER_KEY || '',
-      process.env.TEST_SACD_API_SECRET_KEY || '',
-      process.env.TEST_SACD_API_PROVIDER_NAME || '',
-      process.env.TEST_SACD_API_PROVIDER_REFFILE || '',
-      process.env.TEST_SACD_API_PROVIDER_PASSWORD || ''
+      process.env.SACD_API_CONSUMER_KEY || '',
+      process.env.SACD_API_SECRET_KEY || '',
+      process.env.SACD_API_PROVIDER_NAME || '',
+      process.env.SACD_API_PROVIDER_REFFILE || '',
+      process.env.SACD_API_PROVIDER_PASSWORD || ''
     );
   }
 }
