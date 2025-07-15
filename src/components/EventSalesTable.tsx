@@ -227,6 +227,16 @@ export function EventSalesTable({ wrapper, onRowUpdate, readonly }: EventSalesTa
     [apiRef]
   );
 
+  useEffect(() => {
+    if (apiRef.current) {
+      apiRef.current.setColumnVisibilityModel({
+        actions: !readonly,
+      });
+
+      apiRef.current.autosizeColumns(autosizeOption);
+    }
+  }, [readonly]);
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}

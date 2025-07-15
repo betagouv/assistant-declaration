@@ -278,6 +278,16 @@ export function SacdAccountingEntriesTable({ control, trigger, errors, readonly 
     autosizeOption,
   ]);
 
+  useEffect(() => {
+    if (apiRef.current) {
+      apiRef.current.setColumnVisibilityModel({
+        actions: !readonly,
+      });
+
+      apiRef.current.autosizeColumns(autosizeOption);
+    }
+  }, [readonly]);
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       {!readonly && (
