@@ -1,5 +1,6 @@
 import { eachOfLimit } from 'async';
-import { getUnixTime } from 'date-fns';
+import Bottleneck from 'bottleneck';
+import { getUnixTime, minutesToMilliseconds } from 'date-fns';
 
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
 import {
@@ -25,11 +26,21 @@ import { sleep } from '@ad/src/utils/sleep';
 
 export class BilletwebTicketingSystemClient implements TicketingSystemClient {
   public readonly baseUrl = 'https://www.billetweb.fr/api';
+  protected requestsPerMinuteLimit = 90; // It's 100 according to our tests but using a margin just in case
+  protected requestsLimiter: Bottleneck = new Bottleneck({
+    reservoir: this.requestsPerMinuteLimit,
+    reservoirRefreshAmount: this.requestsPerMinuteLimit,
+    reservoirRefreshInterval: minutesToMilliseconds(1),
+  });
 
   constructor(
     private readonly accessKey: string,
     private readonly secretKey: string
   ) {}
+
+  protected async rateLimitedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+    return await this.requestsLimiter.schedule(() => fetch(input, init));
+  }
 
   protected formatUrl(subpathname: string, params: Record<string, string> = {}): string {
     const url = new URL(`${this.baseUrl}${subpathname}`);
@@ -55,7 +66,7 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
   public async testConnection(): Promise<boolean> {
     try {
       // We fetch the minimum of information since it's just to test the connection
-      const lastModifiedAttendeesResponse = await fetch(
+      const lastModifiedAttendeesResponse = await this.rateLimitedFetch(
         this.formatUrl(`/attendees`, {
           last_update: getUnixTime(new Date()).toString(),
         }),
@@ -96,7 +107,7 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
 
   public async getEventsSeries(fromDate: Date, toDate?: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
     // Get attendees modifications to know which events to synchronize (for the first time, or again)
-    const lastModifiedAttendeesResponse = await fetch(
+    const lastModifiedAttendeesResponse = await this.rateLimitedFetch(
       this.formatUrl(`/attendees`, {
         last_update: getUnixTime(fromDate).toString(), // Should be used to synchronize only from last complete synchronization
         ...(toDate ? { to: getUnixTime(toDate).toString() } : {}), // This is only used for tests to return a decent amount of data
@@ -133,7 +144,7 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
     // since our first users should not have many many events
     let events: JsonGetEventsResponseSchemaType;
     if (eventsIdsToSynchronize.length > 0) {
-      const eventsResponse = await fetch(
+      const eventsResponse = await this.rateLimitedFetch(
         this.formatUrl(`/events`, {
           past: '1',
         }),
@@ -165,7 +176,7 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
       // TODO: unfortunately there is no endpoint to get an event alone, so to get name/description/startDate we have to reuse them from `/attendees`
       // endpoint to not fetch all events from the beginning... (missing endDate)
 
-      const datesResponse = await fetch(
+      const datesResponse = await this.rateLimitedFetch(
         this.formatUrl(`/event/${eventId}/dates`, {
           past: '1',
           // TODO: for now try not using it for simplicity
@@ -236,7 +247,7 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
       //
       // At the end, we let them pass all, but will implement a way for users to ignore specific ones so the UI is clean
 
-      const attendeesResponse = await fetch(
+      const attendeesResponse = await this.rateLimitedFetch(
         this.formatUrl(`/event/${eventId}/attendees`, {
           // TODO: for now try not using it for simplicity
           // last_update: getUnixTime(fromDate).toString(), // Should be used to synchronize only from last complete synchronization
@@ -286,7 +297,7 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
         }
       }
 
-      const ticketCategoriesResponse = await fetch(this.formatUrl(`/event/${eventId}/tickets`, {}), {
+      const ticketCategoriesResponse = await this.rateLimitedFetch(this.formatUrl(`/event/${eventId}/tickets`, {}), {
         method: 'GET',
       });
 
