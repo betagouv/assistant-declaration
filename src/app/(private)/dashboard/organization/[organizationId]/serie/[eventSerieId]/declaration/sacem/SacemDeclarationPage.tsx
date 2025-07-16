@@ -2,8 +2,8 @@
 
 import { fr } from '@codegouvfr/react-dsfr';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Download, Save } from '@mui/icons-material';
-import { Alert, Autocomplete, Box, Button, Container, Grid, Link, TextField, Tooltip, Typography } from '@mui/material';
+import { CheckCircle, Download, ForwardToInbox, Save } from '@mui/icons-material';
+import { Alert, Autocomplete, Button, Container, Grid, TextField, Tooltip, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -17,13 +17,13 @@ import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
 import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
+import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
 import { FillSacemDeclarationSchema, FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
-import { getBaseUrl } from '@ad/src/utils/url';
 
 export interface SacemDeclarationPageProps {
   params: { organizationId: string; eventSerieId: string };
@@ -33,7 +33,10 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
   const { t } = useTranslation('common');
   const { ContextualDeclarationHeader } = useContext(SacemDeclarationPageContext);
 
+  const { showConfirmationDialog } = useSingletonConfirmationDialog();
+
   const fillSacemDeclaration = trpc.fillSacemDeclaration.useMutation();
+  const transmitDeclaration = trpc.transmitDeclaration.useMutation();
 
   const getEventSerie = trpc.getEventSerie.useQuery({
     id: eventSerieId,
@@ -83,6 +86,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
         clientId: result.sacemDeclaration.clientId,
         placeName: result.sacemDeclaration.placeName,
         placeCapacity: result.sacemDeclaration.placeCapacity,
+        placePostalCode: result.sacemDeclaration.placePostalCode,
         managerName: result.sacemDeclaration.managerName,
         managerTitle: result.sacemDeclaration.managerTitle,
         performanceType: result.sacemDeclaration.performanceType,
@@ -108,6 +112,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
             clientId: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.clientId,
             placeName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeName,
             placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeCapacity,
+            placePostalCode: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placePostalCode,
             managerName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerName,
             managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerTitle,
             performanceType: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.performanceType,
@@ -124,6 +129,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
             clientId: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.clientId[0] ?? undefined,
             placeName: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.placeName[0] ?? undefined,
             placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.placeCapacity[0] ?? undefined,
+            placePostalCode: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.placePostalCode[0] ?? undefined,
             managerName: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.managerName[0] ?? undefined,
             managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.managerTitle[0] ?? undefined,
             performanceType: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.performanceType[0] ?? undefined,
@@ -155,6 +161,12 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
       transmittedDeclarations: getEventSerie.data?.partialDeclarations.filter((pD) => pD.transmittedAt !== null).map((pD) => pD.type) ?? [],
     };
   }, [getEventSerie]);
+
+  const { alreadyDeclared } = useMemo(() => {
+    return {
+      alreadyDeclared: (getSacemDeclaration.data?.sacemDeclarationWrapper.declaration?.transmittedAt || null) !== null,
+    };
+  }, [getSacemDeclaration]);
 
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
@@ -192,55 +204,12 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
             eventsWrappers={eventsWrappers}
             currentDeclaration="sacem"
             transmittedDeclarations={transmittedDeclarations}
+            readonly={alreadyDeclared}
           />
         </Container>
       </Container>
       {eventsWrappers.length > 0 ? (
         <>
-          <Container
-            sx={{
-              p: 1,
-              mt: 3,
-            }}
-          >
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Box
-                  sx={{
-                    bgcolor: fr.colors.decisions.background.alt.blueFrance.default,
-                    borderRadius: '8px',
-                    p: 3,
-                  }}
-                >
-                  <Typography variant="body1">
-                    <Typography component="span" sx={{ fontWeight: 600 }}>
-                      Le formulaire ci-dessous vous permet de générer un PDF à transmettre à la SACEM.
-                    </Typography>{' '}
-                    <Typography component="span" sx={{ fontStyle: 'italic' }}>
-                      Si vous préférez, il est aussi possible de reporter manuellement les données sur le PDF fourni par la SACEM (
-                      <Link
-                        component={NextLink}
-                        href={`${getBaseUrl()}/assets/templates/declaration/sacem.pdf`}
-                        target="_blank"
-                        onClick={() => {
-                          push(['trackEvent', 'declaration', 'downloadTemplate', 'type', DeclarationTypeSchema.Values.SACEM]);
-                        }}
-                        underline="none"
-                        sx={{
-                          '&::after': {
-                            display: 'none !important',
-                          },
-                        }}
-                      >
-                        téléchargeable ici
-                      </Link>
-                      ).
-                    </Typography>
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-          </Container>
           <Container sx={{ pt: 2 }}>
             <BaseForm
               handleSubmit={handleSubmit}
@@ -258,7 +227,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                   <Grid item xs={12} sm={6}>
                     <Tooltip
                       // TODO: should be editable from the account
-                      title={'Cet intitulé a été configuré par notre équipe au moment de votre inscription'}
+                      title={alreadyDeclared ? '' : 'Cet intitulé a été configuré par notre équipe au moment de votre inscription'}
                     >
                       <TextField
                         disabled
@@ -276,6 +245,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             options={sacemDeclarationWrapper.placeholder.clientId}
                             freeSolo
                             onBlur={onBlur}
@@ -307,6 +277,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             options={sacemDeclarationWrapper.placeholder.placeName}
                             freeSolo
                             onBlur={onBlur}
@@ -315,7 +286,14 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                               onChange(newValue);
                             }}
                             renderInput={(params) => (
-                              <TextField {...params} label="Nom de la salle" inputRef={ref} error={!!error} helperText={error?.message} fullWidth />
+                              <TextField
+                                {...params}
+                                label="Intitulé (de la salle ou du lieu)"
+                                inputRef={ref}
+                                error={!!error}
+                                helperText={error?.message}
+                                fullWidth
+                              />
                             )}
                             renderOption={(props, option) => {
                               // Just needed for the Sentry mask
@@ -338,6 +316,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             // [WORKAROUND] We had issue for `value` and some errors on changes when dealing with number
                             // So only using numbers for the underlying `TextField`
                             options={sacemDeclarationWrapper.placeholder.placeCapacity.map((capacity) => {
@@ -392,11 +371,51 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                   <Grid item xs={12} sm={6}>
                     <Controller
                       control={control}
+                      name="placePostalCode"
+                      defaultValue={control._defaultValues.placePostalCode || ''}
+                      render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                        return (
+                          <Autocomplete
+                            disabled={alreadyDeclared}
+                            options={sacemDeclarationWrapper.placeholder.placePostalCode}
+                            freeSolo
+                            onBlur={onBlur}
+                            value={value}
+                            onInputChange={(event, newValue, reason) => {
+                              onChange(newValue);
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Code postal du lieu"
+                                inputRef={ref}
+                                error={!!error}
+                                helperText={error?.message}
+                                fullWidth
+                              />
+                            )}
+                            renderOption={(props, option) => {
+                              // Just needed for the Sentry mask
+                              return (
+                                <li {...props} key={option} data-sentry-mask>
+                                  {option}
+                                </li>
+                              );
+                            }}
+                          />
+                        );
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Controller
+                      control={control}
                       name="managerName"
                       defaultValue={control._defaultValues.managerName || ''}
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             options={sacemDeclarationWrapper.placeholder.managerName}
                             freeSolo
                             onBlur={onBlur}
@@ -435,6 +454,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             options={sacemDeclarationWrapper.placeholder.managerTitle}
                             freeSolo
                             onBlur={onBlur}
@@ -467,7 +487,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                 <hr />
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <Tooltip title={'Cet intitulé est non modifiable car il provient de votre système de billetterie'}>
+                    <Tooltip title={alreadyDeclared ? '' : 'Cet intitulé est non modifiable car il provient de votre système de billetterie'}>
                       <TextField disabled label="Nom du spectacle" value={eventSerie.name} fullWidth />
                     </Tooltip>
                   </Grid>
@@ -479,9 +499,15 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                           {t('date.longWithTime', {
                             date: eventSerie.endAt,
                           })}
-                          <br />
-                          <br />
-                          Ces dates sont non modifiables car elles proviennent de votre système de billetterie
+                          {alreadyDeclared ? (
+                            ''
+                          ) : (
+                            <>
+                              <br />
+                              <br />
+                              Ces dates sont non modifiables car elles proviennent de votre système de billetterie
+                            </>
+                          )}
                         </>
                       }
                       data-sentry-mask
@@ -502,7 +528,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                     </Tooltip>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Tooltip title={'Cette valeur est non modifiable car elle provient de votre système de billetterie'}>
+                    <Tooltip title={alreadyDeclared ? '' : 'Cette valeur est non modifiable car elle provient de votre système de billetterie'}>
                       <TextField
                         disabled
                         label="Nombre de représentations"
@@ -521,6 +547,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                         return (
                           <Autocomplete
+                            disabled={alreadyDeclared}
                             options={sacemDeclarationWrapper.placeholder.performanceType}
                             freeSolo
                             onBlur={onBlur}
@@ -562,7 +589,9 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                   <Grid item xs={12} sm={6}>
                     <Tooltip
                       title={
-                        'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
+                        alreadyDeclared
+                          ? ''
+                          : 'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
                       }
                     >
                       <TextField
@@ -578,7 +607,9 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                   <Grid item xs={12} sm={6}>
                     <Tooltip
                       title={
-                        'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
+                        alreadyDeclared
+                          ? ''
+                          : 'Cette valeur provient initialement de votre billetterie mais peut être corrigée en ajustant les valeurs des représentations plus haut'
                       }
                     >
                       <TextField
@@ -592,7 +623,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                     </Tooltip>
                   </Grid>
                   <Grid item xs={12} sx={{ mt: 1 }}>
-                    <SacemRevenuesTable control={control} trigger={trigger} errors={errors.revenues} />
+                    <SacemRevenuesTable control={control} trigger={trigger} errors={errors.revenues} readonly={alreadyDeclared} />
                   </Grid>
                 </Grid>
               </Grid>
@@ -603,7 +634,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                 <hr />
                 <Grid container spacing={2}>
                   <Grid item xs={12} sx={{ mt: 1 }}>
-                    <SacemExpensesTable control={control} trigger={trigger} errors={errors.expenses} />
+                    <SacemExpensesTable control={control} trigger={trigger} errors={errors.expenses} readonly={alreadyDeclared} />
                   </Grid>
                 </Grid>
               </Grid>
@@ -615,6 +646,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                   render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                     return (
                       <Autocomplete
+                        disabled={alreadyDeclared}
                         options={sacemDeclarationWrapper.placeholder.declarationPlace}
                         freeSolo
                         onBlur={onBlur}
@@ -690,8 +722,51 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                             },
                           }}
                         >
-                          Générer la déclaration
+                          Télécharger la déclaration
                         </Button>
+                      </Grid>
+                      <Grid item xs>
+                        {alreadyDeclared ? (
+                          <Button disabled={true} size="large" variant="contained" fullWidth startIcon={<CheckCircle />}>
+                            Télédéclaration le {t('date.shortWithTime', { date: sacemDeclarationWrapper.declaration.transmittedAt })}
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => {
+                              showConfirmationDialog({
+                                description: (
+                                  <>
+                                    Êtes-vous sûr de vouloir transmettre ces informations à la SACEM pour le spectacle{' '}
+                                    <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
+                                      {eventSerie.name}
+                                    </Typography>{' '}
+                                    ?
+                                    <br />
+                                    <br />
+                                    <Typography component="span" variant="body2" sx={{ fontStyle: 'italic' }}>
+                                      Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou
+                                      amendement de la déclaration, il faudra directement contacter votre interlocuteur SACEM.
+                                    </Typography>
+                                  </>
+                                ),
+                                onConfirm: async () => {
+                                  const result = await transmitDeclaration.mutateAsync({
+                                    eventSerieId: eventSerieId,
+                                    type: DeclarationTypeSchema.Values.SACEM,
+                                  });
+
+                                  push(['trackEvent', 'declaration', 'transmit', 'type', DeclarationTypeSchema.Values.SACEM]);
+                                },
+                              });
+                            }}
+                            size="large"
+                            variant="contained"
+                            fullWidth
+                            startIcon={<ForwardToInbox />}
+                          >
+                            Télédéclarer
+                          </Button>
+                        )}
                       </Grid>
                     </>
                   )}

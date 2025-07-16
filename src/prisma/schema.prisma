@@ -295,6 +295,7 @@ model EventSerieSacemDeclaration {
   clientId         String
   placeName        String
   placeCapacity    Int
+  placePostalCode  String @default("-")
   managerName      String
   managerTitle     String
   performanceType  String @default("")

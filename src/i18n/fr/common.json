@@ -42,6 +42,8 @@
       "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
       "organizationNotFound": "aucune organisation trouvée",
+      "sacemAgencyNotFound": "le code postal spécifié pour le lieu ne nous permet pas de savoir à quelle agence SACEM envoyer la déclaration. Veuillez le vérifier ou contacter notre support",
+      "sacemDeclarationUnsuccessful": "nous n'avons pas réussi à transférer la déclaration à la SACEM. Merci de réessayer dans quelques secondes ou de nous contacter si le problème persiste",
       "sacdDeclarationIncorrectDeclarant": "l'identifiant de déclarant SACD que vous avez configuré est incorrect, nous vous conseillons de le vérifier et de nous contacter si besoin",
       "sacdDeclarationUnsuccessful": "la SACD nous a indiqué ne pas avoir complètement accepté votre déclaration. Nous vous conseillons de contacter votre interlocuteur SACD pour plus d'informations",
       "supersoniksAccessKeyInvalidDomainName": "l'identifiant est invalide, il doit correspondre au nom de domaine de votre billetterie (par exemple \"billetterie.masalledespectacle.com\" si votre billetterie est accessible via l'adresse https://billetterie.masalledespectacle.com/",

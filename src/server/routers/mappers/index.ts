@@ -237,10 +237,10 @@ export function sacemDeclarationPrismaToModel(
   },
   sacemDeclaration: Pick<
     EventSerieSacemDeclaration,
-    'id' | 'clientId' | 'placeName' | 'placeCapacity' | 'managerName' | 'managerTitle' | 'performanceType' | 'declarationPlace'
+    'id' | 'clientId' | 'placeName' | 'placeCapacity' | 'placePostalCode' | 'managerName' | 'managerTitle' | 'performanceType' | 'declarationPlace'
   > & {
     SacemDeclarationAccountingEntry: Pick<SacemDeclarationAccountingEntry, 'flux' | 'category' | 'categoryPrecision' | 'taxRate' | 'amount'>[];
-  }
+  } & Pick<EventSerieDeclaration, 'transmittedAt'>
 ): SacemDeclarationSchemaType {
   // Reuse data from the placeholder since this one is used until the form is submitted
   const { revenues, expenses, ...computedPlaceholder } = sacemPlaceholderDeclarationPrismaToModel(eventSerie);
@@ -269,6 +269,7 @@ export function sacemDeclarationPrismaToModel(
     clientId: sacemDeclaration.clientId,
     placeName: sacemDeclaration.placeName,
     placeCapacity: sacemDeclaration.placeCapacity,
+    placePostalCode: sacemDeclaration.placePostalCode,
     managerName: sacemDeclaration.managerName,
     managerTitle: sacemDeclaration.managerTitle,
     performanceType: sacemDeclaration.performanceType,
@@ -276,6 +277,7 @@ export function sacemDeclarationPrismaToModel(
     revenues: ensureMinimumSacemRevenueItems(revenues),
     expenses: ensureMinimumSacemExpenseItems(expenses),
     ...computedPlaceholder,
+    transmittedAt: sacemDeclaration.transmittedAt,
   };
 }
 

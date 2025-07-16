@@ -187,6 +187,8 @@ export const duplicateEntryCategoryLabelError = new BusinessError(
   'duplicateEntryCategoryLabel',
   t('errors.validation.accountingEntries.duplicateEntryCategoryLabel')
 );
+export const sacemAgencyNotFoundError = new BusinessError('sacemAgencyNotFound', t('errors.custom.sacemAgencyNotFound'));
+export const sacemDeclarationUnsuccessfulError = new BusinessError('sacemDeclarationUnsuccessful', t('errors.custom.sacemDeclarationUnsuccessful'));
 export const sacdDeclarationIncorrectDeclarantError = new BusinessError(
   'sacdDeclarationIncorrectDeclarant',
   t('errors.custom.sacdDeclarationIncorrectDeclarant')
