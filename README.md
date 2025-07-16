@@ -49,10 +49,26 @@ docker-compose down
 Now the database schema and client need to be initialized:
 `npm run db:migration:deploy && npm run db:schema:compile`
 
-Note since the application has a logic of jobs to be run regularly to fetch, analyze, and compute data. Those are not available in the UI, but you can trigger them through our custom CLI by running:
+She application has extra logic not accessible through the UI, we may have to use the CLI to perform some actions:
 `npm run cli`
 
 That's it! But still, we advise you to read the documentation below to better understand how the project is structured.
+
+### Requirements for SACEM declaration
+
+For the SACEM we have to target the right agency to transmit the declaration. There is a huge matching between postal codes and their bound agency.
+
+This document is considered private for now so we cannot script the whole process. Here the manual steps:
+
+1. Get from the SACEM the mapping file (should contain columns `LOCAL`, `CP`, `Mail`)
+2. Since they usually give a XLSX, just save it as CSV with comma as delimiter (can be done with LibreOffice)
+3. Move the file under `./data/sacem-agencies.csv`
+4. Synchronize data into the database depending on the environment:
+   - If `local` you can simply run: `npm run cli sacem agency async`
+   - If `development` or `production`, first export the database environment variable `DATABASE_URL` and then run: `npm run cli:unsecure sacem agency async`
+5. Check within the database the table has been filled correctly
+
+The synchronization is working making a difference of both states, so if SACEM is updating its file, juste update the CSV and rerun the synchronization. It will work properly.
 
 ## Technical setup
 
