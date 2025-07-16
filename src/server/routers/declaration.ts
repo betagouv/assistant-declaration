@@ -37,7 +37,7 @@ import {
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
-import { getDiff } from '@ad/src/utils/comparaison';
+import { getDiff, sortDiffWithKeys } from '@ad/src/utils/comparaison';
 
 export const declarationRouter = router({
   transmitDeclaration: privateProcedure.input(TransmitDeclarationSchema).mutation(async ({ ctx, input }) => {
@@ -541,6 +541,7 @@ export const declarationRouter = router({
       }
 
       const accountingEntriesDiffResult = getDiff(storedLiteAccountingEntries, submittedLiteAccountingEntries);
+      const sortedAccountingEntriesDiffResult = sortDiffWithKeys(accountingEntriesDiffResult);
 
       // Nullable field cannot be used as part of the unique compound... so we need to perform association mutations without unique constraints
       // Ref: https://github.com/prisma/prisma/issues/3197
@@ -557,34 +558,34 @@ export const declarationRouter = router({
           performanceType: input.performanceType,
           declarationPlace: input.declarationPlace,
           SacemDeclarationAccountingEntry: {
-            deleteMany: accountingEntriesDiffResult.removed.map((removedEntry) => {
+            deleteMany: sortedAccountingEntriesDiffResult.removed.map((removedEntry) => {
               return {
                 sacemDeclarationId: sacemDeclarationId,
-                flux: removedEntry.flux,
-                category: removedEntry.category,
-                categoryPrecision: removedEntry.categoryPrecision,
+                flux: removedEntry.model.flux,
+                category: removedEntry.model.category,
+                categoryPrecision: removedEntry.model.categoryPrecision,
               } satisfies Prisma.SacemDeclarationAccountingEntryScalarWhereInput;
             }),
-            create: accountingEntriesDiffResult.added.map((addedEntry) => {
+            create: sortedAccountingEntriesDiffResult.added.map((addedEntry) => {
               return {
-                flux: addedEntry.flux,
-                category: addedEntry.category,
-                categoryPrecision: addedEntry.categoryPrecision,
-                taxRate: addedEntry.taxRate,
-                amount: addedEntry.includingTaxesAmount,
+                flux: addedEntry.model.flux,
+                category: addedEntry.model.category,
+                categoryPrecision: addedEntry.model.categoryPrecision,
+                taxRate: addedEntry.model.taxRate,
+                amount: addedEntry.model.includingTaxesAmount,
               } satisfies Prisma.SacemDeclarationAccountingEntryCreateWithoutSacemDeclarationInput;
             }),
-            updateMany: accountingEntriesDiffResult.updated.map((updatedEntry) => {
+            updateMany: sortedAccountingEntriesDiffResult.updated.map((updatedEntry) => {
               return {
                 where: {
                   sacemDeclarationId: sacemDeclarationId,
-                  flux: updatedEntry.flux,
-                  category: updatedEntry.category,
-                  categoryPrecision: updatedEntry.categoryPrecision,
+                  flux: updatedEntry.model.flux,
+                  category: updatedEntry.model.category,
+                  categoryPrecision: updatedEntry.model.categoryPrecision,
                 },
                 data: {
-                  taxRate: updatedEntry.taxRate,
-                  amount: updatedEntry.includingTaxesAmount,
+                  taxRate: updatedEntry.model.taxRate,
+                  amount: updatedEntry.model.includingTaxesAmount,
                 },
               } satisfies Prisma.SacemDeclarationAccountingEntryUpdateManyWithWhereWithoutSacemDeclarationInput;
             }),
@@ -1082,6 +1083,7 @@ export const declarationRouter = router({
       }
 
       const accountingEntriesDiffResult = getDiff(storedLiteAccountingEntries, submittedLiteAccountingEntries);
+      const sortedAccountingEntriesDiffResult = sortDiffWithKeys(accountingEntriesDiffResult);
 
       // Nullable field cannot be used as part of the unique compound... so we need to perform association mutations without unique constraints
       // Ref: https://github.com/prisma/prisma/issues/3197
@@ -1111,31 +1113,31 @@ export const declarationRouter = router({
             },
           },
           SacdDeclarationAccountingEntry: {
-            deleteMany: accountingEntriesDiffResult.removed.map((removedEntry) => {
+            deleteMany: sortedAccountingEntriesDiffResult.removed.map((removedEntry) => {
               return {
                 sacdDeclarationId: sacdDeclarationId,
-                category: removedEntry.category,
-                categoryPrecision: removedEntry.categoryPrecision,
+                category: removedEntry.model.category,
+                categoryPrecision: removedEntry.model.categoryPrecision,
               } satisfies Prisma.SacdDeclarationAccountingEntryScalarWhereInput;
             }),
-            create: accountingEntriesDiffResult.added.map((addedEntry) => {
+            create: sortedAccountingEntriesDiffResult.added.map((addedEntry) => {
               return {
-                category: addedEntry.category,
-                categoryPrecision: addedEntry.categoryPrecision,
-                taxRate: addedEntry.taxRate,
-                amount: addedEntry.includingTaxesAmount,
+                category: addedEntry.model.category,
+                categoryPrecision: addedEntry.model.categoryPrecision,
+                taxRate: addedEntry.model.taxRate,
+                amount: addedEntry.model.includingTaxesAmount,
               } satisfies Prisma.SacdDeclarationAccountingEntryCreateWithoutSacdDeclarationInput;
             }),
-            updateMany: accountingEntriesDiffResult.updated.map((updatedEntry) => {
+            updateMany: sortedAccountingEntriesDiffResult.updated.map((updatedEntry) => {
               return {
                 where: {
                   sacdDeclarationId: sacdDeclarationId,
-                  category: updatedEntry.category,
-                  categoryPrecision: updatedEntry.categoryPrecision,
+                  category: updatedEntry.model.category,
+                  categoryPrecision: updatedEntry.model.categoryPrecision,
                 },
                 data: {
-                  taxRate: updatedEntry.taxRate,
-                  amount: updatedEntry.includingTaxesAmount,
+                  taxRate: updatedEntry.model.taxRate,
+                  amount: updatedEntry.model.includingTaxesAmount,
                 },
               } satisfies Prisma.SacdDeclarationAccountingEntryUpdateManyWithWhereWithoutSacdDeclarationInput;
             }),
