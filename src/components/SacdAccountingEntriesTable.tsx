@@ -286,7 +286,7 @@ export function SacdAccountingEntriesTable({ control, trigger, errors, readonly 
 
       apiRef.current.autosizeColumns(autosizeOption);
     }
-  }, [readonly]);
+  }, [readonly, apiRef, autosizeOption]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>

@@ -235,7 +235,7 @@ export function EventSalesTable({ wrapper, onRowUpdate, readonly }: EventSalesTa
 
       apiRef.current.autosizeColumns(autosizeOption);
     }
-  }, [readonly]);
+  }, [readonly, apiRef, autosizeOption]);
 
   return (
     <>
