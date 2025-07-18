@@ -492,46 +492,57 @@ export function SacdDeclarationPage({ params: { organizationId, eventSerieId } }
                         </Button>
                       </Grid>
                       <Grid item xs>
-                        {alreadyDeclared ? (
-                          <Button disabled={true} size="large" variant="contained" fullWidth startIcon={<CheckCircle />}>
-                            Télédéclaration le {t('date.shortWithTime', { date: sacdDeclarationWrapper.declaration.transmittedAt })}
+                        {process.env.NEXT_PUBLIC_APP_MODE === 'prod' && process.env.NEXT_PUBLIC_FEATURE_FLAG_SACD === 'disabled' ? (
+                          <Button disabled={true} size="large" variant="contained" fullWidth startIcon={<ForwardToInbox />}>
+                            Télédéclarer&nbsp;
+                            <Typography component="span" sx={{ fontStyle: 'italic' }}>
+                              (bientôt disponible)
+                            </Typography>
                           </Button>
                         ) : (
-                          <Button
-                            onClick={() => {
-                              showConfirmationDialog({
-                                description: (
-                                  <>
-                                    Êtes-vous sûr de vouloir transmettre ces informations à la SACD pour le spectacle{' '}
-                                    <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
-                                      {eventSerie.name}
-                                    </Typography>{' '}
-                                    ?
-                                    <br />
-                                    <br />
-                                    <Typography component="span" variant="body2" sx={{ fontStyle: 'italic' }}>
-                                      Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou
-                                      amendement de la déclaration, il faudra directement contacter votre interlocuteur SACD.
-                                    </Typography>
-                                  </>
-                                ),
-                                onConfirm: async () => {
-                                  const result = await transmitDeclaration.mutateAsync({
-                                    eventSerieId: eventSerieId,
-                                    type: DeclarationTypeSchema.Values.SACD,
-                                  });
+                          <>
+                            {alreadyDeclared ? (
+                              <Button disabled={true} size="large" variant="contained" fullWidth startIcon={<CheckCircle />}>
+                                Télédéclaration le {t('date.shortWithTime', { date: sacdDeclarationWrapper.declaration!.transmittedAt })}
+                              </Button>
+                            ) : (
+                              <Button
+                                onClick={() => {
+                                  showConfirmationDialog({
+                                    description: (
+                                      <>
+                                        Êtes-vous sûr de vouloir transmettre ces informations à la SACD pour le spectacle{' '}
+                                        <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
+                                          {eventSerie.name}
+                                        </Typography>{' '}
+                                        ?
+                                        <br />
+                                        <br />
+                                        <Typography component="span" variant="body2" sx={{ fontStyle: 'italic' }}>
+                                          Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou
+                                          amendement de la déclaration, il faudra directement contacter votre interlocuteur SACD.
+                                        </Typography>
+                                      </>
+                                    ),
+                                    onConfirm: async () => {
+                                      const result = await transmitDeclaration.mutateAsync({
+                                        eventSerieId: eventSerieId,
+                                        type: DeclarationTypeSchema.Values.SACD,
+                                      });
 
-                                  push(['trackEvent', 'declaration', 'transmit', 'type', DeclarationTypeSchema.Values.SACD]);
-                                },
-                              });
-                            }}
-                            size="large"
-                            variant="contained"
-                            fullWidth
-                            startIcon={<ForwardToInbox />}
-                          >
-                            Télédéclarer
-                          </Button>
+                                      push(['trackEvent', 'declaration', 'transmit', 'type', DeclarationTypeSchema.Values.SACD]);
+                                    },
+                                  });
+                                }}
+                                size="large"
+                                variant="contained"
+                                fullWidth
+                                startIcon={<ForwardToInbox />}
+                              >
+                                Télédéclarer
+                              </Button>
+                            )}
+                          </>
                         )}
                       </Grid>
                     </>
