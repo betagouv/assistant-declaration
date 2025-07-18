@@ -772,15 +772,6 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                   )}
                 </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <Alert severity="warning">
-                  Notre service vous permet de générer la déclaration remplie mais n&apos;effectue pas de télétransmission.{' '}
-                  <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 'bold' }}>
-                    Il vous incombe de transmettre le fichier PDF de cette déclaration à votre interlocuteur SACEM compétent. Et de vous assurer de
-                    l&apos;exactitude des informations saisies.
-                  </Typography>
-                </Alert>
-              </Grid>
             </BaseForm>
           </Container>
         </>
