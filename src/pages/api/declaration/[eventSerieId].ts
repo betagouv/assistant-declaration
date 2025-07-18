@@ -101,6 +101,7 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
                   clientId: true,
                   placeName: true,
                   placeCapacity: true,
+                  placePostalCode: true,
                   managerName: true,
                   managerTitle: true,
                   performanceType: true,

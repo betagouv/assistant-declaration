@@ -29,6 +29,7 @@ export const FillSacemDeclarationSchema = z
     clientId: SacemDeclarationSchema.shape.clientId,
     placeName: SacemDeclarationSchema.shape.placeName,
     placeCapacity: SacemDeclarationSchema.shape.placeCapacity,
+    placePostalCode: SacemDeclarationSchema.shape.placePostalCode,
     managerName: SacemDeclarationSchema.shape.managerName,
     managerTitle: SacemDeclarationSchema.shape.managerTitle,
     performanceType: SacemDeclarationSchema.shape.performanceType,

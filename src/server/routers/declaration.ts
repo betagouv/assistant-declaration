@@ -1,7 +1,11 @@
 import { EventSerieDeclarationStatus, Prisma } from '@prisma/client';
+import { renderToBuffer } from '@react-pdf/renderer';
+import slugify from '@sindresorhus/slugify';
 
+import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
 import { ensureMinimumSacdAccountingItems, ensureMinimumSacemExpenseItems, ensureMinimumSacemRevenueItems } from '@ad/src/core/declaration';
 import { getSacdClient } from '@ad/src/core/declaration/sacd';
+import { Attachment as EmailAttachment, mailer } from '@ad/src/emails/mailer';
 import {
   FillSacdDeclarationSchema,
   FillSacemDeclarationSchema,
@@ -9,6 +13,7 @@ import {
   GetSacemDeclarationSchema,
   TransmitDeclarationSchema,
 } from '@ad/src/models/actions/declaration';
+import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { LiteSacdDeclarationAccountingEntrySchemaType, SacdDeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import {
   AccountingCategorySchema,
@@ -20,6 +25,8 @@ import {
   BusinessError,
   eventSerieNotFoundError,
   organizationCollaboratorRoleRequiredError,
+  sacemAgencyNotFoundError,
+  sacemDeclarationUnsuccessfulError,
   transmittedDeclarationCannotBeUpdatedError,
 } from '@ad/src/models/entities/errors';
 import { EventWrapperSchemaType } from '@ad/src/models/entities/event';
@@ -38,10 +45,11 @@ import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/or
 import { privateProcedure, router } from '@ad/src/server/trpc';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { getDiff, sortDiffWithKeys } from '@ad/src/utils/comparaison';
+import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export const declarationRouter = router({
   transmitDeclaration: privateProcedure.input(TransmitDeclarationSchema).mutation(async ({ ctx, input }) => {
-    if (!['SACD'].includes(input.type)) {
+    if (!['SACEM', 'SACD'].includes(input.type)) {
       throw new Error(`cannot transmit declaration of this type`);
     }
 
@@ -73,7 +81,31 @@ export const declarationRouter = router({
           select: {
             id: true,
             transmittedAt: true,
+            EventSerieSacemDeclaration: {
+              // Cannot use `input.type === DeclarationTypeSchema.Values.SACEM` otherwise result type is incomplete
+              select: {
+                id: true,
+                clientId: true,
+                placeName: true,
+                placeCapacity: true,
+                placePostalCode: true,
+                managerName: true,
+                managerTitle: true,
+                performanceType: true,
+                declarationPlace: true,
+                SacemDeclarationAccountingEntry: {
+                  select: {
+                    flux: true,
+                    category: true,
+                    categoryPrecision: true,
+                    taxRate: true,
+                    amount: true,
+                  },
+                },
+              },
+            },
             EventSerieSacdDeclaration: {
+              // Cannot use `input.type === DeclarationTypeSchema.Values.SACD` otherwise result type is incomplete
               select: {
                 id: true,
                 clientId: true,
@@ -146,6 +178,12 @@ export const declarationRouter = router({
       throw organizationCollaboratorRoleRequiredError;
     }
 
+    const originatorUser = await prisma.user.findUniqueOrThrow({
+      where: {
+        id: ctx.user.id,
+      },
+    });
+
     const eventSerieModel = eventSeriePrismaToModel(eventSerie);
     const wrappersModel = eventSerie.Event.map((event): EventWrapperSchemaType => {
       return {
@@ -163,18 +201,83 @@ export const declarationRouter = router({
 
     try {
       switch (input.type) {
-        case 'SACD':
-          const declaration = eventSerie.EventSerieDeclaration.find((eSD) => eSD.EventSerieSacdDeclaration !== null);
+        case 'SACEM':
+          const sacemDeclaration = eventSerie.EventSerieDeclaration.find((eSD) => eSD.EventSerieSacemDeclaration !== null);
 
-          if (!declaration) {
+          if (!sacemDeclaration) {
+            throw new Error(`no sacem declaration exists for this event serie`);
+          }
+
+          declarationId = sacemDeclaration.id;
+
+          const sacemDeclarationModel = sacemDeclarationPrismaToModel(eventSerie, {
+            ...sacemDeclaration.EventSerieSacemDeclaration!,
+            transmittedAt: sacemDeclaration.transmittedAt,
+          });
+
+          const eventPlacePostalCode: string = sacemDeclarationModel.placePostalCode;
+
+          const sacemAgency = await prisma.sacemAgency.findFirst({
+            where: {
+              matchingFrenchPostalCodes: {
+                has: eventPlacePostalCode,
+              },
+            },
+            select: {
+              email: true,
+            },
+          });
+
+          if (!sacemAgency) {
+            throw sacemAgencyNotFoundError;
+          }
+
+          // We generate a PDF so the SACEM can deal with it easily (instead of setting the whole into the email text)
+          const jsxDocument = SacemDeclarationDocument({
+            sacemDeclaration: sacemDeclarationModel,
+            signatory: `${originatorUser.firstname} ${originatorUser.lastname}`,
+          });
+
+          const declarationPdfBuffer = await renderToBuffer(jsxDocument);
+
+          const declarationAttachment: EmailAttachment = {
+            contentType: 'application/pdf',
+            filename: `Déclaration SACEM - ${slugify(eventSerie.name)}.pdf`,
+            content: declarationPdfBuffer,
+            inline: false, // It will be attached, not specifically set somewhere in the content
+          };
+
+          try {
+            await mailer.sendDeclarationToSacemAgency({
+              recipient: sacemAgency.email,
+              replyTo: originatorUser.email, // We give the SACEM the possibility to directly converse with the declarer
+              eventSerieName: eventSerieModel.name,
+              originatorFirstname: originatorUser.firstname,
+              originatorLastname: originatorUser.lastname,
+              originatorEmail: originatorUser.email,
+              organizationName: eventSerie.ticketingSystem.organization.name,
+              aboutUrl: linkRegistry.get('about', undefined, { absolute: true }),
+              attachments: [declarationAttachment],
+            });
+          } catch (error) {
+            console.error(error);
+
+            throw sacemDeclarationUnsuccessfulError;
+          }
+
+          break;
+        case 'SACD':
+          const sacdDeclaration = eventSerie.EventSerieDeclaration.find((eSD) => eSD.EventSerieSacdDeclaration !== null);
+
+          if (!sacdDeclaration) {
             throw new Error(`no sacd declaration exists for this event serie`);
           }
 
-          declarationId = declaration.id;
+          declarationId = sacdDeclaration.id;
 
-          const declarationModel = sacdDeclarationPrismaToModel(eventSerie, {
-            ...declaration.EventSerieSacdDeclaration!,
-            transmittedAt: declaration.transmittedAt,
+          const sacdDeclarationModel = sacdDeclarationPrismaToModel(eventSerie, {
+            ...sacdDeclaration.EventSerieSacdDeclaration!,
+            transmittedAt: sacdDeclaration.transmittedAt,
           });
 
           const sacdClient = getSacdClient(ctx.user.id);
@@ -182,25 +285,27 @@ export const declarationRouter = router({
           // Since not tracking token expiration we log in again (but we could improve that)
           await sacdClient.login();
 
-          await sacdClient.declare(declarationModel.clientId, eventSerieModel, wrappersModel, declarationModel);
-
-          // If successful mark the declaration as transmitted
-          await prisma.eventSerieDeclaration.update({
-            where: {
-              id: declaration.id,
-            },
-            data: {
-              status: EventSerieDeclarationStatus.PROCESSED,
-              transmittedAt: new Date(),
-              lastTransmissionError: null,
-              lastTransmissionErrorAt: null,
-            },
-          });
+          await sacdClient.declare(sacdDeclarationModel.clientId, eventSerieModel, wrappersModel, sacdDeclarationModel);
 
           break;
         default:
           throw new Error('declaration type to transmit not supported');
       }
+
+      assert(declarationId);
+
+      // If successful mark the declaration as transmitted
+      await prisma.eventSerieDeclaration.update({
+        where: {
+          id: declarationId,
+        },
+        data: {
+          status: EventSerieDeclarationStatus.PROCESSED,
+          transmittedAt: new Date(),
+          lastTransmissionError: null,
+          lastTransmissionErrorAt: null,
+        },
+      });
     } catch (error) {
       if (error instanceof Error) {
         if (declarationId) {
@@ -246,12 +351,14 @@ export const declarationRouter = router({
         EventSerieDeclaration: {
           select: {
             id: true,
+            transmittedAt: true,
             EventSerieSacemDeclaration: {
               select: {
                 id: true,
                 clientId: true,
                 placeName: true,
                 placeCapacity: true,
+                placePostalCode: true,
                 managerName: true,
                 managerTitle: true,
                 performanceType: true,
@@ -313,6 +420,7 @@ export const declarationRouter = router({
         clientId: true,
         placeName: true,
         placeCapacity: true,
+        placePostalCode: true,
         managerName: true,
         managerTitle: true,
         performanceType: true,
@@ -327,7 +435,7 @@ export const declarationRouter = router({
           },
         },
       },
-      distinct: ['clientId', 'placeName', 'placeCapacity', 'managerName', 'managerTitle', 'performanceType', 'declarationPlace'], // At least the distinct may remove duplicates for the whole chain
+      distinct: ['clientId', 'placeName', 'placeCapacity', 'placePostalCode', 'managerName', 'managerTitle', 'performanceType', 'declarationPlace'], // At least the distinct may remove duplicates for the whole chain
       // Get only a few of the last declarations since it should representative
       orderBy: {
         updatedAt: 'desc',
@@ -342,6 +450,7 @@ export const declarationRouter = router({
       clientId: [],
       placeName: [],
       placeCapacity: [],
+      placePostalCode: [],
       managerName: [],
       managerTitle: [],
       performanceType: [],
@@ -371,6 +480,8 @@ export const declarationRouter = router({
       if (!placeholder.clientId.includes(previousDeclaration.clientId)) placeholder.clientId.push(previousDeclaration.clientId);
       if (!placeholder.placeName.includes(previousDeclaration.placeName)) placeholder.placeName.push(previousDeclaration.placeName);
       if (!placeholder.placeCapacity.includes(previousDeclaration.placeCapacity)) placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
+      if (!placeholder.placePostalCode.includes(previousDeclaration.placePostalCode))
+        placeholder.placePostalCode.push(previousDeclaration.placePostalCode);
       if (!placeholder.managerName.includes(previousDeclaration.managerName)) placeholder.managerName.push(previousDeclaration.managerName);
       if (!placeholder.managerTitle.includes(previousDeclaration.managerTitle)) placeholder.managerTitle.push(previousDeclaration.managerTitle);
       if (!placeholder.performanceType.includes(previousDeclaration.performanceType))
@@ -436,7 +547,12 @@ export const declarationRouter = router({
     // Note: the generated properties calculation is done 2 times but we are fine with that for now
     return {
       sacemDeclarationWrapper: {
-        declaration: existingDeclaration ? sacemDeclarationPrismaToModel(eventSerie, existingDeclaration.EventSerieSacemDeclaration!) : null,
+        declaration: existingDeclaration
+          ? sacemDeclarationPrismaToModel(eventSerie, {
+              ...existingDeclaration.EventSerieSacemDeclaration!,
+              transmittedAt: existingDeclaration.transmittedAt,
+            })
+          : null,
         placeholder: placeholder,
       } satisfies SacemDeclarationWrapperSchemaType,
     };
@@ -456,6 +572,7 @@ export const declarationRouter = router({
         EventSerieDeclaration: {
           select: {
             id: true,
+            transmittedAt: true,
             EventSerieSacemDeclaration: {
               select: {
                 id: true,
@@ -524,6 +641,10 @@ export const declarationRouter = router({
     let sacemDeclaration;
 
     if (existingDeclaration) {
+      if (existingDeclaration.transmittedAt) {
+        throw transmittedDeclarationCannotBeUpdatedError;
+      }
+
       assert(existingDeclaration.EventSerieSacemDeclaration);
 
       const sacemDeclarationId = existingDeclaration.EventSerieSacemDeclaration.id;
@@ -553,6 +674,7 @@ export const declarationRouter = router({
           clientId: input.clientId,
           placeName: input.placeName,
           placeCapacity: input.placeCapacity,
+          placePostalCode: input.placePostalCode,
           managerName: input.managerName,
           managerTitle: input.managerTitle,
           performanceType: input.performanceType,
@@ -596,6 +718,7 @@ export const declarationRouter = router({
           clientId: true,
           placeName: true,
           placeCapacity: true,
+          placePostalCode: true,
           managerName: true,
           managerTitle: true,
           performanceType: true,
@@ -603,6 +726,7 @@ export const declarationRouter = router({
           eventSerieDeclaration: {
             select: {
               id: true,
+              transmittedAt: true,
               eventSerie: {
                 select: {
                   id: true,
@@ -656,6 +780,7 @@ export const declarationRouter = router({
           clientId: input.clientId,
           placeName: input.placeName,
           placeCapacity: input.placeCapacity,
+          placePostalCode: input.placePostalCode,
           managerName: input.managerName,
           managerTitle: input.managerTitle,
           performanceType: input.performanceType,
@@ -686,6 +811,7 @@ export const declarationRouter = router({
           clientId: true,
           placeName: true,
           placeCapacity: true,
+          placePostalCode: true,
           managerName: true,
           managerTitle: true,
           performanceType: true,
@@ -693,6 +819,7 @@ export const declarationRouter = router({
           eventSerieDeclaration: {
             select: {
               id: true,
+              transmittedAt: true,
               eventSerie: {
                 select: {
                   id: true,
@@ -743,7 +870,10 @@ export const declarationRouter = router({
     }
 
     return {
-      sacemDeclaration: sacemDeclarationPrismaToModel(sacemDeclaration.eventSerieDeclaration.eventSerie, sacemDeclaration),
+      sacemDeclaration: sacemDeclarationPrismaToModel(sacemDeclaration.eventSerieDeclaration.eventSerie, {
+        ...sacemDeclaration,
+        transmittedAt: sacemDeclaration.eventSerieDeclaration.transmittedAt,
+      }),
     };
   }),
   getSacdDeclaration: privateProcedure.input(GetSacdDeclarationSchema).query(async ({ ctx, input }) => {
@@ -1261,6 +1391,8 @@ export const declarationRouter = router({
               status: EventSerieDeclarationStatus.PENDING,
               eventSerieId: eventSerie.id,
               transmittedAt: null,
+              lastTransmissionError: null,
+              lastTransmissionErrorAt: null,
             },
           },
           SacdDeclarationAccountingEntry: {

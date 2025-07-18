@@ -71,8 +71,12 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
           <Text>{props.sacemDeclaration.clientId}</Text>
         </View>
         <View style={styles.gridItem}>
-          <Text style={styles.label}>Nom de la salle</Text>
+          <Text style={styles.label}>Intitulé du lieu de représentation</Text>
           <Text>{props.sacemDeclaration.placeName}</Text>
+        </View>
+        <View style={styles.gridItem}>
+          <Text style={styles.label}>Code postal du lieu de représentation</Text>
+          <Text>{props.sacemDeclaration.placePostalCode}</Text>
         </View>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Jauge</Text>

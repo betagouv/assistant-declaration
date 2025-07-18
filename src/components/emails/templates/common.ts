@@ -5,4 +5,5 @@ export const titles = {
   SignUpConfirmationEmail: `Inscription en attente de confirmation`,
   UserDeletedEmail: `Compte désactivé`,
   WelcomeOrganizationCollaboratorEmail: `Bienvenue !`,
+  DeclarationToSacemAgencyEmail: `Nouvelle déclaration SACEM`,
 };

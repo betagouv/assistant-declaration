@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { AddressSchema } from '@ad/src/models/entities/address';
+import { DeclarationSchema } from '@ad/src/models/entities/declaration';
 import { duplicateFluxEntryCategoryLabelError } from '@ad/src/models/entities/errors';
 import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 import { EventSerieSchema } from '@ad/src/models/entities/event';
@@ -99,6 +101,7 @@ export const SacemDeclarationSchema = applyTypedParsers(
       clientId: z.string().min(1).max(100),
       placeName: z.string().min(1).max(150),
       placeCapacity: z.number().int().nonnegative(),
+      placePostalCode: AddressSchema.shape.postalCode,
       managerName: z.string().min(1).max(150),
       managerTitle: z.string().min(1).max(150),
       performanceType: z.string().min(1).max(250),
@@ -113,6 +116,7 @@ export const SacemDeclarationSchema = applyTypedParsers(
       eventsCount: z.number().int().nonnegative(),
       paidTickets: z.number().int().nonnegative(),
       freeTickets: z.number().int().nonnegative(),
+      transmittedAt: DeclarationSchema.shape.transmittedAt,
     })
     .strict()
 );
@@ -147,6 +151,7 @@ export const SacemDeclarationWrapperSchema = applyTypedParsers(
         clientId: z.array(SacemDeclarationSchema.shape.clientId),
         placeName: z.array(SacemDeclarationSchema.shape.placeName),
         placeCapacity: z.array(SacemDeclarationSchema.shape.placeCapacity),
+        placePostalCode: z.array(SacemDeclarationSchema.shape.placePostalCode),
         managerName: z.array(SacemDeclarationSchema.shape.managerName),
         managerTitle: z.array(SacemDeclarationSchema.shape.managerTitle),
         performanceType: z.array(SacemDeclarationSchema.shape.performanceType),

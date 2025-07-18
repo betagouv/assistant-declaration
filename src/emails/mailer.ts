@@ -4,6 +4,7 @@ import nodemailer, { Transporter } from 'nodemailer';
 import type { Options as MailOptions } from 'nodemailer/lib/mailer/index';
 import { Readable } from 'stream';
 
+import { DeclarationToSacemAgencyEmail, DeclarationToSacemAgencyEmailProps } from '@ad/src/components/emails/templates/DeclarationToSacemAgency';
 import { NewPasswordRequestEmail, NewPasswordRequestEmailProps } from '@ad/src/components/emails/templates/NewPasswordRequest';
 import { PasswordChangedEmail, PasswordChangedEmailProps } from '@ad/src/components/emails/templates/PasswordChanged';
 import { PasswordResetEmail, PasswordResetEmailProps } from '@ad/src/components/emails/templates/PasswordReset';
@@ -40,6 +41,7 @@ export interface Attachment {
 
 export interface SendOptions {
   sender?: string;
+  replyTo?: string;
   recipients: string[];
   subject: string;
   emailComponent: React.JSX.Element;
@@ -121,6 +123,7 @@ export class Mailer {
 
     const parameters: MailOptions = {
       from: options.sender || this.defaultSender,
+      replyTo: options.replyTo ?? undefined, // Will fallback to the `from` if undefined
       to: options.recipients.join(','),
       subject: options.subject,
       html: rawHtmlVersion,
@@ -193,6 +196,16 @@ export class Mailer {
       recipients: [parameters.recipient],
       subject: titles.WelcomeOrganizationCollaboratorEmail,
       emailComponent: WelcomeOrganizationCollaboratorEmail(parameters),
+    });
+  }
+
+  public async sendDeclarationToSacemAgency(parameters: DeclarationToSacemAgencyEmailProps & { recipient: string; replyTo: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      replyTo: parameters.replyTo,
+      subject: titles.DeclarationToSacemAgencyEmail,
+      emailComponent: DeclarationToSacemAgencyEmail(parameters),
+      attachments: parameters.attachments,
     });
   }
 }

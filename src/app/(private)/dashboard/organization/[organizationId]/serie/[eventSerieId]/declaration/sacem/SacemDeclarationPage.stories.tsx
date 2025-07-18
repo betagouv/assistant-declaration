@@ -8,6 +8,7 @@ import { SacemDeclarationPageContext } from '@ad/src/app/(private)/dashboard/org
 import { Normal as DeclarationHeaderNormalStory } from '@ad/src/components/DeclarationHeader.stories';
 import { sacemDeclarations, sacemDeclarationsWrappers } from '@ad/src/fixtures/declaration/sacem';
 import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
+import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
 type ComponentType = typeof SacemDeclarationPage;
@@ -21,30 +22,52 @@ export default {
   }),
 } as Meta<ComponentType>;
 
-const mswCommonParameters = [
-  getTRPCMock({
-    type: 'query',
-    path: ['getEventSerie'],
-    response: {
-      eventSerie: eventsSeries[0],
-      partialDeclarations: [],
-    },
-  }),
-  getTRPCMock({
-    type: 'query',
-    path: ['getSacemDeclaration'],
-    response: {
-      sacemDeclarationWrapper: sacemDeclarationsWrappers[0],
-    },
-  }),
-  getTRPCMock({
-    type: 'mutation',
-    path: ['fillSacemDeclaration'],
-    response: {
-      sacemDeclaration: sacemDeclarations[0],
-    },
-  }),
-];
+function mswCommonParameters(options: { transmitted: boolean; noEvent: boolean }) {
+  const adjustedSacemDeclaration = {
+    ...sacemDeclarations[0],
+    transmittedAt: options.transmitted ? new Date('December 31, 2024 10:00:00 UTC') : null,
+  };
+
+  return [
+    getTRPCMock({
+      type: 'query',
+      path: ['getEventSerie'],
+      response: {
+        eventSerie: eventsSeries[0],
+        partialDeclarations: options.transmitted
+          ? [
+              {
+                type: DeclarationTypeSchema.Values.SACEM,
+                status: DeclarationStatusSchema.Values.PROCESSED,
+                transmittedAt: new Date('December 31, 2024 10:00:00 UTC'),
+              },
+            ]
+          : [],
+      },
+    }),
+    getTRPCMock({
+      type: 'query',
+      path: ['getSacemDeclaration'],
+      response: {
+        sacemDeclarationWrapper: { ...sacemDeclarationsWrappers[0], declaration: adjustedSacemDeclaration },
+      },
+    }),
+    getTRPCMock({
+      type: 'mutation',
+      path: ['fillSacemDeclaration'],
+      response: {
+        sacemDeclaration: adjustedSacemDeclaration,
+      },
+    }),
+    getTRPCMock({
+      type: 'query' as 'query',
+      path: ['listEvents'],
+      response: {
+        eventsWrappers: options.noEvent ? [] : [eventsWrappers[0], eventsWrappers[1], eventsWrappers[2]],
+      },
+    }),
+  ];
+}
 
 const commonComponentProps: ComponentProps<ComponentType> = {
   params: {
@@ -63,16 +86,7 @@ NormalStory.args = {
 };
 NormalStory.parameters = {
   msw: {
-    handlers: [
-      ...mswCommonParameters,
-      getTRPCMock({
-        type: 'query' as 'query',
-        path: ['listEvents'],
-        response: {
-          eventsWrappers: [eventsWrappers[0], eventsWrappers[1], eventsWrappers[2]],
-        },
-      }),
-    ],
+    handlers: [...mswCommonParameters({ transmitted: false, noEvent: false })],
   },
 };
 NormalStory.play = async ({ canvasElement }) => {
@@ -88,22 +102,35 @@ export const Normal = prepareStory(NormalStory, {
   },
 });
 
+const TransmittedStory = Template.bind({});
+TransmittedStory.args = {
+  ...NormalStory.args,
+};
+TransmittedStory.parameters = {
+  msw: {
+    handlers: [...mswCommonParameters({ transmitted: true, noEvent: false })],
+  },
+};
+TransmittedStory.play = async ({ canvasElement }) => {
+  await playFindMainTitle(canvasElement, /cracheur/i);
+};
+
+export const Transmitted = prepareStory(TransmittedStory, {
+  childrenContext: {
+    context: SacemDeclarationPageContext,
+    value: {
+      ContextualDeclarationHeader: DeclarationHeaderNormalStory,
+    },
+  },
+});
+
 const NotFoundStory = Template.bind({});
 NotFoundStory.args = {
   ...commonComponentProps,
 };
 NotFoundStory.parameters = {
   msw: {
-    handlers: [
-      ...mswCommonParameters,
-      getTRPCMock({
-        type: 'query' as 'query',
-        path: ['listEvents'],
-        response: {
-          eventsWrappers: [],
-        },
-      }),
-    ],
+    handlers: [...mswCommonParameters({ transmitted: false, noEvent: true })],
   },
 };
 NotFoundStory.play = async ({ canvasElement }) => {
