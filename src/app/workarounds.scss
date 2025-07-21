@@ -41,3 +41,9 @@ a.MuiMenuItem-root {
     }
   }
 }
+
+.MuiRadio-root.Mui-disabled {
+  // For whatever reason the button is twice bigger when disabled
+  // (we tried finding the issue but did not)
+  transform: scale(0.5);
+}

@@ -5,17 +5,13 @@ import { useIsDark } from '@codegouvfr/react-dsfr/useIsDark';
 import { Grid, Link, Typography } from '@mui/material';
 import Image from 'next/image';
 import NextLink from 'next/link';
-import { createContext, useContext } from 'react';
+import { useContext } from 'react';
 
-import { SignInForm } from '@ad/src/app/(visitor-only)/auth/sign-in/SignInForm';
+import { SignInPageContext } from '@ad/src/app/(visitor-only)/auth/sign-in/SignInPageContext';
 import assistant from '@ad/src/assets/images/sign-in/assistant.svg';
 import { formTitleProps } from '@ad/src/utils/form';
 import { centeredFormContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
-
-export const SignInPageContext = createContext({
-  ContextualSignInForm: SignInForm,
-});
 
 export function SignInPage() {
   const { ContextualSignInForm } = useContext(SignInPageContext);

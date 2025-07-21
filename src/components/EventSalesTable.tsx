@@ -24,12 +24,11 @@ const ticketCategoryTypedNameof = nameof<TicketCategorySchemaType>;
 export interface EventSalesTableProps {
   wrapper: EventWrapperSchemaType;
   onRowUpdate: (updatedRow: SalesWrapperSchemaType) => Promise<void>;
+  readonly?: boolean;
 }
 
-export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) {
+export function EventSalesTable({ wrapper, onRowUpdate, readonly }: EventSalesTableProps) {
   const { t } = useTranslation('common');
-
-  const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   const apiRef = useGridApiRef();
 
@@ -228,6 +227,16 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
     [apiRef]
   );
 
+  useEffect(() => {
+    if (apiRef.current) {
+      apiRef.current.setColumnVisibilityModel({
+        actions: !readonly,
+      });
+
+      apiRef.current.autosizeColumns(autosizeOption);
+    }
+  }, [readonly, apiRef, autosizeOption]);
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
@@ -241,7 +250,15 @@ export function EventSalesTable({ wrapper, onRowUpdate }: EventSalesTableProps) 
           disableColumnFilter
           disableColumnMenu
           disableRowSelectionOnClick
+          initialState={{
+            columns: {
+              columnVisibilityModel: {
+                actions: !readonly,
+              },
+            },
+          }}
           editMode="row"
+          isCellEditable={readonly ? () => false : (params) => true}
           processRowUpdate={processRowUpdate}
           onProcessRowUpdateError={handleProcessRowUpdateError}
           onCellEditStart={(params, event) => {

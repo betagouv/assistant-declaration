@@ -1,9 +1,12 @@
 import { Meta, StoryFn } from '@storybook/react';
 
-import { commonEmailsParameters, withEmailClientOverviewFactory, withEmailRenderer } from '@ad/.storybook/email';
+import { WithEmailClientOverviewFactory } from '@ad/.storybook/WithEmailClientOverviewFactory';
+import { WithEmailRenderer } from '@ad/.storybook/WithEmailRenderer';
+import { commonEmailsParameters } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
-import { PasswordResetEmail, formatTitle } from '@ad/src/components/emails/templates/PasswordReset';
+import { PasswordResetEmail } from '@ad/src/components/emails/templates/PasswordReset';
+import { titles } from '@ad/src/components/emails/templates/common';
 
 type ComponentType = typeof PasswordResetEmail;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -32,7 +35,7 @@ NormalStory.args = {
   firstname: 'Thomas',
   signInUrl: '',
 };
-NormalStory.decorators = [withEmailRenderer];
+NormalStory.decorators = [WithEmailRenderer];
 NormalStory.play = async ({ canvasElement }) => {
   await playFindEmailStructure(canvasElement);
 };
@@ -43,7 +46,7 @@ const ClientOverviewStory = Template.bind({});
 ClientOverviewStory.args = {
   ...NormalStory.args,
 };
-ClientOverviewStory.decorators = [withEmailRenderer, withEmailClientOverviewFactory(formatTitle())];
+ClientOverviewStory.decorators = [WithEmailRenderer, WithEmailClientOverviewFactory(titles.PasswordResetEmail)];
 ClientOverviewStory.play = async ({ canvasElement }) => {
   await playFindEmailStructure(canvasElement);
 };

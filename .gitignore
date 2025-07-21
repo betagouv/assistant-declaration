@@ -34,13 +34,14 @@ yarn-debug.log*
 yarn-error.log*
 
 # data
+/data/
 /public/assets/fonts/
 
 # local env files
 .env.local
-.env.development.local
+.env.dev.local
 .env.test.local
-.env.production.local
+.env.prod.local
 .env.jest.local
 
 # legal documents to transform to HTML (with `format-legal-documents.sh`)

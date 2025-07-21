@@ -3,10 +3,8 @@ import { Meta, StoryFn } from '@storybook/react';
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindMainTitle } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
-import {
-  AstpDeclarationPage,
-  AstpDeclarationPageContext,
-} from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/astp/AstpDeclarationPage';
+import { AstpDeclarationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/astp/AstpDeclarationPage';
+import { AstpDeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/astp/AstpDeclarationPageContext';
 import { Normal as DeclarationHeaderNormalStory } from '@ad/src/components/DeclarationHeader.stories';
 import { eventCategoryTickets, eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
@@ -28,6 +26,7 @@ const mswCommonParameters = [
     path: ['getEventSerie'],
     response: {
       eventSerie: eventsSeries[0],
+      partialDeclarations: [],
     },
   }),
   getTRPCMock({

@@ -3,7 +3,8 @@ import { within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { Empty as UpdateTicketingSystemFormEmptyStory } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-systems/UpdateTicketingSystemForm.stories';
-import { TicketingSystemCard, TicketingSystemCardContext } from '@ad/src/components/TicketingSystemCard';
+import { TicketingSystemCard } from '@ad/src/components/TicketingSystemCard';
+import { TicketingSystemCardContext } from '@ad/src/components/TicketingSystemCardContext';
 import { ticketingSystems } from '@ad/src/fixtures/ticketing';
 
 type ComponentType = typeof TicketingSystemCard;

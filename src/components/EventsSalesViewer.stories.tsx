@@ -5,7 +5,8 @@ import { screen, userEvent, within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { Normal as EventsSalesOverviewNormalStory } from '@ad/src/components/EventsSalesOverview.stories';
-import { EventsSalesViewer, EventsSalesViewerContext } from '@ad/src/components/EventsSalesViewer';
+import { EventsSalesViewer } from '@ad/src/components/EventsSalesViewer';
+import { EventsSalesViewerContext } from '@ad/src/components/EventsSalesViewerContext';
 import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 

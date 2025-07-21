@@ -30,9 +30,10 @@ export interface SacemExpensesTableProps {
   control: Control<FillSacemDeclarationSchemaType, any>;
   trigger: UseFormTrigger<FillSacemDeclarationSchemaType>;
   errors: FieldErrors<FillSacemDeclarationSchemaType>['expenses'];
+  readonly?: boolean;
 }
 
-export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTableProps) {
+export function SacemExpensesTable({ control, trigger, errors, readonly }: SacemExpensesTableProps) {
   const { t } = useTranslation('common');
 
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
@@ -266,55 +267,78 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
     autosizeOption,
   ]);
 
+  useEffect(() => {
+    if (apiRef.current) {
+      apiRef.current.setColumnVisibilityModel({
+        actions: !readonly,
+      });
+
+      apiRef.current.autosizeColumns(autosizeOption);
+    }
+  }, [readonly, apiRef, autosizeOption]);
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <FormControl
-        sx={{
-          flexDirection: 'row',
-          justifyContent: 'end',
-          alignItems: 'center',
-          // There is no way to modify easily all children font size and radio buttons size so just hacking a bit with scaling the whole
-          transform: 'scale(0.8)',
-          transformOrigin: 'center right',
-        }}
-      >
-        <FormLabel
-          id="editable-amount-group-label"
+      {!readonly && (
+        <FormControl
           sx={{
-            mr: 2,
+            flexDirection: 'row',
+            justifyContent: 'end',
+            alignItems: 'center',
+            // There is no way to modify easily all children font size and radio buttons size so just hacking a bit with scaling the whole
+            transform: 'scale(0.8)',
+            transformOrigin: 'center right',
           }}
         >
-          Montants modifiables :
-        </FormLabel>
-        <RadioGroup
-          row
-          value={editableAmount}
-          onChange={(event) => {
-            setEditableAmount(event.target.value as EditableAmountSwitch);
-          }}
-          aria-labelledby="editable-amount-group-label"
-        >
-          <FormControlLabel value="excludingTaxes" control={<Radio />} label="HT" />
-          <FormControlLabel value="includingTaxes" control={<Radio />} label="TTC" />
-        </RadioGroup>
-      </FormControl>
+          <FormLabel
+            id="editable-amount-group-label"
+            sx={{
+              mr: 2,
+            }}
+          >
+            Montants modifiables :
+          </FormLabel>
+          <RadioGroup
+            row
+            value={editableAmount}
+            onChange={(event) => {
+              setEditableAmount(event.target.value as EditableAmountSwitch);
+            }}
+            aria-labelledby="editable-amount-group-label"
+          >
+            <FormControlLabel value="excludingTaxes" control={<Radio />} label="HT" />
+            <FormControlLabel value="includingTaxes" control={<Radio />} label="TTC" />
+          </RadioGroup>
+        </FormControl>
+      )}
       <DataGrid
         apiRef={apiRef}
         rows={rowsWithErrorLogic}
         getRowId={(row) => `${row.data.category}_${row.data.categoryPrecision || ''}`}
         columns={columns}
-        editMode="row"
-        isCellEditable={(params) => {
-          if (
-            params.field === `${rowTypedNameof('data')}.${entryTypedNameof('category')}` &&
-            params.row.data.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS
-          ) {
-            // If not a custom expense the category field cannot be edited
-            return false;
-          }
-
-          return true;
+        initialState={{
+          columns: {
+            columnVisibilityModel: {
+              actions: !readonly,
+            },
+          },
         }}
+        editMode="row"
+        isCellEditable={
+          readonly
+            ? () => false
+            : (params) => {
+                if (
+                  params.field === `${rowTypedNameof('data')}.${entryTypedNameof('category')}` &&
+                  params.row.data.category !== AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS
+                ) {
+                  // If not a custom expense the category field cannot be edited
+                  return false;
+                }
+
+                return true;
+              }
+        }
         processRowUpdate={(newRow, oldRow, params) => {
           // If the category has been changed we need to make sure it does not exist already to keep the uniqueness of fields
           if (
@@ -403,44 +427,46 @@ export function SacemExpensesTable({ control, trigger, errors }: SacemExpensesTa
           {errors.message}
         </Typography>
       )}
-      <Button
-        onClick={async () => {
-          // Each row must have a unique key for DataGrid (implicitly a unique category precision for "other expenses")
-          let categoryPrecision = `${t(`model.sacemDeclaration.accountingCategory.enum.OTHER_ARTISTIC_CONTRACTS`)} ${
-            fields.filter((row) => {
-              return row.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS;
-            }).length + 1
-          }`;
+      {!readonly && (
+        <Button
+          onClick={async () => {
+            // Each row must have a unique key for DataGrid (implicitly a unique category precision for "other expenses")
+            let categoryPrecision = `${t(`model.sacemDeclaration.accountingCategory.enum.OTHER_ARTISTIC_CONTRACTS`)} ${
+              fields.filter((row) => {
+                return row.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS;
+              }).length + 1
+            }`;
 
-          while (true) {
-            const anotherRowWithThisLabel = fields.find((item) => {
-              return item.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS && item.categoryPrecision === categoryPrecision;
-            });
+            while (true) {
+              const anotherRowWithThisLabel = fields.find((item) => {
+                return item.category === AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS && item.categoryPrecision === categoryPrecision;
+              });
 
-            if (anotherRowWithThisLabel) {
-              // Renaming since that's the easiest solution here...
-              categoryPrecision = `${categoryPrecision} bis`;
-            } else {
-              break;
+              if (anotherRowWithThisLabel) {
+                // Renaming since that's the easiest solution here...
+                categoryPrecision = `${categoryPrecision} bis`;
+              } else {
+                break;
+              }
             }
-          }
 
-          append({
-            category: AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS,
-            categoryPrecision: categoryPrecision,
-            taxRate: 0.2,
-            includingTaxesAmount: 0,
-          });
-        }}
-        size="medium"
-        variant="outlined"
-        sx={{
-          alignSelf: 'self-end',
-          mt: 1,
-        }}
-      >
-        Ajouter une autre dépense
-      </Button>
+            append({
+              category: AccountingCategorySchema.Values.OTHER_ARTISTIC_CONTRACTS,
+              categoryPrecision: categoryPrecision,
+              taxRate: 0.2,
+              includingTaxesAmount: 0,
+            });
+          }}
+          size="medium"
+          variant="outlined"
+          sx={{
+            alignSelf: 'self-end',
+            mt: 1,
+          }}
+        >
+          Ajouter une autre dépense
+        </Button>
+      )}
     </Box>
   );
 }

@@ -49,10 +49,26 @@ docker-compose down
 Now the database schema and client need to be initialized:
 `npm run db:migration:deploy && npm run db:schema:compile`
 
-Note since the application has a logic of jobs to be run regularly to fetch, analyze, and compute data. Those are not available in the UI, but you can trigger them through our custom CLI by running:
+She application has extra logic not accessible through the UI, we may have to use the CLI to perform some actions:
 `npm run cli`
 
 That's it! But still, we advise you to read the documentation below to better understand how the project is structured.
+
+### Requirements for SACEM declaration
+
+For the SACEM we have to target the right agency to transmit the declaration. There is a huge matching between postal codes and their bound agency.
+
+This document is considered private for now so we cannot script the whole process. Here the manual steps:
+
+1. Get from the SACEM the mapping file (should contain columns `LOCAL`, `CP`, `Mail`)
+2. Since they usually give a XLSX, just save it as CSV with comma as delimiter (can be done with LibreOffice)
+3. Move the file under `./data/sacem-agencies.csv`
+4. Synchronize data into the database depending on the environment:
+   - If `local` you can simply run: `npm run cli sacem agency async`
+   - If `development` or `production`, first export the database environment variable `DATABASE_URL` and then run: `npm run cli:unsecure sacem agency async`
+5. Check within the database the table has been filled correctly
+
+The synchronization is working making a difference of both states, so if SACEM is updating its file, juste update the CSV and rerun the synchronization. It will work properly.
 
 ## Technical setup
 
@@ -184,7 +200,7 @@ For each build and runtime (since they are shared), you should have set some env
 - `NEXT_PUBLIC_CRISP_WEBSITE_ID`: [TO_DEFINE] _(this ID is defined in your Crisp account and depends on the development or production environment)_
 - `NEXT_PUBLIC_SENTRY_DSN`: [SECRET] _(format `https://xxx.yyy.zzz/nn`)_
 - `MAILER_DEFAULT_DOMAIN`: [TO_DEFINE] _(format `xxx.yyy.zzz` depending on the environment application URL)_
-- `MAILER_DOMAINS_TO_CATCH`: `domain.demo` _(this should only be set in the development environment)_
+- `MAILER_DOMAINS_TO_CATCH`: `domain.demo,sacem.fr` _(this should only be set in the development environment, comma separated domains)_
 - `MAILER_SMTP_HOST`: [SECRET]
 - `MAILER_SMTP_PORT`: [SECRET]
 - `MAILER_SMTP_USER`: [SECRET]
@@ -193,6 +209,12 @@ For each build and runtime (since they are shared), you should have set some env
 - `MAILER_FALLBACK_SMTP_PORT`: [SECRET]
 - `MAILER_FALLBACK_SMTP_USER`: [SECRET]
 - `MAILER_FALLBACK_SMTP_PASSWORD`: [SECRET]
+- `SACD_API_BASE_URL`: [SECRET]
+- `SACD_API_CONSUMER_KEY`: [SECRET]
+- `SACD_API_SECRET_KEY`: [SECRET]
+- `SACD_API_PROVIDER_NAME`: [SECRET]
+- `SACD_API_PROVIDER_REFFILE`: [SECRET]
+- `SACD_API_PROVIDER_PASSWORD`: [SECRET]
 - `DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS`: [TO_DEFINE] _(environments that are not production will by default mock remote ticketing system calls. For testing purpose you can provide a comma separated UUID list of users who need to perform real tests)_
 
 #### Review apps

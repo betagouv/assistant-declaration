@@ -5,6 +5,7 @@
 /.storybook/coverage/
 /.vscode/i18n-ally-reviews.yml
 /build/
+/data/
 /dist/
 /storybook-static/
 /public/mockServiceWorker.js
@@ -15,5 +16,7 @@
 /src/server/trpc-next-layout/**/*.tsx
 /src/**/*.docx
 /src/**/*.transformed.html
+/src/**/*.svg
 /package-lock.json
+/services_diagram.drawio.svg
 /tsconfig.json

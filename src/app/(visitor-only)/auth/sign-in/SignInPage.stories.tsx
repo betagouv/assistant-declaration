@@ -4,7 +4,8 @@ import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindForm, playFindFormInMain } from '@ad/.storybook/testing';
 import { Normal as VisitorOnlyLayoutNormalStory } from '@ad/src/app/(visitor-only)/VisitorOnlyLayout.stories';
 import { Empty as SignInFormEmptyStory } from '@ad/src/app/(visitor-only)/auth/sign-in/SignInForm.stories';
-import { SignInPage, SignInPageContext } from '@ad/src/app/(visitor-only)/auth/sign-in/SignInPage';
+import { SignInPage } from '@ad/src/app/(visitor-only)/auth/sign-in/SignInPage';
+import { SignInPageContext } from '@ad/src/app/(visitor-only)/auth/sign-in/SignInPageContext';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 type ComponentType = typeof SignInPage;

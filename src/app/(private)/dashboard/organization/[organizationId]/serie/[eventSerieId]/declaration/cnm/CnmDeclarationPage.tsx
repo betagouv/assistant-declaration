@@ -5,20 +5,16 @@ import { Alert, Box, Button, Container, Grid, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import NextLink from 'next/link';
-import { createContext, useContext } from 'react';
+import { useContext, useMemo } from 'react';
 
+import { CnmDeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/cnm/CnmDeclarationPageContext';
 import typingImage from '@ad/src/assets/images/declaration/typing.svg';
 import { trpc } from '@ad/src/client/trpcClient';
-import { DeclarationHeader } from '@ad/src/components/DeclarationHeader';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
-
-export const CnmDeclarationPageContext = createContext({
-  ContextualDeclarationHeader: DeclarationHeader,
-});
 
 export interface CnmDeclarationPageProps {
   params: { organizationId: string; eventSerieId: string };
@@ -39,6 +35,12 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
   });
 
   const aggregatedQueries = new AggregatedQueries(getEventSerie, listEvents);
+
+  const { transmittedDeclarations } = useMemo(() => {
+    return {
+      transmittedDeclarations: getEventSerie.data?.partialDeclarations.filter((pD) => pD.transmittedAt !== null).map((pD) => pD.type) ?? [],
+    };
+  }, [getEventSerie]);
 
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
@@ -75,6 +77,7 @@ export function CnmDeclarationPage({ params: { organizationId, eventSerieId } }:
             eventsWrappers={eventsWrappers}
             roundValuesForCopy={true}
             currentDeclaration="cnm"
+            transmittedDeclarations={transmittedDeclarations}
           />
         </Container>
       </Container>

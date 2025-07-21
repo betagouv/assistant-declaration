@@ -3,7 +3,8 @@ import { Meta, StoryFn } from '@storybook/react';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindForm, playFindFormInMain } from '@ad/.storybook/testing';
 import { Normal as VisitorOnlyLayoutNormalStory } from '@ad/src/app/(visitor-only)/VisitorOnlyLayout.stories';
-import { ForgottenPasswordPage, ForgottenPasswordPageContext } from '@ad/src/app/(visitor-only)/auth/password/retrieve/ForgottenPasswordPage';
+import { ForgottenPasswordPage } from '@ad/src/app/(visitor-only)/auth/password/retrieve/ForgottenPasswordPage';
+import { ForgottenPasswordPageContext } from '@ad/src/app/(visitor-only)/auth/password/retrieve/ForgottenPasswordPageContext';
 import { Empty as RetrievePasswordFormEmptyStory } from '@ad/src/app/(visitor-only)/auth/password/retrieve/RetrievePasswordForm.stories';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 

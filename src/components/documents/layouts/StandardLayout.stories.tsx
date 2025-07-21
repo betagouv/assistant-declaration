@@ -1,10 +1,12 @@
 import { Text } from '@react-pdf/renderer';
 import { Meta, StoryFn } from '@storybook/react';
 
-import { WithDocumentRenderer, commonDocumentsParameters } from '@ad/.storybook/document';
+import { WithDocumentRenderer } from '@ad/.storybook/WithDocumentRenderer';
+import { commonDocumentsParameters } from '@ad/.storybook/document';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindDocumentStructure } from '@ad/.storybook/testing';
-import { StandardLayout, styles } from '@ad/src/components/documents/layouts/StandardLayout';
+import { StandardLayout } from '@ad/src/components/documents/layouts/StandardLayout';
+import { styles } from '@ad/src/components/documents/layouts/standard';
 
 type ComponentType = typeof StandardLayout;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();

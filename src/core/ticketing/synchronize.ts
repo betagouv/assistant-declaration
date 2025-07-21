@@ -16,7 +16,7 @@ import {
 import { prisma } from '@ad/src/prisma/client';
 import { assertUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
-import { getDiff } from '@ad/src/utils/comparaison';
+import { getDiff, sortDiffWithKeys } from '@ad/src/utils/comparaison';
 
 export async function synchronizeDataFromTicketingSystems(organizationId: string, userId: string): Promise<void> {
   await assertUserACollaboratorPartOfOrganization(organizationId, userId);
@@ -246,15 +246,16 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
             // We won't consider removing events series that may not be fetched due to a slight shift in the query parameters from both side
             // but we will for all "subentites" like events, categories and sales
             const eventsSeriesDiffResult = getDiff(storedLiteEventsSeries, remoteLiteEventsSeries);
+            const sortedEventsSeriesDiffResult = sortDiffWithKeys(eventsSeriesDiffResult);
 
             const newEventsSeries = await tx.eventSerie.createManyAndReturn({
-              data: eventsSeriesDiffResult.added.map((addedEventSerie) => ({
-                internalTicketingSystemId: addedEventSerie.internalTicketingSystemId,
+              data: sortedEventsSeriesDiffResult.added.map((addedEventSerie) => ({
+                internalTicketingSystemId: addedEventSerie.model.internalTicketingSystemId,
                 ticketingSystemId: ticketingSystem.id,
-                name: addedEventSerie.name,
-                startAt: addedEventSerie.startAt,
-                endAt: addedEventSerie.endAt,
-                taxRate: addedEventSerie.taxRate,
+                name: addedEventSerie.model.name,
+                startAt: addedEventSerie.model.startAt,
+                endAt: addedEventSerie.model.endAt,
+                taxRate: addedEventSerie.model.taxRate,
               })),
               skipDuplicates: true,
               select: {
@@ -268,31 +269,32 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               eventsSeriesTicketingSystemIdToDatabaseId.set(newEventsSerie.internalTicketingSystemId, newEventsSerie.id)
             );
 
-            for (const updatedEventSerie of eventsSeriesDiffResult.updated) {
+            for (const updatedEventSerie of sortedEventsSeriesDiffResult.updated) {
               await tx.eventSerie.update({
                 where: {
                   ticketingSystemId_internalTicketingSystemId: {
-                    internalTicketingSystemId: updatedEventSerie.internalTicketingSystemId,
+                    internalTicketingSystemId: updatedEventSerie.model.internalTicketingSystemId,
                     ticketingSystemId: ticketingSystem.id,
                   },
                 },
                 data: {
-                  name: updatedEventSerie.name,
-                  startAt: updatedEventSerie.startAt,
-                  endAt: updatedEventSerie.endAt,
-                  taxRate: updatedEventSerie.taxRate,
+                  name: updatedEventSerie.model.name,
+                  startAt: updatedEventSerie.model.startAt,
+                  endAt: updatedEventSerie.model.endAt,
+                  taxRate: updatedEventSerie.model.taxRate,
                 },
               });
             }
 
             // Then make the diff of events sales
             const eventSalesDiffResult = getDiff(storedLiteEventSales, remoteLiteEventSales);
+            const sortedEventSalesDiffResult = sortDiffWithKeys(eventSalesDiffResult);
 
             // We set the bindings removal at top of operations because it would fail if the removal is due to an associated entity being deleted (due to the `onDelete` of the database)
             // (we cannot only on the database `onDelete` since a binding can be removed without affecting associated entities, we have to keep this removal loop)
-            for (const removedEventSales of eventSalesDiffResult.removed) {
-              const eventId = eventsTicketingSystemIdToDatabaseId.get(removedEventSales.internalEventTicketingSystemId);
-              const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(removedEventSales.internalTicketCategoryTicketingSystemId);
+            for (const removedEventSales of sortedEventSalesDiffResult.removed) {
+              const eventId = eventsTicketingSystemIdToDatabaseId.get(removedEventSales.model.internalEventTicketingSystemId);
+              const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(removedEventSales.model.internalTicketCategoryTicketingSystemId);
 
               assert(eventId, 'dddddddd');
               assert(categoryId, 'eeeee');
@@ -309,22 +311,23 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
 
             // Then make the diff of tickets categories (we are sure they are bound to an event serie due to returned serie wrappers)
             const ticketCategoriesDiffResult = getDiff(storedLiteTicketCategories, remoteLiteTicketCategories);
+            const sortedTicketCategoriesDiffResult = sortDiffWithKeys(ticketCategoriesDiffResult);
 
-            for (const addedTicketCategory of ticketCategoriesDiffResult.added) {
+            for (const addedTicketCategory of sortedTicketCategoriesDiffResult.added) {
               const newTicketCategory = await tx.ticketCategory.create({
                 data: {
-                  internalTicketingSystemId: addedTicketCategory.internalTicketingSystemId,
+                  internalTicketingSystemId: addedTicketCategory.model.internalTicketingSystemId,
                   eventSerie: {
                     connect: {
                       ticketingSystemId_internalTicketingSystemId: {
-                        internalTicketingSystemId: addedTicketCategory.internalEventSerieTicketingSystemId,
+                        internalTicketingSystemId: addedTicketCategory.model.internalEventSerieTicketingSystemId,
                         ticketingSystemId: ticketingSystem.id,
                       },
                     },
                   },
-                  name: addedTicketCategory.name,
-                  description: addedTicketCategory.description,
-                  price: addedTicketCategory.price,
+                  name: addedTicketCategory.model.name,
+                  description: addedTicketCategory.model.description,
+                  price: addedTicketCategory.model.price,
                 },
                 select: {
                   id: true,
@@ -336,35 +339,35 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               ticketCategoriesTicketingSystemIdToDatabaseId.set(newTicketCategory.internalTicketingSystemId, newTicketCategory.id);
             }
 
-            for (const updatedTicketCategory of ticketCategoriesDiffResult.updated) {
-              const eventSerieId = eventsSeriesTicketingSystemIdToDatabaseId.get(updatedTicketCategory.internalEventSerieTicketingSystemId);
+            for (const updatedTicketCategory of sortedTicketCategoriesDiffResult.updated) {
+              const eventSerieId = eventsSeriesTicketingSystemIdToDatabaseId.get(updatedTicketCategory.model.internalEventSerieTicketingSystemId);
 
               assert(eventSerieId);
 
               await tx.ticketCategory.update({
                 where: {
                   eventSerieId_internalTicketingSystemId: {
-                    internalTicketingSystemId: updatedTicketCategory.internalTicketingSystemId,
+                    internalTicketingSystemId: updatedTicketCategory.model.internalTicketingSystemId,
                     eventSerieId: eventSerieId,
                   },
                 },
                 data: {
-                  name: updatedTicketCategory.name,
-                  description: updatedTicketCategory.description,
-                  price: updatedTicketCategory.price,
+                  name: updatedTicketCategory.model.name,
+                  description: updatedTicketCategory.model.description,
+                  price: updatedTicketCategory.model.price,
                 },
               });
             }
 
-            for (const removedTicketCategory of ticketCategoriesDiffResult.removed) {
-              const eventSerieId = eventsSeriesTicketingSystemIdToDatabaseId.get(removedTicketCategory.internalEventSerieTicketingSystemId);
+            for (const removedTicketCategory of sortedTicketCategoriesDiffResult.removed) {
+              const eventSerieId = eventsSeriesTicketingSystemIdToDatabaseId.get(removedTicketCategory.model.internalEventSerieTicketingSystemId);
 
               assert(eventSerieId);
 
               await tx.ticketCategory.delete({
                 where: {
                   eventSerieId_internalTicketingSystemId: {
-                    internalTicketingSystemId: removedTicketCategory.internalTicketingSystemId,
+                    internalTicketingSystemId: removedTicketCategory.model.internalTicketingSystemId,
                     eventSerieId: eventSerieId,
                   },
                 },
@@ -373,21 +376,22 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
 
             // Then make the diff of events (we are sure they are bound to an event serie due to returned serie wrappers)
             const eventsDiffResult = getDiff(storedLiteEvents, remoteLiteEvents);
+            const sortedEventsDiffResult = sortDiffWithKeys(eventsDiffResult);
 
-            for (const addedEvent of eventsDiffResult.added) {
+            for (const addedEvent of sortedEventsDiffResult.added) {
               const newEvent = await tx.event.create({
                 data: {
-                  internalTicketingSystemId: addedEvent.internalTicketingSystemId,
+                  internalTicketingSystemId: addedEvent.model.internalTicketingSystemId,
                   eventSerie: {
                     connect: {
                       ticketingSystemId_internalTicketingSystemId: {
-                        internalTicketingSystemId: addedEvent.internalEventSerieTicketingSystemId,
+                        internalTicketingSystemId: addedEvent.model.internalEventSerieTicketingSystemId,
                         ticketingSystemId: ticketingSystem.id,
                       },
                     },
                   },
-                  startAt: addedEvent.startAt,
-                  endAt: addedEvent.endAt,
+                  startAt: addedEvent.model.startAt,
+                  endAt: addedEvent.model.endAt,
                 },
                 select: {
                   id: true,
@@ -399,50 +403,50 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               eventsTicketingSystemIdToDatabaseId.set(newEvent.internalTicketingSystemId, newEvent.id);
             }
 
-            for (const updatedEvent of eventsDiffResult.updated) {
-              const eventSerieId = eventsSeriesTicketingSystemIdToDatabaseId.get(updatedEvent.internalEventSerieTicketingSystemId);
+            for (const updatedEvent of sortedEventsDiffResult.updated) {
+              const eventSerieId = eventsSeriesTicketingSystemIdToDatabaseId.get(updatedEvent.model.internalEventSerieTicketingSystemId);
 
               assert(eventSerieId);
 
               await tx.event.update({
                 where: {
                   eventSerieId_internalTicketingSystemId: {
-                    internalTicketingSystemId: updatedEvent.internalTicketingSystemId,
+                    internalTicketingSystemId: updatedEvent.model.internalTicketingSystemId,
                     eventSerieId: eventSerieId,
                   },
                 },
                 data: {
-                  startAt: updatedEvent.startAt,
-                  endAt: updatedEvent.endAt,
+                  startAt: updatedEvent.model.startAt,
+                  endAt: updatedEvent.model.endAt,
                 },
               });
             }
 
-            for (const removedEvent of eventsDiffResult.removed) {
-              const eventSerieId = eventsSeriesTicketingSystemIdToDatabaseId.get(removedEvent.internalEventSerieTicketingSystemId);
+            for (const removedEvent of sortedEventsDiffResult.removed) {
+              const eventSerieId = eventsSeriesTicketingSystemIdToDatabaseId.get(removedEvent.model.internalEventSerieTicketingSystemId);
 
               assert(eventSerieId);
 
               await tx.event.delete({
                 where: {
                   eventSerieId_internalTicketingSystemId: {
-                    internalTicketingSystemId: removedEvent.internalTicketingSystemId,
+                    internalTicketingSystemId: removedEvent.model.internalTicketingSystemId,
                     eventSerieId: eventSerieId,
                   },
                 },
               });
             }
 
-            for (const addedEventSales of eventSalesDiffResult.added) {
-              const eventId = eventsTicketingSystemIdToDatabaseId.get(addedEventSales.internalEventTicketingSystemId);
-              const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(addedEventSales.internalTicketCategoryTicketingSystemId);
+            for (const addedEventSales of sortedEventSalesDiffResult.added) {
+              const eventId = eventsTicketingSystemIdToDatabaseId.get(addedEventSales.model.internalEventTicketingSystemId);
+              const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(addedEventSales.model.internalTicketCategoryTicketingSystemId);
 
               assert(eventId);
               assert(categoryId);
 
               await tx.eventCategoryTickets.create({
                 data: {
-                  total: addedEventSales.total,
+                  total: addedEventSales.model.total,
                   totalOverride: null,
                   priceOverride: null,
                   eventId: eventId,
@@ -451,9 +455,9 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               });
             }
 
-            for (const updatedEventSales of eventSalesDiffResult.updated) {
-              const eventId = eventsTicketingSystemIdToDatabaseId.get(updatedEventSales.internalEventTicketingSystemId);
-              const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(updatedEventSales.internalTicketCategoryTicketingSystemId);
+            for (const updatedEventSales of sortedEventSalesDiffResult.updated) {
+              const eventId = eventsTicketingSystemIdToDatabaseId.get(updatedEventSales.model.internalEventTicketingSystemId);
+              const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(updatedEventSales.model.internalTicketCategoryTicketingSystemId);
 
               assert(eventId);
               assert(categoryId);
@@ -466,7 +470,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                   },
                 },
                 data: {
-                  total: updatedEventSales.total,
+                  total: updatedEventSales.model.total,
                 },
               });
             }

@@ -81,6 +81,8 @@
     "openapi-ts": "openapi-ts",
     "patch-package": "patch-package",
     "playwright": "playwright",
+    "prisma": "dotenv-run-script .env.test -- prisma:unsecure",
+    "prisma:unsecure": "prisma",
     "tsx": "tsx",
     "jest": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest"
   },
@@ -90,7 +92,7 @@
   },
   "dependencies": {
     "@ag-media/react-pdf-table": "^2.0.3",
-    "@codegouvfr/react-dsfr": "1.25.3",
+    "@codegouvfr/react-dsfr": "1.25.5",
     "@commander-js/extra-typings": "^12.1.0",
     "@faire/mjml-react": "^3.5.0",
     "@fontsource/dancing-script": "^5.1.1",
@@ -128,6 +130,7 @@
     "crisp-sdk-web": "^1.0.25",
     "cssnano": "^7.0.6",
     "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "eventemitter3": "^5.0.1",
     "google-libphonenumber": "^3.2.40",
     "html-to-text": "^9.0.5",
@@ -161,6 +164,7 @@
     "type-route": "^1.0.1",
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.0.3",
+    "xmlbuilder2": "^3.1.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -169,7 +173,9 @@
     "@hey-api/openapi-ts": "^0.63.0",
     "@hookform/devtools": "^4.4.0",
     "@octokit/rest": "^19.0.5",
+    "@prettier/plugin-xml": "^3.4.1",
     "@sentry/cli": "^2.46.0",
+    "@sentry/profiling-node": "^8.30.0",
     "@storybook/addon-a11y": "^9.0.13",
     "@storybook/addon-coverage": "^2.0.0",
     "@storybook/addon-designs": "^10.0.1",
@@ -211,6 +217,7 @@
     "copy-webpack-plugin": "^12.0.2",
     "cross-env": "^7.0.3",
     "css-loader": "^7.1.2",
+    "csv-parse": "^5.5.2",
     "dotenv": "^16.4.7",
     "dotenv-run-script": "^0.4.1",
     "eslint": "^8.57.1",

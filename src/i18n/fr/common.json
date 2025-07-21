@@ -24,6 +24,7 @@
       "authNoCredentialsMatch": "les informations de connexion fournies sont incorrectes",
       "authRetriable": "une erreur est survenue, veuillez retenter",
       "billetwebFirewall": "Billetweb semble rejeter nos requêtes du fait de leur trop grand nombre. Merci de réessayer dans quelques secondes ou de nous contacter si le problème persiste",
+      "cannotMutateTicketingDataOnceDeclared": "les données de billetterie ne sont plus modifiables une fois qu'une télédéclaration a été effectuée pour ce spectacle",
       "collaboratorCanOnlySeeOrganizationEventsSeries": "en tant que collaborateur vous ne pouvez que lister les spectacles concernant votre organisation",
       "collaboratorCanOnlySeeOrganizationTicketingSystems": "en tant que collaborateur vous ne pouvez que lister les systèmes de billetterie de votre organisation",
       "eventCategoryTicketsNotFound": "ces données de catégorie de tickets n'existent pas",
@@ -41,9 +42,14 @@
       "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
       "organizationNotFound": "aucune organisation trouvée",
+      "sacemAgencyNotFound": "le code postal spécifié pour le lieu ne nous permet pas de savoir à quelle agence SACEM envoyer la déclaration. Veuillez le vérifier ou contacter notre support",
+      "sacemDeclarationUnsuccessful": "nous n'avons pas réussi à transférer la déclaration à la SACEM. Merci de réessayer dans quelques secondes ou de nous contacter si le problème persiste",
+      "sacdDeclarationIncorrectDeclarant": "l'identifiant de déclarant SACD que vous avez configuré est incorrect, nous vous conseillons de le vérifier et de nous contacter si besoin",
+      "sacdDeclarationUnsuccessful": "la SACD nous a indiqué ne pas avoir complètement accepté votre déclaration. Nous vous conseillons de contacter votre interlocuteur SACD pour plus d'informations",
       "supersoniksAccessKeyInvalidDomainName": "l'identifiant est invalide, il doit correspondre au nom de domaine de votre billetterie (par exemple \"billetterie.masalledespectacle.com\" si votre billetterie est accessible via l'adresse https://billetterie.masalledespectacle.com/",
       "ticketingSystemConnectionFailed": "le test de connexion à la billetterie a échoué, veuillez vérifier vos identifiants",
       "ticketingSystemNotFound": "ce système de billetterie n'existe pas",
+      "transmittedDeclarationCannotBeUpdated": "une déclaration déjà transmise auprès de l'organisme ne peut pas être modifiée. Si une correction est nécessaire, veuillez contacter l'organisme directement",
       "tooManyOrganizationTicketingSystems": "vous avez atteint la limite du nombre de systèmes de billetterie par organisation",
       "userAlreadyConfirmed": "votre compte est déjà confirmé",
       "userNotConfirmed": "votre inscription doit être confirmée en cliquant sur le lien de l'email avant de pouvoir vous authentifier",
@@ -107,10 +113,6 @@
       "email": {
         "invalid_string": "l'email n'est pas valide",
         "too_small_one": "l'email est requis"
-      },
-      "europeanVatId": {
-        "too_small_one": "le numéro de TVA intracommunautaire est requis",
-        "too_big": "le numéro de TVA intracommunautaire doit faire {{maximum}} caractères maximum"
       },
       "expenses": {
         "categoryPrecision": {
@@ -180,12 +182,6 @@
         "too_big": "le numéro Siren doit faire {{maximum}} caractères maximum",
         "too_small_one": "le numéro Siren est requis"
       },
-      "organizer": {
-        "name": {
-          "too_small_one": "le nom de l'organisateur/diffuseur est requis",
-          "too_big": "le nom de l'organisateur/diffuseur doit faire {{maximum}} caractères maximum"
-        }
-      },
       "password": {
         "passwordRequiresANumeric": "le mot de passe doit contenir au moins un chiffre",
         "passwordRequiresASpecialCharacters": "le mot de passe doit contenir au moins un caractère spécial (@,!,?...)",
@@ -196,22 +192,6 @@
       "performanceType": {
         "too_small_one": "le genre du spectacle est requis",
         "too_big": "le genre du spectacle doit faire {{maximum}} caractères maximum"
-      },
-      "performedWorks": {
-        "category": {
-          "too_small_one": "la discipline est requise",
-          "too_big": "la discipline doit faire {{maximum}} caractères maximum"
-        },
-        "contributors": {
-          "too_big": "chaque nom de contributeur doit faire {{maximum}} caractères maximum"
-        },
-        "durationSeconds": {
-          "too_small": "la durée de l'œuvre est requise"
-        },
-        "name": {
-          "too_small_one": "le titre est requis",
-          "too_big": "le titre doit faire {{maximum}} caractères maximum"
-        }
       },
       "phone": {
         "countryCode": {
@@ -236,12 +216,16 @@
         "too_big": "la ville doit faire {{maximum}} caractères maximum"
       },
       "placeName": {
-        "too_small_one": "le nom de la salle est requis",
-        "too_big": "le nom de la salle doit faire {{maximum}} caractères maximum"
+        "too_small_one": "l'intitulé du lieu est requis",
+        "too_big": "l'intitulé du lieu doit faire {{maximum}} caractères maximum"
       },
       "placePostalCode": {
         "too_small_one": "le code postal est requis",
         "too_big": "le code postal doit faire {{maximum}} caractères maximum"
+      },
+      "placeStreet": {
+        "too_small_one": "l'adresse est requise",
+        "too_big": "l'adresse doit faire {{maximum}} caractères maximum"
       },
       "priceOverride": {
         "too_small": "le prix doit être supérieur à {{minimum}} euro"
@@ -252,13 +236,6 @@
           "too_small_one": "le nom du producteur/tourneur est requis",
           "too_big": "le nom du producteur/tourneur doit faire {{maximum}} caractères maximum"
         }
-      },
-      "productionOperationId": {
-        "too_small_one": "le numéro du dossier d'exploitation est requis",
-        "too_big": "le numéro du dossier d'exploitation doit faire {{maximum}} caractères maximum"
-      },
-      "productionType": {
-        "invalid_enum_value": "la nature de l'exploitation est requise"
       },
       "query": {
         "too_big": "la recherche doit faire {{maximum}} caractères maximum"
@@ -275,13 +252,6 @@
           "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
         },
         "too_big": "il ne peut y avoir que {{maximum}} revenus au maximum"
-      },
-      "rightsFeesManager": {
-        "invalid_type": "l'organisme responsable du paiement est requis",
-        "name": {
-          "too_small_one": "le nom de l'organisme responsable du paiement est requis",
-          "too_big": "le nom de l'organisme responsable du paiement doit faire {{maximum}} caractères maximum"
-        }
       },
       "totalOverride": {
         "invalid_type": "le nombre de places doit être un nombre entier",
@@ -340,26 +310,11 @@
     "sacdDeclaration": {
       "accountingCategory": {
         "enum": {
-          "GLOBAL": "Prix global",
           "SALE_OF_RIGHTS": "Prix de cession",
           "INTRODUCTION_FEES": "Frais d'approche",
           "COPRODUCTION_CONTRIBUTION": "Apport en coproduction",
           "REVENUE_GUARANTEE": "Garantie de recette",
           "OTHER": "Autre somme"
-        }
-      },
-      "audience": {
-        "enum": {
-          "ALL": "Tout public",
-          "YOUNG": "Jeune public",
-          "SCHOOL": "Scolaire",
-          "READING": "Lecture"
-        }
-      },
-      "productionType": {
-        "enum": {
-          "AMATEUR": "Amateur",
-          "PROFESSIONAL": "Professionnel"
         }
       }
     },
