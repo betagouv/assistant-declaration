@@ -54,6 +54,9 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         tokenHost: this.baseUrl,
         tokenPath: '/oauth2/token',
       },
+      options: {
+        authorizationMethod: 'body',
+      },
     });
 
     // HelloAsso requires multiple rate limit conditions when fetching their API
