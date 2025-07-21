@@ -111,9 +111,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
   }
 
   public async login(): Promise<{ accessToken: string; organizationSlug: string }> {
-    const tokenResult = await this.authClient.getToken({
-      scope: '',
-    });
+    const tokenResult = await this.authClient.getToken(});
 
     const token = JsonTokenSchema.parse(tokenResult.token);
 
