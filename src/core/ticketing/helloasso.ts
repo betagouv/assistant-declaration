@@ -3,7 +3,7 @@ import Bottleneck from 'bottleneck';
 import { addDays, addYears, hoursToMilliseconds, minutesToMilliseconds, secondsToMilliseconds, set } from 'date-fns';
 import { ClientCredentials } from 'simple-oauth2';
 
-import { HelloAssoApiV5ModelsStatisticsOrder } from '@ad/src/client/helloasso';
+import { HelloAssoApiV5ModelsStatisticsItem, HelloAssoApiV5ModelsStatisticsOrder } from '@ad/src/client/helloasso';
 import { Client, createClient, createConfig } from '@ad/src/client/helloasso/client';
 import {
   getOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugItems,
@@ -13,6 +13,7 @@ import {
 } from '@ad/src/client/helloasso/sdk.gen';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
 import {
+  LiteEventSalesSchema,
   LiteEventSalesSchemaType,
   LiteEventSchema,
   LiteEventSchemaType,
@@ -207,9 +208,6 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       this.assertCollectionResponseValid(recentOrdersResult);
       assert(recentOrdersResult.data.data);
 
-      // console.log(4444444444);
-      // console.log(recentOrdersResult.data.data);
-
       recentOrders.push(...recentOrdersResult.data.data);
 
       if (!recentOrdersResult.data.pagination.continuationToken) {
@@ -286,21 +284,14 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
 
       let taxRate: number | null = null;
 
+      const dynamicTierIds: number[] = [];
+
       if (formResult.data.tiers) {
         for (const tier of formResult.data.tiers) {
           if (tier.tierType !== 'Registration') {
             // It seems other types should be ignored to only keep ones related to events
             continue;
           }
-
-          const ticketCategory = LiteTicketCategorySchema.parse({
-            internalTicketingSystemId: tier.id.toString(),
-            name: tier.label ?? `Tarif n°${tier.id}`,
-            description: null,
-            price: tier.price !== null ? tier.price / 100 : 0, // 2000 is 20€
-          });
-
-          schemaTicketCategories.set(ticketCategory.internalTicketingSystemId, ticketCategory);
 
           const tierVatRate = tier.vatRate / 100; // Receiving 5.50 for 5.5%
 
@@ -312,13 +303,31 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
             // [WORKAROUND] Until we decide the right way to do, just keep a tax rate none null
             taxRate = Math.max(taxRate, tierVatRate);
           }
+
+          // If there is no price on the tier, it means it's a "pay as you go" so ticket categories will be created
+          // while retrieving bought tickets for this tier
+          if (tier.price === null) {
+            dynamicTierIds.push(tier.id);
+
+            continue;
+          }
+
+          const ticketCategory = LiteTicketCategorySchema.parse({
+            internalTicketingSystemId: tier.id.toString(),
+            name: tier.label ?? `Tarif n°${tier.id}`,
+            description: null,
+            price: tier.price !== null ? tier.price / 100 : 0, // 2000 is 20€
+          });
+
+          schemaTicketCategories.set(ticketCategory.internalTicketingSystemId, ticketCategory);
         }
       }
 
-      // TODO: should be tested
+      const sortedDynamicTierIds = dynamicTierIds.sort(); // To always have the same labels on virtual ticket categories
 
-      // Get tickets modifications to know which events to synchronize (for the first time, or again)
-      const soldItems: HelloAssoApiV5ModelsStatisticsOrder[] = [];
+      // Retrieve tickets to count the totals
+      // TODO: it's not the exact type due to missing one from their OpenAPI schema, but almost the same so reusing it
+      const soldItems: Required<HelloAssoApiV5ModelsStatisticsItem>[] = [];
 
       let soldItemsCurrentCursor: string | null = null;
 
@@ -347,26 +356,80 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
           throw soldItemsResult.error;
         }
 
-        this.assertCollectionResponseValid(soldItemsResult);
-        assert(soldItemsResult.data.data);
+        // TODO: their OpenAPI schema is wrong saying `unknown` whereas it should be, so using intermediate variable
+        // Ref: https://github.com/HelloAsso/helloasso-open-api/issues/15
+        this.assertCollectionResponseValid(soldItemsResult as any);
+        const soldItemsResultData = soldItemsResult.data as any;
+        assert(soldItemsResultData.data);
+        // this.assertCollectionResponseValid(soldItemsResult);
+        // assert(soldItemsResult.data.data);
 
-        // console.log(4444444444);
-        // console.log(soldItemsResult.data.data);
+        soldItems.push(...soldItemsResultData.data);
 
-        soldItems.push(...soldItemsResult.data.data);
-
-        if (!soldItemsResult.data.pagination.continuationToken) {
+        if (!soldItemsResultData.pagination.continuationToken) {
           break;
         }
 
         // Adjust to fetch the next page
-        soldItemsCurrentCursor = soldItemsResult.data.pagination.continuationToken;
+        soldItemsCurrentCursor = soldItemsResultData.pagination.continuationToken;
       }
 
-      // TODO:
-      // TODO: we should then be able to retrieve the total for each tier?
-      // TODO: or maybe we had to get orders from form? needs data to test it...
-      // TODO:
+      // HelloAsso does not allow modifying a ticket category once there is an order for it
+      // but since it allows a "pay as you want" type of ticket, we have to use our own duplication logic
+      // to split all those different amounts
+      // TODO: for now we are not managing discounts on the ticket category price, this should end with duplication logic
+      for (const ticketItem of soldItems) {
+        let eventSalesId: string;
+
+        // Consider "pay as you want" specifically to create virtual categories, and consider the rest as having its tier existing
+        if (ticketItem.priceCategory === 'Pwyw') {
+          const dynamicTierIdIndex = ticketItem.tierId !== null ? sortedDynamicTierIds.indexOf(ticketItem.tierId) : -1;
+
+          if (dynamicTierIdIndex === -1) {
+            throw new Error(`the "pay as you want" ticket should be bound to a tier`);
+          }
+
+          const virtualTicketCategoryId = `${ticketItem.tierId}_${ticketItem.amount}`;
+
+          // If not existing create this virtual ticket category
+          if (!schemaTicketCategories.has(virtualTicketCategoryId)) {
+            const ticketCategory = LiteTicketCategorySchema.parse({
+              internalTicketingSystemId: virtualTicketCategoryId,
+              name: `${ticketItem.name ?? `Tarif libre`} (n°${dynamicTierIdIndex + 1})`,
+              description: null,
+              price: ticketItem.amount / 100, // 2000 is 20€
+            });
+
+            schemaTicketCategories.set(ticketCategory.internalTicketingSystemId, ticketCategory);
+          }
+
+          eventSalesId = virtualTicketCategoryId;
+        } else {
+          assert(ticketItem.tierId !== null);
+
+          eventSalesId = ticketItem.tierId.toString();
+        }
+
+        const ticketCategory = schemaTicketCategories.get(eventSalesId);
+
+        assert(ticketCategory);
+
+        // Since there is only 1 event per "event serie" for HelloAsso, no need to complexify their map key
+        let eventSales = schemaEventSales.get(eventSalesId);
+
+        if (!eventSales) {
+          schemaEventSales.set(
+            ticketCategory.internalTicketingSystemId,
+            LiteEventSalesSchema.parse({
+              internalEventTicketingSystemId: formResult.data.formSlug,
+              internalTicketCategoryTicketingSystemId: ticketCategory.internalTicketingSystemId,
+              total: 1,
+            })
+          );
+        } else {
+          eventSales.total += 1;
+        }
+      }
 
       assert(taxRate !== null);
 
