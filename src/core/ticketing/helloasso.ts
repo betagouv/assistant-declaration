@@ -180,7 +180,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
     // Get tickets modifications to know which events to synchronize (for the first time, or again)
     const recentOrders: HelloAssoApiV5ModelsStatisticsOrder[] = [];
 
-    let recentOrdersCurrentCursor: string | null = null;
+    let recentOrdersCurrentCursor: string = ''; // The cursor cannot be nullable otherwise it breaks request types for whatever reason despite casting...
 
     while (true) {
       const recentOrdersResult = await getOrganizationsByOrganizationSlugOrders({
@@ -195,9 +195,10 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
           formTypes: ['Event'],
           from: fromDate.toISOString(),
           ...(toDate ? { to: toDate.toISOString() } : {}),
-          pageSize: this.maximumItemsPerPage,
           sortOrder: 'Desc', // No `sortField` to choose updated property
           withCount: true,
+          pageSize: this.maximumItemsPerPage,
+          continuationToken: recentOrdersCurrentCursor === '' ? undefined : recentOrdersCurrentCursor,
         },
       });
 
@@ -329,7 +330,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       // TODO: it's not the exact type due to missing one from their OpenAPI schema, but almost the same so reusing it
       const soldItems: Required<HelloAssoApiV5ModelsStatisticsItem>[] = [];
 
-      let soldItemsCurrentCursor: string | null = null;
+      let soldItemsCurrentCursor: string = ''; // The cursor cannot be nullable otherwise it breaks request types for whatever reason despite casting...
 
       while (true) {
         const soldItemsResult = await getOrganizationsByOrganizationSlugFormsByFormTypeByFormSlugItems({
@@ -345,10 +346,11 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
           query: {
             tierTypes: ['Registration'],
             itemStates: ['Processed', 'Registered'],
-            pageSize: this.maximumItemsPerPage,
             sortField: 'CreationDate',
             sortOrder: 'Desc', // No `sortField` to choose updated property
             withCount: true,
+            pageSize: this.maximumItemsPerPage,
+            continuationToken: soldItemsCurrentCursor === '' ? undefined : soldItemsCurrentCursor,
           },
         });
 
