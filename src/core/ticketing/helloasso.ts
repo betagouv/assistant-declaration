@@ -123,7 +123,9 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       },
     });
 
-    if (organizationsResult.error) {
+    if (!organizationsResult.response.ok) {
+      throw organizationsResult.response.text();
+    } else if (organizationsResult.error) {
       throw JSON.stringify(organizationsResult.error);
     }
 
@@ -164,7 +166,9 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         },
       });
 
-      if (itemsResult.error) {
+      if (!itemsResult.response.ok) {
+        throw itemsResult.response.text();
+      } else if (itemsResult.error) {
         throw JSON.stringify(itemsResult.error);
       }
 
@@ -202,8 +206,10 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         },
       });
 
-      if (recentOrdersResult.error) {
-        throw recentOrdersResult.error;
+      if (!recentOrdersResult.response.ok) {
+        throw recentOrdersResult.response.text();
+      } else if (recentOrdersResult.error) {
+        throw JSON.stringify(recentOrdersResult.error);
       }
 
       this.assertCollectionResponseValid(recentOrdersResult);
@@ -254,7 +260,9 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         },
       });
 
-      if (formResult.error) {
+      if (!formResult.response.ok) {
+        throw formResult.response.text();
+      } else if (formResult.error) {
         throw JSON.stringify(formResult.error);
       }
 
@@ -363,7 +371,9 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
           },
         });
 
-        if (soldItemsResult.error) {
+        if (!soldItemsResult.response.ok) {
+          throw soldItemsResult.response.text();
+        } else if (soldItemsResult.error) {
           throw JSON.stringify(soldItemsResult.error);
         }
 
