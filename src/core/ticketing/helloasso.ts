@@ -124,7 +124,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
     });
 
     if (organizationsResult.error) {
-      throw organizationsResult.error;
+      throw JSON.stringify(organizationsResult.error);
     }
 
     assert(organizationsResult.data);
@@ -165,7 +165,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       });
 
       if (itemsResult.error) {
-        throw itemsResult.error;
+        throw JSON.stringify(itemsResult.error);
       }
 
       return true;
@@ -211,7 +211,14 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
 
       recentOrders.push(...recentOrdersResult.data.data);
 
-      if (!recentOrdersResult.data.pagination.continuationToken) {
+      if (
+        !recentOrdersResult.data.pagination.continuationToken ||
+        // [WORKAROUND] There is no explicit marker for the end of pagination so relying on this weird value
+        // Ref: https://github.com/HelloAsso/helloasso-node/issues/2
+        recentOrdersResult.data.pagination.totalPages === 1 ||
+        // Also add a security in case they change their logic
+        recentOrdersResult.data.pagination.continuationToken === recentOrdersCurrentCursor
+      ) {
         break;
       }
 
@@ -220,13 +227,15 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
     }
 
     // Since there is no filter in the query we make sure keeping only items (sales) for events (form type)
-    const formsSlugsToSynchronize: string[] = [];
+    const formsSlugsToSynchronize: string[] = [
+      ...new Set(
+        recentOrders.map((recentOrder) => {
+          assert(recentOrder.formSlug);
 
-    for (const recentOrder of recentOrders) {
-      assert(recentOrder.formSlug);
-
-      formsSlugsToSynchronize.push(recentOrder.formSlug);
-    }
+          return recentOrder.formSlug;
+        })
+      ),
+    ];
 
     const eventsSeriesWrappers: LiteEventSerieWrapperSchemaType[] = [];
 
@@ -246,7 +255,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       });
 
       if (formResult.error) {
-        throw formResult.error;
+        throw JSON.stringify(formResult.error);
       }
 
       assert(formResult.data);
@@ -355,7 +364,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         });
 
         if (soldItemsResult.error) {
-          throw soldItemsResult.error;
+          throw JSON.stringify(soldItemsResult.error);
         }
 
         // TODO: their OpenAPI schema is wrong saying `unknown` whereas it should be, so using intermediate variable
@@ -368,7 +377,14 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
 
         soldItems.push(...soldItemsResultData.data);
 
-        if (!soldItemsResultData.pagination.continuationToken) {
+        if (
+          !soldItemsResultData.pagination.continuationToken ||
+          // [WORKAROUND] There is no explicit marker for the end of pagination so relying on this weird value
+          // Ref: https://github.com/HelloAsso/helloasso-node/issues/2
+          soldItemsResultData.data.pagination.totalPages === 1 ||
+          // Also add a security in case they change their logic
+          soldItemsResultData.data.pagination.continuationToken === soldItemsCurrentCursor
+        ) {
           break;
         }
 
