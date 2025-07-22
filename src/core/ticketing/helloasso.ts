@@ -363,7 +363,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
           query: {
             tierTypes: ['Registration'],
             itemStates: ['Processed', 'Registered'],
-            sortField: 'CreationDate',
+            sortField: 'UpdateDate',
             sortOrder: 'Desc', // No `sortField` to choose updated property
             withCount: true,
             pageSize: this.maximumItemsPerPage,
@@ -391,9 +391,9 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
           !soldItemsResultData.pagination.continuationToken ||
           // [WORKAROUND] There is no explicit marker for the end of pagination so relying on this weird value
           // Ref: https://github.com/HelloAsso/helloasso-node/issues/2
-          soldItemsResultData.data.pagination.totalPages === 1 ||
+          soldItemsResultData.pagination.totalPages === 1 ||
           // Also add a security in case they change their logic
-          soldItemsResultData.data.pagination.continuationToken === soldItemsCurrentCursor
+          soldItemsResultData.pagination.continuationToken === soldItemsCurrentCursor
         ) {
           break;
         }
