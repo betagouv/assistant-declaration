@@ -315,6 +315,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
 
           // TODO: for now we manage a unique tax rate per event serie whereas it should be by ticket category
           if (taxRate === null) {
+            taxRate = tierVatRate;
           } else if (taxRate !== tierVatRate) {
             // throw new Error(`an event serie should have the same tax rate for all categories`)
 
