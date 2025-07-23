@@ -9,6 +9,7 @@
 /dist/
 /storybook-static/
 /public/mockServiceWorker.js
+/src/client/helloasso/
 /src/client/mapado/
 /src/client/supersoniks/
 /src/prisma/migrations/migration_lock.toml
