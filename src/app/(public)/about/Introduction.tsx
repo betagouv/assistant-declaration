@@ -8,6 +8,7 @@ import { ImgHTMLAttributes } from 'react';
 import style from '@ad/src/app/(public)/about/Introduction.module.scss';
 import hero from '@ad/src/assets/images/hero.svg';
 import billetweb from '@ad/src/assets/images/partners/billetweb.png';
+import helloasso from '@ad/src/assets/images/partners/helloasso.png';
 import mapado from '@ad/src/assets/images/partners/mapado.png';
 import soticket from '@ad/src/assets/images/partners/soticket.png';
 import supersoniks from '@ad/src/assets/images/partners/supersoniks.png';
@@ -119,6 +120,24 @@ export function Introduction() {
               }}
             >
               <Image src={soticket} alt="logo de SoTicket" style={{ ...imageProps.style, filter: isDark ? 'invert(100%)' : undefined }} />
+            </Link>
+            <Link
+              component={NextLink}
+              href="https://www.helloasso.com"
+              target="_blank"
+              underline="none"
+              sx={{
+                backgroundImage: 'none !important',
+                '&::after': {
+                  display: 'none !important',
+                },
+              }}
+            >
+              <Image
+                src={helloasso}
+                alt="logo de HelloAsso"
+                style={{ ...imageProps.style, maxHeight: 25, filter: isDark ? 'invert(100%)' : undefined }}
+              />
             </Link>
           </Box>
         </Box>
