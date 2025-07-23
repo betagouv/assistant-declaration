@@ -12,6 +12,7 @@ import {
   getUsersMeOrganizations,
 } from '@ad/src/client/helloasso/sdk.gen';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
+import { helloassoMissingTierError } from '@ad/src/models/entities/errors';
 import {
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
@@ -440,6 +441,14 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         }
 
         const ticketCategory = schemaTicketCategories.get(eventSalesId);
+
+        if (!ticketCategory) {
+          // TODO: it's weird the tier is not retrieved in the public form request
+          // we did contact the HelloAsso support, waiting for an explanation how to manage this
+          // In the meantime we are fine since after tests it happened old forms not in our synchronization scope
+          // but still we set a proper error in case it's more common than expected
+          throw helloassoMissingTierError;
+        }
 
         assert(ticketCategory);
 
