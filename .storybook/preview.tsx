@@ -1,4 +1,5 @@
 import MuiDsfrThemeProvider from '@codegouvfr/react-dsfr/mui';
+import { MDXProvider } from '@mdx-js/react';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { DocsContainerProps } from '@storybook/addon-docs/blocks';
 import { withLinks } from '@storybook/addon-links';
@@ -23,6 +24,7 @@ import '@ad/src/assets/fonts/index.css';
 import { DsfrProvider, StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
 import { DsfrHead, getHtmlAttributes } from '@ad/src/dsfr-bootstrap/server-only-index';
 import { i18n } from '@ad/src/i18n';
+import { useMDXComponents } from '@ad/src/mdx-components';
 
 // const channel = addons.getChannel();
 
@@ -171,22 +173,27 @@ const preview: Preview = {
 
         disableGlobalDsfrStyle(false); // Workaround for global style leaking
 
+        // Reuse the same MDX modifications logic from Next.js
+        const mdxComponents = useMDXComponents({});
+
         // We provide the client provider to mock tRPC calls
         return (
           <>
             <StartDsfrOnHydration />
             <DsfrHead />
-            <AppRouterCacheProvider>
-              <DsfrProvider lang={locale}>
-                <MuiDsfrThemeProvider>
-                  <MockProvider>
-                    <Providers>
-                      <Story />
-                    </Providers>
-                  </MockProvider>
-                </MuiDsfrThemeProvider>
-              </DsfrProvider>
-            </AppRouterCacheProvider>
+            <MDXProvider components={mdxComponents}>
+              <AppRouterCacheProvider>
+                <DsfrProvider lang={locale}>
+                  <MuiDsfrThemeProvider>
+                    <MockProvider>
+                      <Providers>
+                        <Story />
+                      </Providers>
+                    </MockProvider>
+                  </MuiDsfrThemeProvider>
+                </DsfrProvider>
+              </AppRouterCacheProvider>
+            </MDXProvider>
           </>
         );
       }

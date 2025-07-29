@@ -1,4 +1,5 @@
 import BundleAnalyzer from '@next/bundle-analyzer';
+import createMDX from '@next/mdx';
 import { rspack } from '@rspack/core';
 import { SentryBuildOptions, withSentryConfig } from '@sentry/nextjs';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
@@ -7,6 +8,7 @@ import withRspack from 'next-rspack';
 import path from 'path';
 
 import { getCommitSha, getHumanVersion, getTechnicalVersion } from '@ad/src/utils/app-version';
+import { mdxLoaderOptions } from '@ad/src/utils/mdx-loader';
 import { generateRewrites, localizedRoutes } from '@ad/src/utils/routes/list';
 import { getBaseUrl } from '@ad/src/utils/url';
 import { applyRawQueryParserOnNextjsCssModule } from '@ad/src/utils/webpack';
@@ -24,6 +26,7 @@ const generateNextConfig = async (): Promise<NextConfig> => {
 
   let standardModuleExports: NextConfig = {
     reactStrictMode: true,
+    pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'], // Allow using Markdown for content pages like documentation
     output: process.env.NEXTJS_BUILD_OUTPUT_MODE ? (process.env.NEXTJS_BUILD_OUTPUT_MODE as 'standalone' | 'export') : 'standalone', // To debug locally the `next start` comment this line (it will avoid trying to mess with the assembling folders logic of standalone mode)
     env: {
       // Those will replace `process.env.*` with hardcoded values (useful when the value is calculated during the build time)
@@ -82,6 +85,10 @@ const generateNextConfig = async (): Promise<NextConfig> => {
         {
           source: '/robots.txt',
           destination: '/api/robots',
+        },
+        {
+          source: '/openapi.json',
+          destination: '/api/openapi',
         },
       ];
     },
@@ -147,6 +154,16 @@ const generateNextConfig = async (): Promise<NextConfig> => {
     },
   };
 
+  const withMDX = createMDX({
+    extension: /\.(md|mdx)$/,
+    options: mdxLoaderOptions,
+    ...({
+      experimental: {
+        mdxRs: true,
+      },
+    } as any), // Type not existing yet
+  });
+
   const uploadToSentry = process.env.SENTRY_RELEASE_UPLOAD === 'true' && process.env.NODE_ENV === 'production';
 
   const sentryWebpackPluginOptions: SentryBuildOptions = {
@@ -181,7 +198,7 @@ const generateNextConfig = async (): Promise<NextConfig> => {
     disableLogger: false,
   };
 
-  return withBundleAnalyzer(withSentryConfig(standardModuleExports, sentryWebpackPluginOptions));
+  return withBundleAnalyzer(withSentryConfig(withMDX(standardModuleExports), sentryWebpackPluginOptions));
 };
 
 // [WORKAROUND] RsPack not yet fully compatible

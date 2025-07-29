@@ -150,6 +150,7 @@ export function prepareStory<ComponentType, ContextValueType extends MatchingCon
     const layoutStory = options.layoutStory;
     const LayoutStory = layoutStory as PartialStoryFn; // For whatever reason `StoryFn` is no longer working
 
+    // We wrap the current story into the parent one
     story.decorators.push((Story, context) => {
       return (
         <LayoutStory {...layoutStory.args}>
@@ -157,6 +158,17 @@ export function prepareStory<ComponentType, ContextValueType extends MatchingCon
         </LayoutStory>
       );
     });
+
+    // Also, to benefit from a 100% working parent layout, we reuse its decorators like for networking
+    // ... but also if it is itself wrapped into another layout (that results into an added decorator as implemented above)
+    // Note: like that, layouts are chained if there are multiple levels
+    if (options.layoutStory.decorators) {
+      if (!Array.isArray(options.layoutStory.decorators)) {
+        throw new Error('invalid property');
+      }
+
+      story.decorators.push(...(options.layoutStory.decorators as any)); // Types are incompatible but it works properly
+    }
 
     // It we detect some network mocking from the layout story, make sure to reuse it
     if (layoutStory.parameters?.msw) {

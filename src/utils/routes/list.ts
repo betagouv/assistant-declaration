@@ -47,6 +47,13 @@ export const localizedRoutes = {
       fr: (p) => `/api/declaration/${p.eventSerieId}`,
     }
   ),
+  docsSample: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/docs/sample`,
+      fr: (p) => `/documentation/exemple`,
+    }
+  ),
   forgottenPassword: defineLocalizedRoute(
     {},
     {
@@ -194,6 +201,7 @@ export const routes = {
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.en),
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.en),
     declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.en),
+    docsSample: defineRoute(localizedRoutes.docsSample.params, localizedRoutes.docsSample.paths.en),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.en),
     frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.en),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.en),
@@ -216,6 +224,7 @@ export const routes = {
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.fr),
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.fr),
     declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.fr),
+    docsSample: defineRoute(localizedRoutes.docsSample.params, localizedRoutes.docsSample.paths.fr),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.fr),
     frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.fr),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.fr),
