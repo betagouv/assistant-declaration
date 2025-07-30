@@ -210,6 +210,7 @@
     "@types/http-errors": "^2.0.3",
     "@types/jest": "^29.5.14",
     "@types/jsdom": "^21.1.7",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/locks": "^0.2.1",
     "@types/lodash.debounce": "^4.0.7",
     "@types/mdx": "^2.0.13",

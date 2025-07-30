@@ -37,7 +37,10 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
     // so we have to guess the time they release this to use the right query parameter
     const decoded = jwt.decode(secretKey);
 
-    if (typeof decoded.iat === 'number' && decoded.iat < 1751320800) {
+    assert(decoded);
+    assert(typeof decoded === 'object');
+
+    if (decoded.iat && decoded.iat < 1751320800) {
       // Before first July 1st 2025
       this.oldTokenWorkaround = true;
     }
@@ -69,6 +72,7 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
         this.formatUrl(`/tickets/sold`, {
           after: futureDate.toISOString(),
           before: futureDate.toISOString(),
+          cursor: true.toString(), // Needed otherwise the pagination object does not match what we expect for this type of call
         }),
         { method: 'GET' }
       );
