@@ -30,7 +30,7 @@ export const JsonEventSchema = applyTypedParsers(
     //     name: z.string().min(1),
     //   })
     // ),
-    leftTicketsCount: z.number().int().nonnegative(),
+    leftTicketsCount: z.number().int(), // Added `.nonnegative()` at start but for whatever reason it can be `-1`
     // description: z.string().min(1),
     // coverUrl: z.string().url(),
     // coverThumbnailUrl: z.string().url(),
@@ -125,8 +125,8 @@ export const JsonTicketSchema = applyTypedParsers(
     // channel: z.enum(['online']),
     service_fee: z.number().nonnegative(), // Float
     user_service_fee: z.number().nonnegative(), // Float
-    producer_margin: z.number().nonnegative(), // Float
-    producer_margin_on_user_service_fee: z.number().nonnegative(), // Float
+    producer_margin: z.number().nonnegative().optional(), // Float
+    producer_margin_on_user_service_fee: z.number().nonnegative().optional(), // Float
     vat_rate: z.number().nonnegative(), // 0.055 for 5.5%
     ticket_sub_category: z.unknown().nullable(),
     ticket_status: z.enum(['valid', 'resold', 'refunded', 'canceled', 'pending_organizer_approval', 'rejected', 'payment_plan_pending']),

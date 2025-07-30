@@ -1,7 +1,10 @@
 import { eachOfLimit } from 'async';
 import { addYears } from 'date-fns';
+import jwt from 'jsonwebtoken';
+import { z } from 'zod';
 
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
+import { shotgunTooMuchToRetrieveError } from '@ad/src/models/entities/errors';
 import {
   LiteEventSalesSchema,
   LiteEventSalesSchemaType,
@@ -24,11 +27,21 @@ import { sleep } from '@ad/src/utils/sleep';
 export class ShotgunTicketingSystemClient implements TicketingSystemClient {
   public baseUrl = 'https://smartboard-api.shotgun.live/api/shotgun';
   protected usingTestEnvironnement = false;
+  protected oldTokenWorkaround: boolean = false;
 
   constructor(
     private readonly accessKey: string,
     private readonly secretKey: string
-  ) {}
+  ) {
+    // [WORKAROUND] For specific endpoints they added a new auth query parameter but only for recent tokens
+    // so we have to guess the time they release this to use the right query parameter
+    const decoded = jwt.decode(secretKey);
+
+    if (typeof decoded.iat === 'number' && decoded.iat < 1751320800) {
+      // Before first July 1st 2025
+      this.oldTokenWorkaround = true;
+    }
+  }
 
   public useTestEnvironnement() {
     this.usingTestEnvironnement = true;
@@ -40,7 +53,7 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
 
     url.search = new URLSearchParams({
       organizer_id: this.accessKey,
-      token: this.secretKey,
+      ...(this.oldTokenWorkaround ? { token: this.secretKey } : { key: this.secretKey }),
       ...params,
     }).toString();
 
@@ -82,6 +95,37 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
   }
 
   public async getEventsSeries(fromDate: Date, toDate?: Date): Promise<LiteEventSerieWrapperSchemaType[]> {
+    // [WORKAROUND] With Shotgun we have to go through all tickets to compute totals on ticket categories
+    // but we have some users woth 100k+ tickets over a year whereas Shotgun only allows a pagination of 50 items
+    // So for now we have decided to error for those users (we have to get the pagination total, only gettable without a cursor-ed request)
+    const workaroundResponse = await fetch(
+      this.formatUrl(`/tickets/sold`, {
+        after: fromDate.toISOString(),
+        ...(toDate ? { before: toDate.toISOString() } : {}), // This is only used for tests to return a decent amount of data
+      }),
+      { method: 'GET' }
+    );
+
+    if (!workaroundResponse.ok) {
+      const error = await workaroundResponse.text();
+
+      throw error;
+    }
+
+    const workaroundTicketsDataJson = await workaroundResponse.json();
+
+    const workaroundTicketsData = JsonListTicketsResponseSchema.extend({
+      pagination: z.object({
+        // Have to patch the object since not using the cursor pagination
+        totalResults: z.number().int().nonnegative(),
+        totalPages: z.number().int().nonnegative(),
+      }),
+    }).parse(workaroundTicketsDataJson);
+
+    if (workaroundTicketsData.pagination.totalPages > 500) {
+      throw shotgunTooMuchToRetrieveError;
+    }
+
     // Get tickets modifications to know which events to synchronize (for the first time, or again)
     const recentlyUpdatedTickets: JsonTicketSchemaType[] = [];
 
