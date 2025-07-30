@@ -4,6 +4,7 @@ import FileManagerPlugin from 'filemanager-webpack-plugin';
 import path from 'path';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
+import { mdxLoaderOptions } from '@ad/src/utils/mdx-loader';
 import { applyRawQueryParserOnStorybookCssModule } from '@ad/src/utils/webpack';
 
 const staticBuildFolderPath = path.resolve(__dirname, '../storybook-static/');
@@ -15,7 +16,14 @@ const config: StorybookConfig = {
     '@storybook/addon-a11y',
     '@storybook/addon-coverage',
     '@storybook/addon-designs',
-    '@storybook/addon-docs',
+    {
+      name: '@storybook/addon-docs',
+      options: {
+        mdxPluginOptions: {
+          mdxCompileOptions: mdxLoaderOptions,
+        },
+      },
+    },
     '@storybook/addon-links',
     'storybook/viewport',
     '@vueless/storybook-dark-mode',

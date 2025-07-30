@@ -1,0 +1,48 @@
+import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+
+import TicketingSystemConnectionSupport from '@ad/src/app/(public)/docs/common/ticketing-system-connection-support.mdx';
+import ApiScreenWithToken from '@ad/src/assets/images/docs/connection/billetweb/api-screen-with-token.png';
+import ApiScreen from '@ad/src/assets/images/docs/connection/billetweb/api-screen.png';
+import NewTokenForm from '@ad/src/assets/images/docs/connection/billetweb/new-token-form.png';
+import { CaptionedImage } from '@ad/src/components/CaptionedImage';
+
+# Comment créer une clé Billetweb ?
+
+Pour la renseigner lors de la création de votre compte sur l’Assistant Déclaration.
+
+> Temps estimé : **moins de 5 minutes**
+>
+> _Ce tutoriel n’est à faire qu’une seule fois pour connecter votre billetterie._
+
+<Alert severity="info" className={fr.cx('fr-mb-6v')} description={<TicketingSystemConnectionSupport />} />
+
+## Étapes
+
+1. Se connecter sur votre interface Billetweb habituelle
+
+2. Une fois connecté, se rendre sur la page https://www.billetweb.fr/bo/api.php
+
+3. Cliquer sur le bouton `[ créer une clé ]`
+
+   _Si le bouton `[ créer une clé ]` n’est pas présent, connectez-vous avec un compte ayant les droits administrateur. Certains comptes peuvent avoir des droits restreints ne permettant pas de créer une clé._
+
+   <CaptionedImage src={ApiScreen} alt="" />
+
+4. Dans la case `Nom du tiers`, mettre par exemple `Assistant Déclaration` afin de vous rappeler ultérieurement que la clé est dédiée à notre plateforme.
+
+   Ensuite assurez-vous :
+
+   - de bien **laisser la clef en** `lecture seule` (nous ne modifions pas vos données) ;
+   - de bien laisser `Tous sélectionnés` pour le réglage “Restreindre à certains évènements” afin que notre synchronisation fonctionne.
+
+   <CaptionedImage src={NewTokenForm} alt="" />
+
+5. La paire d’identifiants est maintenant créée. Revenir à l’interface de notre plateforme https://assistant-declaration.beta.gouv.fr/ pour les renseigner lors de la connexion de votre billetterie, en respectant la correspondance :
+
+   - Identifiant `User` (en bleu sur l’image) à mettre dans `Identifiant utilisateur`
+   - `Key` (en vert sur l’image) à mettre dans `Clé d’accès`
+
+   <CaptionedImage src={ApiScreenWithToken} alt="" />
+
+NB : les clés sont révocables à tout moment. En supprimant la clé dédiée à notre plateforme nous ne serons plus en mesure de synchroniser vos données de billetterie.

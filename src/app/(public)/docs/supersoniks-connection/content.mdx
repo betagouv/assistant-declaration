@@ -1,0 +1,31 @@
+import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+
+import TicketingSystemConnectionSupport from '@ad/src/app/(public)/docs/common/ticketing-system-connection-support.mdx';
+
+# Comment créer une clé Supersoniks ?
+
+Pour la renseigner lors de la création de votre compte sur l’Assistant Déclaration.
+
+<Alert severity="info" className={fr.cx('fr-mb-6v')} description={<TicketingSystemConnectionSupport />} />
+
+## Étapes
+
+1. Contacter le support technique Supersoniks à l’adresse [billetterie@supersoniks.com](mailto:billetterie@supersoniks.com) afin de leur demander de vous créer une clé d’accès à votre billetterie. Nous vous proposons un email type à leur envoyer :
+
+   > Bonjour,\
+   > \
+   > Nous souhaiterions obtenir une clé d’accès API à notre billetterie Supersoniks afin que l’outil Assistant déclaration du Ministère de la Culture (https://assistant-declaration.beta.gouv.fr/)
+   > puisse synchroniser nos données et nous aider dans nos déclarations.\
+   > \
+   > L’outil a uniquement besoin de lire les données de billetterie, une clé d’accès en “lecture seule” sera donc suffisante.\
+   > \
+   > Merci par avance,
+
+2. _Vous allez devoir attendre leur réponse avant de pouvoir aller plus loin._
+
+3. Une fois qu’ils vous auront communiqué votre clé d’accès vous pourrez retourner sur notre plateforme https://assistant-declaration.beta.gouv.fr/ pour les renseigner au moment d’ajouter votre billetterie Supersoniks. Il faudra respecter la correspondance :
+   - `Identifiant utilisateur` : mettre le nom de domaine de votre billetterie, par exemple si votre billetterie est disponible à l’adresse `https://billetterie.masalledespectacle.com/` il faudra renseigner `billetterie.masalledespectacle.com`
+   - `Clé d’accès` : mettre la clé qu’ils vous auront communiqué par email, elle commence souvent par `ey…` et fait une centaine de caractères en longueur
+
+NB : la clé est révocable à tout moment, il vous suffit pour cela de faire la demande au support Supersoniks. En invalidant la clé dédiée à notre plateforme nous ne serons plus en mesure de synchroniser vos données de billetterie.

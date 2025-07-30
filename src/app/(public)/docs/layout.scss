@@ -1,0 +1,45 @@
+// Adjust code colors depending on the DSFR theme
+@use '@ad/src/app/(public)/docs/hljs-light.scss' as hljsLight;
+@use '@ad/src/app/(public)/docs/hljs-dark.scss' as hljsDark;
+
+@include hljsLight.theme();
+
+html[data-fr-theme='dark'] {
+  @include hljsDark.theme();
+}
+
+.hljs {
+  // Use DSFR colors for better integration
+  color: var(--text-default-grey) !important;
+  background: var(--background-contrast-grey) !important;
+}
+
+pre > code.hljs {
+  display: block; // By default the code block not inline should not be considered as inline otherwise the background is not taking the full place
+  overflow: auto; // Overview a long line will go over the block
+  padding: 1em;
+}
+
+.fr-callout__text {
+  ol,
+  ul {
+    font-size: 1rem; // Sometimes they are not wrapped by a <p> and they end having a bigger text
+  }
+
+  // Since callout has a different background we adjust any inline code
+  code:not(pre > code) {
+    background: var(--background-alt-grey);
+  }
+}
+
+// Inline code was not very visible, since no DSFR standard just doing our own
+code:not(pre > code) {
+  line-height: normal;
+  background: var(--background-contrast-grey);
+  color: var(--text-label-blue-cumulus); // A bit more readable than `--text-default-info`
+  border-radius: 4px;
+  font-size: 85%;
+  padding: 0.2em 0.4em;
+  position: relative;
+  bottom: 0.065em;
+}
