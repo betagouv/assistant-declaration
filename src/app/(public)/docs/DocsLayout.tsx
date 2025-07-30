@@ -15,6 +15,7 @@ export function DocsLayout(props: PropsWithChildren) {
   const docsBilletwebConnectionLink = linkRegistry.get('docsBilletwebConnection', undefined);
   const docsHelloassoConnectionLink = linkRegistry.get('docsHelloassoConnection', undefined);
   const docsMapadoConnectionLink = linkRegistry.get('docsMapadoConnection', undefined);
+  const docsShotgunConnectionLink = linkRegistry.get('docsShotgunConnection', undefined);
   const docsSoticketConnectionLink = linkRegistry.get('docsSoticketConnection', undefined);
   const docsSupersoniksConnectionLink = linkRegistry.get('docsSupersoniksConnection', undefined);
   const docsTicketingApiUsageLink = linkRegistry.get('docsTicketingApiUsage', undefined);
@@ -22,6 +23,7 @@ export function DocsLayout(props: PropsWithChildren) {
   const docsBilletwebConnectionLinkActive = hasPathnameThisMatch(pathname, docsBilletwebConnectionLink);
   const docsHelloassoConnectionLinkActive = hasPathnameThisMatch(pathname, docsHelloassoConnectionLink);
   const docsMapadoConnectionLinkActive = hasPathnameThisMatch(pathname, docsMapadoConnectionLink);
+  const docsShotgunConnectionLinkActive = hasPathnameThisMatch(pathname, docsShotgunConnectionLink);
   const docsSoticketConnectionLinkActive = hasPathnameThisMatch(pathname, docsSoticketConnectionLink);
   const docsSupersoniksConnectionLinkActive = hasPathnameThisMatch(pathname, docsSupersoniksConnectionLink);
   const docsTicketingApiUsageLinkActive = hasPathnameThisMatch(pathname, docsTicketingApiUsageLink);
@@ -43,6 +45,7 @@ export function DocsLayout(props: PropsWithChildren) {
                     docsBilletwebConnectionLinkActive ||
                     docsHelloassoConnectionLinkActive ||
                     docsMapadoConnectionLinkActive ||
+                    docsShotgunConnectionLinkActive ||
                     docsSoticketConnectionLinkActive ||
                     docsSupersoniksConnectionLinkActive,
                   items: [
@@ -65,6 +68,13 @@ export function DocsLayout(props: PropsWithChildren) {
                       text: 'Comment connecter Mapado ?',
                       linkProps: {
                         href: docsMapadoConnectionLink,
+                      },
+                    },
+                    {
+                      isActive: docsShotgunConnectionLinkActive,
+                      text: 'Comment connecter Shotgun ?',
+                      linkProps: {
+                        href: docsShotgunConnectionLink,
                       },
                     },
                     {
