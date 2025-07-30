@@ -1,0 +1,35 @@
+import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+
+import TicketingSystemConnectionSupport from '@ad/src/app/(public)/docs/common/ticketing-system-connection-support.mdx';
+import ApiScreen from '@ad/src/assets/images/docs/connection/helloasso/api-screen.png';
+import { CaptionedImage } from '@ad/src/components/CaptionedImage';
+
+# Comment créer une clé HelloAsso ?
+
+Pour que l’Assistant puisse accéder à vos données de billetterie de manière sécurisée vous devez nous envoyer une clé d’accès. Les étapes vous sont présentées ci-après.
+
+_Nota : en cas de difficultés à suivre les étapes décrites plus bas, vous pouvez regarder une vidéo explicative réalisée par HelloAsso : https://www.youtube.com/watch?v=WAcXF45IcnY_
+
+> Temps estimé : **2 minutes**
+>
+> _Ce tutoriel n’est à faire qu’une seule fois pour connecter votre billetterie._
+
+<Alert severity="info" className={fr.cx('fr-mb-6v')} description={<TicketingSystemConnectionSupport />} />
+
+## Étapes
+
+1. Se connecter sur votre interface HelloAsso avec le compte principal de votre association : https://auth.helloasso.com/connexion
+
+2. Depuis le menu aller dans `Mon compte > Intégrations et API` , aller dans la section `Gérer ma clé API`. Si votre clé API n’a jamais été créée par le passé vous devez cliquer sur le bouton `Générer ma clé API` .
+
+   _Si nous ne voyez pas l’onglet `Rôles` c’est probablement que vous n’êtes pas connecté avec un compte ayant suffisant de droits._
+
+   <CaptionedImage src={ApiScreen} alt="" />
+
+3. La paire d’identifiants se compose du `clientId` et du `clientSecret`. Revenir à l’interface de notre plateforme https://assistant-declaration.beta.gouv.fr/ pour les renseigner lors de la connexion de votre billetterie, en respectant la correspondance :
+
+   - Identifiant `clientId` à mettre dans `Identifiant utilisateur`
+   - `clientSecret` à mettre dans `Clé d’accès`
+
+NB : les clés sont révocables à tout moment. En cliquant sur `Supprimer ma clé API` nous ne serons plus en mesure de synchroniser vos données de billetterie.

@@ -10,6 +10,7 @@ import hero from '@ad/src/assets/images/hero.svg';
 import billetweb from '@ad/src/assets/images/partners/billetweb.png';
 import helloasso from '@ad/src/assets/images/partners/helloasso.png';
 import mapado from '@ad/src/assets/images/partners/mapado.png';
+import shotgun from '@ad/src/assets/images/partners/shotgun.png';
 import soticket from '@ad/src/assets/images/partners/soticket.png';
 import supersoniks from '@ad/src/assets/images/partners/supersoniks.png';
 import { IntroductionContainer } from '@ad/src/components/IntroductionContainer';
@@ -136,6 +137,24 @@ export function Introduction() {
               <Image
                 src={helloasso}
                 alt="logo de HelloAsso"
+                style={{ ...imageProps.style, maxHeight: 25, filter: isDark ? 'invert(100%)' : undefined }}
+              />
+            </Link>
+            <Link
+              component={NextLink}
+              href="https://pro.shotgun.live"
+              target="_blank"
+              underline="none"
+              sx={{
+                backgroundImage: 'none !important',
+                '&::after': {
+                  display: 'none !important',
+                },
+              }}
+            >
+              <Image
+                src={shotgun}
+                alt="logo de Shotgun"
                 style={{ ...imageProps.style, maxHeight: 25, filter: isDark ? 'invert(100%)' : undefined }}
               />
             </Link>

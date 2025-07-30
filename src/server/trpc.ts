@@ -1,52 +1,56 @@
 import { TRPCError, initTRPC } from '@trpc/server';
 import superjson from 'superjson';
+import { OpenApiMeta } from 'trpc-to-openapi';
 import { ZodError } from 'zod';
 
 import { CustomError, internalServerErrorError, unauthorizedError } from '@ad/src/models/entities/errors';
 import { TokenUserSchema } from '@ad/src/models/entities/user';
 import { Context } from '@ad/src/server/context';
 
-const t = initTRPC.context<Context>().create({
-  transformer: superjson,
-  errorFormatter(opts) {
-    const { shape, error } = opts;
+const t = initTRPC
+  .meta<OpenApiMeta>()
+  .context<Context>()
+  .create({
+    transformer: superjson,
+    errorFormatter(opts) {
+      const { shape, error } = opts;
 
-    let acceptableZodError = error.cause instanceof ZodError && error.code === 'BAD_REQUEST' ? error.cause : null; // Only forward zod errors from input validation (others should be internal issues)
-    let customError = error.cause instanceof CustomError ? error.cause : null;
+      let acceptableZodError = error.cause instanceof ZodError && error.code === 'BAD_REQUEST' ? error.cause : null; // Only forward zod errors from input validation (others should be internal issues)
+      let customError = error.cause instanceof CustomError ? error.cause : null;
 
-    let errorData: Record<string, any>;
-    if (acceptableZodError || customError) {
-      errorData = {
-        zodError: !!acceptableZodError ? acceptableZodError.issues : null,
-        customError: !!customError ? customError.json() : null,
-      };
-    } else {
-      // We hide the entire information to hide any sensitive technical information
-      errorData = {
-        message: internalServerErrorError.message,
-        customError: internalServerErrorError.json(),
-      };
-    }
+      let errorData: Record<string, any>;
+      if (acceptableZodError || customError) {
+        errorData = {
+          zodError: !!acceptableZodError ? acceptableZodError.issues : null,
+          customError: !!customError ? customError.json() : null,
+        };
+      } else {
+        // We hide the entire information to hide any sensitive technical information
+        errorData = {
+          message: internalServerErrorError.message,
+          customError: internalServerErrorError.json(),
+        };
+      }
 
-    // We only forward original error details aside our custom error while developing to ease the debugging
-    // Note: by default it may leak error stack that's why we hide that once deployed
-    if (process.env.NODE_ENV === 'development') {
-      return {
-        ...shape,
-        data: {
-          ...shape.data,
-          ...errorData,
-        },
-      };
-    } else {
-      return {
-        message: 'an error has occured',
-        code: -50100,
-        data: errorData,
-      };
-    }
-  },
-});
+      // We only forward original error details aside our custom error while developing to ease the debugging
+      // Note: by default it may leak error stack that's why we hide that once deployed
+      if (process.env.NODE_ENV === 'development') {
+        return {
+          ...shape,
+          data: {
+            ...shape.data,
+            ...errorData,
+          },
+        };
+      } else {
+        return {
+          message: 'an error has occured',
+          code: -50100,
+          data: errorData,
+        };
+      }
+    },
+  });
 
 /**
  * Create a server-side caller

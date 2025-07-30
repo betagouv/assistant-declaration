@@ -14,6 +14,11 @@ declare module '*.html' {
   export default content;
 }
 
+declare module '*.mdx' {
+  const MDXComponent: (props: any) => React.JSX.Element;
+  export default MDXComponent;
+}
+
 declare module '*.xml' {
   const content: string;
   export default content;

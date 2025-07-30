@@ -1,0 +1,47 @@
+import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+
+import TicketingSystemConnectionSupport from '@ad/src/app/(public)/docs/common/ticketing-system-connection-support.mdx';
+import IntegrationsCard from '@ad/src/assets/images/docs/connection/shotgun/integrations-card.png';
+import IntegrationsMenu from '@ad/src/assets/images/docs/connection/shotgun/integrations-menu.png';
+import ParametersMenu from '@ad/src/assets/images/docs/connection/shotgun/parameters-menu.png';
+import TokenScreen from '@ad/src/assets/images/docs/connection/shotgun/token-screen.png';
+import { CaptionedImage } from '@ad/src/components/CaptionedImage';
+
+# Comment créer une clé Shotgun ?
+
+Pour la renseigner lors de la création de votre compte sur l’Assistant Déclaration.
+
+> Temps estimé : **2 minutes**
+>
+> _Ce tutoriel n’est à faire qu’une seule fois pour connecter votre billetterie._
+
+<Alert severity="info" className={fr.cx('fr-mb-6v')} description={<TicketingSystemConnectionSupport />} />
+
+## Étapes
+
+1. Se connecter sur votre interface Shotgun habituelle : https://smartboard.shotgun.live/login
+
+2. Une fois connecté, se rendre dans les `Paramètres` de votre compte
+
+   <CaptionedImage src={ParametersMenu} alt="" />
+
+3. Puis se rendre dans les `Intégrations`
+
+   <CaptionedImage src={IntegrationsMenu} alt="" />
+
+4. Chercher l’intégration `Shotgun APIs` et cliquer sur le bouton associé :
+
+   - Soit `Connecter` si c’est la première utilisation
+   - Ou `Plus d’infos` si dans le passé vous vous en étiez déjà servie
+
+   <CaptionedImage src={IntegrationsCard} alt="" />
+
+5. La paire d’identifiants s’affiche. Revenir à l’interface de notre plateforme https://assistant-declaration.beta.gouv.fr/ pour les renseigner lors de la connexion de votre billetterie, en respectant la correspondance :
+
+   - Identifiant `ID Organisateur` (ressemblant à un nombre) à mettre dans `Identifiant utilisateur`
+   - `Token` (ressemblant à une suite aléatoire) à mettre dans `Clé d’accès`
+
+   <CaptionedImage src={TokenScreen} alt="" />
+
+NB : la clé est révocable à tout moment, il vous suffit pour cela d’en faire la demande au support Shotgun. En invalidant la clé utilisée sur notre plateforme nous ne serons plus en mesure de synchroniser vos données de billetterie.

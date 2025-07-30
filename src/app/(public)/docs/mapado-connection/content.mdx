@@ -1,0 +1,98 @@
+import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+
+import TicketingSystemConnectionSupport from '@ad/src/app/(public)/docs/common/ticketing-system-connection-support.mdx';
+import AddCollaboratorButton from '@ad/src/assets/images/docs/connection/mapado/add-collaborator-button.png';
+import AddCollaboratorForm from '@ad/src/assets/images/docs/connection/mapado/add-collaborator-form.png';
+import ManageTokensButton from '@ad/src/assets/images/docs/connection/mapado/manage-tokens-button.png';
+import ManageTokensScreen from '@ad/src/assets/images/docs/connection/mapado/manage-tokens-screen.png';
+import RightsChoices1 from '@ad/src/assets/images/docs/connection/mapado/rights-choices-1.png';
+import RightsChoices2 from '@ad/src/assets/images/docs/connection/mapado/rights-choices-2.png';
+import RightsChoices3 from '@ad/src/assets/images/docs/connection/mapado/rights-choices-3.png';
+import RightsScreen from '@ad/src/assets/images/docs/connection/mapado/rights-screen.png';
+import { CaptionedImage } from '@ad/src/components/CaptionedImage';
+
+# Comment créer une clé Mapado ?
+
+Pour que l’Assistant puisse accéder à vos données de billetterie de manière sécurisée vous devez nous envoyer une clé d’accès. Les étapes vous sont présentées ci-après.
+
+_Nota : il faut au préalable créer un sous-compte utilisateur dédié, qui aura uniquement des droits en “lecture seule” sur vos données. Cela rallonge un peu les étapes mais permet de limiter les risques._
+
+> Temps estimé : **5-10 minutes**
+>
+> _Ce tutoriel n’est à faire qu’une seule fois pour connecter votre billetterie._
+
+<Alert severity="info" className={fr.cx('fr-mb-6v')} description={<TicketingSystemConnectionSupport />} />
+
+## Étapes
+
+1.  Se connecter sur votre interface Mapado avec le compte principal de votre salle de spectacle : https://desk.mapado.com/settings/user-rights/users
+
+2.  Depuis le menu aller dans `Paramétrage > Droits d'accès` , aller dans l’onglet `Rôles`, puis cliquer sur `Créer un nouveau rôle` . _(il n’existe pas de rôle prédéfini Mapado pour faire “de la lecture seule”)_
+
+    _Si nous ne voyez pas l’onglet `Rôles` c’est probablement que vous n’êtes pas connecté avec un compte ayant suffisant de droits._
+
+    <CaptionedImage src={RightsScreen} alt="" />
+
+3.  Nommer le rôle par exemple `Lecture seule`
+
+4.  Configurer les permissions pour ce rôle afin qu’il soit en lecture seule. Il est nécessaire de cocher seulement :
+
+    - Voir les événements (tous)
+    - Voir les participants et les commandes
+    - Voir les contacts
+    - Voir le suivi quotidien et visuel des ventes
+    - Voir les données comptables et comptes client
+    - Voir toutes les caisses
+
+    _(nous mettons à disposition aussi les images ci-dessous en cas de doute)_
+
+    <CaptionedImage src={RightsChoices1} alt="" />
+
+    <CaptionedImage src={RightsChoices2} alt="" />
+
+    <CaptionedImage src={RightsChoices3} alt="" />
+
+5.  Maintenant en revenant sur la page `Paramétrage > Droits d'accès` , vérifier être dans l’onglet `Collaborateurs`, puis cliquer sur `Ajouter un collaborateur` . Ce nouveau collaborateur sera dédié à notre plateforme https://assistant-declaration.beta.gouv.fr/ .
+
+    <CaptionedImage src={AddCollaboratorButton} alt="" style={{ maxHeight: '300px' }} />
+
+    <CaptionedImage src={AddCollaboratorForm} alt="" />
+
+6.  Ce nouveau collaborateur doit “vous” appartenir, mais vous ne pouvez pas utiliser une adresse email déjà utilisée par un de vos collaborateurs Mapado.
+
+    Plutôt que de créer une nouvelle boîte email (Gmail / Outlook / …). Il existe une technique qui consiste à ajouter un suffixe grâce au symbole `+` sur une adresse email afin de la considérer différente. Cela ne complique en rien les choses puisque vous recevez vos emails au même endroit.
+
+    Donc si votre email utilisé pour Mapado est [jean@spectacle.com](jean@spectacle.com) vous pouvez normalement utiliser [jean+mapado@spectacle.com](jean+mapado@spectacle.com).
+
+    > _**Si vous ne recevez rien après quelques minutes, ni en spam**, il se peut que votre hébergeur d’emails ne supporte pas cette fonctionnalité. Nous vous proposons 2 solutions de secours :_
+    >
+    > - Vous pouvez utiliser une autre adresse email de votre structure **sans le suffixe**, une dont vous savez qu’elle n’a pas pour finalité à servir sur Mapado (adresse générique, adresse d’un collègue…), **poursuivez ensuite le tutoriel ci-dessous**.
+    > - Sinon, dans le cas où vous n’avez plus d’adresse disponible pour Mapado, nous vous proposons d’utiliser l’une de nos adresses dédiée à cela `mapado+MASTRUCTURE@assistant-declaration.beta.gouv.fr` (remplacez `MASTRUCTURE` par `marie-brest` si votre structure s’appelle `Marie Brest`). Prévenez-nous ensuite dans la messagerie de la plateforme pour que l’on aille créer votre compte et vous communiquer la clé d’accès. **Vous n’avez pas besoin de suivre la suite de ce tutoriel.**
+
+    Ensuite dans le formulaire laisser `Guichet principal` (à ignorer si la section `Choisir le guichet` n’est pas présente), et mettre en rôle `Lecture seule` (que l’on vient de créer).
+
+7.  Comme nous allons finaliser l’inscription de ce nouveau collaborateur dans le navigateur internet, vous devez vous déconnecter de votre compte Mapado actuel.
+
+8.  Ensuite sur la boite email choisie pour le nouveau compte, vous avez dû recevoir un email Mapado nommé `Invitation à rejoindre la plateforme Mapado` . Cliquer sur `Finaliser l’inscription` et suivre les étapes que Mapado vous propose.
+
+9.  Une fois inscrit, se connecter au nouveau compte Mapado.
+
+10. Se rendre sur la page de `Mon compte` dans Mapado : https://desk.mapado.com/account (ou depuis l’avatar en haut à gauche)
+
+11. Se rendre sur la page de gestion des jetons d’applications en cliquant sur le bouton approprié (accessible via https://accounts.mapado.com/applications/).
+
+    <CaptionedImage src={ManageTokensButton} alt="" />
+
+12. Créer maintenant une “application” (cela veut juste dire que vous créez un jeton d’accès pour une application) :
+
+    - Nom de votre application : `assistant-declaration`
+    - Adresse de votre application : `https://assistant-declaration.beta.gouv.fr/`
+
+    Puis valider.
+
+13. Une page avec vos identifiants doit maintenant apparaître, votre jeton d’accès en lecture seule est créé. Copier le `Jeton d’authentification` (à droite), puis revenir à l’interface de notre plateforme https://assistant-declaration.beta.gouv.fr/ pour le renseigner lors de la connexion de votre billetterie.
+
+    <CaptionedImage src={ManageTokensScreen} alt="" />
+
+NB : les étapes ci-dessus sont aussi décrites dans la documentation officielle Mapado : [https://help.mapado.com/portal/fr/kb/articles/obtenir-des-clés-d-api-mapado-billetterie](https://help.mapado.com/portal/fr/kb/articles/obtenir-des-cl%C3%A9s-d-api-mapado-billetterie)

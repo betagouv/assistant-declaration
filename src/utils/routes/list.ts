@@ -47,6 +47,55 @@ export const localizedRoutes = {
       fr: (p) => `/api/declaration/${p.eventSerieId}`,
     }
   ),
+  docsBilletwebConnection: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/docs/billetweb-connection`,
+      fr: (p) => `/documentation/connexion-billetweb`,
+    }
+  ),
+  docsHelloassoConnection: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/docs/helloasso-connection`,
+      fr: (p) => `/documentation/connexion-helloasso`,
+    }
+  ),
+  docsMapadoConnection: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/docs/mapado-connection`,
+      fr: (p) => `/documentation/connexion-mapado`,
+    }
+  ),
+  docsShotgunConnection: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/docs/shotgun-connection`,
+      fr: (p) => `/documentation/connexion-shotgun`,
+    }
+  ),
+  docsSoticketConnection: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/docs/soticket-connection`,
+      fr: (p) => `/documentation/connexion-soticket`,
+    }
+  ),
+  docsSupersoniksConnection: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/docs/supersoniks-connection`,
+      fr: (p) => `/documentation/connexion-supersoniks`,
+    }
+  ),
+  docsTicketingApiUsage: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/docs/ticketing-api-usage`,
+      fr: (p) => `/documentation/utilisation-api-de-billetterie`,
+    }
+  ),
   forgottenPassword: defineLocalizedRoute(
     {},
     {
@@ -194,6 +243,13 @@ export const routes = {
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.en),
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.en),
     declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.en),
+    docsBilletwebConnection: defineRoute(localizedRoutes.docsBilletwebConnection.params, localizedRoutes.docsBilletwebConnection.paths.en),
+    docsHelloassoConnection: defineRoute(localizedRoutes.docsHelloassoConnection.params, localizedRoutes.docsHelloassoConnection.paths.en),
+    docsMapadoConnection: defineRoute(localizedRoutes.docsMapadoConnection.params, localizedRoutes.docsMapadoConnection.paths.en),
+    docsShotgunConnection: defineRoute(localizedRoutes.docsShotgunConnection.params, localizedRoutes.docsShotgunConnection.paths.en),
+    docsSoticketConnection: defineRoute(localizedRoutes.docsSoticketConnection.params, localizedRoutes.docsSoticketConnection.paths.en),
+    docsSupersoniksConnection: defineRoute(localizedRoutes.docsSupersoniksConnection.params, localizedRoutes.docsSupersoniksConnection.paths.en),
+    docsTicketingApiUsage: defineRoute(localizedRoutes.docsTicketingApiUsage.params, localizedRoutes.docsTicketingApiUsage.paths.en),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.en),
     frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.en),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.en),
@@ -216,6 +272,13 @@ export const routes = {
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.fr),
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.fr),
     declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.fr),
+    docsBilletwebConnection: defineRoute(localizedRoutes.docsBilletwebConnection.params, localizedRoutes.docsBilletwebConnection.paths.fr),
+    docsHelloassoConnection: defineRoute(localizedRoutes.docsHelloassoConnection.params, localizedRoutes.docsHelloassoConnection.paths.fr),
+    docsMapadoConnection: defineRoute(localizedRoutes.docsMapadoConnection.params, localizedRoutes.docsMapadoConnection.paths.fr),
+    docsShotgunConnection: defineRoute(localizedRoutes.docsShotgunConnection.params, localizedRoutes.docsShotgunConnection.paths.fr),
+    docsSoticketConnection: defineRoute(localizedRoutes.docsSoticketConnection.params, localizedRoutes.docsSoticketConnection.paths.fr),
+    docsSupersoniksConnection: defineRoute(localizedRoutes.docsSupersoniksConnection.params, localizedRoutes.docsSupersoniksConnection.paths.fr),
+    docsTicketingApiUsage: defineRoute(localizedRoutes.docsTicketingApiUsage.params, localizedRoutes.docsTicketingApiUsage.paths.fr),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.fr),
     frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.fr),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.fr),
