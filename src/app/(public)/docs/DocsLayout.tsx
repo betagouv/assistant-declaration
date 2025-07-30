@@ -12,9 +12,19 @@ import { hasPathnameThisMatch } from '@ad/src/utils/url';
 export function DocsLayout(props: PropsWithChildren) {
   const pathname = usePathname();
 
-  const sampleLink = linkRegistry.get('docsSample', undefined);
+  const docsBilletwebConnectionLink = linkRegistry.get('docsBilletwebConnection', undefined);
+  const docsHelloassoConnectionLink = linkRegistry.get('docsHelloassoConnection', undefined);
+  const docsMapadoConnectionLink = linkRegistry.get('docsMapadoConnection', undefined);
+  const docsSoticketConnectionLink = linkRegistry.get('docsSoticketConnection', undefined);
+  const docsSupersoniksConnectionLink = linkRegistry.get('docsSupersoniksConnection', undefined);
+  const docsTicketingApiUsageLink = linkRegistry.get('docsTicketingApiUsage', undefined);
 
-  const sampleLinkActive = hasPathnameThisMatch(pathname, sampleLink);
+  const docsBilletwebConnectionLinkActive = hasPathnameThisMatch(pathname, docsBilletwebConnectionLink);
+  const docsHelloassoConnectionLinkActive = hasPathnameThisMatch(pathname, docsHelloassoConnectionLink);
+  const docsMapadoConnectionLinkActive = hasPathnameThisMatch(pathname, docsMapadoConnectionLink);
+  const docsSoticketConnectionLinkActive = hasPathnameThisMatch(pathname, docsSoticketConnectionLink);
+  const docsSupersoniksConnectionLinkActive = hasPathnameThisMatch(pathname, docsSupersoniksConnectionLink);
+  const docsTicketingApiUsageLinkActive = hasPathnameThisMatch(pathname, docsTicketingApiUsageLink);
 
   return (
     <>
@@ -28,49 +38,60 @@ export function DocsLayout(props: PropsWithChildren) {
               burgerMenuButtonText="Dans cette documentation"
               items={[
                 {
-                  text: 'Niveau 1',
-                  expandedByDefault: sampleLinkActive,
+                  text: 'Pour les déclarants',
+                  expandedByDefault:
+                    docsBilletwebConnectionLinkActive ||
+                    docsHelloassoConnectionLinkActive ||
+                    docsMapadoConnectionLinkActive ||
+                    docsSoticketConnectionLinkActive ||
+                    docsSupersoniksConnectionLinkActive,
                   items: [
                     {
-                      isActive: sampleLinkActive,
-                      text: 'Accès direct niveau 2',
+                      isActive: docsBilletwebConnectionLinkActive,
+                      text: 'Comment connecter Billetweb ?',
                       linkProps: {
-                        href: sampleLink,
+                        href: docsBilletwebConnectionLink,
                       },
                     },
                     {
-                      text: 'Accès direct niveau 2',
+                      isActive: docsHelloassoConnectionLinkActive,
+                      text: 'Comment connecter HelloAsso ?',
                       linkProps: {
-                        href: '#',
+                        href: docsHelloassoConnectionLink,
                       },
                     },
                     {
-                      text: 'Accès direct niveau 2',
+                      isActive: docsMapadoConnectionLinkActive,
+                      text: 'Comment connecter Mapado ?',
                       linkProps: {
-                        href: '#',
+                        href: docsMapadoConnectionLink,
+                      },
+                    },
+                    {
+                      isActive: docsSoticketConnectionLinkActive,
+                      text: 'Comment connecter SoTicket ?',
+                      linkProps: {
+                        href: docsSoticketConnectionLink,
+                      },
+                    },
+                    {
+                      isActive: docsSupersoniksConnectionLinkActive,
+                      text: 'Comment connecter Supersoniks ?',
+                      linkProps: {
+                        href: docsSupersoniksConnectionLink,
                       },
                     },
                   ],
                 },
                 {
-                  text: 'Niveau 2',
+                  text: 'Pour les éditeurs de billetterie',
+                  expandedByDefault: docsTicketingApiUsageLinkActive,
                   items: [
                     {
-                      text: 'Accès direct niveau 2',
+                      isActive: docsTicketingApiUsageLinkActive,
+                      text: 'Introduction',
                       linkProps: {
-                        href: '#',
-                      },
-                    },
-                    {
-                      text: 'Accès direct niveau 2',
-                      linkProps: {
-                        href: '#',
-                      },
-                    },
-                    {
-                      text: 'Accès direct niveau 2',
-                      linkProps: {
-                        href: '#',
+                        href: docsTicketingApiUsageLink,
                       },
                     },
                   ],

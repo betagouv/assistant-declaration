@@ -2,14 +2,14 @@ import { Meta, StoryFn } from '@storybook/react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { WithLayout as DocsLayoutWithLayoutStory } from '@ad/src/app/(public)/docs/DocsLayout.stories';
-import Content from '@ad/src/app/(public)/docs/sample/content.mdx';
+import Content from '@ad/src/app/(public)/docs/ticketing-api-usage/content.mdx';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 type ComponentType = typeof Content;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Pages/Docs/Sample',
+  title: 'Pages/Docs/TicketingApiUsage',
   component: Content,
   ...generateMetaDefault({
     parameters: {},
@@ -32,7 +32,7 @@ WithLayoutStory.parameters = {
   layout: 'fullscreen',
   nextjs: {
     navigation: {
-      pathname: linkRegistry.get('docsSample', undefined), // Needed for the side menu
+      pathname: linkRegistry.get('docsTicketingApiUsage', undefined), // Needed for the side menu
     },
   },
 };

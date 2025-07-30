@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
 
-import Content from '@ad/src/app/(public)/docs/sample/content.mdx';
+import Content from '@ad/src/app/(public)/docs/helloasso-connection/content.mdx';
 import { StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
 import { formatPageTitle } from '@ad/src/utils/page';
 
 export const metadata: Metadata = {
-  title: formatPageTitle(`Paramètres du compte`),
+  title: formatPageTitle(`Comment connecter HelloAsso ?`),
 };
 
 export default async function Page() {
