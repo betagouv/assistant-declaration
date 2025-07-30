@@ -37,10 +37,7 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
     // so we have to guess the time they release this to use the right query parameter
     const decoded = jwt.decode(secretKey);
 
-    assert(decoded);
-    assert(typeof decoded === 'object');
-
-    if (decoded.iat && decoded.iat < 1751320800) {
+    if (decoded && typeof decoded === 'object' && decoded.iat && decoded.iat < 1751320800) {
       // Before first July 1st 2025
       this.oldTokenWorkaround = true;
     }
