@@ -33,7 +33,7 @@ export function dsfrTheme(isDark: boolean): ThemeInterface {
       },
       gray: {
         50: isDark ? '#161616' : '#ffffff', // --text-inverted-grey
-        100: isDark ? '#666666' : '#929292', // --text-disabled-grey
+        100: isDark ? '#343434' : '#f6f6f6', // --background-default-grey-hover
       },
       text: {
         primary: isDark ? '#cecece' : '#3a3a3a', // --text-default-grey
@@ -139,5 +139,18 @@ export function dsfrTheme(isDark: boolean): ThemeInterface {
       backgroundColor: isDark ? '#161616' : '#ffffff', // --background-default-grey
       color: isDark ? '#518fff' : '#0063cb', // --text-default-info
     },
+    // Add to do this because the type are not recognized (despite it works well)
+    ...({
+      extensionsHook: (c: any) => {
+        if (c === 'UnderlinedHeader') {
+          return {
+            color: isDark ? '#ffffff' : '#161616', // --text-title-grey
+            borderBottom: isDark ? '#ffffff' : '#161616', // --border-action-high-grey
+          };
+        }
+
+        // TODO: unfortunately there is no hook on `MimeLabel` to adjust color, and the class name is random so it cannot be patched easily
+      },
+    } as any),
   };
 }

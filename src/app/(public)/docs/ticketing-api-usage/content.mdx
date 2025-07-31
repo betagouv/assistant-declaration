@@ -1,3 +1,52 @@
-# Introduction
+# Utilisation de l'API éditeur
 
-En cours de rédaction...
+> **Rappel :**\
+> La plateforme a été créée pour simplifier les déclarations des entrepreneurs du spectacle vivant. Notre but est d'utiliser les données du déclarant qui sont déjà "numérisées" côté éditeurs pour les proposer à la télédéclaration auprès des organismes de collecte de taxes et de droits.
+
+## Stratégie initiale sans API _#pull_
+
+Nous avons créé des connecteurs afin que la plateforme puisse synchroniser les données des déclarants depuis les éditeurs disposant d'une API. Les données indispensables que les API doivent exposer sont :
+
+- Liste des spectacles, dont :
+  - Leur nom ;
+  - Leur taux de TVA ;
+  - Leurs séances, dont :
+    - La date ;
+  - Leurs tarifs (catégories de billets), dont :
+    - Le nombre de billets vendus/donnés pour chaque catégorie.
+
+**En aucun cas nous ne stockons de données sensibles des spectateurs (ni nom, ni adresse, ni téléphone) même s'ils sont accessibles avec les accès en lecture seule qui nous ont été donnés.**
+
+De plus, la synchronisation se fait de manière différentielle afin de réduire l'impact sur les serveurs : à chaque synchronisation nous allons regarder les derniers billets émis depuis la dernière fois, afin de seulement resynchroniser les spectacles ayant des mises à jour. Cela reste une opération manuelle du déclarant, en moyenne cela devrait représenter très peu de synchronisations dans le mois.
+
+L'objectif de cette stratégie de déploiement a été de **pouvoir lancer notre plateforme sans solliciter les éditeurs dans le moindre développement informatique**.
+
+Pour autant, cette stratégie ne nous permet pas une compatibilité avec tout l'écosystème des éditeurs de billetterie :
+
+- Certains éditeurs n'ont pas la donnée centralisée (logiciel chez le déclarant...) ;
+- Certains éditeurs n'ont pas d'API ;
+- Certaines données requises ne sont pas exposées dans l'API ;
+- L'éditeur est inquiet pour l'impact sur les performances de ces serveurs ;
+- ...
+
+Voilà pourquoi nous proposons comme alternative une API dédiée de notre côté, pour laisser la possibilité aux éditeurs de "pousser" les données sur notre plateforme.
+
+## Stratégie alternative avec API _#push_
+
+TODO:
+
+- comment l'user crée son compte
+- chaque nouvel éditeur doit se déclarer pour qu'on lui créer une "card" dédié avec son nom
+- openapi qu'est-ce que c'est ... génération de client plutôt que de faire à la manière
+- tentative pour ne pas faire de breaking change
+- à disposition s'il y a le moindre souci
+
+* comment cela devrait être pour l'user (dans l'interface ...), aussi token unique par utilisateur
+
+### aaa
+
+aaa
+
+### bbb
+
+bbb
