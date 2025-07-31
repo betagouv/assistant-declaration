@@ -3,7 +3,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import { usePathname } from 'next/navigation';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useMemo } from 'react';
 
 import '@ad/src/app/(public)/docs/layout.scss';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
@@ -19,20 +19,38 @@ export function DocsLayout(props: PropsWithChildren) {
   const docsSoticketConnectionLink = linkRegistry.get('docsSoticketConnection', undefined);
   const docsSupersoniksConnectionLink = linkRegistry.get('docsSupersoniksConnection', undefined);
   const docsTicketingApiUsageLink = linkRegistry.get('docsTicketingApiUsage', undefined);
+  const docsTicketingApiDefinitionLink = linkRegistry.get('docsTicketingApiDefinition', undefined);
 
-  const docsBilletwebConnectionLinkActive = hasPathnameThisMatch(pathname, docsBilletwebConnectionLink);
-  const docsHelloassoConnectionLinkActive = hasPathnameThisMatch(pathname, docsHelloassoConnectionLink);
-  const docsMapadoConnectionLinkActive = hasPathnameThisMatch(pathname, docsMapadoConnectionLink);
-  const docsShotgunConnectionLinkActive = hasPathnameThisMatch(pathname, docsShotgunConnectionLink);
-  const docsSoticketConnectionLinkActive = hasPathnameThisMatch(pathname, docsSoticketConnectionLink);
-  const docsSupersoniksConnectionLinkActive = hasPathnameThisMatch(pathname, docsSupersoniksConnectionLink);
-  const docsTicketingApiUsageLinkActive = hasPathnameThisMatch(pathname, docsTicketingApiUsageLink);
+  const {
+    docsBilletwebConnectionLinkActive,
+    docsHelloassoConnectionLinkActive,
+    docsMapadoConnectionLinkActive,
+    docsShotgunConnectionLinkActive,
+    docsSoticketConnectionLinkActive,
+    docsSupersoniksConnectionLinkActive,
+    docsTicketingApiUsageLinkActive,
+    docsTicketingApiDefinitionLinkActive,
+  } = useMemo(() => {
+    return {
+      docsBilletwebConnectionLinkActive: hasPathnameThisMatch(pathname, docsBilletwebConnectionLink),
+      docsHelloassoConnectionLinkActive: hasPathnameThisMatch(pathname, docsHelloassoConnectionLink),
+      docsMapadoConnectionLinkActive: hasPathnameThisMatch(pathname, docsMapadoConnectionLink),
+      docsShotgunConnectionLinkActive: hasPathnameThisMatch(pathname, docsShotgunConnectionLink),
+      docsSoticketConnectionLinkActive: hasPathnameThisMatch(pathname, docsSoticketConnectionLink),
+      docsSupersoniksConnectionLinkActive: hasPathnameThisMatch(pathname, docsSupersoniksConnectionLink),
+      docsTicketingApiUsageLinkActive: hasPathnameThisMatch(pathname, docsTicketingApiUsageLink),
+      docsTicketingApiDefinitionLinkActive: hasPathnameThisMatch(pathname, docsTicketingApiDefinitionLink),
+    };
+  }, [pathname]);
+
+  // A few pages need to be larger to due to content
+  const widerContainer = useMemo(() => docsTicketingApiDefinitionLinkActive, [docsTicketingApiDefinitionLinkActive]);
 
   return (
     <>
-      <div className={fr.cx('fr-container')}>
+      <div className={fr.cx('fr-container')} style={widerContainer ? { maxWidth: 2400 } : {}}>
         <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-grid-row--center', 'fr-py-8v')}>
-          <div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+          <div className={widerContainer ? fr.cx('fr-col-12', 'fr-col-md-4', 'fr-col-lg-3', 'fr-col-xl-2') : fr.cx('fr-col-12', 'fr-col-md-4')}>
             <SideMenu
               title="Documentation"
               align="left"
@@ -95,7 +113,7 @@ export function DocsLayout(props: PropsWithChildren) {
                 },
                 {
                   text: 'Pour les éditeurs de billetterie',
-                  expandedByDefault: docsTicketingApiUsageLinkActive,
+                  expandedByDefault: docsTicketingApiUsageLinkActive || docsTicketingApiDefinitionLinkActive,
                   items: [
                     {
                       isActive: docsTicketingApiUsageLinkActive,
@@ -104,12 +122,21 @@ export function DocsLayout(props: PropsWithChildren) {
                         href: docsTicketingApiUsageLink,
                       },
                     },
+                    {
+                      isActive: docsTicketingApiDefinitionLinkActive,
+                      text: `Spécifications de l'API`,
+                      linkProps: {
+                        href: docsTicketingApiDefinitionLink,
+                      },
+                    },
                   ],
                 },
               ]}
             />
           </div>
-          <div className={fr.cx('fr-col-12', 'fr-col-md-8')}>{props.children}</div>
+          <div className={widerContainer ? fr.cx('fr-col-12', 'fr-col-md-8', 'fr-col-lg-9', 'fr-col-xl-10') : fr.cx('fr-col-12', 'fr-col-md-8')}>
+            {props.children}
+          </div>
         </div>
       </div>
     </>

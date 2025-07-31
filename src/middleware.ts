@@ -5,7 +5,7 @@ const connectSrcValues = ["'self'"];
 const fontSrcValues = ["'self'", 'https:', 'data:'];
 const imgSrcValues = ["'self'", 'data:'];
 const styleSrcValues = ["'self'", 'https:'];
-const workerSrcValues: string[] = [];
+const workerSrcValues = ["'self'", 'blob:'];
 
 // Make sure no `http` url are used
 // Note: we scoped this to production some browsers enable it by default, which causes issues with `http://localhost:3000` upgrading links, breaking scripts and tags

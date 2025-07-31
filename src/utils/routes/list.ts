@@ -89,6 +89,13 @@ export const localizedRoutes = {
       fr: (p) => `/documentation/connexion-supersoniks`,
     }
   ),
+  docsTicketingApiDefinition: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/docs/ticketing-api-definition`,
+      fr: (p) => `/documentation/specifications-api-de-billetterie`,
+    }
+  ),
   docsTicketingApiUsage: defineLocalizedRoute(
     {},
     {
@@ -249,6 +256,7 @@ export const routes = {
     docsShotgunConnection: defineRoute(localizedRoutes.docsShotgunConnection.params, localizedRoutes.docsShotgunConnection.paths.en),
     docsSoticketConnection: defineRoute(localizedRoutes.docsSoticketConnection.params, localizedRoutes.docsSoticketConnection.paths.en),
     docsSupersoniksConnection: defineRoute(localizedRoutes.docsSupersoniksConnection.params, localizedRoutes.docsSupersoniksConnection.paths.en),
+    docsTicketingApiDefinition: defineRoute(localizedRoutes.docsTicketingApiDefinition.params, localizedRoutes.docsTicketingApiDefinition.paths.en),
     docsTicketingApiUsage: defineRoute(localizedRoutes.docsTicketingApiUsage.params, localizedRoutes.docsTicketingApiUsage.paths.en),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.en),
     frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.en),
@@ -278,6 +286,7 @@ export const routes = {
     docsShotgunConnection: defineRoute(localizedRoutes.docsShotgunConnection.params, localizedRoutes.docsShotgunConnection.paths.fr),
     docsSoticketConnection: defineRoute(localizedRoutes.docsSoticketConnection.params, localizedRoutes.docsSoticketConnection.paths.fr),
     docsSupersoniksConnection: defineRoute(localizedRoutes.docsSupersoniksConnection.params, localizedRoutes.docsSupersoniksConnection.paths.fr),
+    docsTicketingApiDefinition: defineRoute(localizedRoutes.docsTicketingApiDefinition.params, localizedRoutes.docsTicketingApiDefinition.paths.fr),
     docsTicketingApiUsage: defineRoute(localizedRoutes.docsTicketingApiUsage.params, localizedRoutes.docsTicketingApiUsage.paths.fr),
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.fr),
     frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.fr),

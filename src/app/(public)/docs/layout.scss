@@ -27,13 +27,13 @@ pre > code.hljs {
   }
 
   // Since callout has a different background we adjust any inline code
-  code:not(pre > code) {
+  code:not(pre > code):not(.redoc-wrap code) {
     background: var(--background-alt-grey);
   }
 }
 
 // Inline code was not very visible, since no DSFR standard just doing our own
-code:not(pre > code) {
+code:not(pre > code):not(.redoc-wrap code) {
   line-height: normal;
   background: var(--background-contrast-grey);
   color: var(--text-label-blue-cumulus); // A bit more readable than `--text-default-info`
