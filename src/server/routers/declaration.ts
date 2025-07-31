@@ -1,6 +1,7 @@
 import { EventSerieDeclarationStatus, Prisma } from '@prisma/client';
 import { renderToBuffer } from '@react-pdf/renderer';
 import slugify from '@sindresorhus/slugify';
+import { z } from 'zod';
 
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
 import { ensureMinimumSacdAccountingItems, ensureMinimumSacemExpenseItems, ensureMinimumSacemRevenueItems } from '@ad/src/core/declaration';
@@ -557,6 +558,13 @@ export const declarationRouter = router({
       } satisfies SacemDeclarationWrapperSchemaType,
     };
   }),
+  sayHello: privateProcedure
+    .meta({ openapi: { method: 'POST', path: '/say-hello/{name}', tags: ['partner'] } })
+    .input(z.object({ name: z.string(), greeting: z.string() }))
+    .output(z.object({ greeting: z.string() }))
+    .mutation(({ input }) => {
+      return { greeting: `${input.greeting} ${input.name}!` };
+    }),
   fillSacemDeclaration: privateProcedure.input(FillSacemDeclarationSchema).mutation(async ({ ctx, input }) => {
     const eventSerie = await prisma.eventSerie.findUnique({
       where: {
