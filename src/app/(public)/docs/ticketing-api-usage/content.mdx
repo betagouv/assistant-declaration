@@ -1,9 +1,9 @@
-# Utilisation de l'API éditeur
+# Intégration des éditeurs de billetterie
 
 > **Rappel :**\
 > La plateforme a été créée pour simplifier les déclarations des entrepreneurs du spectacle vivant. Notre but est d'utiliser les données du déclarant qui sont déjà "numérisées" côté éditeurs pour les proposer à la télédéclaration auprès des organismes de collecte de taxes et de droits.
 
-## Stratégie initiale sans API _#pull_
+## Stratégie initiale depuis la plateforme _#pull_
 
 Nous avons créé des connecteurs afin que la plateforme puisse synchroniser les données des déclarants depuis les éditeurs disposant d'une API. Les données indispensables que les API doivent exposer sont :
 
@@ -29,9 +29,54 @@ Pour autant, cette stratégie ne nous permet pas une compatibilité avec tout l'
 - L'éditeur est inquiet pour l'impact sur les performances de ces serveurs ;
 - ...
 
-Voilà pourquoi nous proposons comme alternative une API dédiée de notre côté, pour laisser la possibilité aux éditeurs de "pousser" les données sur notre plateforme.
+Voilà pourquoi nous avons proposé a posteriori l'alternative d'une API dédiée de notre côté, pour laisser la possibilité aux éditeurs de "pousser" les données sur notre plateforme.
 
-## Stratégie alternative avec API _#push_
+_À noter que cela en remplacera pas la stratégie initiale. Si vous avez une API compatible il et que vous souhaitez que l'on fasse un connecteur pour vous, n'hésitez pas à nous contacter directement._
+
+## Stratégie alternative depuis l'éditeur _#push_
+
+L'alternative est que l'éditeur puisse pousser les données de billetterie d'un déclarant sur la plateforme. Cela demande quelques modifications informatiques de votre outil de billetterie mais cela devrait rester sommaire.
+
+**Nous tentons ci-dessous d'apporter un peu de contexte métier sur comment intégrer notre API. Il est fortement conseillé de lire ces passages avant de passer directement à l'intégration technique.**
+
+_Si jamais vous avez un doute sur l'intégration de notre API ou une suggestion, nous restons à disposition pour y apporter des améliorations._
+
+### La déclaration ne pourra pas se faire depuis votre outil
+
+Notre API va **seulement** vous permettre de nous pousser les données de billetterie, mais vous ne pourrez pas déclencher une déclaration auprès d'un organisme depuis votre outil. En effet nous ne souhaitons pas faire fuiter la logique métier des organismes sur votre outil car :
+
+1. Vous auriez à demander les champs spécifiques de chaque organisme ;
+2. Il est possible que nous soyons compatibles avec plus d'organismes à l'avenir, ce qui induirait des changements sur votre outil ;
+3. Nous travaillons avec les organismes pour tenter de simplifier les démarches officielles (ce qui induit aussi petit à petit des changements).
+
+### Le déclenchement de la synchronisation des données
+
+**Au moment de déclarer un spectacle depuis notre plateforme le déclarant doit avoir lesdites données à jour.** Ce que nous proposons avec la _stratégie initiale_ c'est de laisser le déclarant manuellement synchroniser les données de l'éditeur dans notre plateforme. Cela pour plusieurs raisons :
+
+- L'utilisateur a la certitude que cette opération synchrone a échoué ou non (et sait donc si la plateforme a bien les dernières données) ;
+- Les déclarations d'un spectacle sont rares, il n'y a donc pas d'intérêt à nous envoyer des mises à jour automatique et très fréquente (qui impliquerait aussi une gestion additionnelle en cas d'erreur).
+
+C'est pourquoi avoir dans votre outil un bouton comme `Synchroniser les données dans l'Assistant déclaration` reste selon nous le plus simple. Celui-ci devrait être situé sur la page de chaque spectacle.
+
+### Le moment à laquel proposer la synchronisation des données
+
+A priori le bouton de synchronisation dans votre outil devrait être actionnable une fois la dernière représentation du spectacle passée. Nous conseillons toutefois dans l'afficher grisé (désactivé) avec une infobulle au survol pour expliquer au déclarant que cette action n'est disponible qu'au moment que vous aurez choisi. _Certains éditeurs par exemple permettent une clôture définitive du spectacle bloquant ainsi toute modification de billetterie (remboursement...), cela peut être le moment pour "activer" le bouton de synchronsiation._
+
+Notre API autorise les éditeurs à synchroniser plusieurs fois un même spectacle. Cela est utile dans les cas où :
+
+- Une fois sur notre plateforme l'utilisateur s'aperçoit d'informations à ajuster comme des tickets mal renseignés (il est ainsi en mesure de modifier à la source de vérité chez vous, puis de resynchroniser) ;
+- Si pour ce spectacle une date est ajoutée.
+
+> Pour information, nous investiguons la possibilité d'établir un référentiel des données de programmation. Techniquement cela peut réutiliser la synchronisation des données de billetterie à la création de nouvelles dates (synchronisations possiblement automatiques de l'éditeur avec les données de billetterie vides).\
+> \
+> Les informations considérées comme publiques pourraient être partagées avec des partenaires (nom du spectacle, dates de représentations). L'avantage serait double :
+>
+> 1. Les organismes passent pas mal de temps à scruter les programmations pour savoir ce qui est joué, cela leur apporterait un référentiel supplémentaire ;
+> 2. Beaucoup de déclarants nous ont partagé qu'après un spectacle ils ne savent pas toujours auxquels organismes déclarer (règles complexes...), le référentiel aiderait les organismes à :
+>    - Nous faire un retour sur l'éligibilité d'un spectacle à tels droits ou taxes afin d'ajuster notre formulaire de déclaration sur la plateforme ;
+>    - Être proactif si rien n'est reçu.
+
+### La billetterie doit être détaillé par catégoire de billet
 
 TODO:
 
@@ -40,6 +85,11 @@ TODO:
 - openapi qu'est-ce que c'est ... génération de client plutôt que de faire à la manière
 - tentative pour ne pas faire de breaking change
 - à disposition s'il y a le moindre souci
+- lien unique pour tomber sur la bonne déclaration dans notre outil (il doit être get par un appel... car il pourrait changer)
+
+* import postman du schema openapi pour tester..
+
+  .
 
 * comment cela devrait être pour l'user (dans l'interface ...), aussi token unique par utilisateur
 
