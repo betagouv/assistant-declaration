@@ -76,16 +76,75 @@ Notre API autorise les éditeurs à synchroniser plusieurs fois un même spectac
 >    - Nous faire un retour sur l'éligibilité d'un spectacle à tels droits ou taxes afin d'ajuster notre formulaire de déclaration sur la plateforme ;
 >    - Être proactif si rien n'est reçu.
 
-### La billetterie doit être détaillé par catégoire de billet
+### La recette de billetterie doit être détaillée par catégorie de billet
+
+En fonction des organismes le total HT ou TTC du spectacle peut être suffisant, des fois il faut le spécifier par représentation, et des fois il faut spécifier la répartition d'entrées payantes et gratuites.
+
+Comme en plus le déclarant peut avoir besoin :
+
+1. D'ajuster les entrées si cela n'est pas possible chez l'éditeur (par exemple des entrées vendues sans le logiciel de billetterie) ;
+2. De supprimer certaines catégories pour la déclaration (l'usage de la billetterie est parfois détournée pour vendre des choses autres que des places).
+
+... nous avons fait le choix de demander la recette par catégorie de billet par représentation. Donnant la possibilité au déclarant depuis notre plateforme de s'assurer de la cohérence de ce qu'il s'apprête à déclarer, de manière uniformisé qu'il ait un éditeur ou plusieurs connectés.
+
+Par exemple s'il y a eu 5 billets émis pour une représentation, nous n'avons pas besoin de chaque billet détaillé mais des sommes comme :
+
+| Identifiant éditeur | Catégorie de billet | Prix du billet TTC | Nombre émis |
+| ------------------- | ------------------- | ------------------ | ----------- |
+| `cat_1`             | Catégorie adulte    | 10 €               | 3           |
+| `cat_2`             | Catégorie enfant    | 0 €                | 2           |
+
+> Il arrive que des catégories de billet aient un prix dynamique au cours des ventes. Par exemple si la catégorie adulte était vendue à 12 € puis 10 €, il faudrait par exemple la séparer en :
+>
+> - `cat_1_1200`: Catégorie adulte (n°1)
+> - `cat_2_1000`: Catégorie adulte (n°2)
+
+### Structuration des endpoints
+
+Nous proposons 2 endpoints :
+
+- 1 en écriture ("mutater") pour pousser un nouveau spectacle ou modifier un spectacle. Une modification de spectacle équivaut une action HTTP `PUT` (et non un `PATCH`). L'idée est que vous n'ayez pas à gérer plusieurs appels pour ajouter/modifier/supprimer différentes entités qui doivent en plus être associées entre-elles. Nous prenons l'état `A` en cours dans notre base de données et le comparons à l'état `B` que vous nous envoyez afin de faire la diférentiel nécessaire pour ajuster l'état en base de données ;
+- 1 en lecture ("getter") qui ne devrait servir qu'à des fins de debug pour vous assurer durant vos tests qu'une "mutation" a correctement été prise en compte par notre plateforme.
+
+### Les clients SDK pour l'API
+
+Nous avons fait le choix de ne pas développer et maintenir nos propres clients SDK car :
+
+- Chaque éditeur a pu utiliser un langage de programmation différent ;
+- La maintenance manuelle de chaque client aurait de grandes chances de diverger avec le temps ;
+- On s'enlève la gestion de packages (pour chaque langage).
+
+Mais **nous proposons un document [OpenAPI (anciennement Swagger)](https://www.openapis.org/)** directement généré depuis l'implémentation de nos endpoints. Cela vous permet d'utiliser des générateurs de clients SDK suivant vos contraintes, et nous permet de garantir une documentation technique à jour par rapport aux modifications de l'API.
+
+Le plus simple pour bien choisir votre "générateur de client SDK" est de regarder sur GitHub une librairie ayant assez de popularité pour le langage visé, avec une licence sans restriction (`MIT` idéalement). À titre indicatif, pour générer un client TypeScript on trouve un large écosystème :
+
+- [OpenAPI Generator](https://openapi-generator.tech/) _(propose quasiment [tous les langages et tout type de librairie de requêtage](https://openapi-generator.tech/docs/generators/))_
+- [`openapi-typescript`](https://github.com/openapi-ts/openapi-typescript)
+- [`openapi-ts`](https://github.com/hey-api/openapi-ts)
+- [`orval`](https://github.com/orval-labs/orval)
+- ...
+
+**Vous trouverez le document `openapi.json` [disponible ici](https://assistant-declaration.beta.gouv.fr/openapi.json)**, et un aperçu de la documentation technique [sur la page suivante](/docs/ticketing-api-definition).
+
+> L'un des principaux avantages du client SDK est si vous utilisez le typage dans votre langage de programmation. Cela vous donnera un minimum de garantie au moment de la compilation/transpilation.
+>
+> Nous allons tout faire pour permettre la rétrocompatibilité de nos modifications. Mais vous pouvez tout à fait dans votre intégration continu (CI/CD) récupérer notre document `openapi.json` et tester s'il y a des différences avec le client SDK généré que vous aviez committé auparavant.
+
+_(À noter qu'au vu du faible nombre d'endpoints actuellement, vous pouvez aussi coder "en brut" les requêtes malgré quelques avantages perdus)_
+
+...
+
+---
 
 TODO:
 
 - comment l'user crée son compte
 - chaque nouvel éditeur doit se déclarer pour qu'on lui créer une "card" dédié avec son nom
-- openapi qu'est-ce que c'est ... génération de client plutôt que de faire à la manière
-- tentative pour ne pas faire de breaking change
 - à disposition s'il y a le moindre souci
 - lien unique pour tomber sur la bonne déclaration dans notre outil (il doit être get par un appel... car il pourrait changer)
+- tester sur la dev ...
+- on doit créer un identifiant pour eux en base ? ou pas ... ? mais pour faire leurs tests... hmm
+- TODO: quid des tarifs avec des promotions à l'achat
 
 * import postman du schema openapi pour tester..
 
