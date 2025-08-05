@@ -54,25 +54,25 @@ Notre API va **seulement** vous permettre de nous pousser les données de billet
 **Au moment de déclarer un spectacle depuis notre plateforme le déclarant doit avoir lesdites données à jour.** Ce que nous proposons avec la _stratégie initiale_ c'est de laisser le déclarant manuellement synchroniser les données de l'éditeur dans notre plateforme. Cela pour plusieurs raisons :
 
 - L'utilisateur a la certitude que cette opération synchrone a échoué ou non (et sait donc si la plateforme a bien les dernières données) ;
-- Les déclarations d'un spectacle sont rares, il n'y a donc pas d'intérêt à nous envoyer des mises à jour automatique et très fréquente (qui impliquerait aussi une gestion additionnelle en cas d'erreur).
+- Les déclarations d'un spectacle sont rares, il n'y a donc pas d'intérêt à nous envoyer des mises à jour automatiques et très fréquentes (qui impliquerait aussi une gestion additionnelle en cas d'erreur).
 
 C'est pourquoi avoir dans votre outil un bouton comme `Synchroniser les données dans l'Assistant déclaration` reste selon nous le plus simple. Celui-ci devrait être situé sur la page de chaque spectacle.
 
 ### Le moment à laquel proposer la synchronisation des données
 
-A priori le bouton de synchronisation dans votre outil devrait être actionnable une fois la dernière représentation du spectacle passée. Nous conseillons toutefois dans l'afficher grisé (désactivé) avec une infobulle au survol pour expliquer au déclarant que cette action n'est disponible qu'au moment que vous aurez choisi. _Certains éditeurs par exemple permettent une clôture définitive du spectacle bloquant ainsi toute modification de billetterie (remboursement...), cela peut être le moment pour "activer" le bouton de synchronsiation._
+A priori le bouton de synchronisation dans votre outil devrait être actionnable une fois la dernière représentation du spectacle passée. Nous conseillons toutefois de l'afficher grisé (désactivé) avec une infobulle au survol pour expliquer au déclarant quand cette sera disponible (moment que vous aurez choisi). _Certains éditeurs par exemple permettent une clôture définitive du spectacle bloquant ainsi toute modification de billetterie (remboursement...), cela peut être le moment pour "activer" le bouton de synchronisation._
 
 Notre API autorise les éditeurs à synchroniser plusieurs fois un même spectacle. Cela est utile dans les cas où :
 
 - Une fois sur notre plateforme l'utilisateur s'aperçoit d'informations à ajuster comme des tickets mal renseignés (il est ainsi en mesure de modifier à la source de vérité chez vous, puis de resynchroniser) ;
 - Si pour ce spectacle une date est ajoutée.
 
-> Pour information, nous investiguons la possibilité d'établir un référentiel des données de programmation. Techniquement cela peut réutiliser la synchronisation des données de billetterie à la création de nouvelles dates (synchronisations possiblement automatiques de l'éditeur avec les données de billetterie vides).\
+> Pour information, nous investiguons la possibilité d'établir un référentiel des données de programmation. Assez simplement à chaque nouvelle création de représentation, l'éditeur pourrait utiliser le même endpoint que pour la synchronisation des données de billetterie (même si celles-ci sont poussées vides).\
 > \
 > Les informations considérées comme publiques pourraient être partagées avec des partenaires (nom du spectacle, dates de représentations). L'avantage serait double :
 >
 > 1. Les organismes passent pas mal de temps à scruter les programmations pour savoir ce qui est joué, cela leur apporterait un référentiel supplémentaire ;
-> 2. Beaucoup de déclarants nous ont partagé qu'après un spectacle ils ne savent pas toujours auxquels organismes déclarer (règles complexes...), le référentiel aiderait les organismes à :
+> 2. Beaucoup de déclarants nous ont partagé qu'après un spectacle ils ne savent pas toujours à quels organismes déclarer (règles complexes...), le référentiel aiderait les organismes à :
 >    - Nous faire un retour sur l'éligibilité d'un spectacle à tels droits ou taxes afin d'ajuster notre formulaire de déclaration sur la plateforme ;
 >    - Être proactif si rien n'est reçu.
 
@@ -80,12 +80,12 @@ Notre API autorise les éditeurs à synchroniser plusieurs fois un même spectac
 
 En fonction des organismes le total HT ou TTC du spectacle peut être suffisant, des fois il faut le spécifier par représentation, et des fois il faut spécifier la répartition d'entrées payantes et gratuites.
 
-Comme en plus le déclarant peut avoir besoin :
+En plus le déclarant peut avoir besoin :
 
 1. D'ajuster les entrées si cela n'est pas possible chez l'éditeur (par exemple des entrées vendues sans le logiciel de billetterie) ;
 2. De supprimer certaines catégories pour la déclaration (l'usage de la billetterie est parfois détournée pour vendre des choses autres que des places).
 
-... nous avons fait le choix de demander la recette par catégorie de billet par représentation. Donnant la possibilité au déclarant depuis notre plateforme de s'assurer de la cohérence de ce qu'il s'apprête à déclarer, de manière uniformisé qu'il ait un éditeur ou plusieurs connectés.
+Nous avons donc fait le choix de demander la recette par catégorie de billet par représentation. Donnant la possibilité au déclarant depuis notre plateforme de s'assurer de la cohérence de ce qu'il s'apprête à déclarer, de manière uniformisée qu'il ait un seul éditeur ou plusieurs connectés.
 
 Par exemple s'il y a eu 5 billets émis pour une représentation, nous n'avons pas besoin de chaque billet détaillé mais des sommes comme :
 
@@ -94,16 +94,16 @@ Par exemple s'il y a eu 5 billets émis pour une représentation, nous n'avons p
 | `cat_1`             | Catégorie adulte    | 10 €               | 3           |
 | `cat_2`             | Catégorie enfant    | 0 €                | 2           |
 
-> Il arrive que des catégories de billet aient un prix dynamique au cours des ventes. Par exemple si la catégorie adulte était vendue à 12 € puis 10 €, il faudrait par exemple la séparer en :
+> Il arrive que des catégories de billet aient un prix dynamique au cours des ventes. Par exemple si la catégorie adulte était vendue à 12 € puis 10 €, il faudrait par exemple la séparer en plusieurs catégories virtuelles (identifiées de manière unique via leur prix) :
 >
 > - `cat_1_1200`: Catégorie adulte (n°1)
-> - `cat_2_1000`: Catégorie adulte (n°2)
+> - `cat_1_1000`: Catégorie adulte (n°2)
 
 ### Structuration des endpoints
 
 Nous proposons 2 endpoints :
 
-- 1 en écriture ("mutater") pour pousser un nouveau spectacle ou modifier un spectacle. Une modification de spectacle équivaut une action HTTP `PUT` (et non un `PATCH`). L'idée est que vous n'ayez pas à gérer plusieurs appels pour ajouter/modifier/supprimer différentes entités qui doivent en plus être associées entre-elles. Nous prenons l'état `A` en cours dans notre base de données et le comparons à l'état `B` que vous nous envoyez afin de faire la diférentiel nécessaire pour ajuster l'état en base de données ;
+- 1 en écriture ("mutater") pour pousser un nouveau spectacle ou modifier un spectacle déjà poussé. Sachant qu'une modification de spectacle équivaut une action HTTP `PUT` (et non à un `PATCH`). L'idée est que vous n'ayez pas à gérer plusieurs appels pour ajouter/modifier/supprimer différentes entités qui doivent en plus être associées entre-elles. Nous prenons l'état `A` en cours dans notre base de données et le comparons à l'état `B` que vous nous envoyez afin de faire la diférentiel nécessaire pour ajuster l'état en base de données ;
 - 1 en lecture ("getter") qui ne devrait servir qu'à des fins de debug pour vous assurer durant vos tests qu'une "mutation" a correctement été prise en compte par notre plateforme.
 
 ### Les clients SDK pour l'API
@@ -128,18 +128,18 @@ Le plus simple pour bien choisir votre "générateur de client SDK" est de regar
 
 > L'un des principaux avantages du client SDK est si vous utilisez le typage dans votre langage de programmation. Cela vous donnera un minimum de garantie au moment de la compilation/transpilation.
 >
-> Nous allons tout faire pour permettre la rétrocompatibilité de nos modifications. Mais vous pouvez tout à fait dans votre intégration continu (CI/CD) récupérer notre document `openapi.json` et tester s'il y a des différences avec le client SDK généré que vous aviez committé auparavant.
+> Bien que nous souhaitions permettre la rétrocompatibilité de nos modifications, vous pouvez tout à fait dans votre intégration continue (CI/CD) récupérer notre document `openapi.json` et émettre une erreur s'il y a des différences avec le client SDK généré que vous aviez committé auparavant.
 
-_(À noter qu'au vu du faible nombre d'endpoints actuellement, vous pouvez aussi coder "en brut" les requêtes malgré quelques avantages perdus)_
+_(À noter qu'au vu du faible nombre d'endpoints actuellement, vous pouvez aussi coder "en brut" les requêtes malgré la perte des quelques avantages mentionnés plus haut)_
 
 ### Tester votre intégration
 
 Nous disposons de 2 environnements :
 
 - Production : https://assistant-declaration.beta.gouv.fr
-- Développement (dans notre cas aussi assimilé à du "staging" / à de l'intégration) : https://assistant-declaration.incubateur.net
+- Développement : https://assistant-declaration.incubateur.net _(dans notre cas aussi assimilé à du "staging" / intégration)_
 
-**La production est réservée à tout usage réel des éditeurs et des déclarants**, donc durant vos tests d'intégration de notre API nous vous demandons de tout faire sur l'environnement de "Développement".
+**La production étant réservée à tout usage réel des éditeurs et des déclarants**, vos tests d'intégration de notre API doivent donc se faire sur l'environnement de "Développement".
 
 Les étapes pour tester :
 
@@ -147,21 +147,21 @@ Les étapes pour tester :
 2. Se connecter
 3. Aller dans l'interface de connexion d'une billetterie et sélectionner la billetterie `Générique`
 4. Utiliser les identifiants proposés dans votre client SDK
-5. Faites vos tests
+5. Faire vos tests
 
 <Alert
   severity="info"
   className={fr.cx('fr-mb-6v')}
-  description={`Les jetons d'accès n'ont pas d'expiration jusqu'à leur renouvellement. Depuis notre interface vous pouvez forcer la génération de nouveau accès, ou supprimer la billetterie en question pour que l'accès soit invalidé.`}
+  description={`Les jetons d'accès n'ont pas d'expiration. Depuis notre interface vous pouvez forcer la génération de nouveaux accès, ou supprimer la billetterie en question pour que l'accès soit invalidé.`}
 />
 
 > Pour tester rapidement l'API vous pouvez importer le document `openapi.json` dans un outil open source comme [Hoppscotch](https://hoppscotch.io) ou [Yaak](https://yaak.app) (équivalents à Postman et Insomnia) afin d'avoir une interface facile à utiliser.
 
 ### Officialiser votre intégration
 
-Bien que vous puissiez proposer à vos clients d'utiliser la billetterie `Générique` pour récupérer des accès à configurer dans les paramètres de votre outil de billetterie, il peut être plus approprié d'avoir votre identité de marque comme cela est fait pour les éditeurs avec une intégration _vers leur API_.
+Bien que vous puissiez proposer à vos clients d'utiliser la billetterie `Générique` pour récupérer des accès à configurer dans les paramètres de votre outil de billetterie, il peut être plus approprié d'avoir votre identité de marque comme cela est fait pour les éditeurs ayant une intégration _vers leur API_.
 
-Pour cela rien de plus simple, veuillez nous contacter pour que l'équipe technique ajuste la plateforme. Nous ferons en sorte de reprendre le connecteur `Générique`, mais à votre nom, avec votre logo et avec une documentation dédiée.
+Pour cela veuillez nous contacter pour que l'équipe technique ajuste la plateforme. Nous ferons en sorte de reprendre le connecteur `Générique`, mais à votre nom, avec votre logo et avec une documentation dédiée.
 
 > Pour faciliter l'usage aux déclarants, nous vous demanderons des captures d'écrans pour illustrer notre tutoriel.
 
@@ -169,4 +169,6 @@ Pour cela rien de plus simple, veuillez nous contacter pour que l'équipe techni
 
 Une fois que l'utilisateur pousse ses données de billetterie sur notre plateforme depuis votre outil, il peut être intéressant de lui proposer d'aller sur notre plateforme pour déclarer ce spectacle.
 
-Plutôt que l'amener sur l'accueil de la plateforme, nous proposons l'utilisation d'un lien stable dans le temps afin d'être redirigé sur la bonne page du spectacle. Pour cela vous devrez fournir dans le lien `l'identifiant de billetterie (A)` ainsi que `l'identifiant de spectacle interne à votre outil (B)` : `https://assistant-declaration.beta.gouv.fr/redirect?target=declaration&ticketingSystemId=${VARIABLE_A}&internalEventSerieId=${VARIABLE_B}`
+Plutôt que l'amener sur l'accueil de la plateforme, nous proposons l'utilisation d'un lien stable dans le temps afin d'être redirigé sur la bonne page du spectacle. Pour cela vous devrez fournir dans le lien `l'identifiant de billetterie (format UUID) [A]` ainsi que `l'identifiant de spectacle interne à votre outil [B]` : `https://assistant-declaration.beta.gouv.fr/redirect?target=declaration&ticketingSystemId=${VARIABLE_A}&internalEventSerieId=${VARIABLE_B}`
+
+_(Ajustez la base de l'URL pour les tests sur l'environnement de développement)_
