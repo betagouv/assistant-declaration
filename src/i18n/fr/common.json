@@ -324,6 +324,7 @@
       "enum": {
         "BILLETWEB": "Billetweb",
         "HELLOASSO": "HelloAsso",
+        "GENERIC": "Billetterie générique",
         "MAPADO": "Mapado",
         "SHOTGUN": "Shotgun",
         "SOTICKET": "SoTicket",

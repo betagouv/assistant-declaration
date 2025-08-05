@@ -1,4 +1,4 @@
-import { ticketingSystemRequiresApiAccessKey } from '@ad/src/core/ticketing/common';
+import { ticketingSystemSettings } from '@ad/src/core/ticketing/common';
 import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
 import {
   ConnectTicketingSystemSchema,
@@ -23,6 +23,8 @@ import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export const ticketingRouter = router({
   connectTicketingSystem: privateProcedure.input(ConnectTicketingSystemSchema).mutation(async ({ ctx, input }) => {
+    const ticketingSettings = ticketingSystemSettings[input.ticketingSystemName];
+
     if (!(await isUserACollaboratorPartOfOrganization(input.organizationId, ctx.user.id))) {
       throw organizationCollaboratorRoleRequiredError;
     }
@@ -38,45 +40,57 @@ export const ticketingRouter = router({
       throw tooManyOrganizationTicketingSystemsError;
     }
 
-    const sameCredentialsOrganization = await prisma.ticketingSystem.findFirst({
-      where: {
-        organizationId: input.organizationId,
-        name: input.ticketingSystemName,
-        deletedAt: null,
-        ...(ticketingSystemRequiresApiAccessKey[input.ticketingSystemName] === true
-          ? {
-              apiAccessKey: input.apiAccessKey,
-            }
-          : {
-              apiSecretKey: input.apiSecretKey,
-            }),
-      },
-    });
+    let apiAccessKey: string | null;
+    let apiSecretKey: string;
 
-    if (sameCredentialsOrganization) {
-      throw alreadyExistingTicketingSystemError;
-    }
+    // Only try to match existing same identifier, and real possible connection when it's a PULL strategy
+    if (ticketingSettings.strategy === 'PULL') {
+      const sameCredentialsOrganization = await prisma.ticketingSystem.findFirst({
+        where: {
+          organizationId: input.organizationId,
+          name: input.ticketingSystemName,
+          deletedAt: null,
+          ...(ticketingSettings.requiresApiAccessKey === true
+            ? {
+                apiAccessKey: input.apiAccessKey,
+              }
+            : {
+                apiSecretKey: input.apiSecretKey,
+              }),
+        },
+      });
 
-    // We want to check the connection to immediately tell the user if the credentials are wrong
-    const ticketingSystemClient = getTicketingSystemClient(
-      {
-        name: input.ticketingSystemName,
-        apiAccessKey: input.apiAccessKey,
-        apiSecretKey: input.apiSecretKey,
-      },
-      ctx.user.id
-    );
+      if (sameCredentialsOrganization) {
+        throw alreadyExistingTicketingSystemError;
+      }
 
-    if (!(await ticketingSystemClient.testConnection())) {
-      throw ticketingSystemConnectionFailedError;
+      // We want to check the connection to immediately tell the user if the credentials are wrong
+      const ticketingSystemClient = getTicketingSystemClient(
+        {
+          name: input.ticketingSystemName,
+          apiAccessKey: input.apiAccessKey,
+          apiSecretKey: input.apiSecretKey,
+        },
+        ctx.user.id
+      );
+
+      if (!(await ticketingSystemClient.testConnection())) {
+        throw ticketingSystemConnectionFailedError;
+      }
+
+      apiAccessKey = input.apiAccessKey;
+      apiSecretKey = input.apiSecretKey;
+    } else {
+      apiAccessKey = input.apiAccessKey;
+      apiSecretKey = input.apiSecretKey;
     }
 
     const newOrganization = await prisma.ticketingSystem.create({
       data: {
         organizationId: input.organizationId,
         name: input.ticketingSystemName,
-        apiAccessKey: input.apiAccessKey,
-        apiSecretKey: input.apiSecretKey,
+        apiAccessKey: apiAccessKey,
+        apiSecretKey: apiSecretKey,
       },
     });
 

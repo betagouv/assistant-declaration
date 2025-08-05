@@ -10,13 +10,14 @@ import { useForm } from 'react-hook-form';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
-import { ticketingSystemRequiresApiAccessKey } from '@ad/src/core/ticketing/common';
+import { ticketingSystemSettings } from '@ad/src/core/ticketing/common';
 import {
   UpdateTicketingSystemPrefillSchemaType,
   UpdateTicketingSystemSchema,
   UpdateTicketingSystemSchemaType,
 } from '@ad/src/models/actions/ticketing';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export interface UpdateTicketingSystemFormProps {
   ticketingSystem: TicketingSystemSchemaType;
@@ -55,7 +56,14 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
   const handleClickShowApiSecretKey = () => setShowApiSecretKey(!showApiSecretKey);
   const handleMouseDownShowApiSecretKey = () => setShowApiSecretKey(!showApiSecretKey);
 
-  const displayApiAccessKey = useMemo(() => ticketingSystemRequiresApiAccessKey[props.ticketingSystem.name], [props.ticketingSystem.name]);
+  const displayApiAccessKey = useMemo(() => {
+    const ticketingSettings = ticketingSystemSettings[props.ticketingSystem.name];
+
+    // This form should not be used for push strategy
+    assert(ticketingSettings.strategy === 'PULL');
+
+    return ticketingSettings.requiresApiAccessKey;
+  }, [props.ticketingSystem.name]);
 
   return (
     <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="créer une organisation">

@@ -6,13 +6,13 @@ import { Alert, Button, Grid, IconButton, InputAdornment, Link, MenuItem, TextFi
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
-import { ticketingSystemRequiresApiAccessKey } from '@ad/src/core/ticketing/common';
+import { ticketingSystemSettings } from '@ad/src/core/ticketing/common';
 import {
   ConnectTicketingSystemPrefillSchemaType,
   ConnectTicketingSystemSchema,
@@ -76,9 +76,11 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
   const handleClickShowApiSecretKey = () => setShowApiSecretKey(!showApiSecretKey);
   const handleMouseDownShowApiSecretKey = () => setShowApiSecretKey(!showApiSecretKey);
 
+  const [displayApiForm, setDisplayApiForm] = useState(true);
   const [displayApiAccessKey, setDisplayApiAccessKey] = useState(true);
 
   const watchedTicketingSystemName = watch('ticketingSystemName');
+  const ticketingSettings = useMemo(() => ticketingSystemSettings[watchedTicketingSystemName], [watchedTicketingSystemName]);
 
   useEffect(() => {
     // Casting because otherwise it complexifies the whole form validation logic
@@ -90,15 +92,21 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
 
     setShowOtherIndication(false);
 
-    const required = ticketingSystemRequiresApiAccessKey[watchedTicketingSystemName];
+    // Reset any value if its field is not required so it's not passed when submitting (empty string will be converted to null)
+    if (ticketingSettings.strategy === 'PUSH') {
+      setDisplayApiForm(false);
+    } else {
+      setDisplayApiForm(true);
 
-    setDisplayApiAccessKey(required);
+      const required = ticketingSettings.requiresApiAccessKey;
 
-    // Reset the value if the field is not required so it's not passed when submitting (empty string will be converted to null)
-    if (!required) {
-      setValue('apiAccessKey', '');
+      setDisplayApiAccessKey(required);
+
+      if (!required) {
+        setValue('apiAccessKey', '');
+      }
     }
-  }, [watchedTicketingSystemName, setValue]);
+  }, [ticketingSettings, setValue]);
 
   return (
     <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="créer une organisation">
@@ -130,75 +138,89 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
         </Grid>
       ) : (
         <>
-          {displayApiAccessKey && (
-            <Grid item xs={12}>
-              <TextField
-                type="text"
-                label="Identifiant utilisateur"
-                {...register('apiAccessKey')}
-                autoComplete="off"
-                error={!!errors.apiAccessKey}
-                helperText={errors?.apiAccessKey?.message}
-                fullWidth
-              />
-            </Grid>
+          {displayApiForm ? (
+            <>
+              {displayApiAccessKey && (
+                <Grid item xs={12}>
+                  <TextField
+                    type="text"
+                    label="Identifiant utilisateur"
+                    {...register('apiAccessKey')}
+                    autoComplete="off"
+                    error={!!errors.apiAccessKey}
+                    helperText={errors?.apiAccessKey?.message}
+                    fullWidth
+                  />
+                </Grid>
+              )}
+              <Grid item xs={12}>
+                <TextField
+                  type="text"
+                  label="Clé d'accès"
+                  {...register('apiSecretKey')}
+                  autoComplete="off"
+                  error={!!errors.apiSecretKey}
+                  helperText={errors?.apiSecretKey?.message}
+                  fullWidth
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="changer la visibilité de la clé d'accès"
+                          onClick={handleClickShowApiSecretKey}
+                          onMouseDown={handleMouseDownShowApiSecretKey}
+                        >
+                          {showApiSecretKey ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& input': {
+                      // When using `type="password"` Chrome was forcing autofilling password despite the `autocomplete="off"`, so using a text input with password style
+                      // Note: this webkit property is broadly adopted so it's fine, and in case it's not, we are fine it's not like a standard password (should be longer than input display...)
+                      WebkitTextSecurity: showApiSecretKey ? 'none' : 'disc',
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Alert severity="info">
+                  Nous vous recommandons de suivre{' '}
+                  <Link
+                    component={NextLink}
+                    href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
+                    target="_blank"
+                    onClick={() => {
+                      push(['trackEvent', 'ticketing', 'openHowTo', 'system', getValues('ticketingSystemName')]);
+                    }}
+                    underline="none"
+                    sx={{
+                      '&::after': {
+                        display: 'none !important',
+                      },
+                    }}
+                  >
+                    notre tutoriel pour bien configurer et récupérer les options de connexion
+                  </Link>{' '}
+                  à nous fournir.
+                </Alert>
+              </Grid>
+            </>
+          ) : (
+            <>
+              <Grid item xs={12}>
+                <Alert severity="info">
+                  Ce système de billetterie va nécessiter que l'on vous crée des identifiants qu'il faudra ensuite rentrer dans l'interface de leur
+                  outil.
+                </Alert>
+              </Grid>
+            </>
           )}
-          <Grid item xs={12}>
-            <TextField
-              type="text"
-              label="Clé d'accès"
-              {...register('apiSecretKey')}
-              autoComplete="off"
-              error={!!errors.apiSecretKey}
-              helperText={errors?.apiSecretKey?.message}
-              fullWidth
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="changer la visibilité de la clé d'accès"
-                      onClick={handleClickShowApiSecretKey}
-                      onMouseDown={handleMouseDownShowApiSecretKey}
-                    >
-                      {showApiSecretKey ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& input': {
-                  // When using `type="password"` Chrome was forcing autofilling password despite the `autocomplete="off"`, so using a text input with password style
-                  // Note: this webkit property is broadly adopted so it's fine, and in case it's not, we are fine it's not like a standard password (should be longer than input display...)
-                  WebkitTextSecurity: showApiSecretKey ? 'none' : 'disc',
-                },
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Alert severity="info">
-              Nous vous recommandons de suivre{' '}
-              <Link
-                component={NextLink}
-                href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
-                target="_blank"
-                onClick={() => {
-                  push(['trackEvent', 'ticketing', 'openHowTo', 'system', getValues('ticketingSystemName')]);
-                }}
-                underline="none"
-                sx={{
-                  '&::after': {
-                    display: 'none !important',
-                  },
-                }}
-              >
-                notre tutoriel pour bien configurer et récupérer les options de connexion
-              </Link>{' '}
-              à nous fournir.
-            </Alert>
-          </Grid>
+
           <Grid item xs={12}>
             <Button type="submit" loading={connectTicketingSystem.isPending} size="large" variant="contained" fullWidth>
-              Tester et connecter
+              {displayApiForm ? `Tester et connecter` : `Activer`}
             </Button>
           </Grid>
         </>

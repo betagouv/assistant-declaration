@@ -156,6 +156,7 @@ model Organization {
 enum TicketingSystemName {
   BILLETWEB
   HELLOASSO
+  GENERIC // Default to push
   MAPADO
   SHOTGUN
   SOTICKET

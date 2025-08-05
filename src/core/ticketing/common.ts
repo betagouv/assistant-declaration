@@ -1,16 +1,46 @@
 import { set } from 'date-fns';
 
 import { LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
-import { TicketingSystemNameSchemaType } from '@ad/src/models/entities/ticketing';
+import { TicketingSystemNameSchemaType, TicketingSystemStrategySchemaType } from '@ad/src/models/entities/ticketing';
 import { sleep } from '@ad/src/utils/sleep';
 
-export const ticketingSystemRequiresApiAccessKey: Record<TicketingSystemNameSchemaType, boolean> = {
-  BILLETWEB: true,
-  HELLOASSO: true,
-  MAPADO: false,
-  SHOTGUN: true,
-  SOTICKET: true,
-  SUPERSONIKS: true,
+export const ticketingSystemSettings: Record<
+  TicketingSystemNameSchemaType,
+  | {
+      strategy: Extract<TicketingSystemStrategySchemaType, 'PULL'>;
+      requiresApiAccessKey: boolean;
+    }
+  | {
+      strategy: Extract<TicketingSystemStrategySchemaType, 'PUSH'>;
+    }
+> = {
+  BILLETWEB: {
+    strategy: 'PULL',
+    requiresApiAccessKey: true,
+  },
+  HELLOASSO: {
+    strategy: 'PULL',
+    requiresApiAccessKey: true,
+  },
+  GENERIC: {
+    strategy: 'PUSH',
+  },
+  MAPADO: {
+    strategy: 'PULL',
+    requiresApiAccessKey: false,
+  },
+  SHOTGUN: {
+    strategy: 'PULL',
+    requiresApiAccessKey: true,
+  },
+  SOTICKET: {
+    strategy: 'PULL',
+    requiresApiAccessKey: true,
+  },
+  SUPERSONIKS: {
+    strategy: 'PULL',
+    requiresApiAccessKey: true,
+  },
 };
 
 export interface TicketingSystemClient {
