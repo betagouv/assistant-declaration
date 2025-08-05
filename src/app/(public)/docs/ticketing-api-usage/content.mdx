@@ -132,30 +132,41 @@ Le plus simple pour bien choisir votre "générateur de client SDK" est de regar
 
 _(À noter qu'au vu du faible nombre d'endpoints actuellement, vous pouvez aussi coder "en brut" les requêtes malgré quelques avantages perdus)_
 
-...
+### Tester votre intégration
 
----
+Nous disposons de 2 environnements :
 
-TODO:
+- Production : https://assistant-declaration.beta.gouv.fr
+- Développement (dans notre cas aussi assimilé à du "staging" / à de l'intégration) : https://assistant-declaration.incubateur.net
 
-- comment l'user crée son compte
-- chaque nouvel éditeur doit se déclarer pour qu'on lui créer une "card" dédié avec son nom
-- à disposition s'il y a le moindre souci
-- lien unique pour tomber sur la bonne déclaration dans notre outil (il doit être get par un appel... car il pourrait changer)
-- tester sur la dev ...
-- on doit créer un identifiant pour eux en base ? ou pas ... ? mais pour faire leurs tests... hmm
-- TODO: quid des tarifs avec des promotions à l'achat
+**La production est réservée à tout usage réel des éditeurs et des déclarants**, donc durant vos tests d'intégration de notre API nous vous demandons de tout faire sur l'environnement de "Développement".
 
-* import postman du schema openapi pour tester..
+Les étapes pour tester :
 
-  .
+1. Se créer un compte
+2. Se connecter
+3. Aller dans l'interface de connexion d'une billetterie et sélectionner la billetterie `Générique`
+4. Utiliser les identifiants proposés dans votre client SDK
+5. Faites vos tests
 
-* comment cela devrait être pour l'user (dans l'interface ...), aussi token unique par utilisateur
+<Alert
+  severity="info"
+  className={fr.cx('fr-mb-6v')}
+  description={`Les jetons d'accès n'ont pas d'expiration jusqu'à leur renouvellement. Depuis notre interface vous pouvez forcer la génération de nouveau accès, ou supprimer la billetterie en question pour que l'accès soit invalidé.`}
+/>
 
-### aaa
+> Pour tester rapidement l'API vous pouvez importer le document `openapi.json` dans un outil open source comme [Hoppscotch](https://hoppscotch.io) ou [Yaak](https://yaak.app) (équivalents à Postman et Insomnia) afin d'avoir une interface facile à utiliser.
 
-aaa
+### Officialiser votre intégration
 
-### bbb
+Bien que vous puissiez proposer à vos clients d'utiliser la billetterie `Générique` pour récupérer des accès à configurer dans les paramètres de votre outil de billetterie, il peut être plus approprié d'avoir votre identité de marque comme cela est fait pour les éditeurs avec une intégration _vers leur API_.
 
-bbb
+Pour cela rien de plus simple, veuillez nous contacter pour que l'équipe technique ajuste la plateforme. Nous ferons en sorte de reprendre le connecteur `Générique`, mais à votre nom, avec votre logo et avec une documentation dédiée.
+
+> Pour faciliter l'usage aux déclarants, nous vous demanderons des captures d'écrans pour illustrer notre tutoriel.
+
+### Rediriger votre client sur la bonne déclaration
+
+Une fois que l'utilisateur pousse ses données de billetterie sur notre plateforme depuis votre outil, il peut être intéressant de lui proposer d'aller sur notre plateforme pour déclarer ce spectacle.
+
+Plutôt que l'amener sur l'accueil de la plateforme, nous proposons l'utilisation d'un lien stable dans le temps afin d'être redirigé sur la bonne page du spectacle. Pour cela vous devrez fournir dans le lien `l'identifiant de billetterie (A)` ainsi que `l'identifiant de spectacle interne à votre outil (B)` : `https://assistant-declaration.beta.gouv.fr/redirect?target=declaration&ticketingSystemId=${VARIABLE_A}&internalEventSerieId=${VARIABLE_B}`
