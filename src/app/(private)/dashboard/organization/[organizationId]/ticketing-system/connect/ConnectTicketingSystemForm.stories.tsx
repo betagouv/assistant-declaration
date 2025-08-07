@@ -32,10 +32,18 @@ const defaultMswParameters = {
 
           const ticketingSettings = ticketingSystemSettings[parameters.ticketingSystemName];
 
-          return {
-            ticketingSystem: ticketingSystems[0],
-            pushStrategyToken: ticketingSettings.strategy === 'PUSH' ? 'e1722981ebe9055a61a44f21bc2a037b1fd197127654f6f84b5424039a5e5866' : undefined,
-          };
+          return ticketingSettings.strategy === 'PUSH'
+            ? {
+                ticketingSystem: {
+                  ...ticketingSystems[0],
+                  name: parameters.ticketingSystemName, // To respect any check, set the requested ticketing system
+                },
+                pushStrategyToken: 'e1722981ebe9055a61a44f21bc2a037b1fd197127654f6f84b5424039a5e5866',
+              }
+            : {
+                ticketingSystem: ticketingSystems[0],
+                pushStrategyToken: undefined,
+              };
         },
       }),
     ],
