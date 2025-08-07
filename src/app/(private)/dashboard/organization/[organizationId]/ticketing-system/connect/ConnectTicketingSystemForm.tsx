@@ -86,12 +86,14 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
           title: `Étape importante`,
           description: (
             <>
-              Vous devez maintenant configurer dans l'outil de votre éditeur de billetterie les identifiants suivants afin qu'il puisse nous
+              Vous devez maintenant configurer dans l&apos;outil de votre éditeur de billetterie les identifiants suivants afin qu&apos;il puisse nous
               transférer les données de billetterie.
               <Alert severity="warning">
-                <Typography sx={{ fontWeight: 'bold' }}>Pour des raisons de sécurité, la clé d'accès n'est visibile qu'une seule fois.</Typography>
-                Si vous ne configurez pas tout de suite votre outil de billetterie, gardez temporairement la clé d'accès dans un fichier sur votre
-                ordinateur.
+                <Typography sx={{ fontWeight: 'bold' }}>
+                  Pour des raisons de sécurité, la clé d&apos;accès n&apos;est visibile qu&apos;une seule fois.
+                </Typography>
+                Si vous ne configurez pas tout de suite votre outil de billetterie, gardez temporairement la clé d&apos;accès dans un fichier sur
+                votre ordinateur.
               </Alert>
               {/* Identifiant */}
               {/* PWD */}
@@ -105,7 +107,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
         onComplete();
       }
     },
-    [connectTicketingSystem, onboardingFlow, router, showOtherIndication, props.prefill]
+    [connectTicketingSystem, onboardingFlow, router, showOtherIndication, props.prefill, showConfirmationDialog]
   );
 
   const [showApiSecretKey, setShowApiSecretKey] = useState(false);
@@ -142,7 +144,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
         setValue('pullStrategyCredentials.apiAccessKey', '');
       }
     }
-  }, [ticketingSettings, setValue]);
+  }, [ticketingSettings, setValue, watchedTicketingSystemName]);
 
   return (
     <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="connecter un système de billetterie">
@@ -247,8 +249,8 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
             <>
               <Grid item xs={12}>
                 <Alert severity="info">
-                  Ce système de billetterie va nécessiter que l'on vous crée des identifiants qu'il faudra ensuite rentrer dans l'interface de leur
-                  outil.
+                  Ce système de billetterie va nécessiter que l&apos;on vous crée des identifiants qu&apos;il faudra ensuite rentrer dans
+                  l&apos;interface de leur outil.
                 </Alert>
               </Grid>
             </>

@@ -41,7 +41,17 @@ export function DocsLayout(props: PropsWithChildren) {
       docsTicketingApiUsageLinkActive: hasPathnameThisMatch(pathname, docsTicketingApiUsageLink),
       docsTicketingApiDefinitionLinkActive: hasPathnameThisMatch(pathname, docsTicketingApiDefinitionLink),
     };
-  }, [pathname]);
+  }, [
+    pathname,
+    docsBilletwebConnectionLink,
+    docsHelloassoConnectionLink,
+    docsMapadoConnectionLink,
+    docsShotgunConnectionLink,
+    docsSoticketConnectionLink,
+    docsSupersoniksConnectionLink,
+    docsTicketingApiUsageLink,
+    docsTicketingApiDefinitionLink,
+  ]);
 
   // A few pages need to be larger to due to content
   const widerContainer = useMemo(() => docsTicketingApiDefinitionLinkActive, [docsTicketingApiDefinitionLinkActive]);
