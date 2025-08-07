@@ -130,7 +130,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
 
     // Reset any value if its field is not required so it's not passed when submitting (empty string will be converted to null)
     if (ticketingSettings.strategy === 'PUSH') {
-      setDisplayApiForm(false);
+      setDisplayApiForm(true);
     } else {
       setDisplayApiForm(true);
 
@@ -139,13 +139,13 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
       setDisplayApiAccessKey(required);
 
       if (!required) {
-        setValue('apiAccessKey', '');
+        setValue('pullStrategyCredentials.apiAccessKey', '');
       }
     }
   }, [ticketingSettings, setValue]);
 
   return (
-    <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="créer une organisation">
+    <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="connecter un système de billetterie">
       <Grid item xs={12}>
         <TextField
           select

@@ -23,6 +23,8 @@ import { isUserACollaboratorPartOfOrganization, isUserACollaboratorPartOfOrganiz
 import { privateProcedure, router } from '@ad/src/server/trpc';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
+const pushStrategyTokenLength = 64;
+
 export const ticketingRouter = router({
   connectTicketingSystem: privateProcedure.input(ConnectTicketingSystemSchema).mutation(async ({ ctx, input }) => {
     const ticketingSettings = ticketingSystemSettings[input.ticketingSystemName];
@@ -47,6 +49,8 @@ export const ticketingRouter = router({
 
     // Only try to match existing same identifier, and real possible connection when it's a PULL strategy
     if (ticketingSettings.strategy === 'PULL') {
+      assert(input.pullStrategyCredentials);
+
       const sameCredentialsOrganization = await prisma.ticketingSystem.findFirst({
         where: {
           organizationId: input.organizationId,
@@ -54,10 +58,10 @@ export const ticketingRouter = router({
           deletedAt: null,
           ...(ticketingSettings.requiresApiAccessKey === true
             ? {
-                apiAccessKey: input.apiAccessKey,
+                apiAccessKey: input.pullStrategyCredentials.apiAccessKey,
               }
             : {
-                apiSecretKey: input.apiSecretKey,
+                apiSecretKey: input.pullStrategyCredentials.apiSecretKey,
               }),
         },
       });
@@ -70,8 +74,8 @@ export const ticketingRouter = router({
       const ticketingSystemClient = getTicketingSystemClient(
         {
           name: input.ticketingSystemName,
-          apiAccessKey: input.apiAccessKey,
-          apiSecretKey: input.apiSecretKey,
+          apiAccessKey: input.pullStrategyCredentials.apiAccessKey,
+          apiSecretKey: input.pullStrategyCredentials.apiSecretKey,
         },
         ctx.user.id
       );
@@ -80,14 +84,14 @@ export const ticketingRouter = router({
         throw ticketingSystemConnectionFailedError;
       }
 
-      apiAccessKey = input.apiAccessKey;
-      apiSecretKey = input.apiSecretKey;
+      apiAccessKey = input.pullStrategyCredentials.apiAccessKey;
+      apiSecretKey = input.pullStrategyCredentials.apiSecretKey;
     } else {
       const tokenLength = 64;
 
       // In case of a PUSH strategy we use the ticketing system ID as identifier, and a generated readable api secret
       apiAccessKey = null;
-      apiSecretKey = crypto.randomBytes(tokenLength / 2).toString('hex'); // 1 byte = 2 chars with hexa
+      apiSecretKey = crypto.randomBytes(pushStrategyTokenLength / 2).toString('hex'); // 1 byte = 2 chars with hexa
     }
 
     const newTicketingSystem = await prisma.ticketingSystem.create({
@@ -141,6 +145,8 @@ export const ticketingRouter = router({
     };
   }),
   updateTicketingSystem: privateProcedure.input(UpdateTicketingSystemSchema).mutation(async ({ ctx, input }) => {
+    const ticketingSettings = ticketingSystemSettings[input.ticketingSystemName];
+
     const ticketingSystem = await prisma.ticketingSystem.findUnique({
       where: {
         id: input.ticketingSystemId,
@@ -161,18 +167,32 @@ export const ticketingRouter = router({
     // We have the `name` in the input only to properly ajust the validation on passed credentials
     assert(input.ticketingSystemName === ticketingSystem.name);
 
-    // We want to check the connection to immediately tell the user if the credentials are wrong
-    const ticketingSystemClient = getTicketingSystemClient(
-      {
-        name: ticketingSystem.name,
-        apiAccessKey: input.apiAccessKey,
-        apiSecretKey: input.apiSecretKey,
-      },
-      ctx.user.id
-    );
+    let apiAccessKey: string | null;
+    let apiSecretKey: string;
 
-    if (!(await ticketingSystemClient.testConnection())) {
-      throw ticketingSystemConnectionFailedError;
+    if (ticketingSettings.strategy === 'PULL') {
+      assert(input.pullStrategyCredentials);
+
+      // We want to check the connection to immediately tell the user if the credentials are wrong
+      const ticketingSystemClient = getTicketingSystemClient(
+        {
+          name: ticketingSystem.name,
+          apiAccessKey: input.pullStrategyCredentials.apiAccessKey,
+          apiSecretKey: input.pullStrategyCredentials.apiSecretKey,
+        },
+        ctx.user.id
+      );
+
+      if (!(await ticketingSystemClient.testConnection())) {
+        throw ticketingSystemConnectionFailedError;
+      }
+
+      apiAccessKey = input.pullStrategyCredentials.apiAccessKey;
+      apiSecretKey = input.pullStrategyCredentials.apiSecretKey;
+    } else {
+      // In case of a PUSH strategy we use the ticketing system ID as identifier, and a generated readable api secret
+      apiAccessKey = null;
+      apiSecretKey = crypto.randomBytes(pushStrategyTokenLength / 2).toString('hex'); // 1 byte = 2 chars with hexa
     }
 
     const updatedTicketingSystem = await prisma.ticketingSystem.update({
@@ -180,13 +200,14 @@ export const ticketingRouter = router({
         id: ticketingSystem.id,
       },
       data: {
-        apiAccessKey: input.apiAccessKey,
-        apiSecretKey: input.apiSecretKey,
+        apiAccessKey: apiAccessKey,
+        apiSecretKey: apiSecretKey,
       },
     });
 
     return {
       ticketingSystem: ticketingSystemPrismaToModel(updatedTicketingSystem),
+      pushStrategyToken: ticketingSettings.strategy === 'PUSH' ? apiSecretKey : undefined,
     };
   }),
   disconnectTicketingSystem: privateProcedure.input(DisconnectTicketingSystemSchema).mutation(async ({ ctx, input }) => {

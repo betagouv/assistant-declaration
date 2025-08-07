@@ -25,6 +25,7 @@ const defaultMswParameters = {
         path: ['updateTicketingSystem'],
         response: {
           ticketingSystem: ticketingSystems[0],
+          pushStrategyToken: undefined,
         },
       }),
     ],
@@ -50,8 +51,10 @@ const FilledStory = Template.bind({});
 FilledStory.args = {
   ticketingSystem: ticketingSystems[0],
   prefill: UpdateTicketingSystemPrefillSchema.parse({
-    apiAccessKey: '123456789',
-    apiSecretKey: '123456789',
+    pullStrategyCredentials: {
+      apiAccessKey: '123456789',
+      apiSecretKey: '123456789',
+    },
   }),
 };
 FilledStory.parameters = { ...defaultMswParameters };

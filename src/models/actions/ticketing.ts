@@ -2,7 +2,7 @@ import z from 'zod';
 
 import { ticketingSystemSettings } from '@ad/src/core/ticketing/common';
 import { GetterInputSchema } from '@ad/src/models/actions/common';
-import { supersoniksAccessKeyInvalidDomainNameError } from '@ad/src/models/entities/errors';
+import { invalidTicketingSystemCredentialsError, supersoniksAccessKeyInvalidDomainNameError } from '@ad/src/models/entities/errors';
 import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { TicketingSystemNameSchemaType, TicketingSystemSchema } from '@ad/src/models/entities/ticketing';
@@ -19,9 +19,15 @@ function preprocessDependingOnTicketingSystem(data: any, ctx: any) {
   const ticketingSettings = ticketingSystemSettings[data.ticketingSystemName as TicketingSystemNameSchemaType];
 
   if (ticketingSettings.strategy === 'PUSH') {
-    data = { ...structuredClone(data), apiAccessKey: null, apiSecretKey: null };
+    data = { ...structuredClone(data), pullStrategyCredentials: null };
   } else if (ticketingSettings.requiresApiAccessKey === false && data.apiAccessKey === '') {
-    data = { ...structuredClone(data), apiAccessKey: null };
+    data = {
+      ...structuredClone(data),
+      pullStrategyCredentials: {
+        ...data.pullStrategyCredentials,
+        apiAccessKey: null,
+      },
+    };
   }
 
   return data;
@@ -31,8 +37,12 @@ const rawConnectTicketingSystemSchema = z
   .object({
     organizationId: OrganizationSchema.shape.id,
     ticketingSystemName: TicketingSystemSchema.shape.name,
-    apiAccessKey: z.string().min(1).nullable(),
-    apiSecretKey: z.string().min(1),
+    pullStrategyCredentials: z
+      .object({
+        apiAccessKey: z.string().min(1).nullable(),
+        apiSecretKey: z.string().min(1),
+      })
+      .nullable(),
   })
   .strict();
 
@@ -40,10 +50,20 @@ export const ConnectTicketingSystemSchema = applyTypedParsers(
   z.preprocess(
     preprocessDependingOnTicketingSystem,
     rawConnectTicketingSystemSchema.superRefine((data, ctx) => {
+      const ticketingSettings = ticketingSystemSettings[data.ticketingSystemName as TicketingSystemNameSchemaType];
+
+      // Since managing PULL and PUSH strategies within the same mutation, we make sure of the logic
+      if (
+        (ticketingSettings.strategy === 'PULL' && data.pullStrategyCredentials === null) ||
+        (ticketingSettings.strategy === 'PUSH' && data.pullStrategyCredentials !== null)
+      ) {
+        ctx.addIssue(customErrorToZodIssue(invalidTicketingSystemCredentialsError));
+      }
+
       if (
         (data.ticketingSystemName === 'SUPERSONIKS' || data.ticketingSystemName === 'SOTICKET') &&
-        data.apiAccessKey &&
-        !domainNameRegexp.test(data.apiAccessKey)
+        data.pullStrategyCredentials?.apiAccessKey &&
+        !domainNameRegexp.test(data.pullStrategyCredentials.apiAccessKey)
       ) {
         ctx.addIssue(customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError));
       }
@@ -69,8 +89,7 @@ const rawUpdateTicketingSystemSchema = applyTypedParsers(
   z.object({
     ticketingSystemId: TicketingSystemSchema.shape.id,
     ticketingSystemName: TicketingSystemSchema.shape.name,
-    apiAccessKey: rawConnectTicketingSystemSchema.shape.apiAccessKey,
-    apiSecretKey: rawConnectTicketingSystemSchema.shape.apiSecretKey,
+    pullStrategyCredentials: rawConnectTicketingSystemSchema.shape.pullStrategyCredentials,
   })
 );
 
@@ -78,12 +97,22 @@ export const UpdateTicketingSystemSchema = applyTypedParsers(
   z.preprocess(
     preprocessDependingOnTicketingSystem, // Despite this transformer, if PUSH strategy is used it will be reject by the endpoint
     rawUpdateTicketingSystemSchema.superRefine((data, ctx) => {
+      const ticketingSettings = ticketingSystemSettings[data.ticketingSystemName as TicketingSystemNameSchemaType];
+
       if (
         (data.ticketingSystemName === 'SUPERSONIKS' || data.ticketingSystemName === 'SOTICKET') &&
-        data.apiAccessKey &&
-        !domainNameRegexp.test(data.apiAccessKey)
+        data.pullStrategyCredentials?.apiAccessKey &&
+        !domainNameRegexp.test(data.pullStrategyCredentials.apiAccessKey)
       ) {
         ctx.addIssue(customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError));
+      }
+
+      // Since managing PULL and PUSH strategies within the same mutation, we make sure of the logic
+      if (
+        (ticketingSettings.strategy === 'PULL' && data.pullStrategyCredentials === null) ||
+        (ticketingSettings.strategy === 'PUSH' && data.pullStrategyCredentials !== null)
+      ) {
+        ctx.addIssue(customErrorToZodIssue(invalidTicketingSystemCredentialsError));
       }
     })
   )

@@ -55,8 +55,10 @@ FilledStory.args = {
   prefill: ConnectTicketingSystemPrefillSchema.parse({
     organizationId: organizations[0].id,
     ticketingSystemName: 'BILLETWEB',
-    apiAccessKey: '123456789',
-    apiSecretKey: '123456789',
+    pullStrategyCredentials: {
+      apiAccessKey: '123456789',
+      apiSecretKey: '123456789',
+    },
   }),
 };
 FilledStory.parameters = { ...defaultMswParameters };

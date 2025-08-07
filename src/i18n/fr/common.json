@@ -36,6 +36,7 @@
       "helloassoMissingTier": "malheureusement nous n'arrivons pas à récupérer l'un des tarifs de vos événements auprès de HelloAsso. Veuillez contacter notre support pour que l'on puisse investiguer cette anomalie",
       "internalServerError": "une erreur interne est survenue, veuillez retenter",
       "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",
+      "invalidTicketingSystemCredentials": "les identifiants joints ne correspondent pas au système de billetterie choisi",
       "invalidVerificationToken": "l'opération que vous essayez de réaliser a été refusée",
       "missingBilletwebEventsRights": "la clé d'identification Billetweb que vous nous avez fournie est restreinte à certains événements. Il est nécessaire de la régler en \"Tous sélectionnés\" pour que nous puissions synchroniser vos données.",
       "multipleUserOrganizationsCreation": "vous ne pouvez créer une nouvelle organisation étant déjà rattachée à une. Si c'est un besoin confirmé, veuillez contacter notre support",
