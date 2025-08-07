@@ -130,7 +130,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
 
     // Reset any value if its field is not required so it's not passed when submitting (empty string will be converted to null)
     if (ticketingSettings.strategy === 'PUSH') {
-      setDisplayApiForm(true);
+      setDisplayApiForm(false);
     } else {
       setDisplayApiForm(true);
 
@@ -181,10 +181,10 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
                   <TextField
                     type="text"
                     label="Identifiant utilisateur"
-                    {...register('apiAccessKey')}
+                    {...register('pullStrategyCredentials.apiAccessKey')}
                     autoComplete="off"
-                    error={!!errors.apiAccessKey}
-                    helperText={errors?.apiAccessKey?.message}
+                    error={!!errors.pullStrategyCredentials?.apiAccessKey}
+                    helperText={errors?.pullStrategyCredentials?.apiAccessKey?.message}
                     fullWidth
                   />
                 </Grid>
@@ -193,10 +193,10 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
                 <TextField
                   type="text"
                   label="Clé d'accès"
-                  {...register('apiSecretKey')}
+                  {...register('pullStrategyCredentials.apiSecretKey')}
                   autoComplete="off"
-                  error={!!errors.apiSecretKey}
-                  helperText={errors?.apiSecretKey?.message}
+                  error={!!errors.pullStrategyCredentials?.apiSecretKey}
+                  helperText={errors?.pullStrategyCredentials?.apiSecretKey?.message}
                   fullWidth
                   InputProps={{
                     endAdornment: (

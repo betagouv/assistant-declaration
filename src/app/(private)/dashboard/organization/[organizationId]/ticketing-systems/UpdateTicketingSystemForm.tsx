@@ -66,16 +66,16 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
   }, [props.ticketingSystem.name]);
 
   return (
-    <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="créer une organisation">
+    <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="mettre à jour un système de billetterie">
       {displayApiAccessKey && (
         <Grid item xs={12}>
           <TextField
             type="text"
             label="Identifiant utilisateur"
-            {...register('apiAccessKey')}
+            {...register('pullStrategyCredentials.apiAccessKey')}
             autoComplete="off"
-            error={!!errors.apiAccessKey}
-            helperText={errors?.apiAccessKey?.message}
+            error={!!errors.pullStrategyCredentials?.apiAccessKey}
+            helperText={errors?.pullStrategyCredentials?.apiAccessKey?.message}
             fullWidth
           />
         </Grid>
@@ -84,10 +84,10 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
         <TextField
           type="text"
           label="Clé d'accès"
-          {...register('apiSecretKey')}
+          {...register('pullStrategyCredentials.apiSecretKey')}
           autoComplete="off"
-          error={!!errors.apiSecretKey}
-          helperText={errors?.apiSecretKey?.message}
+          error={!!errors.pullStrategyCredentials?.apiSecretKey}
+          helperText={errors?.pullStrategyCredentials?.apiSecretKey?.message}
           fullWidth
           InputProps={{
             endAdornment: (
