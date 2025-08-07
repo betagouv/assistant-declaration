@@ -3,6 +3,7 @@ import { Meta, StoryFn } from '@storybook/react';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindForm } from '@ad/.storybook/testing';
 import { ConnectTicketingSystemForm } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-system/connect/ConnectTicketingSystemForm';
+import { ticketingSystemSettings } from '@ad/src/core/ticketing/common';
 import { organizations } from '@ad/src/fixtures/organization';
 import { ticketingSystems } from '@ad/src/fixtures/ticketing';
 import { ConnectTicketingSystemPrefillSchema } from '@ad/src/models/actions/ticketing';
@@ -24,9 +25,13 @@ const defaultMswParameters = {
       getTRPCMock({
         type: 'mutation',
         path: ['connectTicketingSystem'],
-        response: {
-          ticketingSystem: ticketingSystems[0],
-          pushStrategyToken: undefined,
+        response: (params) => {
+          const ticketingSettings = ticketingSystemSettings[params.ticketingSystemName];
+
+          return {
+            ticketingSystem: ticketingSystems[0],
+            pushStrategyToken: ticketingSettings.strategy === 'PUSH' ? 'e1722981ebe9055a61a44f21bc2a037b1fd197127654f6f84b5424039a5e5866' : undefined,
+          };
         },
       }),
     ],
@@ -75,20 +80,7 @@ PushStrategyStory.args = {
     ticketingSystemName: 'GENERIC',
   }),
 };
-PushStrategyStory.parameters = {
-  msw: {
-    handlers: [
-      getTRPCMock({
-        type: 'mutation',
-        path: ['connectTicketingSystem'],
-        response: {
-          ticketingSystem: { ...ticketingSystems[0], name: 'GENERIC' },
-          pushStrategyToken: 'e1722981ebe9055a61a44f21bc2a037b1fd197127654f6f84b5424039a5e5866',
-        },
-      }),
-    ],
-  },
-};
+PushStrategyStory.parameters = { ...defaultMswParameters };
 PushStrategyStory.play = async ({ canvasElement }) => {
   await playFindForm(canvasElement);
 };

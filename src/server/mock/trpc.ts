@@ -35,7 +35,7 @@ export const getTRPCMock = <
   O extends RouterOutputs[K1], // all its keys
 >(endpoint: {
   path: [K1];
-  response: O | Error; // Ideally `response` should satisfies `O` instead of extending to avoid mistake when merging objects with wrong properties but there is no solution for now (ref: https://github.com/microsoft/TypeScript/issues/51556)
+  response: O | Error | ((params: RouterInputs[K1]) => O) | ((params: RouterInputs[K1]) => Error); // Ideally `response` should satisfies `O` instead of extending to avoid mistake when merging objects with wrong properties but there is no solution for now (ref: https://github.com/microsoft/TypeScript/issues/51556)
   type?: 'query' | 'mutation' | 'subscription';
   delayHook?: (request: StrictRequest<DefaultBodyType>, params: RouterInputs[K1]) => number | DelayMode | null;
 }) => {
@@ -44,26 +44,29 @@ export const getTRPCMock = <
   const route = `${mockBaseUrl}/api/trpc/${endpoint.path[0]}`;
 
   return fn(route, async (info) => {
-    const isResponseAnError = (endpoint.response as any) instanceof Error;
+    let params: RouterInputs[K1];
+    if (endpoint.type === 'query') {
+      params = extractParamsFromQuery(info.request) as RouterInputs[K1];
+    } else {
+      params = info.params as RouterInputs[K1];
+    }
+
+    // Depending on the mock we correctly retrieve the response
+    const response = typeof endpoint.response === 'function' ? endpoint.response(params) : endpoint.response;
+
+    const isResponseAnError = response instanceof Error;
 
     let rpcResponse: DefaultBodyType;
     if (isResponseAnError) {
-      rpcResponse = jsonRpcErrorResponse(endpoint.response as Error);
+      rpcResponse = jsonRpcErrorResponse(response as Error);
     } else {
       // In the real app we use the `superjson` transformer to encode/decode complex response objects, so we have to mimic the server behavior
-      const transformedResponse = superjson.serialize(endpoint.response);
+      const transformedResponse = superjson.serialize(response);
 
       rpcResponse = jsonRpcSuccessResponse(transformedResponse);
     }
 
     if (!!endpoint.delayHook) {
-      let params: RouterInputs[K1];
-      if (endpoint.type === 'query') {
-        params = extractParamsFromQuery(info.request) as RouterInputs[K1];
-      } else {
-        params = info.params as RouterInputs[K1];
-      }
-
       const delayToAdd = endpoint.delayHook(info.request, params);
 
       if (delayToAdd !== null && delayToAdd !== 0) {
