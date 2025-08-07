@@ -47,6 +47,8 @@ export const getTRPCMock = <
     let params: RouterInputs[K1];
     if (endpoint.type === 'query') {
       params = extractParamsFromQuery(info.request) as RouterInputs[K1];
+    } else if (endpoint.type === 'mutation') {
+      params = (await extractParamsFromMutation(info.request)) as RouterInputs[K1];
     } else {
       params = info.params as RouterInputs[K1];
     }
@@ -87,6 +89,16 @@ export function extractParamsFromQuery(request: StrictRequest<DefaultBodyType>):
     const params = JSON.parse(inputQueryParam)[0];
 
     return params;
+  }
+
+  return {};
+}
+
+export async function extractParamsFromMutation(request: StrictRequest<DefaultBodyType>): Promise<object> {
+  const body = (await request.json()) as any;
+
+  if (body.json) {
+    return body.json;
   }
 
   return {};

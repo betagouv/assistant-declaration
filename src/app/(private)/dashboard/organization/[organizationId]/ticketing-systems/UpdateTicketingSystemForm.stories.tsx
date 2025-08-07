@@ -3,8 +3,9 @@ import { Meta, StoryFn } from '@storybook/react';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindForm } from '@ad/.storybook/testing';
 import { UpdateTicketingSystemForm } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/ticketing-systems/UpdateTicketingSystemForm';
+import { ticketingSystemSettings } from '@ad/src/core/ticketing/common';
 import { ticketingSystems } from '@ad/src/fixtures/ticketing';
-import { UpdateTicketingSystemPrefillSchema } from '@ad/src/models/actions/ticketing';
+import { UpdateTicketingSystemPrefillSchema, UpdateTicketingSystemSchemaType } from '@ad/src/models/actions/ticketing';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
 type ComponentType = typeof UpdateTicketingSystemForm;
@@ -23,9 +24,17 @@ const defaultMswParameters = {
       getTRPCMock({
         type: 'mutation',
         path: ['updateTicketingSystem'],
-        response: {
-          ticketingSystem: ticketingSystems[0],
-          pushStrategyToken: undefined,
+        response: (req, params) => {
+          // For whatever reason due to the `preprocess()` it will have the type `unknown` from tRPC `RouterInputs` whereas
+          // the type is fine within the endpoint implementation... So casting for now since didn't find a proper way to fix this
+          const parameters = params as UpdateTicketingSystemSchemaType;
+
+          const ticketingSettings = ticketingSystemSettings[parameters.ticketingSystemName];
+
+          return {
+            ticketingSystem: ticketingSystems[0],
+            pushStrategyToken: ticketingSettings.strategy === 'PUSH' ? 'e1722981ebe9055a61a44f21bc2a037b1fd197127654f6f84b5424039a5e5866' : undefined,
+          };
         },
       }),
     ],
