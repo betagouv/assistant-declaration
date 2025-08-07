@@ -35,7 +35,7 @@ export const getTRPCMock = <
   O extends RouterOutputs[K1], // all its keys
 >(endpoint: {
   path: [K1];
-  response: O | Error | ((params: RouterInputs[K1]) => O) | ((params: RouterInputs[K1]) => Error); // Ideally `response` should satisfies `O` instead of extending to avoid mistake when merging objects with wrong properties but there is no solution for now (ref: https://github.com/microsoft/TypeScript/issues/51556)
+  response: O | Error | ((request: StrictRequest<DefaultBodyType>, params: RouterInputs[K1]) => O | Error); // Ideally `response` should satisfies `O` instead of extending to avoid mistake when merging objects with wrong properties but there is no solution for now (ref: https://github.com/microsoft/TypeScript/issues/51556)
   type?: 'query' | 'mutation' | 'subscription';
   delayHook?: (request: StrictRequest<DefaultBodyType>, params: RouterInputs[K1]) => number | DelayMode | null;
 }) => {
@@ -52,7 +52,7 @@ export const getTRPCMock = <
     }
 
     // Depending on the mock we correctly retrieve the response
-    const response = typeof endpoint.response === 'function' ? endpoint.response(params) : endpoint.response;
+    const response = typeof endpoint.response === 'function' ? endpoint.response(info.request, params) : endpoint.response;
 
     const isResponseAnError = response instanceof Error;
 

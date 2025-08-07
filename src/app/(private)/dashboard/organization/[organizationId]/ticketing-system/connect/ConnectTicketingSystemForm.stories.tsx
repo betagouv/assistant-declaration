@@ -6,7 +6,7 @@ import { ConnectTicketingSystemForm } from '@ad/src/app/(private)/dashboard/orga
 import { ticketingSystemSettings } from '@ad/src/core/ticketing/common';
 import { organizations } from '@ad/src/fixtures/organization';
 import { ticketingSystems } from '@ad/src/fixtures/ticketing';
-import { ConnectTicketingSystemPrefillSchema } from '@ad/src/models/actions/ticketing';
+import { ConnectTicketingSystemPrefillSchema, ConnectTicketingSystemSchemaType } from '@ad/src/models/actions/ticketing';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
 type ComponentType = typeof ConnectTicketingSystemForm;
@@ -25,8 +25,12 @@ const defaultMswParameters = {
       getTRPCMock({
         type: 'mutation',
         path: ['connectTicketingSystem'],
-        response: (params) => {
-          const ticketingSettings = ticketingSystemSettings[params.ticketingSystemName];
+        response: (req, params) => {
+          // For whatever reason due to the `preprocess()` it will have the type `unknown` from tRPC `RouterInputs` whereas
+          // the type is fine within the endpoint implementation... So casting for now since didn't find a proper way to fix this
+          const parameters = params as ConnectTicketingSystemSchemaType;
+
+          const ticketingSettings = ticketingSystemSettings[parameters.ticketingSystemName];
 
           return {
             ticketingSystem: ticketingSystems[0],
