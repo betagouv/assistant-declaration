@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import { ticketingSystemSettings } from '@ad/src/core/ticketing/common';
 import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
 import {
@@ -81,11 +83,14 @@ export const ticketingRouter = router({
       apiAccessKey = input.apiAccessKey;
       apiSecretKey = input.apiSecretKey;
     } else {
-      apiAccessKey = input.apiAccessKey;
-      apiSecretKey = input.apiSecretKey;
+      const tokenLength = 64;
+
+      // In case of a PUSH strategy we use the ticketing system ID as identifier, and a generated readable api secret
+      apiAccessKey = null;
+      apiSecretKey = crypto.randomBytes(tokenLength / 2).toString('hex'); // 1 byte = 2 chars with hexa
     }
 
-    const newOrganization = await prisma.ticketingSystem.create({
+    const newTicketingSystem = await prisma.ticketingSystem.create({
       data: {
         organizationId: input.organizationId,
         name: input.ticketingSystemName,
@@ -95,7 +100,8 @@ export const ticketingRouter = router({
     });
 
     return {
-      ticketingSystem: ticketingSystemPrismaToModel(newOrganization),
+      ticketingSystem: ticketingSystemPrismaToModel(newTicketingSystem),
+      pushStrategyToken: ticketingSettings.strategy === 'PUSH' ? apiSecretKey : undefined,
     };
   }),
   listTicketingSystems: privateProcedure.input(ListTicketingSystemsSchema).query(async ({ ctx, input }) => {

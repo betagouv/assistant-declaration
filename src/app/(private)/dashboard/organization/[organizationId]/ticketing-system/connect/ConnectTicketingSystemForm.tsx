@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Alert, Button, Grid, IconButton, InputAdornment, Link, MenuItem, TextField } from '@mui/material';
+import { Alert, Button, Grid, IconButton, InputAdornment, Link, MenuItem, TextField, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
+import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { ticketingSystemSettings } from '@ad/src/core/ticketing/common';
 import {
   ConnectTicketingSystemPrefillSchemaType,
@@ -19,6 +20,7 @@ import {
   ConnectTicketingSystemSchemaType,
 } from '@ad/src/models/actions/ticketing';
 import { TicketingSystemNameSchema, TicketingSystemNameSchemaType } from '@ad/src/models/entities/ticketing';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export interface ConnectTicketingSystemFormProps {
@@ -28,6 +30,8 @@ export interface ConnectTicketingSystemFormProps {
 export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProps) {
   const { t } = useTranslation('common');
   const router = useRouter();
+
+  const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   const connectTicketingSystem = trpc.connectTicketingSystem.useMutation();
 
@@ -59,15 +63,47 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
         return;
       }
 
+      const onComplete = () => {
+        if (onboardingFlow) {
+          router.push(linkRegistry.get('organization', { organizationId: props.prefill!.organizationId! }));
+        } else {
+          router.push(linkRegistry.get('ticketingSystemList', { organizationId: props.prefill!.organizationId! }));
+        }
+
+        push(['trackEvent', 'ticketing', 'connect', 'system', input.ticketingSystemName]);
+      };
+
       const result = await connectTicketingSystem.mutateAsync(input);
 
-      if (onboardingFlow) {
-        router.push(linkRegistry.get('organization', { organizationId: props.prefill!.organizationId! }));
-      } else {
-        router.push(linkRegistry.get('ticketingSystemList', { organizationId: props.prefill!.organizationId! }));
-      }
+      const resultTicketingSettings = ticketingSystemSettings[result.ticketingSystem.name];
 
-      push(['trackEvent', 'ticketing', 'connect', 'system', input.ticketingSystemName]);
+      // If the ticketing system has PUSH strategy we make sure to display the token this time only
+      if (resultTicketingSettings.strategy === 'PUSH') {
+        assert(result.pushStrategyToken);
+
+        showConfirmationDialog({
+          hideCancel: true,
+          title: `Étape importante`,
+          description: (
+            <>
+              Vous devez maintenant configurer dans l'outil de votre éditeur de billetterie les identifiants suivants afin qu'il puisse nous
+              transférer les données de billetterie.
+              <Alert severity="warning">
+                <Typography sx={{ fontWeight: 'bold' }}>Pour des raisons de sécurité, la clé d'accès n'est visibile qu'une seule fois.</Typography>
+                Si vous ne configurez pas tout de suite votre outil de billetterie, gardez temporairement la clé d'accès dans un fichier sur votre
+                ordinateur.
+              </Alert>
+              {/* Identifiant */}
+              {/* PWD */}
+            </>
+          ),
+          onConfirm: async () => {
+            onComplete();
+          },
+        });
+      } else {
+        onComplete();
+      }
     },
     [connectTicketingSystem, onboardingFlow, router, showOtherIndication, props.prefill]
   );

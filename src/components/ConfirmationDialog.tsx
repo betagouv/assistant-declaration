@@ -10,6 +10,7 @@ export interface ConfirmationDialogProps {
   onConfirm: () => Promise<void>;
   onCancel?: () => Promise<void>;
   onClose: () => void;
+  hideCancel?: boolean;
 }
 
 export const ConfirmationDialog = (props: ConfirmationDialogProps) => {
@@ -51,18 +52,20 @@ export const ConfirmationDialog = (props: ConfirmationDialogProps) => {
         </DialogContentText>
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
-        <Button
-          onClick={async () => {
-            if (props.onCancel) {
-              await props.onCancel();
-            }
+        {props.hideCancel !== true && (
+          <Button
+            onClick={async () => {
+              if (props.onCancel) {
+                await props.onCancel();
+              }
 
-            closeCallback();
-          }}
-          disabled={isPending}
-        >
-          Annuler
-        </Button>
+              closeCallback();
+            }}
+            disabled={isPending}
+          >
+            Annuler
+          </Button>
+        )}
         <Button
           color="primary"
           onClick={async () => {

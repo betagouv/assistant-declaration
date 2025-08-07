@@ -8,7 +8,7 @@ export const useSingletonModal = () => {
   return useContext(ModalContext);
 };
 
-export type ShowConfirmationDialogProps = Pick<ConfirmationDialogProps, 'title' | 'description' | 'onConfirm' | 'onCancel'>;
+export type ShowConfirmationDialogProps = Pick<ConfirmationDialogProps, 'title' | 'description' | 'onConfirm' | 'onCancel' | 'hideCancel'>;
 
 export const useSingletonConfirmationDialog = () => {
   const { showModal } = useSingletonModal();
