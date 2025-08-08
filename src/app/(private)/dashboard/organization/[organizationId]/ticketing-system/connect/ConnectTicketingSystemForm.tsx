@@ -115,10 +115,22 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
               </Alert>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CopiableField label="Identifiant" value={result.ticketingSystem.id} copyAriaLabel="copier l'identifiant" fullWidth />
+                  <CopiableField
+                    label="Identifiant"
+                    value={result.ticketingSystem.id}
+                    copyAriaLabel="copier l'identifiant"
+                    fullWidth
+                    data-sentry-mask
+                  />
                 </Grid>
                 <Grid item xs={12}>
-                  <CopiableField label="Jeton d'accès" value={result.pushStrategyToken} copyAriaLabel="copier le jeton d'accès" fullWidth />
+                  <CopiableField
+                    label="Jeton d'accès"
+                    value={result.pushStrategyToken}
+                    copyAriaLabel="copier le jeton d'accès"
+                    fullWidth
+                    data-sentry-mask
+                  />
                 </Grid>
               </Grid>
             </>

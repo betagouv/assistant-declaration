@@ -30,12 +30,31 @@ const NormalStory = Template.bind({});
 NormalStory.args = {
   ticketingSystem: ticketingSystems[0],
   disconnectAction: async () => {},
+  resetCredentialsAction: async () => {},
 };
 NormalStory.play = async ({ canvasElement }) => {
   await playFindElement(canvasElement);
 };
 
 export const Normal = prepareStory(NormalStory, {
+  childrenContext: {
+    context: TicketingSystemCardContext,
+    value: {
+      ContextualUpdateTicketingSystemForm: UpdateTicketingSystemFormEmptyStory,
+    },
+  },
+});
+
+const PushStrategyStory = Template.bind({});
+PushStrategyStory.args = {
+  ...NormalStory.args,
+  ticketingSystem: { ...ticketingSystems[0], name: 'GENERIC' },
+};
+PushStrategyStory.play = async ({ canvasElement }) => {
+  await playFindElement(canvasElement);
+};
+
+export const PushStrategy = prepareStory(PushStrategyStory, {
   childrenContext: {
     context: TicketingSystemCardContext,
     value: {

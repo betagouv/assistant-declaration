@@ -29,12 +29,14 @@ import soticket from '@ad/src/assets/images/ticketing/soticket.jpg';
 import supersoniks from '@ad/src/assets/images/ticketing/supersoniks.jpg';
 import { TicketingSystemCardContext } from '@ad/src/components/TicketingSystemCardContext';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
+import { ticketingSystemSettings } from '@ad/src/core/ticketing/common';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
 import { menuPaperProps } from '@ad/src/utils/menu';
 
 export interface TicketingSystemCardProps {
   ticketingSystem: TicketingSystemSchemaType;
   disconnectAction: () => Promise<void>;
+  resetCredentialsAction: () => Promise<void>;
 }
 
 export function TicketingSystemCard(props: TicketingSystemCardProps) {
@@ -59,6 +61,28 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
   };
 
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
+
+  const resetCredentialsAction = useCallback(async () => {
+    showConfirmationDialog({
+      description: (
+        <>
+          Êtes-vous sûr de vouloir réinitialiser le jeton d&apos;accès pour l'identifiant{' '}
+          <Typography component="span" sx={{ fontWeight: 'bold' }} data-sentry-mask>
+            {props.ticketingSystem.id}
+          </Typography>{' '}
+          ?
+          <br />
+          <br />
+          <Typography component="span" sx={{ fontStyle: 'italic' }}>
+            Cette étape invalidera le précédent jeton d'accès. Si vous l&apos;aviez entré dans votre outil de billetterie, il faudra le mettre à jour.
+          </Typography>
+        </>
+      ),
+      onConfirm: async () => {
+        await props.resetCredentialsAction();
+      },
+    });
+  }, [props, showConfirmationDialog, t]);
 
   const disconnectAction = useCallback(async () => {
     showConfirmationDialog({
@@ -94,6 +118,8 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
       return fallback;
     }
   }, [props.ticketingSystem.name]);
+
+  const ticketingSettings = useMemo(() => ticketingSystemSettings[props.ticketingSystem.name], [props.ticketingSystem.name]);
 
   return (
     <Card variant="outlined" sx={{ position: 'relative' }}>
@@ -145,12 +171,21 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem onClick={handeOpenModal}>
-          <ListItemIcon>
-            <AdminPanelSettings fontSize="small" />
-          </ListItemIcon>
-          Mettre à jour les identifiants
-        </MenuItem>
+        {ticketingSettings.strategy === 'PUSH' ? (
+          <MenuItem onClick={resetCredentialsAction}>
+            <ListItemIcon>
+              <AdminPanelSettings fontSize="small" />
+            </ListItemIcon>
+            Réinitialiser les identifiants
+          </MenuItem>
+        ) : (
+          <MenuItem onClick={handeOpenModal}>
+            <ListItemIcon>
+              <AdminPanelSettings fontSize="small" />
+            </ListItemIcon>
+            Mettre à jour les identifiants
+          </MenuItem>
+        )}
         <MenuItem onClick={disconnectAction}>
           <ListItemIcon>
             <NotInterested fontSize="small" />
