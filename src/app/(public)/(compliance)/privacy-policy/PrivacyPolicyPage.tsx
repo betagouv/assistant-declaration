@@ -1,4 +1,4 @@
-import { Container } from '@mui/material';
+import { fr } from '@codegouvfr/react-dsfr';
 
 import statementContent from '@ad/src/app/(public)/(compliance)/privacy-policy/content.transformed.html';
 
@@ -8,12 +8,8 @@ function createMarkup() {
 
 export function PrivacyPolicyPage() {
   return (
-    <Container
-      sx={{
-        py: 6,
-      }}
-    >
+    <div className={fr.cx('fr-container', 'fr-py-12v')}>
       <div dangerouslySetInnerHTML={createMarkup()}></div>
-    </Container>
+    </div>
   );
 }
