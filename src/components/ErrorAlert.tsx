@@ -1,5 +1,6 @@
-import { Replay } from '@mui/icons-material';
-import { Alert, AlertProps, Button } from '@mui/material';
+import { fr } from '@codegouvfr/react-dsfr';
+import { Alert, AlertProps } from '@codegouvfr/react-dsfr/Alert';
+import { Button } from '@codegouvfr/react-dsfr/Button';
 import { TRPCClientErrorLike } from '@trpc/client';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +14,7 @@ import { capitalizeFirstLetter } from '@ad/src/utils/format';
 
 // import { QueryObserverResult, RefetchOptions } from '@tansack/query-core';
 
-export interface ErrorAlertProps extends Pick<AlertProps, 'onClose' | 'sx'> {
+export interface ErrorAlertProps extends Pick<AlertProps, 'onClose' | 'style'> {
   errors: (TRPCClientErrorLike<AppRouter> | Error)[]; // Errors can be from the network (tRPC most of the time) or local
   // TODO: impossible to import types... why?
   // refetchs: (options?: RefetchOptions) => Promise<QueryObserverResult<unknown, unknown>>[];
@@ -23,8 +24,8 @@ export interface ErrorAlertProps extends Pick<AlertProps, 'onClose' | 'sx'> {
 export function ErrorAlert(props: ErrorAlertProps) {
   const { t } = useTranslation('common');
 
-  const { errors, containsServerError } = useMemo(() => {
-    let containsServerError: boolean = false;
+  const { errors, containsRetriableServerError } = useMemo(() => {
+    let containsRetriableServerError: boolean = false;
     let errs: string[] = [];
     for (const error of props.errors) {
       if (error instanceof Error && error.name === 'TRPCClientError') {
@@ -45,7 +46,7 @@ export function ErrorAlert(props: ErrorAlertProps) {
           errs.push(formatMessageFromCustomError(customError) || customError.message);
         } else {
           // If not a validation error (`ZodError`), nor a business error (`BusinessError`), consider it as a server error that can be retried
-          containsServerError = true;
+          containsRetriableServerError = true;
 
           // The API is supposed to hide details so show internal server error translation
           errs.push(t(`errors.custom.${internalServerErrorError.code as 'internalServerError'}`));
@@ -62,7 +63,7 @@ export function ErrorAlert(props: ErrorAlertProps) {
     }
 
     return {
-      containsServerError,
+      containsRetriableServerError,
       // Remove duplicates since it has no value
       // and uppercase the first letter of each since our errors are lowercase by default to combine them as we want
       errors: [...new Set(errs)].map((err) => capitalizeFirstLetter(err)),
@@ -88,46 +89,34 @@ export function ErrorAlert(props: ErrorAlertProps) {
   return (
     <Alert
       severity="error"
-      sx={{
-        ...(props.sx || {}),
-        '& .MuiAlert-message': {
-          width: '100%',
-        },
-      }}
-    >
-      {errors.length === 1 ? (
-        <>{errors[0]}</>
-      ) : (
+      small={false}
+      title="Erreur"
+      description={
         <>
-          Plusieurs erreurs ont été rencontrées :
-          <br />
-          <ul>
-            {errors.map((error) => {
-              return <li key={error}>{error}</li>;
-            })}
-          </ul>
+          {errors.length === 1 ? (
+            <>{errors[0]}</>
+          ) : (
+            <>
+              Plusieurs erreurs ont été rencontrées :
+              <br />
+              <ul>
+                {errors.map((error) => {
+                  return <li key={error}>{error}</li>;
+                })}
+              </ul>
+            </>
+          )}
+          {retry && containsRetriableServerError && (
+            <>
+              <br />
+              <Button onClick={retry} iconId="fr-icon-refresh-fill" className={fr.cx('fr-mt-4v', 'fr-mx-auto')} style={{ display: 'flex' }}>
+                Réessayer
+              </Button>
+            </>
+          )}
         </>
-      )}
-      {retry && containsServerError && (
-        <>
-          <br />
-          <Button
-            onClick={retry}
-            size="large"
-            variant="contained"
-            color="error"
-            startIcon={<Replay />}
-            sx={{
-              display: 'flex',
-              mt: 2,
-              ml: 'auto',
-              mr: 'auto',
-            }}
-          >
-            Réessayer
-          </Button>
-        </>
-      )}
-    </Alert>
+      }
+      style={props.style || {}}
+    />
   );
 }
