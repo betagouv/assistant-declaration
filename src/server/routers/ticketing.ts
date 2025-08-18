@@ -159,7 +159,7 @@ export const ticketingRouter = router({
     });
 
     if (!ticketingSystem) {
-      return ticketingSystemNotFoundError;
+      throw ticketingSystemNotFoundError;
     } else if (!(await isUserACollaboratorPartOfOrganization(ticketingSystem.organizationId, ctx.user.id))) {
       throw organizationCollaboratorRoleRequiredError;
     }

@@ -9,7 +9,12 @@ import { useCallback } from 'react';
 import { trpc } from '@ad/src/client/trpcClient';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
+import { PushStrategyTicketingDialogContent } from '@ad/src/components/PushStrategyTicketingDialogContent';
 import { TicketingSystemCard } from '@ad/src/components/TicketingSystemCard';
+import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
+import { ticketingSystemSettings } from '@ad/src/core/ticketing/common';
+import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { centeredAlertContainerGridProps, centeredContainerGridProps, ulComponentResetStyles } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
@@ -19,7 +24,10 @@ export interface TicketingSystemListPageProps {
 }
 
 export function TicketingSystemListPage({ params: { organizationId } }: TicketingSystemListPageProps) {
+  const { showConfirmationDialog } = useSingletonConfirmationDialog();
+
   const disconnectTicketingSystem = trpc.disconnectTicketingSystem.useMutation();
+  const updateTicketingSystem = trpc.updateTicketingSystem.useMutation();
 
   const disconnectTicketingSystemAction = useCallback(
     async (ticketingSystemId: string) => {
@@ -28,6 +36,38 @@ export function TicketingSystemListPage({ params: { organizationId } }: Ticketin
       });
 
       push(['trackEvent', 'ticketing', 'disconnect']);
+    },
+    [disconnectTicketingSystem]
+  );
+
+  const updateTicketingSystemAction = useCallback(
+    async (ticketingSystem: TicketingSystemSchemaType) => {
+      const resultTicketingSettings = ticketingSystemSettings[ticketingSystem.name];
+
+      assert(resultTicketingSettings.strategy === 'PUSH');
+
+      const result = await updateTicketingSystem.mutateAsync({
+        ticketingSystemId: ticketingSystem.id,
+        ticketingSystemName: ticketingSystem.name,
+        pullStrategyCredentials: null,
+      });
+
+      assert(result.pushStrategyToken);
+
+      showConfirmationDialog({
+        hideCancel: true,
+        title: `Étape importante`,
+        description: (
+          <PushStrategyTicketingDialogContent
+            ticketingSystemName={ticketingSystem.name}
+            accessKey={ticketingSystem.id}
+            secretKey={result.pushStrategyToken}
+          />
+        ),
+        onConfirm: async () => {
+          push(['trackEvent', 'ticketing', 'update', 'system', ticketingSystem.name]);
+        },
+      });
     },
     [disconnectTicketingSystem]
   );
@@ -78,7 +118,11 @@ export function TicketingSystemListPage({ params: { organizationId } }: Ticketin
           <Grid container component="ul" spacing={3} sx={ulComponentResetStyles}>
             {ticketingSystems.map((ticketingSystem) => (
               <Grid key={ticketingSystem.id} item component="li" xs={12} sm={6}>
-                <TicketingSystemCard ticketingSystem={ticketingSystem} disconnectAction={() => disconnectTicketingSystemAction(ticketingSystem.id)} />
+                <TicketingSystemCard
+                  ticketingSystem={ticketingSystem}
+                  resetCredentialsAction={() => updateTicketingSystemAction(ticketingSystem)}
+                  disconnectAction={() => disconnectTicketingSystemAction(ticketingSystem.id)}
+                />
               </Grid>
             ))}
           </Grid>
