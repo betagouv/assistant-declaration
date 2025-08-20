@@ -1,7 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { DevTool } from '@hookform/devtools';
-import { Grid } from '@mui/material';
 import * as Sentry from '@sentry/nextjs';
 import { Mutex } from 'locks';
 import { CSSProperties, FormEventHandler, MutableRefObject, PropsWithChildren, useMemo, useRef, useState } from 'react';
@@ -101,7 +100,7 @@ export function BaseForm<FormSchemaType extends FieldValues>(props: PropsWithChi
       {/* <DevTool control={props.control} /> */}
 
       <form onSubmit={onSubmit} aria-label={props.ariaLabel} style={props.style} ref={setMultipleRefs}>
-        <Grid container spacing={2}>
+        <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
           {!!onSubmitError && (
             <div className={fr.cx('fr-col-12', 'fr-py-4v')}>
               <ErrorAlert errors={[onSubmitError]} />
@@ -124,7 +123,7 @@ export function BaseForm<FormSchemaType extends FieldValues>(props: PropsWithChi
           )}
 
           {props.children}
-        </Grid>
+        </div>
       </form>
     </>
   );

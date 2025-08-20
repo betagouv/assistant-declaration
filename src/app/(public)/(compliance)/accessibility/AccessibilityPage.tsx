@@ -22,7 +22,7 @@ export function AccessibilityPage() {
             Aucun audit d&apos;accessibilité RGAA n&apos;a pour l&apos;instant été fait d&apos;où la non-conformité du produit mentionnée ci-dessous.
           </>
         }
-      ></Alert>
+      />
       <div dangerouslySetInnerHTML={createMarkup()}></div>
     </div>
   );

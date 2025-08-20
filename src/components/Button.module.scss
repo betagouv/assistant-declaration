@@ -1,0 +1,30 @@
+.spinner {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  animation: none;
+
+  &.loading {
+    opacity: 1;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.text {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+
+  &.loading {
+    opacity: 0;
+  }
+}
+
+.button {
+  justify-content: center;
+}
