@@ -22,7 +22,6 @@ import { useForm } from 'react-hook-form';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
-import { PasswordFieldHinter } from '@ad/src/components/PasswordFieldHinter';
 import { SignUpPrefillSchemaType, SignUpSchema, SignUpSchemaType } from '@ad/src/models/actions/auth';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
@@ -97,7 +96,7 @@ export function SignUpForm({ prefill, onSuccess }: { prefill?: SignUpPrefillSche
             ),
           }}
         />
-        <PasswordFieldHinter password={watch('password')} />
+        {/* <PasswordFieldHinter password={watch('password')} /> */}
       </Grid>
       <Grid item xs={12}>
         <FormControl error={!!errors.termsAccepted}>

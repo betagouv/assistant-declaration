@@ -2,14 +2,14 @@ import { Meta, StoryFn } from '@storybook/react';
 import { within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { PasswordFieldHinter } from '@ad/src/components/PasswordFieldHinter';
+import { PasswordMutationInput } from '@ad/src/components/PasswordMutationInput';
 
-type ComponentType = typeof PasswordFieldHinter;
+type ComponentType = typeof PasswordMutationInput;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Components/PasswordFieldHinter',
-  component: PasswordFieldHinter,
+  title: 'Components/PasswordMutationInput',
+  component: PasswordMutationInput,
   ...generateMetaDefault({
     parameters: {},
   }),
@@ -20,12 +20,14 @@ async function playFindHints(canvasElement: HTMLElement): Promise<HTMLElement> {
 }
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <PasswordFieldHinter {...args} />;
+  return <PasswordMutationInput {...args} label="Password" />;
 };
 
 const ValidStory = Template.bind({});
 ValidStory.args = {
-  password: 'Mypassword@1',
+  nativeInputProps: {
+    value: 'Mypassword@1',
+  },
 };
 ValidStory.parameters = {};
 ValidStory.play = async ({ canvasElement }) => {
@@ -34,9 +36,25 @@ ValidStory.play = async ({ canvasElement }) => {
 
 export const Valid = prepareStory(ValidStory);
 
+const IncompleteStory = Template.bind({});
+IncompleteStory.args = {
+  nativeInputProps: {
+    value: 'Hola',
+  },
+};
+IncompleteStory.parameters = {};
+IncompleteStory.play = async ({ canvasElement }) => {
+  await playFindHints(canvasElement);
+};
+
+export const Incomplete = prepareStory(IncompleteStory);
+
 const InvalidStory = Template.bind({});
 InvalidStory.args = {
-  password: 'hola',
+  error: 'erreur aléatoire',
+  nativeInputProps: {
+    value: 'Hola',
+  },
 };
 InvalidStory.parameters = {};
 InvalidStory.play = async ({ canvasElement }) => {
@@ -47,7 +65,9 @@ export const Invalid = prepareStory(InvalidStory);
 
 const EmptyStory = Template.bind({});
 EmptyStory.args = {
-  password: '',
+  nativeInputProps: {
+    value: '',
+  },
 };
 EmptyStory.parameters = {};
 EmptyStory.play = async ({ canvasElement }) => {

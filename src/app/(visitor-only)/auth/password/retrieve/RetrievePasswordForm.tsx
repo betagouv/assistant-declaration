@@ -3,7 +3,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { TextField } from '@mui/material';
 import NextLink from 'next/link';
 import React from 'react';
 import { useForm } from 'react-hook-form';

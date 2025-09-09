@@ -8,7 +8,6 @@ import { useForm } from 'react-hook-form';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
-import { PasswordFieldHinter } from '@ad/src/components/PasswordFieldHinter';
 import { ChangePasswordPrefillSchemaType, ChangePasswordSchema, ChangePasswordSchemaType } from '@ad/src/models/actions/auth';
 
 export interface ChangePasswordFormProps {
@@ -98,7 +97,7 @@ export function ChangePasswordForm(props: ChangePasswordFormProps) {
             ),
           }}
         />
-        <PasswordFieldHinter password={watch('newPassword')} headline={`Le nouveau mot de passe doit contenir :`} />
+        {/* <PasswordFieldHinter password={watch('newPassword')} headline={`Le nouveau mot de passe doit contenir :`} /> */}
       </Grid>
       <Grid item xs={12}>
         <Button type="submit" loading={changePassword.isPending} size="large" variant="contained" fullWidth>

@@ -1,14 +1,14 @@
 'use client';
 
-import { Grid, Typography } from '@mui/material';
+import { fr } from '@codegouvfr/react-dsfr';
 import { useSearchParams } from 'next/navigation';
 import { useContext } from 'react';
 
 import { ResetPasswordPageContext } from '@ad/src/app/(visitor-only)/auth/password/reset/ResetPasswordPageContext';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { ResetPasswordPrefillSchema } from '@ad/src/models/actions/auth';
-import { formTitleProps } from '@ad/src/utils/form';
-import { centeredAlertContainerGridProps, centeredFormContainerGridProps } from '@ad/src/utils/grid';
+import { wrongConfirmationTokenError } from '@ad/src/models/entities/errors';
+import { formTitleClasses } from '@ad/src/utils/form';
 
 export function ResetPasswordPage() {
   const { ContextualResetPasswordForm } = useContext(ResetPasswordPageContext);
@@ -16,26 +16,24 @@ export function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const resetToken = searchParams!.get('token');
 
-  if (!resetToken) {
-    const error = new Error(`Le jeton de réinitialisation de mot de passe n'est pas détecté, merci de bien copier le lien depuis l'email.`);
-
-    return (
-      <Grid container {...centeredAlertContainerGridProps}>
-        <ErrorAlert errors={[error]} />
-      </Grid>
-    );
-  }
-
   return (
-    <Grid container {...centeredFormContainerGridProps}>
-      <Typography component="h1" {...formTitleProps}>
-        Redéfinir votre mot de passe
-      </Typography>
-      <ContextualResetPasswordForm
-        prefill={ResetPasswordPrefillSchema.parse({
-          token: resetToken,
-        })}
-      />
-    </Grid>
+    <div className={fr.cx('fr-container', 'fr-py-12v')}>
+      <div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+        {!resetToken ? (
+          <div className={fr.cx('fr-col-md-6', 'fr-col-lg-6')}>
+            <ErrorAlert errors={[wrongConfirmationTokenError]} />
+          </div>
+        ) : (
+          <div className={fr.cx('fr-col-md-6', 'fr-col-lg-4')}>
+            <h1 className={fr.cx(...formTitleClasses)}>Redéfinir votre mot de passe</h1>
+            <ContextualResetPasswordForm
+              prefill={ResetPasswordPrefillSchema.parse({
+                token: resetToken,
+              })}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
