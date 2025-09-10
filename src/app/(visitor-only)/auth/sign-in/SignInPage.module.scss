@@ -1,0 +1,30 @@
+.formContainer {
+  @media (min-width: 1280px) {
+    max-width: 420px;
+  }
+}
+
+.description {
+  display: flex;
+  gap: 1rem;
+  flex-grow: 1;
+  max-width: 800;
+  align-items: center;
+  margin-left: auto;
+  text-align: center;
+
+  @media (min-width: 768px) {
+    text-align: inherit;
+  }
+}
+
+.descriptionImage {
+  width: 100%;
+  max-width: 200px;
+  height: 100%;
+  object-fit: contain;
+
+  @media (min-width: 768px) {
+    max-width: 400px;
+  }
+}
