@@ -1,0 +1,18 @@
+.formContainer {
+  @media (min-width: 1280px) {
+    max-width: 420px;
+  }
+}
+
+.description {
+  max-width: 560px;
+  padding-top: 40px;
+}
+
+.descriptionImage {
+  background-color: '#f5f5fe'; // [WORKAROUND] Simple hack since DSFR does not provide pictograms in dark mode
+  width: 90%;
+  height: auto;
+  max-height: 250px;
+  object-fit: contain;
+}
