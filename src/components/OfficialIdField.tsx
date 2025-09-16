@@ -1,30 +1,32 @@
-import { InputBaseComponentProps } from '@mui/material';
-import { forwardRef } from 'react';
-import { IMaskInput } from 'react-imask';
+import { useEffect } from 'react';
+import { ControllerRenderProps } from 'react-hook-form';
+import { useIMask } from 'react-imask';
 
-export interface CreateOfficialIdMaskInputProps {
-  onAccept: (unmaskedValue: string) => void;
-}
+interface UseOfficialIdInputProps extends Pick<ControllerRenderProps<any, string>, 'value' | 'onChange'> {}
 
-export function createOfficialIdMaskInput({ onAccept }: CreateOfficialIdMaskInputProps) {
-  return forwardRef<HTMLInputElement, InputBaseComponentProps>(function TextMaskOfficialId(props, ref) {
-    return (
-      <IMaskInput
-        {...props}
-        placeholder="111 222 333"
-        mask="000 000 000"
-        unmask={true} // Return the value without spaces from the mask
-        definitions={{
-          '0': /[0-9]/,
-        }}
-        onAccept={(unmaskedValue, mask, event) => {
-          // Cannot use `props.onChange(event)` since it would take the current input value (with spaces...), not the one set and expected by `unmask`
-          // So we had to use a custom callback to forward the unmasked value to the parent component
-          onAccept(unmaskedValue);
-        }}
-        inputRef={ref}
-        overwrite
-      />
-    );
-  });
+export function useOfficialIdInput({ value, onChange }: UseOfficialIdInputProps) {
+  const { ref: inputRef, setUnmaskedValue } = useIMask(
+    {
+      mask: '000 000 000',
+      definitions: {
+        '0': /[0-9]/,
+      },
+      overwrite: true,
+    },
+    {
+      onAccept: (maskedValue, mask, event) => {
+        onChange(mask.unmaskedValue);
+      },
+    }
+  );
+
+  // The following is needed to synchronize "form state" into the masked input
+  // Note: despite the `onChange` bound to the `value` it won't be triggered in a loop when typing into the input
+  useEffect(() => {
+    if (value != null) {
+      setUnmaskedValue(value);
+    }
+  }, [value, setUnmaskedValue]);
+
+  return { inputRef: inputRef };
 }
