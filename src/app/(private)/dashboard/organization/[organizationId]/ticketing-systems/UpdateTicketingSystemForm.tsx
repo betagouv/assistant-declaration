@@ -57,9 +57,9 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
   const displayApiAccessKey = useMemo(() => ticketingSystemRequiresApiAccessKey[props.ticketingSystem.name], [props.ticketingSystem.name]);
 
   return (
-    <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="créer une organisation">
+    <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="éditer un système de billetterie">
       <div className={fr.cx('fr-col-12')}>
-        <fieldset className={fr.cx('fr-fieldset')}>
+        <fieldset className={fr.cx('fr-fieldset', 'fr-mb-0')}>
           {displayApiAccessKey && (
             <div className={fr.cx('fr-fieldset__element')}>
               <Input
