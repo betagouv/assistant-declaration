@@ -557,6 +557,7 @@ export const declarationRouter = router({
       } satisfies SacemDeclarationWrapperSchemaType,
     };
   }),
+  // TODO: should fill direct value
   fillSacemDeclaration: privateProcedure.input(FillSacemDeclarationSchema).mutation(async ({ ctx, input }) => {
     const eventSerie = await prisma.eventSerie.findUnique({
       where: {

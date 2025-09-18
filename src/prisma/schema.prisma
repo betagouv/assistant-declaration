@@ -125,15 +125,16 @@ model LiveChatSettings {
 }
 
 model Organization {
-  id                    String  @id @default(uuid()) @db.Uuid
-  name                  String
-  officialId            String  @unique
-  officialHeadquarterId String  @unique
-  sacemId               String? @unique
-  sacdId                String? @unique
+  id                     String  @id @default(uuid()) @db.Uuid
+  name                   String
+  officialId             String  @unique
+  officialHeadquartersId String  @unique
+  sacemId                String? @unique
+  sacdId                 String? @unique
 
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   TicketingSystem TicketingSystem[]
   Collaborator    Collaborator[]
 }
@@ -198,7 +199,6 @@ enum Audience {
   ALL
   YOUNG
   SCHOOL
-  READING
 }
 
 enum DeclarationType {
@@ -212,14 +212,14 @@ model EventSerie {
   ticketingSystemId         String            @db.Uuid
   name                      String
   producerOfficialId        String?
-  producerOfficialName      String?
-  type                      String?
+  producerName              String?
+  performanceType           String?
   expectedDeclarationTypes  DeclarationType[]
   // image Attachment
 
   // Properties specific to when it's performed
   placeId        String   @db.Uuid
-  capacity       Int?
+  placeCapacity  Int?
   audience       Audience @default(ALL)
   taxRate        Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
   expensesAmount Decimal  @db.Decimal(10, 2)
@@ -250,7 +250,7 @@ model Event {
   // Each event has following properties but they are defined at
   // the event serie level, here it's to override in case of specifics
   placeOverrideId String?   @db.Uuid
-  capacity        Int?
+  placeCapacity   Int?
   audience        Audience?
   taxRate         Decimal?  @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
 

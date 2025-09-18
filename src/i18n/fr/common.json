@@ -61,20 +61,6 @@
       "wrongConfirmationToken": "le lien de confirmation est invalide, veuillez contacter notre support"
     },
     "validation": {
-      "accountingEntries": {
-        "categoryPrecision": {
-          "too_small_one": "l'intitulé du flux de comptabilité est requis"
-        },
-        "duplicateEntryCategoryLabel": "les libellées des cessions de droit d'exploitation doivent être uniques",
-        "duplicateFluxEntryCategoryLabel": "les libellées des flux de comptabilité doivent être uniques",
-        "includingTaxesAmount": {
-          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
-        },
-        "taxRate": {
-          "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
-        },
-        "too_big": "il ne peut y avoir que {{maximum}} flux de comptabilité au maximum"
-      },
       "address": {
         "city": {
           "too_big": "la ville doit faire {{maximum}} caractères maximum",
@@ -101,33 +87,12 @@
       "audience": {
         "invalid_enum_value": "la nature des représentations est requise"
       },
-      "clientId": {
-        "too_small_one": "le numéro client est requis",
-        "too_big": "le numéro client doit faire {{maximum}} caractères maximum"
-      },
       "currentPassword": {
         "too_small_one": "le mot de passe actuel est requis"
-      },
-      "declarationPlace": {
-        "too_small_one": "le lieu de la déclaration est requis",
-        "too_big": "le lieu de la déclaration doit faire {{maximum}} caractères maximum"
       },
       "email": {
         "invalid_string": "l'email n'est pas valide",
         "too_small_one": "l'email est requis"
-      },
-      "expenses": {
-        "categoryPrecision": {
-          "too_small_one": "l'intitulé du type de contrat est requis"
-        },
-        "duplicateFluxEntryCategoryLabel": "les libellées des contrats artistiques doivent être uniques",
-        "includingTaxesAmount": {
-          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
-        },
-        "taxRate": {
-          "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
-        },
-        "too_big": "il ne peut y avoir que {{maximum}} dépenses au maximum"
       },
       "firstname": {
         "too_small_one": "le prénom est requis"
@@ -152,18 +117,6 @@
       "lastname": {
         "too_small_one": "le nom de famille est requis"
       },
-      "managerName": {
-        "too_small_one": "le nom de la personne en charge est requis",
-        "too_big": "le nom de la personne en charge doit faire {{maximum}} caractères maximum"
-      },
-      "managerTitle": {
-        "too_small_one": "le rôle de la personne en charge est requis",
-        "too_big": "le rôle de la personne en charge doit faire {{maximum}} caractères maximum"
-      },
-      "message": {
-        "too_big": "le message doit faire {{maximum}} caractères maximum",
-        "too_small_one": "le message est requis"
-      },
       "name": {
         "too_big": "le nom doit faire {{maximum}} caractères maximum",
         "too_small_one": "le nom est requis"
@@ -176,6 +129,7 @@
         "too_small_one": "le nouveau mot de passe est requis"
       },
       "officialHeadquartersId": {
+        "officialHeadquartersIdMustBe14Digits": "le numéro Siret doit être composé de 14 chiffres",
         "too_small_one": "le numéro Siret est requis",
         "too_big": "le numéro Siret doit faire {{maximum}} caractères maximum"
       },
@@ -195,69 +149,45 @@
         "too_small_one": "le genre du spectacle est requis",
         "too_big": "le genre du spectacle doit faire {{maximum}} caractères maximum"
       },
-      "phone": {
-        "countryCode": {
-          "countryInvalid": "le pays saisi est invalide"
-        },
-        "invalid_type": "le numéro de téléphone est requis",
-        "number": {
-          "too_big": "le numéro de téléphone doit faire {{maximum}} caractères maximum",
-          "too_small_one": "le numéro de téléphone est requis"
-        },
-        "phoneCombinationInvalid": "le numéro de téléphone doit avoir une combinaison valide",
-        "phoneCombinationInvalidWithLeadingZeroWarning": "le numéro de téléphone doit avoir une combinaison valide, peut-être un zéro en trop devant",
-        "phoneInvalid": "le numéro de téléphone doit être valide"
-      },
       "placeCapacity": {
         "invalid_type": "la capacité de la salle doit être un nombre entier",
         "too_small": "la capacité de la salle doit être supérieure à {{minimum}}",
         "too_small_one": "la capacité de la salle est requise"
       },
-      "placeCity": {
-        "too_small_one": "la ville est requise",
-        "too_big": "la ville doit faire {{maximum}} caractères maximum"
-      },
-      "placeName": {
-        "too_small_one": "l'intitulé du lieu est requis",
-        "too_big": "l'intitulé du lieu doit faire {{maximum}} caractères maximum"
-      },
-      "placePostalCode": {
-        "too_small_one": "le code postal est requis",
-        "too_big": "le code postal doit faire {{maximum}} caractères maximum"
-      },
-      "placeStreet": {
-        "too_small_one": "l'adresse est requise",
-        "too_big": "l'adresse doit faire {{maximum}} caractères maximum"
-      },
-      "priceOverride": {
-        "too_small": "le prix doit être supérieur à {{minimum}} euro"
-      },
-      "producer": {
-        "invalid_type": "le producteur/tourneur est requis",
-        "name": {
-          "too_small_one": "le nom du producteur/tourneur est requis",
-          "too_big": "le nom du producteur/tourneur doit faire {{maximum}} caractères maximum"
+      "placeAddress": {
+        "city": {
+          "too_big": "la ville doit faire {{maximum}} caractères maximum",
+          "too_small_one": "la ville est requise"
+        },
+        "countryCode": {
+          "countryInvalid": "le pays saisi est invalide"
+        },
+        "postalCode": {
+          "too_big": "le code postal doit faire {{maximum}} caractères maximum",
+          "too_small_one": "le code postal est requis"
+        },
+        "street": {
+          "too_big": "le numéro et la voie doivent faire {{maximum}} caractères maximum",
+          "too_small_one": "le numéro et la voie sont requis"
         }
       },
-      "query": {
-        "too_big": "la recherche doit faire {{maximum}} caractères maximum"
+      "producerOfficialId": {
+        "officialIdMustBe9Digits": "le numéro Siren du producteur doit être composé de 9 chiffres",
+        "too_big": "le numéro Siren du producteur doit faire {{maximum}} caractères maximum",
+        "too_small_one": "le numéro Siren du producteur est requis"
       },
-      "revenues": {
-        "categoryPrecision": {
-          "too_small_one": "l'intitulé de l'origine de la recette est requis"
-        },
-        "duplicateFluxEntryCategoryLabel": "les libellées des recettes doivent être uniques",
-        "includingTaxesAmount": {
-          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
-        },
-        "taxRate": {
-          "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
-        },
-        "too_big": "il ne peut y avoir que {{maximum}} revenus au maximum"
+      "producerOfficialName": {
+        "too_small_one": "le code postal est requis"
       },
-      "totalOverride": {
-        "invalid_type": "le nombre de places doit être un nombre entier",
-        "too_small": "le nombre de places doit être supérieur à {{minimum}}"
+      "sacemId": {
+        "sacemIdMustBeDigits": "l'identifiant Sacem doit être composé de 1 à 10 chiffres",
+        "too_big": "l'identifiant Sacem doit faire {{maximum}} caractères maximum",
+        "too_small_one": "l'identifiant Sacem est requis"
+      },
+      "sacdId": {
+        "sacdIdMustBeDigits": "l'identifiant SACD doit être composé de 1 à 10 chiffres",
+        "too_big": "l'identifiant SACD doit faire {{maximum}} caractères maximum",
+        "too_small_one": "l'identifiant SACD est requis"
       },
       "termsAccepted": {
         "invalid_literal": "les modalités d'utilisation doivent être acceptées"
@@ -293,31 +223,17 @@
     "fromSeconds": "{{ duration, durationFromSeconds }}"
   },
   "model": {
-    "sacemDeclaration": {
-      "accountingCategory": {
-        "enum": {
-          "TICKETING": "Entrées",
-          "CONSUMPTIONS": "Consommations",
-          "CATERING": "Restauration",
-          "PROGRAM_SALES": "Vente de programmes",
-          "OTHER_REVENUES": "Autre recette",
-          "ENGAGEMENT_CONTRACTS": "Contrat d'engagement",
-          "RIGHTS_TRANSFER_CONTRACTS": "Contrat de cession",
-          "COREALIZATION_CONTRACTS": "Contrat de coréalisation",
-          "COPRODUCTION_CONTRACTS": "Contrat de coproduction",
-          "OTHER_ARTISTIC_CONTRACTS": "Autre contrat artistique"
-        }
+    "audience": {
+      "enum": {
+        "ALL": "Tout public",
+        "YOUNG": "Jeune public",
+        "SCHOOL": "Scolaire"
       }
     },
-    "sacdDeclaration": {
-      "accountingCategory": {
-        "enum": {
-          "SALE_OF_RIGHTS": "Prix de cession",
-          "INTRODUCTION_FEES": "Frais d'approche",
-          "COPRODUCTION_CONTRIBUTION": "Apport en coproduction",
-          "REVENUE_GUARANTEE": "Garantie de recette",
-          "OTHER": "Autre somme"
-        }
+    "declarationType": {
+      "enum": {
+        "SACEM": "Sacem",
+        "SACD": "SACD"
       }
     },
     "ticketingSystemName": {

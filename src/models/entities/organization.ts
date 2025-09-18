@@ -13,6 +13,20 @@ export const OrganizationSchema = applyTypedParsers(
         .string()
         .min(1)
         .regex(/^\d{9}$/, customErrorToZodIssue(officialIdMustBe9DigitsError)),
+      officialHeadquartersId: z
+        .string()
+        .min(1)
+        .regex(/^\d{14}$/, customErrorToZodIssue(officialIdMustBe9DigitsError)),
+      sacemId: z
+        .string()
+        .min(1)
+        .regex(/^\d{1,10}$/, customErrorToZodIssue(officialIdMustBe9DigitsError))
+        .nullable(),
+      sacdId: z
+        .string()
+        .min(1)
+        .regex(/^\d{1,10}$/, customErrorToZodIssue(officialIdMustBe9DigitsError))
+        .nullable(),
       createdAt: z.date(),
       updatedAt: z.date(),
     })

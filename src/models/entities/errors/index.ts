@@ -119,6 +119,12 @@ export const userNotFoundError = new BusinessError('userNotFound', t('errors.cus
 
 // Organization
 export const officialIdMustBe9DigitsError = new BusinessError('officialIdMustBe9Digits', t('errors.validation.officialId.officialIdMustBe9Digits'));
+export const officialIdHeadquartersMustBe14DigitsError = new BusinessError(
+  'officialIdHeadquartersMustBe14Digits',
+  t('errors.validation.officialHeadquartersId.officialIdHeadquartersMustBe14Digits')
+);
+export const sacemIdMustBeDigitsError = new BusinessError('sacemIdMustBeDigits', t('errors.validation.sacemId.sacemIdMustBeDigits'));
+export const sacdIdMustBeDigitsError = new BusinessError('sacdIdMustBeDigits', t('errors.validation.sacdId.sacdIdMustBe9Digits'));
 export const anotherOrganizationAlreadyHasThisOfficialIdError = new BusinessError(
   'anotherOrganizationAlreadyHasThisOfficialId',
   t('errors.custom.anotherOrganizationAlreadyHasThisOfficialId')
