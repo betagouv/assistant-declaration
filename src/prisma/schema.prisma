@@ -63,25 +63,7 @@ model Address {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  SacdDeclarationOrganization SacdDeclarationOrganization[]
-}
-
-enum PhoneType {
-  UNSPECIFIED
-  HOME
-  MOBILE
-}
-
-// Maybe manage enum objects like Phone/Address through native Postgres objects? To simplify structure/relations?
-model Phone {
-  id          String    @id @default(uuid()) @db.Uuid
-  phoneType   PhoneType @default(UNSPECIFIED)
-  callingCode String
-  countryCode String
-  number      String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  Place Place?
 }
 
 enum UserStatus {
@@ -143,9 +125,12 @@ model LiveChatSettings {
 }
 
 model Organization {
-  id         String @id @default(uuid()) @db.Uuid
-  name       String
-  officialId String @unique
+  id                    String  @id @default(uuid()) @db.Uuid
+  name                  String
+  officialId            String  @unique
+  officialHeadquarterId String  @unique
+  sacemId               String? @unique
+  sacdId                String? @unique
 
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @default(now()) @updatedAt
@@ -196,75 +181,87 @@ model Collaborator {
   @@unique([userId, organizationId])
 }
 
-model EventSerie {
-  id                        String   @id @default(uuid()) @db.Uuid
-  internalTicketingSystemId String
-  ticketingSystemId         String   @db.Uuid
-  name                      String
-  startAt                   DateTime
-  endAt                     DateTime
-  taxRate                   Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
-  // image Attachment
+model Place {
+  id        String              @id @default(uuid()) @db.Uuid
+  name      TicketingSystemName
+  addressId String              @unique @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  address    Address      @relation(fields: [addressId], references: [id])
+  EventSerie EventSerie[]
+  Event      Event[]
+}
+
+enum Audience {
+  ALL
+  YOUNG
+  SCHOOL
+  READING
+}
+
+enum DeclarationType {
+  SACEM
+  SACD
+}
+
+model EventSerie {
+  id                        String            @id @default(uuid()) @db.Uuid
+  internalTicketingSystemId String
+  ticketingSystemId         String            @db.Uuid
+  name                      String
+  producerOfficialId        String?
+  producerOfficialName      String?
+  type                      String?
+  expectedDeclarationTypes  DeclarationType[]
+  // image Attachment
+
+  // Properties specific to when it's performed
+  placeId        String   @db.Uuid
+  capacity       Int?
+  audience       Audience @default(ALL)
+  taxRate        Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
+  expensesAmount Decimal  @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  place                 Place                   @relation(fields: [placeId], references: [id])
   ticketingSystem       TicketingSystem         @relation(fields: [ticketingSystemId], references: [id], onDelete: Cascade)
   Event                 Event[]
-  TicketCategory        TicketCategory[]
   EventSerieDeclaration EventSerieDeclaration[]
 
   @@unique([ticketingSystemId, internalTicketingSystemId])
 }
 
 model Event {
-  id                        String   @id @default(uuid()) @db.Uuid
-  internalTicketingSystemId String
-  eventSerieId              String   @db.Uuid
-  startAt                   DateTime
-  endAt                     DateTime
+  id                             String    @id @default(uuid()) @db.Uuid
+  internalTicketingSystemId      String
+  eventSerieId                   String    @db.Uuid
+  startAt                        DateTime
+  endAt                          DateTime?
+  ticketingRevenueIncludingTaxes Decimal   @db.Decimal(10, 2)
+  ticketingRevenueExcludingTaxes Decimal   @db.Decimal(10, 2)
+  ticketingRevenueTaxRate        Decimal?  @db.Decimal(10, 2)
+  freeTickets                    Int
+  paidTickets                    Int
+
+  // Each event has following properties but they are defined at
+  // the event serie level, here it's to override in case of specifics
+  placeOverrideId String?   @db.Uuid
+  capacity        Int?
+  audience        Audience?
+  taxRate         Decimal?  @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  eventSerie           EventSerie             @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
-  EventCategoryTickets EventCategoryTickets[]
+  eventSerie    EventSerie @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
+  placeOverride Place?     @relation(fields: [placeId], references: [id])
+  placeId       String?    @db.Uuid
 
   @@unique([eventSerieId, internalTicketingSystemId])
-}
-
-model TicketCategory {
-  id                        String  @id @default(uuid()) @db.Uuid
-  internalTicketingSystemId String // Not unique here since a category could evolve a few years later (impacting displayed data)
-  eventSerieId              String  @db.Uuid
-  name                      String
-  description               String?
-  price                     Decimal @db.Decimal(8, 2)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  eventSerie           EventSerie             @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
-  EventCategoryTickets EventCategoryTickets[]
-
-  @@unique([eventSerieId, internalTicketingSystemId])
-}
-
-model EventCategoryTickets {
-  id            String   @id @default(uuid()) @db.Uuid
-  eventId       String   @db.Uuid
-  categoryId    String   @db.Uuid
-  total         Int
-  totalOverride Int?
-  priceOverride Decimal? @db.Decimal(8, 2)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  event    Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  category TicketCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  @@unique([eventId, categoryId])
 }
 
 enum EventSerieDeclarationStatus {
@@ -276,6 +273,7 @@ enum EventSerieDeclarationStatus {
 model EventSerieDeclaration {
   id                      String                      @id @default(uuid()) @db.Uuid
   eventSerieId            String                      @db.Uuid
+  type                    DeclarationType
   status                  EventSerieDeclarationStatus @default(PENDING)
   transmittedAt           DateTime?
   lastTransmissionError   String?
@@ -284,138 +282,9 @@ model EventSerieDeclaration {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  eventSerie                 EventSerie                  @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
-  EventSerieSacemDeclaration EventSerieSacemDeclaration?
-  EventSerieSacdDeclaration  EventSerieSacdDeclaration?
-}
+  eventSerie EventSerie @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
 
-model EventSerieSacemDeclaration {
-  id                      String @id @default(uuid()) @db.Uuid
-  eventSerieDeclarationId String @unique @db.Uuid
-
-  // Fields from the SACEM form
-  clientId         String
-  placeName        String
-  placeCapacity    Int
-  placePostalCode  String @default("-")
-  managerName      String
-  managerTitle     String
-  performanceType  String @default("")
-  declarationPlace String @default("")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  eventSerieDeclaration           EventSerieDeclaration             @relation(fields: [eventSerieDeclarationId], references: [id], onDelete: Cascade)
-  SacemDeclarationAccountingEntry SacemDeclarationAccountingEntry[]
-}
-
-enum AccountingFlux {
-  REVENUE
-  EXPENSE
-}
-
-enum AccountingCategory {
-  // Revenues
-  TICKETING // Should be never used as for now it's dynamically computed from ticketing system tables
-  CONSUMPTIONS
-  CATERING
-  PROGRAM_SALES
-  OTHER_REVENUES
-  // Expenses
-  ENGAGEMENT_CONTRACTS
-  RIGHTS_TRANSFER_CONTRACTS
-  COREALIZATION_CONTRACTS
-  COPRODUCTION_CONTRACTS
-  OTHER_ARTISTIC_CONTRACTS
-}
-
-model SacemDeclarationAccountingEntry {
-  id                 String             @id @default(uuid()) @db.Uuid
-  sacemDeclarationId String             @db.Uuid
-  flux               AccountingFlux
-  category           AccountingCategory
-  categoryPrecision  String?
-  taxRate            Decimal            @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
-  amount             Decimal            @db.Decimal(8, 2) // Always including taxes
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  sacemDeclaration EventSerieSacemDeclaration @relation(fields: [sacemDeclarationId], references: [id], onDelete: Cascade)
-
-  @@unique([sacemDeclarationId, flux, category, categoryPrecision])
-}
-
-enum EventSerieSacdDeclarationAudience {
-  ALL
-  YOUNG
-  SCHOOL
-  READING
-}
-
-enum EventSerieSacdDeclarationProductionType {
-  AMATEUR
-  PROFESSIONAL
-}
-
-model SacdDeclarationOrganization {
-  id String @id @default(uuid()) @db.Uuid
-
-  // Fields from the SACD form
-  name                   String
-  headquartersAddressId  String @db.Uuid
-  officialHeadquartersId String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  headquartersAddress      Address                     @relation(fields: [headquartersAddressId], references: [id])
-  DeclarationWhereProducer EventSerieSacdDeclaration[] @relation("DeclarationWhereProducer")
-}
-
-model EventSerieSacdDeclaration {
-  id                      String @id @default(uuid()) @db.Uuid
-  eventSerieDeclarationId String @unique @db.Uuid
-
-  // Fields from the SACD form
-  clientId        String
-  placeName       String
-  placeStreet     String @default("-")
-  placePostalCode String
-  placeCity       String
-  producerId      String @db.Uuid
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  eventSerieDeclaration          EventSerieDeclaration            @relation(fields: [eventSerieDeclarationId], references: [id], onDelete: Cascade)
-  producer                       SacdDeclarationOrganization      @relation("DeclarationWhereProducer", fields: [producerId], references: [id])
-  SacdDeclarationAccountingEntry SacdDeclarationAccountingEntry[]
-}
-
-enum SacdAccountingCategory {
-  SALE_OF_RIGHTS
-  INTRODUCTION_FEES
-  COPRODUCTION_CONTRIBUTION
-  REVENUE_GUARANTEE
-  OTHER
-}
-
-model SacdDeclarationAccountingEntry {
-  id                String                 @id @default(uuid()) @db.Uuid
-  sacdDeclarationId String                 @db.Uuid
-  category          SacdAccountingCategory
-  categoryPrecision String?
-  taxRate           Decimal?               @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%, also a null value means "not applicable"
-  amount            Decimal                @db.Decimal(8, 2) // Always including taxes
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  sacdDeclaration EventSerieSacdDeclaration @relation(fields: [sacdDeclarationId], references: [id], onDelete: Cascade)
-
-  @@unique([sacdDeclarationId, category, categoryPrecision])
+  @@unique([eventSerieId, type])
 }
 
 model SacemAgency {
