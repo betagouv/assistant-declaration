@@ -1,15 +1,18 @@
 'use client';
 
-import { Sync } from '@mui/icons-material';
-import { Alert, Button, Container, Grid, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+import { SegmentedControl, SegmentedControlProps } from '@codegouvfr/react-dsfr/SegmentedControl';
+import { RiLoopLeftFill } from '@remixicon/react';
 import { push } from '@socialgouv/matomo-next';
-import { isAfter, isBefore, subHours, subMonths } from 'date-fns';
+import { isBefore, subHours, subMonths } from 'date-fns';
 import NextLink from 'next/link';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAsyncFn } from 'react-use';
 
 import { trpc } from '@ad/src/client/trpcClient';
+import { Button } from '@ad/src/components/Button';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventSerieCard } from '@ad/src/components/EventSerieCard';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
@@ -18,7 +21,6 @@ import { CustomError, internalServerErrorError } from '@ad/src/models/entities/e
 import { mockBaseUrl, shouldTargetMock } from '@ad/src/server/mock/environment';
 import { CHUNK_DATA_PREFIX, CHUNK_ERROR_PREFIX, CHUNK_PING_PREFIX } from '@ad/src/utils/api';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
-import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 import { getBaseUrl } from '@ad/src/utils/url';
@@ -26,11 +28,11 @@ import { getBaseUrl } from '@ad/src/utils/url';
 const textDecoder = new TextDecoder();
 
 enum ListFilter {
-  ALL = 1,
-  ARCHIVED_ONLY,
-  ENDED_ONLY,
-  CURRENT_ONLY,
-  FUTURE_ONLY,
+  ALL = 'ALL',
+  ARCHIVED_ONLY = 'ARCHIVED_ONLY',
+  ENDED_ONLY = 'ENDED_ONLY',
+  CURRENT_ONLY = 'CURRENT_ONLY',
+  FUTURE_ONLY = 'FUTURE_ONLY',
 }
 
 export interface OrganizationPageProps {
@@ -166,9 +168,13 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
     return (
-      <Grid container {...centeredAlertContainerGridProps}>
-        <ErrorAlert errors={aggregatedQueries.errors} refetchs={aggregatedQueries.refetchs} />
-      </Grid>
+      <div className={fr.cx('fr-container', 'fr-py-12v')}>
+        <div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+          <div className={fr.cx('fr-col-md-8', 'fr-col-lg-6')}>
+            <ErrorAlert errors={aggregatedQueries.errors} refetchs={aggregatedQueries.refetchs} />
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -177,188 +183,173 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
   const eventsSeriesWrappers = listEventsSeries.data!.eventsSeriesWrappers;
 
   return (
-    <Container
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        py: 3,
-      }}
-    >
-      {ticketingSystems.length > 0 ? (
-        <>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={3} sx={{ pb: 1 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Typography component="h1" variant="h4">
-                    Spectacles
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography component="p" variant="body1">
-                    Synchronisez vos données, puis sélectionnez le spectacle à déclarer.
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Grid item sx={{ ml: { md: 'auto' } }}>
-                    <Button
-                      onClick={async () => {
-                        await synchronizeDataFromTicketingSystemsTrigger({
-                          organizationId: organization.id,
-                        });
+    <div className={fr.cx('fr-container', 'fr-py-12v')} style={{ height: '100%' }}>
+      <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')} style={{ height: '100%' }}>
+        {ticketingSystems.length > 0 ? (
+          <>
+            <div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+              <h1 className={fr.cx('fr-h4')}>Spectacles</h1>
+              <p>Synchronisez vos données, puis sélectionnez le spectacle à déclarer.</p>
+              <Button
+                onClick={async () => {
+                  await synchronizeDataFromTicketingSystemsTrigger({
+                    organizationId: organization.id,
+                  });
 
-                        push(['trackEvent', 'ticketing', 'synchronize']);
-                      }}
-                      loading={synchronizeDataFromTicketingSystems.loading}
-                      size="large"
-                      variant="contained"
-                      startIcon={<Sync />}
-                    >
-                      Synchroniser
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={12} md={9}>
-              <Grid container spacing={2} justifyContent="center">
+                  push(['trackEvent', 'ticketing', 'synchronize']);
+                }}
+                loading={synchronizeDataFromTicketingSystems.loading}
+              >
+                <RiLoopLeftFill size={20} aria-hidden={true} style={{ marginRight: 8 }} />
+                Synchroniser
+              </Button>
+            </div>
+            <div className={fr.cx('fr-col-12', 'fr-col-md-9')}>
+              {lastSynchronizationAt !== null ? (
                 <>
-                  {lastSynchronizationAt !== null ? (
-                    <>
-                      {lastSynchronizationTooOld ? (
-                        <Grid item xs={12} sx={{ pb: 1 }}>
-                          <Alert severity="warning">
-                            La dernière synchronisation date d&apos;{t('date.ago', { date: lastSynchronizationAt })}. Il est fortement recommandé de
-                            resynchroniser vos données avant de faire une déclaration.
-                          </Alert>
-                        </Grid>
-                      ) : (
-                        <Grid item xs={12} sx={{ pb: 1 }}>
-                          <Alert severity="info">
-                            Vous avez synchronisé vos données de billeterie {t('date.relative', { date: lastSynchronizationAt })}.
-                          </Alert>
-                        </Grid>
-                      )}
-                      {synchronizeDataFromTicketingSystems.error && (
-                        <Grid item xs={12} sx={{ pb: 1 }}>
-                          <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />
-                        </Grid>
-                      )}
-                      <Grid item xs={12} sx={{ py: 1 }}>
-                        <Grid container spacing={1} alignContent="flex-start">
-                          <Grid item>
-                            <ToggleButtonGroup
-                              color="primary"
-                              value={listFilter}
-                              exclusive
-                              onChange={(event, newValue) => {
-                                if (newValue !== null) {
-                                  setListFilter(newValue);
-                                }
-                              }}
-                              aria-label="filtre"
-                              sx={{
-                                flexWrap: 'wrap',
-                                button: {
-                                  textTransform: 'none',
-                                },
-                              }}
-                            >
-                              <ToggleButton value={ListFilter.ALL}>Tous</ToggleButton>
-                              <ToggleButton value={ListFilter.ARCHIVED_ONLY}>Archivés</ToggleButton>
-                              <ToggleButton value={ListFilter.ENDED_ONLY}>Terminés</ToggleButton>
-                              <ToggleButton value={ListFilter.CURRENT_ONLY}>En cours</ToggleButton>
-                              <ToggleButton value={ListFilter.FUTURE_ONLY}>À venir</ToggleButton>
-                            </ToggleButtonGroup>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                      {filteredEventsSeriesWrappers.length > 0 ? (
-                        <Grid item xs={12} sx={{ py: 2 }}>
-                          <Grid container spacing={2} justifyContent="center" alignItems="center">
-                            {filteredEventsSeriesWrappers.map((eventsSeriesWrapper) => {
-                              return (
-                                <Grid key={eventsSeriesWrapper.serie.id} item xs={12}>
-                                  <EventSerieCard
-                                    wrapper={eventsSeriesWrapper}
-                                    sacemDeclarationLink={linkRegistry.get('declaration', {
-                                      organizationId: organizationId,
-                                      eventSerieId: eventsSeriesWrapper.serie.id,
-                                      declarationType: 'sacem',
-                                    })}
-                                    sacdDeclarationLink={linkRegistry.get('declaration', {
-                                      organizationId: organizationId,
-                                      eventSerieId: eventsSeriesWrapper.serie.id,
-                                      declarationType: 'sacd',
-                                    })}
-                                    astpDeclarationLink={linkRegistry.get('declaration', {
-                                      organizationId: organizationId,
-                                      eventSerieId: eventsSeriesWrapper.serie.id,
-                                      declarationType: 'astp',
-                                    })}
-                                    cnmDeclarationLink={linkRegistry.get('declaration', {
-                                      organizationId: organizationId,
-                                      eventSerieId: eventsSeriesWrapper.serie.id,
-                                      declarationType: 'cnm',
-                                    })}
-                                  />
-                                </Grid>
-                              );
-                            })}
-                          </Grid>
-                        </Grid>
-                      ) : (
-                        <Grid item xs={12} sx={{ py: 2 }}>
-                          {eventsSeriesWrappers.length === 0
-                            ? `Aucun spectacle n'a été trouvé dans votre billetterie.`
-                            : `Aucun spectacle n'a été trouvé dans votre billetterie avec le filtre choisi.`}
-                        </Grid>
-                      )}
-                    </>
+                  {lastSynchronizationTooOld ? (
+                    <Alert
+                      severity="warning"
+                      small={true}
+                      description={`La dernière synchronisation date d'${t('date.ago', {
+                        date: lastSynchronizationAt,
+                      })}. Il est fortement recommandé de resynchroniser vos données avant de faire une déclaration.`}
+                      className={fr.cx('fr-mb-2v')}
+                    />
                   ) : (
-                    <>
-                      <Grid item xs={12} sx={{ pt: 2, pb: 1 }}>
-                        <Alert severity="warning">
-                          Veuillez synchroniser les données de votre billetterie pour débuter vos déclarations.{' '}
-                          <Typography component="span" sx={{ fontSize: 'inherit', fontWeight: 600 }}>
-                            À noter que pour la première synchronisation cette opération peut durer quelques minutes en fonction de la quantité de
-                            spectacles à retrouver.
-                          </Typography>
-                        </Alert>
-                      </Grid>
-                      {synchronizeDataFromTicketingSystems.error && (
-                        <Grid item xs={12} sx={{ py: 1 }}>
-                          <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />
-                        </Grid>
-                      )}
-                    </>
+                    <Alert
+                      severity="info"
+                      small={true}
+                      description={`Vous avez synchronisé vos données de billeterie ${t('date.relative', { date: lastSynchronizationAt })}.`}
+                      className={fr.cx('fr-mb-2v')}
+                    />
+                  )}
+                  {synchronizeDataFromTicketingSystems.error && (
+                    <div className={fr.cx('fr-pb-2v')}>
+                      <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />
+                    </div>
+                  )}
+                  <div className={fr.cx('fr-py-2v')} aria-label="filtre">
+                    <SegmentedControl
+                      segments={
+                        [
+                          {
+                            label: 'Tous',
+                            value: ListFilter.ALL,
+                          },
+                          {
+                            label: 'Archivés',
+                            value: ListFilter.ARCHIVED_ONLY,
+                          },
+                          {
+                            label: 'Terminés',
+                            value: ListFilter.ENDED_ONLY,
+                          },
+                          {
+                            label: 'En cours',
+                            value: ListFilter.CURRENT_ONLY,
+                          },
+                          {
+                            label: 'À venir',
+                            value: ListFilter.FUTURE_ONLY,
+                          },
+                        ].map((segment) => {
+                          return {
+                            label: segment.label,
+                            nativeInputProps: {
+                              value: segment.value as unknown as string,
+                              defaultChecked: segment.value === listFilter,
+                              onChange: (event) => {
+                                setListFilter(event.currentTarget.value as ListFilter);
+                              },
+                            },
+                          } satisfies SegmentedControlProps.Segments[0];
+                        }) as SegmentedControlProps.Segments // Cast needed because the type expects a tuple, not an array
+                      }
+                      hideLegend={true}
+                    ></SegmentedControl>
+                  </div>
+                  {filteredEventsSeriesWrappers.length > 0 ? (
+                    <div>
+                      {filteredEventsSeriesWrappers.map((eventsSeriesWrapper) => {
+                        return (
+                          <div key={eventsSeriesWrapper.serie.id} className={fr.cx('fr-py-2v')}>
+                            <EventSerieCard
+                              wrapper={eventsSeriesWrapper}
+                              sacemDeclarationLink={linkRegistry.get('declaration', {
+                                organizationId: organizationId,
+                                eventSerieId: eventsSeriesWrapper.serie.id,
+                                declarationType: 'sacem',
+                              })}
+                              sacdDeclarationLink={linkRegistry.get('declaration', {
+                                organizationId: organizationId,
+                                eventSerieId: eventsSeriesWrapper.serie.id,
+                                declarationType: 'sacd',
+                              })}
+                              astpDeclarationLink={linkRegistry.get('declaration', {
+                                organizationId: organizationId,
+                                eventSerieId: eventsSeriesWrapper.serie.id,
+                                declarationType: 'astp',
+                              })}
+                              cnmDeclarationLink={linkRegistry.get('declaration', {
+                                organizationId: organizationId,
+                                eventSerieId: eventsSeriesWrapper.serie.id,
+                                declarationType: 'cnm',
+                              })}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className={fr.cx('fr-py-4v')}>
+                      {eventsSeriesWrappers.length === 0
+                        ? `Aucun spectacle n'a été trouvé dans votre billetterie.`
+                        : `Aucun spectacle n'a été trouvé dans votre billetterie avec le filtre choisi.`}
+                    </p>
                   )}
                 </>
-              </Grid>
-            </Grid>
-          </Grid>
-        </>
-      ) : (
-        <Grid container sx={{ justifyContent: 'center', my: 'auto' }}>
-          <Grid item xs={12}>
-            <Typography component="p" variant="body2" sx={{ textAlign: 'center', py: 2 }}>
+              ) : (
+                <>
+                  <Alert
+                    severity="warning"
+                    small={true}
+                    description={
+                      <>
+                        Veuillez synchroniser les données de votre billetterie pour débuter vos déclarations.{' '}
+                        <span className={fr.cx('fr-text--bold')}>
+                          À noter que pour la première synchronisation cette opération peut durer quelques minutes en fonction de la quantité de
+                          spectacles à retrouver.
+                        </span>
+                      </>
+                    }
+                    className={fr.cx('fr-py-2v')}
+                  />
+                  {synchronizeDataFromTicketingSystems.error && <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />}
+                </>
+              )}
+            </div>
+          </>
+        ) : (
+          <div
+            className={fr.cx('fr-col-12')}
+            style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}
+          >
+            <h1 className={fr.cx('fr-h4')}>Synchronisation de vos données</h1>
+            <p>
               La dernière étape pour commencer les déclarations est de connecter votre système de billetterie.
               <br />
               Des indications vous seront affichées en fonction du système choisi.
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sx={{ pt: 3, pb: 1, textAlign: 'center' }}>
-            <Button
-              component={NextLink}
+            </p>
+            <NextLink
               href={linkRegistry.get('ticketingSystemConnection', { organizationId: organizationId, onboarding: true })}
-              size="large"
-              variant="contained"
+              className={fr.cx('fr-btn', 'fr-mt-8v')}
             >
               Connecter un système de billetterie
-            </Button>
-          </Grid>
-        </Grid>
-      )}
-    </Container>
+            </NextLink>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

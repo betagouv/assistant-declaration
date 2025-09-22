@@ -17,6 +17,8 @@
 }
 
 .text {
+  display: flex;
+  align-items: center; // In case there is an added icon we make sure it will be aligned according to text
   opacity: 1;
   transition: opacity 0.5s ease-in-out;
 
