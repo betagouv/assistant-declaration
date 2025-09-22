@@ -1,5 +1,7 @@
-import { Box, CircularProgress } from '@mui/material';
-import * as React from 'react';
+import { fr } from '@codegouvfr/react-dsfr';
+import { RiLoader4Fill } from '@remixicon/react';
+
+import styles from '@ad/src/components/LoadingArea.module.scss';
 
 export interface LoadingAreaProps {
   ariaLabelTarget: string;
@@ -8,32 +10,30 @@ export interface LoadingAreaProps {
   loaderSize?: number | 'medium' | 'large' | 'small';
 }
 
-export const LoadingArea = (props: LoadingAreaProps) => {
+export function LoadingArea(props: LoadingAreaProps) {
   const ariaLabel = `zone en cours de chargement - ${props.ariaLabelTarget}`;
   let loaderSize: number;
 
   if (!props.loaderSize || props.loaderSize === 'medium') {
-    loaderSize = 30;
-  } else if (props.loaderSize === 'large') {
     loaderSize = 40;
+  } else if (props.loaderSize === 'large') {
+    loaderSize = 50;
   } else if (props.loaderSize === 'small') {
-    loaderSize = 20;
+    loaderSize = 30;
   } else {
     throw new Error('wrong loader size provided');
   }
 
   return (
-    <Box
-      aria-busy={true}
-      sx={{
-        display: 'flex',
-        flex: '1 1 auto',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: 3,
-      }}
-    >
-      <CircularProgress size={loaderSize} aria-label={ariaLabel} />
-    </Box>
+    <div className={styles.container}>
+      <RiLoader4Fill
+        size={loaderSize}
+        className={styles.spinner}
+        style={{
+          color: fr.colors.decisions.background.flat.blueFrance.default,
+        }}
+        aria-label={ariaLabel}
+      />
+    </div>
   );
-};
+}
