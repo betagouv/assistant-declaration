@@ -1,7 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import { ArrowForward } from '@mui/icons-material';
-import { Box, CardContent, Chip, Link, Tooltip, Typography } from '@mui/material';
-import { Card } from '@mui/material';
+import { Tag } from '@codegouvfr/react-dsfr/Tag';
+import { Card, CardContent, Tooltip } from '@mui/material';
 import { isSameDay } from 'date-fns';
 import NextLink from 'next/link';
 import { useMemo } from 'react';
@@ -25,7 +24,7 @@ export function EventSerieCard(props: EventSerieCardProps) {
   }, [props.wrapper.serie.startAt, props.wrapper.serie.endAt]);
 
   return (
-    <Link component={NextLink} href={props.sacemDeclarationLink} underline="none">
+    <NextLink href={props.sacemDeclarationLink} className={fr.cx('fr-link')}>
       <Card
         variant="outlined"
         sx={{
@@ -34,42 +33,42 @@ export function EventSerieCard(props: EventSerieCardProps) {
         }}
       >
         <CardContent sx={{ p: '0 !important' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-              <Typography component="div" variant="h5" color="primary" data-sentry-mask>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <div className={fr.cx('fr-h5')} style={{ color: fr.colors.decisions.text.actionHigh.blueFrance.default }} data-sentry-mask>
                 {props.wrapper.serie.name}
-              </Typography>
+              </div>
               <Tooltip
                 title={`Du ${t('date.longWithTime', { date: props.wrapper.serie.startAt })} au ${t('date.longWithTime', {
                   date: props.wrapper.serie.endAt,
                 })}`}
                 data-sentry-mask
               >
-                <Chip
-                  label={
-                    onTheSameDay
-                      ? t('date.shortWithTime', { date: props.wrapper.serie.startAt })
-                      : `${t('date.short', { date: props.wrapper.serie.startAt })}  →  ${t('date.short', {
-                          date: props.wrapper.serie.endAt,
-                        })}`
-                  }
-                  sx={{
-                    bgcolor: 'var(--background-contrast-brown-opera)',
-                    height: 'auto',
-                    p: '5px',
-                    '& > .MuiChip-label': {
-                      whiteSpace: 'pre-wrap !important',
-                      wordBreak: 'break-word !important', // Needed in case of word/sentence bigger than parent width
-                    },
+                <Tag
+                  as="span"
+                  style={{
+                    backgroundColor: 'var(--background-contrast-brown-opera)',
                   }}
                   data-sentry-mask
-                />
+                >
+                  {onTheSameDay
+                    ? t('date.shortWithTime', { date: props.wrapper.serie.startAt })
+                    : `${t('date.short', { date: props.wrapper.serie.startAt })}  →  ${t('date.short', {
+                        date: props.wrapper.serie.endAt,
+                      })}`}
+                </Tag>
               </Tooltip>
-            </Box>
-            <ArrowForward sx={{ color: fr.colors.decisions.text.actionHigh.blueFrance.default, ml: 'auto' }} />
-          </Box>
+            </div>
+            <span
+              className={fr.cx('fr-icon--md', 'fr-icon-arrow-right-line')}
+              style={{
+                color: fr.colors.decisions.text.actionHigh.blueFrance.default,
+                marginLeft: 'auto',
+              }}
+            />
+          </div>
         </CardContent>
       </Card>
-    </Link>
+    </NextLink>
   );
 }
