@@ -18,6 +18,7 @@ export function Partners() {
       >
         <span className={fr.cx('fr-h6')}>Vous êtes éditeur ?</span>
         <p className={fr.cx('fr-my-0')}>
+          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
           <a href="#" onClick={showLiveChat} className={fr.cx('fr-link')}>
             Contactez notre équipe technique
           </a>{' '}

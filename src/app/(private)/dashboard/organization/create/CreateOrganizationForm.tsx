@@ -61,6 +61,7 @@ export function CreateOrganizationForm(props: CreateOrganizationFormProps) {
               name="officialId"
               defaultValue={control._defaultValues.officialId || ''}
               render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                // eslint-disable-next-line react-hooks/rules-of-hooks
                 const { inputRef } = useOfficialIdInput({ value: value, onChange: onChange });
 
                 return (
