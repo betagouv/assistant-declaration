@@ -1,11 +1,11 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import { cx } from '@codegouvfr/react-dsfr/tools/cx';
 import { useIsDark } from '@codegouvfr/react-dsfr/useIsDark';
-import { Box, Link, Typography, useMediaQuery, useTheme } from '@mui/material';
 import Image from 'next/image';
 import NextLink from 'next/link';
 import { ImgHTMLAttributes } from 'react';
 
-import style from '@ad/src/app/(public)/about/Introduction.module.scss';
+import styles from '@ad/src/app/(public)/about/Introduction.module.scss';
 import hero from '@ad/src/assets/images/hero.svg';
 import billetweb from '@ad/src/assets/images/partners/billetweb.png';
 import helloasso from '@ad/src/assets/images/partners/helloasso.png';
@@ -27,149 +27,74 @@ const imageProps: ImgHTMLAttributes<HTMLImageElement> = {
 
 export function Introduction() {
   const { isDark } = useIsDark();
-  const theme = useTheme();
-  const mdUp = useMediaQuery(theme.breakpoints.up('md'));
 
   return (
     <IntroductionContainer
       left={
-        <Box
-          sx={{
-            pl: 4,
-            pr: 4,
-            py: 3,
-          }}
-        >
-          <Typography component="h1" variant="h2" sx={{ my: 2, maxWidth: 600 }}>
+        <div className={fr.cx('fr-py-6v', 'fr-px-8v')}>
+          <h1 className={fr.cx('fr-h2', 'fr-my-4v')} style={{ maxWidth: 600 }}>
             Simplifiez vos déclarations de spectacles
-          </Typography>
-          {!mdUp && (
-            <Image
-              src={hero}
-              alt=""
-              priority={true}
-              className={style.hero}
-              style={{
-                color: undefined, // [WORKAROUND] Ref: https://github.com/vercel/next.js/issues/61388#issuecomment-1988278891
-                height: 'auto',
-                maxHeight: 200,
-                filter: isDark ? 'invert(100%)' : undefined,
-              }}
-            />
-          )}
-          <Typography color="text.secondary" sx={{ mb: 4, maxWidth: 600 }}>
+          </h1>
+          <Image
+            src={hero}
+            alt=""
+            priority={true}
+            className={cx(fr.cx('fr-hidden-md'), styles.hero)}
+            style={{
+              color: undefined, // [WORKAROUND] Ref: https://github.com/vercel/next.js/issues/61388#issuecomment-1988278891
+              height: 'auto',
+              maxHeight: 200,
+              filter: isDark ? 'invert(100%)' : undefined,
+            }}
+          />
+          <p className={fr.cx('fr-mb-8v')} style={{ maxWidth: 600 }}>
             L&apos;Assistant pour les déclarations du spectacle aide les diffuseurs de spectacles à remplir les formalités SACEM, SACD, CNM et ASTP.
             <br />
             Il réutilise les données de billetterie pour simplifier la saisie des informations attendues par les organismes.
-          </Typography>
-          <Typography sx={{ color: fr.colors.decisions.text.mention.grey.default, mb: 2, maxWidth: 600 }}>
+          </p>
+          <p className={fr.cx('fr-mb-4v')} style={{ maxWidth: 600, color: fr.colors.decisions.text.mention.grey.default }}>
             Les systèmes de billetterie déjà connectés :
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 2 }}>
-            <Link
-              component={NextLink}
-              href="https://www.billetweb.fr"
-              target="_blank"
-              underline="none"
-              sx={{
-                backgroundImage: 'none !important',
-                '&::after': {
-                  display: 'none !important',
-                },
-              }}
-            >
+          </p>
+          <div className={cx(styles.logos, fr.cx('fr-mb-4v'))}>
+            <NextLink href="https://www.billetweb.fr" target="_blank">
               <Image src={billetweb} alt="logo de Billetweb" style={{ ...imageProps.style, filter: isDark ? 'invert(100%)' : undefined }} />
-            </Link>
-            <Link
-              component={NextLink}
-              href="https://www.mapado.com"
-              target="_blank"
-              underline="none"
-              sx={{
-                backgroundImage: 'none !important',
-                '&::after': {
-                  display: 'none !important',
-                },
-              }}
-            >
+            </NextLink>
+            <NextLink href="https://www.mapado.com" target="_blank">
               <Image src={mapado} alt="logo de Mapado" style={{ ...imageProps.style, filter: isDark ? 'invert(100%)' : undefined }} />
-            </Link>
-            <Link
-              component={NextLink}
-              href="https://supersoniks.com"
-              target="_blank"
-              underline="none"
-              sx={{
-                backgroundImage: 'none !important',
-                '&::after': {
-                  display: 'none !important',
-                },
-              }}
-            >
+            </NextLink>
+            <NextLink href="https://supersoniks.com" target="_blank">
               <Image src={supersoniks} alt="logo de Supersoniks" style={{ ...imageProps.style, filter: isDark ? 'invert(100%)' : undefined }} />
-            </Link>
-            <Link
-              component={NextLink}
-              href="https://www.socoop.fr"
-              target="_blank"
-              underline="none"
-              sx={{
-                backgroundImage: 'none !important',
-                '&::after': {
-                  display: 'none !important',
-                },
-              }}
-            >
+            </NextLink>
+            <NextLink href="https://www.socoop.fr" target="_blank">
               <Image src={soticket} alt="logo de SoTicket" style={{ ...imageProps.style, filter: isDark ? 'invert(100%)' : undefined }} />
-            </Link>
-            <Link
-              component={NextLink}
-              href="https://www.helloasso.com"
-              target="_blank"
-              underline="none"
-              sx={{
-                backgroundImage: 'none !important',
-                '&::after': {
-                  display: 'none !important',
-                },
-              }}
-            >
+            </NextLink>
+            <NextLink href="https://www.helloasso.com" target="_blank">
               <Image
                 src={helloasso}
                 alt="logo de HelloAsso"
                 style={{ ...imageProps.style, maxHeight: 25, filter: isDark ? 'invert(100%)' : undefined }}
               />
-            </Link>
-            <Link
-              component={NextLink}
-              href="https://pro.shotgun.live"
-              target="_blank"
-              underline="none"
-              sx={{
-                backgroundImage: 'none !important',
-                '&::after': {
-                  display: 'none !important',
-                },
-              }}
-            >
+            </NextLink>
+            <NextLink href="https://pro.shotgun.live" target="_blank">
               <Image
                 src={shotgun}
                 alt="logo de Shotgun"
                 style={{ ...imageProps.style, maxHeight: 25, filter: isDark ? 'invert(100%)' : undefined }}
               />
-            </Link>
-          </Box>
-        </Box>
+            </NextLink>
+          </div>
+        </div>
       }
       right={
         <Image
           src={hero}
           alt=""
           priority={true}
-          className={style.hero}
+          className={styles.hero}
           style={{
             color: undefined, // [WORKAROUND] Ref: https://github.com/vercel/next.js/issues/61388#issuecomment-1988278891
             height: 'auto',
+            maxHeight: 400,
             filter: isDark ? 'invert(100%)' : undefined,
           }}
         />

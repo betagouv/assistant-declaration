@@ -1,4 +1,4 @@
-import { Button, Container, Grid, Typography } from '@mui/material';
+import { fr } from '@codegouvfr/react-dsfr';
 import NextLink from 'next/link';
 
 import { Widget } from '@ad/src/app/(public)/about/Widget';
@@ -9,59 +9,51 @@ import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export function QuickLinks() {
   return (
-    <Container sx={{ pt: { xs: 2, md: 4 }, pb: { xs: 4, md: 8 } }}>
-      <Grid container spacing={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
-        <Grid item xs={12} sm={6} md={4}>
+    <div className={fr.cx('fr-container', 'fr-pt-8v', 'fr-pb-16v')}>
+      <div className={fr.cx('fr-grid-row', 'fr-grid-row--center', 'fr-grid-row--gutters')}>
+        <div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-col-md-4')}>
           <Widget icon={delivery} title="Une démo ? Une question ? Un retour sur le service ?">
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-              N&apos;hésitez pas cela nous aidera à améliorer l&apos;outil.
-            </Typography>
-            <Button
-              component={NextLink}
+            <p className={fr.cx('fr-mb-8v')}>N&apos;hésitez pas cela nous aidera à améliorer l&apos;outil.</p>
+            <NextLink
               href="mailto:contact@assistant-declaration.beta.gouv.fr"
-              size="medium"
-              variant="contained"
-              sx={{ width: 'fit-content', mt: 'auto', mx: 'auto', mb: 4 }}
+              className={fr.cx('fr-btn', 'fr-mt-auto', 'fr-mx-auto', 'fr-mb-8v')}
+              style={{ width: 'fit-content' }}
             >
               Contactez-nous
-            </Button>
+            </NextLink>
           </Widget>
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </div>
+        <div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-col-md-4')}>
           <Widget icon={computer} title="Accéder à l'outil">
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+            <p className={fr.cx('fr-mb-8v')}>
               Créez votre compte et testez l&apos;outil. Vous serez accompagné pour connecter votre système de billetterie.
-            </Typography>
-            <Button
-              component={NextLink}
+            </p>
+            <NextLink
               href={linkRegistry.get('dashboard', undefined)}
-              size="medium"
-              variant="contained"
-              sx={{ width: 'fit-content', mt: 'auto', mx: 'auto', mb: 4 }}
+              className={fr.cx('fr-btn', 'fr-mt-auto', 'fr-mx-auto', 'fr-mb-8v')}
+              style={{ width: 'fit-content' }}
             >
               Accédez à l&apos;outil
-            </Button>
+            </NextLink>
           </Widget>
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </div>
+        <div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-col-md-4')}>
           <Widget icon={gesture} title="Participez à la co-construction">
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+            <p className={fr.cx('fr-mb-8v')}>
               L&apos;Assistant évolue via une démarche itérative basée sur les retours des utilisateurs. Nous cherchons des testeurs pour
               co-construire.
-            </Typography>
-            <Button
-              component={NextLink}
+            </p>
+            <NextLink
               href="https://atelier-numerique.notion.site/21447c728624818e8a49d9af2058d985"
               target="_blank"
-              size="medium"
-              variant="contained"
-              sx={{ width: 'fit-content', mt: 'auto', mx: 'auto', mb: 4 }}
+              className={fr.cx('fr-btn', 'fr-mt-auto', 'fr-mx-auto', 'fr-mb-8v')}
+              style={{ width: 'fit-content' }}
             >
               Participez
-            </Button>
+            </NextLink>
           </Widget>
-        </Grid>
-      </Grid>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

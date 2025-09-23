@@ -1,53 +1,37 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import { Box, BoxProps, Container, Grid } from '@mui/material';
-import * as React from 'react';
 
-export function IntroductionContainer({
-  left,
-  right,
-  rightRef,
-  rightSx,
-  containerMaxHeight,
-}: {
-  left: React.ReactElement;
-  right: React.ReactElement;
-  rightRef?: React.MutableRefObject<HTMLDivElement | null>;
-  rightSx?: BoxProps['sx'];
-  containerMaxHeight?: any; // Tried to type `BoxProps['sx']['maxHeight']` but it's not working
-}) {
-  const containerMaxHeightToUse = containerMaxHeight || 550;
-
+export function IntroductionContainer({ left, right }: { left: React.ReactElement; right: React.ReactElement }) {
   return (
-    <Box
-      sx={{
-        bgcolor: fr.colors.decisions.background.actionLow.blueFrance.default,
+    <div
+      style={{
+        backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.default,
         overflow: 'hidden',
       }}
     >
-      <Container
-        sx={{
-          minHeight: Math.min(...Object.values<number>(containerMaxHeightToUse)),
-          height: {
-            md: 'calc(100vh - 120px)',
-          },
-          maxHeight: {
-            md: containerMaxHeightToUse,
-            xl: containerMaxHeightToUse + 50,
-          },
+      <div
+        className={fr.cx('fr-container')}
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          display: 'flex',
+          minHeight: 'min(calc(100vh - 120px), 550px)',
           transition: '0.3s',
         }}
       >
-        <Grid container alignItems="center" wrap="nowrap" sx={{ height: '100%', mx: 'auto' }}>
-          <Grid item md={7} lg={7} sx={{ m: 'auto' }}>
-            {left}
-          </Grid>
-          <Grid item md={5} lg={5} sx={{ maxHeight: '100%', display: { xs: 'none', md: 'initial' } }}>
-            <Box ref={rightRef} id="introduction-container-right-area" aria-hidden="true">
-              {right}
-            </Box>
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+        <div
+          className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mx-auto')}
+          style={{
+            alignItems: 'center',
+            flexWrap: 'nowrap',
+            height: '100%',
+          }}
+        >
+          <div className={fr.cx('fr-col-12', 'fr-col-md-7', 'fr-col-lg-7', 'fr-m-auto')}>{left}</div>
+          <div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col-lg-5')}>
+            <div aria-hidden="true">{right}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

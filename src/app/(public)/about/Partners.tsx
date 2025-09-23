@@ -1,5 +1,4 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import { Box, Container, Link, Typography } from '@mui/material';
 
 import { useLiveChat } from '@ad/src/components/live-chat/useLiveChat';
 
@@ -7,38 +6,24 @@ export function Partners() {
   const { showLiveChat } = useLiveChat();
 
   return (
-    <Container sx={{ pt: 1, pb: { xs: 4, sm: 5, md: 6 } }}>
-      <Box
-        sx={{
-          bgcolor: fr.colors.decisions.background.actionLow.blueFrance.default,
+    <div className={fr.cx('fr-container')}>
+      <div
+        className={fr.cx('fr-py-12v', 'fr-px-6v', 'fr-mx-auto')}
+        style={{
+          backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.default,
           textAlign: 'center',
           maxWidth: 800,
-          mx: 'auto',
-          borderRadius: '5px',
-          px: 3,
-          py: 6,
+          borderRadius: 5,
         }}
       >
-        <Typography component="span" variant="h6">
-          Vous êtes éditeur ?
-        </Typography>
-        <Typography variant="body1">
-          <Link
-            component="button"
-            onClick={showLiveChat}
-            sx={{
-              top: -1, // Just due to the button among text, could use flex parent too
-              textUnderlineOffset: 3,
-              '&::after': {
-                display: 'none !important',
-              },
-            }}
-          >
+        <span className={fr.cx('fr-h6')}>Vous êtes éditeur ?</span>
+        <p className={fr.cx('fr-my-0')}>
+          <a href="#" onClick={showLiveChat} className={fr.cx('fr-link')}>
             Contactez notre équipe technique
-          </Link>{' '}
+          </a>{' '}
           pour proposer le service à vos clients !
-        </Typography>
-      </Box>
-    </Container>
+        </p>
+      </div>
+    </div>
   );
 }
