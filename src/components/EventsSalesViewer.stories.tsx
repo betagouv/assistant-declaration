@@ -1,9 +1,9 @@
-import { Button } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 import { useState } from 'react';
 import { screen, userEvent, within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
+import { Button } from '@ad/src/components/Button';
 import { Normal as EventsSalesOverviewNormalStory } from '@ad/src/components/EventsSalesOverview.stories';
 import { EventsSalesViewer } from '@ad/src/components/EventsSalesViewer';
 import { EventsSalesViewerContext } from '@ad/src/components/EventsSalesViewerContext';
@@ -44,7 +44,6 @@ const Template: StoryFn<ComponentType> = (args) => {
         onClick={() => {
           setOpen(true);
         }}
-        variant="contained"
       >
         Display the ticketing viewer
       </Button>

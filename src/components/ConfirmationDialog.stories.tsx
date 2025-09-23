@@ -1,8 +1,9 @@
-import { Button, Typography } from '@mui/material';
+import { fr } from '@codegouvfr/react-dsfr';
 import { Meta, StoryFn } from '@storybook/react';
 import { screen, userEvent, within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
+import { Button } from '@ad/src/components/Button';
 import { ConfirmationDialog } from '@ad/src/components/ConfirmationDialog';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { sleep } from '@ad/src/utils/sleep';
@@ -39,22 +40,14 @@ const Template: StoryFn<ComponentType> = (args) => {
     });
   };
 
-  return (
-    <Button onClick={onClick} variant="contained">
-      Display the confirmation dialog
-    </Button>
-  );
+  return <Button onClick={onClick}>Display the confirmation dialog</Button>;
 };
 
 const DefaultStory = Template.bind({});
 DefaultStory.args = {
   description: (
     <>
-      Do you want to confirm after reading{' '}
-      <Typography component="span" sx={{ fontWeight: 'bold' }}>
-        this text
-      </Typography>
-      ?
+      Do you want to confirm after reading <span className={fr.cx('fr-text--bold')}>this text</span>?
     </>
   ),
   onConfirm: async () => {},
