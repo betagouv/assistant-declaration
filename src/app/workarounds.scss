@@ -9,6 +9,12 @@
   margin-bottom: 1rem !important;
 }
 
+form[aria-label='renseigner la déclaration'] > .fr-grid-row.fr-grid-row--gutters {
+  // [WORKAROUND] Until new implementation of unified form with DSFR
+  flex-direction: column;
+  gap: 1rem;
+}
+
 // ---
 // The following is needed because links contained (NextLink) have weird parameters (in the opposite of a button with "onClick") that breaks the wanted UI
 // Adding here some workarounds but more may be needed depending on the color needed (I was not able to override or disable the style making a mess... tried a lot)
