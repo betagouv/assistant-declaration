@@ -25,14 +25,13 @@ export function LoadingArea(props: LoadingAreaProps) {
   }
 
   return (
-    <div className={styles.container}>
+    <div role="progressbar" className={styles.container} aria-label={ariaLabel}>
       <RiLoader4Fill
         size={loaderSize}
         className={styles.spinner}
         style={{
           color: fr.colors.decisions.background.flat.blueFrance.default,
         }}
-        aria-label={ariaLabel}
       />
     </div>
   );

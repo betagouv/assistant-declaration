@@ -88,6 +88,7 @@ export function ErrorAlert(props: ErrorAlertProps) {
 
   return (
     <Alert
+      {...({ role: 'alert' } as any)}
       severity="error"
       small={false}
       title="Erreur"
