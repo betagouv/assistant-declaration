@@ -180,7 +180,6 @@ export const cannotMutateTicketingDataOnceDeclaredError = new BusinessError(
   'cannotMutateTicketingDataOnceDeclared',
   t('errors.custom.cannotMutateTicketingDataOnceDeclared')
 );
-export const eventCategoryTicketsNotFoundError = new BusinessError('eventCategoryTicketsNotFound', t('errors.custom.eventCategoryTicketsNotFound'));
 
 // Declaration
 export const transmittedDeclarationCannotBeUpdatedError = new BusinessError(

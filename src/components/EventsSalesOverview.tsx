@@ -11,10 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import repairingImage from '@ad/src/assets/images/declaration/repairing.svg';
 import { trpc } from '@ad/src/client/trpcClient';
-import { ClipboardTicketingEventsSales } from '@ad/src/components/ClipboardTicketingEventsSales';
-import { ClipboardTrigger } from '@ad/src/components/ClipboardTrigger';
 import { EventSalesTable } from '@ad/src/components/EventSalesTable';
-import { EventsSalesKeyFigures } from '@ad/src/components/EventsSalesKeyFigures';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
@@ -74,29 +71,6 @@ export function EventsSalesOverview({ wrappers, eventSerie, roundValuesForCopy, 
           )}
         </Grid>
          */}
-        <Grid item sx={{ ml: 'auto' }}>
-          {triggerEventsSalesCopy && (
-            <ClipboardTrigger
-              onCopy={() => {
-                setTriggerEventsSalesCopy(false);
-
-                push(['trackEvent', 'declaration', 'copyEventsSales', 'scope', eventsWrappersToCopy.length > 1 ? 'all' : 'one']);
-              }}
-            >
-              <ClipboardTicketingEventsSales eventSerieName={eventSerie.name} eventsWrappers={eventsWrappersToCopy} />
-            </ClipboardTrigger>
-          )}
-          <Tooltip title={'Copier le tableau des ventes de toutes les représentations pour Excel, Word...'} sx={{ ml: 1 }}>
-            <IconButton
-              onClick={async () => {
-                setEventsWrappersToCopy(wrappers);
-                setTriggerEventsSalesCopy(true);
-              }}
-            >
-              <ContentCopy fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Grid>
       </Grid>
       <Grid container spacing={2} justifyContent="center" sx={{ pt: 1 }}>
         <Grid item xs={12} sx={{ py: 2 }}>

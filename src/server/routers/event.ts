@@ -1,5 +1,3 @@
-import { EventCategoryTickets } from '@prisma/client';
-
 import {
   GetEventSerieSchema,
   ListEventsSchema,
@@ -11,19 +9,12 @@ import { DeclarationStatusSchema } from '@ad/src/models/entities/common';
 import {
   cannotMutateTicketingDataOnceDeclaredError,
   collaboratorCanOnlySeeOrganizationEventsSeriesError,
-  eventCategoryTicketsNotFoundError,
   eventSerieNotFoundError,
   organizationCollaboratorRoleRequiredError,
 } from '@ad/src/models/entities/errors';
 import { EventSerieWrapperSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { prisma } from '@ad/src/prisma/client';
-import {
-  declarationTypePrismaToModel,
-  eventCategoryTicketsPrismaToModel,
-  eventPrismaToModel,
-  eventSeriePrismaToModel,
-  ticketCategoryPrismaToModel,
-} from '@ad/src/server/routers/mappers';
+import { declarationTypePrismaToModel, eventPrismaToModel, eventSeriePrismaToModel } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization, isUserACollaboratorPartOfOrganizations } from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
 

@@ -152,11 +152,6 @@ export function declarationPrismaToModel(
     ticketingSystem: {
       organization: Pick<Organization, 'name'>;
     };
-    Event: {
-      EventCategoryTickets: (Pick<EventCategoryTickets, 'total' | 'totalOverride' | 'priceOverride'> & {
-        category: Pick<TicketCategory, 'price'>;
-      })[];
-    }[];
   },
   declaration: Pick<
     EventSerieDeclaration,

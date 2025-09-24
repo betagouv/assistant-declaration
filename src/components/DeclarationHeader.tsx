@@ -7,7 +7,6 @@ import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DeclarationHeaderContext } from '@ad/src/components/DeclarationHeaderContext';
-import { EventsSalesKeyFigures } from '@ad/src/components/EventsSalesKeyFigures';
 import { DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { useLocalStorageViewedTicketingModal } from '@ad/src/proxies/ticketing';
@@ -92,9 +91,6 @@ export function DeclarationHeader({ eventSerie, eventsWrappers, transmittedDecla
                 readonly={readonly}
               />
             </Typography>
-          </Grid>
-          <Grid item xs={12} lg={8}>
-            <EventsSalesKeyFigures eventSerie={eventSerie} wrappers={eventsWrappers} roundValuesForCopy={roundValuesForCopy} minimal={true} />
           </Grid>
         </Grid>
       </Grid>

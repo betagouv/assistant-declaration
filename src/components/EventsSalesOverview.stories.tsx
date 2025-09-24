@@ -3,7 +3,7 @@ import { within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { EventsSalesOverview } from '@ad/src/components/EventsSalesOverview';
-import { eventCategoryTickets, eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
+import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
 type ComponentType = typeof EventsSalesOverview;
@@ -26,19 +26,7 @@ NormalStory.args = {
   wrappers: eventsWrappers,
   eventSerie: eventsSeries[0],
 };
-NormalStory.parameters = {
-  msw: {
-    handlers: [
-      getTRPCMock({
-        type: 'mutation',
-        path: ['updateEventCategoryTickets'],
-        response: {
-          eventCategoryTickets: eventCategoryTickets[0],
-        },
-      }),
-    ],
-  },
-};
+NormalStory.parameters = {};
 NormalStory.play = async ({ canvasElement }) => {
   await within(canvasElement).findByText(/données/i);
 };

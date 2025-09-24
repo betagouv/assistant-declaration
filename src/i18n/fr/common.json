@@ -27,7 +27,6 @@
       "cannotMutateTicketingDataOnceDeclared": "les données de billetterie ne sont plus modifiables une fois qu'une télédéclaration a été effectuée pour ce spectacle",
       "collaboratorCanOnlySeeOrganizationEventsSeries": "en tant que collaborateur vous ne pouvez que lister les spectacles concernant votre organisation",
       "collaboratorCanOnlySeeOrganizationTicketingSystems": "en tant que collaborateur vous ne pouvez que lister les systèmes de billetterie de votre organisation",
-      "eventCategoryTicketsNotFound": "ces données de catégorie de tickets n'existent pas",
       "eventSerieNotFound": "ce spectacle n'existe pas",
       "expiredVerificationToken": "vous avez dépassé le temps imparti, merci de renouveler votre demande",
       "expiredConfirmationToken": "le lien de confirmation a expiré, veuillez contacter notre support",
