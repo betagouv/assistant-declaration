@@ -201,6 +201,23 @@ enum Audience {
   SCHOOL
 }
 
+enum PerformanceType {
+  OUTDOOR_PERFORMANCE
+  CABARET_AND_MUSIC_HALL
+  CIRCUS_AND_MAGIC
+  MUSICAL_THEATRE
+  DANCE
+  COMEDY_AND_STAND_UP
+  PUPPETRY
+  CLASSICAL_AND_OPERA_AND_CONTEMPORARY_MUSIC
+  POPULAR_AND_JAZZ_MUSIC
+  WORLD_AND_TRADITIONAL_MUSIC_AND_DANCE
+  HISTORICAL_REENACTMENTS_AND_HERITAGE_SOUND_AND_LIGHT_SHOWS
+  LIVE_PERFORMANCE_WITHOUT_DOMINANT_DISCIPLINE
+  ICE_SHOWS_AND_THEME_PARKS_AND_RELATED_PERFORMANCES
+  THEATRE_AND_STORYTELLING_AND_MIME
+}
+
 enum DeclarationType {
   SACEM
   SACD
@@ -218,7 +235,7 @@ model EventSerie {
   // image Attachment
 
   // Properties specific to when it's performed
-  placeId        String   @db.Uuid
+  placeId        String?  @db.Uuid
   placeCapacity  Int?
   audience       Audience @default(ALL)
   taxRate        Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
@@ -227,7 +244,7 @@ model EventSerie {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  place                 Place                   @relation(fields: [placeId], references: [id])
+  place                 Place?                  @relation(fields: [placeId], references: [id])
   ticketingSystem       TicketingSystem         @relation(fields: [ticketingSystemId], references: [id], onDelete: Cascade)
   Event                 Event[]
   EventSerieDeclaration EventSerieDeclaration[]
@@ -249,17 +266,16 @@ model Event {
 
   // Each event has following properties but they are defined at
   // the event serie level, here it's to override in case of specifics
-  placeOverrideId String?   @db.Uuid
-  placeCapacity   Int?
-  audience        Audience?
-  taxRate         Decimal?  @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
+  placeOverrideId       String?   @db.Uuid
+  placeCapacityOverride Int?
+  audienceOverride      Audience?
+  taxRateOverride       Decimal?  @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
   eventSerie    EventSerie @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
-  placeOverride Place?     @relation(fields: [placeId], references: [id])
-  placeId       String?    @db.Uuid
+  placeOverride Place?     @relation(fields: [placeOverrideId], references: [id])
 
   @@unique([eventSerieId, internalTicketingSystemId])
 }

@@ -235,6 +235,24 @@
         "SACD": "SACD"
       }
     },
+    "performanceType": {
+      "enum": {
+        "OUTDOOR_PERFORMANCE": "Arts de la rue",
+        "CABARET_AND_MUSIC_HALL": "Cabaret, music-hall",
+        "CIRCUS_AND_MAGIC": "Cirque, magie",
+        "MUSICAL_THEATRE": "Comédie musicale, spectacle ou théâtre musical",
+        "DANCE": "Danse",
+        "COMEDY_AND_STAND_UP": "Humour, one man shows, stand-up",
+        "PUPPETRY": "Marionnettes",
+        "CLASSICAL_AND_OPERA_AND_CONTEMPORARY_MUSIC": "Musique classique, lyrique et contemporaine",
+        "POPULAR_AND_JAZZ_MUSIC": "Musiques actuelles et jazz",
+        "WORLD_AND_TRADITIONAL_MUSIC_AND_DANCE": "Musiques et danses du monde et traditionnelles",
+        "HISTORICAL_REENACTMENTS_AND_HERITAGE_SOUND_AND_LIGHT_SHOWS": "Reconstitutions historiques, sons et lumières patrimoniales",
+        "LIVE_PERFORMANCE_WITHOUT_DOMINANT_DISCIPLINE": "Spectacle vivant sans discipline dominante",
+        "ICE_SHOWS_AND_THEME_PARKS_AND_RELATED_PERFORMANCES": "Spectacles sur glace, parcs de loisirs et assimilés",
+        "THEATRE_AND_STORYTELLING_AND_MIME": "Théâtre, conte, mime"
+      }
+    },
     "ticketingSystemName": {
       "enum": {
         "BILLETWEB": "Billetweb",
