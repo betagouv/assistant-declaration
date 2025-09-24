@@ -26,7 +26,7 @@ export function KeyReasons() {
         </div>
         <div className={fr.cx('fr-col-12', 'fr-col-md-8', 'fr-col-lg-7')}>
           <div className={fr.cx('fr-h3')}>Pourquoi un Assistant pour les déclarations du spectacle ?</div>
-          <p>
+          <div>
             <span className={fr.cx('fr-text--bold')}>Pour gagner du temps :</span> chaque mois, vous devez déclarer plusieurs fois les mêmes
             informations auprès des organismes. L&apos;Assistant a pour objectif de simplifier cette tâche.
             <br />
@@ -39,7 +39,7 @@ export function KeyReasons() {
             </ol>
             <br />
             La possibilité de télétransmettre les données via l&apos;Assistant sera étudiée dans un second temps.
-          </p>
+          </div>
         </div>
       </div>
     </div>
