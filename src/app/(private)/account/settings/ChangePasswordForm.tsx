@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { Button } from '@ad/src/components/Button';
+import { PasswordMutationInput } from '@ad/src/components/PasswordMutationInput';
 import { ChangePasswordPrefillSchemaType, ChangePasswordSchema, ChangePasswordSchemaType } from '@ad/src/models/actions/auth';
 
 export interface ChangePasswordFormProps {
@@ -54,9 +55,9 @@ export function ChangePasswordForm(props: ChangePasswordFormProps) {
             />
           </div>
           <div className={fr.cx('fr-fieldset__element')}>
-            <PasswordInput
+            <PasswordMutationInput
               label="Nouveau mot de passe"
-              messages={errors?.newPassword ? [{ severity: 'error', message: errors?.newPassword?.message }] : []}
+              error={errors?.newPassword?.message}
               nativeInputProps={{
                 ...register('newPassword'),
                 autoComplete: 'new-password',
