@@ -10,7 +10,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { SacemDeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacem/SacemDeclarationPageContext';
+import { DeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPageContext';
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
@@ -19,23 +19,23 @@ import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
 import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
-import { FillSacemDeclarationSchema, FillSacemDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { FillDeclarationSchema, FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 
-export interface SacemDeclarationPageProps {
+export interface DeclarationPageProps {
   params: { organizationId: string; eventSerieId: string };
 }
 
-export function SacemDeclarationPage({ params: { organizationId, eventSerieId } }: SacemDeclarationPageProps) {
+export function DeclarationPage({ params: { organizationId, eventSerieId } }: DeclarationPageProps) {
   const { t } = useTranslation('common');
-  const { ContextualDeclarationHeader } = useContext(SacemDeclarationPageContext);
+  const { ContextualDeclarationHeader } = useContext(DeclarationPageContext);
 
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
-  const fillSacemDeclaration = trpc.fillSacemDeclaration.useMutation();
+  const fillDeclaration = trpc.fillDeclaration.useMutation();
   const transmitDeclaration = trpc.transmitDeclaration.useMutation();
 
   const getEventSerie = trpc.getEventSerie.useQuery({
@@ -49,11 +49,11 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
     },
   });
 
-  const getSacemDeclaration = trpc.getSacemDeclaration.useQuery({
+  const getDeclaration = trpc.getDeclaration.useQuery({
     eventSerieId: eventSerieId,
   });
 
-  const aggregatedQueries = new AggregatedQueries(getEventSerie, listEvents, getSacemDeclaration);
+  const aggregatedQueries = new AggregatedQueries(getEventSerie, listEvents, getDeclaration);
 
   const [formInitialized, setFormInitialized] = useState<boolean>(false);
 
@@ -65,8 +65,8 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
     control,
     trigger,
     reset,
-  } = useForm<FillSacemDeclarationSchemaType>({
-    resolver: zodResolver(FillSacemDeclarationSchema),
+  } = useForm<FillDeclarationSchemaType>({
+    resolver: zodResolver(FillDeclarationSchema),
     defaultValues: {
       // ...prefill,
       eventSerieId: eventSerieId,
@@ -77,8 +77,8 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
   useConfirmationIfUnsavedChange(isDirty);
 
   const onSubmit = useCallback(
-    async (input: FillSacemDeclarationSchemaType) => {
-      const result = await fillSacemDeclaration.mutateAsync(input);
+    async (input: FillDeclarationSchemaType) => {
+      const result = await fillDeclaration.mutateAsync(input);
 
       // Reset the form state so fields considered as "dirty" are no longer
       reset({
@@ -97,43 +97,43 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
 
       push(['trackEvent', 'declaration', 'fill', 'type', DeclarationTypeSchema.Values.SACEM]);
     },
-    [fillSacemDeclaration, reset, eventSerieId]
+    [fillDeclaration, reset, eventSerieId]
   );
 
   useEffect(() => {
-    if (getSacemDeclaration.data) {
+    if (getDeclaration.data) {
       if (!formInitialized) {
         setFormInitialized(true); // It's needed otherwise if you blur/focus again the window the new fetch data will override the "dirty form data"
 
         // Update the form with fetched data
-        if (getSacemDeclaration.data.sacemDeclarationWrapper.declaration) {
+        if (getDeclaration.data.sacemDeclarationWrapper.declaration) {
           reset({
             eventSerieId: eventSerieId,
-            clientId: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.clientId,
-            placeName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeName,
-            placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placeCapacity,
-            placePostalCode: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.placePostalCode,
-            managerName: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerName,
-            managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.managerTitle,
-            performanceType: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.performanceType,
-            declarationPlace: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.declarationPlace,
-            revenues: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.revenues,
-            expenses: getSacemDeclaration.data.sacemDeclarationWrapper.declaration.expenses,
+            clientId: getDeclaration.data.sacemDeclarationWrapper.declaration.clientId,
+            placeName: getDeclaration.data.sacemDeclarationWrapper.declaration.placeName,
+            placeCapacity: getDeclaration.data.sacemDeclarationWrapper.declaration.placeCapacity,
+            placePostalCode: getDeclaration.data.sacemDeclarationWrapper.declaration.placePostalCode,
+            managerName: getDeclaration.data.sacemDeclarationWrapper.declaration.managerName,
+            managerTitle: getDeclaration.data.sacemDeclarationWrapper.declaration.managerTitle,
+            performanceType: getDeclaration.data.sacemDeclarationWrapper.declaration.performanceType,
+            declarationPlace: getDeclaration.data.sacemDeclarationWrapper.declaration.declarationPlace,
+            revenues: getDeclaration.data.sacemDeclarationWrapper.declaration.revenues,
+            expenses: getDeclaration.data.sacemDeclarationWrapper.declaration.expenses,
           });
-        } else if (getSacemDeclaration.data.sacemDeclarationWrapper.placeholder) {
+        } else if (getDeclaration.data.sacemDeclarationWrapper.placeholder) {
           reset({
             eventSerieId: eventSerieId,
-            revenues: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.revenues,
-            expenses: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.expenses,
+            revenues: getDeclaration.data.sacemDeclarationWrapper.placeholder.revenues,
+            expenses: getDeclaration.data.sacemDeclarationWrapper.placeholder.expenses,
             // Taking the first placeholder since the backend sorted them by the last modification (likely to have the right data)
-            clientId: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.clientId[0] ?? undefined,
-            placeName: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.placeName[0] ?? undefined,
-            placeCapacity: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.placeCapacity[0] ?? undefined,
-            placePostalCode: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.placePostalCode[0] ?? undefined,
-            managerName: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.managerName[0] ?? undefined,
-            managerTitle: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.managerTitle[0] ?? undefined,
-            performanceType: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.performanceType[0] ?? undefined,
-            declarationPlace: getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.declarationPlace[0] ?? undefined,
+            clientId: getDeclaration.data.sacemDeclarationWrapper.placeholder.clientId[0] ?? undefined,
+            placeName: getDeclaration.data.sacemDeclarationWrapper.placeholder.placeName[0] ?? undefined,
+            placeCapacity: getDeclaration.data.sacemDeclarationWrapper.placeholder.placeCapacity[0] ?? undefined,
+            placePostalCode: getDeclaration.data.sacemDeclarationWrapper.placeholder.placePostalCode[0] ?? undefined,
+            managerName: getDeclaration.data.sacemDeclarationWrapper.placeholder.managerName[0] ?? undefined,
+            managerTitle: getDeclaration.data.sacemDeclarationWrapper.placeholder.managerTitle[0] ?? undefined,
+            performanceType: getDeclaration.data.sacemDeclarationWrapper.placeholder.performanceType[0] ?? undefined,
+            declarationPlace: getDeclaration.data.sacemDeclarationWrapper.placeholder.declarationPlace[0] ?? undefined,
           });
         }
       } else {
@@ -145,16 +145,16 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
         setValue(
           'revenues',
           [
-            getSacemDeclaration.data.sacemDeclarationWrapper.declaration
-              ? getSacemDeclaration.data.sacemDeclarationWrapper.declaration.revenues[0]
-              : getSacemDeclaration.data.sacemDeclarationWrapper.placeholder.revenues[0],
+            getDeclaration.data.sacemDeclarationWrapper.declaration
+              ? getDeclaration.data.sacemDeclarationWrapper.declaration.revenues[0]
+              : getDeclaration.data.sacemDeclarationWrapper.placeholder.revenues[0],
             ...getValues('revenues').slice(1),
           ],
           { shouldValidate: true }
         );
       }
     }
-  }, [getSacemDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId, getValues, setValue]);
+  }, [getDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId, getValues, setValue]);
 
   const { transmittedDeclarations } = useMemo(() => {
     return {
@@ -164,9 +164,9 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
 
   const { alreadyDeclared } = useMemo(() => {
     return {
-      alreadyDeclared: (getSacemDeclaration.data?.sacemDeclarationWrapper.declaration?.transmittedAt || null) !== null,
+      alreadyDeclared: (getDeclaration.data?.sacemDeclarationWrapper.declaration?.transmittedAt || null) !== null,
     };
-  }, [getSacemDeclaration]);
+  }, [getDeclaration]);
 
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
@@ -180,7 +180,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
 
   const eventSerie = getEventSerie.data!.eventSerie;
   const eventsWrappers = listEvents.data!.eventsWrappers; // Descending order (from the API)
-  const sacemDeclarationWrapper = getSacemDeclaration.data!.sacemDeclarationWrapper;
+  const sacemDeclarationWrapper = getDeclaration.data!.sacemDeclarationWrapper;
 
   return (
     <Container
@@ -199,10 +199,8 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
       >
         <Container>
           <ContextualDeclarationHeader
-            organizationId={organizationId}
             eventSerie={eventSerie}
             eventsWrappers={eventsWrappers}
-            currentDeclaration="sacem"
             transmittedDeclarations={transmittedDeclarations}
             readonly={alreadyDeclared}
           />
@@ -687,7 +685,7 @@ export function SacemDeclarationPage({ params: { organizationId, eventSerieId } 
                     <Grid item xs={12} sm={8} md={6} sx={{ mx: 'auto' }}>
                       <Button
                         type="submit"
-                        loading={fillSacemDeclaration.isPending}
+                        loading={fillDeclaration.isPending}
                         size="large"
                         variant="contained"
                         color="warning"

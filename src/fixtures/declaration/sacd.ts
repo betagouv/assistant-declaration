@@ -1,4 +1,3 @@
-import { ensureMinimumSacdAccountingItems } from '@ad/src/core/declaration';
 import { eventsSeries } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
 import {
@@ -63,20 +62,6 @@ export const sacdDeclarations: SacdDeclarationSchemaType[] = [
     organizationName: organizations[0].name,
     eventSerieName: eventsSeries[0].name,
     averageTicketPrice: 318,
-    accountingEntries: ensureMinimumSacdAccountingItems([
-      {
-        category: SacdAccountingCategorySchema.Values.INTRODUCTION_FEES,
-        categoryPrecision: null,
-        taxRate: 0.2,
-        includingTaxesAmount: 2368,
-      },
-      {
-        category: SacdAccountingCategorySchema.Values.OTHER,
-        categoryPrecision: 'Divers',
-        taxRate: 0.2,
-        includingTaxesAmount: 930,
-      },
-    ]),
     transmittedAt: null,
   }),
   SacdDeclarationSchema.parse({
@@ -91,26 +76,6 @@ export const sacdDeclarations: SacdDeclarationSchemaType[] = [
     organizationName: organizations[1].name,
     eventSerieName: eventsSeries[1].name,
     averageTicketPrice: 381,
-    accountingEntries: ensureMinimumSacdAccountingItems([
-      {
-        category: SacdAccountingCategorySchema.Values.SALE_OF_RIGHTS,
-        categoryPrecision: null,
-        taxRate: 0.055,
-        includingTaxesAmount: 422,
-      },
-      {
-        category: SacdAccountingCategorySchema.Values.REVENUE_GUARANTEE,
-        categoryPrecision: null,
-        taxRate: 0.2,
-        includingTaxesAmount: 244,
-      },
-      {
-        category: SacdAccountingCategorySchema.Values.OTHER,
-        categoryPrecision: 'Divers',
-        taxRate: 0.2,
-        includingTaxesAmount: 260,
-      },
-    ]),
     transmittedAt: null,
   }),
   SacdDeclarationSchema.parse({
@@ -125,14 +90,6 @@ export const sacdDeclarations: SacdDeclarationSchemaType[] = [
     organizationName: organizations[2].name,
     eventSerieName: eventsSeries[2].name,
     averageTicketPrice: 931,
-    accountingEntries: ensureMinimumSacdAccountingItems([
-      {
-        category: SacdAccountingCategorySchema.Values.SALE_OF_RIGHTS,
-        categoryPrecision: null,
-        taxRate: 0.055,
-        includingTaxesAmount: 7385,
-      },
-    ]),
     transmittedAt: new Date('December 31, 2024 10:00:00 UTC'),
   }),
 ];

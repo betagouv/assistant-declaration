@@ -10,10 +10,7 @@ import { EventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
 
 export interface EventSerieCardProps {
   wrapper: EventSerieWrapperSchemaType;
-  sacemDeclarationLink: string;
-  sacdDeclarationLink: string;
-  astpDeclarationLink: string;
-  cnmDeclarationLink: string;
+  declarationLink: string;
 }
 
 export function EventSerieCard(props: EventSerieCardProps) {
@@ -24,7 +21,7 @@ export function EventSerieCard(props: EventSerieCardProps) {
   }, [props.wrapper.serie.startAt, props.wrapper.serie.endAt]);
 
   return (
-    <NextLink href={props.sacemDeclarationLink} className={fr.cx('fr-link')}>
+    <NextLink href={props.declarationLink} className={fr.cx('fr-link')}>
       <Card
         variant="outlined"
         sx={{

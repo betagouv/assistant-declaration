@@ -1,15 +1,9 @@
 import { Address, DeclarationType, Event, EventSerie, EventSerieDeclaration, Organization, TicketingSystem, User } from '@prisma/client';
 
-import { ensureMinimumSacdAccountingItems, ensureMinimumSacemExpenseItems, ensureMinimumSacemRevenueItems } from '@ad/src/core/declaration';
 import { AddressSchemaType } from '@ad/src/models/entities/address';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
-import { SacdDeclarationOrganizationSchemaType, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
-import {
-  AccountingCategorySchema,
-  SacemDeclarationAccountingFluxEntrySchemaType,
-  SacemDeclarationSchemaType,
-} from '@ad/src/models/entities/declaration/sacem';
-import { EventCategoryTicketsSchemaType, EventSchemaType, EventSerieSchemaType, TicketCategorySchemaType } from '@ad/src/models/entities/event';
+import { AccountingCategorySchema, DeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
+import { EventSchemaType, EventSerieSchemaType } from '@ad/src/models/entities/event';
 import { OrganizationSchemaType } from '@ad/src/models/entities/organization';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
 import { UserSchemaType } from '@ad/src/models/entities/user';
@@ -93,32 +87,6 @@ export function eventPrismaToModel(event: Event): EventSchemaType {
   };
 }
 
-export function ticketCategoryPrismaToModel(ticketCategory: TicketCategory): TicketCategorySchemaType {
-  return {
-    id: ticketCategory.id,
-    internalTicketingSystemId: ticketCategory.internalTicketingSystemId,
-    eventSerieId: ticketCategory.eventSerieId,
-    name: ticketCategory.name,
-    description: ticketCategory.description,
-    price: ticketCategory.price.toNumber(),
-    createdAt: ticketCategory.createdAt,
-    updatedAt: ticketCategory.updatedAt,
-  };
-}
-
-export function eventCategoryTicketsPrismaToModel(eventCategoryTickets: EventCategoryTickets): EventCategoryTicketsSchemaType {
-  return {
-    id: eventCategoryTickets.id,
-    eventId: eventCategoryTickets.eventId,
-    categoryId: eventCategoryTickets.categoryId,
-    total: eventCategoryTickets.total,
-    totalOverride: eventCategoryTickets.totalOverride,
-    priceOverride: eventCategoryTickets.priceOverride !== null ? eventCategoryTickets.priceOverride.toNumber() : null,
-    createdAt: eventCategoryTickets.createdAt,
-    updatedAt: eventCategoryTickets.updatedAt,
-  };
-}
-
 export function declarationTypePrismaToModel(declarationType: DeclarationType): DeclarationTypeSchemaType {
   switch (declarationType) {
     case 'SACEM':
@@ -130,19 +98,14 @@ export function declarationTypePrismaToModel(declarationType: DeclarationType): 
   }
 }
 
-export function sacemPlaceholderDeclarationPrismaToModel(
+export function placeholderDeclarationPrismaToModel(
   eventSerie: Pick<EventSerie, 'id' | 'name' | 'startAt' | 'endAt' | 'taxRate'> & {
     ticketingSystem: {
       organization: Pick<Organization, 'name'>;
     };
-    Event: {
-      EventCategoryTickets: (Pick<EventCategoryTickets, 'total' | 'totalOverride' | 'priceOverride'> & {
-        category: Pick<TicketCategory, 'price'>;
-      })[];
-    }[];
   }
 ): Pick<
-  SacemDeclarationSchemaType,
+  DeclarationSchemaType,
   | 'organizationName'
   | 'eventSerieName'
   | 'eventSerieStartAt'
@@ -157,19 +120,10 @@ export function sacemPlaceholderDeclarationPrismaToModel(
   let paidTickets: number = 0;
   let includingTaxesAmount: number = 0;
 
-  for (const event of eventSerie.Event) {
-    for (const eventCategoryTicket of event.EventCategoryTickets) {
-      const total = eventCategoryTicket.totalOverride ?? eventCategoryTicket.total;
-      const price = (eventCategoryTicket.priceOverride ?? eventCategoryTicket.category.price).toNumber();
-
-      if (price === 0) {
-        freeTickets += total;
-      } else {
-        paidTickets += total;
-        includingTaxesAmount += total * price;
-      }
-    }
-  }
+  // TODO:
+  // TODO:
+  // TODO:
+  // TODO:
 
   return {
     organizationName: eventSerie.ticketingSystem.organization.name,
@@ -193,7 +147,7 @@ export function sacemPlaceholderDeclarationPrismaToModel(
   };
 }
 
-export function sacemDeclarationPrismaToModel(
+export function declarationPrismaToModel(
   eventSerie: Pick<EventSerie, 'id' | 'name' | 'startAt' | 'endAt' | 'taxRate'> & {
     ticketingSystem: {
       organization: Pick<Organization, 'name'>;
@@ -204,48 +158,27 @@ export function sacemDeclarationPrismaToModel(
       })[];
     }[];
   },
-  sacemDeclaration: Pick<
-    EventSerieSacemDeclaration,
+  declaration: Pick<
+    EventSerieDeclaration,
     'id' | 'clientId' | 'placeName' | 'placeCapacity' | 'placePostalCode' | 'managerName' | 'managerTitle' | 'performanceType' | 'declarationPlace'
-  > & {
-    SacemDeclarationAccountingEntry: Pick<SacemDeclarationAccountingEntry, 'flux' | 'category' | 'categoryPrecision' | 'taxRate' | 'amount'>[];
-  } & Pick<EventSerieDeclaration, 'transmittedAt'>
-): SacemDeclarationSchemaType {
+  > &
+    Pick<EventSerieDeclaration, 'transmittedAt'>
+): DeclarationSchemaType {
   // Reuse data from the placeholder since this one is used until the form is submitted
-  const { revenues, expenses, ...computedPlaceholder } = sacemPlaceholderDeclarationPrismaToModel(eventSerie);
-
-  for (const accountingEntry of sacemDeclaration.SacemDeclarationAccountingEntry) {
-    const taxRate = accountingEntry.taxRate.toNumber();
-    const includingTaxesAmount = accountingEntry.amount.toNumber();
-
-    const categoryFluxEntry: SacemDeclarationAccountingFluxEntrySchemaType = {
-      category: accountingEntry.category,
-      categoryPrecision: accountingEntry.categoryPrecision,
-      taxRate: taxRate,
-      includingTaxesAmount: includingTaxesAmount,
-    };
-
-    if (accountingEntry.flux === 'REVENUE') {
-      revenues.push(categoryFluxEntry);
-    } else if (accountingEntry.flux === 'EXPENSE') {
-      expenses.push(categoryFluxEntry);
-    }
-  }
+  const computedPlaceholder = placeholderDeclarationPrismaToModel(eventSerie);
 
   return {
-    id: sacemDeclaration.id,
+    id: declaration.id,
     eventSerieId: eventSerie.id,
-    clientId: sacemDeclaration.clientId,
-    placeName: sacemDeclaration.placeName,
-    placeCapacity: sacemDeclaration.placeCapacity,
-    placePostalCode: sacemDeclaration.placePostalCode,
-    managerName: sacemDeclaration.managerName,
-    managerTitle: sacemDeclaration.managerTitle,
-    performanceType: sacemDeclaration.performanceType,
-    declarationPlace: sacemDeclaration.declarationPlace,
-    revenues: ensureMinimumSacemRevenueItems(revenues),
-    expenses: ensureMinimumSacemExpenseItems(expenses),
+    clientId: declaration.clientId,
+    placeName: declaration.placeName,
+    placeCapacity: declaration.placeCapacity,
+    placePostalCode: declaration.placePostalCode,
+    managerName: declaration.managerName,
+    managerTitle: declaration.managerTitle,
+    performanceType: declaration.performanceType,
+    declarationPlace: declaration.declarationPlace,
     ...computedPlaceholder,
-    transmittedAt: sacemDeclaration.transmittedAt,
+    transmittedAt: declaration.transmittedAt,
   };
 }

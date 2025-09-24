@@ -1,7 +1,7 @@
 import z from 'zod';
 
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
-import { DeclarationSchema } from '@ad/src/models/entities/declaration/sacem';
+import { DeclarationSchema } from '@ad/src/models/entities/declaration';
 import { EventSerieSchema } from '@ad/src/models/entities/event';
 
 export const TransmitDeclarationSchema = z

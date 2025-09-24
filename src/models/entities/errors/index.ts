@@ -124,7 +124,7 @@ export const officialIdHeadquartersMustBe14DigitsError = new BusinessError(
   t('errors.validation.officialHeadquartersId.officialIdHeadquartersMustBe14Digits')
 );
 export const sacemIdMustBeDigitsError = new BusinessError('sacemIdMustBeDigits', t('errors.validation.sacemId.sacemIdMustBeDigits'));
-export const sacdIdMustBeDigitsError = new BusinessError('sacdIdMustBeDigits', t('errors.validation.sacdId.sacdIdMustBe9Digits'));
+export const sacdIdMustBeDigitsError = new BusinessError('sacdIdMustBeDigits', t('errors.validation.sacdId.sacdIdMustBeDigits'));
 export const anotherOrganizationAlreadyHasThisOfficialIdError = new BusinessError(
   'anotherOrganizationAlreadyHasThisOfficialId',
   t('errors.custom.anotherOrganizationAlreadyHasThisOfficialId')

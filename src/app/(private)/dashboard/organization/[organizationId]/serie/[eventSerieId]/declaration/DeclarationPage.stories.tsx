@@ -3,27 +3,27 @@ import { Meta, StoryFn } from '@storybook/react';
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindMainTitle } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
-import { SacemDeclarationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacem/SacemDeclarationPage';
-import { SacemDeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacem/SacemDeclarationPageContext';
+import { DeclarationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPage';
+import { DeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPageContext';
 import { Normal as DeclarationHeaderNormalStory } from '@ad/src/components/DeclarationHeader.stories';
 import { sacemDeclarations, sacemDeclarationsWrappers } from '@ad/src/fixtures/declaration/sacem';
 import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
-type ComponentType = typeof SacemDeclarationPage;
+type ComponentType = typeof DeclarationPage;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Pages/SacemDeclaration',
-  component: SacemDeclarationPage,
+  title: 'Pages/Declaration',
+  component: DeclarationPage,
   ...generateMetaDefault({
     parameters: {},
   }),
 } as Meta<ComponentType>;
 
 function mswCommonParameters(options: { transmitted: boolean; noEvent: boolean }) {
-  const adjustedSacemDeclaration = {
+  const adjustedDeclaration = {
     ...sacemDeclarations[0],
     transmittedAt: options.transmitted ? new Date('December 31, 2024 10:00:00 UTC') : null,
   };
@@ -47,16 +47,16 @@ function mswCommonParameters(options: { transmitted: boolean; noEvent: boolean }
     }),
     getTRPCMock({
       type: 'query',
-      path: ['getSacemDeclaration'],
+      path: ['getDeclaration'],
       response: {
-        sacemDeclarationWrapper: { ...sacemDeclarationsWrappers[0], declaration: adjustedSacemDeclaration },
+        sacemDeclarationWrapper: { ...sacemDeclarationsWrappers[0], declaration: adjustedDeclaration },
       },
     }),
     getTRPCMock({
       type: 'mutation',
-      path: ['fillSacemDeclaration'],
+      path: ['fillDeclaration'],
       response: {
-        sacemDeclaration: adjustedSacemDeclaration,
+        sacemDeclaration: adjustedDeclaration,
       },
     }),
     getTRPCMock({
@@ -77,7 +77,7 @@ const commonComponentProps: ComponentProps<ComponentType> = {
 };
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <SacemDeclarationPage {...args} />;
+  return <DeclarationPage {...args} />;
 };
 
 const NormalStory = Template.bind({});
@@ -95,7 +95,7 @@ NormalStory.play = async ({ canvasElement }) => {
 
 export const Normal = prepareStory(NormalStory, {
   childrenContext: {
-    context: SacemDeclarationPageContext,
+    context: DeclarationPageContext,
     value: {
       ContextualDeclarationHeader: DeclarationHeaderNormalStory,
     },
@@ -117,7 +117,7 @@ TransmittedStory.play = async ({ canvasElement }) => {
 
 export const Transmitted = prepareStory(TransmittedStory, {
   childrenContext: {
-    context: SacemDeclarationPageContext,
+    context: DeclarationPageContext,
     value: {
       ContextualDeclarationHeader: DeclarationHeaderNormalStory,
     },
@@ -139,7 +139,7 @@ NotFoundStory.play = async ({ canvasElement }) => {
 
 export const NotFound = prepareStory(NotFoundStory, {
   childrenContext: {
-    context: SacemDeclarationPageContext,
+    context: DeclarationPageContext,
     value: {
       ContextualDeclarationHeader: DeclarationHeaderNormalStory,
     },
@@ -161,7 +161,7 @@ WithLayoutStory.play = async ({ canvasElement }) => {
 export const WithLayout = prepareStory(WithLayoutStory, {
   layoutStory: PrivateLayoutAsCollaboratorStory,
   childrenContext: {
-    context: SacemDeclarationPageContext,
+    context: DeclarationPageContext,
     value: {
       ContextualDeclarationHeader: DeclarationHeaderNormalStory,
     },

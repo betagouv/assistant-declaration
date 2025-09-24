@@ -4,7 +4,7 @@ import { create } from 'xmlbuilder2';
 
 import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { getServerTranslation } from '@ad/src/i18n';
-import { SacdAccountingCategorySchema, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
+import { SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { sacdDeclarationIncorrectDeclarantError, sacdDeclarationUnsuccessfulError } from '@ad/src/models/entities/errors';
 import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import {
@@ -343,61 +343,61 @@ export function prepareDeclarationParameter(
       },
     };
 
-    if (!eventSerieSpecificsFilled) {
-      eventSerieSpecificsFilled = true;
+    // if (!eventSerieSpecificsFilled) {
+    //   eventSerieSpecificsFilled = true;
 
-      const saleOfRights = declaration.accountingEntries.find(
-        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.SALE_OF_RIGHTS
-      );
-      const saleOfRightsTaxRate = saleOfRights?.taxRate ?? 0;
+    //   const saleOfRights = declaration.accountingEntries.find(
+    //     (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.SALE_OF_RIGHTS
+    //   );
+    //   const saleOfRightsTaxRate = saleOfRights?.taxRate ?? 0;
 
-      declarationParameterRepresentation.Exploitation.rep_mt_cession = formatAmountNumber(
-        saleOfRights ? getExcludingTaxesAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate) : 0
-      );
-      declarationParameterRepresentation.Exploitation.rep_tx_tva_cession = 100 * saleOfRightsTaxRate; // Providing 5.5% as 5.5 instead of 0.055
-      declarationParameterRepresentation.Exploitation.rep_mt_tva_cession = formatAmountNumber(
-        saleOfRights ? getTaxAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate) : 0
-      );
+    //   declarationParameterRepresentation.Exploitation.rep_mt_cession = formatAmountNumber(
+    //     saleOfRights ? getExcludingTaxesAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate) : 0
+    //   );
+    //   declarationParameterRepresentation.Exploitation.rep_tx_tva_cession = 100 * saleOfRightsTaxRate; // Providing 5.5% as 5.5 instead of 0.055
+    //   declarationParameterRepresentation.Exploitation.rep_mt_tva_cession = formatAmountNumber(
+    //     saleOfRights ? getTaxAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate) : 0
+    //   );
 
-      const introductionFees = declaration.accountingEntries.find(
-        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.INTRODUCTION_FEES
-      );
-      const introductionFeesTaxRate = introductionFees?.taxRate ?? 0;
+    //   const introductionFees = declaration.accountingEntries.find(
+    //     (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.INTRODUCTION_FEES
+    //   );
+    //   const introductionFeesTaxRate = introductionFees?.taxRate ?? 0;
 
-      declarationParameterRepresentation.Exploitation.rep_mt_frais = formatAmountNumber(
-        introductionFees ? getExcludingTaxesAmountFromIncludingTaxesAmount(introductionFees.includingTaxesAmount, introductionFeesTaxRate) : 0
-      );
+    //   declarationParameterRepresentation.Exploitation.rep_mt_frais = formatAmountNumber(
+    //     introductionFees ? getExcludingTaxesAmountFromIncludingTaxesAmount(introductionFees.includingTaxesAmount, introductionFeesTaxRate) : 0
+    //   );
 
-      const coproductionContribution = declaration.accountingEntries.find(
-        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.COPRODUCTION_CONTRIBUTION
-      );
-      const coproductionContributionTaxRate = coproductionContribution?.taxRate ?? 0;
+    //   const coproductionContribution = declaration.accountingEntries.find(
+    //     (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.COPRODUCTION_CONTRIBUTION
+    //   );
+    //   const coproductionContributionTaxRate = coproductionContribution?.taxRate ?? 0;
 
-      declarationParameterRepresentation.Exploitation.rep_mt_apports_coprod = formatAmountNumber(
-        coproductionContribution
-          ? getExcludingTaxesAmountFromIncludingTaxesAmount(coproductionContribution.includingTaxesAmount, coproductionContributionTaxRate)
-          : 0
-      );
+    //   declarationParameterRepresentation.Exploitation.rep_mt_apports_coprod = formatAmountNumber(
+    //     coproductionContribution
+    //       ? getExcludingTaxesAmountFromIncludingTaxesAmount(coproductionContribution.includingTaxesAmount, coproductionContributionTaxRate)
+    //       : 0
+    //   );
 
-      const revenueGuarantee = declaration.accountingEntries.find(
-        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.REVENUE_GUARANTEE
-      );
-      const revenueGuaranteeTaxRate = revenueGuarantee?.taxRate ?? 0;
+    //   const revenueGuarantee = declaration.accountingEntries.find(
+    //     (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.REVENUE_GUARANTEE
+    //   );
+    //   const revenueGuaranteeTaxRate = revenueGuarantee?.taxRate ?? 0;
 
-      declarationParameterRepresentation.Exploitation.rep_mt_garantie_rec = formatAmountNumber(
-        revenueGuarantee ? getExcludingTaxesAmountFromIncludingTaxesAmount(revenueGuarantee.includingTaxesAmount, revenueGuaranteeTaxRate) : 0
-      );
+    //   declarationParameterRepresentation.Exploitation.rep_mt_garantie_rec = formatAmountNumber(
+    //     revenueGuarantee ? getExcludingTaxesAmountFromIncludingTaxesAmount(revenueGuarantee.includingTaxesAmount, revenueGuaranteeTaxRate) : 0
+    //   );
 
-      // // The budget is not something we are collecting from declarants
-      // declarationParameterRepresentation.Exploitation.rep_mt_depenses = 'TODO';
+    //   // // The budget is not something we are collecting from declarants
+    //   // declarationParameterRepresentation.Exploitation.rep_mt_depenses = 'TODO';
 
-      const other = declaration.accountingEntries.find((accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.OTHER);
-      const otherTaxRate = other?.taxRate ?? 0;
+    //   const other = declaration.accountingEntries.find((accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.OTHER);
+    //   const otherTaxRate = other?.taxRate ?? 0;
 
-      declarationParameterRepresentation.Exploitation.rep_mt_autres = formatAmountNumber(
-        other ? getExcludingTaxesAmountFromIncludingTaxesAmount(other.includingTaxesAmount, otherTaxRate) : 0
-      );
-    }
+    //   declarationParameterRepresentation.Exploitation.rep_mt_autres = formatAmountNumber(
+    //     other ? getExcludingTaxesAmountFromIncludingTaxesAmount(other.includingTaxesAmount, otherTaxRate) : 0
+    //   );
+    // }
 
     declarationParameter.Declaration.Representations.Representation.push(declarationParameterRepresentation);
   }

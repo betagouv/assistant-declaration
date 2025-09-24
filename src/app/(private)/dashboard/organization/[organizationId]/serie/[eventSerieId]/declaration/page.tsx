@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 
 import {
-  SacemDeclarationPage,
-  SacemDeclarationPageProps,
-} from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/sacem/SacemDeclarationPage';
+  DeclarationPage,
+  DeclarationPageProps,
+} from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPage';
 import { StartDsfrOnHydration } from '@ad/src/dsfr-bootstrap';
 import { formatPageTitle } from '@ad/src/utils/page';
 
@@ -11,11 +11,11 @@ export const metadata: Metadata = {
   title: formatPageTitle(`Déclaration SACEM d'un spectacle`),
 };
 
-export default async function Page({ params }: SacemDeclarationPageProps) {
+export default async function Page({ params }: DeclarationPageProps) {
   return (
     <>
       <StartDsfrOnHydration />
-      <SacemDeclarationPage params={await params} />
+      <DeclarationPage params={await params} />
     </>
   );
 }

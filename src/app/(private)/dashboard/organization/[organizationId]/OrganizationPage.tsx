@@ -276,25 +276,9 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                           <div key={eventsSeriesWrapper.serie.id} className={fr.cx('fr-py-2v')}>
                             <EventSerieCard
                               wrapper={eventsSeriesWrapper}
-                              sacemDeclarationLink={linkRegistry.get('declaration', {
+                              declarationLink={linkRegistry.get('declaration', {
                                 organizationId: organizationId,
                                 eventSerieId: eventsSeriesWrapper.serie.id,
-                                declarationType: 'sacem',
-                              })}
-                              sacdDeclarationLink={linkRegistry.get('declaration', {
-                                organizationId: organizationId,
-                                eventSerieId: eventsSeriesWrapper.serie.id,
-                                declarationType: 'sacd',
-                              })}
-                              astpDeclarationLink={linkRegistry.get('declaration', {
-                                organizationId: organizationId,
-                                eventSerieId: eventsSeriesWrapper.serie.id,
-                                declarationType: 'astp',
-                              })}
-                              cnmDeclarationLink={linkRegistry.get('declaration', {
-                                organizationId: organizationId,
-                                eventSerieId: eventsSeriesWrapper.serie.id,
-                                declarationType: 'cnm',
                               })}
                             />
                           </div>

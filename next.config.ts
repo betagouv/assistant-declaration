@@ -54,15 +54,7 @@ const generateNextConfig = async (): Promise<NextConfig> => {
       '*': ['./scripts/**/*'], // Note that folders starting with a dot are already ignored after verification
     },
     experimental: {
-      optimizePackageImports: [
-        '@mui/material',
-        '@mui/icons-material',
-        '@mui/lab',
-        '@mui/x-data-grid',
-        '@mui/x-date-pickers',
-        'date-fns',
-        'react-use',
-      ],
+      optimizePackageImports: ['@mui/material', '@mui/icons-material', 'date-fns', 'react-use'],
       swcPlugins: [['superjson-next', { router: 'PAGE' }]],
     },
     async redirects() {
