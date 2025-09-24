@@ -3,7 +3,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { Input } from '@codegouvfr/react-dsfr/Input';
-import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import { zodResolver } from '@hookform/resolvers/zod';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -12,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { Button } from '@ad/src/components/Button';
+import { PasswordMutationInput } from '@ad/src/components/PasswordMutationInput';
 import { SignUpPrefillSchemaType, SignUpSchema, SignUpSchemaType } from '@ad/src/models/actions/auth';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
@@ -77,9 +77,9 @@ export function SignUpForm({ prefill, onSuccess }: { prefill?: SignUpPrefillSche
             />
           </div>
           <div className={fr.cx('fr-fieldset__element')}>
-            <PasswordInput
+            <PasswordMutationInput
               label="Mot de passe"
-              messages={errors?.password ? [{ severity: 'error', message: errors?.password?.message }] : []}
+              error={errors?.password?.message}
               nativeInputProps={{
                 ...register('password'),
                 autoComplete: 'new-password',
