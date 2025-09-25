@@ -129,6 +129,7 @@ export const StricterEventSchema = z.object({
 export const EventSchema = applyTypedParsers(
   StricterEventSchema.extend({
     endAt: StricterEventSchema.shape.endAt.nullable(),
+    ticketingRevenueTaxRate: StricterEventSchema.shape.ticketingRevenueTaxRate.nullable(),
     placeOverrideId: StricterEventSchema.shape.placeOverrideId.nullable(),
     placeCapacityOverride: StricterEventSchema.shape.placeCapacityOverride.nullable(),
     audienceOverride: StricterEventSchema.shape.audienceOverride.nullable(),

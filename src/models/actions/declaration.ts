@@ -1,13 +1,11 @@
 import z from 'zod';
 
-import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 
 export const TransmitDeclarationSchema = z
   .object({
     eventSerieId: EventSerieSchema.shape.id,
-    type: DeclarationTypeSchema,
   })
   .strict();
 export type TransmitDeclarationSchemaType = z.infer<typeof TransmitDeclarationSchema>;

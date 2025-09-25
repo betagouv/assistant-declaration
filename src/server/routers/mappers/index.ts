@@ -1,8 +1,8 @@
-import { Address, DeclarationType, Event, EventSerie, EventSerieDeclaration, Organization, TicketingSystem, User } from '@prisma/client';
+import { Address, DeclarationType, Event, EventSerie, Organization, TicketingSystem, User } from '@prisma/client';
 
 import { AddressSchemaType } from '@ad/src/models/entities/address';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
-import { AccountingCategorySchema, DeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
+import { DeclarationSchemaType } from '@ad/src/models/entities/declaration/common';
 import { EventSchemaType, EventSerieSchemaType } from '@ad/src/models/entities/event';
 import { OrganizationSchemaType } from '@ad/src/models/entities/organization';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
@@ -67,9 +67,15 @@ export function eventSeriePrismaToModel(eventSerie: EventSerie): EventSerieSchem
     internalTicketingSystemId: eventSerie.internalTicketingSystemId,
     ticketingSystemId: eventSerie.ticketingSystemId,
     name: eventSerie.name,
-    startAt: eventSerie.startAt,
-    endAt: eventSerie.endAt,
+    producerOfficialId: eventSerie.producerOfficialId,
+    producerName: eventSerie.producerName,
+    performanceType: eventSerie.performanceType ? eventSerie.performanceType : null,
+    expectedDeclarationTypes: eventSerie.expectedDeclarationTypes,
+    placeId: eventSerie.placeId,
+    placeCapacity: eventSerie.placeCapacity,
+    audience: eventSerie.audience,
     taxRate: eventSerie.taxRate.toNumber(),
+    expensesAmount: eventSerie.expensesAmount.toNumber(),
     createdAt: eventSerie.createdAt,
     updatedAt: eventSerie.updatedAt,
   };
@@ -82,6 +88,15 @@ export function eventPrismaToModel(event: Event): EventSchemaType {
     eventSerieId: event.eventSerieId,
     startAt: event.startAt,
     endAt: event.endAt,
+    ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes.toNumber(),
+    ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes.toNumber(),
+    ticketingRevenueTaxRate: event.ticketingRevenueTaxRate !== null ? event.ticketingRevenueTaxRate.toNumber() : null,
+    freeTickets: event.freeTickets,
+    paidTickets: event.paidTickets,
+    placeOverrideId: event.placeOverrideId,
+    placeCapacityOverride: event.placeCapacityOverride,
+    audienceOverride: event.audienceOverride,
+    taxRateOverride: event.taxRateOverride !== null ? event.taxRateOverride.toNumber() : null,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,
   };
@@ -98,82 +113,68 @@ export function declarationTypePrismaToModel(declarationType: DeclarationType): 
   }
 }
 
-export function placeholderDeclarationPrismaToModel(
-  eventSerie: Pick<EventSerie, 'id' | 'name' | 'startAt' | 'endAt' | 'taxRate'> & {
-    ticketingSystem: {
-      organization: Pick<Organization, 'name'>;
-    };
-  }
-): Pick<
-  DeclarationSchemaType,
-  | 'organizationName'
-  | 'eventSerieName'
-  | 'eventSerieStartAt'
-  | 'eventSerieEndAt'
-  | 'eventsCount'
-  | 'paidTickets'
-  | 'freeTickets'
-  | 'revenues'
-  | 'expenses'
-> {
-  let freeTickets: number = 0;
-  let paidTickets: number = 0;
-  let includingTaxesAmount: number = 0;
+// export function placeholderDeclarationPrismaToModel(
+//   eventSerie: Pick<EventSerie, 'id' | 'name' | 'startAt' | 'endAt' | 'taxRate'> & {
+//     ticketingSystem: {
+//       organization: Pick<Organization, 'name'>;
+//     };
+//   }
+// ): Pick<
+//   DeclarationSchemaType,
+//   | 'organizationName'
+//   | 'eventSerieName'
+//   | 'eventSerieStartAt'
+//   | 'eventSerieEndAt'
+//   | 'eventsCount'
+//   | 'paidTickets'
+//   | 'freeTickets'
+//   | 'revenues'
+//   | 'expenses'
+// > {
+//   let freeTickets: number = 0;
+//   let paidTickets: number = 0;
+//   let includingTaxesAmount: number = 0;
 
-  // TODO:
-  // TODO:
-  // TODO:
-  // TODO:
+//   // TODO:
+//   // TODO:
+//   // TODO:
+//   // TODO:
 
-  return {
-    organizationName: eventSerie.ticketingSystem.organization.name,
-    eventSerieName: eventSerie.name,
-    eventSerieStartAt: eventSerie.startAt,
-    eventSerieEndAt: eventSerie.endAt,
-    eventsCount: eventSerie.Event.length,
-    paidTickets: paidTickets,
-    freeTickets: freeTickets,
-    // With placeholder there is no reason to fill data except ticketing we have data for
-    // Note: ensuring minimum items is done at another layer
-    revenues: [
-      {
-        category: AccountingCategorySchema.Values.TICKETING,
-        categoryPrecision: null,
-        taxRate: eventSerie.taxRate.toNumber(),
-        includingTaxesAmount: includingTaxesAmount,
-      },
-    ],
-    expenses: [],
-  };
-}
+//   return {
+//     organizationName: eventSerie.ticketingSystem.organization.name,
+//     eventSerieName: eventSerie.name,
+//     eventSerieStartAt: eventSerie.startAt,
+//     eventSerieEndAt: eventSerie.endAt,
+//     eventsCount: eventSerie.Event.length,
+//     paidTickets: paidTickets,
+//     freeTickets: freeTickets,
+//     // With placeholder there is no reason to fill data except ticketing we have data for
+//     // Note: ensuring minimum items is done at another layer
+//     revenues: [
+//       {
+//         category: AccountingCategorySchema.Values.TICKETING,
+//         categoryPrecision: null,
+//         taxRate: eventSerie.taxRate.toNumber(),
+//         includingTaxesAmount: includingTaxesAmount,
+//       },
+//     ],
+//     expenses: [],
+//   };
+// }
 
 export function declarationPrismaToModel(
-  eventSerie: Pick<EventSerie, 'id' | 'name' | 'startAt' | 'endAt' | 'taxRate'> & {
+  eventSerie: EventSerie & {
     ticketingSystem: {
-      organization: Pick<Organization, 'name'>;
+      organization: Organization;
     };
-  },
-  declaration: Pick<
-    EventSerieDeclaration,
-    'id' | 'clientId' | 'placeName' | 'placeCapacity' | 'placePostalCode' | 'managerName' | 'managerTitle' | 'performanceType' | 'declarationPlace'
-  > &
-    Pick<EventSerieDeclaration, 'transmittedAt'>
+    Event: Event[];
+  }
 ): DeclarationSchemaType {
-  // Reuse data from the placeholder since this one is used until the form is submitted
-  const computedPlaceholder = placeholderDeclarationPrismaToModel(eventSerie);
-
   return {
-    id: declaration.id,
-    eventSerieId: eventSerie.id,
-    clientId: declaration.clientId,
-    placeName: declaration.placeName,
-    placeCapacity: declaration.placeCapacity,
-    placePostalCode: declaration.placePostalCode,
-    managerName: declaration.managerName,
-    managerTitle: declaration.managerTitle,
-    performanceType: declaration.performanceType,
-    declarationPlace: declaration.declarationPlace,
-    ...computedPlaceholder,
-    transmittedAt: declaration.transmittedAt,
+    organization: organizationPrismaToModel(eventSerie.ticketingSystem.organization),
+    eventSerie: eventSeriePrismaToModel(eventSerie),
+    events: eventSerie.Event.map((event) => {
+      return eventPrismaToModel(event);
+    }),
   };
 }

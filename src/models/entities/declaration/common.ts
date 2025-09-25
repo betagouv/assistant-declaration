@@ -30,7 +30,7 @@ export const DeclarationSchema = applyTypedParsers(
         expensesAmount: true,
       }).merge(
         z.object({
-          place: PlaceSchema.nullable(),
+          // place: PlaceSchema.nullable(),
         })
       ),
       events: z.array(
@@ -49,7 +49,7 @@ export const DeclarationSchema = applyTypedParsers(
           taxRateOverride: true,
         }).merge(
           z.object({
-            placeOverride: PlaceSchema.nullable(),
+            // placeOverride: PlaceSchema.nullable(),
           })
         )
       ),

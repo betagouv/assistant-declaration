@@ -230,7 +230,7 @@ model EventSerie {
   name                      String
   producerOfficialId        String?
   producerName              String?
-  performanceType           String?
+  performanceType           PerformanceType?
   expectedDeclarationTypes  DeclarationType[]
   // image Attachment
 
@@ -260,7 +260,8 @@ model Event {
   endAt                          DateTime?
   ticketingRevenueIncludingTaxes Decimal   @db.Decimal(10, 2)
   ticketingRevenueExcludingTaxes Decimal   @db.Decimal(10, 2)
-  ticketingRevenueTaxRate        Decimal?  @db.Decimal(10, 2)
+  ticketingRevenueTaxRate        Decimal?  @db.Decimal(10, 2) // Optional if reusing the one from the event serie
+  ticketingRevenueDefinedTaxRate Boolean // In case there is no legal rate to bind both amounts
   freeTickets                    Int
   paidTickets                    Int
 

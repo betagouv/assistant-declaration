@@ -23,12 +23,7 @@ export interface SacdClientInterface {
   login(): Promise<void>;
   logout(): Promise<void>;
   test(): Promise<void>;
-  declare(
-    declarantId: string,
-    eventSerie: EventSerieSchemaType,
-    wrappers: EventWrapperSchemaType[],
-    declaration: SacdDeclarationSchemaType
-  ): Promise<void>;
+  declare(declaration: SacdDeclarationSchemaType): Promise<void>;
 }
 
 export function getSacdClient(userId: string): SacdClientInterface {
