@@ -12,7 +12,7 @@ import {
   GetSacemDeclarationSchema,
   TransmitDeclarationSchema,
 } from '@ad/src/models/actions/declaration';
-import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
+import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
 import {
   LiteSacdDeclarationAccountingEntrySchemaType,
@@ -148,7 +148,7 @@ export const declarationRouter = router({
     let sacemDeclaration: SacemDeclarationSchemaType | null = null;
     let sacdDeclaration: SacdDeclarationSchemaType | null = null;
 
-    const declarationsToDeclare: (SacemDeclarationSchemaType | SacdDeclarationSchemaType)[] = [];
+    const declarationsToDeclare: [DeclarationTypeSchemaType, SacemDeclarationSchemaType | SacdDeclarationSchemaType][] = [];
 
     for (const declarationType of agnosticDeclaration.eventSerie.expectedDeclarationTypes) {
       // If that's a retry, we make sure not transmitting again to organisms
@@ -159,11 +159,16 @@ export const declarationRouter = router({
       switch (declarationType) {
         case 'SACEM':
           sacemDeclaration = SacemDeclarationSchema.parse(agnosticDeclaration);
-          declarationsToDeclare.push(sacemDeclaration);
+
+          declarationsToDeclare.push([declarationType, sacemDeclaration]);
+
           break;
         case 'SACD':
           sacdDeclaration = SacdDeclarationSchema.parse(agnosticDeclaration);
-          declarationsToDeclare.push(sacdDeclaration);
+
+          // Doing SACD declaration first because it's more likely to fail than sending the email as for Sacem
+          declarationsToDeclare.unshift([declarationType, sacdDeclaration]);
+
           break;
         default:
           throw new Error(`declaration type not handled`);
@@ -174,120 +179,115 @@ export const declarationRouter = router({
       throw new Error('should not resubmit as all declarations have been declared');
     }
 
-    for (const declarationToDeclare of declarationsToDeclare) {
-      // Doing SACD declaration first because it's more likely to fail than sending the email as for Sacem
-      switch (declarationToDeclare) {
+    for (const [declarationType, declarationToDeclare] of declarationsToDeclare) {
+      try {
+        if (declarationToDeclare === sacemDeclaration) {
+          const eventPlacePostalCode: string = sacemDeclaration.eventSerie.placeId; // TODO: get details
 
-      }
-        try {
+          const sacemAgency = await prisma.sacemAgency.findFirst({
+            where: {
+              matchingFrenchPostalCodes: {
+                has: eventPlacePostalCode,
+              },
+            },
+            select: {
+              email: true,
+            },
+          });
+
+          if (!sacemAgency) {
+            throw sacemAgencyNotFoundError;
+          }
+
+          // We generate a PDF so the SACEM can deal with it easily (instead of setting the whole into the email text)
+          const jsxDocument = SacemDeclarationDocument({
+            sacemDeclaration: sacemDeclaration,
+            signatory: `${originatorUser.firstname} ${originatorUser.lastname}`,
+          });
+
+          const declarationPdfBuffer = await renderToBuffer(jsxDocument);
+
+          const declarationAttachment: EmailAttachment = {
+            contentType: 'application/pdf',
+            filename: `Déclaration SACEM - ${slugify(eventSerie.name)}.pdf`,
+            content: declarationPdfBuffer,
+            inline: false, // It will be attached, not specifically set somewhere in the content
+          };
+
+          try {
+            await mailer.sendDeclarationToSacemAgency({
+              recipient: sacemAgency.email,
+              replyTo: originatorUser.email, // We give the SACEM the possibility to directly converse with the declarer
+              eventSerieName: sacemDeclaration.eventSerie.name,
+              originatorFirstname: originatorUser.firstname,
+              originatorLastname: originatorUser.lastname,
+              originatorEmail: originatorUser.email,
+              organizationName: sacemDeclaration.organization.name,
+              aboutUrl: linkRegistry.get('about', undefined, { absolute: true }),
+              attachments: [declarationAttachment],
+            });
+          } catch (error) {
+            console.error(error);
+
+            throw sacemDeclarationUnsuccessfulError;
+          }
+        } else if (declarationToDeclare === sacemDeclaration) {
           const sacdClient = getSacdClient(ctx.user.id);
 
           // Since not tracking token expiration we log in again (but we could improve that)
           await sacdClient.login();
 
           await sacdClient.declare(sacdDeclaration);
-        } catch (error) {
-          if (error instanceof Error) {
-            // Keep track of errors to help debugging
-            await prisma.eventSerieDeclaration.update({
-              where: {
-                eventSerieId_type: {
-                  eventSerieId: agnosticDeclaration.eventSerie.id,
-                  type: 'SACD',
-                },
-              },
-              data: {
-                lastTransmissionError: error instanceof BusinessError ? error.code : error.message,
-                lastTransmissionErrorAt: new Date(),
-              },
-            });
-          }
-
-          throw error;
         }
-      } else if (sacemDeclaration) {
-        const eventPlacePostalCode: string = sacemDeclaration.eventSerie.placeId; // TODO: get details
 
-        const sacemAgency = await prisma.sacemAgency.findFirst({
+        // If successful mark the declaration as transmitted
+        await prisma.eventSerieDeclaration.upsert({
           where: {
-            matchingFrenchPostalCodes: {
-              has: eventPlacePostalCode,
+            eventSerieId_type: {
+              eventSerieId: agnosticDeclaration.eventSerie.id,
+              type: declarationType,
             },
           },
-          select: {
-            email: true,
+          create: {
+            eventSerieId: agnosticDeclaration.eventSerie.id,
+            type: declarationType,
+            transmittedAt: new Date(),
+            status: EventSerieDeclarationStatus.PROCESSED,
+          },
+          update: {
+            status: EventSerieDeclarationStatus.PROCESSED,
+            transmittedAt: new Date(),
+            lastTransmissionError: null,
+            lastTransmissionErrorAt: null,
           },
         });
+      } catch (error) {
+        if (error instanceof Error) {
+          const lastTransmissionError = error instanceof BusinessError ? error.code : error.message;
+          const lastTransmissionErrorAt = new Date();
 
-        if (!sacemAgency) {
-          throw sacemAgencyNotFoundError;
-        }
-
-        // We generate a PDF so the SACEM can deal with it easily (instead of setting the whole into the email text)
-        const jsxDocument = SacemDeclarationDocument({
-          sacemDeclaration: sacemDeclaration,
-          signatory: `${originatorUser.firstname} ${originatorUser.lastname}`,
-        });
-
-        const declarationPdfBuffer = await renderToBuffer(jsxDocument);
-
-        const declarationAttachment: EmailAttachment = {
-          contentType: 'application/pdf',
-          filename: `Déclaration SACEM - ${slugify(eventSerie.name)}.pdf`,
-          content: declarationPdfBuffer,
-          inline: false, // It will be attached, not specifically set somewhere in the content
-        };
-
-        try {
-          await mailer.sendDeclarationToSacemAgency({
-            recipient: sacemAgency.email,
-            replyTo: originatorUser.email, // We give the SACEM the possibility to directly converse with the declarer
-            eventSerieName: sacemDeclaration.eventSerie.name,
-            originatorFirstname: originatorUser.firstname,
-            originatorLastname: originatorUser.lastname,
-            originatorEmail: originatorUser.email,
-            organizationName: sacemDeclaration.organization.name,
-            aboutUrl: linkRegistry.get('about', undefined, { absolute: true }),
-            attachments: [declarationAttachment],
-          });
-        } catch (error) {
-          console.error(error);
-
-          throw sacemDeclarationUnsuccessfulError;
-        }
-      }
-    }
-
-    try {
-      // If successful mark the declaration as transmitted
-      await prisma.eventSerieDeclaration.update({
-        where: {
-          id: declarationId,
-        },
-        data: {
-          status: EventSerieDeclarationStatus.PROCESSED,
-          transmittedAt: new Date(),
-          lastTransmissionError: null,
-          lastTransmissionErrorAt: null,
-        },
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        if (declarationId) {
           // Keep track of errors to help debugging
-          await prisma.eventSerieDeclaration.update({
+          await prisma.eventSerieDeclaration.upsert({
             where: {
-              id: declarationId,
+              eventSerieId_type: {
+                eventSerieId: agnosticDeclaration.eventSerie.id,
+                type: declarationType,
+              },
             },
-            data: {
-              lastTransmissionError: error instanceof BusinessError ? error.code : error.message,
-              lastTransmissionErrorAt: new Date(),
+            create: {
+              eventSerieId: agnosticDeclaration.eventSerie.id,
+              type: declarationType,
+              status: EventSerieDeclarationStatus.PENDING,
+            },
+            update: {
+              lastTransmissionError: lastTransmissionError,
+              lastTransmissionErrorAt: lastTransmissionErrorAt,
             },
           });
         }
-      }
 
-      throw error;
+        throw error;
+      }
     }
 
     return undefined;
