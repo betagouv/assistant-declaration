@@ -1,12 +1,12 @@
 import z from 'zod';
 
 import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
-import { DeclarationSchema } from '@ad/src/models/entities/declaration';
-import { EventSerieSchema } from '@ad/src/models/entities/event';
+import { EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
+import { OrganizationSchema } from '@ad/src/models/entities/organization';
 
 export const TransmitDeclarationSchema = z
   .object({
-    eventSerieId: DeclarationSchema.shape.eventSerieId,
+    eventSerieId: EventSerieSchema.shape.id,
     type: DeclarationTypeSchema,
   })
   .strict();
@@ -24,17 +24,38 @@ export type GetDeclarationPrefillSchemaType = z.infer<typeof GetDeclarationPrefi
 
 export const FillDeclarationSchema = z
   .object({
-    eventSerieId: DeclarationSchema.shape.eventSerieId,
-    clientId: DeclarationSchema.shape.clientId,
-    placeName: DeclarationSchema.shape.placeName,
-    placeCapacity: DeclarationSchema.shape.placeCapacity,
-    placePostalCode: DeclarationSchema.shape.placePostalCode,
-    managerName: DeclarationSchema.shape.managerName,
-    managerTitle: DeclarationSchema.shape.managerTitle,
-    performanceType: DeclarationSchema.shape.performanceType,
-    declarationPlace: DeclarationSchema.shape.declarationPlace,
-    revenues: DeclarationSchema.shape.revenues,
-    expenses: DeclarationSchema.shape.expenses,
+    eventSerieId: EventSerieSchema.shape.id,
+    organization: OrganizationSchema.pick({
+      sacemId: true,
+      sacdId: true,
+    }),
+    eventSerie: EventSerieSchema.pick({
+      producerOfficialId: true,
+      producerName: true,
+      performanceType: true,
+      expectedDeclarationTypes: true,
+      placeId: true,
+      placeCapacity: true,
+      audience: true,
+      taxRate: true,
+      expensesAmount: true,
+    }),
+    events: z.array(
+      EventSchema.pick({
+        id: true,
+        startAt: true,
+        endAt: true,
+        ticketingRevenueIncludingTaxes: true,
+        ticketingRevenueExcludingTaxes: true,
+        ticketingRevenueTaxRate: true,
+        freeTickets: true,
+        paidTickets: true,
+        placeOverrideId: true,
+        placeCapacityOverride: true,
+        audienceOverride: true,
+        taxRateOverride: true,
+      })
+    ),
   })
   .strict();
 export type FillDeclarationSchemaType = z.infer<typeof FillDeclarationSchema>;

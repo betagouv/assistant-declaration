@@ -1,3 +1,4 @@
+import { places } from '@ad/src/fixtures/place';
 import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import {
   AudienceSchema,
@@ -69,6 +70,7 @@ export const eventsSeries: EventSerieSchemaType[] = [
 export const eventsSeriesWrappers: EventSerieWrapperSchemaType[] = [
   EventSerieWrapperSchema.parse({
     serie: eventsSeries[0],
+    place: places[0],
     partialDeclarations: [
       {
         type: DeclarationTypeSchema.Values.SACEM,
@@ -79,10 +81,12 @@ export const eventsSeriesWrappers: EventSerieWrapperSchemaType[] = [
   }),
   EventSerieWrapperSchema.parse({
     serie: eventsSeries[1],
+    place: places[1],
     partialDeclarations: [],
   }),
   EventSerieWrapperSchema.parse({
     serie: eventsSeries[2],
+    place: null,
     partialDeclarations: [
       {
         type: DeclarationTypeSchema.Values.SACEM,
@@ -100,6 +104,15 @@ export const events: EventSchemaType[] = [
     eventSerieId: 'd79cb3ba-745e-5d9a-8903-4a02327a7e01',
     startAt: new Date('December 1, 2024 10:00:00 UTC'),
     endAt: new Date('December 20, 2024 21:00:00 UTC'),
+    ticketingRevenueIncludingTaxes: 105.5,
+    ticketingRevenueExcludingTaxes: 100,
+    ticketingRevenueTaxRate: 0.055,
+    freeTickets: 9,
+    paidTickets: 10,
+    placeOverrideId: places[1].id,
+    placeCapacityOverride: null,
+    audienceOverride: null,
+    taxRateOverride: null,
     createdAt: new Date('December 17, 2024 03:24:00 UTC'),
     updatedAt: new Date('December 18, 2024 04:33:00 UTC'),
   }),
@@ -109,6 +122,15 @@ export const events: EventSchemaType[] = [
     eventSerieId: 'd79cb3ba-745e-5d9a-8903-4a02327a7e01',
     startAt: new Date('December 2, 2024 14:00:00 UTC'),
     endAt: new Date('December 2, 2024 15:00:00 UTC'),
+    ticketingRevenueIncludingTaxes: 263.75,
+    ticketingRevenueExcludingTaxes: 250,
+    ticketingRevenueTaxRate: 0.055,
+    freeTickets: 35,
+    paidTickets: 43,
+    placeOverrideId: null,
+    placeCapacityOverride: 92,
+    audienceOverride: AudienceSchema.Values.YOUNG,
+    taxRateOverride: null,
     createdAt: new Date('December 17, 2024 03:24:00 UTC'),
     updatedAt: new Date('December 18, 2024 04:33:00 UTC'),
   }),
@@ -118,6 +140,15 @@ export const events: EventSchemaType[] = [
     eventSerieId: 'd79cb3ba-745e-5d9a-8903-4a02327a7e01',
     startAt: new Date('December 10, 2024 20:30:00 UTC'),
     endAt: new Date('December 15, 2024 22:00:00 UTC'),
+    ticketingRevenueIncludingTaxes: 1021,
+    ticketingRevenueExcludingTaxes: 1000,
+    ticketingRevenueTaxRate: 0.055,
+    freeTickets: 86,
+    paidTickets: 99,
+    placeOverrideId: places[2].id,
+    placeCapacityOverride: null,
+    audienceOverride: null,
+    taxRateOverride: 0.021,
     createdAt: new Date('December 17, 2024 03:24:00 UTC'),
     updatedAt: new Date('December 18, 2024 04:33:00 UTC'),
   }),
@@ -126,11 +157,14 @@ export const events: EventSchemaType[] = [
 export const eventsWrappers: EventWrapperSchemaType[] = [
   EventWrapperSchema.parse({
     event: events[0],
+    placeOverride: places[1],
   }),
   EventWrapperSchema.parse({
     event: events[1],
+    placeOverride: null,
   }),
   EventWrapperSchema.parse({
     event: events[2],
+    placeOverride: places[2],
   }),
 ];

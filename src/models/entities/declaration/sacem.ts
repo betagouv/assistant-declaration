@@ -1,17 +1,49 @@
 import { z } from 'zod';
 
-import { EventSerieSchema } from '@ad/src/models/entities/event';
+import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
+import { EventSchema, StricterEventSchema, StricterEventSerieSchema } from '@ad/src/models/entities/event';
+import { StricterOrganizationSchema } from '@ad/src/models/entities/organization';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
+// Here we take the original stored structure but forcing fields as required when needed by Sacem
 export const SacemDeclarationSchema = applyTypedParsers(
-  z
-    .object({
-      id: z.string().uuid(),
-      eventSerieId: EventSerieSchema.shape.id,
-      // TODO:
-      // TODO: should extend from base to be sure having the right format
-      // TODO:
-    })
-    .strict()
+  DeclarationSchema.extend({
+    organization: StricterOrganizationSchema.pick({
+      id: true,
+      name: true,
+      officialId: true,
+      officialHeadquartersId: true,
+      sacemId: true,
+    }),
+    eventSerie: StricterEventSerieSchema.pick({
+      name: true,
+      performanceType: true,
+      expectedDeclarationTypes: true,
+      placeId: true,
+      placeCapacity: true,
+      audience: true,
+      taxRate: true,
+      expensesAmount: true,
+    }),
+    events: z.array(
+      StricterEventSchema.pick({
+        startAt: true,
+        endAt: true,
+        ticketingRevenueIncludingTaxes: true,
+        ticketingRevenueExcludingTaxes: true,
+        ticketingRevenueTaxRate: true,
+        freeTickets: true,
+        paidTickets: true,
+      }).merge(
+        // Since that's overrides there are not required
+        EventSchema.pick({
+          placeOverrideId: true,
+          placeCapacityOverride: true,
+          audienceOverride: true,
+          taxRateOverride: true,
+        })
+      )
+    ),
+  })
 );
 export type SacemDeclarationSchemaType = z.infer<typeof SacemDeclarationSchema>;

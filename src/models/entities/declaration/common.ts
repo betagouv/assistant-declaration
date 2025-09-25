@@ -1,0 +1,59 @@
+import { z } from 'zod';
+
+import { EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
+import { OrganizationSchema } from '@ad/src/models/entities/organization';
+import { PlaceSchema } from '@ad/src/models/entities/place';
+import { applyTypedParsers } from '@ad/src/utils/zod';
+
+export const DeclarationSchema = applyTypedParsers(
+  z
+    .object({
+      organization: OrganizationSchema.pick({
+        id: true,
+        name: true,
+        officialId: true,
+        officialHeadquartersId: true,
+        sacemId: true,
+        sacdId: true,
+      }),
+      eventSerie: EventSerieSchema.pick({
+        id: true,
+        name: true,
+        producerOfficialId: true,
+        producerName: true,
+        performanceType: true,
+        expectedDeclarationTypes: true,
+        placeId: true,
+        placeCapacity: true,
+        audience: true,
+        taxRate: true,
+        expensesAmount: true,
+      }).merge(
+        z.object({
+          place: PlaceSchema.nullable(),
+        })
+      ),
+      events: z.array(
+        EventSchema.pick({
+          id: true,
+          startAt: true,
+          endAt: true,
+          ticketingRevenueIncludingTaxes: true,
+          ticketingRevenueExcludingTaxes: true,
+          ticketingRevenueTaxRate: true,
+          freeTickets: true,
+          paidTickets: true,
+          placeOverrideId: true,
+          placeCapacityOverride: true,
+          audienceOverride: true,
+          taxRateOverride: true,
+        }).merge(
+          z.object({
+            placeOverride: PlaceSchema.nullable(),
+          })
+        )
+      ),
+    })
+    .strict()
+);
+export type DeclarationSchemaType = z.infer<typeof DeclarationSchema>;

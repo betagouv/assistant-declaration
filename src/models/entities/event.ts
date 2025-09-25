@@ -1,7 +1,8 @@
 import z from 'zod';
 
 import { DeclarationStatusSchema, DeclarationTypeSchema, OfficialIdSchema } from '@ad/src/models/entities/common';
-import { DeclarationSchema } from '@ad/src/models/entities/declaration';
+import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
+import { PlaceSchema } from '@ad/src/models/entities/place';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
 export const AudienceSchema = z.enum(['ALL', 'YOUNG', 'SCHOOL']);
@@ -59,26 +60,32 @@ export const LiteEventSerieWrapperSchema = applyTypedParsers(
 );
 export type LiteEventSerieWrapperSchemaType = z.infer<typeof LiteEventSerieWrapperSchema>;
 
+export const StricterEventSerieSchema = z.object({
+  id: z.string().uuid(),
+  internalTicketingSystemId: z.string().min(1),
+  ticketingSystemId: z.string().uuid(),
+  name: z.string().min(1),
+  producerOfficialId: OfficialIdSchema,
+  producerName: z.string().min(1),
+  performanceType: PerformanceTypeSchema,
+  expectedDeclarationTypes: z.array(DeclarationTypeSchema),
+  placeId: z.string().uuid(),
+  placeCapacity: z.number().int().nonnegative(),
+  audience: AudienceSchema,
+  taxRate: z.number().nonnegative(),
+  expensesAmount: z.number().nonnegative(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
 export const EventSerieSchema = applyTypedParsers(
-  z
-    .object({
-      id: z.string().uuid(),
-      internalTicketingSystemId: z.string().min(1),
-      ticketingSystemId: z.string().uuid(),
-      name: z.string().min(1),
-      producerOfficialId: OfficialIdSchema.nullable(),
-      producerName: z.string().min(1).nullable(),
-      performanceType: PerformanceTypeSchema.nullable(),
-      expectedDeclarationTypes: z.array(DeclarationTypeSchema),
-      placeId: z.string().uuid().nullable(),
-      placeCapacity: z.number().int().nonnegative().nullable(),
-      audience: AudienceSchema,
-      taxRate: z.number().nonnegative(),
-      expensesAmount: z.number().nonnegative(),
-      createdAt: z.date(),
-      updatedAt: z.date(),
-    })
-    .strict()
+  StricterEventSerieSchema.extend({
+    producerOfficialId: StricterEventSerieSchema.shape.producerOfficialId.nullable(),
+    producerName: StricterEventSerieSchema.shape.producerName.nullable(),
+    performanceType: StricterEventSerieSchema.shape.performanceType.nullable(),
+    placeId: StricterEventSerieSchema.shape.placeId.nullable(),
+    placeCapacity: StricterEventSerieSchema.shape.placeCapacity.nullable(),
+  }).strict()
 );
 export type EventSerieSchemaType = z.infer<typeof EventSerieSchema>;
 
@@ -86,6 +93,7 @@ export const EventSerieWrapperSchema = applyTypedParsers(
   z
     .object({
       serie: EventSerieSchema,
+      place: PlaceSchema.nullable(),
       partialDeclarations: z.array(
         // This is partial declarations just to adjust the UI
         z.object({
@@ -99,27 +107,33 @@ export const EventSerieWrapperSchema = applyTypedParsers(
 );
 export type EventSerieWrapperSchemaType = z.infer<typeof EventSerieWrapperSchema>;
 
+export const StricterEventSchema = z.object({
+  id: z.string().uuid(),
+  internalTicketingSystemId: z.string().min(1),
+  eventSerieId: z.string().uuid(),
+  startAt: z.date(),
+  endAt: z.date(),
+  ticketingRevenueIncludingTaxes: z.number().nonnegative(),
+  ticketingRevenueExcludingTaxes: z.number().nonnegative(),
+  ticketingRevenueTaxRate: z.number().nonnegative(),
+  freeTickets: z.number().int().nonnegative(),
+  paidTickets: z.number().int().nonnegative(),
+  placeOverrideId: EventSerieSchema.shape.placeId,
+  placeCapacityOverride: EventSerieSchema.shape.placeCapacity,
+  audienceOverride: EventSerieSchema.shape.audience,
+  taxRateOverride: EventSerieSchema.shape.taxRate,
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
 export const EventSchema = applyTypedParsers(
-  z
-    .object({
-      id: z.string().uuid(),
-      internalTicketingSystemId: z.string().min(1),
-      eventSerieId: z.string().uuid(),
-      startAt: z.date(),
-      endAt: z.date().nullable(),
-      ticketingRevenueIncludingTaxes: z.number().nonnegative(),
-      ticketingRevenueExcludingTaxes: z.number().nonnegative(),
-      ticketingRevenueTaxRate: z.number().nonnegative(),
-      freeTickets: z.number().int().nonnegative(),
-      paidTickets: z.number().int().nonnegative(),
-      placeOverrideId: z.string().uuid().nullable(),
-      placeCapacityOverride: z.number().int().nonnegative().nullable(),
-      audienceOverride: AudienceSchema.nullable(),
-      taxRateOverride: z.number().nonnegative().nullable(),
-      createdAt: z.date(),
-      updatedAt: z.date(),
-    })
-    .strict()
+  StricterEventSchema.extend({
+    endAt: StricterEventSchema.shape.endAt.nullable(),
+    placeOverrideId: StricterEventSchema.shape.placeOverrideId.nullable(),
+    placeCapacityOverride: StricterEventSchema.shape.placeCapacityOverride.nullable(),
+    audienceOverride: StricterEventSchema.shape.audienceOverride.nullable(),
+    taxRateOverride: StricterEventSchema.shape.taxRateOverride.nullable(),
+  }).strict()
 );
 export type EventSchemaType = z.infer<typeof EventSchema>;
 
@@ -127,6 +141,7 @@ export const EventWrapperSchema = applyTypedParsers(
   z
     .object({
       event: EventSchema,
+      placeOverride: PlaceSchema.nullable(),
     })
     .strict()
 );
