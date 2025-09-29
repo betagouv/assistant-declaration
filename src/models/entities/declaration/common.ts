@@ -57,3 +57,19 @@ export const DeclarationSchema = applyTypedParsers(
     .strict()
 );
 export type DeclarationSchemaType = z.infer<typeof DeclarationSchema>;
+
+export const DeclarationWrapperSchema = applyTypedParsers(
+  z
+    .object({
+      declaration: DeclarationSchema,
+      // We provide some suggestions from past declarations to fill this one
+      placeholder: z.object({
+        producerOfficialId: z.array(DeclarationSchema.shape.eventSerie.shape.producerOfficialId),
+        producerName: z.array(DeclarationSchema.shape.eventSerie.shape.producerName),
+        place: z.array(PlaceSchema),
+        placeCapacity: z.array(DeclarationSchema.shape.eventSerie.shape.placeCapacity),
+      }),
+    })
+    .strict()
+);
+export type DeclarationWrapperSchemaType = z.infer<typeof DeclarationWrapperSchema>;

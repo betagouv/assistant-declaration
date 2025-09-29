@@ -5,13 +5,7 @@ import slugify from '@sindresorhus/slugify';
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
 import { getSacdClient } from '@ad/src/core/declaration/sacd';
 import { Attachment as EmailAttachment, mailer } from '@ad/src/emails/mailer';
-import {
-  FillDeclarationSchema,
-  FillSacdDeclarationSchema,
-  GetSacdDeclarationSchema,
-  GetSacemDeclarationSchema,
-  TransmitDeclarationSchema,
-} from '@ad/src/models/actions/declaration';
+import { FillDeclarationSchema, GetDeclarationSchema, TransmitDeclarationSchema } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
 import {
@@ -23,10 +17,10 @@ import {
 import {
   AccountingCategorySchema,
   AccountingFluxSchema,
+  DeclarationWrapperSchemaType,
   LiteSacemDeclarationAccountingEntrySchemaType,
   SacemDeclarationSchema,
   SacemDeclarationSchemaType,
-  SacemDeclarationWrapperSchemaType,
 } from '@ad/src/models/entities/declaration/sacem';
 import {
   BusinessError,
@@ -46,7 +40,6 @@ import {
   sacdDeclarationPrismaToModel,
   sacdPlaceholderDeclarationPrismaToModel,
   sacemDeclarationPrismaToModel,
-  sacemPlaceholderDeclarationPrismaToModel,
   ticketCategoryPrismaToModel,
 } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
@@ -292,182 +285,139 @@ export const declarationRouter = router({
 
     return undefined;
   }),
-  // getDeclaration: privateProcedure.input(GetSacemDeclarationSchema).query(async ({ ctx, input }) => {
-  //   const eventSerie = await prisma.eventSerie.findUnique({
-  //     where: {
-  //       id: input.eventSerieId,
-  //     },
-  //     select: {
-  //       id: true,
-  //       name: true,
-  //       startAt: true,
-  //       endAt: true,
-  //       taxRate: true,
-  //       ticketingSystem: {
-  //         select: {
-  //           organization: {
-  //             select: {
-  //               id: true,
-  //               name: true,
-  //             },
-  //           },
-  //         },
-  //       },
-  //       EventSerieDeclaration: {
-  //         select: {
-  //           id: true,
-  //           transmittedAt: true,
-  //           EventSerieSacemDeclaration: {
-  //             select: {
-  //               id: true,
-  //               clientId: true,
-  //               placeName: true,
-  //               placeCapacity: true,
-  //               placePostalCode: true,
-  //               managerName: true,
-  //               managerTitle: true,
-  //               performanceType: true,
-  //               declarationPlace: true,
-  //               SacemDeclarationAccountingEntry: {
-  //                 select: {
-  //                   flux: true,
-  //                   category: true,
-  //                   categoryPrecision: true,
-  //                   taxRate: true,
-  //                   amount: true,
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         },
-  //       },
-  //       Event: {
-  //         select: {
-  //           EventCategoryTickets: {
-  //             select: {
-  //               total: true,
-  //               totalOverride: true,
-  //               priceOverride: true,
-  //               category: {
-  //                 select: {
-  //                   price: true,
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   });
+  getDeclaration: privateProcedure.input(GetDeclarationSchema).query(async ({ ctx, input }) => {
+    const eventSerie = await prisma.eventSerie.findUnique({
+      where: {
+        id: input.eventSerieId,
+      },
+      select: {
+        id: true,
+        internalTicketingSystemId: true,
+        ticketingSystemId: true,
+        name: true,
+        producerOfficialId: true,
+        producerName: true,
+        performanceType: true,
+        expectedDeclarationTypes: true,
+        placeId: true,
+        placeCapacity: true,
+        audience: true,
+        taxRate: true,
+        expensesAmount: true,
+        createdAt: true,
+        updatedAt: true,
+        ticketingSystem: {
+          select: {
+            organization: {
+              select: {
+                id: true,
+                name: true,
+                officialId: true,
+                officialHeadquartersId: true,
+                sacemId: true,
+                sacdId: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
+        Event: {
+          select: {
+            id: true,
+            internalTicketingSystemId: true,
+            eventSerieId: true,
+            startAt: true,
+            endAt: true,
+            ticketingRevenueIncludingTaxes: true,
+            ticketingRevenueExcludingTaxes: true,
+            ticketingRevenueTaxRate: true,
+            ticketingRevenueDefinedTaxRate: true,
+            freeTickets: true,
+            paidTickets: true,
+            placeOverrideId: true,
+            placeCapacityOverride: true,
+            audienceOverride: true,
+            taxRateOverride: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        EventSerieDeclaration: {
+          select: {
+            id: true,
+            type: true,
+            status: true,
+          },
+        },
+      },
+    });
 
-  //   if (!eventSerie) {
-  //     throw eventSerieNotFoundError;
-  //   }
+    if (!eventSerie) {
+      throw eventSerieNotFoundError;
+    }
 
-  //   // Before returning, make sure the caller has rights on this authority ;)
-  //   if (!(await isUserACollaboratorPartOfOrganization(eventSerie.ticketingSystem.organization.id, ctx.user.id))) {
-  //     throw organizationCollaboratorRoleRequiredError;
-  //   }
+    // Before returning, make sure the caller has rights on this authority ;)
+    if (!(await isUserACollaboratorPartOfOrganization(eventSerie.ticketingSystem.organization.id, ctx.user.id))) {
+      throw organizationCollaboratorRoleRequiredError;
+    }
 
-  //   // Get suggestions from previous declarations to ease the filling of the form
-  //   // Note: `distinct` cannot be done on different properties get unique values, `groupBy` cannot have an orderBy+limit, so using `findMany` with local logic
-  //   const previousDeclarations = await prisma.eventSerieSacemDeclaration.findMany({
-  //     where: {
-  //       eventSerieDeclaration: {
-  //         eventSerie: {
-  //           ticketingSystem: {
-  //             organizationId: eventSerie.ticketingSystem.organization.id,
-  //           },
-  //         },
-  //       },
-  //     },
-  //     select: {
-  //       clientId: true,
-  //       placeName: true,
-  //       placeCapacity: true,
-  //       placePostalCode: true,
-  //       managerName: true,
-  //       managerTitle: true,
-  //       performanceType: true,
-  //       declarationPlace: true,
-  //       SacemDeclarationAccountingEntry: {
-  //         select: {
-  //           flux: true,
-  //           category: true,
-  //           categoryPrecision: true,
-  //           taxRate: true,
-  //           amount: true,
-  //         },
-  //       },
-  //     },
-  //     distinct: ['clientId', 'placeName', 'placeCapacity', 'placePostalCode', 'managerName', 'managerTitle', 'performanceType', 'declarationPlace'], // At least the distinct may remove duplicates for the whole chain
-  //     // Get only a few of the last declarations since it should representative
-  //     orderBy: {
-  //       updatedAt: 'desc',
-  //     },
-  //     take: 10,
-  //   });
+    // Get suggestions from previous declarations to ease the filling of the form
+    // Note: `distinct` cannot be done on different properties get unique values, `groupBy` cannot have an orderBy+limit, so using `findMany` with local logic
+    const previousDeclarations = await prisma.eventSerie.findMany({
+      where: {
+        ticketingSystem: {
+          organizationId: eventSerie.ticketingSystem.organization.id,
+        },
+        EventSerieDeclaration: {
+          // Ensure the serie has been declared to consider administrative information
+          some: {},
+        },
+      },
+      select: {
+        producerOfficialId: true,
+        producerName: true,
+        placeId: true,
+        placeCapacity: true,
+        place: {
+          select: {
+            name: true,
+            address: true,
+          },
+        },
+      },
+      distinct: ['producerOfficialId', 'producerName', 'placeId', 'placeCapacity'], // At least the distinct may remove duplicates for the whole chain
+      // Get only a few of the last declarations since it should representative
+      orderBy: {
+        updatedAt: 'desc',
+      },
+      take: 10,
+    });
 
-  //   const { revenues, expenses, ...computedPlaceholder } = sacemPlaceholderDeclarationPrismaToModel(eventSerie);
+    const placeholder: DeclarationWrapperSchemaType['placeholder'] = {
+      producerOfficialId: [],
+      producerName: [],
+      place: [],
+      placeCapacity: [],
+    };
 
-  //   const placeholder: SacemDeclarationWrapperSchemaType['placeholder'] = {
-  //     ...computedPlaceholder,
-  //     clientId: [],
-  //     placeName: [],
-  //     placeCapacity: [],
-  //     placePostalCode: [],
-  //     managerName: [],
-  //     managerTitle: [],
-  //     performanceType: [],
-  //     declarationPlace: [],
-  //     revenuesOptions: {
-  //       ticketing: { taxRate: [], amount: [] },
-  //       consumptions: { taxRate: [], amount: [] },
-  //       catering: { taxRate: [], amount: [] },
-  //       programSales: { taxRate: [], amount: [] },
-  //       other: { taxRate: [], amount: [] },
-  //       otherCategories: [],
-  //     },
-  //     expensesOptions: {
-  //       engagementContracts: { taxRate: [], amount: [] },
-  //       rightsTransferContracts: { taxRate: [], amount: [] },
-  //       corealizationContracts: { taxRate: [], amount: [] },
-  //       coproductionContracts: { taxRate: [], amount: [] },
-  //       other: { taxRate: [], amount: [] },
-  //       otherCategories: [],
-  //     },
-  //   };
+    // Fill with unique values
+    for (const previousDeclaration of previousDeclarations) {
+      if (!placeholder.producerOfficialId.includes(previousDeclaration.producerOfficialId))
+        placeholder.producerOfficialId.push(previousDeclaration.producerOfficialId);
+      if (!placeholder.producerName.includes(previousDeclaration.producerName)) placeholder.producerName.push(previousDeclaration.producerName);
+      if (!placeholder.place.find((p) => p.id === previousDeclaration.place?.id)) placeholder.place.push(previousDeclaration.place);
+      if (!placeholder.placeCapacity.includes(previousDeclaration.placeCapacity)) placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
+    }
 
-  //   // Fill with unique values
-  //   for (const previousDeclaration of previousDeclarations) {
-  //     if (!placeholder.clientId.includes(previousDeclaration.clientId)) placeholder.clientId.push(previousDeclaration.clientId);
-  //     if (!placeholder.placeName.includes(previousDeclaration.placeName)) placeholder.placeName.push(previousDeclaration.placeName);
-  //     if (!placeholder.placeCapacity.includes(previousDeclaration.placeCapacity)) placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
-  //     if (!placeholder.placePostalCode.includes(previousDeclaration.placePostalCode))
-  //       placeholder.placePostalCode.push(previousDeclaration.placePostalCode);
-  //     if (!placeholder.managerName.includes(previousDeclaration.managerName)) placeholder.managerName.push(previousDeclaration.managerName);
-  //     if (!placeholder.managerTitle.includes(previousDeclaration.managerTitle)) placeholder.managerTitle.push(previousDeclaration.managerTitle);
-  //     if (!placeholder.performanceType.includes(previousDeclaration.performanceType))
-  //       placeholder.performanceType.push(previousDeclaration.performanceType);
-  //     if (!placeholder.declarationPlace.includes(previousDeclaration.declarationPlace))
-  //       placeholder.declarationPlace.push(previousDeclaration.declarationPlace);
-
-  //   const existingDeclaration = eventSerie.EventSerieDeclaration.find((eSD) => eSD.EventSerieSacemDeclaration !== null);
-
-  //   // Note: the generated properties calculation is done 2 times but we are fine with that for now
-  //   return {
-  //     declarationWrapper: {
-  //       declaration: existingDeclaration
-  //         ? declarationPrismaToModel(eventSerie, {
-  //             ...existingDeclaration.EventSerieSacemDeclaration!,
-  //             transmittedAt: existingDeclaration.transmittedAt,
-  //           })
-  //         : null,
-  //       placeholder: placeholder,
-  //     } satisfies SacemDeclarationWrapperSchemaType,
-  //   };
-  // }),
-  // // TODO: should fill direct value
+    return {
+      declarationWrapper: {
+        declaration: declarationPrismaToModel(eventSerie),
+        placeholder: placeholder,
+      } satisfies DeclarationWrapperSchemaType,
+    };
+  }),
+  // TODO: should fill direct value
   // fillDeclaration: privateProcedure.input(FillDeclarationSchema).mutation(async ({ ctx, input }) => {
   //   const eventSerie = await prisma.eventSerie.findUnique({
   //     where: {

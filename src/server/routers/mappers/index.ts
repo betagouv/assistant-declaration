@@ -113,55 +113,6 @@ export function declarationTypePrismaToModel(declarationType: DeclarationType): 
   }
 }
 
-// export function placeholderDeclarationPrismaToModel(
-//   eventSerie: Pick<EventSerie, 'id' | 'name' | 'startAt' | 'endAt' | 'taxRate'> & {
-//     ticketingSystem: {
-//       organization: Pick<Organization, 'name'>;
-//     };
-//   }
-// ): Pick<
-//   DeclarationSchemaType,
-//   | 'organizationName'
-//   | 'eventSerieName'
-//   | 'eventSerieStartAt'
-//   | 'eventSerieEndAt'
-//   | 'eventsCount'
-//   | 'paidTickets'
-//   | 'freeTickets'
-//   | 'revenues'
-//   | 'expenses'
-// > {
-//   let freeTickets: number = 0;
-//   let paidTickets: number = 0;
-//   let includingTaxesAmount: number = 0;
-
-//   // TODO:
-//   // TODO:
-//   // TODO:
-//   // TODO:
-
-//   return {
-//     organizationName: eventSerie.ticketingSystem.organization.name,
-//     eventSerieName: eventSerie.name,
-//     eventSerieStartAt: eventSerie.startAt,
-//     eventSerieEndAt: eventSerie.endAt,
-//     eventsCount: eventSerie.Event.length,
-//     paidTickets: paidTickets,
-//     freeTickets: freeTickets,
-//     // With placeholder there is no reason to fill data except ticketing we have data for
-//     // Note: ensuring minimum items is done at another layer
-//     revenues: [
-//       {
-//         category: AccountingCategorySchema.Values.TICKETING,
-//         categoryPrecision: null,
-//         taxRate: eventSerie.taxRate.toNumber(),
-//         includingTaxesAmount: includingTaxesAmount,
-//       },
-//     ],
-//     expenses: [],
-//   };
-// }
-
 export function declarationPrismaToModel(
   eventSerie: EventSerie & {
     ticketingSystem: {
