@@ -10,6 +10,10 @@ export function getTaxAmountFromIncludingTaxesAmount(includingTaxesAmount: numbe
   return includingTaxesAmount - getExcludingTaxesAmountFromIncludingTaxesAmount(includingTaxesAmount, taxRate);
 }
 
+export function getTaxAmountFromIncludingAndExcludingTaxesAmounts(includingTaxesAmount: number, excludingTaxesAmount: number): number {
+  return includingTaxesAmount - excludingTaxesAmount;
+}
+
 export function getIncludingTaxesAmountFromExcludingTaxesAmount(excludingTaxesAmount: number, taxRate: number): number {
   return (1 + taxRate) * excludingTaxesAmount;
 }

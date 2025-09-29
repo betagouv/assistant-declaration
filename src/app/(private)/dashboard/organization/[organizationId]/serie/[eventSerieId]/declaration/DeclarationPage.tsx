@@ -252,7 +252,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               onChange(newValue);
                             }}
                             renderInput={(params) => (
-                              <TextField {...params} label="N° de client" inputRef={ref} error={!!error} helperText={error?.message} fullWidth />
+                              <TextField {...params} label="N° client" inputRef={ref} error={!!error} helperText={error?.message} fullWidth />
                             )}
                             renderOption={(props, option) => {
                               // Just needed for the Sentry mask
