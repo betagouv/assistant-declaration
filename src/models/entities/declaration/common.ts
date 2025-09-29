@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
+import { EventSchema, EventSerieSchema, StricterEventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceSchema } from '@ad/src/models/entities/place';
 import { applyTypedParsers } from '@ad/src/utils/zod';
@@ -62,12 +62,12 @@ export const DeclarationWrapperSchema = applyTypedParsers(
   z
     .object({
       declaration: DeclarationSchema,
-      // We provide some suggestions from past declarations to fill this one
+      // We provide some suggestions from past declarations to fill the current one
       placeholder: z.object({
-        producerOfficialId: z.array(DeclarationSchema.shape.eventSerie.shape.producerOfficialId),
-        producerName: z.array(DeclarationSchema.shape.eventSerie.shape.producerName),
+        producerOfficialId: z.array(StricterEventSerieSchema.shape.producerOfficialId),
+        producerName: z.array(StricterEventSerieSchema.shape.producerName),
         place: z.array(PlaceSchema),
-        placeCapacity: z.array(DeclarationSchema.shape.eventSerie.shape.placeCapacity),
+        placeCapacity: z.array(StricterEventSerieSchema.shape.placeCapacity),
       }),
     })
     .strict()
