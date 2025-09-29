@@ -42,5 +42,5 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
       })
     )
   ),
-});
+}).strip();
 export type SacdDeclarationSchemaType = z.infer<typeof SacdDeclarationSchema>;

@@ -12,7 +12,7 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
     officialId: true,
     officialHeadquartersId: true,
     sacemId: true,
-  }),
+  }).strip(),
   eventSerie: StricterEventSerieSchema.pick({
     name: true,
     performanceType: true,
@@ -22,7 +22,7 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
     audience: true,
     taxRate: true,
     expensesAmount: true,
-  }),
+  }).strip(),
   events: z.array(
     StricterEventSchema.pick({
       startAt: true,
@@ -31,15 +31,17 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
       ticketingRevenueTaxRate: true,
       freeTickets: true,
       paidTickets: true,
-    }).merge(
-      // Since that's overrides there are not required
-      EventSchema.pick({
-        placeOverrideId: true,
-        placeCapacityOverride: true,
-        audienceOverride: true,
-        taxRateOverride: true,
-      })
-    )
+    })
+      .merge(
+        // Since that's overrides there are not required
+        EventSchema.pick({
+          placeOverrideId: true,
+          placeCapacityOverride: true,
+          audienceOverride: true,
+          taxRateOverride: true,
+        })
+      )
+      .strip()
   ),
 });
 export type SacemDeclarationSchemaType = z.infer<typeof SacemDeclarationSchema>;

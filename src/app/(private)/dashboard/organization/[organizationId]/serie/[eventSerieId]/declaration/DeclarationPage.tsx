@@ -15,8 +15,8 @@ import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
-import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
-import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
+// import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
+// import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
 import { FillDeclarationSchema, FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
@@ -621,7 +621,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                     </Tooltip>
                   </Grid>
                   <Grid item xs={12} sx={{ mt: 1 }}>
-                    <SacemRevenuesTable control={control} trigger={trigger} errors={errors.revenues} readonly={alreadyDeclared} />
+                    {/* <SacemRevenuesTable control={control} trigger={trigger} errors={errors.revenues} readonly={alreadyDeclared} /> */}
                   </Grid>
                 </Grid>
               </Grid>
@@ -632,7 +632,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                 <hr />
                 <Grid container spacing={2}>
                   <Grid item xs={12} sx={{ mt: 1 }}>
-                    <SacemExpensesTable control={control} trigger={trigger} errors={errors.expenses} readonly={alreadyDeclared} />
+                    {/* <SacemExpensesTable control={control} trigger={trigger} errors={errors.expenses} readonly={alreadyDeclared} /> */}
                   </Grid>
                 </Grid>
               </Grid>

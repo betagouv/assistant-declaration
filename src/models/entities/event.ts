@@ -99,7 +99,8 @@ export const EventSerieWrapperSchema = applyTypedParsers(
         z.object({
           type: DeclarationTypeSchema,
           status: DeclarationStatusSchema,
-          transmittedAt: DeclarationSchema.shape.transmittedAt,
+          // transmittedAt: DeclarationSchema.shape.transmittedAt,
+          transmittedAt: z.unknown(),
         })
       ),
     })

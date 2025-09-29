@@ -7,6 +7,8 @@ import { layoutStyles, styles } from '@ad/src/components/documents/layouts/stand
 import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
+import { capitalizeFirstLetter } from '@ad/src/utils/format';
 import { escapeFormattedNumberForPdf } from '@ad/src/utils/pdf';
 import { getBaseUrl } from '@ad/src/utils/url';
 
@@ -24,7 +26,13 @@ export interface SacemDeclarationDocumentProps {
 
 export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
   const { t } = useServerTranslation('common');
-  const title = `Déclaration SACEM - ${props.sacemDeclaration.eventSerieName}`;
+  const title = `Déclaration SACEM - ${props.sacemDeclaration.eventSerie.name}`;
+
+  assert(props.sacemDeclaration.events.length > 0, 'no event has no meaning');
+
+  const ascendingEvents = props.sacemDeclaration.events.sort((a, b) => +a.startAt - +b.startAt);
+  const firstEvent = ascendingEvents[0];
+  const lastEvent = ascendingEvents[ascendingEvents.length - 1];
 
   // // [WORKAROUND] After upgrading to Next.js v15 we wanted to avoid transpiling the entire `react-dsfr`
   // // This was needed only for the `pages` directory, so since just using a few hexadecimals, for now we prefer to hardcode them
@@ -64,15 +72,64 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
       <View style={styles.gridContainer}>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Organisateur / Structure</Text>
-          <Text>{props.sacemDeclaration.organizationName}</Text>
+          <Text>{props.sacemDeclaration.organization.name}</Text>
         </View>
         <View style={styles.gridItem}>
           <Text style={styles.label}>N° de client</Text>
-          <Text>{props.sacemDeclaration.clientId}</Text>
+          <Text>{props.sacemDeclaration.organization.sacemId}</Text>
+        </View>
+      </View>
+      <Text style={styles.h2}>Informations sur le spectacle</Text>
+      <View style={styles.gridContainer}>
+        <View style={styles.gridItem}>
+          <Text style={styles.label}>Nom du spectacle</Text>
+          <Text>{props.sacemDeclaration.eventSerie.name}</Text>
         </View>
         <View style={styles.gridItem}>
+          <Text style={styles.label}>Date</Text>
+          <Text>
+            {t('date.short', { date: firstEvent.startAt })} →{' '}
+            {t('date.short', {
+              date: lastEvent.startAt,
+            })}
+          </Text>
+        </View>
+        <View style={styles.gridItem}>
+          <Text style={styles.label}>Nombre de représentations</Text>
+          <Text>
+            {escapeFormattedNumberForPdf(
+              t('number.default', {
+                number: props.sacemDeclaration.events.length,
+              })
+            )}
+          </Text>
+        </View>
+        <View style={styles.gridItem}>
+          <Text style={styles.label}>Genre du spectacle</Text>
+          <Text>{t(`model.performanceType.enum.${props.sacemDeclaration.eventSerie.performanceType}`)}</Text>
+        </View>
+      </View>
+      <Text style={styles.h2}>Informations sur les représentations</Text>
+      {ascendingEvents.map((event, index) => (
+        <View key={index} style={{ width: '100%' }}>
+          <Text style={styles.h3}>{capitalizeFirstLetter(t('date.longWithTime', { date: event.startAt }))}</Text>
+          <View style={styles.gridContainer}>
+            <View style={styles.gridItem}>
+              <Text style={styles.label}>Nombre d&apos;entrées payantes</Text>
+              <Text>
+                {/* {escapeFormattedNumberForPdf(
+                  t('number.default', {
+                    number: props.sacemDeclaration.paidTickets,
+                  })
+                )} */}
+              </Text>
+            </View>
+          </View>
+        </View>
+      ))}
+      {/* <View style={styles.gridItem}>
           <Text style={styles.label}>Intitulé du lieu de représentation</Text>
-          <Text>{props.sacemDeclaration.placeName}</Text>
+          <Text>{props.sacemDeclaration.eventSerie}</Text>
         </View>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Code postal du lieu de représentation</Text>
@@ -87,48 +144,8 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
               })
             )}
           </Text>
-        </View>
-        <View style={styles.gridItem}>
-          <Text style={styles.label}>Personne en charge</Text>
-          <Text>{props.sacemDeclaration.managerName}</Text>
-        </View>
-        <View style={styles.gridItem}>
-          <Text style={styles.label}>Qualité</Text>
-          <Text>{props.sacemDeclaration.managerTitle}</Text>
-        </View>
-      </View>
-      <Text style={styles.h2}>Informations sur le spectacle</Text>
-      <View style={styles.gridContainer}>
-        <View style={styles.gridItem}>
-          <Text style={styles.label}>Nom du spectacle</Text>
-          <Text>{props.sacemDeclaration.eventSerieName}</Text>
-        </View>
-        <View style={styles.gridItem}>
-          <Text style={styles.label}>Date</Text>
-          <Text>
-            {t('date.short', { date: props.sacemDeclaration.eventSerieStartAt })} →{' '}
-            {t('date.short', {
-              date: props.sacemDeclaration.eventSerieEndAt,
-            })}
-          </Text>
-        </View>
-        <View style={styles.gridItem}>
-          <Text style={styles.label}>Nombre de représentations</Text>
-          <Text>
-            {escapeFormattedNumberForPdf(
-              t('number.default', {
-                number: props.sacemDeclaration.eventsCount,
-              })
-            )}
-          </Text>
-        </View>
-        <View style={styles.gridItem}>
-          <Text style={styles.label}>Genre du spectacle</Text>
-          <Text>{props.sacemDeclaration.performanceType}</Text>
-        </View>
-      </View>
-      <Text style={styles.h2}>Recettes</Text>
-      <View style={styles.gridContainer}>
+        </View> */}
+      {/* <View style={styles.gridContainer}>
         <View style={styles.gridItem}>
           <Text style={styles.label}>Nombre d&apos;entrées payantes</Text>
           <Text>
@@ -254,7 +271,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
             {props.signatory}
           </Text>
         </View>
-      </View>
+      </View> */}
     </StandardLayout>
   );
 }

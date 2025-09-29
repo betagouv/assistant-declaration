@@ -12,6 +12,7 @@ import { SacdDeclarationSchema, SacdDeclarationSchemaType } from '@ad/src/models
 import { SacemDeclarationSchema, SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import {
   BusinessError,
+  atLeastOneEventToTransmitError,
   eventSerieNotFoundError,
   organizationCollaboratorRoleRequiredError,
   sacemAgencyNotFoundError,
@@ -146,6 +147,8 @@ export const declarationRouter = router({
 
     if (declarationsToDeclare.length === 0) {
       throw new Error('should not resubmit as all declarations have been declared');
+    } else if (agnosticDeclaration.events.length === 0) {
+      throw atLeastOneEventToTransmitError;
     }
 
     for (const [declarationType, declarationToDeclare] of declarationsToDeclare) {
