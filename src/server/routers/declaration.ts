@@ -1,4 +1,4 @@
-import { EventSerieDeclarationStatus, Prisma } from '@prisma/client';
+import { EventSerieDeclarationStatus } from '@prisma/client';
 import { renderToBuffer } from '@react-pdf/renderer';
 import slugify from '@sindresorhus/slugify';
 
@@ -6,22 +6,10 @@ import { SacemDeclarationDocument } from '@ad/src/components/documents/templates
 import { getSacdClient } from '@ad/src/core/declaration/sacd';
 import { Attachment as EmailAttachment, mailer } from '@ad/src/emails/mailer';
 import { FillDeclarationSchema, GetDeclarationSchema, TransmitDeclarationSchema } from '@ad/src/models/actions/declaration';
-import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
-import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
-import {
-  LiteSacdDeclarationAccountingEntrySchemaType,
-  SacdDeclarationSchema,
-  SacdDeclarationSchemaType,
-  SacdDeclarationWrapperSchemaType,
-} from '@ad/src/models/entities/declaration/sacd';
-import {
-  AccountingCategorySchema,
-  AccountingFluxSchema,
-  DeclarationWrapperSchemaType,
-  LiteSacemDeclarationAccountingEntrySchemaType,
-  SacemDeclarationSchema,
-  SacemDeclarationSchemaType,
-} from '@ad/src/models/entities/declaration/sacem';
+import { DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
+import { DeclarationSchema, DeclarationSchemaType, DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
+import { SacdDeclarationSchema, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
+import { SacemDeclarationSchema, SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import {
   BusinessError,
   eventSerieNotFoundError,
@@ -30,22 +18,10 @@ import {
   sacemDeclarationUnsuccessfulError,
   transmittedDeclarationCannotBeUpdatedError,
 } from '@ad/src/models/entities/errors';
-import { EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import { prisma } from '@ad/src/prisma/client';
-import {
-  declarationPrismaToModel,
-  eventCategoryTicketsPrismaToModel,
-  eventPrismaToModel,
-  eventSeriePrismaToModel,
-  sacdDeclarationPrismaToModel,
-  sacdPlaceholderDeclarationPrismaToModel,
-  sacemDeclarationPrismaToModel,
-  ticketCategoryPrismaToModel,
-} from '@ad/src/server/routers/mappers';
+import { declarationPrismaToModel } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
-import { workaroundAssert as assert } from '@ad/src/utils/assert';
-import { getDiff, sortDiffWithKeys } from '@ad/src/utils/comparaison';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export const declarationRouter = router({
@@ -381,6 +357,7 @@ export const declarationRouter = router({
         placeCapacity: true,
         place: {
           select: {
+            id: true,
             name: true,
             address: true,
           },
@@ -402,12 +379,16 @@ export const declarationRouter = router({
     };
 
     // Fill with unique values
+    // Since some are optional we ensure they are not null
     for (const previousDeclaration of previousDeclarations) {
-      if (!placeholder.producerOfficialId.includes(previousDeclaration.producerOfficialId))
+      if (previousDeclaration.producerOfficialId && !placeholder.producerOfficialId.includes(previousDeclaration.producerOfficialId))
         placeholder.producerOfficialId.push(previousDeclaration.producerOfficialId);
-      if (!placeholder.producerName.includes(previousDeclaration.producerName)) placeholder.producerName.push(previousDeclaration.producerName);
-      if (!placeholder.place.find((p) => p.id === previousDeclaration.place?.id)) placeholder.place.push(previousDeclaration.place);
-      if (!placeholder.placeCapacity.includes(previousDeclaration.placeCapacity)) placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
+      if (previousDeclaration.producerName && !placeholder.producerName.includes(previousDeclaration.producerName))
+        placeholder.producerName.push(previousDeclaration.producerName);
+      if (previousDeclaration.place && !placeholder.place.find((p) => p.id === previousDeclaration.place!.id))
+        placeholder.place.push(previousDeclaration.place);
+      if (previousDeclaration.placeCapacity && !placeholder.placeCapacity.includes(previousDeclaration.placeCapacity))
+        placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
     }
 
     return {
@@ -417,208 +398,198 @@ export const declarationRouter = router({
       } satisfies DeclarationWrapperSchemaType,
     };
   }),
-  // TODO: should fill direct value
-  // fillDeclaration: privateProcedure.input(FillDeclarationSchema).mutation(async ({ ctx, input }) => {
-  //   const eventSerie = await prisma.eventSerie.findUnique({
-  //     where: {
-  //       id: input.eventSerieId,
-  //     },
-  //     select: {
-  //       id: true,
-  //       ticketingSystem: {
-  //         select: {
-  //           organizationId: true,
-  //         },
-  //       },
-  //       EventSerieDeclaration: {
-  //         select: {
-  //           id: true,
-  //           transmittedAt: true,
-  //         },
-  //       },
-  //     },
-  //   });
+  fillDeclaration: privateProcedure.input(FillDeclarationSchema).mutation(async ({ ctx, input }) => {
+    const eventSerie = await prisma.eventSerie.findUnique({
+      where: {
+        id: input.eventSerieId,
+      },
+      select: {
+        id: true,
+        name: true,
+        ticketingSystem: {
+          select: {
+            organization: {
+              select: {
+                id: true,
+                name: true,
+                officialId: true,
+                officialHeadquartersId: true,
+                sacemId: true,
+                sacdId: true,
+              },
+            },
+          },
+        },
+        EventSerieDeclaration: {
+          select: {
+            id: true,
+            transmittedAt: true,
+          },
+        },
+      },
+    });
 
-  //   if (!eventSerie) {
-  //     throw eventSerieNotFoundError;
-  //   }
+    if (!eventSerie) {
+      throw eventSerieNotFoundError;
+    }
 
-  //   // Before returning, make sure the caller has rights on this authority ;)
-  //   if (!(await isUserACollaboratorPartOfOrganization(eventSerie.ticketingSystem.organizationId, ctx.user.id))) {
-  //     throw organizationCollaboratorRoleRequiredError;
-  //   }
+    // Before returning, make sure the caller has rights on this authority ;)
+    if (!(await isUserACollaboratorPartOfOrganization(eventSerie.ticketingSystem.organization.id, ctx.user.id))) {
+      throw organizationCollaboratorRoleRequiredError;
+    }
 
-  //   const existingDeclaration = eventSerie.EventSerieDeclaration.find((eSD) => eSD.EventSerieSacemDeclaration !== null);
+    // TODO: maybe we could allow the user to add data if he just added an organism...
+    // but for simplicity for now we consider he had to select all organisms correctly before the first transmission
+    // Note: we do not consider status "PENDING/PROCESSED" as creation means an attempt has been done
+    if (eventSerie.EventSerieDeclaration.length > 0) {
+      throw transmittedDeclarationCannotBeUpdatedError;
+    }
 
-  //   // We have to handle both update and creation since it's implicitely linked to an event serie
-  //   // [WORKAROUND] `upsert` cannot be used to `where` not accepting undefined values (the zero UUID could be a bit at risk so using `create+update`)
-  //   // Ref: https://github.com/prisma/prisma/issues/5233
-  //   let declaration;
+    // Make sure it has at least a valid structure even if partially filled
+    const agnosticDeclaration = DeclarationSchema.parse({
+      organization: {
+        id: eventSerie.ticketingSystem.organization.id,
+        name: eventSerie.ticketingSystem.organization.name,
+        officialId: eventSerie.ticketingSystem.organization.officialId,
+        officialHeadquartersId: eventSerie.ticketingSystem.organization.officialHeadquartersId,
+        sacemId: eventSerie.ticketingSystem.organization.sacemId,
+        sacdId: eventSerie.ticketingSystem.organization.sacdId,
+      },
+      eventSerie: {
+        id: eventSerie.id,
+        name: eventSerie.name,
+        producerOfficialId: input.eventSerie.producerOfficialId,
+        producerName: input.eventSerie.producerName,
+        performanceType: input.eventSerie.performanceType,
+        expectedDeclarationTypes: input.eventSerie.expectedDeclarationTypes,
+        placeId: input.eventSerie.placeId,
+        placeCapacity: input.eventSerie.placeCapacity,
+        audience: input.eventSerie.audience,
+        taxRate: input.eventSerie.taxRate,
+        expensesAmount: input.eventSerie.expensesAmount,
+      },
+      events: input.events.map((event) => {
+        return {
+          id: event.id,
+          startAt: event.startAt,
+          endAt: event.endAt,
+          ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
+          ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
+          ticketingRevenueTaxRate: event.ticketingRevenueTaxRate,
+          freeTickets: event.freeTickets,
+          paidTickets: event.paidTickets,
+          placeOverrideId: event.placeOverrideId,
+          placeCapacityOverride: event.placeCapacityOverride,
+          audienceOverride: event.audienceOverride,
+          taxRateOverride: event.taxRateOverride,
+        };
+      }),
+    });
 
-  //   if (existingDeclaration) {
-  //     if (existingDeclaration.transmittedAt) {
-  //       throw transmittedDeclarationCannotBeUpdatedError;
-  //     }
+    // TODO:
+    // TODO: should we ensure format for each organism?
+    // ... to allow users saving the form even if not complete fully
+    // TODO:
 
-  //     const declarationId = existingDeclaration.id;
+    // // Then ensure it's correctly fulfilled for each declaration expected
+    // for (const declarationType of agnosticDeclaration.eventSerie.expectedDeclarationTypes) {
+    //   switch (declarationType) {
+    //     case 'SACEM':
+    //       SacemDeclarationSchema.parse(agnosticDeclaration);
+    //       break;
+    //     case 'SACD':
+    //       SacdDeclarationSchema.parse(agnosticDeclaration);
+    //       break;
+    //     default:
+    //       throw new Error(`declaration type not handled`);
+    //   }
+    // }
 
-  //     // Nullable field cannot be used as part of the unique compound... so we need to perform association mutations without unique constraints
-  //     // Ref: https://github.com/prisma/prisma/issues/3197
-  //     declaration = await prisma.eventSerieDeclaration.update({
-  //       where: {
-  //         id: declarationId,
-  //       },
-  //       data: {
-  //         clientId: input.clientId,
-  //         placeName: input.placeName,
-  //         placeCapacity: input.placeCapacity,
-  //         placePostalCode: input.placePostalCode,
-  //         managerName: input.managerName,
-  //         managerTitle: input.managerTitle,
-  //         performanceType: input.performanceType,
-  //         declarationPlace: input.declarationPlace,
-  //       },
-  //       select: {
-  //         id: true,
-  //         clientId: true,
-  //         placeName: true,
-  //         placeCapacity: true,
-  //         placePostalCode: true,
-  //         managerName: true,
-  //         managerTitle: true,
-  //         performanceType: true,
-  //         declarationPlace: true,
-  //         eventSerieDeclaration: {
-  //           select: {
-  //             id: true,
-  //             transmittedAt: true,
-  //             eventSerie: {
-  //               select: {
-  //                 id: true,
-  //                 name: true,
-  //                 startAt: true,
-  //                 endAt: true,
-  //                 taxRate: true,
-  //                 ticketingSystem: {
-  //                   select: {
-  //                     organization: {
-  //                       select: {
-  //                         name: true,
-  //                       },
-  //                     },
-  //                   },
-  //                 },
-  //                 Event: {
-  //                   select: {
-  //                     EventCategoryTickets: {
-  //                       select: {
-  //                         total: true,
-  //                         totalOverride: true,
-  //                         priceOverride: true,
-  //                         category: {
-  //                           select: {
-  //                             price: true,
-  //                           },
-  //                         },
-  //                       },
-  //                     },
-  //                   },
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         },
-  //         SacemDeclarationAccountingEntry: {
-  //           select: {
-  //             flux: true,
-  //             category: true,
-  //             categoryPrecision: true,
-  //             taxRate: true,
-  //             amount: true,
-  //           },
-  //         },
-  //       },
-  //     });
-  //   } else {
-  //     declaration = await prisma.eventSerieDeclaration.create({
-  //       data: {
-  //         clientId: input.clientId,
-  //         placeName: input.placeName,
-  //         placeCapacity: input.placeCapacity,
-  //         placePostalCode: input.placePostalCode,
-  //         managerName: input.managerName,
-  //         managerTitle: input.managerTitle,
-  //         performanceType: input.performanceType,
-  //         declarationPlace: input.declarationPlace,
-  //         eventSerieDeclaration: {
-  //           create: {
-  //             status: EventSerieDeclarationStatus.PENDING,
-  //             eventSerieId: eventSerie.id,
-  //             transmittedAt: null,
-  //             lastTransmissionError: null,
-  //             lastTransmissionErrorAt: null,
-  //           },
-  //         },
-  //       },
-  //       select: {
-  //         id: true,
-  //         clientId: true,
-  //         placeName: true,
-  //         placeCapacity: true,
-  //         placePostalCode: true,
-  //         managerName: true,
-  //         managerTitle: true,
-  //         performanceType: true,
-  //         declarationPlace: true,
-  //         eventSerieDeclaration: {
-  //           select: {
-  //             id: true,
-  //             transmittedAt: true,
-  //             eventSerie: {
-  //               select: {
-  //                 id: true,
-  //                 name: true,
-  //                 startAt: true,
-  //                 endAt: true,
-  //                 taxRate: true,
-  //                 ticketingSystem: {
-  //                   select: {
-  //                     organization: {
-  //                       select: {
-  //                         name: true,
-  //                       },
-  //                     },
-  //                   },
-  //                 },
-  //                 Event: {
-  //                   select: {
-  //                     EventCategoryTickets: {
-  //                       select: {
-  //                         total: true,
-  //                         totalOverride: true,
-  //                         priceOverride: true,
-  //                         category: {
-  //                           select: {
-  //                             price: true,
-  //                           },
-  //                         },
-  //                       },
-  //                     },
-  //                   },
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     });
-  //   }
+    // TODO:
+    // TODO:
+    // TODO: ensure UUID are scoped...
+    // TODO: place should be an input (if modified and linked to other, create a new one)
+    // TODO:
+    // TODO:
 
-  //   return {
-  //     declaration: declarationPrismaToModel(declaration.eventSerieDeclaration.eventSerie, {
-  //       ...declaration,
-  //       transmittedAt: declaration.eventSerieDeclaration.transmittedAt,
-  //     }),
-  //   };
-  // }),
+    // TODO:
+    // TODO:
+    // TODO: create place if needed, same for events or their places + update events
+    // TODO:
+
+    const updatedEventSerie = await prisma.eventSerie.update({
+      where: {
+        id: eventSerie.id,
+      },
+      data: {
+        producerOfficialId: input.eventSerie.producerOfficialId,
+        producerName: input.eventSerie.producerName,
+        performanceType: input.eventSerie.performanceType,
+        expectedDeclarationTypes: input.eventSerie.expectedDeclarationTypes,
+        placeId: input.eventSerie.placeId,
+        placeCapacity: input.eventSerie.placeCapacity,
+        audience: input.eventSerie.audience,
+        taxRate: input.eventSerie.taxRate,
+        expensesAmount: input.eventSerie.expensesAmount,
+      },
+      select: {
+        id: true,
+        internalTicketingSystemId: true,
+        ticketingSystemId: true,
+        name: true,
+        producerOfficialId: true,
+        producerName: true,
+        performanceType: true,
+        expectedDeclarationTypes: true,
+        placeId: true,
+        placeCapacity: true,
+        audience: true,
+        taxRate: true,
+        expensesAmount: true,
+        createdAt: true,
+        updatedAt: true,
+        ticketingSystem: {
+          select: {
+            organization: {
+              select: {
+                id: true,
+                name: true,
+                officialId: true,
+                officialHeadquartersId: true,
+                sacemId: true,
+                sacdId: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
+        Event: {
+          select: {
+            id: true,
+            internalTicketingSystemId: true,
+            eventSerieId: true,
+            startAt: true,
+            endAt: true,
+            ticketingRevenueIncludingTaxes: true,
+            ticketingRevenueExcludingTaxes: true,
+            ticketingRevenueTaxRate: true,
+            ticketingRevenueDefinedTaxRate: true,
+            freeTickets: true,
+            paidTickets: true,
+            placeOverrideId: true,
+            placeCapacityOverride: true,
+            audienceOverride: true,
+            taxRateOverride: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
+
+    return {
+      declaration: declarationPrismaToModel(updatedEventSerie),
+    };
+  }),
 });

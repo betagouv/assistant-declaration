@@ -50,7 +50,7 @@
       "supersoniksAccessKeyInvalidDomainName": "l'identifiant est invalide, il doit correspondre au nom de domaine de votre billetterie (par exemple \"billetterie.masalledespectacle.com\" si votre billetterie est accessible via l'adresse https://billetterie.masalledespectacle.com/",
       "ticketingSystemConnectionFailed": "le test de connexion à la billetterie a échoué, veuillez vérifier vos identifiants",
       "ticketingSystemNotFound": "ce système de billetterie n'existe pas",
-      "transmittedDeclarationCannotBeUpdated": "une déclaration déjà transmise auprès de l'organisme ne peut pas être modifiée. Si une correction est nécessaire, veuillez contacter l'organisme directement",
+      "transmittedDeclarationCannotBeUpdated": "une déclaration déjà transmise auprès d'un organisme ne peut pas être modifiée. Si une correction est nécessaire, veuillez contacter l'organisme directement",
       "tooManyOrganizationTicketingSystems": "vous avez atteint la limite du nombre de systèmes de billetterie par organisation",
       "userAlreadyConfirmed": "votre compte est déjà confirmé",
       "userNotConfirmed": "votre inscription doit être confirmée en cliquant sur le lien de l'email avant de pouvoir vous authentifier",
