@@ -29,12 +29,12 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
       endAt: true,
       ticketingRevenueIncludingTaxes: true,
       ticketingRevenueExcludingTaxes: true,
-      ticketingRevenueTaxRate: true,
       freeTickets: true,
       paidTickets: true,
     }).merge(
-      // Since that's overrides there are not required
       EventSchema.pick({
+        ticketingRevenueTaxRate: true,
+        // Since that's overrides there are not required
         placeOverrideId: true,
         placeCapacityOverride: true,
         audienceOverride: true,
@@ -44,3 +44,26 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
   ),
 }).strip();
 export type SacdDeclarationSchemaType = z.infer<typeof SacdDeclarationSchema>;
+
+// This is useful to avoid in multiple locations of the code trying to search for the default value to display it
+// It will ensure no isolate issue over time
+export const FlattenSacdEventSchema = StricterEventSchema.pick({
+  startAt: true,
+  ticketingRevenueIncludingTaxes: true,
+  ticketingRevenueExcludingTaxes: true,
+  freeTickets: true,
+  paidTickets: true,
+})
+  .merge(
+    EventSchema.pick({
+      ticketingRevenueTaxRate: true,
+    })
+  )
+  .merge(
+    StricterEventSerieSchema.pick({
+      placeId: true,
+      placeCapacity: true,
+      audience: true,
+    })
+  );
+export type FlattenSacdEventSchemaType = z.infer<typeof FlattenSacdEventSchema>;

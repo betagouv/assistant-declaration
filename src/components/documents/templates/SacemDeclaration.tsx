@@ -10,6 +10,7 @@ import {
   getTaxAmountFromIncludingAndExcludingTaxesAmounts,
   getTaxAmountFromIncludingTaxesAmount,
 } from '@ad/src/core/declaration';
+import { getFlattenEventsForSacemDeclaration, getFlattenEventsKeyFigures } from '@ad/src/core/declaration/format';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -29,7 +30,7 @@ const sacemTableLayoutStyles = StyleSheet.create({
   ...layoutStyles,
   page: {
     ...layoutStyles.page,
-    padding: '1vw 1vw 1vw 1vw',
+    padding: '2vw 2vw 2vw 2vw',
   },
   content: {
     ...layoutStyles.content,
@@ -42,6 +43,10 @@ const sacemTableLayoutStyles = StyleSheet.create({
     border: 0,
     marginTop: 1,
     marginLeft: 1,
+  },
+  totalCell: {
+    fontWeight: 800,
+    backgroundColor: '#f4be30', // [WORKAROUND] Harcoded from `theme` since it has to be constructed by `StyleSheet.create`
   },
 });
 
@@ -56,9 +61,12 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
 
   assert(props.sacemDeclaration.events.length > 0, 'no event has no meaning');
 
-  const ascendingEvents = props.sacemDeclaration.events.sort((a, b) => +a.startAt - +b.startAt);
-  const firstEvent = ascendingEvents[0];
-  const lastEvent = ascendingEvents[ascendingEvents.length - 1];
+  const flattenEvents = getFlattenEventsForSacemDeclaration(props.sacemDeclaration);
+  const flattenEventsKeyFigures = getFlattenEventsKeyFigures(flattenEvents);
+
+  const ascendingFlattenEvents = flattenEvents.sort((a, b) => +a.startAt - +b.startAt);
+  const firstEvent = ascendingFlattenEvents[0];
+  const lastEvent = ascendingFlattenEvents[ascendingFlattenEvents.length - 1];
 
   // // [WORKAROUND] After upgrading to Next.js v15 we wanted to avoid transpiling the entire `react-dsfr`
   // // This was needed only for the `pages` directory, so since just using a few hexadecimals, for now we prefer to hardcode them
@@ -69,6 +77,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
       background: {
         default: { grey: { default: '#ffffff' } },
         alt: { blueFrance: { default: '#f5f5fe' } },
+        contrast: { yellowMoutarde: { active: ' #f4be30' } },
       },
     },
   };
@@ -301,6 +310,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
       </View> */}
       </PageLayout>
       <PageLayout orientation="landscape" layoutStyles={sacemTableLayoutStyles}>
+        <Text style={styles.h4}>Représentations - {props.sacemDeclaration.eventSerie.name}</Text>
         <View style={styles.gridContainer}>
           <View style={styles.gridItem}>
             <Table weightings={[2, 1, 2, 1, 1, 1, 1, 1, 1]} tdStyle={{ padding: 5 }}>
@@ -315,7 +325,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 <TableCell style={{ justifyContent: 'flex-end' }}>Montant de la TVA</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>Montant TTC</TableCell>
               </TableHeader>
-              {ascendingEvents.map((event, index) => (
+              {ascendingFlattenEvents.map((event, index) => (
                 <TableRow
                   key={index}
                   style={{
@@ -327,19 +337,19 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                     <Text>{capitalizeFirstLetter(t('date.longWithTime', { date: event.startAt }))}</Text>
                   </TableCell>
                   <TableCell>
-                    <Text>{t(`model.audience.enum.${props.sacemDeclaration.eventSerie.audience}`)}</Text>
+                    <Text>{t(`model.audience.enum.${event.audience}`)}</Text>
                   </TableCell>
                   <TableCell>
                     <View>
                       <Text>{'Lieu NAME'}</Text>
                       <Text>
-                        {/* ADDR {event.placeOverrideId ?? props.sacemDeclaration.eventSerie.placeId} */}
+                        {/* ADDR {event.placeId} */}
                         ADDR to format
                       </Text>
                     </View>
                   </TableCell>
-                  <TableCell>
-                    <Text>{event.placeCapacityOverride ?? props.sacemDeclaration.eventSerie.placeCapacity}</Text>
+                  <TableCell style={{ justifyContent: 'flex-end' }}>
+                    <Text>{event.placeCapacity}</Text>
                   </TableCell>
                   <TableCell>
                     <View>
@@ -349,19 +359,13 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                   </TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>
                     <Text>
-                      {event.taxRateOverride
-                        ? event.ticketingRevenueTaxRate !== null
-                          ? escapeFormattedNumberForPdf(
-                              t('number.percent', {
-                                percentage: event.ticketingRevenueTaxRate,
-                              })
-                            )
-                          : '-'
-                        : escapeFormattedNumberForPdf(
+                      {event.ticketingRevenueTaxRate !== null
+                        ? escapeFormattedNumberForPdf(
                             t('number.percent', {
-                              percentage: props.sacemDeclaration.eventSerie.taxRate,
+                              percentage: event.ticketingRevenueTaxRate,
                             })
-                          )}
+                          )
+                        : '-'}
                     </Text>
                   </TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>
@@ -385,32 +389,34 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 </TableRow>
               ))}
               <TableRow>
-                {/* <TableCell weighting={6 / 11}>Totaux</TableCell>
-                <TableCell weighting={1 / 11}></TableCell>
-                <TableCell weighting={1 / 11}></TableCell>
-                <TableCell weighting={1 / 11}></TableCell>
-                <TableCell weighting={1 / 11}></TableCell>
-                <TableCell weighting={1 / 11}></TableCell> */}
-
                 {/* colspan usage is not possible and weighting is not working properly, so using hidden unit cells to achieve the total row */}
                 <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
                 <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
                 <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
                 <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
-                <TableCell>
-                  <Text>XXXX</Text>
+                <TableCell style={sacemTableLayoutStyles.totalCell}>
+                  <Text>
+                    <View>
+                      <Text>{flattenEventsKeyFigures.paidTickets} gratuites</Text>
+                      <Text>{flattenEventsKeyFigures.freeTickets} payantes</Text>
+                    </View>
+                  </Text>
                 </TableCell>
-                <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}>
-                  <Text></Text>
+                <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
+                <TableCell style={sacemTableLayoutStyles.totalCell}>
+                  <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEventsKeyFigures.ticketingRevenueExcludingTaxes }))}</Text>
                 </TableCell>
-                <TableCell>
-                  <Text>XXXX</Text>
+                <TableCell style={sacemTableLayoutStyles.totalCell}>
+                  <Text>
+                    {escapeFormattedNumberForPdf(
+                      t('currency.amount', {
+                        amount: flattenEventsKeyFigures.ticketingRevenueTaxes,
+                      })
+                    )}
+                  </Text>
                 </TableCell>
-                <TableCell>
-                  <Text>XXXX</Text>
-                </TableCell>
-                <TableCell>
-                  <Text>XXXX</Text>
+                <TableCell style={sacemTableLayoutStyles.totalCell}>
+                  <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEventsKeyFigures.ticketingRevenueIncludingTaxes }))}</Text>
                 </TableCell>
               </TableRow>
             </Table>

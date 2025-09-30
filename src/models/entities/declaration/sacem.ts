@@ -33,8 +33,9 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
       paidTickets: true,
     })
       .merge(
-        // Since that's overrides there are not required
         EventSchema.pick({
+          ticketingRevenueTaxRate: true,
+          // Since that's overrides there are not required
           placeOverrideId: true,
           placeCapacityOverride: true,
           audienceOverride: true,
@@ -45,3 +46,26 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
   ),
 });
 export type SacemDeclarationSchemaType = z.infer<typeof SacemDeclarationSchema>;
+
+// This is useful to avoid in multiple locations of the code trying to search for the default value to display it
+// It will ensure no isolate issue over time
+export const FlattenSacemEventSchema = StricterEventSchema.pick({
+  startAt: true,
+  ticketingRevenueIncludingTaxes: true,
+  ticketingRevenueExcludingTaxes: true,
+  freeTickets: true,
+  paidTickets: true,
+})
+  .merge(
+    EventSchema.pick({
+      ticketingRevenueTaxRate: true,
+    })
+  )
+  .merge(
+    StricterEventSerieSchema.pick({
+      placeId: true,
+      placeCapacity: true,
+      audience: true,
+    })
+  );
+export type FlattenSacemEventSchemaType = z.infer<typeof FlattenSacemEventSchema>;
