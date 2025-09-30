@@ -154,7 +154,7 @@ export const declarationRouter = router({
     for (const [declarationType, declarationToDeclare] of declarationsToDeclare) {
       try {
         if (declarationToDeclare === sacemDeclaration) {
-          const eventPlacePostalCode: string = sacemDeclaration.eventSerie.placeId; // TODO: get details
+          const eventPlacePostalCode: string = sacemDeclaration.eventSerie.place.id; // TODO: get details
 
           const sacemAgency = await prisma.sacemAgency.findFirst({
             where: {
@@ -465,7 +465,7 @@ export const declarationRouter = router({
         producerName: input.eventSerie.producerName,
         performanceType: input.eventSerie.performanceType,
         expectedDeclarationTypes: input.eventSerie.expectedDeclarationTypes,
-        placeId: input.eventSerie.placeId,
+        place: null, // TODO: need association properly
         placeCapacity: input.eventSerie.placeCapacity,
         audience: input.eventSerie.audience,
         taxRate: input.eventSerie.taxRate,
@@ -481,7 +481,7 @@ export const declarationRouter = router({
           ticketingRevenueTaxRate: event.ticketingRevenueTaxRate,
           freeTickets: event.freeTickets,
           paidTickets: event.paidTickets,
-          placeOverrideId: event.placeOverrideId,
+          placeOverride: null, // TODO: need association properly
           placeCapacityOverride: event.placeCapacityOverride,
           audienceOverride: event.audienceOverride,
           taxRateOverride: event.taxRateOverride,

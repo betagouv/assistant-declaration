@@ -23,14 +23,13 @@ export const DeclarationSchema = applyTypedParsers(
         producerName: true,
         performanceType: true,
         expectedDeclarationTypes: true,
-        placeId: true,
         placeCapacity: true,
         audience: true,
         taxRate: true,
         expensesAmount: true,
       }).merge(
         z.object({
-          // place: PlaceSchema.nullable(),
+          place: PlaceSchema.nullable(),
         })
       ),
       events: z.array(
@@ -43,13 +42,12 @@ export const DeclarationSchema = applyTypedParsers(
           ticketingRevenueTaxRate: true,
           freeTickets: true,
           paidTickets: true,
-          placeOverrideId: true,
           placeCapacityOverride: true,
           audienceOverride: true,
           taxRateOverride: true,
         }).merge(
           z.object({
-            // placeOverride: PlaceSchema.nullable(),
+            placeOverride: PlaceSchema.nullable(),
           })
         )
       ),

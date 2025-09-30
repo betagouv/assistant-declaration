@@ -8,9 +8,11 @@ import {
   DeclarationWrapperSchemaType,
 } from '@ad/src/models/entities/declaration/common';
 
-// const { id as id0, endAt as endAt0, ...event0 } = events[0];
-// const { id as id1, endAt as endAt1, ...event1 } = events[1];
-// const { id as id2, endAt as endAt2, ...event2 } = events[2];
+const eventsWithPlace = [
+  { ...events[0], placeOverride: places[1] },
+  { ...events[1], placeOverride: null },
+  { ...events[2], placeOverride: places[2] },
+];
 
 export const declarations: DeclarationSchemaType[] = [
   DeclarationSchema.parse({
@@ -29,13 +31,13 @@ export const declarations: DeclarationSchemaType[] = [
       producerName: eventsSeries[0].producerName,
       performanceType: eventsSeries[0].performanceType,
       expectedDeclarationTypes: eventsSeries[0].expectedDeclarationTypes,
-      placeId: eventsSeries[0].placeId,
+      place: places[0],
       placeCapacity: eventsSeries[0].placeCapacity,
       audience: eventsSeries[0].audience,
       taxRate: eventsSeries[0].taxRate,
       expensesAmount: eventsSeries[0].expensesAmount,
     },
-    events: [events[0], events[1], events[2]],
+    events: [eventsWithPlace[0], eventsWithPlace[1], eventsWithPlace[2]],
   }),
   DeclarationSchema.parse({
     organization: {
@@ -53,13 +55,13 @@ export const declarations: DeclarationSchemaType[] = [
       producerName: eventsSeries[1].producerName,
       performanceType: eventsSeries[1].performanceType,
       expectedDeclarationTypes: eventsSeries[1].expectedDeclarationTypes,
-      placeId: eventsSeries[1].placeId,
+      place: places[1],
       placeCapacity: eventsSeries[1].placeCapacity,
       audience: eventsSeries[1].audience,
       taxRate: eventsSeries[1].taxRate,
       expensesAmount: eventsSeries[1].expensesAmount,
     },
-    events: [events[1], events[2]],
+    events: [eventsWithPlace[1], eventsWithPlace[2]],
   }),
   DeclarationSchema.parse({
     organization: {
@@ -77,13 +79,13 @@ export const declarations: DeclarationSchemaType[] = [
       producerName: eventsSeries[2].producerName,
       performanceType: eventsSeries[2].performanceType,
       expectedDeclarationTypes: eventsSeries[2].expectedDeclarationTypes,
-      placeId: eventsSeries[2].placeId,
+      place: null,
       placeCapacity: eventsSeries[2].placeCapacity,
       audience: eventsSeries[2].audience,
       taxRate: eventsSeries[2].taxRate,
       expensesAmount: eventsSeries[2].expensesAmount,
     },
-    events: [events[2]],
+    events: [eventsWithPlace[2]],
   }),
 ];
 

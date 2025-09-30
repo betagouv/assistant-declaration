@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
 import { EventSchema, StricterEventSchema, StricterEventSerieSchema } from '@ad/src/models/entities/event';
 import { StricterOrganizationSchema } from '@ad/src/models/entities/organization';
+import { PlaceSchema } from '@ad/src/models/entities/place';
 
 // Here we take the original stored structure but forcing fields as required when needed by Sacem
 export const SacemDeclarationSchema = DeclarationSchema.extend({
@@ -17,12 +18,17 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
     name: true,
     performanceType: true,
     expectedDeclarationTypes: true,
-    placeId: true,
     placeCapacity: true,
     audience: true,
     taxRate: true,
     expensesAmount: true,
-  }).strip(),
+  })
+    .merge(
+      z.object({
+        place: PlaceSchema,
+      })
+    )
+    .strip(),
   events: z.array(
     StricterEventSchema.pick({
       startAt: true,
@@ -36,10 +42,14 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
         EventSchema.pick({
           ticketingRevenueTaxRate: true,
           // Since that's overrides there are not required
-          placeOverrideId: true,
           placeCapacityOverride: true,
           audienceOverride: true,
           taxRateOverride: true,
+        })
+      )
+      .merge(
+        z.object({
+          placeOverride: PlaceSchema.nullable(),
         })
       )
       .strip()
@@ -56,6 +66,9 @@ export const FlattenSacemEventSchema = StricterEventSchema.pick({
   freeTickets: true,
   paidTickets: true,
 })
+  .extend({
+    place: PlaceSchema,
+  })
   .merge(
     EventSchema.pick({
       ticketingRevenueTaxRate: true,
@@ -63,7 +76,6 @@ export const FlattenSacemEventSchema = StricterEventSchema.pick({
   )
   .merge(
     StricterEventSerieSchema.pick({
-      placeId: true,
       placeCapacity: true,
       audience: true,
     })

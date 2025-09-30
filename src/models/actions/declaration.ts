@@ -32,7 +32,7 @@ export const FillDeclarationSchema = z
       producerName: true,
       performanceType: true,
       expectedDeclarationTypes: true,
-      placeId: true,
+      placeId: true, // TODO: should be PlaceInput, z.or(id, or object with text?)
       placeCapacity: true,
       audience: true,
       taxRate: true,

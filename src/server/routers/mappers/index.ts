@@ -121,11 +121,21 @@ export function declarationPrismaToModel(
     Event: Event[];
   }
 ): DeclarationSchemaType {
+  const { placeId, ...liteEventSerie } = eventSeriePrismaToModel(eventSerie);
+
   return {
     organization: organizationPrismaToModel(eventSerie.ticketingSystem.organization),
-    eventSerie: eventSeriePrismaToModel(eventSerie),
+    eventSerie: {
+      ...liteEventSerie,
+      place: null, // TODO: should patch place
+    },
     events: eventSerie.Event.map((event) => {
-      return eventPrismaToModel(event);
+      const { placeOverrideId, ...liteEvent } = eventPrismaToModel(event);
+
+      return {
+        ...liteEvent,
+        placeOverride: null, // TODO: should patch place
+      };
     }),
   };
 }

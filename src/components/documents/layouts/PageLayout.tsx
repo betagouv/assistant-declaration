@@ -1,4 +1,4 @@
-import { Image, Link, Page, Styles, Text, View } from '@react-pdf/renderer';
+import { Image, Link, Page, Text, View } from '@react-pdf/renderer';
 import { Orientation } from '@react-pdf/types';
 import React, { PropsWithChildren } from 'react';
 
@@ -18,11 +18,6 @@ export function PageLayout(props: PropsWithChildren<PageLayoutProps>) {
   const { t } = useServerTranslation('common');
 
   const layoutStyles = props.layoutStyles ?? defaultLayoutStyles;
-
-  // TODO: hide tmp
-  if (props.showHeader) {
-    return <></>;
-  }
 
   return (
     <Page size="A4" wrap style={layoutStyles.page} orientation={props.orientation ?? 'portrait'}>

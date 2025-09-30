@@ -13,7 +13,7 @@ export function getFlattenEventsForSacemDeclaration(declaration: SacemDeclaratio
       ticketingRevenueTaxRate: originalEvent.taxRateOverride ? originalEvent.ticketingRevenueTaxRate : declaration.eventSerie.taxRate,
       freeTickets: originalEvent.freeTickets,
       paidTickets: originalEvent.paidTickets,
-      placeId: originalEvent.placeOverrideId ?? declaration.eventSerie.placeId,
+      place: originalEvent.placeOverride ?? declaration.eventSerie.place,
       placeCapacity: originalEvent.placeCapacityOverride ?? declaration.eventSerie.placeCapacity,
       audience: originalEvent.audienceOverride ?? declaration.eventSerie.audience,
     });
@@ -33,7 +33,7 @@ export function getFlattenEventsForSacdDeclaration(declaration: SacdDeclarationS
       ticketingRevenueTaxRate: originalEvent.taxRateOverride ? originalEvent.ticketingRevenueTaxRate : declaration.eventSerie.taxRate,
       freeTickets: originalEvent.freeTickets,
       paidTickets: originalEvent.paidTickets,
-      placeId: originalEvent.placeOverrideId ?? declaration.eventSerie.placeId,
+      place: originalEvent.placeOverride ?? declaration.eventSerie.place,
       placeCapacity: originalEvent.placeCapacityOverride ?? declaration.eventSerie.placeCapacity,
       audience: originalEvent.audienceOverride ?? declaration.eventSerie.audience,
     });

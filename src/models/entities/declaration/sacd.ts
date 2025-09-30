@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
 import { EventSchema, StricterEventSchema, StricterEventSerieSchema } from '@ad/src/models/entities/event';
 import { StricterOrganizationSchema } from '@ad/src/models/entities/organization';
+import { PlaceSchema } from '@ad/src/models/entities/place';
 
 // Here we take the original stored structure but forcing fields as required when needed by SACD
 export const SacdDeclarationSchema = DeclarationSchema.extend({
@@ -10,19 +11,24 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
     id: true,
     name: true,
     sacdId: true,
-  }),
+  }).strip(),
   eventSerie: StricterEventSerieSchema.pick({
     name: true,
     producerOfficialId: true,
     producerName: true,
     performanceType: true,
     expectedDeclarationTypes: true,
-    placeId: true,
     placeCapacity: true,
     audience: true,
     taxRate: true,
     expensesAmount: true,
-  }),
+  })
+    .merge(
+      z.object({
+        place: PlaceSchema,
+      })
+    )
+    .strip(),
   events: z.array(
     StricterEventSchema.pick({
       startAt: true,
@@ -31,18 +37,25 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
       ticketingRevenueExcludingTaxes: true,
       freeTickets: true,
       paidTickets: true,
-    }).merge(
-      EventSchema.pick({
-        ticketingRevenueTaxRate: true,
-        // Since that's overrides there are not required
-        placeOverrideId: true,
-        placeCapacityOverride: true,
-        audienceOverride: true,
-        taxRateOverride: true,
-      })
-    )
+    })
+      .merge(
+        EventSchema.pick({
+          ticketingRevenueTaxRate: true,
+          // Since that's overrides there are not required
+          placeOverrideId: true,
+          placeCapacityOverride: true,
+          audienceOverride: true,
+          taxRateOverride: true,
+        })
+      )
+      .merge(
+        z.object({
+          placeOverride: PlaceSchema.nullable(),
+        })
+      )
+      .strip()
   ),
-}).strip();
+});
 export type SacdDeclarationSchemaType = z.infer<typeof SacdDeclarationSchema>;
 
 // This is useful to avoid in multiple locations of the code trying to search for the default value to display it
@@ -54,6 +67,9 @@ export const FlattenSacdEventSchema = StricterEventSchema.pick({
   freeTickets: true,
   paidTickets: true,
 })
+  .extend({
+    place: PlaceSchema,
+  })
   .merge(
     EventSchema.pick({
       ticketingRevenueTaxRate: true,
@@ -61,7 +77,6 @@ export const FlattenSacdEventSchema = StricterEventSchema.pick({
   )
   .merge(
     StricterEventSerieSchema.pick({
-      placeId: true,
       placeCapacity: true,
       audience: true,
     })

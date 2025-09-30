@@ -1,4 +1,5 @@
 import { declarations } from '@ad/src/fixtures/declaration/common';
+import { places } from '@ad/src/fixtures/place';
 import { SacemDeclarationSchema, SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import { PerformanceTypeSchema } from '@ad/src/models/entities/event';
 
@@ -14,7 +15,7 @@ export const sacemDeclarations: SacemDeclarationSchemaType[] = [
     eventSerie: {
       ...declarations[2].eventSerie,
       performanceType: PerformanceTypeSchema.Values.DANCE,
-      placeId: 'd79cb3ba-745e-5d9a-8903-4a02327a7e44',
+      place: places[2],
       placeCapacity: 100,
     },
   }),

@@ -1,21 +1,19 @@
 import { Table, TableCell, TableHeader, TableRow } from '@ag-media/react-pdf-table';
+import addressFormatter from '@fragaria/address-formatter';
 // import { fr } from '@codegouvfr/react-dsfr';
 import { Image, Link, StyleSheet, Text, View } from '@react-pdf/renderer';
 
 import { PageLayout } from '@ad/src/components/documents/layouts/PageLayout';
 import { StandardLayout } from '@ad/src/components/documents/layouts/StandardLayout';
 import { layoutStyles, styles } from '@ad/src/components/documents/layouts/standard';
-import {
-  getExcludingTaxesAmountFromIncludingTaxesAmount,
-  getTaxAmountFromIncludingAndExcludingTaxesAmounts,
-  getTaxAmountFromIncludingTaxesAmount,
-} from '@ad/src/core/declaration';
+import { getTaxAmountFromIncludingAndExcludingTaxesAmounts } from '@ad/src/core/declaration';
 import { getFlattenEventsForSacemDeclaration, getFlattenEventsKeyFigures } from '@ad/src/core/declaration/format';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
 import { escapeFormattedNumberForPdf } from '@ad/src/utils/pdf';
+import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { getBaseUrl } from '@ad/src/utils/url';
 
 const sacemLayoutStyles = StyleSheet.create({
@@ -144,182 +142,50 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
             <Text style={styles.label}>Genre du spectacle</Text>
             <Text>{t(`model.performanceType.enum.${props.sacemDeclaration.eventSerie.performanceType}`)}</Text>
           </View>
-        </View>
-        <Text style={styles.h2}>Informations sur les représentations</Text>
-        {/* {ascendingEvents.map((event, index) => (
-          <View key={index} style={{ width: '100%' }}>
-            <Text style={styles.h3}>{capitalizeFirstLetter(t('date.longWithTime', { date: event.startAt }))}</Text>
-            <View style={styles.gridContainer}>
-              <View style={styles.gridItem}>
-                <Text style={styles.label}>Nombre d&apos;entrées payantes</Text>
-                <Text>
-                  {escapeFormattedNumberForPdf(
-                  t('number.default', {
-                    number: props.sacemDeclaration.paidTickets,
-                  })
-                )}
-                </Text>
-              </View>
-            </View>
+          <View style={styles.gridItem}>
+            <Text style={styles.label}>Recette billetterie HT</Text>
+            <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEventsKeyFigures.ticketingRevenueExcludingTaxes }))}</Text>
           </View>
-        ))} */}
-        {/* <View style={styles.gridItem}>
-          <Text style={styles.label}>Intitulé du lieu de représentation</Text>
-          <Text>{props.sacemDeclaration.eventSerie}</Text>
+          <View style={styles.gridItem}>
+            <Text style={styles.label}>Recettes autres HT</Text>
+            <Text>TODO</Text>
+          </View>
+          <View style={styles.gridItem}>
+            <Text style={styles.label}>Dépenses HT</Text>
+            <Text>TODO {escapeFormattedNumberForPdf(t('currency.amount', { amount: props.sacemDeclaration.eventSerie.expensesAmount }))}</Text>
+          </View>
         </View>
-        <View style={styles.gridItem}>
-          <Text style={styles.label}>Code postal du lieu de représentation</Text>
-          <Text>{props.sacemDeclaration.placePostalCode}</Text>
+        <View style={styles.gridContainer}>
+          <View style={{ ...styles.gridItem, textAlign: 'right', paddingRight: '6vw', paddingTop: 10 }}>
+            <Text>Je certifie l&apos;exactitude des renseignements ci-joint.</Text>
+            <Text style={{ marginTop: 10 }}>
+              Fait via <Link src={linkRegistry.get('home', undefined, { absolute: true })}>l'Assistant déclaration</Link>, le{' '}
+              {t('date.short', { date: new Date() })}
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'Dancing Script',
+                fontSize: 35,
+                marginTop: 10,
+                marginRight: 10,
+              }}
+            >
+              {props.signatory}
+            </Text>
+          </View>
         </View>
-        <View style={styles.gridItem}>
-          <Text style={styles.label}>Jauge</Text>
-          <Text>
-            {escapeFormattedNumberForPdf(
-              t('number.default', {
-                number: props.sacemDeclaration.placeCapacity,
-              })
-            )}
-          </Text>
-        </View> */}
-        {/* <View style={styles.gridContainer}>
-        <View style={styles.gridItem}>
-          <Text style={styles.label}>Nombre d&apos;entrées payantes</Text>
-          <Text>
-            {escapeFormattedNumberForPdf(
-              t('number.default', {
-                number: props.sacemDeclaration.paidTickets,
-              })
-            )}
-          </Text>
-        </View>
-        <View style={styles.gridItem}>
-          <Text style={styles.label}>Nombre d&apos;entrées gratuites</Text>
-          <Text>
-            {escapeFormattedNumberForPdf(
-              t('number.default', {
-                number: props.sacemDeclaration.freeTickets,
-              })
-            )}
-          </Text>
-        </View>
-        <View style={{ ...styles.gridItem, paddingTop: 10 }}>
-          <Table weightings={[2, 1, 1, 1, 1]} tdStyle={{ padding: 5 }}>
-            <TableHeader fixed>
-              <TableCell>Origine des recettes</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Taux de TVA</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Montant HT</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Montant de la TVA</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Montant TTC</TableCell>
-            </TableHeader>
-            {props.sacemDeclaration.revenues.map((revenue, index) => (
-              <TableRow
-                key={index}
-                style={{
-                  backgroundColor:
-                    index % 2 === 0 ? theme.decisions.background.alt.blueFrance.default : theme.decisions.background.default.grey.default,
-                }}
-              >
-                <TableCell>{revenue.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${revenue.category}`)}</TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {escapeFormattedNumberForPdf(
-                    t('number.percent', {
-                      percentage: revenue.taxRate,
-                    })
-                  )}
-                </TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {escapeFormattedNumberForPdf(
-                    t('currency.amount', { amount: getExcludingTaxesAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate) })
-                  )}
-                </TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {escapeFormattedNumberForPdf(
-                    t('currency.amount', { amount: getTaxAmountFromIncludingTaxesAmount(revenue.includingTaxesAmount, revenue.taxRate) })
-                  )}
-                </TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {escapeFormattedNumberForPdf(t('currency.amount', { amount: revenue.includingTaxesAmount }))}
-                </TableCell>
-              </TableRow>
-            ))}
-          </Table>
-        </View>
-      </View>
-      <Text style={styles.h2}>Dépenses artistiques</Text>
-      <View style={styles.gridContainer}>
-        <View style={styles.gridItem}>
-          <Table weightings={[2, 1, 1, 1, 1]} tdStyle={{ padding: 5 }}>
-            <TableHeader fixed>
-              <TableCell>Type de contrat</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Taux de TVA</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Montant HT</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Montant de la TVA</TableCell>
-              <TableCell style={{ justifyContent: 'flex-end' }}>Montant TTC</TableCell>
-            </TableHeader>
-            {props.sacemDeclaration.expenses.map((expense, index) => (
-              <TableRow
-                key={index}
-                style={{
-                  backgroundColor:
-                    index % 2 === 0 ? theme.decisions.background.alt.blueFrance.default : theme.decisions.background.default.grey.default,
-                }}
-              >
-                <TableCell>{expense.categoryPrecision ?? t(`model.sacemDeclaration.accountingCategory.enum.${expense.category}`)}</TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {escapeFormattedNumberForPdf(
-                    t('number.percent', {
-                      percentage: expense.taxRate,
-                    })
-                  )}
-                </TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {escapeFormattedNumberForPdf(
-                    t('currency.amount', { amount: getExcludingTaxesAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate) })
-                  )}
-                </TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {escapeFormattedNumberForPdf(
-                    t('currency.amount', { amount: getTaxAmountFromIncludingTaxesAmount(expense.includingTaxesAmount, expense.taxRate) })
-                  )}
-                </TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>
-                  {escapeFormattedNumberForPdf(t('currency.amount', { amount: expense.includingTaxesAmount }))}
-                </TableCell>
-              </TableRow>
-            ))}
-          </Table>
-        </View>
-      </View>
-      <View style={styles.gridContainer}>
-        <View style={{ ...styles.gridItem, textAlign: 'right', paddingRight: '6vw', paddingTop: 10 }}>
-          <Text>Je certifie l&apos;exactitude des renseignements ci-dessus.</Text>
-          <Text style={{ marginTop: 10 }}>
-            Fait à {props.sacemDeclaration.declarationPlace}, le {t('date.short', { date: new Date() })}
-          </Text>
-          <Text
-            style={{
-              fontFamily: 'Dancing Script',
-              fontSize: 35,
-              marginTop: 10,
-              marginRight: 10,
-            }}
-          >
-            {props.signatory}
-          </Text>
-        </View>
-      </View> */}
       </PageLayout>
       <PageLayout orientation="landscape" layoutStyles={sacemTableLayoutStyles}>
         <Text style={styles.h4}>Représentations - {props.sacemDeclaration.eventSerie.name}</Text>
         <View style={styles.gridContainer}>
           <View style={styles.gridItem}>
-            <Table weightings={[2, 1, 2, 1, 1, 1, 1, 1, 1]} tdStyle={{ padding: 5 }}>
+            <Table weightings={[3, 1.2, 3, 1.25, 1, 1, 1, 1, 1]} tdStyle={{ padding: 5 }}>
               <TableHeader fixed>
                 <TableCell>Date et heure</TableCell>
                 <TableCell>Audience</TableCell>
                 <TableCell>Lieu</TableCell>
-                <TableCell>Jauge</TableCell>
                 <TableCell>Entrées</TableCell>
+                <TableCell style={{ justifyContent: 'flex-end' }}>Jauge</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>Taux de TVA</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>Montant HT</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>Montant de la TVA</TableCell>
@@ -341,21 +207,26 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                   </TableCell>
                   <TableCell>
                     <View>
-                      <Text>{'Lieu NAME'}</Text>
+                      <Text>{event.place.name}</Text>
                       <Text>
-                        {/* ADDR {event.placeId} */}
-                        ADDR to format
+                        {addressFormatter.format({
+                          street: event.place.address.street,
+                          city: event.place.address.city,
+                          postcode: event.place.address.postalCode,
+                          state: event.place.address.subdivision,
+                          countryCode: event.place.address.countryCode,
+                        })}
                       </Text>
                     </View>
-                  </TableCell>
-                  <TableCell style={{ justifyContent: 'flex-end' }}>
-                    <Text>{event.placeCapacity}</Text>
                   </TableCell>
                   <TableCell>
                     <View>
                       <Text>{event.paidTickets} gratuites</Text>
                       <Text>{event.freeTickets} payantes</Text>
                     </View>
+                  </TableCell>
+                  <TableCell style={{ justifyContent: 'flex-end' }}>
+                    <Text>{event.placeCapacity}</Text>
                   </TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>
                     <Text>
@@ -393,20 +264,18 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
                 <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
                 <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
-                <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
                 <TableCell style={sacemTableLayoutStyles.totalCell}>
-                  <Text>
-                    <View>
-                      <Text>{flattenEventsKeyFigures.paidTickets} gratuites</Text>
-                      <Text>{flattenEventsKeyFigures.freeTickets} payantes</Text>
-                    </View>
-                  </Text>
+                  <View>
+                    <Text>{flattenEventsKeyFigures.paidTickets} gratuites</Text>
+                    <Text>{flattenEventsKeyFigures.freeTickets} payantes</Text>
+                  </View>
                 </TableCell>
                 <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
-                <TableCell style={sacemTableLayoutStyles.totalCell}>
+                <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
+                <TableCell style={{ ...sacemTableLayoutStyles.totalCell, justifyContent: 'flex-end' }}>
                   <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEventsKeyFigures.ticketingRevenueExcludingTaxes }))}</Text>
                 </TableCell>
-                <TableCell style={sacemTableLayoutStyles.totalCell}>
+                <TableCell style={{ ...sacemTableLayoutStyles.totalCell, justifyContent: 'flex-end' }}>
                   <Text>
                     {escapeFormattedNumberForPdf(
                       t('currency.amount', {
@@ -415,7 +284,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                     )}
                   </Text>
                 </TableCell>
-                <TableCell style={sacemTableLayoutStyles.totalCell}>
+                <TableCell style={{ ...sacemTableLayoutStyles.totalCell, justifyContent: 'flex-end' }}>
                   <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEventsKeyFigures.ticketingRevenueIncludingTaxes }))}</Text>
                 </TableCell>
               </TableRow>
