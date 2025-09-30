@@ -44,7 +44,7 @@ export const declarationRouter = router({
         placeCapacity: true,
         audience: true,
         taxRate: true,
-        expensesAmount: true,
+        expensesExcludingTaxes: true,
         createdAt: true,
         updatedAt: true,
         ticketingSystem: {
@@ -282,7 +282,7 @@ export const declarationRouter = router({
         placeCapacity: true,
         audience: true,
         taxRate: true,
-        expensesAmount: true,
+        expensesExcludingTaxes: true,
         createdAt: true,
         updatedAt: true,
         ticketingSystem: {
@@ -469,7 +469,7 @@ export const declarationRouter = router({
         placeCapacity: input.eventSerie.placeCapacity,
         audience: input.eventSerie.audience,
         taxRate: input.eventSerie.taxRate,
-        expensesAmount: input.eventSerie.expensesAmount,
+        expensesExcludingTaxes: input.eventSerie.expensesExcludingTaxes,
       },
       events: input.events.map((event) => {
         return {
@@ -533,7 +533,7 @@ export const declarationRouter = router({
         placeCapacity: input.eventSerie.placeCapacity,
         audience: input.eventSerie.audience,
         taxRate: input.eventSerie.taxRate,
-        expensesAmount: input.eventSerie.expensesAmount,
+        expensesExcludingTaxes: input.eventSerie.expensesExcludingTaxes,
       },
       select: {
         id: true,
@@ -548,7 +548,7 @@ export const declarationRouter = router({
         placeCapacity: true,
         audience: true,
         taxRate: true,
-        expensesAmount: true,
+        expensesExcludingTaxes: true,
         createdAt: true,
         updatedAt: true,
         ticketingSystem: {

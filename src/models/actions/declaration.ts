@@ -36,7 +36,7 @@ export const FillDeclarationSchema = z
       placeCapacity: true,
       audience: true,
       taxRate: true,
-      expensesAmount: true,
+      expensesExcludingTaxes: true,
     }),
     events: z.array(
       EventSchema.pick({

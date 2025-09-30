@@ -152,7 +152,9 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
           </View>
           <View style={styles.gridItem}>
             <Text style={styles.label}>Dépenses HT</Text>
-            <Text>TODO {escapeFormattedNumberForPdf(t('currency.amount', { amount: props.sacemDeclaration.eventSerie.expensesAmount }))}</Text>
+            <Text>
+              TODO {escapeFormattedNumberForPdf(t('currency.amount', { amount: props.sacemDeclaration.eventSerie.expensesExcludingTaxes }))}
+            </Text>
           </View>
         </View>
         <View style={styles.gridContainer}>
@@ -191,7 +193,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 <TableCell style={{ justifyContent: 'flex-end' }}>Montant de la TVA</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>Montant TTC</TableCell>
               </TableHeader>
-              {ascendingFlattenEvents.map((event, index) => (
+              {ascendingFlattenEvents.map((flattenEvent, index) => (
                 <TableRow
                   key={index}
                   style={{
@@ -200,62 +202,62 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                   }}
                 >
                   <TableCell>
-                    <Text>{capitalizeFirstLetter(t('date.longWithTime', { date: event.startAt }))}</Text>
+                    <Text>{capitalizeFirstLetter(t('date.longWithTime', { date: flattenEvent.startAt }))}</Text>
                   </TableCell>
                   <TableCell>
-                    <Text>{t(`model.audience.enum.${event.audience}`)}</Text>
+                    <Text>{t(`model.audience.enum.${flattenEvent.audience}`)}</Text>
                   </TableCell>
                   <TableCell>
                     <View>
-                      <Text>{event.place.name}</Text>
+                      <Text>{flattenEvent.place.name}</Text>
                       <Text>
                         {addressFormatter.format({
-                          street: event.place.address.street,
-                          city: event.place.address.city,
-                          postcode: event.place.address.postalCode,
-                          state: event.place.address.subdivision,
-                          countryCode: event.place.address.countryCode,
+                          street: flattenEvent.place.address.street,
+                          city: flattenEvent.place.address.city,
+                          postcode: flattenEvent.place.address.postalCode,
+                          state: flattenEvent.place.address.subdivision,
+                          countryCode: flattenEvent.place.address.countryCode,
                         })}
                       </Text>
                     </View>
                   </TableCell>
                   <TableCell>
                     <View>
-                      <Text>{event.paidTickets} gratuites</Text>
-                      <Text>{event.freeTickets} payantes</Text>
+                      <Text>{flattenEvent.paidTickets} gratuites</Text>
+                      <Text>{flattenEvent.freeTickets} payantes</Text>
                     </View>
                   </TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>
-                    <Text>{event.placeCapacity}</Text>
+                    <Text>{flattenEvent.placeCapacity}</Text>
                   </TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>
                     <Text>
-                      {event.ticketingRevenueTaxRate !== null
+                      {flattenEvent.ticketingRevenueTaxRate !== null
                         ? escapeFormattedNumberForPdf(
                             t('number.percent', {
-                              percentage: event.ticketingRevenueTaxRate,
+                              percentage: flattenEvent.ticketingRevenueTaxRate,
                             })
                           )
                         : '-'}
                     </Text>
                   </TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>
-                    <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: event.ticketingRevenueExcludingTaxes }))}</Text>
+                    <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.ticketingRevenueExcludingTaxes }))}</Text>
                   </TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>
                     <Text>
                       {escapeFormattedNumberForPdf(
                         t('currency.amount', {
                           amount: getTaxAmountFromIncludingAndExcludingTaxesAmounts(
-                            event.ticketingRevenueIncludingTaxes,
-                            event.ticketingRevenueExcludingTaxes
+                            flattenEvent.ticketingRevenueIncludingTaxes,
+                            flattenEvent.ticketingRevenueExcludingTaxes
                           ),
                         })
                       )}
                     </Text>
                   </TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>
-                    <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: event.ticketingRevenueIncludingTaxes }))}</Text>
+                    <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.ticketingRevenueIncludingTaxes }))}</Text>
                   </TableCell>
                 </TableRow>
               ))}

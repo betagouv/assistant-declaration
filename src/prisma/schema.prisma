@@ -63,7 +63,8 @@ model Address {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  Place Place?
+  Place        Place?
+  Organization Organization?
 }
 
 enum UserStatus {
@@ -129,14 +130,16 @@ model Organization {
   name                   String
   officialId             String  @unique
   officialHeadquartersId String  @unique
+  headquartersAddressId  String? @unique @db.Uuid
   sacemId                String? @unique
   sacdId                 String? @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  TicketingSystem TicketingSystem[]
-  Collaborator    Collaborator[]
+  headquartersAddress Address?          @relation(fields: [headquartersAddressId], references: [id], onDelete: Cascade)
+  TicketingSystem     TicketingSystem[]
+  Collaborator        Collaborator[]
 }
 
 enum TicketingSystemName {
@@ -235,11 +238,11 @@ model EventSerie {
   // image Attachment
 
   // Properties specific to when it's performed
-  placeId        String?  @db.Uuid
-  placeCapacity  Int?
-  audience       Audience @default(ALL)
-  taxRate        Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
-  expensesAmount Decimal  @db.Decimal(10, 2)
+  placeId                String?  @db.Uuid
+  placeCapacity          Int?
+  audience               Audience @default(ALL)
+  taxRate                Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
+  expensesExcludingTaxes Decimal  @db.Decimal(10, 2)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

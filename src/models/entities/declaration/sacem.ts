@@ -21,7 +21,7 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
     placeCapacity: true,
     audience: true,
     taxRate: true,
-    expensesAmount: true,
+    expensesExcludingTaxes: true,
   })
     .merge(
       z.object({

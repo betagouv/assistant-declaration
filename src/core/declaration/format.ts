@@ -27,7 +27,9 @@ export function getFlattenEventsForSacdDeclaration(declaration: SacdDeclarationS
 
   for (const originalEvent of declaration.events) {
     flattenEvents.push({
+      id: originalEvent.id,
       startAt: originalEvent.startAt,
+      endAt: originalEvent.endAt,
       ticketingRevenueIncludingTaxes: originalEvent.ticketingRevenueIncludingTaxes,
       ticketingRevenueExcludingTaxes: originalEvent.ticketingRevenueExcludingTaxes,
       ticketingRevenueTaxRate: originalEvent.taxRateOverride ? originalEvent.ticketingRevenueTaxRate : declaration.eventSerie.taxRate,
@@ -42,7 +44,12 @@ export function getFlattenEventsForSacdDeclaration(declaration: SacdDeclarationS
   return flattenEvents;
 }
 
-export function getFlattenEventsKeyFigures(events: (FlattenSacemEventSchemaType | FlattenSacdEventSchemaType)[]) {
+export function getFlattenEventsKeyFigures(
+  events: Pick<
+    FlattenSacemEventSchemaType | FlattenSacdEventSchemaType,
+    'ticketingRevenueIncludingTaxes' | 'ticketingRevenueExcludingTaxes' | 'freeTickets' | 'paidTickets'
+  >[]
+) {
   const keyFigures = {
     ticketingRevenueIncludingTaxes: 0,
     ticketingRevenueExcludingTaxes: 0,

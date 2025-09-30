@@ -75,7 +75,7 @@ export function eventSeriePrismaToModel(eventSerie: EventSerie): EventSerieSchem
     placeCapacity: eventSerie.placeCapacity,
     audience: eventSerie.audience,
     taxRate: eventSerie.taxRate.toNumber(),
-    expensesAmount: eventSerie.expensesAmount.toNumber(),
+    expensesExcludingTaxes: eventSerie.expensesExcludingTaxes.toNumber(),
     createdAt: eventSerie.createdAt,
     updatedAt: eventSerie.updatedAt,
   };

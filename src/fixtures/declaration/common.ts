@@ -1,3 +1,4 @@
+import { addresses } from '@ad/src/fixtures/address';
 import { events, eventsSeries } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
 import { places } from '@ad/src/fixtures/place';
@@ -21,6 +22,7 @@ export const declarations: DeclarationSchemaType[] = [
       name: organizations[0].name,
       officialId: organizations[0].officialId,
       officialHeadquartersId: organizations[0].officialHeadquartersId,
+      headquartersAddress: addresses[0],
       sacemId: organizations[0].sacemId,
       sacdId: organizations[0].sacdId,
     },
@@ -35,7 +37,7 @@ export const declarations: DeclarationSchemaType[] = [
       placeCapacity: eventsSeries[0].placeCapacity,
       audience: eventsSeries[0].audience,
       taxRate: eventsSeries[0].taxRate,
-      expensesAmount: eventsSeries[0].expensesAmount,
+      expensesExcludingTaxes: eventsSeries[0].expensesExcludingTaxes,
     },
     events: [eventsWithPlace[0], eventsWithPlace[1], eventsWithPlace[2]],
   }),
@@ -45,6 +47,7 @@ export const declarations: DeclarationSchemaType[] = [
       name: organizations[1].name,
       officialId: organizations[1].officialId,
       officialHeadquartersId: organizations[1].officialHeadquartersId,
+      headquartersAddress: addresses[1],
       sacemId: organizations[1].sacemId,
       sacdId: organizations[1].sacdId,
     },
@@ -59,7 +62,7 @@ export const declarations: DeclarationSchemaType[] = [
       placeCapacity: eventsSeries[1].placeCapacity,
       audience: eventsSeries[1].audience,
       taxRate: eventsSeries[1].taxRate,
-      expensesAmount: eventsSeries[1].expensesAmount,
+      expensesExcludingTaxes: eventsSeries[1].expensesExcludingTaxes,
     },
     events: [eventsWithPlace[1], eventsWithPlace[2]],
   }),
@@ -69,6 +72,7 @@ export const declarations: DeclarationSchemaType[] = [
       name: organizations[2].name,
       officialId: organizations[2].officialId,
       officialHeadquartersId: organizations[2].officialHeadquartersId,
+      headquartersAddress: addresses[2],
       sacemId: organizations[2].sacemId,
       sacdId: organizations[2].sacdId,
     },
@@ -83,7 +87,7 @@ export const declarations: DeclarationSchemaType[] = [
       placeCapacity: eventsSeries[2].placeCapacity,
       audience: eventsSeries[2].audience,
       taxRate: eventsSeries[2].taxRate,
-      expensesAmount: eventsSeries[2].expensesAmount,
+      expensesExcludingTaxes: eventsSeries[2].expensesExcludingTaxes,
     },
     events: [eventsWithPlace[2]],
   }),

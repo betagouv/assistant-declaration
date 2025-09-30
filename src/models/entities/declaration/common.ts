@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { AddressSchema } from '@ad/src/models/entities/address';
 import { EventSchema, EventSerieSchema, StricterEventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceSchema } from '@ad/src/models/entities/place';
@@ -15,7 +16,11 @@ export const DeclarationSchema = applyTypedParsers(
         officialHeadquartersId: true,
         sacemId: true,
         sacdId: true,
-      }),
+      }).merge(
+        z.object({
+          headquartersAddress: AddressSchema,
+        })
+      ),
       eventSerie: EventSerieSchema.pick({
         id: true,
         name: true,
@@ -26,7 +31,7 @@ export const DeclarationSchema = applyTypedParsers(
         placeCapacity: true,
         audience: true,
         taxRate: true,
-        expensesAmount: true,
+        expensesExcludingTaxes: true,
       }).merge(
         z.object({
           place: PlaceSchema.nullable(),

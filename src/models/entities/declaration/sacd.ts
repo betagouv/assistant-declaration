@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { AddressSchema } from '@ad/src/models/entities/address';
 import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
 import { EventSchema, StricterEventSchema, StricterEventSerieSchema } from '@ad/src/models/entities/event';
 import { StricterOrganizationSchema } from '@ad/src/models/entities/organization';
@@ -10,9 +11,17 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
   organization: StricterOrganizationSchema.pick({
     id: true,
     name: true,
+    officialId: true,
     sacdId: true,
-  }).strip(),
+  })
+    .merge(
+      z.object({
+        headquartersAddress: AddressSchema,
+      })
+    )
+    .strip(),
   eventSerie: StricterEventSerieSchema.pick({
+    id: true,
     name: true,
     producerOfficialId: true,
     producerName: true,
@@ -21,7 +30,7 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
     placeCapacity: true,
     audience: true,
     taxRate: true,
-    expensesAmount: true,
+    expensesExcludingTaxes: true,
   })
     .merge(
       z.object({
@@ -31,6 +40,7 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
     .strip(),
   events: z.array(
     StricterEventSchema.pick({
+      id: true,
       startAt: true,
       endAt: true,
       ticketingRevenueIncludingTaxes: true,
@@ -61,6 +71,7 @@ export type SacdDeclarationSchemaType = z.infer<typeof SacdDeclarationSchema>;
 // This is useful to avoid in multiple locations of the code trying to search for the default value to display it
 // It will ensure no isolate issue over time
 export const FlattenSacdEventSchema = StricterEventSchema.pick({
+  id: true,
   startAt: true,
   ticketingRevenueIncludingTaxes: true,
   ticketingRevenueExcludingTaxes: true,
@@ -72,6 +83,7 @@ export const FlattenSacdEventSchema = StricterEventSchema.pick({
   })
   .merge(
     EventSchema.pick({
+      endAt: true,
       ticketingRevenueTaxRate: true,
     })
   )

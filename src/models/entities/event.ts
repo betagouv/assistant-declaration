@@ -73,7 +73,7 @@ export const StricterEventSerieSchema = z.object({
   placeCapacity: z.number().int().nonnegative(),
   audience: AudienceSchema,
   taxRate: z.number().nonnegative(),
-  expensesAmount: z.number().nonnegative(),
+  expensesExcludingTaxes: z.number().nonnegative(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
