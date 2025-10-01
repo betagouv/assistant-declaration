@@ -22,6 +22,7 @@ export const StricterOrganizationSchema = z.object({
   name: z.string().min(1),
   officialId: OfficialIdSchema,
   officialHeadquartersId: OfficialHeadquartersIdSchema,
+  headquartersAddressId: z.string().uuid(),
   sacemId: SacemIdSchema,
   sacdId: SacdIdSchema,
   createdAt: z.date(),

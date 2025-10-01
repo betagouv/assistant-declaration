@@ -7,7 +7,7 @@ import { getSacdClient } from '@ad/src/core/declaration/sacd';
 import { Attachment as EmailAttachment, mailer } from '@ad/src/emails/mailer';
 import { FillDeclarationSchema, GetDeclarationSchema, TransmitDeclarationSchema } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
-import { DeclarationSchema, DeclarationSchemaType, DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
+import { DeclarationSchema, DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
 import { SacdDeclarationSchema, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { SacemDeclarationSchema, SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import {
@@ -55,12 +55,21 @@ export const declarationRouter = router({
                 name: true,
                 officialId: true,
                 officialHeadquartersId: true,
+                headquartersAddressId: true,
                 sacemId: true,
                 sacdId: true,
                 createdAt: true,
                 updatedAt: true,
+                headquartersAddress: true,
               },
             },
+          },
+        },
+        place: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
           },
         },
         Event: {
@@ -82,6 +91,13 @@ export const declarationRouter = router({
             taxRateOverride: true,
             createdAt: true,
             updatedAt: true,
+            placeOverride: {
+              select: {
+                id: true,
+                name: true,
+                address: true,
+              },
+            },
           },
         },
         EventSerieDeclaration: {
@@ -203,7 +219,7 @@ export const declarationRouter = router({
 
             throw sacemDeclarationUnsuccessfulError;
           }
-        } else if (declarationToDeclare === sacemDeclaration) {
+        } else if (declarationToDeclare === sacdDeclaration) {
           const sacdClient = getSacdClient(ctx.user.id);
 
           // Since not tracking token expiration we log in again (but we could improve that)
@@ -293,12 +309,21 @@ export const declarationRouter = router({
                 name: true,
                 officialId: true,
                 officialHeadquartersId: true,
+                headquartersAddressId: true,
                 sacemId: true,
                 sacdId: true,
                 createdAt: true,
                 updatedAt: true,
+                headquartersAddress: true,
               },
             },
+          },
+        },
+        place: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
           },
         },
         Event: {
@@ -320,6 +345,13 @@ export const declarationRouter = router({
             taxRateOverride: true,
             createdAt: true,
             updatedAt: true,
+            placeOverride: {
+              select: {
+                id: true,
+                name: true,
+                address: true,
+              },
+            },
           },
         },
         EventSerieDeclaration: {
@@ -419,6 +451,7 @@ export const declarationRouter = router({
                 officialHeadquartersId: true,
                 sacemId: true,
                 sacdId: true,
+                headquartersAddress: true,
               },
             },
           },
@@ -455,6 +488,7 @@ export const declarationRouter = router({
         name: eventSerie.ticketingSystem.organization.name,
         officialId: eventSerie.ticketingSystem.organization.officialId,
         officialHeadquartersId: eventSerie.ticketingSystem.organization.officialHeadquartersId,
+        headquartersAddress: eventSerie.ticketingSystem.organization.headquartersAddress,
         sacemId: eventSerie.ticketingSystem.organization.sacemId,
         sacdId: eventSerie.ticketingSystem.organization.sacdId,
       },
@@ -559,12 +593,21 @@ export const declarationRouter = router({
                 name: true,
                 officialId: true,
                 officialHeadquartersId: true,
+                headquartersAddressId: true,
                 sacemId: true,
                 sacdId: true,
                 createdAt: true,
                 updatedAt: true,
+                headquartersAddress: true,
               },
             },
+          },
+        },
+        place: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
           },
         },
         Event: {
@@ -586,6 +629,13 @@ export const declarationRouter = router({
             taxRateOverride: true,
             createdAt: true,
             updatedAt: true,
+            placeOverride: {
+              select: {
+                id: true,
+                name: true,
+                address: true,
+              },
+            },
           },
         },
       },

@@ -130,14 +130,14 @@ model Organization {
   name                   String
   officialId             String  @unique
   officialHeadquartersId String  @unique
-  headquartersAddressId  String? @unique @db.Uuid
+  headquartersAddressId  String  @unique @db.Uuid
   sacemId                String? @unique
   sacdId                 String? @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  headquartersAddress Address?          @relation(fields: [headquartersAddressId], references: [id], onDelete: Cascade)
+  headquartersAddress Address           @relation(fields: [headquartersAddressId], references: [id], onDelete: Cascade)
   TicketingSystem     TicketingSystem[]
   Collaborator        Collaborator[]
 }

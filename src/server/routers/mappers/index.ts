@@ -1,10 +1,11 @@
-import { Address, DeclarationType, Event, EventSerie, Organization, TicketingSystem, User } from '@prisma/client';
+import { Address, DeclarationType, Event, EventSerie, Organization, Place, TicketingSystem, User } from '@prisma/client';
 
 import { AddressSchemaType } from '@ad/src/models/entities/address';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { DeclarationSchemaType } from '@ad/src/models/entities/declaration/common';
 import { EventSchemaType, EventSerieSchemaType } from '@ad/src/models/entities/event';
 import { OrganizationSchemaType } from '@ad/src/models/entities/organization';
+import { PlaceSchemaType } from '@ad/src/models/entities/place';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
 import { UserSchemaType } from '@ad/src/models/entities/user';
 
@@ -26,6 +27,7 @@ export function organizationPrismaToModel(organization: Organization): Organizat
     id: organization.id,
     officialId: organization.officialId,
     officialHeadquartersId: organization.officialHeadquartersId,
+    headquartersAddressId: organization.headquartersAddressId,
     name: organization.name,
     sacemId: organization.sacemId,
     sacdId: organization.sacdId,
@@ -44,6 +46,18 @@ export function addressPrismaToModel(
     postalCode: address.postalCode,
     countryCode: address.countryCode,
     subdivision: address.subdivision,
+  };
+}
+
+export function placePrismaToModel(
+  place: Pick<Place, 'id' | 'name'> & {
+    address: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
+  }
+): PlaceSchemaType {
+  return {
+    id: place.id,
+    name: place.name,
+    address: addressPrismaToModel(place.address),
   };
 }
 
@@ -116,25 +130,42 @@ export function declarationTypePrismaToModel(declarationType: DeclarationType): 
 export function declarationPrismaToModel(
   eventSerie: EventSerie & {
     ticketingSystem: {
-      organization: Organization;
+      organization: Organization & {
+        headquartersAddress: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
+      };
     };
-    Event: Event[];
+    place:
+      | (Pick<Place, 'id' | 'name'> & {
+          address: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
+        })
+      | null;
+    Event: (Event & {
+      placeOverride:
+        | (Pick<Place, 'id' | 'name'> & {
+            address: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
+          })
+        | null;
+    })[];
   }
 ): DeclarationSchemaType {
+  const { headquartersAddressId, ...liteOrganization } = organizationPrismaToModel(eventSerie.ticketingSystem.organization);
   const { placeId, ...liteEventSerie } = eventSeriePrismaToModel(eventSerie);
 
   return {
-    organization: organizationPrismaToModel(eventSerie.ticketingSystem.organization),
+    organization: {
+      ...liteOrganization,
+      headquartersAddress: addressPrismaToModel(eventSerie.ticketingSystem.organization.headquartersAddress),
+    },
     eventSerie: {
       ...liteEventSerie,
-      place: null, // TODO: should patch place
+      place: eventSerie.place ? placePrismaToModel(eventSerie.place) : null,
     },
     events: eventSerie.Event.map((event) => {
       const { placeOverrideId, ...liteEvent } = eventPrismaToModel(event);
 
       return {
         ...liteEvent,
-        placeOverride: null, // TODO: should patch place
+        placeOverride: event.placeOverride ? placePrismaToModel(event.placeOverride) : null,
       };
     }),
   };
