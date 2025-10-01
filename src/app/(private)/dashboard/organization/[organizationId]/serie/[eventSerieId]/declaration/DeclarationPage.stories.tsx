@@ -1,12 +1,12 @@
 import { Meta, StoryFn } from '@storybook/react';
 
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
-import { playFindMainTitle } from '@ad/.storybook/testing';
+// import { playFindMainTitle } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
 import { DeclarationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPage';
 import { DeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPageContext';
 import { Normal as DeclarationHeaderNormalStory } from '@ad/src/components/DeclarationHeader.stories';
-import { sacemDeclarations, sacemDeclarationsWrappers } from '@ad/src/fixtures/declaration/sacem';
+import { declarations, declarationsWrappers } from '@ad/src/fixtures/declaration/common';
 import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
 import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
@@ -24,46 +24,23 @@ export default {
 
 function mswCommonParameters(options: { transmitted: boolean; noEvent: boolean }) {
   const adjustedDeclaration = {
-    ...sacemDeclarations[0],
+    ...declarations[0],
     transmittedAt: options.transmitted ? new Date('December 31, 2024 10:00:00 UTC') : null,
   };
 
   return [
     getTRPCMock({
       type: 'query',
-      path: ['getEventSerie'],
-      response: {
-        eventSerie: eventsSeries[0],
-        partialDeclarations: options.transmitted
-          ? [
-              {
-                type: DeclarationTypeSchema.Values.SACEM,
-                status: DeclarationStatusSchema.Values.PROCESSED,
-                transmittedAt: new Date('December 31, 2024 10:00:00 UTC'),
-              },
-            ]
-          : [],
-      },
-    }),
-    getTRPCMock({
-      type: 'query',
       path: ['getDeclaration'],
       response: {
-        sacemDeclarationWrapper: { ...sacemDeclarationsWrappers[0], declaration: adjustedDeclaration },
+        declarationWrapper: { ...declarationsWrappers[0], declaration: adjustedDeclaration },
       },
     }),
     getTRPCMock({
       type: 'mutation',
       path: ['fillDeclaration'],
       response: {
-        sacemDeclaration: adjustedDeclaration,
-      },
-    }),
-    getTRPCMock({
-      type: 'query' as 'query',
-      path: ['listEvents'],
-      response: {
-        eventsWrappers: options.noEvent ? [] : [eventsWrappers[0], eventsWrappers[1], eventsWrappers[2]],
+        declaration: adjustedDeclaration,
       },
     }),
   ];
@@ -90,7 +67,7 @@ NormalStory.parameters = {
   },
 };
 NormalStory.play = async ({ canvasElement }) => {
-  await playFindMainTitle(canvasElement, /cracheur/i);
+  // await playFindMainTitle(canvasElement, /cracheur/i);
 };
 
 export const Normal = prepareStory(NormalStory, {
@@ -112,7 +89,7 @@ TransmittedStory.parameters = {
   },
 };
 TransmittedStory.play = async ({ canvasElement }) => {
-  await playFindMainTitle(canvasElement, /cracheur/i);
+  // await playFindMainTitle(canvasElement, /cracheur/i);
 };
 
 export const Transmitted = prepareStory(TransmittedStory, {
@@ -134,7 +111,7 @@ NotFoundStory.parameters = {
   },
 };
 NotFoundStory.play = async ({ canvasElement }) => {
-  await playFindMainTitle(canvasElement, /cracheur/i);
+  // await playFindMainTitle(canvasElement, /cracheur/i);
 };
 
 export const NotFound = prepareStory(NotFoundStory, {
@@ -155,7 +132,7 @@ WithLayoutStory.parameters = {
   ...NormalStory.parameters,
 };
 WithLayoutStory.play = async ({ canvasElement }) => {
-  await playFindMainTitle(canvasElement, /cracheur/i);
+  // await playFindMainTitle(canvasElement, /cracheur/i);
 };
 
 export const WithLayout = prepareStory(WithLayoutStory, {

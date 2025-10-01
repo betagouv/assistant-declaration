@@ -1,6 +1,7 @@
 'use client';
 
 import { fr } from '@codegouvfr/react-dsfr';
+import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckCircle, Download, ForwardToInbox, Save } from '@mui/icons-material';
 import { Alert, Autocomplete, Button, Container, Grid, TextField, Tooltip, Typography } from '@mui/material';
@@ -20,7 +21,7 @@ import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
 import { FillDeclarationSchema, FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
-import { DeclarationTypeSchema } from '@ad/src/models/entities/common';
+import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
@@ -38,23 +39,13 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const fillDeclaration = trpc.fillDeclaration.useMutation();
   const transmitDeclaration = trpc.transmitDeclaration.useMutation();
 
-  const getEventSerie = trpc.getEventSerie.useQuery({
-    id: eventSerieId,
-  });
-
-  const listEvents = trpc.listEvents.useQuery({
-    orderBy: {},
-    filterBy: {
-      eventSeriesIds: [eventSerieId],
-    },
-  });
-
   const getDeclaration = trpc.getDeclaration.useQuery({
     eventSerieId: eventSerieId,
   });
 
-  const aggregatedQueries = new AggregatedQueries(getEventSerie, listEvents, getDeclaration);
+  const aggregatedQueries = new AggregatedQueries(getDeclaration);
 
+  const [modalSelectedDeclarationTypes, setModalSelectedDeclarationTypes] = useState<DeclarationTypeSchemaType[]>([]);
   const [formInitialized, setFormInitialized] = useState<boolean>(false);
 
   const {
@@ -83,19 +74,17 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       // Reset the form state so fields considered as "dirty" are no longer
       reset({
         eventSerieId: eventSerieId,
-        clientId: result.sacemDeclaration.clientId,
-        placeName: result.sacemDeclaration.placeName,
-        placeCapacity: result.sacemDeclaration.placeCapacity,
-        placePostalCode: result.sacemDeclaration.placePostalCode,
-        managerName: result.sacemDeclaration.managerName,
-        managerTitle: result.sacemDeclaration.managerTitle,
-        performanceType: result.sacemDeclaration.performanceType,
-        declarationPlace: result.sacemDeclaration.declarationPlace,
-        revenues: result.sacemDeclaration.revenues,
-        expenses: result.sacemDeclaration.expenses,
+        organization: {
+          sacemId: result.declaration.organization.sacemId,
+          sacdId: result.declaration.organization.sacdId,
+        },
+        eventSerie: {
+          // TODO
+        },
+        events: [], // TODO
       });
 
-      push(['trackEvent', 'declaration', 'fill', 'type', DeclarationTypeSchema.Values.SACEM]);
+      push(['trackEvent', 'declaration', 'fill']);
     },
     [fillDeclaration, reset, eventSerieId]
   );
@@ -106,81 +95,87 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         setFormInitialized(true); // It's needed otherwise if you blur/focus again the window the new fetch data will override the "dirty form data"
 
         // Update the form with fetched data
-        if (getDeclaration.data.sacemDeclarationWrapper.declaration) {
-          reset({
-            eventSerieId: eventSerieId,
-            clientId: getDeclaration.data.sacemDeclarationWrapper.declaration.clientId,
-            placeName: getDeclaration.data.sacemDeclarationWrapper.declaration.placeName,
-            placeCapacity: getDeclaration.data.sacemDeclarationWrapper.declaration.placeCapacity,
-            placePostalCode: getDeclaration.data.sacemDeclarationWrapper.declaration.placePostalCode,
-            managerName: getDeclaration.data.sacemDeclarationWrapper.declaration.managerName,
-            managerTitle: getDeclaration.data.sacemDeclarationWrapper.declaration.managerTitle,
-            performanceType: getDeclaration.data.sacemDeclarationWrapper.declaration.performanceType,
-            declarationPlace: getDeclaration.data.sacemDeclarationWrapper.declaration.declarationPlace,
-            revenues: getDeclaration.data.sacemDeclarationWrapper.declaration.revenues,
-            expenses: getDeclaration.data.sacemDeclarationWrapper.declaration.expenses,
-          });
-        } else if (getDeclaration.data.sacemDeclarationWrapper.placeholder) {
-          reset({
-            eventSerieId: eventSerieId,
-            revenues: getDeclaration.data.sacemDeclarationWrapper.placeholder.revenues,
-            expenses: getDeclaration.data.sacemDeclarationWrapper.placeholder.expenses,
-            // Taking the first placeholder since the backend sorted them by the last modification (likely to have the right data)
-            clientId: getDeclaration.data.sacemDeclarationWrapper.placeholder.clientId[0] ?? undefined,
-            placeName: getDeclaration.data.sacemDeclarationWrapper.placeholder.placeName[0] ?? undefined,
-            placeCapacity: getDeclaration.data.sacemDeclarationWrapper.placeholder.placeCapacity[0] ?? undefined,
-            placePostalCode: getDeclaration.data.sacemDeclarationWrapper.placeholder.placePostalCode[0] ?? undefined,
-            managerName: getDeclaration.data.sacemDeclarationWrapper.placeholder.managerName[0] ?? undefined,
-            managerTitle: getDeclaration.data.sacemDeclarationWrapper.placeholder.managerTitle[0] ?? undefined,
-            performanceType: getDeclaration.data.sacemDeclarationWrapper.placeholder.performanceType[0] ?? undefined,
-            declarationPlace: getDeclaration.data.sacemDeclarationWrapper.placeholder.declarationPlace[0] ?? undefined,
-          });
-        }
-      } else {
-        // Here it's a special case, we don't want to override the modified form except the ticketing revenues that are calculated and that result
-        // from other entity modifications (we could have tried to separate first item from others revenues but it seemed not ideal)
-        // Notes:
-        // - it should always be the first item and filled so no check needed
-        // - we tried to only mutate `revenues.à`
-        setValue(
-          'revenues',
-          [
-            getDeclaration.data.sacemDeclarationWrapper.declaration
-              ? getDeclaration.data.sacemDeclarationWrapper.declaration.revenues[0]
-              : getDeclaration.data.sacemDeclarationWrapper.placeholder.revenues[0],
-            ...getValues('revenues').slice(1),
-          ],
-          { shouldValidate: true }
-        );
+        reset({
+          eventSerieId: eventSerieId,
+          organization: {
+            sacemId: getDeclaration.data.declarationWrapper.declaration.organization.sacemId,
+            sacdId: getDeclaration.data.declarationWrapper.declaration.organization.sacdId,
+          },
+          eventSerie: {
+            expectedDeclarationTypes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expectedDeclarationTypes,
+            // TODO
+          },
+          events: [], // TODO
+        });
       }
     }
-  }, [getDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId, getValues, setValue]);
-
-  const { transmittedDeclarations } = useMemo(() => {
-    return {
-      transmittedDeclarations: getEventSerie.data?.partialDeclarations.filter((pD) => pD.transmittedAt !== null).map((pD) => pD.type) ?? [],
-    };
-  }, [getEventSerie]);
-
-  const { alreadyDeclared } = useMemo(() => {
-    return {
-      alreadyDeclared: (getDeclaration.data?.sacemDeclarationWrapper.declaration?.transmittedAt || null) !== null,
-    };
-  }, [getDeclaration]);
+  }, [getDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
 
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
     return (
-      <Grid container {...centeredAlertContainerGridProps}>
-        <ErrorAlert errors={aggregatedQueries.errors} refetchs={aggregatedQueries.refetchs} />
-      </Grid>
+      <div className={fr.cx('fr-container', 'fr-py-12v')}>
+        <div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+          <div className={fr.cx('fr-col-md-8', 'fr-col-lg-6')}>
+            <ErrorAlert errors={aggregatedQueries.errors} refetchs={aggregatedQueries.refetchs} />
+          </div>
+        </div>
+      </div>
     );
   }
 
-  const eventSerie = getEventSerie.data!.eventSerie;
-  const eventsWrappers = listEvents.data!.eventsWrappers; // Descending order (from the API)
-  const sacemDeclarationWrapper = getDeclaration.data!.sacemDeclarationWrapper;
+  const declarationWrapper = getDeclaration.data!.declarationWrapper;
+  const declaration = declarationWrapper.declaration;
+
+  return (
+    <div className={fr.cx('fr-container', 'fr-py-12v')} style={{ height: '100%' }}>
+      <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')} style={{ height: '100%' }}>
+        {declaration.events.length > 0 ? (
+          <>
+            <div className={fr.cx('fr-col-12')}>TODO: set in modal</div>
+            <div className={fr.cx('fr-col-12')}>
+              <Checkbox
+                legend="Légende pour l’ensemble des champs"
+                options={Object.values(DeclarationTypeSchema.Values).map((declarationType) => {
+                  return {
+                    label: t(`model.declarationType.enum.${declarationType}`),
+                    nativeInputProps: {
+                      name: `checkbox-${declarationType}`,
+                      value: declarationType,
+                      defaultChecked: getValues('eventSerie.expectedDeclarationTypes')?.includes(declarationType) ?? false,
+                      onChange: (event) => {
+                        const newSelectedDeclarationsTypes = new Set<DeclarationTypeSchemaType>(
+                          getValues('eventSerie.expectedDeclarationTypes') ?? []
+                        );
+
+                        if (event.target.checked) {
+                          newSelectedDeclarationsTypes.add(declarationType);
+                        } else {
+                          newSelectedDeclarationsTypes.delete(declarationType);
+                        }
+
+                        // maybe options should be useMemo ?
+
+                        // newSelectedDeclarationsTypes.values().
+
+                        setModalSelectedDeclarationTypes([...newSelectedDeclarationsTypes.values()]);
+                        console.log(111111);
+                        console.log(event);
+                      },
+                    },
+                  };
+                })}
+                orientation="vertical"
+              />
+            </div>
+          </>
+        ) : (
+          <div className={fr.cx('fr-col-12')}>Aucune représentation n'est associée à ce spectacle, il n'y a donc pas de déclaration à faire.</div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <Container
