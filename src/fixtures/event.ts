@@ -67,36 +67,6 @@ export const eventsSeries: EventSerieSchemaType[] = [
   }),
 ];
 
-export const eventsSeriesWrappers: EventSerieWrapperSchemaType[] = [
-  EventSerieWrapperSchema.parse({
-    serie: eventsSeries[0],
-    place: places[0],
-    partialDeclarations: [
-      {
-        type: DeclarationTypeSchema.Values.SACEM,
-        status: DeclarationStatusSchema.Values.PROCESSED,
-        transmittedAt: null,
-      },
-    ],
-  }),
-  EventSerieWrapperSchema.parse({
-    serie: eventsSeries[1],
-    place: places[1],
-    partialDeclarations: [],
-  }),
-  EventSerieWrapperSchema.parse({
-    serie: eventsSeries[2],
-    place: null,
-    partialDeclarations: [
-      {
-        type: DeclarationTypeSchema.Values.SACEM,
-        status: DeclarationStatusSchema.Values.PENDING,
-        transmittedAt: new Date('December 31, 2024 10:00:00 UTC'),
-      },
-    ],
-  }),
-];
-
 export const events: EventSchemaType[] = [
   EventSchema.parse({
     id: 'e79cb3ba-745e-5d9a-8903-4a02327a7e01',
@@ -166,5 +136,41 @@ export const eventsWrappers: EventWrapperSchemaType[] = [
   EventWrapperSchema.parse({
     event: events[2],
     placeOverride: places[2],
+  }),
+];
+
+export const eventsSeriesWrappers: EventSerieWrapperSchemaType[] = [
+  EventSerieWrapperSchema.parse({
+    serie: eventsSeries[0],
+    computedStartAt: new Date('December 1, 2024 10:00:00 UTC'),
+    computedEndAt: new Date('December 3, 2024 16:00:00 UTC'),
+    place: places[0],
+    partialDeclarations: [
+      {
+        type: DeclarationTypeSchema.Values.SACEM,
+        status: DeclarationStatusSchema.Values.PROCESSED,
+        transmittedAt: null,
+      },
+    ],
+  }),
+  EventSerieWrapperSchema.parse({
+    serie: eventsSeries[1],
+    computedStartAt: new Date('December 1, 2024 10:00:00 UTC'),
+    computedEndAt: new Date('December 1, 2024 12:00:00 UTC'),
+    place: places[1],
+    partialDeclarations: [],
+  }),
+  EventSerieWrapperSchema.parse({
+    serie: eventsSeries[2],
+    computedStartAt: new Date('December 1, 2024 20:00:00 UTC'),
+    computedEndAt: new Date('December 10, 2024 22:00:00 UTC'),
+    place: null,
+    partialDeclarations: [
+      {
+        type: DeclarationTypeSchema.Values.SACEM,
+        status: DeclarationStatusSchema.Values.PENDING,
+        transmittedAt: new Date('December 31, 2024 10:00:00 UTC'),
+      },
+    ],
   }),
 ];

@@ -93,6 +93,8 @@ export const EventSerieWrapperSchema = applyTypedParsers(
   z
     .object({
       serie: EventSerieSchema,
+      computedStartAt: z.date(),
+      computedEndAt: z.date(),
       place: PlaceSchema.nullable(),
       partialDeclarations: z.array(
         // This is partial declarations just to adjust the UI
