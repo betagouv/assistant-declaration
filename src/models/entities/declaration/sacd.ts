@@ -52,7 +52,6 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
         EventSchema.pick({
           ticketingRevenueTaxRate: true,
           // Since that's overrides there are not required
-          placeOverrideId: true,
           placeCapacityOverride: true,
           audienceOverride: true,
           taxRateOverride: true,
