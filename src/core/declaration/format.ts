@@ -1,6 +1,7 @@
 import { getTaxAmountFromIncludingAndExcludingTaxesAmounts } from '@ad/src/core/declaration';
 import { FlattenSacdEventSchemaType, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { FlattenSacemEventSchemaType, SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
+import { EventSchemaType } from '@ad/src/models/entities/event';
 
 export function getFlattenEventsForSacemDeclaration(declaration: SacemDeclarationSchemaType): FlattenSacemEventSchemaType[] {
   const flattenEvents: FlattenSacemEventSchemaType[] = [];
@@ -44,9 +45,9 @@ export function getFlattenEventsForSacdDeclaration(declaration: SacdDeclarationS
   return flattenEvents;
 }
 
-export function getFlattenEventsKeyFigures(
+export function getEventsKeyFigures(
   events: Pick<
-    FlattenSacemEventSchemaType | FlattenSacdEventSchemaType,
+    EventSchemaType | FlattenSacemEventSchemaType | FlattenSacdEventSchemaType,
     'ticketingRevenueIncludingTaxes' | 'ticketingRevenueExcludingTaxes' | 'freeTickets' | 'paidTickets'
   >[]
 ) {

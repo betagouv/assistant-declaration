@@ -2,12 +2,14 @@
 
 import { fr } from '@codegouvfr/react-dsfr';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
+import { Input } from '@codegouvfr/react-dsfr/Input';
+import { Select } from '@codegouvfr/react-dsfr/SelectNext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckCircle, Download, ForwardToInbox, Save } from '@mui/icons-material';
 import { Alert, Autocomplete, Button, Container, Grid, TextField, Tooltip, Typography } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Ref, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -16,12 +18,16 @@ import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
+import { useOfficialHeadquartersIdInput } from '@ad/src/components/OfficialHeadquartersIdField';
 // import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
 // import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
+import { currentTaxRates } from '@ad/src/core/declaration';
+import { getEventsKeyFigures } from '@ad/src/core/declaration/format';
 import { FillDeclarationSchema, FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
+import { AudienceSchema, PerformanceTypeSchema } from '@ad/src/models/entities/event';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
@@ -49,11 +55,13 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const [formInitialized, setFormInitialized] = useState<boolean>(false);
 
   const {
+    register,
     handleSubmit,
     formState: { errors, isDirty },
     getValues,
     setValue,
     control,
+    watch,
     trigger,
     reset,
   } = useForm<FillDeclarationSchemaType>({
@@ -111,6 +119,29 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     }
   }, [getDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
 
+  const { inputRef: officialHeadquartersIdInputRef } = useOfficialHeadquartersIdInput({
+    value: getDeclaration.data?.declarationWrapper.declaration.organization.officialHeadquartersId ?? '',
+    onChange: () => {},
+  });
+
+  const { computedStartAt, computedEndAt, eventsKeyFigures } = useMemo(() => {
+    if (getDeclaration.data && getDeclaration.data.declarationWrapper.declaration.events.length > 0) {
+      const ascendingEvents = getDeclaration.data.declarationWrapper.declaration.events.sort((a, b) => +a.startAt - +b.startAt);
+
+      return {
+        computedStartAt: ascendingEvents[0].startAt,
+        computedEndAt: ascendingEvents[ascendingEvents.length - 1].endAt ?? ascendingEvents[ascendingEvents.length - 1].startAt,
+        eventsKeyFigures: getEventsKeyFigures(getDeclaration.data.declarationWrapper.declaration.events),
+      };
+    } else {
+      return {
+        computedStartAt: new Date(0),
+        computedEndAt: new Date(0),
+        eventsKeyFigures: getEventsKeyFigures([]),
+      };
+    }
+  }, [getDeclaration.data]);
+
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
@@ -143,11 +174,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                     nativeInputProps: {
                       name: `checkbox-${declarationType}`,
                       value: declarationType,
-                      defaultChecked: getValues('eventSerie.expectedDeclarationTypes')?.includes(declarationType) ?? false,
+                      defaultChecked: modalSelectedDeclarationTypes.includes(declarationType),
                       onChange: (event) => {
-                        const newSelectedDeclarationsTypes = new Set<DeclarationTypeSchemaType>(
-                          getValues('eventSerie.expectedDeclarationTypes') ?? []
-                        );
+                        const newSelectedDeclarationsTypes = new Set<DeclarationTypeSchemaType>(modalSelectedDeclarationTypes);
 
                         if (event.target.checked) {
                           newSelectedDeclarationsTypes.add(declarationType);
@@ -162,12 +191,235 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                         setModalSelectedDeclarationTypes([...newSelectedDeclarationsTypes.values()]);
                         console.log(111111);
                         console.log(event);
+
+                        //
+                        //
+                        // TODO:
+                        // TODO:
+                        // TODO: ou faire un subform juste pour la modal... avec des register(declarationType)
+                        // TODO: en utilisant useForm<DeclarationTypeSchemaType>
+                        // TODO: ... et au moment du submit... checker les valeurs et faire ".push()" pour un setValues du form principal
+                        // TODO:
+                        // TODO:
+                        // TODO: faire un comp dédié xxForm... ?
+                        // TODO:
+                        // TODO:
+                        //
+                        //
                       },
                     },
                   };
                 })}
                 orientation="vertical"
               />
+              <div className={fr.cx('fr-col-12')}>
+                <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="connecter un système de billetterie">
+                  <div className={fr.cx('fr-col-12')}>
+                    <fieldset className={fr.cx('fr-fieldset')}>
+                      <h2 className={fr.cx('fr-h4')}>Déclarant</h2>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="Nom de la structure"
+                          disabled
+                          nativeInputProps={{
+                            value: declaration.organization.name,
+                          }}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="SIRET"
+                          disabled
+                          nativeInputProps={{
+                            ref: officialHeadquartersIdInputRef as Ref<HTMLInputElement> | undefined,
+                          }}
+                        />
+                      </div>
+                      {watch('organization.sacemId') !== null && (
+                        <div className={fr.cx('fr-fieldset__element')}>
+                          <Input
+                            label="Identifiant Sacem"
+                            state={!!errors.organization?.sacemId ? 'error' : undefined}
+                            stateRelatedMessage={errors?.organization?.sacemId?.message}
+                            nativeInputProps={{
+                              ...register('organization.sacemId'),
+                            }}
+                          />
+                        </div>
+                      )}
+                      {watch('organization.sacdId') !== null && (
+                        <div className={fr.cx('fr-fieldset__element')}>
+                          <Input
+                            label="Identifiant SACD"
+                            state={!!errors.organization?.sacdId ? 'error' : undefined}
+                            stateRelatedMessage={errors?.organization?.sacdId?.message}
+                            nativeInputProps={{
+                              ...register('organization.sacdId'),
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="Raison sociale du producteur"
+                          state={!!errors.eventSerie?.producerName ? 'error' : undefined}
+                          stateRelatedMessage={errors?.eventSerie?.producerName?.message}
+                          nativeInputProps={{
+                            // TODO: from enterprise directory
+                            ...register('eventSerie.producerName'),
+                          }}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Select
+                          label="Genre"
+                          state={!!errors.eventSerie?.performanceType ? 'error' : undefined}
+                          stateRelatedMessage={errors?.eventSerie?.performanceType?.message}
+                          nativeSelectProps={{
+                            ...register('eventSerie.performanceType'),
+                            defaultValue: control._defaultValues.eventSerie?.performanceType || '',
+                          }}
+                          options={[
+                            ...Object.values(PerformanceTypeSchema.Values).map((performanceType) => {
+                              return {
+                                label: t(`model.performanceType.enum.${performanceType}`),
+                                value: performanceType,
+                              };
+                            }),
+                          ].sort((a, b) => a.label.localeCompare(b.label))}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="Date"
+                          disabled
+                          nativeInputProps={{
+                            value: `${t('date.long', { date: computedStartAt })}  →  ${t('date.long', {
+                              date: computedEndAt,
+                            })}`,
+                          }}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="Représentations"
+                          disabled
+                          nativeInputProps={{
+                            value: declaration.events.length,
+                          }}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="Intitulé du lieu"
+                          state={!!errors.eventSerie?.placeId ? 'error' : undefined}
+                          stateRelatedMessage={errors?.eventSerie?.placeId?.message}
+                          nativeInputProps={{
+                            // TODO: placeholder of previous places
+                            // TODO: should not be placeId... PlaceInput
+                            ...register('eventSerie.placeId'),
+                          }}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="Adresse"
+                          // state={!!errors.eventSerie?.placeId ? 'error' : undefined}
+                          // stateRelatedMessage={errors?.eventSerie?.placeId?.message}
+                          nativeInputProps={
+                            {
+                              // TODO: should use address directory (BAN)
+                              // ...register('eventSerie.placeId'),
+                            }
+                          }
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Select
+                          label="Audience"
+                          state={!!errors.eventSerie?.audience ? 'error' : undefined}
+                          stateRelatedMessage={errors?.eventSerie?.audience?.message}
+                          nativeSelectProps={{
+                            ...register('eventSerie.audience'),
+                            defaultValue: control._defaultValues.eventSerie?.audience || '',
+                          }}
+                          options={[
+                            ...Object.values(AudienceSchema.Values).map((audience) => {
+                              return {
+                                label: t(`model.audience.enum.${audience}`),
+                                value: audience,
+                              };
+                            }),
+                          ].sort((a, b) => a.label.localeCompare(b.label))}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Select
+                          label="Taux de TVA"
+                          state={!!errors.eventSerie?.taxRate ? 'error' : undefined}
+                          stateRelatedMessage={errors?.eventSerie?.taxRate?.message}
+                          nativeSelectProps={{
+                            ...register('eventSerie.taxRate'),
+                            defaultValue: currentTaxRates[0],
+                          }}
+                          options={currentTaxRates.map((taxRate) => {
+                            return {
+                              label: `${100 * taxRate}%`,
+                              value: taxRate.toString(),
+                            };
+                          })}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="Recette HT"
+                          disabled
+                          nativeInputProps={{
+                            value: eventsKeyFigures.ticketingRevenueExcludingTaxes,
+                          }}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="Recette TTC"
+                          disabled
+                          nativeInputProps={{
+                            value: eventsKeyFigures.ticketingRevenueIncludingTaxes,
+                          }}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="Entrées payantes"
+                          disabled
+                          nativeInputProps={{
+                            value: eventsKeyFigures.paidTickets,
+                          }}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="Entrées gratuites"
+                          disabled
+                          nativeInputProps={{
+                            value: eventsKeyFigures.freeTickets,
+                          }}
+                        />
+                      </div>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <Input
+                          label="Dépenses globales HT"
+                          state={!!errors.eventSerie?.expensesExcludingTaxes ? 'error' : undefined}
+                          stateRelatedMessage={errors?.eventSerie?.expensesExcludingTaxes?.message}
+                          nativeInputProps={{
+                            ...register('eventSerie.expensesExcludingTaxes'),
+                          }}
+                        />
+                      </div>
+                    </fieldset>
+                  </div>
+                </BaseForm>
+              </div>
             </div>
           </>
         ) : (

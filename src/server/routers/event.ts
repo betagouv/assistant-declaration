@@ -44,9 +44,9 @@ export const eventRouter = router({
     return {
       eventsSeriesWrappers: eventsSeries.map((eventsSerie): EventSerieWrapperSchemaType => {
         // Fallback to old dates since it should not happen often
-        const computedStartAt = eventsSerie.Event.length > 1 ? eventsSerie.Event[0].startAt : new Date(0);
+        const computedStartAt = eventsSerie.Event.length > 0 ? eventsSerie.Event[0].startAt : new Date(0);
         const computedEndAt =
-          eventsSerie.Event.length > 1
+          eventsSerie.Event.length > 0
             ? eventsSerie.Event[eventsSerie.Event.length - 1].endAt ?? eventsSerie.Event[eventsSerie.Event.length - 1].startAt
             : new Date(0);
 

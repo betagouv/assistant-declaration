@@ -7,7 +7,7 @@ import { PageLayout } from '@ad/src/components/documents/layouts/PageLayout';
 import { StandardLayout } from '@ad/src/components/documents/layouts/StandardLayout';
 import { layoutStyles, styles } from '@ad/src/components/documents/layouts/standard';
 import { getTaxAmountFromIncludingAndExcludingTaxesAmounts } from '@ad/src/core/declaration';
-import { getFlattenEventsForSacemDeclaration, getFlattenEventsKeyFigures } from '@ad/src/core/declaration/format';
+import { getEventsKeyFigures, getFlattenEventsForSacemDeclaration } from '@ad/src/core/declaration/format';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -60,7 +60,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
   assert(props.sacemDeclaration.events.length > 0, 'no event has no meaning');
 
   const flattenEvents = getFlattenEventsForSacemDeclaration(props.sacemDeclaration);
-  const flattenEventsKeyFigures = getFlattenEventsKeyFigures(flattenEvents);
+  const flattenEventsKeyFigures = getEventsKeyFigures(flattenEvents);
 
   const ascendingFlattenEvents = flattenEvents.sort((a, b) => +a.startAt - +b.startAt);
   const firstEvent = ascendingFlattenEvents[0];
