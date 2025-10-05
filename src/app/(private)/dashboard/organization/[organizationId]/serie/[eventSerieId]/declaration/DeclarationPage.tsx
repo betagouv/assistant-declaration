@@ -391,7 +391,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           label="Recette HT"
                           disabled
                           nativeInputProps={{
-                            value: eventsKeyFigures.ticketingRevenueExcludingTaxes,
+                            value: t('currency.amount', {
+                              amount: eventsKeyFigures.ticketingRevenueExcludingTaxes,
+                            }),
                           }}
                         />
                       </div>
@@ -400,7 +402,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           label="Recette TTC"
                           disabled
                           nativeInputProps={{
-                            value: eventsKeyFigures.ticketingRevenueIncludingTaxes,
+                            value: t('currency.amount', {
+                              amount: eventsKeyFigures.ticketingRevenueIncludingTaxes,
+                            }),
                           }}
                         />
                       </div>
@@ -409,7 +413,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           label="Entrées payantes"
                           disabled
                           nativeInputProps={{
-                            value: eventsKeyFigures.paidTickets,
+                            value: t('number.default', {
+                              number: eventsKeyFigures.paidTickets,
+                            }),
                           }}
                         />
                       </div>
@@ -418,7 +424,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           label="Entrées gratuites"
                           disabled
                           nativeInputProps={{
-                            value: eventsKeyFigures.freeTickets,
+                            value: t('number.default', {
+                              number: eventsKeyFigures.freeTickets,
+                            }),
                           }}
                         />
                       </div>
