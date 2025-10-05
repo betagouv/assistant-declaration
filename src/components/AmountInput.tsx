@@ -1,7 +1,7 @@
 'use client';
 
 import { FactoryOpts, InputMask } from 'imask';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 import { useIMask } from 'react-imask';
 
@@ -23,11 +23,12 @@ function getNumberSeparators(locale: string) {
   return { group, decimal };
 }
 
-interface UseAmountInputProps extends Pick<ControllerRenderProps<any, string>, 'value' | 'onChange'> {
+interface UseAmountInputProps extends Pick<ControllerRenderProps<any, string>, 'onChange'> {
+  defaultValue: ControllerRenderProps<any, string>['value'];
   signed?: boolean;
 }
 
-export function useAmountInput({ value, onChange, signed }: UseAmountInputProps) {
+export function useAmountInput({ defaultValue, onChange, signed }: UseAmountInputProps) {
   const onAccept = useCallback<(value: InputMask<FactoryOpts>['value'], maskRef: InputMask<FactoryOpts>, e?: InputEvent) => void>(
     (maskedValue, mask, event) => {
       console.log('VALID');
@@ -39,7 +40,7 @@ export function useAmountInput({ value, onChange, signed }: UseAmountInputProps)
 
   const [separators] = useState(() => getNumberSeparators(i18n.language));
 
-  const { ref: inputRef } = useIMask(
+  const { ref: inputRef, setUnmaskedValue } = useIMask(
     {
       mask: [
         { mask: '' },
@@ -65,7 +66,12 @@ export function useAmountInput({ value, onChange, signed }: UseAmountInputProps)
     }
   );
 
-  // The following is needed to synchronize "form state" into the masked input
-  // Note: despite the `onChange` bound to the `value` it won't be triggered in a loop when typing into the input
+  // The following is needed to synchronize "form state" into the masked input in case a `reset()` is used
+  useEffect(() => {
+    if (defaultValue != null) {
+      setUnmaskedValue(defaultValue);
+    }
+  }, [defaultValue, setUnmaskedValue]);
+
   return { inputRef: inputRef };
 }

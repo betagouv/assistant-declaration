@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPageContext';
 import { trpc } from '@ad/src/client/trpcClient';
+import { useAmountInput } from '@ad/src/components/AmountInput';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
@@ -110,8 +111,15 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             sacdId: getDeclaration.data.declarationWrapper.declaration.organization.sacdId,
           },
           eventSerie: {
+            producerOfficialId: getDeclaration.data.declarationWrapper.declaration.eventSerie.producerOfficialId,
+            producerName: getDeclaration.data.declarationWrapper.declaration.eventSerie.producerName,
+            performanceType: getDeclaration.data.declarationWrapper.declaration.eventSerie.performanceType,
             expectedDeclarationTypes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expectedDeclarationTypes,
-            // TODO
+            placeId: getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.id ?? null,
+            placeCapacity: getDeclaration.data.declarationWrapper.declaration.eventSerie.placeCapacity,
+            audience: getDeclaration.data.declarationWrapper.declaration.eventSerie.audience,
+            taxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.taxRate,
+            expensesExcludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expensesExcludingTaxes,
           },
           events: [], // TODO
         });
@@ -119,9 +127,16 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     }
   }, [getDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
 
-  const { inputRef: officialHeadquartersIdInputRef } = useOfficialHeadquartersIdInput({
-    value: getDeclaration.data?.declarationWrapper.declaration.organization.officialHeadquartersId ?? '',
-    onChange: () => {},
+  // To ease the UX we use input masks
+  const setters = useMemo(() => {
+    return {
+      setExpensesExcludingTaxes: (value: number) => setValue('eventSerie.expensesExcludingTaxes', value),
+    };
+  }, [setValue]);
+
+  const { inputRef: expensesExcludingTaxesMaskInputRef } = useAmountInput({
+    defaultValue: control._defaultValues.eventSerie?.expensesExcludingTaxes?.toString() ?? '',
+    onChange: setters.setExpensesExcludingTaxes,
   });
 
   const { computedStartAt, computedEndAt, eventsKeyFigures } = useMemo(() => {
@@ -407,12 +422,23 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                         />
                       </div>
                       <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="Dépenses globales HT"
-                          state={!!errors.eventSerie?.expensesExcludingTaxes ? 'error' : undefined}
-                          stateRelatedMessage={errors?.eventSerie?.expensesExcludingTaxes?.message}
-                          nativeInputProps={{
-                            ...register('eventSerie.expensesExcludingTaxes'),
+                        <Controller
+                          control={control}
+                          name="eventSerie.expensesExcludingTaxes"
+                          defaultValue={control._defaultValues.eventSerie?.expensesExcludingTaxes ?? 0}
+                          render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                            return (
+                              <Input
+                                label="Dépenses globales HT"
+                                state={!!error ? 'error' : undefined}
+                                stateRelatedMessage={error?.message}
+                                nativeInputProps={{
+                                  ref: expensesExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                                  placeholder: '0 €',
+                                  onBlur: onBlur,
+                                }}
+                              />
+                            );
                           }}
                         />
                       </div>
