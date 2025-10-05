@@ -30,6 +30,7 @@ import { FillDeclarationSchema, FillDeclarationSchemaType } from '@ad/src/models
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { AudienceSchema, PerformanceTypeSchema } from '@ad/src/models/entities/event';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
+import { formatMaskedValue } from '@ad/src/utils/imask';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 
@@ -246,7 +247,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           label="SIRET"
                           disabled
                           nativeInputProps={{
-                            ref: officialHeadquartersIdInputRef as Ref<HTMLInputElement> | undefined,
+                            value: formatMaskedValue(officialHeadquartersIdMask, declaration.organization.officialHeadquartersId),
                           }}
                         />
                       </div>

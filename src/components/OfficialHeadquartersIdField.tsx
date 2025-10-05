@@ -1,32 +1,34 @@
+import type { MaskedPatternOptions } from 'imask';
 import { useEffect } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 import { useIMask } from 'react-imask';
 
-interface UseOfficialHeadquartersIdInputProps extends Pick<ControllerRenderProps<any, string>, 'value' | 'onChange'> {}
+// Can be used directly with `xxx.format(value)`
+export const officialHeadquartersIdMask: MaskedPatternOptions = {
+  mask: '000 000 000 00000',
+  definitions: {
+    '0': /[0-9]/,
+  },
+  overwrite: 'shift',
+};
 
-export function useOfficialHeadquartersIdInput({ value, onChange }: UseOfficialHeadquartersIdInputProps) {
-  const { ref: inputRef, setUnmaskedValue } = useIMask(
-    {
-      mask: '000 000 000 00000',
-      definitions: {
-        '0': /[0-9]/,
-      },
-      overwrite: true,
+interface UseOfficialHeadquartersIdInputProps extends Pick<ControllerRenderProps<any, string>, 'onChange'> {
+  defaultValue: ControllerRenderProps<any, string>['value'];
+}
+
+export function useOfficialHeadquartersIdInput({ defaultValue, onChange }: UseOfficialHeadquartersIdInputProps) {
+  const { ref: inputRef, setUnmaskedValue } = useIMask(officialHeadquartersIdMask, {
+    onAccept: (maskedValue, mask, event) => {
+      onChange(mask.unmaskedValue);
     },
-    {
-      onAccept: (maskedValue, mask, event) => {
-        onChange(mask.unmaskedValue);
-      },
-    }
-  );
+  });
 
-  // The following is needed to synchronize "form state" into the masked input
-  // Note: despite the `onChange` bound to the `value` it won't be triggered in a loop when typing into the input
+  // The following is needed to synchronize "form state" into the masked input in case a `reset()` is used
   useEffect(() => {
-    if (value != null) {
-      setUnmaskedValue(value);
+    if (defaultValue != null) {
+      setUnmaskedValue(defaultValue);
     }
-  }, [value, setUnmaskedValue]);
+  }, [defaultValue, setUnmaskedValue]);
 
   return { inputRef: inputRef };
 }

@@ -57,7 +57,7 @@ export function useAmountInput({ defaultValue, onChange, signed }: UseAmountInpu
               mapToRadix: separators.decimal === ',' ? [','] : ['.'],
             },
           },
-          overwrite: true,
+          overwrite: 'shift',
         },
       ],
     },
