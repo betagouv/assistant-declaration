@@ -380,7 +380,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           }}
                           options={currentTaxRates.map((taxRate) => {
                             return {
-                              label: `${100 * taxRate}%`,
+                              label: t('number.percent', {
+                                percentage: taxRate,
+                              }),
                               value: taxRate.toString(),
                             };
                           })}
