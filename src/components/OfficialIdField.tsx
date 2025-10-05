@@ -1,10 +1,10 @@
-import type { MaskedPatternOptions } from 'imask';
+import { FactoryOpts } from 'imask';
 import { useEffect } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 import { useIMask } from 'react-imask';
 
 // Can be used directly with `xxx.format(value)`
-export const officialIdMask: MaskedPatternOptions = {
+export const officialIdMask: FactoryOpts = {
   mask: '000 000 000',
   definitions: {
     '0': /[0-9]/,

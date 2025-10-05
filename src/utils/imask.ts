@@ -1,7 +1,7 @@
-import type { MaskedPatternOptions } from 'imask';
+import { FactoryArg } from 'imask';
 import IMask from 'imask';
 
-export function formatMaskedValue(maskOptions: MaskedPatternOptions, value: string) {
+export function formatMaskedValue(maskOptions: FactoryArg, value: string) {
   // Each mask of `imask` has its own instance, that's why a factory like this is needed
   const mask = IMask.createMask(maskOptions);
 

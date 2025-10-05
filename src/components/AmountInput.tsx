@@ -23,6 +23,31 @@ function getNumberSeparators(locale: string) {
   return { group, decimal };
 }
 
+export function AmountMaskFactory(locale: string, signed?: boolean): FactoryOpts {
+  const separators = getNumberSeparators(locale);
+
+  return {
+    mask: [
+      { mask: '' },
+      {
+        mask: 'num €',
+        lazy: false,
+        blocks: {
+          num: {
+            mask: Number,
+            scale: 2,
+            thousandsSeparator: separators.group,
+            radix: separators.decimal,
+            mapToRadix: separators.decimal === ',' ? [','] : ['.'],
+            ...({ signed: signed ?? true } as any), // Cast since not recognized
+          },
+        },
+        overwrite: 'shift',
+      },
+    ],
+  };
+}
+
 interface UseAmountInputProps extends Pick<ControllerRenderProps<any, string>, 'onChange'> {
   defaultValue: ControllerRenderProps<any, string>['value'];
   signed?: boolean;
@@ -31,40 +56,16 @@ interface UseAmountInputProps extends Pick<ControllerRenderProps<any, string>, '
 export function useAmountInput({ defaultValue, onChange, signed }: UseAmountInputProps) {
   const onAccept = useCallback<(value: InputMask<FactoryOpts>['value'], maskRef: InputMask<FactoryOpts>, e?: InputEvent) => void>(
     (maskedValue, mask, event) => {
-      console.log('VALID');
-
       onChange(mask.unmaskedValue);
     },
     [onChange]
   );
 
-  const [separators] = useState(() => getNumberSeparators(i18n.language));
+  const [amountMask] = useState(() => AmountMaskFactory(i18n.language));
 
-  const { ref: inputRef, setUnmaskedValue } = useIMask(
-    {
-      mask: [
-        { mask: '' },
-        {
-          mask: 'num €',
-          lazy: false,
-          blocks: {
-            num: {
-              mask: Number,
-              signed: signed ?? true,
-              scale: 2,
-              thousandsSeparator: separators.group,
-              radix: separators.decimal,
-              mapToRadix: separators.decimal === ',' ? [','] : ['.'],
-            },
-          },
-          overwrite: 'shift',
-        },
-      ],
-    },
-    {
-      onAccept: onAccept,
-    }
-  );
+  const { ref: inputRef, setUnmaskedValue } = useIMask(amountMask, {
+    onAccept: onAccept,
+  });
 
   // The following is needed to synchronize "form state" into the masked input in case a `reset()` is used
   useEffect(() => {
