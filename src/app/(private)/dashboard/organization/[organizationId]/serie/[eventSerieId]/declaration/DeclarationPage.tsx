@@ -19,7 +19,7 @@ import { useAmountInput } from '@ad/src/components/AmountInput';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
-import { useOfficialHeadquartersIdInput } from '@ad/src/components/OfficialHeadquartersIdField';
+import { officialHeadquartersIdMask } from '@ad/src/components/OfficialHeadquartersIdField';
 // import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
 // import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
