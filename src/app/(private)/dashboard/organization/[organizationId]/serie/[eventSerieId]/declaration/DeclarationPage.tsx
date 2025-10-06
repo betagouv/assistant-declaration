@@ -20,6 +20,8 @@ import { BaseForm } from '@ad/src/components/BaseForm';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { officialHeadquartersIdMask } from '@ad/src/components/OfficialHeadquartersIdField';
+import { useSacdIdInput } from '@ad/src/components/SacdIdField';
+import { useSacemIdInput } from '@ad/src/components/SacemIdField';
 // import { SacemExpensesTable } from '@ad/src/components/SacemExpensesTable';
 // import { SacemRevenuesTable } from '@ad/src/components/SacemRevenuesTable';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
@@ -131,9 +133,21 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   // To ease the UX we use input masks
   const setters = useMemo(() => {
     return {
+      setSacemId: (value: string) => setValue('organization.sacemId', value),
+      setSacdId: (value: string) => setValue('organization.sacdId', value),
       setExpensesExcludingTaxes: (value: number) => setValue('eventSerie.expensesExcludingTaxes', value),
     };
   }, [setValue]);
+
+  const { inputRef: sacemIdMaskInputRef } = useSacemIdInput({
+    defaultValue: control._defaultValues.organization?.sacemId?.toString() ?? '',
+    onChange: setters.setSacemId,
+  });
+
+  const { inputRef: sacdIdMaskInputRef } = useSacdIdInput({
+    defaultValue: control._defaultValues.organization?.sacdId?.toString() ?? '',
+    onChange: setters.setSacdId,
+  });
 
   const { inputRef: expensesExcludingTaxesMaskInputRef } = useAmountInput({
     defaultValue: control._defaultValues.eventSerie?.expensesExcludingTaxes?.toString() ?? '',
@@ -253,24 +267,46 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                       </div>
                       {watch('organization.sacemId') !== null && (
                         <div className={fr.cx('fr-fieldset__element')}>
-                          <Input
-                            label="Identifiant Sacem"
-                            state={!!errors.organization?.sacemId ? 'error' : undefined}
-                            stateRelatedMessage={errors?.organization?.sacemId?.message}
-                            nativeInputProps={{
-                              ...register('organization.sacemId'),
+                          <Controller
+                            control={control}
+                            name="organization.sacemId"
+                            defaultValue={control._defaultValues.organization?.sacemId ?? ''}
+                            render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                              return (
+                                <Input
+                                  label="Identifiant Sacem"
+                                  state={!!error ? 'error' : undefined}
+                                  stateRelatedMessage={error?.message}
+                                  nativeInputProps={{
+                                    ref: sacemIdMaskInputRef as Ref<HTMLInputElement> | undefined,
+                                    placeholder: '000000',
+                                    onBlur: onBlur,
+                                  }}
+                                />
+                              );
                             }}
                           />
                         </div>
                       )}
                       {watch('organization.sacdId') !== null && (
                         <div className={fr.cx('fr-fieldset__element')}>
-                          <Input
-                            label="Identifiant SACD"
-                            state={!!errors.organization?.sacdId ? 'error' : undefined}
-                            stateRelatedMessage={errors?.organization?.sacdId?.message}
-                            nativeInputProps={{
-                              ...register('organization.sacdId'),
+                          <Controller
+                            control={control}
+                            name="organization.sacdId"
+                            defaultValue={control._defaultValues.organization?.sacdId ?? ''}
+                            render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                              return (
+                                <Input
+                                  label="Identifiant SACD"
+                                  state={!!error ? 'error' : undefined}
+                                  stateRelatedMessage={error?.message}
+                                  nativeInputProps={{
+                                    ref: sacdIdMaskInputRef as Ref<HTMLInputElement> | undefined,
+                                    placeholder: '000000',
+                                    onBlur: onBlur,
+                                  }}
+                                />
+                              );
                             }}
                           />
                         </div>
