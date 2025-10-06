@@ -61,9 +61,7 @@ export function useAmountInput({ defaultValue, onChange, signed }: UseAmountInpu
     [onChange]
   );
 
-  const [amountMask] = useState(() => AmountMaskFactory(i18n.language));
-
-  const { ref: inputRef, setUnmaskedValue } = useIMask(amountMask, {
+  const { ref: inputRef, setUnmaskedValue } = useIMask(AmountMaskFactory(i18n.language, signed), {
     onAccept: onAccept,
   });
 
