@@ -5,18 +5,18 @@ import { Input, InputProps } from '@codegouvfr/react-dsfr/Input';
 import addressFormatter from '@fragaria/address-formatter';
 import Autocomplete from '@mui/material/Autocomplete';
 import debounce from 'lodash.debounce';
-import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import { FocusEventHandler, PropsWithChildren, useEffect, useMemo, useState } from 'react';
 
 import { BanAddress } from '@ad/src/client/national-address-base';
 import { AddressSchemaType } from '@ad/src/models/entities/address';
 import { searchAddressSuggestions } from '@ad/src/proxies/national-address-base';
 
 export interface AddressFieldProps {
-  initialValue?: Omit<AddressSchemaType, 'id'> | null;
+  value?: Omit<AddressSchemaType, 'id'> | null;
   inputProps: Pick<InputProps, 'label' | 'nativeInputProps'>;
   onChange: (newValue: BanAddress | null) => void;
+  onBlur: FocusEventHandler<HTMLDivElement>;
   errorMessage?: string;
-  // suggestionsPostalCode?: string;
 }
 
 export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
@@ -25,13 +25,7 @@ export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
 
   // In the following region context can be ommitted because if coming from the value and not listed it won't be used
   // We provide it just for the Autocomplete component to take the right type without casting
-  const [currentValue, setCurrentValue] = useState<BanAddress | null>(props.initialValue ? { ...props.initialValue, regionContext: '' } : null);
-
-  useEffect(() => {
-    if (props.initialValue !== undefined) {
-      setCurrentValue(props.initialValue ? { ...props.initialValue, regionContext: '' } : null);
-    }
-  }, [props.initialValue]);
+  const adjustedValue = useMemo(() => (props.value ? { ...props.value, regionContext: '' } : null), [props.value]);
 
   const handleSearchAddressQueryChange = async (query: string) => {
     console.log(33333);
@@ -56,28 +50,9 @@ export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
     };
   }, [debouncedHandleAddressQuery]);
 
-  // useEffect(() => {
-  //   if (props.suggestionsPostalCode && props.suggestionsPostalCode.length > 0) {
-  //     debouncedHandleAddressQuery(props.suggestionsPostalCode);
-  //   } else {
-  //     setSearchAddressQuerySuggestions([]);
-  //   }
-  // }, [props.suggestionsPostalCode, debouncedHandleAddressQuery, setSearchAddressQuerySuggestions]);
-
   return (
     <Autocomplete
-      // open={true}
-      value={currentValue}
-      // value={{
-      //   street: 'LOL',
-      //   postalCode: '35000',
-      //   city: 'Rennes',
-      //   subdivision: '',
-      //   countryCode: 'FR',
-      //   regionContext: '35, Ille-et-Vilaine, Bretagne',
-      // }}
-      // inputValue={searchQuery}
-      // defaultValue={props.initialValue ? { ...props.initialValue, regionContext: '' } : null}
+      value={adjustedValue}
       options={searchAddressQuerySuggestions}
       renderInput={({ InputProps, disabled, id, inputProps }) => {
         // Unable to prevent the autocomplete for address from Chrome despite `autoComplete="false"` so giving up
@@ -127,21 +102,12 @@ export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
       onInputChange={(event, newInputValue, reason) => {
         if (reason === 'input') {
           handleSearchAddressQueryChange(newInputValue);
-          // setSearchQuery(newInputValue);
         }
       }}
       onChange={(event, newValue) => {
-        // // [WORKAROUND] When selecting an item it won't update the input value
-        // // and there is no way to bind by reference or both onChange... so using additional setValue from the parent
-        // if (props.workaroundSetValue) {
-        //   props.workaroundSetValue(newValue);
-        // }
-
-        console.log(777777);
-        console.log(newValue);
-
-        setCurrentValue(newValue);
+        props.onChange(newValue);
       }}
+      onBlur={props.onBlur}
       loading={suggestionsLoading}
       selectOnFocus
       handleHomeEndKeys

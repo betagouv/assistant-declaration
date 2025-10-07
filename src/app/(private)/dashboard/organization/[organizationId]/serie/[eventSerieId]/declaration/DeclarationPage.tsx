@@ -130,12 +130,10 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             performanceType: getDeclaration.data.declarationWrapper.declaration.eventSerie.performanceType,
             expectedDeclarationTypes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expectedDeclarationTypes,
             placeId: getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.id ?? null,
-            placeTmp: getDeclaration.data.declarationWrapper.declaration.eventSerie.place
-              ? {
-                  name: getDeclaration.data.declarationWrapper.declaration.eventSerie.place.name,
-                  address: getDeclaration.data.declarationWrapper.declaration.eventSerie.place.address,
-                }
-              : null,
+            placeTmp: {
+              name: getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.name ?? null,
+              address: getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.address ?? null,
+            },
             placeCapacity: getDeclaration.data.declarationWrapper.declaration.eventSerie.placeCapacity,
             audience: getDeclaration.data.declarationWrapper.declaration.eventSerie.audience,
             taxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.taxRate,
@@ -379,109 +377,115 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                         />
                       </div>
                       <div className={fr.cx('fr-fieldset__element')}>
-                        <Autocomplete
-                          disablePortal
-                          options={declarationWrapper.placeholder.place}
-                          renderInput={({ InputProps, disabled, id, inputProps }) => {
+                        <Controller
+                          control={control}
+                          name="eventSerie.placeTmp.name"
+                          defaultValue={control._defaultValues.eventSerie?.placeTmp?.name ?? null}
+                          render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                             return (
-                              <Input
-                                ref={InputProps.ref}
-                                label="Intitulé du lieu"
-                                id={id}
-                                disabled={disabled}
-                                state={!!errors.eventSerie?.placeTmp ? 'error' : undefined}
-                                stateRelatedMessage={errors?.eventSerie?.placeTmp?.message}
-                                nativeInputProps={{
-                                  ...inputProps,
-                                  placeholder: 'Saisie ou recherche',
+                              <Autocomplete
+                                disablePortal
+                                options={declarationWrapper.placeholder.place}
+                                value={value}
+                                // inputValue={value ?? ''}
+                                renderInput={({ InputProps, disabled, id, inputProps }) => {
+                                  return (
+                                    <Input
+                                      ref={InputProps.ref}
+                                      label="Intitulé du lieu"
+                                      id={id}
+                                      disabled={disabled}
+                                      state={!!error ? 'error' : undefined}
+                                      stateRelatedMessage={error?.message}
+                                      nativeInputProps={{
+                                        ...inputProps,
+                                        placeholder: 'Saisie ou recherche',
+                                      }}
+                                    />
+                                  );
                                 }}
+                                renderOption={(props, option) => {
+                                  const { key, ...otherProps } = props;
+
+                                  return (
+                                    <li key={key} {...otherProps} data-sentry-mask>
+                                      <span className={fr.cx('fr-text--bold')}>{option.name}</span>
+                                      &nbsp;
+                                      <span style={{ fontStyle: 'italic' }}>
+                                        (
+                                        {addressFormatter
+                                          .format({
+                                            street: option.address.street,
+                                            city: option.address.city,
+                                            postcode: option.address.postalCode,
+                                            state: option.address.subdivision,
+                                            countryCode: option.address.countryCode,
+                                          })
+                                          .trim()}
+                                        )
+                                      </span>
+                                    </li>
+                                  );
+                                }}
+                                isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // TODO
+                                getOptionLabel={(option) => {
+                                  if (typeof option === 'string') {
+                                    // Value selected with enter, right from the input
+                                    return option;
+                                  } else {
+                                    return option.name;
+                                  }
+                                }}
+                                onInputChange={(event: React.SyntheticEvent<Element, Event>, newValue: string) => {
+                                  setValue('eventSerie.placeTmp.name', newValue);
+                                }}
+                                onChange={(event, newValue) => {
+                                  if (newValue) {
+                                    if (typeof newValue === 'string') {
+                                      onChange(newValue);
+                                    } else {
+                                      onChange(newValue.name);
+
+                                      // Override the current address used
+                                      setValue('eventSerie.placeTmp.address', newValue.address);
+                                    }
+                                  } else {
+                                    setValue('eventSerie.placeTmp.name', null);
+                                  }
+                                }}
+                                onBlur={onBlur}
+                                freeSolo
+                                selectOnFocus
+                                handleHomeEndKeys
+                                fullWidth
                               />
                             );
                           }}
-                          renderOption={(props, option) => {
-                            const { key, ...otherProps } = props;
-
-                            return (
-                              <li key={key} {...otherProps} data-sentry-mask>
-                                <span className={fr.cx('fr-text--bold')}>{option.name}</span>
-                                &nbsp;
-                                <span style={{ fontStyle: 'italic' }}>
-                                  (
-                                  {addressFormatter
-                                    .format({
-                                      street: option.address.street,
-                                      city: option.address.city,
-                                      postcode: option.address.postalCode,
-                                      state: option.address.subdivision,
-                                      countryCode: option.address.countryCode,
-                                    })
-                                    .trim()}
-                                  )
-                                </span>
-                              </li>
-                            );
-                          }}
-                          isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // TODO
-                          getOptionLabel={(option) => {
-                            if (typeof option === 'string') {
-                              // Value selected with enter, right from the input
-                              return option;
-                            } else {
-                              return option.name;
-                            }
-                          }}
-                          onChange={(event, newValue) => {
-                            if (newValue) {
-                              if (typeof newValue === 'string') {
-                                setValue('eventSerie.placeTmp', {
-                                  name: newValue,
-                                  address: null,
-                                });
-
-                                setInitialPlaceAddress(null);
-                              } else {
-                                setValue('eventSerie.placeTmp', {
-                                  id: newValue.id,
-                                });
-
-                                // Adjust the UI (still the user could overwrite the address, which would dissociate the place ID)
-                                setInitialPlaceAddress(newValue.address);
-                              }
-                            } else {
-                              setValue('eventSerie.placeTmp', null);
-                            }
-                          }}
-                          freeSolo
-                          selectOnFocus
-                          handleHomeEndKeys
-                          fullWidth
                         />
                       </div>
                       <div className={fr.cx('fr-fieldset__element')}>
-                        <AddressField
-                          initialValue={initialPlaceAddress}
-                          inputProps={{
-                            label: 'Adresse du lieu',
-                            nativeInputProps: {
-                              placeholder: 'Recherche',
-                            },
+                        <Controller
+                          control={control}
+                          name="eventSerie.placeTmp.address"
+                          defaultValue={null}
+                          render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                            return (
+                              <AddressField
+                                value={value}
+                                inputProps={{
+                                  label: 'Adresse du lieu',
+                                  nativeInputProps: {
+                                    placeholder: 'Recherche',
+                                  },
+                                }}
+                                onChange={(newValue) => {
+                                  onChange(newValue);
+                                }}
+                                onBlur={onBlur}
+                                errorMessage={error?.message}
+                              />
+                            );
                           }}
-                          onChange={(newValue) => {
-                            // if (newValue === null) {
-                            //   setInitialPlaceAddress(null);
-                            // }
-
-                            // If there is any change from there, in all cases this is no longer linked to a place
-                            setValue('eventSerie.placeTmp', {
-                              name: getValues('eventSerie.placeTmp.id'), // TODO: how to retrieve the current name?
-                              address: newValue,
-                            });
-                          }}
-                          errorMessage={
-                            errors?.eventSerie?.placeTmp && 'address' in errors.eventSerie.placeTmp
-                              ? errors.eventSerie.placeTmp.address?.message // TODO: ...
-                              : undefined
-                          }
                         />
                       </div>
                       <div className={fr.cx('fr-fieldset__element')}>

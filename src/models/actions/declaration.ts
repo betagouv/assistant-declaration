@@ -40,17 +40,10 @@ export const FillDeclarationSchema = z
       taxRate: true,
       expensesExcludingTaxes: true,
     }).extend({
-      placeTmp: z
-        .object({
-          id: PlaceSchema.shape.id,
-        })
-        .or(
-          z.object({
-            name: PlaceSchema.shape.name,
-            address: AddressInputSchema.nullable(),
-          })
-        )
-        .nullable(),
+      placeTmp: z.object({
+        name: PlaceSchema.shape.name.nullable(),
+        address: AddressInputSchema.nullable(),
+      }),
     }),
     events: z.array(
       EventSchema.pick({
