@@ -82,14 +82,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   // Due to the UI having tabs to switch between different declarations, we make sure the user is aware of loosing modifications
   useConfirmationIfUnsavedChange(isDirty);
 
-  // This is needed since the location label may change the address
-  const [initialPlaceAddress, setInitialPlaceAddress] = useState<Omit<AddressSchemaType, 'id'> | null>(
-    control._defaultValues.eventSerie?.placeTmp && 'address' in control._defaultValues.eventSerie.placeTmp
-      ? (control._defaultValues.eventSerie.placeTmp.address as any)
-      : null
-  );
-  // const currentPlaceName =
-
   const onSubmit = useCallback(
     async (input: FillDeclarationSchemaType) => {
       const result = await fillDeclaration.mutateAsync(input);
