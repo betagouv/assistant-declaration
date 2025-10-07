@@ -373,8 +373,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 label="Intitulé du lieu"
                                 id={id}
                                 disabled={disabled}
-                                state={!!errors.eventSerie?.placeId ? 'error' : undefined}
-                                stateRelatedMessage={errors?.eventSerie?.placeId?.message}
+                                state={!!errors.eventSerie?.placeTmp ? 'error' : undefined}
+                                stateRelatedMessage={errors?.eventSerie?.placeTmp?.message}
                                 nativeInputProps={{
                                   ...inputProps,
                                   placeholder: 'Saisie ou recherche',
@@ -383,10 +383,10 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             );
                           }}
                           renderOption={(props, option) => {
-                            // Needed also for the Sentry mask
-                            // Note: `props` already contains the `key` prop
+                            const { key, ...otherProps } = props;
+
                             return (
-                              <li {...props} data-sentry-mask>
+                              <li key={key} {...otherProps} data-sentry-mask>
                                 <span className={fr.cx('fr-text--bold')}>{option.name}</span>
                                 &nbsp;
                                 <span style={{ fontStyle: 'italic' }}>
@@ -419,6 +419,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               if (typeof newValue === 'string') {
                                 setValue('eventSerie.placeTmp', {
                                   name: newValue,
+                                  address: null,
                                 });
                               } else {
                                 setValue('eventSerie.placeTmp', {
