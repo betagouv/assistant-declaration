@@ -2,6 +2,7 @@ import z from 'zod';
 
 import { EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
+import { PlaceSchema } from '@ad/src/models/entities/place';
 
 export const TransmitDeclarationSchema = z
   .object({
@@ -32,11 +33,22 @@ export const FillDeclarationSchema = z
       producerName: true,
       performanceType: true,
       expectedDeclarationTypes: true,
-      placeId: true, // TODO: should be PlaceInput, z.or(id, or object with text?)
+      placeId: true, // TODO: should be PlaceInput, z.or(id, or object with text?) ... or just text and compare on backend?
       placeCapacity: true,
       audience: true,
       taxRate: true,
       expensesExcludingTaxes: true,
+    }).extend({
+      placeTmp: z
+        .object({
+          id: PlaceSchema.shape.id,
+        })
+        .or(
+          z.object({
+            name: PlaceSchema.shape.name,
+          })
+        )
+        .nullable(),
     }),
     events: z.array(
       EventSchema.pick({

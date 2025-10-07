@@ -4,6 +4,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { Select } from '@codegouvfr/react-dsfr/SelectNext';
+import addressFormatter from '@fragaria/address-formatter';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckCircle, Download, ForwardToInbox, Save } from '@mui/icons-material';
 import { Alert, Autocomplete, Button, Container, Grid, TextField, Tooltip, Typography } from '@mui/material';
@@ -362,15 +363,76 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                         />
                       </div>
                       <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="Intitulé du lieu"
-                          state={!!errors.eventSerie?.placeId ? 'error' : undefined}
-                          stateRelatedMessage={errors?.eventSerie?.placeId?.message}
-                          nativeInputProps={{
-                            // TODO: placeholder of previous places
-                            // TODO: should not be placeId... PlaceInput
-                            ...register('eventSerie.placeId'),
+                        <Autocomplete
+                          disablePortal
+                          options={declarationWrapper.placeholder.place}
+                          renderInput={({ InputProps, disabled, id, inputProps }) => {
+                            return (
+                              <Input
+                                ref={InputProps.ref}
+                                label="Intitulé du lieu"
+                                id={id}
+                                disabled={disabled}
+                                state={!!errors.eventSerie?.placeId ? 'error' : undefined}
+                                stateRelatedMessage={errors?.eventSerie?.placeId?.message}
+                                nativeInputProps={{
+                                  ...inputProps,
+                                  placeholder: 'Saisie ou recherche',
+                                }}
+                              />
+                            );
                           }}
+                          renderOption={(props, option) => {
+                            // Needed also for the Sentry mask
+                            // Note: `props` already contains the `key` prop
+                            return (
+                              <li {...props} data-sentry-mask>
+                                <span className={fr.cx('fr-text--bold')}>{option.name}</span>
+                                &nbsp;
+                                <span style={{ fontStyle: 'italic' }}>
+                                  (
+                                  {addressFormatter
+                                    .format({
+                                      street: option.address.street,
+                                      city: option.address.city,
+                                      postcode: option.address.postalCode,
+                                      state: option.address.subdivision,
+                                      countryCode: option.address.countryCode,
+                                    })
+                                    .trim()}
+                                  )
+                                </span>
+                              </li>
+                            );
+                          }}
+                          isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // TODO
+                          getOptionLabel={(option) => {
+                            if (typeof option === 'string') {
+                              // Value selected with enter, right from the input
+                              return option;
+                            } else {
+                              return option.name;
+                            }
+                          }}
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              if (typeof newValue === 'string') {
+                                setValue('eventSerie.placeTmp', {
+                                  name: newValue,
+                                });
+                              } else {
+                                setValue('eventSerie.placeTmp', {
+                                  id: newValue.id,
+                                });
+                              }
+                            } else {
+                              setValue('eventSerie.placeTmp', null);
+                            }
+                          }}
+                          freeSolo
+                          selectOnFocus
+                          handleHomeEndKeys
+                          fullWidth
                         />
                       </div>
                       <div className={fr.cx('fr-fieldset__element')}>
