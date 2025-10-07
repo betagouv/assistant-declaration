@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPageContext';
 import { trpc } from '@ad/src/client/trpcClient';
+import { AddressField } from '@ad/src/components/AddressField';
 import { useAmountInput } from '@ad/src/components/AmountInput';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
@@ -30,6 +31,7 @@ import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/us
 import { currentTaxRates } from '@ad/src/core/declaration';
 import { getEventsKeyFigures } from '@ad/src/core/declaration/format';
 import { FillDeclarationSchema, FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { AddressSchemaType } from '@ad/src/models/entities/address';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { AudienceSchema, PerformanceTypeSchema } from '@ad/src/models/entities/event';
 import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
@@ -80,6 +82,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   // Due to the UI having tabs to switch between different declarations, we make sure the user is aware of loosing modifications
   useConfirmationIfUnsavedChange(isDirty);
 
+  // This is needed since the location label may change the address
+  const [initialPlaceAddress, setInitialPlaceAddress] = useState<Omit<AddressSchemaType, 'id'> | null>(
+    control._defaultValues.eventSerie?.placeTmp && 'address' in control._defaultValues.eventSerie.placeTmp
+      ? (control._defaultValues.eventSerie.placeTmp.address as any)
+      : null
+  );
+  // const currentPlaceName =
+
   const onSubmit = useCallback(
     async (input: FillDeclarationSchemaType) => {
       const result = await fillDeclaration.mutateAsync(input);
@@ -120,6 +130,12 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             performanceType: getDeclaration.data.declarationWrapper.declaration.eventSerie.performanceType,
             expectedDeclarationTypes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expectedDeclarationTypes,
             placeId: getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.id ?? null,
+            placeTmp: getDeclaration.data.declarationWrapper.declaration.eventSerie.place
+              ? {
+                  name: getDeclaration.data.declarationWrapper.declaration.eventSerie.place.name,
+                  address: getDeclaration.data.declarationWrapper.declaration.eventSerie.place.address,
+                }
+              : null,
             placeCapacity: getDeclaration.data.declarationWrapper.declaration.eventSerie.placeCapacity,
             audience: getDeclaration.data.declarationWrapper.declaration.eventSerie.audience,
             taxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.taxRate,
@@ -421,10 +437,15 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                   name: newValue,
                                   address: null,
                                 });
+
+                                setInitialPlaceAddress(null);
                               } else {
                                 setValue('eventSerie.placeTmp', {
                                   id: newValue.id,
                                 });
+
+                                // Adjust the UI (still the user could overwrite the address, which would dissociate the place ID)
+                                setInitialPlaceAddress(newValue.address);
                               }
                             } else {
                               setValue('eventSerie.placeTmp', null);
@@ -437,15 +458,29 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                         />
                       </div>
                       <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="Adresse"
-                          // state={!!errors.eventSerie?.placeId ? 'error' : undefined}
-                          // stateRelatedMessage={errors?.eventSerie?.placeId?.message}
-                          nativeInputProps={
-                            {
-                              // TODO: should use address directory (BAN)
-                              // ...register('eventSerie.placeId'),
-                            }
+                        <AddressField
+                          initialValue={initialPlaceAddress}
+                          inputProps={{
+                            label: 'Adresse du lieu',
+                            nativeInputProps: {
+                              placeholder: 'Recherche',
+                            },
+                          }}
+                          onChange={(newValue) => {
+                            // if (newValue === null) {
+                            //   setInitialPlaceAddress(null);
+                            // }
+
+                            // If there is any change from there, in all cases this is no longer linked to a place
+                            setValue('eventSerie.placeTmp', {
+                              name: getValues('eventSerie.placeTmp.id'), // TODO: how to retrieve the current name?
+                              address: newValue,
+                            });
+                          }}
+                          errorMessage={
+                            errors?.eventSerie?.placeTmp && 'address' in errors.eventSerie.placeTmp
+                              ? errors.eventSerie.placeTmp.address?.message // TODO: ...
+                              : undefined
                           }
                         />
                       </div>

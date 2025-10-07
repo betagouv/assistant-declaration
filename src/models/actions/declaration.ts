@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { AddressInputSchema } from '@ad/src/models/entities/address';
 import { EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceSchema } from '@ad/src/models/entities/place';
@@ -46,6 +47,7 @@ export const FillDeclarationSchema = z
         .or(
           z.object({
             name: PlaceSchema.shape.name,
+            address: AddressInputSchema.nullable(),
           })
         )
         .nullable(),
