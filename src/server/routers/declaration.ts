@@ -563,11 +563,12 @@ export const declarationRouter = router({
         id: eventSerie.id,
       },
       data: {
-        producerOfficialId: input.eventSerie.producerOfficialId,
-        producerName: input.eventSerie.producerName,
+        producerOfficialId: input.eventSerie.producer?.officialId ?? null,
+        producerName: input.eventSerie.producer?.name ?? null,
         performanceType: input.eventSerie.performanceType,
         expectedDeclarationTypes: input.eventSerie.expectedDeclarationTypes,
-        placeId: input.eventSerie.placeId,
+        // TODO:
+        // placeId: input.eventSerie.placeId,
         placeCapacity: input.eventSerie.placeCapacity,
         audience: input.eventSerie.audience,
         taxRate: input.eventSerie.taxRate,

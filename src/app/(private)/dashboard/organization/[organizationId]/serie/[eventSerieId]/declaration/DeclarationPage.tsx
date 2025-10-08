@@ -19,6 +19,7 @@ import { useAmountInput } from '@ad/src/components/AmountInput';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { CompanyField } from '@ad/src/components/CompanyField';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
+import { EventsFieldsets } from '@ad/src/components/EventsFieldsets';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { officialHeadquartersIdMask } from '@ad/src/components/OfficialHeadquartersIdField';
 import { useSacdIdInput } from '@ad/src/components/SacdIdField';
@@ -121,8 +122,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                 : null,
             performanceType: getDeclaration.data.declarationWrapper.declaration.eventSerie.performanceType,
             expectedDeclarationTypes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expectedDeclarationTypes,
-            placeId: getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.id ?? null,
-            placeTmp: {
+            place: {
               name: getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.name ?? null,
               address: getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.address ?? null,
             },
@@ -131,7 +131,25 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             taxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.taxRate,
             expensesExcludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expensesExcludingTaxes,
           },
-          events: [], // TODO
+          events: getDeclaration.data.declarationWrapper.declaration.events.map((event) => {
+            return {
+              id: event.id,
+              startAt: event.startAt,
+              endAt: event.endAt,
+              ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
+              ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
+              ticketingRevenueTaxRate: event.ticketingRevenueTaxRate,
+              freeTickets: event.freeTickets,
+              paidTickets: event.paidTickets,
+              placeOverride: {
+                name: event.placeOverride?.name ?? null,
+                address: event.placeOverride?.address ?? null,
+              },
+              placeCapacityOverride: event.placeCapacityOverride,
+              audienceOverride: event.audienceOverride,
+              taxRateOverride: event.taxRateOverride,
+            };
+          }),
         });
       }
     }
@@ -193,6 +211,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     );
   }
 
+  console.log(1111111);
+
   const declarationWrapper = getDeclaration.data!.declarationWrapper;
   const declaration = declarationWrapper.declaration;
 
@@ -253,349 +273,470 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                 <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="connecter un système de billetterie">
                   <div className={fr.cx('fr-col-12')}>
                     <fieldset className={fr.cx('fr-fieldset')}>
-                      <h2 className={fr.cx('fr-h4')}>Déclarant</h2>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="Nom de la structure"
-                          disabled
-                          nativeInputProps={{
-                            value: declaration.organization.name,
-                          }}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="SIRET"
-                          disabled
-                          nativeInputProps={{
-                            value: formatMaskedValue(officialHeadquartersIdMask, declaration.organization.officialHeadquartersId),
-                          }}
-                        />
-                      </div>
-                      {watch('organization.sacemId') !== null && (
-                        <div className={fr.cx('fr-fieldset__element')}>
-                          <Controller
-                            control={control}
-                            name="organization.sacemId"
-                            defaultValue={control._defaultValues.organization?.sacemId ?? ''}
-                            render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                              return (
-                                <Input
-                                  label="Identifiant Sacem"
-                                  state={!!error ? 'error' : undefined}
-                                  stateRelatedMessage={error?.message}
-                                  nativeInputProps={{
-                                    ref: sacemIdMaskInputRef as Ref<HTMLInputElement> | undefined,
-                                    placeholder: '000000',
-                                    onBlur: onBlur,
-                                  }}
-                                />
-                              );
-                            }}
-                          />
-                        </div>
-                      )}
-                      {watch('organization.sacdId') !== null && (
-                        <div className={fr.cx('fr-fieldset__element')}>
-                          <Controller
-                            control={control}
-                            name="organization.sacdId"
-                            defaultValue={control._defaultValues.organization?.sacdId ?? ''}
-                            render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                              return (
-                                <Input
-                                  label="Identifiant SACD"
-                                  state={!!error ? 'error' : undefined}
-                                  stateRelatedMessage={error?.message}
-                                  nativeInputProps={{
-                                    ref: sacdIdMaskInputRef as Ref<HTMLInputElement> | undefined,
-                                    placeholder: '000000',
-                                    onBlur: onBlur,
-                                  }}
-                                />
-                              );
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Controller
-                          control={control}
-                          name="eventSerie.producer"
-                          defaultValue={null}
-                          render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                            return (
-                              <CompanyField
-                                value={value}
-                                defaultSuggestions={declarationWrapper.placeholder.producer}
-                                inputProps={{
-                                  label: 'Raison sociale du producteur',
-                                  nativeInputProps: {
-                                    placeholder: 'Recherche',
-                                  },
+                      <h2 className={fr.cx('fr-h4')}>Représentations</h2>
+                      <EventsFieldsets control={control} trigger={trigger} errors={errors.events} readonly={false} />
+                    </fieldset>
+                    <fieldset className={fr.cx('fr-fieldset')}>
+                      <h2 className={fr.cx('fr-h4')}>Général</h2>
+                      <div className={fr.cx('fr-col-12')}>
+                        <div className={fr.cx('fr-grid-row')}>
+                          <div className={fr.cx('fr-col-7', 'fr-col-md-5')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="Nom de la structure"
+                                disabled
+                                nativeInputProps={{
+                                  value: declaration.organization.name,
                                 }}
-                                onChange={(newValue) => {
-                                  onChange(newValue);
-                                }}
-                                onBlur={onBlur}
-                                errorMessage={error?.message}
                               />
-                            );
-                          }}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Select
-                          label="Genre"
-                          state={!!errors.eventSerie?.performanceType ? 'error' : undefined}
-                          stateRelatedMessage={errors?.eventSerie?.performanceType?.message}
-                          nativeSelectProps={{
-                            ...register('eventSerie.performanceType'),
-                            defaultValue: control._defaultValues.eventSerie?.performanceType || '',
-                          }}
-                          options={[
-                            ...Object.values(PerformanceTypeSchema.Values).map((performanceType) => {
-                              return {
-                                label: t(`model.performanceType.enum.${performanceType}`),
-                                value: performanceType,
-                              };
-                            }),
-                          ].sort((a, b) => a.label.localeCompare(b.label))}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="Date"
-                          disabled
-                          nativeInputProps={{
-                            value: `${t('date.long', { date: computedStartAt })}  →  ${t('date.long', {
-                              date: computedEndAt,
-                            })}`,
-                          }}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="Représentations"
-                          disabled
-                          nativeInputProps={{
-                            value: declaration.events.length,
-                          }}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Controller
-                          control={control}
-                          name="eventSerie.placeTmp.name"
-                          defaultValue={control._defaultValues.eventSerie?.placeTmp?.name ?? null}
-                          render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                            return (
-                              <Autocomplete
-                                disablePortal
-                                options={declarationWrapper.placeholder.place}
-                                value={value}
-                                renderInput={({ InputProps, disabled, id, inputProps }) => {
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-5', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="SIRET"
+                                disabled
+                                nativeInputProps={{
+                                  value: formatMaskedValue(officialHeadquartersIdMask, declaration.organization.officialHeadquartersId),
+                                }}
+                              />
+                            </div>
+                          </div>
+                          {watch('organization.sacemId') !== null && (
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="organization.sacemId"
+                                  defaultValue={control._defaultValues.organization?.sacemId ?? ''}
+                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                    return (
+                                      <Input
+                                        label="Identifiant Sacem"
+                                        state={!!error ? 'error' : undefined}
+                                        stateRelatedMessage={error?.message}
+                                        nativeInputProps={{
+                                          ref: sacemIdMaskInputRef as Ref<HTMLInputElement> | undefined,
+                                          placeholder: '000000',
+                                          onBlur: onBlur,
+                                        }}
+                                      />
+                                    );
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                          {watch('organization.sacdId') !== null && (
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="organization.sacdId"
+                                  defaultValue={control._defaultValues.organization?.sacdId ?? ''}
+                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                    return (
+                                      <Input
+                                        label="Identifiant SACD"
+                                        state={!!error ? 'error' : undefined}
+                                        stateRelatedMessage={error?.message}
+                                        nativeInputProps={{
+                                          ref: sacdIdMaskInputRef as Ref<HTMLInputElement> | undefined,
+                                          placeholder: '000000',
+                                          onBlur: onBlur,
+                                        }}
+                                      />
+                                    );
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <hr className={fr.cx('fr-my-3v')} />
+                        <div className={fr.cx('fr-grid-row')}>
+                          <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Controller
+                                control={control}
+                                name="eventSerie.producer"
+                                defaultValue={null}
+                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                                   return (
-                                    <Input
-                                      ref={InputProps.ref}
-                                      label="Intitulé du lieu"
-                                      id={id}
-                                      disabled={disabled}
-                                      state={!!error ? 'error' : undefined}
-                                      stateRelatedMessage={error?.message}
-                                      nativeInputProps={{
-                                        ...inputProps,
-                                        placeholder: 'Saisie ou recherche',
+                                    <CompanyField
+                                      value={value}
+                                      defaultSuggestions={declarationWrapper.placeholder.producer}
+                                      inputProps={{
+                                        label: 'Raison sociale du producteur',
+                                        nativeInputProps: {
+                                          placeholder: 'Recherche',
+                                        },
+                                      }}
+                                      onChange={(newValue) => {
+                                        onChange(newValue);
+                                      }}
+                                      onBlur={onBlur}
+                                      errorMessage={error?.message}
+                                    />
+                                  );
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Select
+                                label="Genre"
+                                state={!!errors.eventSerie?.performanceType ? 'error' : undefined}
+                                stateRelatedMessage={errors?.eventSerie?.performanceType?.message}
+                                nativeSelectProps={{
+                                  ...register('eventSerie.performanceType'),
+                                  defaultValue: control._defaultValues.eventSerie?.performanceType || '',
+                                }}
+                                options={[
+                                  ...Object.values(PerformanceTypeSchema.Values).map((performanceType) => {
+                                    return {
+                                      label: t(`model.performanceType.enum.${performanceType}`),
+                                      value: performanceType,
+                                    };
+                                  }),
+                                ].sort((a, b) => a.label.localeCompare(b.label))}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-12', 'fr-col-md-7')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="Date"
+                                disabled
+                                nativeInputProps={{
+                                  value: `${t('date.long', { date: computedStartAt })}  →  ${t('date.long', {
+                                    date: computedEndAt,
+                                  })}`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="Représentations"
+                                disabled
+                                nativeInputProps={{
+                                  value: declaration.events.length,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <hr className={fr.cx('fr-my-3v')} />
+                        <div className={fr.cx('fr-grid-row')}>
+                          <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Controller
+                                control={control}
+                                name="eventSerie.place.name"
+                                defaultValue={control._defaultValues.eventSerie?.place?.name ?? null}
+                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                  return (
+                                    <Autocomplete
+                                      disablePortal
+                                      options={declarationWrapper.placeholder.place}
+                                      value={value}
+                                      renderInput={({ InputProps, disabled, id, inputProps }) => {
+                                        return (
+                                          <Input
+                                            ref={InputProps.ref}
+                                            label="Intitulé du lieu"
+                                            id={id}
+                                            disabled={disabled}
+                                            state={!!error ? 'error' : undefined}
+                                            stateRelatedMessage={error?.message}
+                                            nativeInputProps={{
+                                              ...inputProps,
+                                              placeholder: 'Saisie ou recherche',
+                                            }}
+                                          />
+                                        );
+                                      }}
+                                      renderOption={(props, option) => {
+                                        const { key, ...otherProps } = props;
+
+                                        return (
+                                          <li key={key} {...otherProps} data-sentry-mask>
+                                            <span className={fr.cx('fr-text--bold')}>{option.name}</span>
+                                            &nbsp;
+                                            <span style={{ fontStyle: 'italic' }}>
+                                              (
+                                              {addressFormatter
+                                                .format({
+                                                  street: option.address.street,
+                                                  city: option.address.city,
+                                                  postcode: option.address.postalCode,
+                                                  state: option.address.subdivision,
+                                                  countryCode: option.address.countryCode,
+                                                })
+                                                .trim()}
+                                              )
+                                            </span>
+                                          </li>
+                                        );
+                                      }}
+                                      isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // TODO
+                                      getOptionLabel={(option) => {
+                                        if (typeof option === 'string') {
+                                          // Value selected with enter, right from the input
+                                          return option;
+                                        } else {
+                                          return option.name;
+                                        }
+                                      }}
+                                      onInputChange={(event: React.SyntheticEvent<Element, Event>, newValue: string) => {
+                                        setValue('eventSerie.place.name', newValue);
+                                      }}
+                                      onChange={(event, newValue) => {
+                                        if (newValue) {
+                                          if (typeof newValue === 'string') {
+                                            onChange(newValue);
+                                          } else {
+                                            onChange(newValue.name);
+
+                                            // Override the current address used
+                                            setValue('eventSerie.place.address', newValue.address);
+                                          }
+                                        } else {
+                                          setValue('eventSerie.place.name', null);
+                                        }
+                                      }}
+                                      onBlur={onBlur}
+                                      freeSolo
+                                      selectOnFocus
+                                      handleHomeEndKeys
+                                      fullWidth
+                                    />
+                                  );
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-8', 'fr-col-md-5')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Controller
+                                control={control}
+                                name="eventSerie.place.address"
+                                defaultValue={null}
+                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                  return (
+                                    <AddressField
+                                      value={value}
+                                      inputProps={{
+                                        label: 'Adresse du lieu',
+                                        nativeInputProps: {
+                                          placeholder: 'Recherche',
+                                        },
+                                      }}
+                                      onChange={(newValue) => {
+                                        onChange(newValue);
+                                      }}
+                                      onBlur={onBlur}
+                                      errorMessage={error?.message}
+                                    />
+                                  );
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Controller
+                                control={control}
+                                name="eventSerie.placeCapacity"
+                                defaultValue={control._defaultValues.eventSerie?.placeCapacity ?? 0}
+                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                  return (
+                                    <Autocomplete
+                                      options={declarationWrapper.placeholder.placeCapacity}
+                                      freeSolo
+                                      onBlur={onBlur}
+                                      value={value ?? 0}
+                                      onInputChange={(event, newValue, reason) => {
+                                        onChange(newValue);
+                                      }}
+                                      renderInput={({ InputProps, disabled, id, inputProps }) => {
+                                        return (
+                                          <Input
+                                            ref={InputProps.ref}
+                                            label="Jauge"
+                                            id={id}
+                                            disabled={disabled}
+                                            state={!!error ? 'error' : undefined}
+                                            stateRelatedMessage={error?.message}
+                                            nativeInputProps={{
+                                              ...inputProps,
+                                              type: 'number',
+                                              placeholder: '0',
+                                              step: 1,
+                                              min: 0,
+                                              onWheel: (event) => {
+                                                // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
+
+                                                // `event.currentTarget` is a callable type but is targetting the MUI element
+                                                // whereas `event.target` targets the input element but does not have the callable type, so casting
+                                                (event.target as HTMLInputElement).blur();
+                                              },
+                                            }}
+                                          />
+                                        );
+                                      }}
+                                      renderOption={(props, option) => {
+                                        // Just needed for the Sentry mask
+                                        return (
+                                          <li {...props} key={option} data-sentry-mask>
+                                            {option}
+                                          </li>
+                                        );
+                                      }}
+                                      getOptionLabel={(option) => {
+                                        if (typeof option === 'string') {
+                                          // Value selected with enter, right from the input
+                                          return option;
+                                        } else {
+                                          return option.toString();
+                                        }
                                       }}
                                     />
                                   );
                                 }}
-                                renderOption={(props, option) => {
-                                  const { key, ...otherProps } = props;
-
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <hr className={fr.cx('fr-my-3v')} />
+                        <div className={fr.cx('fr-grid-row')}>
+                          <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Select
+                                label="Audience"
+                                state={!!errors.eventSerie?.audience ? 'error' : undefined}
+                                stateRelatedMessage={errors?.eventSerie?.audience?.message}
+                                nativeSelectProps={{
+                                  ...register('eventSerie.audience'),
+                                  defaultValue: control._defaultValues.eventSerie?.audience || '',
+                                }}
+                                options={[
+                                  ...Object.values(AudienceSchema.Values).map((audience) => {
+                                    return {
+                                      label: t(`model.audience.enum.${audience}`),
+                                      value: audience,
+                                    };
+                                  }),
+                                ].sort((a, b) => a.label.localeCompare(b.label))}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-4', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Select
+                                label="Taux de TVA"
+                                state={!!errors.eventSerie?.taxRate ? 'error' : undefined}
+                                stateRelatedMessage={errors?.eventSerie?.taxRate?.message}
+                                nativeSelectProps={{
+                                  ...register('eventSerie.taxRate'),
+                                  defaultValue: currentTaxRates[0],
+                                }}
+                                options={currentTaxRates.map((taxRate) => {
+                                  return {
+                                    label: t('number.percent', {
+                                      percentage: taxRate,
+                                    }),
+                                    value: taxRate.toString(),
+                                  };
+                                })}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <hr className={fr.cx('fr-my-3v')} />
+                        <div className={fr.cx('fr-grid-row')}>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="Recette HT"
+                                disabled
+                                nativeInputProps={{
+                                  value: t('currency.amount', {
+                                    amount: eventsKeyFigures.ticketingRevenueExcludingTaxes,
+                                  }),
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="Recette TTC"
+                                disabled
+                                nativeInputProps={{
+                                  value: t('currency.amount', {
+                                    amount: eventsKeyFigures.ticketingRevenueIncludingTaxes,
+                                  }),
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="Entrées payantes"
+                                disabled
+                                nativeInputProps={{
+                                  value: t('number.default', {
+                                    number: eventsKeyFigures.paidTickets,
+                                  }),
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="Entrées gratuites"
+                                disabled
+                                nativeInputProps={{
+                                  value: t('number.default', {
+                                    number: eventsKeyFigures.freeTickets,
+                                  }),
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <hr className={fr.cx('fr-my-3v')} />
+                        <div className={fr.cx('fr-grid-row')}>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Controller
+                                control={control}
+                                name="eventSerie.expensesExcludingTaxes"
+                                defaultValue={control._defaultValues.eventSerie?.expensesExcludingTaxes ?? 0}
+                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                                   return (
-                                    <li key={key} {...otherProps} data-sentry-mask>
-                                      <span className={fr.cx('fr-text--bold')}>{option.name}</span>
-                                      &nbsp;
-                                      <span style={{ fontStyle: 'italic' }}>
-                                        (
-                                        {addressFormatter
-                                          .format({
-                                            street: option.address.street,
-                                            city: option.address.city,
-                                            postcode: option.address.postalCode,
-                                            state: option.address.subdivision,
-                                            countryCode: option.address.countryCode,
-                                          })
-                                          .trim()}
-                                        )
-                                      </span>
-                                    </li>
+                                    <Input
+                                      label="Dépenses globales HT"
+                                      state={!!error ? 'error' : undefined}
+                                      stateRelatedMessage={error?.message}
+                                      nativeInputProps={{
+                                        ref: expensesExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                                        placeholder: '0 €',
+                                        onBlur: onBlur,
+                                      }}
+                                    />
                                   );
                                 }}
-                                isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // TODO
-                                getOptionLabel={(option) => {
-                                  if (typeof option === 'string') {
-                                    // Value selected with enter, right from the input
-                                    return option;
-                                  } else {
-                                    return option.name;
-                                  }
-                                }}
-                                onInputChange={(event: React.SyntheticEvent<Element, Event>, newValue: string) => {
-                                  setValue('eventSerie.placeTmp.name', newValue);
-                                }}
-                                onChange={(event, newValue) => {
-                                  if (newValue) {
-                                    if (typeof newValue === 'string') {
-                                      onChange(newValue);
-                                    } else {
-                                      onChange(newValue.name);
-
-                                      // Override the current address used
-                                      setValue('eventSerie.placeTmp.address', newValue.address);
-                                    }
-                                  } else {
-                                    setValue('eventSerie.placeTmp.name', null);
-                                  }
-                                }}
-                                onBlur={onBlur}
-                                freeSolo
-                                selectOnFocus
-                                handleHomeEndKeys
-                                fullWidth
                               />
-                            );
-                          }}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Controller
-                          control={control}
-                          name="eventSerie.placeTmp.address"
-                          defaultValue={null}
-                          render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                            return (
-                              <AddressField
-                                value={value}
-                                inputProps={{
-                                  label: 'Adresse du lieu',
-                                  nativeInputProps: {
-                                    placeholder: 'Recherche',
-                                  },
-                                }}
-                                onChange={(newValue) => {
-                                  onChange(newValue);
-                                }}
-                                onBlur={onBlur}
-                                errorMessage={error?.message}
-                              />
-                            );
-                          }}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Select
-                          label="Audience"
-                          state={!!errors.eventSerie?.audience ? 'error' : undefined}
-                          stateRelatedMessage={errors?.eventSerie?.audience?.message}
-                          nativeSelectProps={{
-                            ...register('eventSerie.audience'),
-                            defaultValue: control._defaultValues.eventSerie?.audience || '',
-                          }}
-                          options={[
-                            ...Object.values(AudienceSchema.Values).map((audience) => {
-                              return {
-                                label: t(`model.audience.enum.${audience}`),
-                                value: audience,
-                              };
-                            }),
-                          ].sort((a, b) => a.label.localeCompare(b.label))}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Select
-                          label="Taux de TVA"
-                          state={!!errors.eventSerie?.taxRate ? 'error' : undefined}
-                          stateRelatedMessage={errors?.eventSerie?.taxRate?.message}
-                          nativeSelectProps={{
-                            ...register('eventSerie.taxRate'),
-                            defaultValue: currentTaxRates[0],
-                          }}
-                          options={currentTaxRates.map((taxRate) => {
-                            return {
-                              label: t('number.percent', {
-                                percentage: taxRate,
-                              }),
-                              value: taxRate.toString(),
-                            };
-                          })}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="Recette HT"
-                          disabled
-                          nativeInputProps={{
-                            value: t('currency.amount', {
-                              amount: eventsKeyFigures.ticketingRevenueExcludingTaxes,
-                            }),
-                          }}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="Recette TTC"
-                          disabled
-                          nativeInputProps={{
-                            value: t('currency.amount', {
-                              amount: eventsKeyFigures.ticketingRevenueIncludingTaxes,
-                            }),
-                          }}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="Entrées payantes"
-                          disabled
-                          nativeInputProps={{
-                            value: t('number.default', {
-                              number: eventsKeyFigures.paidTickets,
-                            }),
-                          }}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="Entrées gratuites"
-                          disabled
-                          nativeInputProps={{
-                            value: t('number.default', {
-                              number: eventsKeyFigures.freeTickets,
-                            }),
-                          }}
-                        />
-                      </div>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <Controller
-                          control={control}
-                          name="eventSerie.expensesExcludingTaxes"
-                          defaultValue={control._defaultValues.eventSerie?.expensesExcludingTaxes ?? 0}
-                          render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                            return (
-                              <Input
-                                label="Dépenses globales HT"
-                                state={!!error ? 'error' : undefined}
-                                stateRelatedMessage={error?.message}
-                                nativeInputProps={{
-                                  ref: expensesExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                                  placeholder: '0 €',
-                                  onBlur: onBlur,
-                                }}
-                              />
-                            );
-                          }}
-                        />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </fieldset>
                   </div>

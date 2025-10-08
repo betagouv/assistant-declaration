@@ -1,9 +1,8 @@
 import z from 'zod';
 
-import { AddressInputSchema } from '@ad/src/models/entities/address';
 import { EventSchema, EventSerieSchema, StricterEventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
-import { PlaceSchema } from '@ad/src/models/entities/place';
+import { PlaceInputSchema } from '@ad/src/models/entities/place';
 
 export const TransmitDeclarationSchema = z
   .object({
@@ -32,16 +31,12 @@ export const FillDeclarationSchema = z
     eventSerie: EventSerieSchema.pick({
       performanceType: true,
       expectedDeclarationTypes: true,
-      placeId: true, // TODO: should be PlaceInput, z.or(id, or object with text?) ... or just text and compare on backend?
       placeCapacity: true,
       audience: true,
       taxRate: true,
       expensesExcludingTaxes: true,
     }).extend({
-      placeTmp: z.object({
-        name: PlaceSchema.shape.name.nullable(),
-        address: AddressInputSchema.nullable(),
-      }),
+      place: PlaceInputSchema,
       producer: z
         .object({
           officialId: StricterEventSerieSchema.shape.producerOfficialId,
@@ -59,10 +54,11 @@ export const FillDeclarationSchema = z
         ticketingRevenueTaxRate: true,
         freeTickets: true,
         paidTickets: true,
-        placeOverrideId: true,
         placeCapacityOverride: true,
         audienceOverride: true,
         taxRateOverride: true,
+      }).extend({
+        placeOverride: PlaceInputSchema,
       })
     ),
   })

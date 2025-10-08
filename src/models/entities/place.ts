@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { AddressSchema } from '@ad/src/models/entities/address';
+import { AddressInputSchema, AddressSchema } from '@ad/src/models/entities/address';
 
 export const PlaceSchema = z
   .object({
@@ -10,3 +10,11 @@ export const PlaceSchema = z
   })
   .strict();
 export type PlaceSchemaType = z.infer<typeof PlaceSchema>;
+
+export const PlaceInputSchema = z
+  .object({
+    name: PlaceSchema.shape.name.nullable(),
+    address: AddressInputSchema.nullable(),
+  })
+  .strict();
+export type PlaceInputSchemaType = z.infer<typeof PlaceInputSchema>;
