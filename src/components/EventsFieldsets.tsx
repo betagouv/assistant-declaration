@@ -31,7 +31,7 @@ export function EventsFieldsets({ control, trigger, errors, readonly }: EventsFi
   }, [fields, errors]);
 
   return (
-    <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-grid-row--center')}>
+    <div className={fr.cx('fr-grid-row')}>
       {errors?.message && (
         <div className={fr.cx('fr-col-12')}>
           <Alert severity="error" small={true} description={errors.message} />
@@ -41,8 +41,17 @@ export function EventsFieldsets({ control, trigger, errors, readonly }: EventsFi
         <>
           {eventsWithErrorLogic.map((eventWithErrorLogic) => {
             return (
-              <div key={eventWithErrorLogic.index} className={fr.cx('fr-col-12')}>
-                <EventFieldset control={control} trigger={trigger} errors={eventWithErrorLogic.errors} readonly={false} />
+              <div className={fr.cx('fr-col-12')}>
+                {eventWithErrorLogic.index > 0 && <hr className={fr.cx('fr-my-3v')} />}
+                <div key={eventWithErrorLogic.index} className={fr.cx('fr-col-12')}>
+                  <EventFieldset
+                    control={control}
+                    trigger={trigger}
+                    name={`events.${eventWithErrorLogic.index}`}
+                    errors={eventWithErrorLogic.errors}
+                    readonly={false}
+                  />
+                </div>
               </div>
             );
           })}

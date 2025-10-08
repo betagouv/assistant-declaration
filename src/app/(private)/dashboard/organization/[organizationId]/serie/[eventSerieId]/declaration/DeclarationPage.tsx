@@ -180,6 +180,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   });
 
   const { computedStartAt, computedEndAt, eventsKeyFigures } = useMemo(() => {
+    // TODO: this should be based on form data, not the one from the API (since it needs to use local state)
     if (getDeclaration.data && getDeclaration.data.declarationWrapper.declaration.events.length > 0) {
       const ascendingEvents = getDeclaration.data.declarationWrapper.declaration.events.sort((a, b) => +a.startAt - +b.startAt);
 
@@ -274,7 +275,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                   <div className={fr.cx('fr-col-12')}>
                     <fieldset className={fr.cx('fr-fieldset')}>
                       <h2 className={fr.cx('fr-h4')}>Représentations</h2>
-                      <EventsFieldsets control={control} trigger={trigger} errors={errors.events} readonly={false} />
+                      <div className={fr.cx('fr-col-12')}>
+                        <EventsFieldsets control={control} trigger={trigger} errors={errors.events} readonly={false} />
+                      </div>
                     </fieldset>
                     <fieldset className={fr.cx('fr-fieldset')}>
                       <h2 className={fr.cx('fr-h4')}>Général</h2>
