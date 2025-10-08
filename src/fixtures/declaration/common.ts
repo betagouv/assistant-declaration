@@ -97,8 +97,16 @@ export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
   DeclarationWrapperSchema.parse({
     declaration: declarations[0],
     placeholder: {
-      producerOfficialId: [declarations[0].eventSerie.producerOfficialId!, declarations[1].eventSerie.producerOfficialId!],
-      producerName: [declarations[0].eventSerie.producerName!, declarations[1].eventSerie.producerName!],
+      producer: [
+        {
+          officialId: declarations[0].eventSerie.producerOfficialId!,
+          name: declarations[0].eventSerie.producerName!,
+        },
+        {
+          officialId: declarations[1].eventSerie.producerOfficialId!,
+          name: declarations[1].eventSerie.producerName!,
+        },
+      ],
       place: [places[1]],
       placeCapacity: [declarations[0].eventSerie.placeCapacity!, declarations[1].eventSerie.placeCapacity!],
     },
@@ -106,8 +114,12 @@ export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
   DeclarationWrapperSchema.parse({
     declaration: declarations[1],
     placeholder: {
-      producerOfficialId: [declarations[0].eventSerie.producerOfficialId!],
-      producerName: [declarations[0].eventSerie.producerName!],
+      producer: [
+        {
+          officialId: declarations[0].eventSerie.producerOfficialId!,
+          name: declarations[0].eventSerie.producerName!,
+        },
+      ],
       place: [places[2]],
       placeCapacity: [declarations[1].eventSerie.placeCapacity!],
     },
@@ -115,8 +127,12 @@ export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
   DeclarationWrapperSchema.parse({
     declaration: declarations[2],
     placeholder: {
-      producerOfficialId: [declarations[1].eventSerie.producerOfficialId!],
-      producerName: [declarations[1].eventSerie.producerName!],
+      producer: [
+        {
+          officialId: declarations[1].eventSerie.producerOfficialId!,
+          name: declarations[1].eventSerie.producerName!,
+        },
+      ],
       place: [places[0]],
       placeCapacity: [],
     },

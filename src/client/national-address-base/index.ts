@@ -31,8 +31,6 @@ export async function searchAddressSuggestions(query: string): Promise<BanAddres
     return [];
   }
 
-  // Wanted to add `lat` and `lon` as query parameter to return address around this position
-  // but after multiple tests it does not seem to work well
   const url = new URL(`${baseUrl}/geocodage/search/`);
   url.searchParams.append('q', query);
   url.searchParams.append('type', 'housenumber'); // Ask for addresses only (not just localities or cities...), it's a burden if they want to specify just a street but we cannot ask for multiple types

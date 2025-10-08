@@ -19,6 +19,7 @@ import { trpc } from '@ad/src/client/trpcClient';
 import { AddressField } from '@ad/src/components/AddressField';
 import { useAmountInput } from '@ad/src/components/AmountInput';
 import { BaseForm } from '@ad/src/components/BaseForm';
+import { CompanyField } from '@ad/src/components/CompanyField';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { officialHeadquartersIdMask } from '@ad/src/components/OfficialHeadquartersIdField';
@@ -117,8 +118,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             sacdId: getDeclaration.data.declarationWrapper.declaration.organization.sacdId,
           },
           eventSerie: {
-            producerOfficialId: getDeclaration.data.declarationWrapper.declaration.eventSerie.producerOfficialId,
-            producerName: getDeclaration.data.declarationWrapper.declaration.eventSerie.producerName,
+            producer:
+              getDeclaration.data.declarationWrapper.declaration.eventSerie.producerOfficialId &&
+              getDeclaration.data.declarationWrapper.declaration.eventSerie.producerName
+                ? {
+                    officialId: getDeclaration.data.declarationWrapper.declaration.eventSerie.producerOfficialId,
+                    name: getDeclaration.data.declarationWrapper.declaration.eventSerie.producerName,
+                  }
+                : null,
             performanceType: getDeclaration.data.declarationWrapper.declaration.eventSerie.performanceType,
             expectedDeclarationTypes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expectedDeclarationTypes,
             placeId: getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.id ?? null,
@@ -319,13 +326,27 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                         </div>
                       )}
                       <div className={fr.cx('fr-fieldset__element')}>
-                        <Input
-                          label="Raison sociale du producteur"
-                          state={!!errors.eventSerie?.producerName ? 'error' : undefined}
-                          stateRelatedMessage={errors?.eventSerie?.producerName?.message}
-                          nativeInputProps={{
-                            // TODO: from enterprise directory
-                            ...register('eventSerie.producerName'),
+                        <Controller
+                          control={control}
+                          name="eventSerie.producer"
+                          defaultValue={null}
+                          render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                            return (
+                              <CompanyField
+                                value={value}
+                                inputProps={{
+                                  label: 'Raison sociale du producteur',
+                                  nativeInputProps: {
+                                    placeholder: 'Recherche',
+                                  },
+                                }}
+                                onChange={(newValue) => {
+                                  onChange(newValue);
+                                }}
+                                onBlur={onBlur}
+                                errorMessage={error?.message}
+                              />
+                            );
                           }}
                         />
                       </div>
@@ -379,7 +400,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 disablePortal
                                 options={declarationWrapper.placeholder.place}
                                 value={value}
-                                // inputValue={value ?? ''}
                                 renderInput={({ InputProps, disabled, id, inputProps }) => {
                                   return (
                                     <Input

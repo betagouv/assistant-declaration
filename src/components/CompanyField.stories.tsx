@@ -2,14 +2,14 @@ import { Meta, StoryFn } from '@storybook/react';
 import { within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { AddressField } from '@ad/src/components/AddressField';
+import { CompanyField } from '@ad/src/components/CompanyField';
 
-type ComponentType = typeof AddressField;
+type ComponentType = typeof CompanyField;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Components/AddressField',
-  component: AddressField,
+  title: 'Components/CompanyField',
+  component: CompanyField,
   ...generateMetaDefault({
     parameters: {},
   }),
@@ -20,13 +20,13 @@ async function playFindLabel(canvasElement: HTMLElement): Promise<HTMLElement> {
 }
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <AddressField {...args} />;
+  return <CompanyField {...args} />;
 };
 
 const NoQueryStory = Template.bind({});
 NoQueryStory.args = {
   inputProps: {
-    label: 'Address',
+    label: 'Company',
   },
 };
 NoQueryStory.play = async ({ canvasElement }) => {

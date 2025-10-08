@@ -67,8 +67,12 @@ export const DeclarationWrapperSchema = applyTypedParsers(
       declaration: DeclarationSchema,
       // We provide some suggestions from past declarations to fill the current one
       placeholder: z.object({
-        producerOfficialId: z.array(StricterEventSerieSchema.shape.producerOfficialId),
-        producerName: z.array(StricterEventSerieSchema.shape.producerName),
+        producer: z.array(
+          z.object({
+            officialId: StricterEventSerieSchema.shape.producerOfficialId,
+            name: StricterEventSerieSchema.shape.producerName,
+          })
+        ),
         place: z.array(PlaceSchema),
         placeCapacity: z.array(StricterEventSerieSchema.shape.placeCapacity),
       }),

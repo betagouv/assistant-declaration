@@ -1,7 +1,7 @@
 import z from 'zod';
 
 import { AddressInputSchema } from '@ad/src/models/entities/address';
-import { EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
+import { EventSchema, EventSerieSchema, StricterEventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceSchema } from '@ad/src/models/entities/place';
 
@@ -30,8 +30,6 @@ export const FillDeclarationSchema = z
       sacdId: true,
     }),
     eventSerie: EventSerieSchema.pick({
-      producerOfficialId: true,
-      producerName: true,
       performanceType: true,
       expectedDeclarationTypes: true,
       placeId: true, // TODO: should be PlaceInput, z.or(id, or object with text?) ... or just text and compare on backend?
@@ -44,6 +42,12 @@ export const FillDeclarationSchema = z
         name: PlaceSchema.shape.name.nullable(),
         address: AddressInputSchema.nullable(),
       }),
+      producer: z
+        .object({
+          officialId: StricterEventSerieSchema.shape.producerOfficialId,
+          name: StricterEventSerieSchema.shape.producerName,
+        })
+        .nullable(),
     }),
     events: z.array(
       EventSchema.pick({

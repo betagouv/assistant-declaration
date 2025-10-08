@@ -407,8 +407,7 @@ export const declarationRouter = router({
     });
 
     const placeholder: DeclarationWrapperSchemaType['placeholder'] = {
-      producerOfficialId: [],
-      producerName: [],
+      producer: [],
       place: [],
       placeCapacity: [],
     };
@@ -416,10 +415,15 @@ export const declarationRouter = router({
     // Fill with unique values
     // Since some are optional we ensure they are not null
     for (const previousDeclaration of previousDeclarations) {
-      if (previousDeclaration.producerOfficialId && !placeholder.producerOfficialId.includes(previousDeclaration.producerOfficialId))
-        placeholder.producerOfficialId.push(previousDeclaration.producerOfficialId);
-      if (previousDeclaration.producerName && !placeholder.producerName.includes(previousDeclaration.producerName))
-        placeholder.producerName.push(previousDeclaration.producerName);
+      if (
+        previousDeclaration.producerOfficialId &&
+        previousDeclaration.producerName &&
+        !placeholder.producer.find((p) => p.officialId === previousDeclaration.producerOfficialId && p.name === previousDeclaration.producerName)
+      )
+        placeholder.producer.push({
+          officialId: previousDeclaration.producerOfficialId,
+          name: previousDeclaration.producerName,
+        });
       if (previousDeclaration.place && !placeholder.place.find((p) => p.id === previousDeclaration.place!.id))
         placeholder.place.push(previousDeclaration.place);
       if (previousDeclaration.placeCapacity && !placeholder.placeCapacity.includes(previousDeclaration.placeCapacity))
@@ -495,8 +499,8 @@ export const declarationRouter = router({
       eventSerie: {
         id: eventSerie.id,
         name: eventSerie.name,
-        producerOfficialId: input.eventSerie.producerOfficialId,
-        producerName: input.eventSerie.producerName,
+        producerOfficialId: input.eventSerie.producer?.officialId ?? null,
+        producerName: input.eventSerie.producer?.name ?? null,
         performanceType: input.eventSerie.performanceType,
         expectedDeclarationTypes: input.eventSerie.expectedDeclarationTypes,
         place: null, // TODO: need association properly

@@ -1,0 +1,136 @@
+'use client';
+
+import { fr } from '@codegouvfr/react-dsfr';
+import { Input, InputProps } from '@codegouvfr/react-dsfr/Input';
+import Autocomplete from '@mui/material/Autocomplete';
+import debounce from 'lodash.debounce';
+import { FocusEventHandler, PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
+
+import { CompanySuggestion } from '@ad/src/client/api-gouv-fr';
+import { officialIdMask } from '@ad/src/components/OfficialIdField';
+import { searchCompanySuggestions } from '@ad/src/proxies/api-gouv.fr';
+import { formatMaskedValue } from '@ad/src/utils/imask';
+
+export interface Company {
+  officialId: string;
+  name: string;
+}
+
+export interface CompanyFieldProps {
+  value?: Company | null;
+  inputProps: Pick<InputProps, 'label' | 'nativeInputProps'>;
+  onChange: (newValue: Company | null) => void;
+  onBlur: FocusEventHandler<HTMLDivElement>;
+  defaultSuggestions?: Company[];
+  errorMessage?: string;
+}
+
+export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
+  // In the following headquarters address can be ommitted because if coming from the value and not listed it won't be used
+  // We provide it just for the Autocomplete component to take the right type without casting
+  const [defaultSuggestions] = useState<CompanySuggestion[]>(
+    props.defaultSuggestions?.map((dS) => {
+      return { ...dS, inlineHeadquartersAddress: '' };
+    }) ?? []
+  );
+  const [searchCompanyQuerySuggestions, setSearchCompanyQuerySuggestions] = useState<CompanySuggestion[]>(defaultSuggestions);
+  const [watchedInputValue, setWatchedInputValue] = useState<string>('');
+  const [suggestionsLoading, setSuggestionsLoading] = useState<boolean>(false);
+
+  const adjustedValue = useMemo(() => (props.value ? { ...props.value, inlineHeadquartersAddress: '' } : null), [props.value]);
+
+  // When there is no input value, we make sure to at least propose initial suggestions to help the user
+  useEffect(() => {
+    if (watchedInputValue === '') {
+      setSearchCompanyQuerySuggestions(defaultSuggestions);
+    }
+  }, [watchedInputValue, setSearchCompanyQuerySuggestions, defaultSuggestions]);
+
+  const handleSearchCompanyQueryChange = useCallback(
+    async (query: string) => {
+      setWatchedInputValue(query);
+
+      try {
+        setSuggestionsLoading(true);
+
+        const suggestions = await searchCompanySuggestions(query);
+
+        setSearchCompanyQuerySuggestions(suggestions);
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    },
+    [setSuggestionsLoading, searchCompanySuggestions]
+  );
+
+  const debouncedHandleCompanyQuery = useMemo(() => debounce(handleSearchCompanyQueryChange, 500), []);
+  useEffect(() => {
+    return () => {
+      debouncedHandleCompanyQuery.cancel();
+    };
+  }, [debouncedHandleCompanyQuery]);
+
+  return (
+    <Autocomplete
+      value={adjustedValue}
+      options={searchCompanyQuerySuggestions}
+      renderInput={({ InputProps, disabled, id, inputProps }) => {
+        return (
+          <Input
+            {...props.inputProps}
+            ref={InputProps.ref}
+            id={id}
+            disabled={disabled}
+            state={!!props.errorMessage ? 'error' : undefined}
+            stateRelatedMessage={props.errorMessage}
+            nativeInputProps={{
+              ...props.inputProps.nativeInputProps,
+              ...inputProps,
+            }}
+          />
+        );
+      }}
+      renderOption={(props, option) => {
+        const { key, ...otherProps } = props;
+
+        return (
+          <li key={key} {...otherProps}>
+            <div>
+              <span className={fr.cx('fr-text--bold')}>{option.name}</span>
+              &nbsp;
+              <span style={{ fontStyle: 'italic' }}>(SIREN {formatMaskedValue(officialIdMask, option.officialId)})</span>
+              <br />
+              <span>{option.inlineHeadquartersAddress}</span>
+            </div>
+          </li>
+        );
+      }}
+      isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // Since it relies on intermediate objects we provide a hard way (no unique ID for those)
+      getOptionLabel={(option) => {
+        return `${option.name} (${formatMaskedValue(officialIdMask, option.officialId)})`;
+      }}
+      onInputChange={(event, newInputValue, reason) => {
+        if (reason === 'input') {
+          handleSearchCompanyQueryChange(newInputValue);
+        }
+      }}
+      onChange={(event, newValue) => {
+        props.onChange(
+          newValue
+            ? {
+                officialId: newValue.officialId,
+                name: newValue.name,
+              }
+            : null
+        );
+      }}
+      onBlur={props.onBlur}
+      loading={suggestionsLoading}
+      selectOnFocus
+      handleHomeEndKeys
+      loadingText="Recherche en cours..."
+      noOptionsText="Aucune suggestion d'entreprise"
+      fullWidth
+    />
+  );
+}

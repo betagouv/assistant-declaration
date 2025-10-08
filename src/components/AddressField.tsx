@@ -5,7 +5,7 @@ import { Input, InputProps } from '@codegouvfr/react-dsfr/Input';
 import addressFormatter from '@fragaria/address-formatter';
 import Autocomplete from '@mui/material/Autocomplete';
 import debounce from 'lodash.debounce';
-import { FocusEventHandler, PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import { FocusEventHandler, PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { BanAddress } from '@ad/src/client/national-address-base';
 import { AddressSchemaType } from '@ad/src/models/entities/address';
@@ -27,21 +27,20 @@ export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
   // We provide it just for the Autocomplete component to take the right type without casting
   const adjustedValue = useMemo(() => (props.value ? { ...props.value, regionContext: '' } : null), [props.value]);
 
-  const handleSearchAddressQueryChange = async (query: string) => {
-    console.log(33333);
-    try {
-      setSuggestionsLoading(true);
+  const handleSearchAddressQueryChange = useCallback(
+    async (query: string) => {
+      try {
+        setSuggestionsLoading(true);
 
-      const suggestions = await searchAddressSuggestions(query);
+        const suggestions = await searchAddressSuggestions(query);
 
-      console.log(33333);
-      console.log(suggestions);
-
-      setSearchAddressQuerySuggestions(suggestions);
-    } finally {
-      setSuggestionsLoading(false);
-    }
-  };
+        setSearchAddressQuerySuggestions(suggestions);
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    },
+    [setSuggestionsLoading, searchAddressSuggestions]
+  );
 
   const debouncedHandleAddressQuery = useMemo(() => debounce(handleSearchAddressQueryChange, 500), []);
   useEffect(() => {
