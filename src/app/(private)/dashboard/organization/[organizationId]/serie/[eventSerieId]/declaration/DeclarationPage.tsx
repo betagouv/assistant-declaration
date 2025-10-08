@@ -334,6 +334,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             return (
                               <CompanyField
                                 value={value}
+                                defaultSuggestions={declarationWrapper.placeholder.producer}
                                 inputProps={{
                                   label: 'Raison sociale du producteur',
                                   nativeInputProps: {

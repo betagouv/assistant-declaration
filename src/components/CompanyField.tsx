@@ -39,28 +39,29 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
 
   const adjustedValue = useMemo(() => (props.value ? { ...props.value, inlineHeadquartersAddress: '' } : null), [props.value]);
 
-  // When there is no input value, we make sure to at least propose initial suggestions to help the user
-  useEffect(() => {
-    if (watchedInputValue === '') {
-      setSearchCompanyQuerySuggestions(defaultSuggestions);
-    }
-  }, [watchedInputValue, setSearchCompanyQuerySuggestions, defaultSuggestions]);
-
   const handleSearchCompanyQueryChange = useCallback(
     async (query: string) => {
       setWatchedInputValue(query);
 
-      try {
-        setSuggestionsLoading(true);
+      if (query !== '') {
+        try {
+          setSuggestionsLoading(true);
 
-        const suggestions = await searchCompanySuggestions(query);
+          const suggestions = await searchCompanySuggestions(query);
 
-        setSearchCompanyQuerySuggestions(suggestions);
-      } finally {
-        setSuggestionsLoading(false);
+          setSearchCompanyQuerySuggestions(suggestions);
+        } finally {
+          setSuggestionsLoading(false);
+        }
+      } else {
+        console.log(3333);
+        console.log(defaultSuggestions);
+
+        // When there is no input value, we make sure to at least propose initial suggestions to help the user
+        setSearchCompanyQuerySuggestions(defaultSuggestions);
       }
     },
-    [setSuggestionsLoading, searchCompanySuggestions]
+    [setSuggestionsLoading, searchCompanySuggestions, defaultSuggestions]
   );
 
   const debouncedHandleCompanyQuery = useMemo(() => debounce(handleSearchCompanyQueryChange, 500), []);
