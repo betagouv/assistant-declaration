@@ -611,7 +611,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             </div>
                           </div>
                         </div>
-                        <hr className={fr.cx('fr-my-3v')} />
                         <div className={fr.cx('fr-grid-row')}>
                           <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
                             <div className={fr.cx('fr-fieldset__element')}>
@@ -711,7 +710,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             </div>
                           </div>
                         </div>
-                        <hr className={fr.cx('fr-my-3v')} />
                         <div className={fr.cx('fr-grid-row')}>
                           <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
                             <div className={fr.cx('fr-fieldset__element')}>
