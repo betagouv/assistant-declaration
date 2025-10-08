@@ -5,23 +5,23 @@ import { Control, FieldErrors, UseFormSetValue, UseFormTrigger, useFieldArray } 
 
 import { EventFieldset } from '@ad/src/components/EventFieldset';
 import { FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
 import { RowForForm } from '@ad/src/utils/validation';
 
 export interface EventsFieldsetsProps {
   control: Control<FillDeclarationSchemaType, any>;
   setValue: UseFormSetValue<FillDeclarationSchemaType>;
   trigger: UseFormTrigger<FillDeclarationSchemaType>;
+  placeholder: DeclarationWrapperSchemaType['placeholder'];
   errors: FieldErrors<FillDeclarationSchemaType>['events'];
   readonly?: boolean;
 }
 
-export function EventsFieldsets({ control, setValue, trigger, errors, readonly }: EventsFieldsetsProps) {
+export function EventsFieldsets({ control, setValue, trigger, placeholder, errors, readonly }: EventsFieldsetsProps) {
   const { fields, append, update, remove } = useFieldArray({
     control,
     name: 'events',
   });
-
-  // const aaa =
 
   const eventsWithErrorLogic = useMemo(() => {
     return fields.map((field, index): RowForForm<typeof field, NonNullable<typeof errors>[0]> => {
@@ -53,6 +53,7 @@ export function EventsFieldsets({ control, setValue, trigger, errors, readonly }
                     trigger={trigger}
                     eventIndex={eventWithErrorLogic.index}
                     name={`events.${eventWithErrorLogic.index}`}
+                    placeholder={placeholder}
                     errors={eventWithErrorLogic.errors}
                     readonly={false}
                   />

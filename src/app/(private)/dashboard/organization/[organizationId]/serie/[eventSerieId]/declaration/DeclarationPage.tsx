@@ -276,7 +276,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                     <fieldset className={fr.cx('fr-fieldset')}>
                       <h2 className={fr.cx('fr-h4')}>Représentations</h2>
                       <div className={fr.cx('fr-col-12')}>
-                        <EventsFieldsets control={control} setValue={setValue} trigger={trigger} errors={errors.events} readonly={false} />
+                        <EventsFieldsets
+                          control={control}
+                          setValue={setValue}
+                          trigger={trigger}
+                          placeholder={declarationWrapper.placeholder}
+                          errors={errors.events}
+                          readonly={false}
+                        />
                       </div>
                     </fieldset>
                     <fieldset className={fr.cx('fr-fieldset')}>
