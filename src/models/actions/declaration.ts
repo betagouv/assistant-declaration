@@ -70,6 +70,7 @@ export const FillDeclarationSchema = z
         placeCapacityOverride: true,
         audienceOverride: true,
         // ticketingRevenueTaxRateOverride: true,
+        ticketingRevenueTaxRateOverride: true, // TODO: waiting to know if using them or not
       }).extend({
         placeOverride: PlaceInputSchema,
       })

@@ -181,14 +181,14 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
         <Text style={styles.h4}>Représentations - {props.sacemDeclaration.eventSerie.name}</Text>
         <View style={styles.gridContainer}>
           <View style={styles.gridItem}>
-            <Table weightings={[3, 1.2, 3, 1.25, 1, 1, 1, 1, 1]} tdStyle={{ padding: 5 }}>
+            <Table weightings={[3, 1.2, 3, 1.25, 1, 1, 1, 1]} tdStyle={{ padding: 5 }}>
               <TableHeader fixed>
                 <TableCell>Date et heure</TableCell>
                 <TableCell>Audience</TableCell>
                 <TableCell>Lieu</TableCell>
                 <TableCell>Entrées</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>Jauge</TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>Taux de TVA</TableCell>
+                {/* <TableCell style={{ justifyContent: 'flex-end' }}>Taux de TVA</TableCell> */}
                 <TableCell style={{ justifyContent: 'flex-end' }}>Montant HT</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>Montant de la TVA</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>Montant TTC</TableCell>
@@ -230,7 +230,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                   <TableCell style={{ justifyContent: 'flex-end' }}>
                     <Text>{flattenEvent.placeCapacity}</Text>
                   </TableCell>
-                  <TableCell style={{ justifyContent: 'flex-end' }}>
+                  {/* <TableCell style={{ justifyContent: 'flex-end' }}>
                     <Text>
                       {flattenEvent.ticketingRevenueTaxRate !== null
                         ? escapeFormattedNumberForPdf(
@@ -240,7 +240,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                           )
                         : '-'}
                     </Text>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell style={{ justifyContent: 'flex-end' }}>
                     <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.ticketingRevenueExcludingTaxes }))}</Text>
                   </TableCell>

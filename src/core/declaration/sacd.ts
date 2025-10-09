@@ -278,13 +278,17 @@ export function prepareDeclarationParameter(declaration: SacdDeclarationSchemaTy
       rep_horaire: formatTime(flattenEvent.startAt),
       Billetterie: {
         rep_mt_billets: formatAmountNumber(flattenEvent.ticketingRevenueExcludingTaxes),
-        rep_tx_tva_billets: 100 * (flattenEvent.ticketingRevenueTaxRate ?? 0), // Providing 5.5% as 5.5 instead of 0.055
         rep_mt_tva_billets: getTaxAmountFromIncludingAndExcludingTaxesAmounts(
           flattenEvent.ticketingRevenueIncludingTaxes,
           flattenEvent.ticketingRevenueExcludingTaxes
         ),
         rep_nb_billets_pay: flattenEvent.paidTickets,
         rep_nb_billets_exo: flattenEvent.freeTickets,
+        // ...(flattenEvent.ticketingRevenueTaxRate !== null
+        //   ? {
+        //       rep_tx_tva_billets: 100 * flattenEvent.ticketingRevenueTaxRate, // Providing 5.5% as 5.5 instead of 0.055
+        //     }
+        //   : {}),
       },
       Exploitation: {
         // expl_type_ref: 'TODO',

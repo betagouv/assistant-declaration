@@ -419,23 +419,23 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     }
   }, [previousAudience, currentAudience, getValues, setValue, displayDefaultImpactMessage]);
 
-  const currentTaxRate = watch('eventSerie.ticketingRevenueTaxRate');
-  const previousTaxRate = usePrevious(currentTaxRate);
+  const currentTicketingRevenueTaxRate = watch('eventSerie.ticketingRevenueTaxRate');
+  const previousTicketingRevenueTaxRate = usePrevious(currentTicketingRevenueTaxRate);
   useEffect(() => {
-    if (previousTaxRate !== undefined && currentTaxRate !== previousTaxRate) {
+    if (previousTicketingRevenueTaxRate !== undefined && currentTicketingRevenueTaxRate !== previousTicketingRevenueTaxRate) {
       const events = getValues('events');
       let modifiedEvents = 0;
 
       events.forEach((event, eventIndex) => {
-        if (event.ticketingRevenueTaxRateOverride === null || event.ticketingRevenueTaxRateOverride === previousTaxRate) {
-          setValue(`events.${eventIndex}.ticketingRevenueTaxRateOverride`, currentTaxRate);
+        if (event.ticketingRevenueTaxRateOverride === null || event.ticketingRevenueTaxRateOverride === previousTicketingRevenueTaxRate) {
+          setValue(`events.${eventIndex}.ticketingRevenueTaxRateOverride`, currentTicketingRevenueTaxRate);
           modifiedEvents++;
         }
       });
 
       displayDefaultImpactMessage(modifiedEvents, events.length);
     }
-  }, [previousTaxRate, currentTaxRate, getValues, setValue, displayDefaultImpactMessage]);
+  }, [previousTicketingRevenueTaxRate, currentTicketingRevenueTaxRate, getValues, setValue, displayDefaultImpactMessage]);
 
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;

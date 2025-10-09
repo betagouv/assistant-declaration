@@ -84,7 +84,6 @@ export const FlattenSacdEventSchema = StricterEventSchema.pick({
   .merge(
     EventSchema.pick({
       endAt: true,
-      ticketingRevenueTaxRate: true,
     })
   )
   .merge(

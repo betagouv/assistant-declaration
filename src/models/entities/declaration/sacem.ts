@@ -91,7 +91,6 @@ export const FlattenSacemEventSchema = StricterEventSchema.pick({
   })
   .merge(
     EventSchema.pick({
-      ticketingRevenueTaxRate: true,
       consumptionsRevenueTaxRate: true,
       cateringRevenueTaxRate: true,
       programSalesRevenueTaxRate: true,
