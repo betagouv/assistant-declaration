@@ -38,11 +38,11 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
   }, [setValue]);
 
   const { inputRef: ticketingRevenueExcludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.ticketingRevenueExcludingTaxes?.toString() ?? '',
+    defaultValue: control._defaultValues.events?.[eventIndex]?.ticketingRevenueExcludingTaxes ?? 0,
     onChange: setters.setTicketingRevenueExcludingTaxes,
   });
   const { inputRef: ticketingRevenueIncludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.ticketingRevenueIncludingTaxes?.toString() ?? '',
+    defaultValue: control._defaultValues.events?.[eventIndex]?.ticketingRevenueIncludingTaxes ?? 0,
     onChange: setters.setTicketingRevenueIncludingTaxes,
   });
 

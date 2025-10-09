@@ -8,13 +8,13 @@ import debounce from 'lodash.debounce';
 import { FocusEventHandler, PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { BanAddress } from '@ad/src/client/national-address-base';
-import { AddressSchemaType } from '@ad/src/models/entities/address';
+import { AddressInputSchemaType, AddressSchemaType } from '@ad/src/models/entities/address';
 import { searchAddressSuggestions } from '@ad/src/proxies/national-address-base';
 
 export interface AddressFieldProps {
   value?: Omit<AddressSchemaType, 'id'> | null;
   inputProps: Pick<InputProps, 'label' | 'nativeInputProps'>;
-  onChange: (newValue: BanAddress | null) => void;
+  onChange: (newValue: AddressInputSchemaType | null) => void;
   onBlur: FocusEventHandler<HTMLDivElement>;
   errorMessage?: string;
 }
@@ -104,7 +104,13 @@ export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
         }
       }}
       onChange={(event, newValue) => {
-        props.onChange(newValue);
+        if (newValue) {
+          const { regionContext, ...addressInput } = newValue;
+
+          props.onChange(addressInput);
+        } else {
+          props.onChange(null);
+        }
       }}
       onBlur={props.onBlur}
       loading={suggestionsLoading}

@@ -1,7 +1,7 @@
 'use client';
 
 import { FactoryOpts, InputMask } from 'imask';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 import { useIMask } from 'react-imask';
 
@@ -49,14 +49,14 @@ export function AmountMaskFactory(locale: string, signed?: boolean): FactoryOpts
 }
 
 interface UseAmountInputProps extends Pick<ControllerRenderProps<any, string>, 'onChange'> {
-  defaultValue: ControllerRenderProps<any, string>['value'];
+  defaultValue: number;
   signed?: boolean;
 }
 
 export function useAmountInput({ defaultValue, onChange, signed }: UseAmountInputProps) {
   const onAccept = useCallback<(value: InputMask<FactoryOpts>['value'], maskRef: InputMask<FactoryOpts>, e?: InputEvent) => void>(
     (maskedValue, mask, event) => {
-      onChange(mask.unmaskedValue);
+      onChange(parseFloat(mask.unmaskedValue)); // Needed since underlying it's managing string only
     },
     [onChange]
   );
@@ -68,7 +68,7 @@ export function useAmountInput({ defaultValue, onChange, signed }: UseAmountInpu
   // The following is needed to synchronize "form state" into the masked input in case a `reset()` is used
   useEffect(() => {
     if (defaultValue != null) {
-      setUnmaskedValue(defaultValue);
+      setUnmaskedValue(defaultValue.toString());
     }
   }, [defaultValue, setUnmaskedValue]);
 

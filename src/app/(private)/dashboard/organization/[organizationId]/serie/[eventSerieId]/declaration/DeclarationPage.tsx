@@ -19,6 +19,7 @@ import { trpc } from '@ad/src/client/trpcClient';
 import { AddressField } from '@ad/src/components/AddressField';
 import { useAmountInput } from '@ad/src/components/AmountInput';
 import { BaseForm } from '@ad/src/components/BaseForm';
+import { Button } from '@ad/src/components/Button';
 import { CompanyField } from '@ad/src/components/CompanyField';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventsFieldsets } from '@ad/src/components/EventsFieldsets';
@@ -31,6 +32,7 @@ import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/us
 import { currentTaxRates } from '@ad/src/core/declaration';
 import { getEventsKeyFigures } from '@ad/src/core/declaration/format';
 import { FillDeclarationSchema, FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { AddressInputSchemaType } from '@ad/src/models/entities/address';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { AudienceSchema, PerformanceTypeSchema } from '@ad/src/models/entities/event';
 import { formatMaskedValue } from '@ad/src/utils/imask';
@@ -107,6 +109,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       if (!formInitialized) {
         setFormInitialized(true); // It's needed otherwise if you blur/focus again the window the new fetch data will override the "dirty form data"
 
+        const tmpAddress = getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.address ?? null;
+        let addressInput: AddressInputSchemaType | null = null;
+
+        if (tmpAddress) {
+          const { id, ...liteAddress } = tmpAddress;
+          addressInput = liteAddress;
+        }
+
         // Update the form with fetched data
         reset({
           eventSerieId: eventSerieId,
@@ -127,7 +137,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             expectedDeclarationTypes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expectedDeclarationTypes,
             place: {
               name: getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.name ?? null,
-              address: getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.address ?? null,
+              address: addressInput,
             },
             placeCapacity: getDeclaration.data.declarationWrapper.declaration.eventSerie.placeCapacity,
             audience: getDeclaration.data.declarationWrapper.declaration.eventSerie.audience,
@@ -135,6 +145,15 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             expensesExcludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expensesExcludingTaxes,
           },
           events: getDeclaration.data.declarationWrapper.declaration.events.map((event) => {
+            const tmpEventAddress =
+              event.placeOverride?.address ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.address ?? null;
+            let eventAddressInput: AddressInputSchemaType | null = null;
+
+            if (tmpEventAddress) {
+              const { id, ...liteEventAddress } = tmpEventAddress;
+              eventAddressInput = liteEventAddress;
+            }
+
             return {
               id: event.id,
               startAt: event.startAt,
@@ -146,7 +165,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
               paidTickets: event.paidTickets,
               placeOverride: {
                 name: event.placeOverride?.name ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.name ?? null,
-                address: event.placeOverride?.address ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.address ?? null,
+                address: eventAddressInput,
               },
               placeCapacityOverride: event.placeCapacityOverride ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.placeCapacity,
               audienceOverride: event.audienceOverride ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.audience,
@@ -178,7 +197,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   });
 
   const { inputRef: expensesExcludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.eventSerie?.expensesExcludingTaxes?.toString() ?? '',
+    defaultValue: control._defaultValues.eventSerie?.expensesExcludingTaxes ?? 0,
     onChange: setters.setExpensesExcludingTaxes,
   });
 
@@ -403,6 +422,49 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
               <div className={fr.cx('fr-col-12')}>
                 <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="connecter un système de billetterie">
                   <div className={fr.cx('fr-col-12')}>
+                    <fieldset className={fr.cx('fr-fieldset')}>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <ul className={fr.cx('fr-btns-group')}>
+                          <li>
+                            <Button type="submit" loading={fillDeclaration.isPending}>
+                              Enregistrer
+                            </Button>
+                          </li>
+                          <li>
+                            <Button
+                              onClick={() => {
+                                showConfirmationDialog({
+                                  description: (
+                                    <>
+                                      Êtes-vous sûr de vouloir transmettre ces informations à la SACEM pour le spectacle{' '}
+                                      <span className={fr.cx('fr-text--bold')} data-sentry-mask>
+                                        {declaration.eventSerie.name}
+                                      </span>{' '}
+                                      ?
+                                      <br />
+                                      <br />
+                                      <span style={{ fontStyle: 'italic' }}>
+                                        Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou
+                                        amendement de la déclaration, il faudra directement contacter votre interlocuteur SACEM.
+                                      </span>
+                                    </>
+                                  ),
+                                  onConfirm: async () => {
+                                    const result = await transmitDeclaration.mutateAsync({
+                                      eventSerieId: eventSerieId,
+                                    });
+
+                                    push(['trackEvent', 'declaration', 'transmit']);
+                                  },
+                                });
+                              }}
+                            >
+                              Déclarer
+                            </Button>
+                          </li>
+                        </ul>
+                      </div>
+                    </fieldset>
                     <fieldset className={fr.cx('fr-fieldset')}>
                       <h2 className={fr.cx('fr-h4')}>Représentations</h2>
                       <div className={fr.cx('fr-col-12')}>
