@@ -45,6 +45,8 @@ export const declarationRouter = router({
         audience: true,
         taxRate: true,
         expensesExcludingTaxes: true,
+        introductionFeesExpensesExcludingTaxes: true,
+        circusSpecificExpensesExcludingTaxes: true,
         createdAt: true,
         updatedAt: true,
         ticketingSystem: {
@@ -83,6 +85,18 @@ export const declarationRouter = router({
             ticketingRevenueExcludingTaxes: true,
             ticketingRevenueTaxRate: true,
             ticketingRevenueDefinedTaxRate: true,
+            consumptionsRevenueIncludingTaxes: true,
+            consumptionsRevenueExcludingTaxes: true,
+            consumptionsRevenueTaxRate: true,
+            cateringRevenueIncludingTaxes: true,
+            cateringRevenueExcludingTaxes: true,
+            cateringRevenueTaxRate: true,
+            programSalesRevenueIncludingTaxes: true,
+            programSalesRevenueExcludingTaxes: true,
+            programSalesRevenueTaxRate: true,
+            otherRevenueIncludingTaxes: true,
+            otherRevenueExcludingTaxes: true,
+            otherRevenueTaxRate: true,
             freeTickets: true,
             paidTickets: true,
             placeOverrideId: true,
@@ -299,6 +313,8 @@ export const declarationRouter = router({
         audience: true,
         taxRate: true,
         expensesExcludingTaxes: true,
+        introductionFeesExpensesExcludingTaxes: true,
+        circusSpecificExpensesExcludingTaxes: true,
         createdAt: true,
         updatedAt: true,
         ticketingSystem: {
@@ -337,6 +353,18 @@ export const declarationRouter = router({
             ticketingRevenueExcludingTaxes: true,
             ticketingRevenueTaxRate: true,
             ticketingRevenueDefinedTaxRate: true,
+            consumptionsRevenueIncludingTaxes: true,
+            consumptionsRevenueExcludingTaxes: true,
+            consumptionsRevenueTaxRate: true,
+            cateringRevenueIncludingTaxes: true,
+            cateringRevenueExcludingTaxes: true,
+            cateringRevenueTaxRate: true,
+            programSalesRevenueIncludingTaxes: true,
+            programSalesRevenueExcludingTaxes: true,
+            programSalesRevenueTaxRate: true,
+            otherRevenueIncludingTaxes: true,
+            otherRevenueExcludingTaxes: true,
+            otherRevenueTaxRate: true,
             freeTickets: true,
             paidTickets: true,
             placeOverrideId: true,
@@ -508,6 +536,8 @@ export const declarationRouter = router({
         audience: input.eventSerie.audience,
         taxRate: input.eventSerie.taxRate,
         expensesExcludingTaxes: input.eventSerie.expensesExcludingTaxes,
+        introductionFeesExpensesExcludingTaxes: input.eventSerie.introductionFeesExpensesExcludingTaxes,
+        circusSpecificExpensesExcludingTaxes: input.eventSerie.circusSpecificExpensesExcludingTaxes,
       },
       events: input.events.map((event) => {
         return {
@@ -516,7 +546,24 @@ export const declarationRouter = router({
           endAt: event.endAt,
           ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
           ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
-          ticketingRevenueTaxRate: event.ticketingRevenueTaxRate,
+          // ticketingRevenueTaxRate: event.ticketingRevenueTaxRate,
+          ticketingRevenueTaxRate: null,
+          consumptionsRevenueIncludingTaxes: event.consumptionsRevenueIncludingTaxes,
+          consumptionsRevenueExcludingTaxes: event.consumptionsRevenueExcludingTaxes,
+          // consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate,
+          consumptionsRevenueTaxRate: null,
+          cateringRevenueIncludingTaxes: event.cateringRevenueIncludingTaxes,
+          cateringRevenueExcludingTaxes: event.cateringRevenueExcludingTaxes,
+          // cateringRevenueTaxRate: event.cateringRevenueTaxRate,
+          cateringRevenueTaxRate: null,
+          programSalesRevenueIncludingTaxes: event.programSalesRevenueIncludingTaxes,
+          programSalesRevenueExcludingTaxes: event.programSalesRevenueExcludingTaxes,
+          // programSalesRevenueTaxRate: event.programSalesRevenueTaxRate,
+          programSalesRevenueTaxRate: null,
+          otherRevenueIncludingTaxes: event.otherRevenueIncludingTaxes,
+          otherRevenueExcludingTaxes: event.otherRevenueExcludingTaxes,
+          // otherRevenueTaxRate: event.otherRevenueTaxRate,
+          otherRevenueTaxRate: null,
           freeTickets: event.freeTickets,
           paidTickets: event.paidTickets,
           placeOverride: null, // TODO: need association properly
@@ -526,6 +573,13 @@ export const declarationRouter = router({
         };
       }),
     });
+
+    //
+    //
+    // circus expenses cannot be greater than expenses, same for introduction fees, use zod
+    // and both cannot be higher than the total...
+    //
+    //
 
     // TODO:
     // TODO: should we ensure format for each organism?
@@ -573,6 +627,8 @@ export const declarationRouter = router({
         audience: input.eventSerie.audience,
         taxRate: input.eventSerie.taxRate,
         expensesExcludingTaxes: input.eventSerie.expensesExcludingTaxes,
+        introductionFeesExpensesExcludingTaxes: input.eventSerie.introductionFeesExpensesExcludingTaxes,
+        circusSpecificExpensesExcludingTaxes: input.eventSerie.circusSpecificExpensesExcludingTaxes,
       },
       select: {
         id: true,
@@ -588,6 +644,8 @@ export const declarationRouter = router({
         audience: true,
         taxRate: true,
         expensesExcludingTaxes: true,
+        introductionFeesExpensesExcludingTaxes: true,
+        circusSpecificExpensesExcludingTaxes: true,
         createdAt: true,
         updatedAt: true,
         ticketingSystem: {
@@ -626,6 +684,18 @@ export const declarationRouter = router({
             ticketingRevenueExcludingTaxes: true,
             ticketingRevenueTaxRate: true,
             ticketingRevenueDefinedTaxRate: true,
+            consumptionsRevenueIncludingTaxes: true,
+            consumptionsRevenueExcludingTaxes: true,
+            consumptionsRevenueTaxRate: true,
+            cateringRevenueIncludingTaxes: true,
+            cateringRevenueExcludingTaxes: true,
+            cateringRevenueTaxRate: true,
+            programSalesRevenueIncludingTaxes: true,
+            programSalesRevenueExcludingTaxes: true,
+            programSalesRevenueTaxRate: true,
+            otherRevenueIncludingTaxes: true,
+            otherRevenueExcludingTaxes: true,
+            otherRevenueTaxRate: true,
             freeTickets: true,
             paidTickets: true,
             placeOverrideId: true,

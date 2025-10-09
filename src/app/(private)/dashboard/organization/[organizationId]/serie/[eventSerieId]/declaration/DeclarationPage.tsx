@@ -119,6 +119,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           audience: result.declaration.eventSerie.audience,
           taxRate: result.declaration.eventSerie.taxRate,
           expensesExcludingTaxes: result.declaration.eventSerie.expensesExcludingTaxes,
+          introductionFeesExpensesExcludingTaxes: result.declaration.eventSerie.introductionFeesExpensesExcludingTaxes,
+          circusSpecificExpensesExcludingTaxes: result.declaration.eventSerie.circusSpecificExpensesExcludingTaxes,
         },
         events: result.declaration.events.map((event) => {
           const tmpEventAddress = event.placeOverride?.address ?? result.declaration.eventSerie.place?.address ?? null;
@@ -136,6 +138,18 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
             ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
             ticketingRevenueTaxRate: event.ticketingRevenueTaxRate,
+            consumptionsRevenueIncludingTaxes: event.consumptionsRevenueIncludingTaxes,
+            consumptionsRevenueExcludingTaxes: event.consumptionsRevenueExcludingTaxes,
+            consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate,
+            cateringRevenueIncludingTaxes: event.cateringRevenueIncludingTaxes,
+            cateringRevenueExcludingTaxes: event.cateringRevenueExcludingTaxes,
+            cateringRevenueTaxRate: event.cateringRevenueTaxRate,
+            programSalesRevenueIncludingTaxes: event.programSalesRevenueIncludingTaxes,
+            programSalesRevenueExcludingTaxes: event.programSalesRevenueExcludingTaxes,
+            programSalesRevenueTaxRate: event.programSalesRevenueTaxRate,
+            otherRevenueIncludingTaxes: event.otherRevenueIncludingTaxes,
+            otherRevenueExcludingTaxes: event.otherRevenueExcludingTaxes,
+            otherRevenueTaxRate: event.otherRevenueTaxRate,
             freeTickets: event.freeTickets,
             paidTickets: event.paidTickets,
             placeOverride: {
@@ -193,6 +207,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             audience: getDeclaration.data.declarationWrapper.declaration.eventSerie.audience,
             taxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.taxRate,
             expensesExcludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expensesExcludingTaxes,
+            introductionFeesExpensesExcludingTaxes:
+              getDeclaration.data.declarationWrapper.declaration.eventSerie.introductionFeesExpensesExcludingTaxes,
+            circusSpecificExpensesExcludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesExcludingTaxes,
           },
           events: getDeclaration.data.declarationWrapper.declaration.events.map((event) => {
             const tmpEventAddress =
@@ -211,6 +228,18 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
               ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
               ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
               ticketingRevenueTaxRate: event.ticketingRevenueTaxRate,
+              consumptionsRevenueIncludingTaxes: event.consumptionsRevenueIncludingTaxes,
+              consumptionsRevenueExcludingTaxes: event.consumptionsRevenueExcludingTaxes,
+              consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate,
+              cateringRevenueIncludingTaxes: event.cateringRevenueIncludingTaxes,
+              cateringRevenueExcludingTaxes: event.cateringRevenueExcludingTaxes,
+              cateringRevenueTaxRate: event.cateringRevenueTaxRate,
+              programSalesRevenueIncludingTaxes: event.programSalesRevenueIncludingTaxes,
+              programSalesRevenueExcludingTaxes: event.programSalesRevenueExcludingTaxes,
+              programSalesRevenueTaxRate: event.programSalesRevenueTaxRate,
+              otherRevenueIncludingTaxes: event.otherRevenueIncludingTaxes,
+              otherRevenueExcludingTaxes: event.otherRevenueExcludingTaxes,
+              otherRevenueTaxRate: event.otherRevenueTaxRate,
               freeTickets: event.freeTickets,
               paidTickets: event.paidTickets,
               placeOverride: {
@@ -233,6 +262,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       setSacemId: (value: string) => setValue('organization.sacemId', value),
       setSacdId: (value: string) => setValue('organization.sacdId', value),
       setExpensesExcludingTaxes: (value: number) => setValue('eventSerie.expensesExcludingTaxes', value),
+      setIntroductionFeesExpensesExcludingTaxes: (value: number) => setValue('eventSerie.introductionFeesExpensesExcludingTaxes', value),
+      setCircusSpecificExpensesExcludingTaxes: (value: number) => setValue('eventSerie.circusSpecificExpensesExcludingTaxes', value),
     };
   }, [setValue]);
 
@@ -249,6 +280,16 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const { inputRef: expensesExcludingTaxesMaskInputRef } = useAmountInput({
     defaultValue: control._defaultValues.eventSerie?.expensesExcludingTaxes ?? 0,
     onChange: setters.setExpensesExcludingTaxes,
+  });
+
+  const { inputRef: introductionFeesExpensesExcludingTaxesMaskInputRef } = useAmountInput({
+    defaultValue: control._defaultValues.eventSerie?.introductionFeesExpensesExcludingTaxes ?? 0,
+    onChange: setters.setIntroductionFeesExpensesExcludingTaxes,
+  });
+
+  const { inputRef: circusSpecificExpensesExcludingTaxesMaskInputRef } = useAmountInput({
+    defaultValue: control._defaultValues.eventSerie?.circusSpecificExpensesExcludingTaxes ?? 0,
+    onChange: setters.setCircusSpecificExpensesExcludingTaxes,
   });
 
   const { computedStartAt, computedEndAt, eventsKeyFigures } = useMemo(() => {
@@ -981,6 +1022,52 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                       stateRelatedMessage={error?.message}
                                       nativeInputProps={{
                                         ref: expensesExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                                        placeholder: '0 €',
+                                        onBlur: onBlur,
+                                      }}
+                                    />
+                                  );
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Controller
+                                control={control}
+                                name="eventSerie.introductionFeesExpensesExcludingTaxes"
+                                defaultValue={control._defaultValues.eventSerie?.introductionFeesExpensesExcludingTaxes ?? 0}
+                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                  return (
+                                    <Input
+                                      label="Dépenses globales HT"
+                                      state={!!error ? 'error' : undefined}
+                                      stateRelatedMessage={error?.message}
+                                      nativeInputProps={{
+                                        ref: introductionFeesExpensesExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                                        placeholder: '0 €',
+                                        onBlur: onBlur,
+                                      }}
+                                    />
+                                  );
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Controller
+                                control={control}
+                                name="eventSerie.circusSpecificExpensesExcludingTaxes"
+                                defaultValue={control._defaultValues.eventSerie?.circusSpecificExpensesExcludingTaxes ?? 0}
+                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                  return (
+                                    <Input
+                                      label="Dépenses globales HT"
+                                      state={!!error ? 'error' : undefined}
+                                      stateRelatedMessage={error?.message}
+                                      nativeInputProps={{
+                                        ref: circusSpecificExpensesExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
                                         placeholder: '0 €',
                                         onBlur: onBlur,
                                       }}

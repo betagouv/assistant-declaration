@@ -22,6 +22,8 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
     audience: true,
     taxRate: true,
     expensesExcludingTaxes: true,
+    introductionFeesExpensesExcludingTaxes: true,
+    circusSpecificExpensesExcludingTaxes: true,
   })
     .merge(
       z.object({
@@ -34,13 +36,24 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
       startAt: true,
       ticketingRevenueIncludingTaxes: true,
       ticketingRevenueExcludingTaxes: true,
-      ticketingRevenueTaxRate: true,
+      consumptionsRevenueIncludingTaxes: true,
+      consumptionsRevenueExcludingTaxes: true,
+      cateringRevenueIncludingTaxes: true,
+      cateringRevenueExcludingTaxes: true,
+      programSalesRevenueIncludingTaxes: true,
+      programSalesRevenueExcludingTaxes: true,
+      otherRevenueIncludingTaxes: true,
+      otherRevenueExcludingTaxes: true,
       freeTickets: true,
       paidTickets: true,
     })
       .merge(
         EventSchema.pick({
           ticketingRevenueTaxRate: true,
+          consumptionsRevenueTaxRate: true,
+          cateringRevenueTaxRate: true,
+          programSalesRevenueTaxRate: true,
+          otherRevenueTaxRate: true,
           // Since that's overrides there are not required
           placeCapacityOverride: true,
           audienceOverride: true,
@@ -63,6 +76,14 @@ export const FlattenSacemEventSchema = StricterEventSchema.pick({
   startAt: true,
   ticketingRevenueIncludingTaxes: true,
   ticketingRevenueExcludingTaxes: true,
+  consumptionsRevenueIncludingTaxes: true,
+  consumptionsRevenueExcludingTaxes: true,
+  cateringRevenueIncludingTaxes: true,
+  cateringRevenueExcludingTaxes: true,
+  programSalesRevenueIncludingTaxes: true,
+  programSalesRevenueExcludingTaxes: true,
+  otherRevenueIncludingTaxes: true,
+  otherRevenueExcludingTaxes: true,
   freeTickets: true,
   paidTickets: true,
 })
@@ -72,6 +93,10 @@ export const FlattenSacemEventSchema = StricterEventSchema.pick({
   .merge(
     EventSchema.pick({
       ticketingRevenueTaxRate: true,
+      consumptionsRevenueTaxRate: true,
+      cateringRevenueTaxRate: true,
+      programSalesRevenueTaxRate: true,
+      otherRevenueTaxRate: true,
     })
   )
   .merge(

@@ -98,15 +98,47 @@
         "too_small_one": "l'email est requis"
       },
       "events": {
+        "cateringRevenueExcludingTaxes": {
+          "invalid_type": "le montant HT doit être un nombre entier",
+          "too_small": "le montant HT doit être supérieur à {{minimum}} euro"
+        },
+        "cateringRevenueIncludingTaxes": {
+          "invalid_type": "le montant TTC doit être un nombre entier",
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
+        "consumptionsRevenueExcludingTaxes": {
+          "invalid_type": "le montant HT doit être un nombre entier",
+          "too_small": "le montant HT doit être supérieur à {{minimum}} euro"
+        },
+        "consumptionsRevenueIncludingTaxes": {
+          "invalid_type": "le montant TTC doit être un nombre entier",
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
         "freeTickets": {
           "invalid_type": "le nombre de billets gratuits doit être un nombre entier",
           "too_small": "le nombre de billets gratuits doit être supérieur à {{minimum}}",
           "too_small_one": "le nombre de billets gratuits est requis"
         },
+        "otherRevenueExcludingTaxes": {
+          "invalid_type": "le montant HT doit être un nombre entier",
+          "too_small": "le montant HT doit être supérieur à {{minimum}} euro"
+        },
+        "otherRevenueIncludingTaxes": {
+          "invalid_type": "le montant TTC doit être un nombre entier",
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
         "paidTickets": {
           "invalid_type": "le nombre de billets payants doit être un nombre entier",
           "too_small": "le nombre de billets payants doit être supérieur à {{minimum}}",
           "too_small_one": "le nombre de billets payants est requis"
+        },
+        "programSalesRevenueExcludingTaxes": {
+          "invalid_type": "le montant HT doit être un nombre entier",
+          "too_small": "le montant HT doit être supérieur à {{minimum}} euro"
+        },
+        "programSalesRevenueIncludingTaxes": {
+          "invalid_type": "le montant TTC doit être un nombre entier",
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
         },
         "taxRateOverride": {
           "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"

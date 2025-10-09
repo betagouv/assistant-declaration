@@ -317,7 +317,12 @@ export function prepareDeclarationParameter(declaration: SacdDeclarationSchemaTy
       eventSerieSpecificsFilled = true;
 
       // TODO: is cession all expenses in our... probably not, waiting for mockups
-      declarationParameterRepresentation.Exploitation.rep_mt_depenses = formatAmountNumber(declaration.eventSerie.expensesExcludingTaxes);
+      declarationParameterRepresentation.Exploitation.rep_mt_depenses = formatAmountNumber(
+        declaration.eventSerie.expensesExcludingTaxes - declaration.eventSerie.circusSpecificExpensesExcludingTaxes
+      );
+      declarationParameterRepresentation.Exploitation.rep_mt_frais = formatAmountNumber(
+        declaration.eventSerie.introductionFeesExpensesExcludingTaxes
+      );
     }
 
     declarationParameter.Declaration.Representations.Representation.push(declarationParameterRepresentation);

@@ -238,11 +238,13 @@ model EventSerie {
   // image Attachment
 
   // Properties specific to when it's performed
-  placeId                String?  @db.Uuid
-  placeCapacity          Int?
-  audience               Audience @default(ALL)
-  taxRate                Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
-  expensesExcludingTaxes Decimal  @db.Decimal(10, 2)
+  placeId                                String?  @db.Uuid
+  placeCapacity                          Int?
+  audience                               Audience @default(ALL)
+  taxRate                                Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
+  expensesExcludingTaxes                 Decimal  @db.Decimal(10, 2)
+  introductionFeesExpensesExcludingTaxes Decimal  @db.Decimal(10, 2)
+  circusSpecificExpensesExcludingTaxes   Decimal? @db.Decimal(10, 2)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -256,17 +258,29 @@ model EventSerie {
 }
 
 model Event {
-  id                             String    @id @default(uuid()) @db.Uuid
-  internalTicketingSystemId      String
-  eventSerieId                   String    @db.Uuid
-  startAt                        DateTime
-  endAt                          DateTime?
-  ticketingRevenueIncludingTaxes Decimal   @db.Decimal(10, 2)
-  ticketingRevenueExcludingTaxes Decimal   @db.Decimal(10, 2)
-  ticketingRevenueTaxRate        Decimal?  @db.Decimal(10, 2) // Optional if reusing the one from the event serie
-  ticketingRevenueDefinedTaxRate Boolean // In case there is no legal rate to bind both amounts
-  freeTickets                    Int
-  paidTickets                    Int
+  id                                String    @id @default(uuid()) @db.Uuid
+  internalTicketingSystemId         String
+  eventSerieId                      String    @db.Uuid
+  startAt                           DateTime
+  endAt                             DateTime?
+  ticketingRevenueIncludingTaxes    Decimal   @db.Decimal(10, 2)
+  ticketingRevenueExcludingTaxes    Decimal   @db.Decimal(10, 2)
+  ticketingRevenueTaxRate           Decimal?  @db.Decimal(10, 2) // Optional if reusing the one from the event serie
+  ticketingRevenueDefinedTaxRate    Boolean // In case there is no legal rate to bind both amounts
+  consumptionsRevenueIncludingTaxes Decimal   @db.Decimal(10, 2)
+  consumptionsRevenueExcludingTaxes Decimal   @db.Decimal(10, 2)
+  consumptionsRevenueTaxRate        Decimal?  @db.Decimal(10, 2) // Optional if both amounts directly set
+  cateringRevenueIncludingTaxes     Decimal   @db.Decimal(10, 2)
+  cateringRevenueExcludingTaxes     Decimal   @db.Decimal(10, 2)
+  cateringRevenueTaxRate            Decimal?  @db.Decimal(10, 2) // Optional if both amounts directly set
+  programSalesRevenueIncludingTaxes Decimal   @db.Decimal(10, 2)
+  programSalesRevenueExcludingTaxes Decimal   @db.Decimal(10, 2)
+  programSalesRevenueTaxRate        Decimal?  @db.Decimal(10, 2) // Optional if both amounts directly set
+  otherRevenueIncludingTaxes        Decimal   @db.Decimal(10, 2)
+  otherRevenueExcludingTaxes        Decimal   @db.Decimal(10, 2)
+  otherRevenueTaxRate               Decimal?  @db.Decimal(10, 2) // Optional if both amounts directly set
+  freeTickets                       Int
+  paidTickets                       Int
 
   // Each event has following properties but they are defined at
   // the event serie level, here it's to override in case of specifics

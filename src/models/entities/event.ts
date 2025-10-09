@@ -74,6 +74,8 @@ export const StricterEventSerieSchema = z.object({
   audience: AudienceSchema,
   taxRate: z.number().nonnegative(),
   expensesExcludingTaxes: z.number().nonnegative(),
+  introductionFeesExpensesExcludingTaxes: z.number().nonnegative(),
+  circusSpecificExpensesExcludingTaxes: z.number().nonnegative(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -85,6 +87,7 @@ export const EventSerieSchema = applyTypedParsers(
     performanceType: StricterEventSerieSchema.shape.performanceType.nullable(),
     placeId: StricterEventSerieSchema.shape.placeId.nullable(),
     placeCapacity: StricterEventSerieSchema.shape.placeCapacity.nullable(),
+    circusSpecificExpensesExcludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesExcludingTaxes.nullable(),
   }).strict()
 );
 export type EventSerieSchemaType = z.infer<typeof EventSerieSchema>;
@@ -119,6 +122,18 @@ export const StricterEventSchema = z.object({
   ticketingRevenueIncludingTaxes: z.number().nonnegative(),
   ticketingRevenueExcludingTaxes: z.number().nonnegative(),
   ticketingRevenueTaxRate: z.number().nonnegative(),
+  consumptionsRevenueIncludingTaxes: z.number().nonnegative(),
+  consumptionsRevenueExcludingTaxes: z.number().nonnegative(),
+  consumptionsRevenueTaxRate: z.number().nonnegative(),
+  cateringRevenueIncludingTaxes: z.number().nonnegative(),
+  cateringRevenueExcludingTaxes: z.number().nonnegative(),
+  cateringRevenueTaxRate: z.number().nonnegative(),
+  programSalesRevenueIncludingTaxes: z.number().nonnegative(),
+  programSalesRevenueExcludingTaxes: z.number().nonnegative(),
+  programSalesRevenueTaxRate: z.number().nonnegative(),
+  otherRevenueIncludingTaxes: z.number().nonnegative(),
+  otherRevenueExcludingTaxes: z.number().nonnegative(),
+  otherRevenueTaxRate: z.number().nonnegative(),
   freeTickets: z.number().int().nonnegative(),
   paidTickets: z.number().int().nonnegative(),
   placeOverrideId: EventSerieSchema.shape.placeId,
@@ -133,6 +148,10 @@ export const EventSchema = applyTypedParsers(
   StricterEventSchema.extend({
     endAt: StricterEventSchema.shape.endAt.nullable(),
     ticketingRevenueTaxRate: StricterEventSchema.shape.ticketingRevenueTaxRate.nullable(),
+    consumptionsRevenueTaxRate: StricterEventSchema.shape.consumptionsRevenueTaxRate.nullable(),
+    cateringRevenueTaxRate: StricterEventSchema.shape.cateringRevenueTaxRate.nullable(),
+    programSalesRevenueTaxRate: StricterEventSchema.shape.programSalesRevenueTaxRate.nullable(),
+    otherRevenueTaxRate: StricterEventSchema.shape.otherRevenueTaxRate.nullable(),
     placeOverrideId: StricterEventSchema.shape.placeOverrideId.nullable(),
     placeCapacityOverride: StricterEventSchema.shape.placeCapacityOverride.nullable(),
     audienceOverride: StricterEventSchema.shape.audienceOverride.nullable(),

@@ -31,6 +31,8 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
     audience: true,
     taxRate: true,
     expensesExcludingTaxes: true,
+    introductionFeesExpensesExcludingTaxes: true,
+    circusSpecificExpensesExcludingTaxes: true,
   })
     .merge(
       z.object({

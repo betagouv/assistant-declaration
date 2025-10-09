@@ -34,6 +34,14 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
     return {
       setTicketingRevenueExcludingTaxes: (value: number) => setValue(`${name}.ticketingRevenueExcludingTaxes`, value),
       setTicketingRevenueIncludingTaxes: (value: number) => setValue(`${name}.ticketingRevenueIncludingTaxes`, value),
+      setConsumptionsRevenueExcludingTaxes: (value: number) => setValue(`${name}.consumptionsRevenueExcludingTaxes`, value),
+      setConsumptionsRevenueIncludingTaxes: (value: number) => setValue(`${name}.consumptionsRevenueIncludingTaxes`, value),
+      setCateringRevenueExcludingTaxes: (value: number) => setValue(`${name}.cateringRevenueExcludingTaxes`, value),
+      setCateringRevenueIncludingTaxes: (value: number) => setValue(`${name}.cateringRevenueIncludingTaxes`, value),
+      setProgramSalesRevenueExcludingTaxes: (value: number) => setValue(`${name}.programSalesRevenueExcludingTaxes`, value),
+      setProgramSalesRevenueIncludingTaxes: (value: number) => setValue(`${name}.programSalesRevenueIncludingTaxes`, value),
+      setOtherRevenueExcludingTaxes: (value: number) => setValue(`${name}.otherRevenueExcludingTaxes`, value),
+      setOtherRevenueIncludingTaxes: (value: number) => setValue(`${name}.otherRevenueIncludingTaxes`, value),
     };
   }, [setValue]);
 
@@ -44,6 +52,38 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
   const { inputRef: ticketingRevenueIncludingTaxesMaskInputRef } = useAmountInput({
     defaultValue: control._defaultValues.events?.[eventIndex]?.ticketingRevenueIncludingTaxes ?? 0,
     onChange: setters.setTicketingRevenueIncludingTaxes,
+  });
+  const { inputRef: consumptionsRevenueExcludingTaxesMaskInputRef } = useAmountInput({
+    defaultValue: control._defaultValues.events?.[eventIndex]?.consumptionsRevenueExcludingTaxes ?? 0,
+    onChange: setters.setConsumptionsRevenueExcludingTaxes,
+  });
+  const { inputRef: consumptionsRevenueIncludingTaxesMaskInputRef } = useAmountInput({
+    defaultValue: control._defaultValues.events?.[eventIndex]?.consumptionsRevenueIncludingTaxes ?? 0,
+    onChange: setters.setConsumptionsRevenueIncludingTaxes,
+  });
+  const { inputRef: cateringRevenueExcludingTaxesMaskInputRef } = useAmountInput({
+    defaultValue: control._defaultValues.events?.[eventIndex]?.cateringRevenueExcludingTaxes ?? 0,
+    onChange: setters.setCateringRevenueExcludingTaxes,
+  });
+  const { inputRef: cateringRevenueIncludingTaxesMaskInputRef } = useAmountInput({
+    defaultValue: control._defaultValues.events?.[eventIndex]?.cateringRevenueIncludingTaxes ?? 0,
+    onChange: setters.setCateringRevenueIncludingTaxes,
+  });
+  const { inputRef: programSalesRevenueExcludingTaxesMaskInputRef } = useAmountInput({
+    defaultValue: control._defaultValues.events?.[eventIndex]?.programSalesRevenueExcludingTaxes ?? 0,
+    onChange: setters.setProgramSalesRevenueExcludingTaxes,
+  });
+  const { inputRef: programSalesRevenueIncludingTaxesMaskInputRef } = useAmountInput({
+    defaultValue: control._defaultValues.events?.[eventIndex]?.programSalesRevenueIncludingTaxes ?? 0,
+    onChange: setters.setProgramSalesRevenueIncludingTaxes,
+  });
+  const { inputRef: otherRevenueExcludingTaxesMaskInputRef } = useAmountInput({
+    defaultValue: control._defaultValues.events?.[eventIndex]?.otherRevenueExcludingTaxes ?? 0,
+    onChange: setters.setOtherRevenueExcludingTaxes,
+  });
+  const { inputRef: otherRevenueIncludingTaxesMaskInputRef } = useAmountInput({
+    defaultValue: control._defaultValues.events?.[eventIndex]?.otherRevenueIncludingTaxes ?? 0,
+    onChange: setters.setOtherRevenueIncludingTaxes,
   });
 
   return (
@@ -391,6 +431,186 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
           </div>
         </div>
       </div>
+      {!!true && (
+        <div className={fr.cx('fr-grid-row')}>
+          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+            <div className={fr.cx('fr-fieldset__element')}>
+              <Controller
+                control={control}
+                name={`${name}.consumptionsRevenueExcludingTaxes`}
+                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                  return (
+                    <Input
+                      label="Consommation HT"
+                      state={!!error ? 'error' : undefined}
+                      stateRelatedMessage={error?.message}
+                      nativeInputProps={{
+                        ref: consumptionsRevenueExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                        placeholder: '0 €',
+                        onBlur: onBlur,
+                      }}
+                    />
+                  );
+                }}
+              />
+            </div>
+          </div>
+          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+            <div className={fr.cx('fr-fieldset__element')}>
+              <Controller
+                control={control}
+                name={`${name}.consumptionsRevenueIncludingTaxes`}
+                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                  return (
+                    <Input
+                      label="Consommation TTC"
+                      state={!!error ? 'error' : undefined}
+                      stateRelatedMessage={error?.message}
+                      nativeInputProps={{
+                        ref: consumptionsRevenueIncludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                        placeholder: '0 €',
+                        onBlur: onBlur,
+                      }}
+                    />
+                  );
+                }}
+              />
+            </div>
+          </div>
+          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+            <div className={fr.cx('fr-fieldset__element')}>
+              <Controller
+                control={control}
+                name={`${name}.cateringRevenueExcludingTaxes`}
+                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                  return (
+                    <Input
+                      label="Restauration HT"
+                      state={!!error ? 'error' : undefined}
+                      stateRelatedMessage={error?.message}
+                      nativeInputProps={{
+                        ref: cateringRevenueExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                        placeholder: '0 €',
+                        onBlur: onBlur,
+                      }}
+                    />
+                  );
+                }}
+              />
+            </div>
+          </div>
+          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+            <div className={fr.cx('fr-fieldset__element')}>
+              <Controller
+                control={control}
+                name={`${name}.cateringRevenueIncludingTaxes`}
+                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                  return (
+                    <Input
+                      label="Restauration TTC"
+                      state={!!error ? 'error' : undefined}
+                      stateRelatedMessage={error?.message}
+                      nativeInputProps={{
+                        ref: cateringRevenueIncludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                        placeholder: '0 €',
+                        onBlur: onBlur,
+                      }}
+                    />
+                  );
+                }}
+              />
+            </div>
+          </div>
+          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+            <div className={fr.cx('fr-fieldset__element')}>
+              <Controller
+                control={control}
+                name={`${name}.programSalesRevenueExcludingTaxes`}
+                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                  return (
+                    <Input
+                      label="Vente prog. HT"
+                      state={!!error ? 'error' : undefined}
+                      stateRelatedMessage={error?.message}
+                      nativeInputProps={{
+                        ref: programSalesRevenueExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                        placeholder: '0 €',
+                        onBlur: onBlur,
+                      }}
+                    />
+                  );
+                }}
+              />
+            </div>
+          </div>
+          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+            <div className={fr.cx('fr-fieldset__element')}>
+              <Controller
+                control={control}
+                name={`${name}.programSalesRevenueIncludingTaxes`}
+                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                  return (
+                    <Input
+                      label="Vente prog. TTC"
+                      state={!!error ? 'error' : undefined}
+                      stateRelatedMessage={error?.message}
+                      nativeInputProps={{
+                        ref: programSalesRevenueIncludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                        placeholder: '0 €',
+                        onBlur: onBlur,
+                      }}
+                    />
+                  );
+                }}
+              />
+            </div>
+          </div>
+          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+            <div className={fr.cx('fr-fieldset__element')}>
+              <Controller
+                control={control}
+                name={`${name}.otherRevenueExcludingTaxes`}
+                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                  return (
+                    <Input
+                      label="Autre recette HT"
+                      state={!!error ? 'error' : undefined}
+                      stateRelatedMessage={error?.message}
+                      nativeInputProps={{
+                        ref: otherRevenueExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                        placeholder: '0 €',
+                        onBlur: onBlur,
+                      }}
+                    />
+                  );
+                }}
+              />
+            </div>
+          </div>
+          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+            <div className={fr.cx('fr-fieldset__element')}>
+              <Controller
+                control={control}
+                name={`${name}.otherRevenueIncludingTaxes`}
+                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                  return (
+                    <Input
+                      label="Autre recette TTC"
+                      state={!!error ? 'error' : undefined}
+                      stateRelatedMessage={error?.message}
+                      nativeInputProps={{
+                        ref: otherRevenueIncludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
+                        placeholder: '0 €',
+                        onBlur: onBlur,
+                      }}
+                    />
+                  );
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
