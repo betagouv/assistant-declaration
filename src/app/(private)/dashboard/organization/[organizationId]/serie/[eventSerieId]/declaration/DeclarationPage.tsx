@@ -6,11 +6,12 @@ import { Input } from '@codegouvfr/react-dsfr/Input';
 import { Select } from '@codegouvfr/react-dsfr/SelectNext';
 import addressFormatter from '@fragaria/address-formatter';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Autocomplete } from '@mui/material';
+import { Alert, AlertProps, Autocomplete, Snackbar } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import { Ref, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { usePrevious } from 'react-use';
 
 import { DeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPageContext';
 import { trpc } from '@ad/src/client/trpcClient';
@@ -71,6 +72,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     defaultValues: {
       // ...prefill,
       eventSerieId: eventSerieId,
+      events: [], // To avoid being "undefined"
     }, // The rest will be set with data fetched
   });
 
@@ -142,12 +144,12 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
               freeTickets: event.freeTickets,
               paidTickets: event.paidTickets,
               placeOverride: {
-                name: event.placeOverride?.name ?? null,
-                address: event.placeOverride?.address ?? null,
+                name: event.placeOverride?.name ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.name ?? null,
+                address: event.placeOverride?.address ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.place?.address ?? null,
               },
-              placeCapacityOverride: event.placeCapacityOverride,
-              audienceOverride: event.audienceOverride,
-              taxRateOverride: event.taxRateOverride,
+              placeCapacityOverride: event.placeCapacityOverride ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.placeCapacity,
+              audienceOverride: event.audienceOverride ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.audience,
+              taxRateOverride: event.taxRateOverride ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.taxRate,
             };
           }),
         });
@@ -197,6 +199,117 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       };
     }
   }, [getDeclaration.data]);
+
+  const [snackbarAlert, setSnackbarAlert] = useState<React.JSX.Element | null>(null);
+  const handleCloseSnackbar = useCallback(() => setSnackbarAlert(null), [setSnackbarAlert]);
+
+  const displayDefaultImpactMessage = useCallback(
+    async (modifiedEvents: number, totalEvents: number) => {
+      let severity: AlertProps['severity'];
+      let message: string;
+
+      if (modifiedEvents === totalEvents) {
+        severity = 'success';
+        message = `La valeur a été appliquée sur toutes les représentations`;
+      }
+      if (modifiedEvents > 0) {
+        severity = 'warning';
+        message = `La valeur a été appliquée sur ${modifiedEvents} des ${totalEvents} représentations`;
+      } else {
+        severity = 'error';
+        message = `La valeur n'a été appliquée sur aucune représentation, il est probable que chacune ait déjà une valeur spécifique`;
+      }
+
+      setSnackbarAlert(
+        <Alert severity={severity} onClose={handleCloseSnackbar}>
+          {message}
+        </Alert>
+      );
+    },
+    [setSnackbarAlert, handleCloseSnackbar]
+  );
+
+  // Modifying a default property should impact events that had the same value as before modification
+  const currentPlaceName = watch('eventSerie.place.name');
+  const previousPlaceName = usePrevious(currentPlaceName);
+  useEffect(() => {
+    const events = getValues('events');
+    let modifiedEvents = 0;
+
+    events.forEach((event, eventIndex) => {
+      if (event.placeOverride.name === null || event.placeOverride.name === previousPlaceName) {
+        setValue(`events.${eventIndex}.placeOverride.name`, currentPlaceName);
+        modifiedEvents++;
+      }
+    });
+
+    displayDefaultImpactMessage(modifiedEvents, events.length);
+  }, [previousPlaceName, currentPlaceName, getValues, setValue, displayDefaultImpactMessage]);
+
+  const currentPlaceAddress = watch('eventSerie.place.address');
+  const previousPlaceAddress = usePrevious(currentPlaceAddress);
+  useEffect(() => {
+    const events = getValues('events');
+    const previousPlaceAddressStringToCompare = JSON.stringify(previousPlaceAddress);
+    let modifiedEvents = 0;
+
+    events.forEach((event, eventIndex) => {
+      if (event.placeOverride.address === null || JSON.stringify(event.placeOverride.address) === previousPlaceAddressStringToCompare) {
+        setValue(`events.${eventIndex}.placeOverride.address`, currentPlaceAddress);
+        modifiedEvents++;
+      }
+    });
+
+    displayDefaultImpactMessage(modifiedEvents, events.length);
+  }, [previousPlaceAddress, currentPlaceAddress, getValues, setValue, displayDefaultImpactMessage]);
+
+  const currentPlaceCapacity = watch('eventSerie.placeCapacity');
+  const previousPlaceCapacity = usePrevious(currentPlaceCapacity);
+  useEffect(() => {
+    const events = getValues('events');
+    let modifiedEvents = 0;
+
+    events.forEach((event, eventIndex) => {
+      if (event.placeCapacityOverride === null || event.placeCapacityOverride === previousPlaceCapacity) {
+        setValue(`events.${eventIndex}.placeCapacityOverride`, currentPlaceCapacity);
+        modifiedEvents++;
+      }
+    });
+
+    displayDefaultImpactMessage(modifiedEvents, events.length);
+  }, [previousPlaceCapacity, currentPlaceCapacity, getValues, setValue, displayDefaultImpactMessage]);
+
+  const currentAudience = watch('eventSerie.audience');
+  const previousAudience = usePrevious(currentAudience);
+  useEffect(() => {
+    const events = getValues('events');
+    let modifiedEvents = 0;
+
+    events.forEach((event, eventIndex) => {
+      if (event.audienceOverride === null || event.audienceOverride === previousAudience) {
+        setValue(`events.${eventIndex}.audienceOverride`, currentAudience);
+        modifiedEvents++;
+      }
+    });
+
+    displayDefaultImpactMessage(modifiedEvents, events.length);
+  }, [previousAudience, currentAudience, getValues, setValue, displayDefaultImpactMessage]);
+
+  const currentTaxRate = watch('eventSerie.taxRate');
+  const previousTaxRate = usePrevious(currentTaxRate);
+  useEffect(() => {
+    const events = getValues('events');
+    let modifiedEvents = 0;
+
+    events.forEach((event, eventIndex) => {
+      if (event.taxRateOverride === null || event.taxRateOverride === previousTaxRate) {
+        setValue(`events.${eventIndex}.taxRateOverride`, currentTaxRate);
+        modifiedEvents++;
+      }
+    });
+
+    displayDefaultImpactMessage(modifiedEvents, events.length);
+  }, [previousTaxRate, currentTaxRate, getValues, setValue, displayDefaultImpactMessage]);
 
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
@@ -278,6 +391,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                       <div className={fr.cx('fr-col-12')}>
                         <EventsFieldsets
                           control={control}
+                          register={register}
                           setValue={setValue}
                           trigger={trigger}
                           placeholder={declarationWrapper.placeholder}
@@ -570,7 +684,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                       onBlur={onBlur}
                                       value={value ?? 0}
                                       onInputChange={(event, newValue, reason) => {
-                                        onChange(newValue);
+                                        onChange(parseInt(newValue, 10)); // Needed since underlying it's managing string only
                                       }}
                                       renderInput={({ InputProps, disabled, id, inputProps }) => {
                                         return (
@@ -650,8 +764,11 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 state={!!errors.eventSerie?.taxRate ? 'error' : undefined}
                                 stateRelatedMessage={errors?.eventSerie?.taxRate?.message}
                                 nativeSelectProps={{
-                                  ...register('eventSerie.taxRate'),
-                                  defaultValue: currentTaxRates[0],
+                                  ...register('eventSerie.taxRate', {
+                                    valueAsNumber: true,
+                                    // setValueAs: (newValue) => parseInt(newValue, 10), // Needed since underlying it's managing string only
+                                  }),
+                                  defaultValue: (control._defaultValues.eventSerie?.taxRate ?? currentTaxRates[0]).toString(),
                                 }}
                                 options={currentTaxRates.map((taxRate) => {
                                   return {
@@ -756,6 +873,11 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           <div className={fr.cx('fr-col-12')}>Aucune représentation n'est associée à ce spectacle, il n'y a donc pas de déclaration à faire.</div>
         )}
       </div>
+      {!!snackbarAlert && (
+        <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={4000}>
+          {snackbarAlert}
+        </Snackbar>
+      )}
     </div>
   );
 }
