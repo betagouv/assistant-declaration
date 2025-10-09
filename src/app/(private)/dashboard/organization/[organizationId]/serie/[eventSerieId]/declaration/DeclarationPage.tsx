@@ -211,8 +211,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       if (modifiedEvents === totalEvents) {
         severity = 'success';
         message = `La valeur a été appliquée sur toutes les représentations`;
-      }
-      if (modifiedEvents > 0) {
+      } else if (modifiedEvents > 0) {
         severity = 'warning';
         message = `La valeur a été appliquée sur ${modifiedEvents} des ${totalEvents} représentations`;
       } else {
@@ -233,82 +232,92 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const currentPlaceName = watch('eventSerie.place.name');
   const previousPlaceName = usePrevious(currentPlaceName);
   useEffect(() => {
-    const events = getValues('events');
-    let modifiedEvents = 0;
+    if (previousPlaceName !== undefined && currentPlaceName !== previousPlaceName) {
+      const events = getValues('events');
+      let modifiedEvents = 0;
 
-    events.forEach((event, eventIndex) => {
-      if (event.placeOverride.name === null || event.placeOverride.name === previousPlaceName) {
-        setValue(`events.${eventIndex}.placeOverride.name`, currentPlaceName);
-        modifiedEvents++;
-      }
-    });
+      events.forEach((event, eventIndex) => {
+        if (event.placeOverride.name === null || event.placeOverride.name === previousPlaceName) {
+          setValue(`events.${eventIndex}.placeOverride.name`, currentPlaceName);
+          modifiedEvents++;
+        }
+      });
 
-    displayDefaultImpactMessage(modifiedEvents, events.length);
+      displayDefaultImpactMessage(modifiedEvents, events.length);
+    }
   }, [previousPlaceName, currentPlaceName, getValues, setValue, displayDefaultImpactMessage]);
 
   const currentPlaceAddress = watch('eventSerie.place.address');
   const previousPlaceAddress = usePrevious(currentPlaceAddress);
   useEffect(() => {
-    const events = getValues('events');
-    const previousPlaceAddressStringToCompare = JSON.stringify(previousPlaceAddress);
-    let modifiedEvents = 0;
+    if (previousPlaceAddress !== undefined && JSON.stringify(currentPlaceAddress) !== JSON.stringify(previousPlaceAddress)) {
+      const events = getValues('events');
+      const previousPlaceAddressStringToCompare = JSON.stringify(previousPlaceAddress);
+      let modifiedEvents = 0;
 
-    events.forEach((event, eventIndex) => {
-      if (event.placeOverride.address === null || JSON.stringify(event.placeOverride.address) === previousPlaceAddressStringToCompare) {
-        setValue(`events.${eventIndex}.placeOverride.address`, currentPlaceAddress);
-        modifiedEvents++;
-      }
-    });
+      events.forEach((event, eventIndex) => {
+        if (event.placeOverride.address === null || JSON.stringify(event.placeOverride.address) === previousPlaceAddressStringToCompare) {
+          setValue(`events.${eventIndex}.placeOverride.address`, currentPlaceAddress);
+          modifiedEvents++;
+        }
+      });
 
-    displayDefaultImpactMessage(modifiedEvents, events.length);
+      displayDefaultImpactMessage(modifiedEvents, events.length);
+    }
   }, [previousPlaceAddress, currentPlaceAddress, getValues, setValue, displayDefaultImpactMessage]);
 
   const currentPlaceCapacity = watch('eventSerie.placeCapacity');
   const previousPlaceCapacity = usePrevious(currentPlaceCapacity);
   useEffect(() => {
-    const events = getValues('events');
-    let modifiedEvents = 0;
+    if (previousPlaceCapacity !== undefined && currentPlaceCapacity !== previousPlaceCapacity) {
+      const events = getValues('events');
+      let modifiedEvents = 0;
 
-    events.forEach((event, eventIndex) => {
-      if (event.placeCapacityOverride === null || event.placeCapacityOverride === previousPlaceCapacity) {
-        setValue(`events.${eventIndex}.placeCapacityOverride`, currentPlaceCapacity);
-        modifiedEvents++;
-      }
-    });
+      events.forEach((event, eventIndex) => {
+        if (event.placeCapacityOverride === null || event.placeCapacityOverride === previousPlaceCapacity) {
+          setValue(`events.${eventIndex}.placeCapacityOverride`, currentPlaceCapacity);
+          modifiedEvents++;
+        }
+      });
 
-    displayDefaultImpactMessage(modifiedEvents, events.length);
+      displayDefaultImpactMessage(modifiedEvents, events.length);
+    }
   }, [previousPlaceCapacity, currentPlaceCapacity, getValues, setValue, displayDefaultImpactMessage]);
 
   const currentAudience = watch('eventSerie.audience');
   const previousAudience = usePrevious(currentAudience);
   useEffect(() => {
-    const events = getValues('events');
-    let modifiedEvents = 0;
+    if (previousAudience !== undefined && currentAudience !== previousAudience) {
+      const events = getValues('events');
+      let modifiedEvents = 0;
 
-    events.forEach((event, eventIndex) => {
-      if (event.audienceOverride === null || event.audienceOverride === previousAudience) {
-        setValue(`events.${eventIndex}.audienceOverride`, currentAudience);
-        modifiedEvents++;
-      }
-    });
+      events.forEach((event, eventIndex) => {
+        if (event.audienceOverride === null || event.audienceOverride === previousAudience) {
+          setValue(`events.${eventIndex}.audienceOverride`, currentAudience);
+          modifiedEvents++;
+        }
+      });
 
-    displayDefaultImpactMessage(modifiedEvents, events.length);
+      displayDefaultImpactMessage(modifiedEvents, events.length);
+    }
   }, [previousAudience, currentAudience, getValues, setValue, displayDefaultImpactMessage]);
 
   const currentTaxRate = watch('eventSerie.taxRate');
   const previousTaxRate = usePrevious(currentTaxRate);
   useEffect(() => {
-    const events = getValues('events');
-    let modifiedEvents = 0;
+    if (previousTaxRate !== undefined && currentTaxRate !== previousTaxRate) {
+      const events = getValues('events');
+      let modifiedEvents = 0;
 
-    events.forEach((event, eventIndex) => {
-      if (event.taxRateOverride === null || event.taxRateOverride === previousTaxRate) {
-        setValue(`events.${eventIndex}.taxRateOverride`, currentTaxRate);
-        modifiedEvents++;
-      }
-    });
+      events.forEach((event, eventIndex) => {
+        if (event.taxRateOverride === null || event.taxRateOverride === previousTaxRate) {
+          setValue(`events.${eventIndex}.taxRateOverride`, currentTaxRate);
+          modifiedEvents++;
+        }
+      });
 
-    displayDefaultImpactMessage(modifiedEvents, events.length);
+      displayDefaultImpactMessage(modifiedEvents, events.length);
+    }
   }, [previousTaxRate, currentTaxRate, getValues, setValue, displayDefaultImpactMessage]);
 
   if (aggregatedQueries.isPending) {
