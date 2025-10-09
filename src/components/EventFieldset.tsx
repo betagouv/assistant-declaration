@@ -54,7 +54,7 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
             <Controller
               control={control}
               name={`${name}.freeTickets`}
-              render={({ field: { ref, ...fieldOthers }, fieldState: { error } }) => {
+              render={({ field: { ref, onChange, ...fieldOthers }, fieldState: { error } }) => {
                 return (
                   <Input
                     ref={ref}
@@ -67,6 +67,9 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
                       placeholder: '0',
                       step: 1,
                       min: 0,
+                      onChange: (event) => {
+                        onChange(event.target.value === '' ? null : Number(event.target.value));
+                      },
                       onWheel: (event) => {
                         // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
 
@@ -86,7 +89,7 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
             <Controller
               control={control}
               name={`${name}.paidTickets`}
-              render={({ field: { ref, ...fieldOthers }, fieldState: { error } }) => {
+              render={({ field: { ref, onChange, ...fieldOthers }, fieldState: { error } }) => {
                 return (
                   <Input
                     ref={ref}
@@ -99,6 +102,9 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
                       placeholder: '0',
                       step: 1,
                       min: 0,
+                      onChange: (event) => {
+                        onChange(event.target.value === '' ? null : Number(event.target.value));
+                      },
                       onWheel: (event) => {
                         // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
 

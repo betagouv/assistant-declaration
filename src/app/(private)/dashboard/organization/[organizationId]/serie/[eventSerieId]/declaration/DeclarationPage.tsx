@@ -87,6 +87,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       const result = await fillDeclaration.mutateAsync(input);
 
       // Reset the form state so fields considered as "dirty" are no longer
+      const tmpAddress = result.declaration.eventSerie.place?.address ?? null;
+      let addressInput: AddressInputSchemaType | null = null;
+
+      if (tmpAddress) {
+        const { id, ...liteAddress } = tmpAddress;
+        addressInput = liteAddress;
+      }
+
       reset({
         eventSerieId: eventSerieId,
         organization: {
@@ -94,9 +102,51 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           sacdId: result.declaration.organization.sacdId,
         },
         eventSerie: {
-          // TODO
+          producer:
+            result.declaration.eventSerie.producerOfficialId && result.declaration.eventSerie.producerName
+              ? {
+                  officialId: result.declaration.eventSerie.producerOfficialId,
+                  name: result.declaration.eventSerie.producerName,
+                }
+              : null,
+          performanceType: result.declaration.eventSerie.performanceType,
+          expectedDeclarationTypes: result.declaration.eventSerie.expectedDeclarationTypes,
+          place: {
+            name: result.declaration.eventSerie.place?.name ?? null,
+            address: addressInput,
+          },
+          placeCapacity: result.declaration.eventSerie.placeCapacity,
+          audience: result.declaration.eventSerie.audience,
+          taxRate: result.declaration.eventSerie.taxRate,
+          expensesExcludingTaxes: result.declaration.eventSerie.expensesExcludingTaxes,
         },
-        events: [], // TODO
+        events: result.declaration.events.map((event) => {
+          const tmpEventAddress = event.placeOverride?.address ?? result.declaration.eventSerie.place?.address ?? null;
+          let eventAddressInput: AddressInputSchemaType | null = null;
+
+          if (tmpEventAddress) {
+            const { id, ...liteEventAddress } = tmpEventAddress;
+            eventAddressInput = liteEventAddress;
+          }
+
+          return {
+            id: event.id,
+            startAt: event.startAt,
+            endAt: event.endAt,
+            ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
+            ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
+            ticketingRevenueTaxRate: event.ticketingRevenueTaxRate,
+            freeTickets: event.freeTickets,
+            paidTickets: event.paidTickets,
+            placeOverride: {
+              name: event.placeOverride?.name ?? result.declaration.eventSerie.place?.name ?? null,
+              address: eventAddressInput,
+            },
+            placeCapacityOverride: event.placeCapacityOverride ?? result.declaration.eventSerie.placeCapacity,
+            audienceOverride: event.audienceOverride ?? result.declaration.eventSerie.audience,
+            taxRateOverride: event.taxRateOverride ?? result.declaration.eventSerie.taxRate,
+          };
+        }),
       });
 
       push(['trackEvent', 'declaration', 'fill']);
