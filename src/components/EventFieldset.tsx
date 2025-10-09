@@ -369,26 +369,6 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
         </div>
         <div className={fr.cx('fr-col-4', 'fr-col-md-3')}>
           <div className={fr.cx('fr-fieldset__element')}>
-            {/* <Controller
-                                control={control}
-                                name={`${name}.taxRateOverride`}
-                                defaultValue={control._defaultValues.eventSerie?.expensesExcludingTaxes ?? 0}
-                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                                  return (
-                                    <Input
-                                      label="Dépenses globales HT"
-                                      state={!!error ? 'error' : undefined}
-                                      stateRelatedMessage={error?.message}
-                                      nativeInputProps={{
-                                        ref: expensesExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                                        placeholder: '0 €',
-                                        onBlur: onBlur,
-                                      }}
-                                    />
-                                  );
-                                }}
-                              /> */}
-
             <Select
               label="Taux de TVA"
               state={!!errors?.taxRateOverride ? 'error' : undefined}
@@ -396,9 +376,7 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
               nativeSelectProps={{
                 ...register(`${name}.taxRateOverride`, {
                   valueAsNumber: true,
-                  // setValueAs: (newValue) => parseInt(newValue, 10), // Needed since underlying it's managing string only
                 }),
-                // defaultValue: currentTaxRates[0].toString(),
                 defaultValue: (control._defaultValues.events?.[eventIndex]?.taxRateOverride ?? currentTaxRates[0]).toString(),
               }}
               options={currentTaxRates.map((taxRate) => {

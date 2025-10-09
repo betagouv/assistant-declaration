@@ -87,12 +87,39 @@
       "audience": {
         "invalid_enum_value": "la nature des représentations est requise"
       },
+      "audienceOverride": {
+        "invalid_enum_value": "la nature de la représentation est requise"
+      },
       "currentPassword": {
         "too_small_one": "le mot de passe actuel est requis"
       },
       "email": {
         "invalid_string": "l'email n'est pas valide",
         "too_small_one": "l'email est requis"
+      },
+      "events": {
+        "freeTickets": {
+          "invalid_type": "le nombre de billets gratuits doit être un nombre entier",
+          "too_small": "le nombre de billets gratuits doit être supérieur à {{minimum}}",
+          "too_small_one": "le nombre de billets gratuits est requis"
+        },
+        "paidTickets": {
+          "invalid_type": "le nombre de billets payants doit être un nombre entier",
+          "too_small": "le nombre de billets payants doit être supérieur à {{minimum}}",
+          "too_small_one": "le nombre de billets payants est requis"
+        },
+        "taxRateOverride": {
+          "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
+        },
+        "ticketingRevenueExcludingTaxes": {
+          "invalid_type": "le montant HT doit être un nombre entier",
+          "too_small": "le montant HT doit être supérieur à {{minimum}} euro"
+        },
+        "ticketingRevenueIncludingTaxes": {
+          "invalid_type": "le montant TTC doit être un nombre entier",
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
+        "too_big": "il ne peut y avoir que {{maximum}} représentations au maximum"
       },
       "firstname": {
         "too_small_one": "le prénom est requis"
@@ -154,21 +181,21 @@
         "too_small": "la capacité de la salle doit être supérieure à {{minimum}}",
         "too_small_one": "la capacité de la salle est requise"
       },
-      "placeAddress": {
-        "city": {
-          "too_big": "la ville doit faire {{maximum}} caractères maximum",
-          "too_small_one": "la ville est requise"
-        },
-        "countryCode": {
-          "countryInvalid": "le pays saisi est invalide"
-        },
-        "postalCode": {
-          "too_big": "le code postal doit faire {{maximum}} caractères maximum",
-          "too_small_one": "le code postal est requis"
-        },
-        "street": {
-          "too_big": "le numéro et la voie doivent faire {{maximum}} caractères maximum",
-          "too_small_one": "le numéro et la voie sont requis"
+      "placeCapacityOverride": {
+        "invalid_type": "la capacité de la salle doit être un nombre entier",
+        "too_small": "la capacité de la salle doit être supérieure à {{minimum}}",
+        "too_small_one": "la capacité de la salle est requise"
+      },
+      "place": {
+        "name": {
+          "too_big": "l'intitulé du lieu doit faire {{maximum}} caractères maximum",
+          "too_small_one": "l'intitulé du lieu est requis"
+        }
+      },
+      "placeOverride": {
+        "name": {
+          "too_big": "l'intitulé du lieu doit faire {{maximum}} caractères maximum",
+          "too_small_one": "l'intitulé du lieu est requis"
         }
       },
       "producerOfficialId": {
@@ -188,6 +215,9 @@
         "sacdIdMustBeDigits": "l'identifiant SACD doit être composé de 1 à 10 chiffres",
         "too_big": "l'identifiant SACD doit faire {{maximum}} caractères maximum",
         "too_small_one": "l'identifiant SACD est requis"
+      },
+      "taxRate": {
+        "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
       },
       "termsAccepted": {
         "invalid_literal": "les modalités d'utilisation doivent être acceptées"
