@@ -1,7 +1,5 @@
 'use client';
 
-import { Grid } from '@mui/material';
-
 import { Introduction } from '@ad/src/app/(public)/about/Introduction';
 import { KeyReasons } from '@ad/src/app/(public)/about/KeyReasons';
 import { Partners } from '@ad/src/app/(public)/about/Partners';
@@ -10,18 +8,12 @@ import { FrequentlyAskedQuestions } from '@ad/src/app/(public)/frequently-asked-
 
 export function AboutPage() {
   return (
-    <Grid
-      container
-      sx={{
-        display: 'block',
-        mx: 'auto',
-      }}
-    >
+    <div style={{ width: '100%' }}>
       <Introduction />
       <KeyReasons />
       <QuickLinks />
       <Partners />
       <FrequentlyAskedQuestions />
-    </Grid>
+    </div>
   );
 }

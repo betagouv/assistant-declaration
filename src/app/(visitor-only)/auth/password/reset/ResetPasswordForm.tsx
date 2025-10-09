@@ -1,15 +1,14 @@
 'use client';
 
+import { fr } from '@codegouvfr/react-dsfr';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Button, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
-import { PasswordFieldHinter } from '@ad/src/components/PasswordFieldHinter';
+import { Button } from '@ad/src/components/Button';
+import { PasswordMutationInput } from '@ad/src/components/PasswordMutationInput';
 import { ResetPasswordPrefillSchemaType, ResetPasswordSchema, ResetPasswordSchemaType } from '@ad/src/models/actions/auth';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
@@ -21,7 +20,6 @@ export function ResetPasswordForm({ prefill }: { prefill?: ResetPasswordPrefillS
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     control,
   } = useForm<ResetPasswordSchemaType>({
     resolver: zodResolver(ResetPasswordSchema),
@@ -34,42 +32,27 @@ export function ResetPasswordForm({ prefill }: { prefill?: ResetPasswordPrefillS
     router.push(linkRegistry.get('signIn', undefined));
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleMouseDownPassword = () => setShowPassword(!showPassword);
-
   return (
     <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="redéfinir son mot de passe">
-      <Grid item xs={12}>
-        <TextField
-          type={showPassword ? 'text' : 'password'}
+      <div className={fr.cx('fr-col-12')}>
+        <PasswordMutationInput
           label="Nouveau mot de passe"
-          {...register('password')}
-          autoComplete="new-password"
-          error={!!errors.password}
-          helperText={errors?.password?.message}
-          fullWidth
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="changer la visibilité du mot de passe"
-                  onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                >
-                  {showPassword ? <Visibility /> : <VisibilityOff />}
-                </IconButton>
-              </InputAdornment>
-            ),
+          error={errors?.password?.message}
+          nativeInputProps={{
+            ...register('password'),
+            autoComplete: 'new-password',
           }}
         />
-        <PasswordFieldHinter password={watch('password')} headline={`Le nouveau mot de passe doit contenir :`} />
-      </Grid>
-      <Grid item xs={12}>
-        <Button type="submit" loading={resetPassword.isPending} size="large" variant="contained" fullWidth>
-          Mettre à jour
-        </Button>
-      </Grid>
+      </div>
+      <div className={fr.cx('fr-col-12')}>
+        <ul className={fr.cx('fr-btns-group')}>
+          <li>
+            <Button type="submit" loading={resetPassword.isPending}>
+              Mettre à jour
+            </Button>
+          </li>
+        </ul>
+      </div>
     </BaseForm>
   );
 }

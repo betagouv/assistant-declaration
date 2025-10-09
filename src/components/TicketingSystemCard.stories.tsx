@@ -19,7 +19,7 @@ export default {
 } as Meta<ComponentType>;
 
 async function playFindElement(canvasElement: HTMLElement): Promise<HTMLElement> {
-  return await within(canvasElement).findByText(/billetweb/i);
+  return await within(canvasElement).findByText(/^billetweb$/i);
 }
 
 const Template: StoryFn<typeof TicketingSystemCard> = (args) => {

@@ -1,8 +1,8 @@
-import { Button } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 import { screen, userEvent, within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
+import { Button } from '@ad/src/components/Button';
 import { ErrorDialog } from '@ad/src/components/ErrorDialog';
 import { useSingletonErrorDialog } from '@ad/src/components/modal/useModal';
 
@@ -38,11 +38,7 @@ const Template: StoryFn<ComponentType> = (args) => {
     });
   };
 
-  return (
-    <Button onClick={onClick} variant="contained">
-      Display the error dialog
-    </Button>
-  );
+  return <Button onClick={onClick}>Display the error dialog</Button>;
 };
 
 const DefaultStory = Template.bind({});

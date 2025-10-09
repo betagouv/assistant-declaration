@@ -1,9 +1,11 @@
 import { Meta, StoryFn } from '@storybook/react';
+import { TRPCClientError } from '@trpc/client';
 import { within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindAlert } from '@ad/.storybook/testing';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
+import { BusinessError } from '@ad/src/models/entities/errors';
 
 type ComponentType = typeof ErrorAlert;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -33,8 +35,8 @@ export const OneError = prepareStory(OneErrorStory);
 const MultipleErrorsStory = Template.bind({});
 MultipleErrorsStory.args = {
   errors: [
-    new Error('this is the first error'),
-    new Error('this is the second error'),
+    new BusinessError('firstError', 'this is the first error'),
+    new BusinessError('secondError', 'this is the second error'),
     new Error('duplicated error is shown once'),
     new Error('duplicated error is shown once'),
   ],
@@ -47,7 +49,7 @@ export const MultipleErrors = prepareStory(MultipleErrorsStory);
 
 const WithRetryStory = Template.bind({});
 WithRetryStory.args = {
-  errors: [new Error('this is an error')],
+  errors: [new TRPCClientError('Error for test')],
   refetchs: [() => Promise.resolve()],
 };
 WithRetryStory.play = async ({ canvasElement }) => {

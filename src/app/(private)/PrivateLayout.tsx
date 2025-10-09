@@ -1,8 +1,8 @@
 'use client';
 
+import { fr } from '@codegouvfr/react-dsfr';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { HeaderProps } from '@codegouvfr/react-dsfr/Header';
-import { Grid } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
 import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
 
@@ -16,7 +16,6 @@ import { UserInterfaceSessionProvider } from '@ad/src/components/user-interface-
 import { UserInterfaceOrganizationSchemaType } from '@ad/src/models/entities/ui';
 import { signIn, useSession } from '@ad/src/proxies/next-auth/react';
 import { commonFooterAttributes, commonHeaderAttributes, helpQuickAccessItem, userQuickAccessItem } from '@ad/src/utils/dsfr';
-import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export function PrivateLayout(props: PropsWithChildren) {
@@ -85,9 +84,13 @@ export function PrivateLayout(props: PropsWithChildren) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (error) {
     return (
-      <Grid container {...centeredAlertContainerGridProps}>
-        <ErrorAlert errors={[error]} refetchs={[refetch]} />
-      </Grid>
+      <div className={fr.cx('fr-container', 'fr-py-12v')}>
+        <div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+          <div className={fr.cx('fr-col-md-8', 'fr-col-lg-6')}>
+            <ErrorAlert errors={[error]} refetchs={[refetch]} />
+          </div>
+        </div>
+      </div>
     );
   }
 

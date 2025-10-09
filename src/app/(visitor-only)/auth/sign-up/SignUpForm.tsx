@@ -1,28 +1,17 @@
 'use client';
 
+import { fr } from '@codegouvfr/react-dsfr';
+import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
+import { Input } from '@codegouvfr/react-dsfr/Input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import {
-  Button,
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  Grid,
-  IconButton,
-  InputAdornment,
-  Link,
-  TextField,
-  Typography,
-} from '@mui/material';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
-import { PasswordFieldHinter } from '@ad/src/components/PasswordFieldHinter';
+import { Button } from '@ad/src/components/Button';
+import { PasswordMutationInput } from '@ad/src/components/PasswordMutationInput';
 import { SignUpPrefillSchemaType, SignUpSchema, SignUpSchemaType } from '@ad/src/models/actions/auth';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
@@ -52,82 +41,92 @@ export function SignUpForm({ prefill, onSuccess }: { prefill?: SignUpPrefillSche
     onSuccess();
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleMouseDownPassword = () => setShowPassword(!showPassword);
-
   return (
     <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="s'inscrire">
-      <Grid item xs={12}>
-        <TextField type="email" label="Email" {...register('email')} error={!!errors.email} helperText={errors?.email?.message} fullWidth />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          type="firstname"
-          label="Prénom"
-          {...register('firstname')}
-          error={!!errors.firstname}
-          helperText={errors?.firstname?.message}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField type="lastname" label="Nom" {...register('lastname')} error={!!errors.lastname} helperText={errors?.lastname?.message} fullWidth />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          type={showPassword ? 'text' : 'password'}
-          label="Mot de passe"
-          {...register('password')}
-          autoComplete="new-password"
-          error={!!errors.password}
-          helperText={errors?.password?.message}
-          fullWidth
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="changer la visibilité du mot de passe"
-                  onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                >
-                  {showPassword ? <Visibility /> : <VisibilityOff />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        <PasswordFieldHinter password={watch('password')} />
-      </Grid>
-      <Grid item xs={12}>
-        <FormControl error={!!errors.termsAccepted}>
-          <FormControlLabel
-            label={
-              <span>
-                J&apos;accepte les&nbsp;
-                <Link href={linkRegistry.get('termsOfUse', undefined)} variant="subtitle2" underline="none">
-                  modalités d&apos;utilisation
-                </Link>
-              </span>
-            }
-            control={<Checkbox {...register('termsAccepted')} defaultChecked={!!control._defaultValues.termsAccepted} />}
-          />
-          <FormHelperText>{errors?.termsAccepted?.message}</FormHelperText>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12}>
-        <Button type="submit" loading={signUp.isPending} size="large" variant="contained" fullWidth>
-          S&apos;enregistrer
-        </Button>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography color="textSecondary" variant="body2">
+      <div className={fr.cx('fr-col-12')}>
+        <fieldset className={fr.cx('fr-fieldset')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Input
+              label="Email"
+              state={!!errors.email ? 'error' : undefined}
+              stateRelatedMessage={errors?.email?.message}
+              nativeInputProps={{
+                type: 'email',
+                ...register('email'),
+              }}
+            />
+          </div>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Input
+              label="Prénom"
+              state={!!errors.firstname ? 'error' : undefined}
+              stateRelatedMessage={errors?.firstname?.message}
+              nativeInputProps={{
+                ...register('firstname'),
+              }}
+            />
+          </div>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Input
+              label="Nom"
+              state={!!errors.lastname ? 'error' : undefined}
+              stateRelatedMessage={errors?.lastname?.message}
+              nativeInputProps={{
+                ...register('lastname'),
+              }}
+            />
+          </div>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <PasswordMutationInput
+              label="Mot de passe"
+              error={errors?.password?.message}
+              nativeInputProps={{
+                ...register('password'),
+                autoComplete: 'new-password',
+              }}
+            />
+          </div>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Checkbox
+              options={[
+                {
+                  label: (
+                    <span>
+                      J&apos;accepte les&nbsp;
+                      <NextLink href={linkRegistry.get('termsOfUse', undefined)} className={fr.cx('fr-link')}>
+                        modalités d&apos;utilisation
+                      </NextLink>
+                    </span>
+                  ),
+                  nativeInputProps: {
+                    ...register('termsAccepted'),
+                    value: 'true',
+                  },
+                },
+              ]}
+              state={!!errors.termsAccepted ? 'error' : undefined}
+              stateRelatedMessage={errors?.termsAccepted?.message}
+              small
+              className={fr.cx('fr-pb-2v')}
+            />
+          </div>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <ul className={fr.cx('fr-btns-group')}>
+              <li>
+                <Button type="submit" loading={signUp.isPending}>
+                  S&apos;enregistrer
+                </Button>
+              </li>
+            </ul>
+          </div>
+        </fieldset>
+        <div>
           Vous possédez déjà un compte ?&nbsp;
-          <Link component={NextLink} href={linkRegistry.get('signIn', undefined)} variant="subtitle2" underline="none">
+          <NextLink href={linkRegistry.get('signIn', undefined)} className={fr.cx('fr-link')}>
             Se connecter
-          </Link>
-        </Typography>
-      </Grid>
+          </NextLink>
+        </div>
+      </div>
     </BaseForm>
   );
 }

@@ -1,7 +1,7 @@
 import { Meta, StoryFn } from '@storybook/react';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
-import { playFindMain } from '@ad/.storybook/testing';
+import { playFindNavigation } from '@ad/.storybook/testing';
 import { AsVisitor as PublicLayoutAsVisitorStory } from '@ad/src/app/(public)/PublicLayout.stories';
 import { DocsLayout } from '@ad/src/app/(public)/docs/DocsLayout';
 
@@ -28,7 +28,7 @@ const NormalStory = Template.bind({});
 NormalStory.parameters = {};
 NormalStory.args = {};
 NormalStory.play = async ({ canvasElement }) => {
-  await playFindMain(canvasElement);
+  await playFindNavigation(canvasElement, /documentation/i);
 };
 
 export const Normal = prepareStory(NormalStory);
@@ -57,7 +57,7 @@ LoremStory.args = {
   ),
 };
 LoremStory.play = async ({ canvasElement }) => {
-  await playFindMain(canvasElement);
+  await playFindNavigation(canvasElement, /documentation/i);
 };
 
 export const Lorem = prepareStory(LoremStory);
@@ -71,7 +71,7 @@ WithLayoutStory.args = {
   ...NormalStory.args,
 };
 WithLayoutStory.play = async ({ canvasElement }) => {
-  await playFindMain(canvasElement);
+  await playFindNavigation(canvasElement, /documentation/i);
 };
 
 export const WithLayout = prepareStory(WithLayoutStory, {

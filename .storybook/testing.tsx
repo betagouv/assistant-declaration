@@ -27,6 +27,12 @@ export async function playFindMain(parentElement: HTMLElement): Promise<HTMLElem
   return await within(parentElement).findByRole('main');
 }
 
+export async function playFindNavigation(parentElement: HTMLElement, name: string | RegExp): Promise<HTMLElement> {
+  return await within(parentElement).findByRole('navigation', {
+    name: name,
+  });
+}
+
 export async function playFindForm(parentElement: HTMLElement): Promise<HTMLElement> {
   return await within(parentElement).findByRole('form');
 }

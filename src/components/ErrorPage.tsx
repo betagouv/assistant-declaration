@@ -3,12 +3,11 @@
 // import { fr } from '@codegouvfr/react-dsfr';
 import ovoidSprite from '@gouvfr/dsfr/dist/artwork/background/ovoid.svg';
 import technicalErrorSprite from '@gouvfr/dsfr/dist/artwork/pictograms/system/technical-error.svg';
-import { Button, Grid } from '@mui/material';
 import NextLink from 'next/link';
 import React from 'react';
 
+import { Button } from '@ad/src/components/Button';
 import { useLiveChat } from '@ad/src/components/live-chat/useLiveChat';
-import { centeredErrorContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 // Simple workaround until Next.js implement the errors into the appDir and not into `pages`
@@ -31,7 +30,7 @@ export function ErrorPage(props: ErrorPageProps) {
   const Description = props.description;
 
   return (
-    <Grid container {...centeredErrorContainerGridProps}>
+    <div className={fr.cx('fr-container')}>
       <div role="alert" className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-grid-row--middle', 'fr-grid-row--center')}>
         <div className={fr.cx('fr-py-0', 'fr-col-12', 'fr-col-md-6')}>
           <h1>{props.title}</h1>
@@ -69,7 +68,7 @@ export function ErrorPage(props: ErrorPageProps) {
           </svg>
         </div>
       </div>
-    </Grid>
+    </div>
   );
 }
 
@@ -89,9 +88,9 @@ export const error404Props: ErrorPageProps = {
   ),
   buttons: [
     () => (
-      <Button component={NextLink} href={linkRegistry.get('home', undefined)} size="large" variant="contained">
+      <NextLink href={linkRegistry.get('home', undefined)} className={fr.cx('fr-btn', 'fr-mx-0')}>
         Page d&apos;accueil
-      </Button>
+      </NextLink>
     ),
   ],
 };
@@ -106,7 +105,13 @@ export const error500Props: ErrorPageProps = {
       const { showLiveChat, isLiveChatLoading } = useLiveChat();
 
       return (
-        <Button onClick={showLiveChat} loading={isLiveChatLoading} size="large" variant="contained">
+        <Button
+          onClick={showLiveChat}
+          loading={isLiveChatLoading}
+          nativeButtonProps={{
+            className: 'fr-mx-0',
+          }}
+        >
           Contactez-nous
         </Button>
       );

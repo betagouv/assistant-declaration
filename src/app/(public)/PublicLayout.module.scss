@@ -1,0 +1,13 @@
+// Inside the header there is no way to force a primary link so we just override styles to mimic one
+.primaryLink {
+  background-color: var(--background-action-high-blue-france) !important;
+  color: var(--text-inverted-blue-france) !important;
+
+  &:hover {
+    background-color: var(--background-action-high-blue-france-hover) !important;
+  }
+
+  &:active {
+    background-color: var(--background-action-high-blue-france-active) !important;
+  }
+}

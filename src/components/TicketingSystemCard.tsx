@@ -1,21 +1,8 @@
 'use client';
 
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { AdminPanelSettings, MoreVert, NotInterested } from '@mui/icons-material';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  ListItemIcon,
-  Menu,
-  MenuItem,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Card, CardContent, CardHeader, Grid, IconButton, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
 import Image from 'next/image';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,6 +19,11 @@ import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModa
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
 import { menuPaperProps } from '@ad/src/utils/menu';
 
+const modal = createModal({
+  id: 'ticketing-system-update-modal',
+  isOpenedByDefault: false,
+});
+
 export interface TicketingSystemCardProps {
   ticketingSystem: TicketingSystemSchemaType;
   disconnectAction: () => Promise<void>;
@@ -40,14 +32,6 @@ export interface TicketingSystemCardProps {
 export function TicketingSystemCard(props: TicketingSystemCardProps) {
   const { t } = useTranslation('common');
   const { ContextualUpdateTicketingSystemForm } = useContext(TicketingSystemCardContext);
-
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const handeOpenModal = () => {
-    setModalOpen(true);
-  };
-  const handleCloseModal = () => {
-    setModalOpen(false);
-  };
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -145,7 +129,7 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem onClick={handeOpenModal}>
+        <MenuItem onClick={() => modal.open()}>
           <ListItemIcon>
             <AdminPanelSettings fontSize="small" />
           </ListItemIcon>
@@ -158,12 +142,9 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
           Déconnecter
         </MenuItem>
       </Menu>
-      <Dialog open={modalOpen} onClose={handleCloseModal} fullWidth maxWidth="sm">
-        <DialogTitle>Modification des identifiants {t(`model.ticketingSystemName.enum.${props.ticketingSystem.name}`)}</DialogTitle>
-        <DialogContent>
-          <ContextualUpdateTicketingSystemForm ticketingSystem={props.ticketingSystem} onSuccess={handleCloseModal} />
-        </DialogContent>
-      </Dialog>
+      <modal.Component title={`Modification des identifiants ${t(`model.ticketingSystemName.enum.${props.ticketingSystem.name}`)}`}>
+        <ContextualUpdateTicketingSystemForm ticketingSystem={props.ticketingSystem} onSuccess={() => modal.close()} />
+      </modal.Component>
     </Card>
   );
 }

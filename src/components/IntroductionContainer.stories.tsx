@@ -1,8 +1,9 @@
-import { Box, Button, Typography } from '@mui/material';
+import { fr } from '@codegouvfr/react-dsfr';
 import { Meta, StoryFn } from '@storybook/react';
 import Image from 'next/image';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
+import { Button } from '@ad/src/components/Button';
 import { IntroductionContainer } from '@ad/src/components/IntroductionContainer';
 
 type ComponentType = typeof IntroductionContainer;
@@ -23,23 +24,13 @@ const Template: StoryFn<ComponentType> = (args) => {
 const NormalStory = Template.bind({});
 NormalStory.args = {
   left: (
-    <Box
-      sx={{
-        px: 4,
-        py: 3,
-        textAlign: { xs: 'center', md: 'left' },
-      }}
-    >
-      <Typography variant="h2" sx={{ my: 2, maxWidth: 500 }}>
+    <div className={fr.cx('fr-py-6v', 'fr-px-8v')}>
+      <div className={fr.cx('fr-h2')} style={{ maxWidth: 500 }}>
         Esse sit laborum
-      </Typography>
-      <Typography color="text.secondary" sx={{ mb: 3, maxWidth: 500 }}>
-        Aut aut iure minus sint perspiciatis dolorem iusto molestias ullam.
-      </Typography>
-      <Button onClick={() => {}} size="large" variant="contained" sx={{ mb: 3 }}>
-        Ipsum
-      </Button>
-    </Box>
+      </div>
+      <p style={{ maxWidth: 500 }}>Aut aut iure minus sint perspiciatis dolorem iusto molestias ullam.</p>
+      <Button onClick={() => {}}>Ipsum</Button>
+    </div>
   ),
   right: (
     <Image
