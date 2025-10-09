@@ -8,6 +8,7 @@ import addressFormatter from '@fragaria/address-formatter';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertProps, Autocomplete, Snackbar } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
+import debounce from 'lodash.debounce';
 import { Ref, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -228,6 +229,13 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     [setSnackbarAlert, handleCloseSnackbar]
   );
 
+  const debouncedDisplayDefaultImpactMessage = useMemo(() => debounce(displayDefaultImpactMessage, 1500), []);
+  useEffect(() => {
+    return () => {
+      debouncedDisplayDefaultImpactMessage.cancel();
+    };
+  }, [debouncedDisplayDefaultImpactMessage]);
+
   // Modifying a default property should impact events that had the same value as before modification
   const currentPlaceName = watch('eventSerie.place.name');
   const previousPlaceName = usePrevious(currentPlaceName);
@@ -243,9 +251,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         }
       });
 
-      displayDefaultImpactMessage(modifiedEvents, events.length);
+      debouncedDisplayDefaultImpactMessage(modifiedEvents, events.length);
     }
-  }, [previousPlaceName, currentPlaceName, getValues, setValue, displayDefaultImpactMessage]);
+  }, [previousPlaceName, currentPlaceName, getValues, setValue, debouncedDisplayDefaultImpactMessage]);
 
   const currentPlaceAddress = watch('eventSerie.place.address');
   const previousPlaceAddress = usePrevious(currentPlaceAddress);
