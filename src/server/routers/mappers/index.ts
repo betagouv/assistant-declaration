@@ -88,7 +88,7 @@ export function eventSeriePrismaToModel(eventSerie: EventSerie): EventSerieSchem
     placeId: eventSerie.placeId,
     placeCapacity: eventSerie.placeCapacity,
     audience: eventSerie.audience,
-    taxRate: eventSerie.taxRate.toNumber(),
+    ticketingRevenueTaxRate: eventSerie.ticketingRevenueTaxRate.toNumber(),
     expensesExcludingTaxes: eventSerie.expensesExcludingTaxes.toNumber(),
     introductionFeesExpensesExcludingTaxes: eventSerie.introductionFeesExpensesExcludingTaxes.toNumber(),
     circusSpecificExpensesExcludingTaxes:
@@ -107,7 +107,6 @@ export function eventPrismaToModel(event: Event): EventSchemaType {
     endAt: event.endAt,
     ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes.toNumber(),
     ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes.toNumber(),
-    ticketingRevenueTaxRate: event.ticketingRevenueTaxRate !== null ? event.ticketingRevenueTaxRate.toNumber() : null,
     consumptionsRevenueIncludingTaxes: event.consumptionsRevenueIncludingTaxes.toNumber(),
     consumptionsRevenueExcludingTaxes: event.consumptionsRevenueExcludingTaxes.toNumber(),
     consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate !== null ? event.consumptionsRevenueTaxRate.toNumber() : null,
@@ -125,7 +124,7 @@ export function eventPrismaToModel(event: Event): EventSchemaType {
     placeOverrideId: event.placeOverrideId,
     placeCapacityOverride: event.placeCapacityOverride,
     audienceOverride: event.audienceOverride,
-    taxRateOverride: event.taxRateOverride !== null ? event.taxRateOverride.toNumber() : null,
+    ticketingRevenueTaxRateOverride: event.ticketingRevenueTaxRateOverride !== null ? event.ticketingRevenueTaxRateOverride.toNumber() : null,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,
   };

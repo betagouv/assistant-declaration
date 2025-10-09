@@ -20,7 +20,7 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
     expectedDeclarationTypes: true,
     placeCapacity: true,
     audience: true,
-    taxRate: true,
+    ticketingRevenueTaxRate: true,
     expensesExcludingTaxes: true,
     introductionFeesExpensesExcludingTaxes: true,
     circusSpecificExpensesExcludingTaxes: true,
@@ -49,7 +49,6 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
     })
       .merge(
         EventSchema.pick({
-          ticketingRevenueTaxRate: true,
           consumptionsRevenueTaxRate: true,
           cateringRevenueTaxRate: true,
           programSalesRevenueTaxRate: true,
@@ -57,7 +56,7 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
           // Since that's overrides there are not required
           placeCapacityOverride: true,
           audienceOverride: true,
-          taxRateOverride: true,
+          ticketingRevenueTaxRateOverride: true,
         })
       )
       .merge(

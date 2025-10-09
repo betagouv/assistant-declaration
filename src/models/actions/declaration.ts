@@ -33,7 +33,7 @@ export const FillDeclarationSchema = z
       expectedDeclarationTypes: true,
       placeCapacity: true,
       audience: true,
-      taxRate: true,
+      ticketingRevenueTaxRate: true,
       expensesExcludingTaxes: true,
       introductionFeesExpensesExcludingTaxes: true,
       circusSpecificExpensesExcludingTaxes: true,
@@ -53,7 +53,6 @@ export const FillDeclarationSchema = z
         endAt: true,
         ticketingRevenueIncludingTaxes: true,
         ticketingRevenueExcludingTaxes: true,
-        // ticketingRevenueTaxRate: true,
         consumptionsRevenueIncludingTaxes: true,
         consumptionsRevenueExcludingTaxes: true,
         // consumptionsRevenueTaxRate: true,
@@ -70,7 +69,7 @@ export const FillDeclarationSchema = z
         paidTickets: true,
         placeCapacityOverride: true,
         audienceOverride: true,
-        taxRateOverride: true,
+        // ticketingRevenueTaxRateOverride: true,
       }).extend({
         placeOverride: PlaceInputSchema,
       })

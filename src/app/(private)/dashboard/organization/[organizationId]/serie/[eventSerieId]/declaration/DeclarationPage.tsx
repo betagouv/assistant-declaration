@@ -117,7 +117,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           },
           placeCapacity: result.declaration.eventSerie.placeCapacity,
           audience: result.declaration.eventSerie.audience,
-          taxRate: result.declaration.eventSerie.taxRate,
+          ticketingRevenueTaxRate: result.declaration.eventSerie.ticketingRevenueTaxRate,
           expensesExcludingTaxes: result.declaration.eventSerie.expensesExcludingTaxes,
           introductionFeesExpensesExcludingTaxes: result.declaration.eventSerie.introductionFeesExpensesExcludingTaxes,
           circusSpecificExpensesExcludingTaxes: result.declaration.eventSerie.circusSpecificExpensesExcludingTaxes,
@@ -137,7 +137,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             endAt: event.endAt,
             ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
             ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
-            ticketingRevenueTaxRate: event.ticketingRevenueTaxRate,
             consumptionsRevenueIncludingTaxes: event.consumptionsRevenueIncludingTaxes,
             consumptionsRevenueExcludingTaxes: event.consumptionsRevenueExcludingTaxes,
             consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate,
@@ -158,7 +157,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             },
             placeCapacityOverride: event.placeCapacityOverride ?? result.declaration.eventSerie.placeCapacity,
             audienceOverride: event.audienceOverride ?? result.declaration.eventSerie.audience,
-            taxRateOverride: event.taxRateOverride ?? result.declaration.eventSerie.taxRate,
+            ticketingRevenueTaxRateOverride: event.ticketingRevenueTaxRateOverride ?? result.declaration.eventSerie.ticketingRevenueTaxRate,
           };
         }),
       });
@@ -205,7 +204,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             },
             placeCapacity: getDeclaration.data.declarationWrapper.declaration.eventSerie.placeCapacity,
             audience: getDeclaration.data.declarationWrapper.declaration.eventSerie.audience,
-            taxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.taxRate,
+            ticketingRevenueTaxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.ticketingRevenueTaxRate,
             expensesExcludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expensesExcludingTaxes,
             introductionFeesExpensesExcludingTaxes:
               getDeclaration.data.declarationWrapper.declaration.eventSerie.introductionFeesExpensesExcludingTaxes,
@@ -227,7 +226,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
               endAt: event.endAt,
               ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
               ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
-              ticketingRevenueTaxRate: event.ticketingRevenueTaxRate,
               consumptionsRevenueIncludingTaxes: event.consumptionsRevenueIncludingTaxes,
               consumptionsRevenueExcludingTaxes: event.consumptionsRevenueExcludingTaxes,
               consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate,
@@ -248,7 +246,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
               },
               placeCapacityOverride: event.placeCapacityOverride ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.placeCapacity,
               audienceOverride: event.audienceOverride ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.audience,
-              taxRateOverride: event.taxRateOverride ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.taxRate,
+              ticketingRevenueTaxRateOverride:
+                event.ticketingRevenueTaxRateOverride ?? getDeclaration.data.declarationWrapper.declaration.eventSerie.ticketingRevenueTaxRate,
             };
           }),
         });
@@ -420,7 +419,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     }
   }, [previousAudience, currentAudience, getValues, setValue, displayDefaultImpactMessage]);
 
-  const currentTaxRate = watch('eventSerie.taxRate');
+  const currentTaxRate = watch('eventSerie.ticketingRevenueTaxRate');
   const previousTaxRate = usePrevious(currentTaxRate);
   useEffect(() => {
     if (previousTaxRate !== undefined && currentTaxRate !== previousTaxRate) {
@@ -428,8 +427,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       let modifiedEvents = 0;
 
       events.forEach((event, eventIndex) => {
-        if (event.taxRateOverride === null || event.taxRateOverride === previousTaxRate) {
-          setValue(`events.${eventIndex}.taxRateOverride`, currentTaxRate);
+        if (event.ticketingRevenueTaxRateOverride === null || event.ticketingRevenueTaxRateOverride === previousTaxRate) {
+          setValue(`events.${eventIndex}.ticketingRevenueTaxRateOverride`, currentTaxRate);
           modifiedEvents++;
         }
       });
@@ -931,14 +930,13 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             <div className={fr.cx('fr-fieldset__element')}>
                               <Select
                                 label="Taux de TVA"
-                                state={!!errors.eventSerie?.taxRate ? 'error' : undefined}
-                                stateRelatedMessage={errors?.eventSerie?.taxRate?.message}
+                                state={!!errors.eventSerie?.ticketingRevenueTaxRate ? 'error' : undefined}
+                                stateRelatedMessage={errors?.eventSerie?.ticketingRevenueTaxRate?.message}
                                 nativeSelectProps={{
-                                  ...register('eventSerie.taxRate', {
+                                  ...register('eventSerie.ticketingRevenueTaxRate', {
                                     valueAsNumber: true,
-                                    // setValueAs: (newValue) => parseInt(newValue, 10), // Needed since underlying it's managing string only
                                   }),
-                                  defaultValue: (control._defaultValues.eventSerie?.taxRate ?? currentTaxRates[0]).toString(),
+                                  defaultValue: (control._defaultValues.eventSerie?.ticketingRevenueTaxRate ?? currentTaxRates[0]).toString(),
                                 }}
                                 options={currentTaxRates.map((taxRate) => {
                                   return {

@@ -30,7 +30,7 @@ export const DeclarationSchema = applyTypedParsers(
         expectedDeclarationTypes: true,
         placeCapacity: true,
         audience: true,
-        taxRate: true,
+        ticketingRevenueTaxRate: true,
         expensesExcludingTaxes: true,
         introductionFeesExpensesExcludingTaxes: true,
         circusSpecificExpensesExcludingTaxes: true,
@@ -46,7 +46,6 @@ export const DeclarationSchema = applyTypedParsers(
           endAt: true,
           ticketingRevenueIncludingTaxes: true,
           ticketingRevenueExcludingTaxes: true,
-          ticketingRevenueTaxRate: true,
           consumptionsRevenueIncludingTaxes: true,
           consumptionsRevenueExcludingTaxes: true,
           consumptionsRevenueTaxRate: true,
@@ -63,7 +62,7 @@ export const DeclarationSchema = applyTypedParsers(
           paidTickets: true,
           placeCapacityOverride: true,
           audienceOverride: true,
-          taxRateOverride: true,
+          ticketingRevenueTaxRateOverride: true,
         }).merge(
           z.object({
             placeOverride: PlaceSchema.nullable(),

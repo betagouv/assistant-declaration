@@ -411,13 +411,13 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
           <div className={fr.cx('fr-fieldset__element')}>
             <Select
               label="Taux de TVA"
-              state={!!errors?.taxRateOverride ? 'error' : undefined}
-              stateRelatedMessage={errors?.taxRateOverride?.message}
+              state={!!errors?.ticketingRevenueTaxRateOverride ? 'error' : undefined}
+              stateRelatedMessage={errors?.ticketingRevenueTaxRateOverride?.message}
               nativeSelectProps={{
-                ...register(`${name}.taxRateOverride`, {
+                ...register(`${name}.ticketingRevenueTaxRateOverride`, {
                   valueAsNumber: true,
                 }),
-                defaultValue: (control._defaultValues.events?.[eventIndex]?.taxRateOverride ?? currentTaxRates[0]).toString(),
+                defaultValue: (control._defaultValues.events?.[eventIndex]?.ticketingRevenueTaxRateOverride ?? currentTaxRates[0]).toString(),
               }}
               options={currentTaxRates.map((taxRate) => {
                 return {

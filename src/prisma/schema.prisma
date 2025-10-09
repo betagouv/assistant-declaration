@@ -241,7 +241,7 @@ model EventSerie {
   placeId                                String?  @db.Uuid
   placeCapacity                          Int?
   audience                               Audience @default(ALL)
-  taxRate                                Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
+  ticketingRevenueTaxRate                Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
   expensesExcludingTaxes                 Decimal  @db.Decimal(10, 2)
   introductionFeesExpensesExcludingTaxes Decimal  @db.Decimal(10, 2)
   circusSpecificExpensesExcludingTaxes   Decimal? @db.Decimal(10, 2)
@@ -265,7 +265,6 @@ model Event {
   endAt                             DateTime?
   ticketingRevenueIncludingTaxes    Decimal   @db.Decimal(10, 2)
   ticketingRevenueExcludingTaxes    Decimal   @db.Decimal(10, 2)
-  ticketingRevenueTaxRate           Decimal?  @db.Decimal(10, 2) // Optional if reusing the one from the event serie
   ticketingRevenueDefinedTaxRate    Boolean // In case there is no legal rate to bind both amounts
   consumptionsRevenueIncludingTaxes Decimal   @db.Decimal(10, 2)
   consumptionsRevenueExcludingTaxes Decimal   @db.Decimal(10, 2)
@@ -284,10 +283,10 @@ model Event {
 
   // Each event has following properties but they are defined at
   // the event serie level, here it's to override in case of specifics
-  placeOverrideId       String?   @db.Uuid
-  placeCapacityOverride Int?
-  audienceOverride      Audience?
-  taxRateOverride       Decimal?  @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
+  placeOverrideId                 String?   @db.Uuid
+  placeCapacityOverride           Int?
+  audienceOverride                Audience?
+  ticketingRevenueTaxRateOverride Decimal?  @db.Decimal(5, 4) // Optional if reusing the one from the event serie
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

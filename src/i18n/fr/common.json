@@ -140,9 +140,6 @@
           "invalid_type": "le montant TTC doit être un nombre entier",
           "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
         },
-        "taxRateOverride": {
-          "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
-        },
         "ticketingRevenueExcludingTaxes": {
           "invalid_type": "le montant HT doit être un nombre entier",
           "too_small": "le montant HT doit être supérieur à {{minimum}} euro"
@@ -150,6 +147,9 @@
         "ticketingRevenueIncludingTaxes": {
           "invalid_type": "le montant TTC doit être un nombre entier",
           "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
+        "ticketingRevenueTaxRateOverride": {
+          "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
         },
         "too_big": "il ne peut y avoir que {{maximum}} représentations au maximum"
       },
@@ -248,11 +248,11 @@
         "too_big": "l'identifiant SACD doit faire {{maximum}} caractères maximum",
         "too_small_one": "l'identifiant SACD est requis"
       },
-      "taxRate": {
-        "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
-      },
       "termsAccepted": {
         "invalid_literal": "les modalités d'utilisation doivent être acceptées"
+      },
+      "ticketingRevenueTaxRate": {
+        "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
       },
       "ticketingSystemName": {
         "invalid_enum_value": "le système de billetterie est requis"

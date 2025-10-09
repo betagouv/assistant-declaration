@@ -33,7 +33,7 @@ export const LiteEventSerieSchema = applyTypedParsers(
       name: z.string().min(1),
       startAt: z.date(),
       endAt: z.date(),
-      taxRate: z.number().nonnegative(),
+      ticketingRevenueTaxRate: z.number().nonnegative(),
     })
     .strict()
 );
@@ -72,7 +72,7 @@ export const StricterEventSerieSchema = z.object({
   placeId: z.string().uuid(),
   placeCapacity: z.number().int().nonnegative(),
   audience: AudienceSchema,
-  taxRate: z.number().nonnegative(),
+  ticketingRevenueTaxRate: z.number().nonnegative(),
   expensesExcludingTaxes: z.number().nonnegative(),
   introductionFeesExpensesExcludingTaxes: z.number().nonnegative(),
   circusSpecificExpensesExcludingTaxes: z.number().nonnegative(),
@@ -121,7 +121,6 @@ export const StricterEventSchema = z.object({
   endAt: z.date(),
   ticketingRevenueIncludingTaxes: z.number().nonnegative(),
   ticketingRevenueExcludingTaxes: z.number().nonnegative(),
-  ticketingRevenueTaxRate: z.number().nonnegative(),
   consumptionsRevenueIncludingTaxes: z.number().nonnegative(),
   consumptionsRevenueExcludingTaxes: z.number().nonnegative(),
   consumptionsRevenueTaxRate: z.number().nonnegative(),
@@ -139,7 +138,7 @@ export const StricterEventSchema = z.object({
   placeOverrideId: EventSerieSchema.shape.placeId,
   placeCapacityOverride: EventSerieSchema.shape.placeCapacity,
   audienceOverride: EventSerieSchema.shape.audience,
-  taxRateOverride: EventSerieSchema.shape.taxRate,
+  ticketingRevenueTaxRateOverride: EventSerieSchema.shape.ticketingRevenueTaxRate,
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -147,7 +146,6 @@ export const StricterEventSchema = z.object({
 export const EventSchema = applyTypedParsers(
   StricterEventSchema.extend({
     endAt: StricterEventSchema.shape.endAt.nullable(),
-    ticketingRevenueTaxRate: StricterEventSchema.shape.ticketingRevenueTaxRate.nullable(),
     consumptionsRevenueTaxRate: StricterEventSchema.shape.consumptionsRevenueTaxRate.nullable(),
     cateringRevenueTaxRate: StricterEventSchema.shape.cateringRevenueTaxRate.nullable(),
     programSalesRevenueTaxRate: StricterEventSchema.shape.programSalesRevenueTaxRate.nullable(),
@@ -155,7 +153,7 @@ export const EventSchema = applyTypedParsers(
     placeOverrideId: StricterEventSchema.shape.placeOverrideId.nullable(),
     placeCapacityOverride: StricterEventSchema.shape.placeCapacityOverride.nullable(),
     audienceOverride: StricterEventSchema.shape.audienceOverride.nullable(),
-    taxRateOverride: StricterEventSchema.shape.taxRateOverride.nullable(),
+    ticketingRevenueTaxRateOverride: StricterEventSchema.shape.ticketingRevenueTaxRateOverride.nullable(),
   }).strict()
 );
 export type EventSchemaType = z.infer<typeof EventSchema>;
