@@ -4,7 +4,7 @@ import { AddressInputSchema, AddressSchema } from '@ad/src/models/entities/addre
 
 export const PlaceSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string().min(1).max(200),
     address: AddressSchema,
   })

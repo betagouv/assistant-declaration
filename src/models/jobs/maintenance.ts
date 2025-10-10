@@ -10,8 +10,8 @@ import z from 'zod';
 export const MaintenanceDataSchema = z
   .object({
     requestedAt: z.coerce.date(),
-    originalJobId: z.string().uuid(),
-    replayedMaintenanceJobId: z.string().uuid().optional(),
+    originalJobId: z.uuid(),
+    replayedMaintenanceJobId: z.uuid().optional(),
   })
   .strict();
 export type MaintenanceDataSchemaType = z.infer<typeof MaintenanceDataSchema>;

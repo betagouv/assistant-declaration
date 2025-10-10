@@ -18,11 +18,11 @@ export const SacdIdSchema = z
 export type SacdIdSchemaType = z.infer<typeof SacdIdSchema>;
 
 export const StricterOrganizationSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().min(1),
   officialId: OfficialIdSchema,
   officialHeadquartersId: OfficialHeadquartersIdSchema,
-  headquartersAddressId: z.string().uuid(),
+  headquartersAddressId: z.uuid(),
   sacemId: SacemIdSchema,
   sacdId: SacdIdSchema,
   createdAt: z.date(),

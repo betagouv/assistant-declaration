@@ -28,7 +28,7 @@ export const SignUpPrefillSchema = zx.deepPartial(SignUpSchema);
 export type SignUpPrefillSchemaType = z.infer<typeof SignUpPrefillSchema>;
 
 export const ConfirmSignUpSchema = z.object({
-  token: z.string().uuid(),
+  token: z.uuid(),
 });
 export type ConfirmSignUpSchemaType = z.infer<typeof ConfirmSignUpSchema>;
 

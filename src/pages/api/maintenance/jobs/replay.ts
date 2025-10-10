@@ -14,7 +14,7 @@ export const replayableJobStates: JobWithMetadata['state'][] = ['completed', 'ca
 export const HandlerBodySchema = z
   .object({
     topicName: z.string().min(1),
-    jobId: z.string().uuid(),
+    jobId: z.uuid(),
   })
   .strict();
 export type HandlerBodySchemaType = z.infer<typeof HandlerBodySchema>;

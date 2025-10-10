@@ -35,7 +35,7 @@ export type UserPasswordSchemaType = z.infer<typeof UserPasswordSchema>;
 
 export const UserSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     firstname: z.string().min(1),
     lastname: z.string().min(1),
     email: z.string().min(1).email(),

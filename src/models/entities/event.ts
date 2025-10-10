@@ -63,15 +63,15 @@ export const LiteEventSerieWrapperSchema = applyTypedParsers(
 export type LiteEventSerieWrapperSchemaType = z.infer<typeof LiteEventSerieWrapperSchema>;
 
 export const StricterEventSerieSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   internalTicketingSystemId: z.string().min(1),
-  ticketingSystemId: z.string().uuid(),
+  ticketingSystemId: z.uuid(),
   name: z.string().min(1),
   producerOfficialId: OfficialIdSchema,
   producerName: z.string().min(1),
   performanceType: PerformanceTypeSchema,
   expectedDeclarationTypes: z.array(DeclarationTypeSchema),
-  placeId: z.string().uuid(),
+  placeId: z.uuid(),
   placeCapacity: z.number().int().nonnegative(),
   audience: AudienceSchema,
   ticketingRevenueTaxRate: z.number().nonnegative(),
@@ -141,9 +141,9 @@ export const EventSerieWrapperSchema = applyTypedParsers(
 export type EventSerieWrapperSchemaType = z.infer<typeof EventSerieWrapperSchema>;
 
 export const StricterEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   internalTicketingSystemId: z.string().min(1),
-  eventSerieId: z.string().uuid(),
+  eventSerieId: z.uuid(),
   startAt: z.date(),
   endAt: z.date(),
   ticketingRevenueIncludingTaxes: z.number().nonnegative(),
