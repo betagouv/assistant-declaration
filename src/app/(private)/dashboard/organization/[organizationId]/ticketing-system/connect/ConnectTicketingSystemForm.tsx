@@ -96,7 +96,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
 
     // Reset the value if the field is not required so it's not passed when submitting (empty string will be converted to null)
     if (!required) {
-      setValue('apiAccessKey', '');
+      setValue('apiAccessKey', '', { shouldDirty: true });
     }
   }, [watchedTicketingSystemName, setValue]);
 

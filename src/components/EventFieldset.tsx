@@ -197,7 +197,7 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
                       }
                     }}
                     onInputChange={(event: React.SyntheticEvent<Element, Event>, newValue: string) => {
-                      setValue(`${name}.placeOverride.name`, newValue);
+                      setValue(`${name}.placeOverride.name`, newValue, { shouldDirty: true });
                     }}
                     onChange={(event, newValue) => {
                       if (newValue) {
@@ -207,10 +207,10 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
                           onChange(newValue.name);
 
                           // Override the current address used
-                          setValue(`${name}.placeOverride.address`, newValue.address);
+                          setValue(`${name}.placeOverride.address`, newValue.address, { shouldDirty: true });
                         }
                       } else {
-                        setValue(`${name}.placeOverride.name`, null);
+                        setValue(`${name}.placeOverride.name`, null, { shouldDirty: true });
                       }
                     }}
                     onBlur={onBlur}

@@ -9,8 +9,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertProps, Autocomplete, Snackbar } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import debounce from 'lodash.debounce';
-import { Controller, useForm } from 'react-hook-form';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { usePrevious } from 'react-use';
 
@@ -255,7 +255,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     }
   }, [getDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
 
-
   const { computedStartAt, computedEndAt, eventsKeyFigures } = useMemo(() => {
     // TODO: this should be based on form data, not the one from the API (since it needs to use local state)
     if (getDeclaration.data && getDeclaration.data.declarationWrapper.declaration.events.length > 0) {
@@ -320,7 +319,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
       events.forEach((event, eventIndex) => {
         if (event.placeOverride.name === null || event.placeOverride.name === previousPlaceName) {
-          setValue(`events.${eventIndex}.placeOverride.name`, currentPlaceName);
+          setValue(`events.${eventIndex}.placeOverride.name`, currentPlaceName, { shouldDirty: true });
           modifiedEvents++;
         }
       });
@@ -339,7 +338,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
       events.forEach((event, eventIndex) => {
         if (event.placeOverride.address === null || JSON.stringify(event.placeOverride.address) === previousPlaceAddressStringToCompare) {
-          setValue(`events.${eventIndex}.placeOverride.address`, currentPlaceAddress);
+          setValue(`events.${eventIndex}.placeOverride.address`, currentPlaceAddress, { shouldDirty: true });
           modifiedEvents++;
         }
       });
@@ -357,7 +356,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
       events.forEach((event, eventIndex) => {
         if (event.placeCapacityOverride === null || event.placeCapacityOverride === previousPlaceCapacity) {
-          setValue(`events.${eventIndex}.placeCapacityOverride`, currentPlaceCapacity);
+          setValue(`events.${eventIndex}.placeCapacityOverride`, currentPlaceCapacity, { shouldDirty: true });
           modifiedEvents++;
         }
       });
@@ -375,7 +374,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
       events.forEach((event, eventIndex) => {
         if (event.audienceOverride === null || event.audienceOverride === previousAudience) {
-          setValue(`events.${eventIndex}.audienceOverride`, currentAudience);
+          setValue(`events.${eventIndex}.audienceOverride`, currentAudience, { shouldDirty: true });
           modifiedEvents++;
         }
       });
@@ -393,7 +392,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
       events.forEach((event, eventIndex) => {
         if (event.ticketingRevenueTaxRateOverride === null || event.ticketingRevenueTaxRateOverride === previousTicketingRevenueTaxRate) {
-          setValue(`events.${eventIndex}.ticketingRevenueTaxRateOverride`, currentTicketingRevenueTaxRate);
+          setValue(`events.${eventIndex}.ticketingRevenueTaxRateOverride`, currentTicketingRevenueTaxRate, { shouldDirty: true });
           modifiedEvents++;
         }
       });
@@ -487,6 +486,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           </li>
                           <li>
                             <Button
+                              disabled={isDirty}
                               onClick={() => {
                                 showConfirmationDialog({
                                   description: (
@@ -726,7 +726,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                         }
                                       }}
                                       onInputChange={(event: React.SyntheticEvent<Element, Event>, newValue: string) => {
-                                        setValue('eventSerie.place.name', newValue);
+                                        setValue('eventSerie.place.name', newValue, { shouldDirty: true });
                                       }}
                                       onChange={(event, newValue) => {
                                         if (newValue) {
@@ -736,10 +736,10 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                             onChange(newValue.name);
 
                                             // Override the current address used
-                                            setValue('eventSerie.place.address', newValue.address);
+                                            setValue('eventSerie.place.address', newValue.address, { shouldDirty: true });
                                           }
                                         } else {
-                                          setValue('eventSerie.place.name', null);
+                                          setValue('eventSerie.place.name', null, { shouldDirty: true });
                                         }
                                       }}
                                       onBlur={onBlur}
