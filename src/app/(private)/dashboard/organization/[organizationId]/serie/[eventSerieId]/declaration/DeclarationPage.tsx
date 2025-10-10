@@ -57,7 +57,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
   const aggregatedQueries = new AggregatedQueries(getDeclaration);
 
-  const [modalSelectedDeclarationTypes, setModalSelectedDeclarationTypes] = useState<DeclarationTypeSchemaType[]>([]);
   const [formInitialized, setFormInitialized] = useState<boolean>(false);
 
   const {
@@ -75,6 +74,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     defaultValues: {
       // ...prefill,
       eventSerieId: eventSerieId,
+      eventSerie: {
+        expectedDeclarationTypes: [],
+      },
       events: [], // To avoid being "undefined"
     }, // The rest will be set with data fetched
   });
@@ -425,57 +427,49 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')} style={{ height: '100%' }}>
         {declaration.events.length > 0 ? (
           <>
-            <div className={fr.cx('fr-col-12')}>TODO: set in modal</div>
             <div className={fr.cx('fr-col-12')}>
-              <Checkbox
-                legend="Légende pour l’ensemble des champs"
-                options={DeclarationTypeSchema.options.map((declarationType) => {
-                  return {
-                    label: t(`model.declarationType.enum.${declarationType}`),
-                    nativeInputProps: {
-                      name: `checkbox-${declarationType}`,
-                      value: declarationType,
-                      defaultChecked: modalSelectedDeclarationTypes.includes(declarationType),
-                      onChange: (event) => {
-                        const newSelectedDeclarationsTypes = new Set<DeclarationTypeSchemaType>(modalSelectedDeclarationTypes);
-
-                        if (event.target.checked) {
-                          newSelectedDeclarationsTypes.add(declarationType);
-                        } else {
-                          newSelectedDeclarationsTypes.delete(declarationType);
-                        }
-
-                        // maybe options should be useMemo ?
-
-                        // newSelectedDeclarationsTypes.values().
-
-                        setModalSelectedDeclarationTypes([...newSelectedDeclarationsTypes.values()]);
-                        console.log(111111);
-                        console.log(event);
-
-                        //
-                        //
-                        // TODO:
-                        // TODO:
-                        // TODO: ou faire un subform juste pour la modal... avec des register(declarationType)
-                        // TODO: en utilisant useForm<DeclarationTypeSchemaType>
-                        // TODO: ... et au moment du submit... checker les valeurs et faire ".push()" pour un setValues du form principal
-                        // TODO:
-                        // TODO:
-                        // TODO: faire un comp dédié xxForm... ?
-                        // TODO:
-                        // TODO:
-                        //
-                        //
-                      },
-                    },
-                  };
-                })}
-                orientation="vertical"
-              />
               <div className={fr.cx('fr-col-12')}>
                 <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="connecter un système de billetterie">
                   <div className={fr.cx('fr-col-12')}>
+                    <fieldset className={fr.cx('fr-fieldset')}>
+                      <p>TODO: set in modal</p>
+                      <Controller
+                        control={control}
+                        name="eventSerie.expectedDeclarationTypes"
+                        render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => {
+                          return (
+                            <Checkbox
+                              legend="Choisir le ou les organismes auxquels déclarer ce spectacle :"
+                              state={!!error ? 'error' : undefined}
+                              stateRelatedMessage={error?.message}
+                              options={DeclarationTypeSchema.options.map((declarationType) => {
+                                return {
+                                  label: t(`model.declarationType.enum.${declarationType}`),
+                                  nativeInputProps: {
+                                    name: `checkbox-${declarationType}`,
+                                    value: declarationType,
+                                    defaultChecked: value.includes(declarationType),
+                                    onChange: (event) => {
+                                      const newSelectedDeclarationsTypes = new Set<DeclarationTypeSchemaType>(value);
+
+                                      if (event.target.checked) {
+                                        newSelectedDeclarationsTypes.add(declarationType);
+                                      } else {
+                                        newSelectedDeclarationsTypes.delete(declarationType);
+                                      }
+
+                                      onChange([...newSelectedDeclarationsTypes.values()]);
+                                    },
+                                    onBlur: onBlur,
+                                  },
+                                };
+                              })}
+                              orientation="vertical"
+                            />
+                          );
+                        }}
+                      />
+                    </fieldset>
                     <fieldset className={fr.cx('fr-fieldset')}>
                       <div className={fr.cx('fr-fieldset__element')}>
                         <ul className={fr.cx('fr-btns-group')}>
@@ -527,6 +521,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           control={control}
                           register={register}
                           setValue={setValue}
+                          watch={watch}
                           trigger={trigger}
                           placeholder={declarationWrapper.placeholder}
                           errors={errors.events}
@@ -560,7 +555,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               />
                             </div>
                           </div>
-                          {watch('organization.sacemId') !== null && (
+                          {watch('eventSerie.expectedDeclarationTypes').includes('SACEM') && (
                             <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Controller
@@ -573,7 +568,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               </div>
                             </div>
                           )}
-                          {watch('organization.sacdId') !== null && (
+                          {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
                             <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Controller
@@ -969,19 +964,21 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               />
                             </div>
                           </div>
-                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Controller
-                                control={control}
-                                name="eventSerie.circusSpecificExpensesExcludingTaxes"
-                                render={({ field, fieldState: { error } }) => {
-                                  return (
-                                    <AmountInput {...field} label="Frais spécifiques au cirque HT" signed={false} errorMessage={error?.message} />
-                                  );
-                                }}
-                              />
+                          {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="eventSerie.circusSpecificExpensesExcludingTaxes"
+                                  render={({ field, fieldState: { error } }) => {
+                                    return (
+                                      <AmountInput {...field} label="Frais spécifiques au cirque HT" signed={false} errorMessage={error?.message} />
+                                    );
+                                  }}
+                                />
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
                       </div>
                     </fieldset>

@@ -5,7 +5,7 @@ import { Select } from '@codegouvfr/react-dsfr/SelectNext';
 import addressFormatter from '@fragaria/address-formatter';
 import { Autocomplete } from '@mui/material';
 import { useMemo } from 'react';
-import { Control, Controller, FieldErrors, UseFormRegister, UseFormSetValue, UseFormTrigger } from 'react-hook-form';
+import { Control, Controller, FieldErrors, UseFormRegister, UseFormSetValue, UseFormTrigger, UseFormWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { AddressField } from '@ad/src/components/AddressField';
@@ -19,6 +19,7 @@ export interface EventFieldsetProps {
   control: Control<FillDeclarationSchemaType, any>;
   register: UseFormRegister<FillDeclarationSchemaType>;
   setValue: UseFormSetValue<FillDeclarationSchemaType>;
+  watch: UseFormWatch<FillDeclarationSchemaType>;
   trigger: UseFormTrigger<FillDeclarationSchemaType>;
   eventIndex: number;
   name: `events.${number}`;
@@ -27,7 +28,7 @@ export interface EventFieldsetProps {
   readonly?: boolean;
 }
 
-export function EventFieldset({ control, register, setValue, trigger, eventIndex, name, placeholder, errors, readonly }: EventFieldsetProps) {
+export function EventFieldset({ control, register, setValue, watch, trigger, eventIndex, name, placeholder, errors, readonly }: EventFieldsetProps) {
   const { t } = useTranslation('common');
 
   const errorMessage = useMemo(() => errors?.root?.message ?? errors?.message, [errors]);
@@ -362,7 +363,7 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
           </div>
         </div>
       </div>
-      {!!true && (
+      {watch('eventSerie.expectedDeclarationTypes').includes('SACEM') && (
         <div className={fr.cx('fr-grid-row')}>
           <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
             <div className={fr.cx('fr-fieldset__element')}>

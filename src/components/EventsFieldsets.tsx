@@ -1,7 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { useMemo } from 'react';
-import { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormTrigger, useFieldArray } from 'react-hook-form';
+import { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormTrigger, UseFormWatch, useFieldArray } from 'react-hook-form';
 
 import { EventFieldset } from '@ad/src/components/EventFieldset';
 import { FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
@@ -12,13 +12,14 @@ export interface EventsFieldsetsProps {
   control: Control<FillDeclarationSchemaType, any>;
   register: UseFormRegister<FillDeclarationSchemaType>;
   setValue: UseFormSetValue<FillDeclarationSchemaType>;
+  watch: UseFormWatch<FillDeclarationSchemaType>;
   trigger: UseFormTrigger<FillDeclarationSchemaType>;
   placeholder: DeclarationWrapperSchemaType['placeholder'];
   errors: FieldErrors<FillDeclarationSchemaType>['events'];
   readonly?: boolean;
 }
 
-export function EventsFieldsets({ control, register, setValue, trigger, placeholder, errors, readonly }: EventsFieldsetsProps) {
+export function EventsFieldsets({ control, register, setValue, watch, trigger, placeholder, errors, readonly }: EventsFieldsetsProps) {
   const { fields, append, update, remove } = useFieldArray({
     control,
     name: 'events',
@@ -54,6 +55,7 @@ export function EventsFieldsets({ control, register, setValue, trigger, placehol
                     control={control}
                     register={register}
                     setValue={setValue}
+                    watch={watch}
                     trigger={trigger}
                     eventIndex={eventWithErrorLogic.index}
                     name={`events.${eventWithErrorLogic.index}`}
