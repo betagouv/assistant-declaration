@@ -13,9 +13,6 @@ import {
   PerformanceTypeSchema,
 } from '@ad/src/models/entities/event';
 
-
-PerformanceTypeSchema.
-
 export const eventsSeries: EventSerieSchemaType[] = [
   EventSerieSchema.parse({
     id: 'd79cb3ba-745e-5d9a-8903-4a02327a7e01',
