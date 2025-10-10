@@ -2,6 +2,8 @@ import z from 'zod';
 
 import { DeclarationStatusSchema, DeclarationTypeSchema, OfficialIdSchema } from '@ad/src/models/entities/common';
 import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
+import { eventSeriePartialExpensesGreatherThanTotalError } from '@ad/src/models/entities/errors';
+import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 import { PlaceSchema } from '@ad/src/models/entities/place';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
@@ -80,6 +82,25 @@ export const StricterEventSerieSchema = z.object({
   updatedAt: z.date(),
 });
 
+export function assertValidExpenses(
+  data: {
+    expensesExcludingTaxes: number;
+    introductionFeesExpensesExcludingTaxes: number;
+    circusSpecificExpensesExcludingTaxes: number | null;
+  },
+  ctx: z.RefinementCtx
+) {
+  let partialExpenses = data.introductionFeesExpensesExcludingTaxes;
+
+  if (data.circusSpecificExpensesExcludingTaxes !== null) {
+    partialExpenses += data.circusSpecificExpensesExcludingTaxes;
+  }
+
+  if (data.expensesExcludingTaxes < partialExpenses) {
+    ctx.addIssue(customErrorToZodIssue(eventSeriePartialExpensesGreatherThanTotalError));
+  }
+}
+
 export const EventSerieSchema = applyTypedParsers(
   StricterEventSerieSchema.extend({
     producerOfficialId: StricterEventSerieSchema.shape.producerOfficialId.nullable(),
@@ -88,7 +109,13 @@ export const EventSerieSchema = applyTypedParsers(
     placeId: StricterEventSerieSchema.shape.placeId.nullable(),
     placeCapacity: StricterEventSerieSchema.shape.placeCapacity.nullable(),
     circusSpecificExpensesExcludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesExcludingTaxes.nullable(),
-  }).strict()
+  })
+    .superRefine((data, ctx) => {
+      // Note: we could also check each amounts pair are respecting "excluding taxes <= including taxes" but since declarative it seems it can be avoided
+      // ... for now it should be fine since we did not chose if tax rate would be use to automate calculation or not
+      assertValidExpenses(data, ctx);
+    })
+    .strict()
 );
 export type EventSerieSchemaType = z.infer<typeof EventSerieSchema>;
 

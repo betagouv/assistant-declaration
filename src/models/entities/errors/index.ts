@@ -168,6 +168,10 @@ export const shotgunTooMuchToRetrieveError = new BusinessError('shotgunTooMuchTo
 
 // Event serie
 export const eventSerieNotFoundError = new BusinessError('eventSerieNotFound', t('errors.custom.eventSerieNotFound'));
+export const eventSeriePartialExpensesGreatherThanTotalError = new BusinessError(
+  'eventSeriePartialExpensesGreatherThanTotal',
+  t('errors.custom.eventSeriePartialExpensesGreatherThanTotal')
+);
 
 // Event category tickets
 export const cannotMutateTicketingDataOnceDeclaredError = new BusinessError(
