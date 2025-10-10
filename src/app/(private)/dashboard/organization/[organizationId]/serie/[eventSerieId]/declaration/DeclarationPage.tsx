@@ -9,8 +9,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertProps, Autocomplete, Snackbar } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import debounce from 'lodash.debounce';
-import { Ref, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePrevious } from 'react-use';
 
@@ -255,16 +255,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     }
   }, [getDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
 
-  // To ease the UX we use input masks
-  const setters = useMemo(() => {
-    return {
-      setSacemId: (value: string) => setValue('organization.sacemId', value),
-      setSacdId: (value: string) => setValue('organization.sacdId', value),
-      setExpensesExcludingTaxes: (value: number) => setValue('eventSerie.expensesExcludingTaxes', value),
-      setIntroductionFeesExpensesExcludingTaxes: (value: number) => setValue('eventSerie.introductionFeesExpensesExcludingTaxes', value),
-      setCircusSpecificExpensesExcludingTaxes: (value: number) => setValue('eventSerie.circusSpecificExpensesExcludingTaxes', value),
-    };
-  }, [setValue]);
 
   const { computedStartAt, computedEndAt, eventsKeyFigures } = useMemo(() => {
     // TODO: this should be based on form data, not the one from the API (since it needs to use local state)
@@ -576,7 +566,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="organization.sacemId"
-                                  defaultValue={control._defaultValues.organization?.sacemId ?? ''}
                                   render={({ field, fieldState: { error } }) => {
                                     return <SacemIdInput {...field} label="Identifiant Sacem" errorMessage={error?.message} />;
                                   }}
@@ -590,7 +579,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="organization.sacdId"
-                                  defaultValue={control._defaultValues.organization?.sacdId ?? ''}
                                   render={({ field, fieldState: { error } }) => {
                                     return <SacdIdInput {...field} label="Identifiant SACD" errorMessage={error?.message} />;
                                   }}
@@ -964,7 +952,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               <Controller
                                 control={control}
                                 name="eventSerie.expensesExcludingTaxes"
-                                defaultValue={control._defaultValues.eventSerie?.expensesExcludingTaxes ?? 0}
                                 render={({ field, fieldState: { error } }) => {
                                   return <AmountInput {...field} label="Dépenses globales HT" signed={false} errorMessage={error?.message} />;
                                 }}
@@ -976,7 +963,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               <Controller
                                 control={control}
                                 name="eventSerie.introductionFeesExpensesExcludingTaxes"
-                                defaultValue={control._defaultValues.eventSerie?.introductionFeesExpensesExcludingTaxes ?? 0}
                                 render={({ field, fieldState: { error } }) => {
                                   return <AmountInput {...field} label="Frais d'approche HT" signed={false} errorMessage={error?.message} />;
                                 }}
@@ -988,7 +974,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               <Controller
                                 control={control}
                                 name="eventSerie.circusSpecificExpensesExcludingTaxes"
-                                defaultValue={control._defaultValues.eventSerie?.circusSpecificExpensesExcludingTaxes ?? 0}
                                 render={({ field, fieldState: { error } }) => {
                                   return (
                                     <AmountInput {...field} label="Frais spécifiques au cirque HT" signed={false} errorMessage={error?.message} />

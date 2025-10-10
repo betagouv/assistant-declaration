@@ -39,7 +39,6 @@ export function AmountMaskFactory(locale: string, signed?: boolean): FactoryOpts
             scale: 2,
             thousandsSeparator: separators.group,
             radix: separators.decimal,
-            mapToRadix: separators.decimal === ',' ? [','] : ['.'],
             ...({ signed: signed ?? true } as any), // Cast since not recognized
           },
         },
@@ -97,7 +96,6 @@ export function AmountInput(props: AmountInputProps) {
       nativeInputProps={{
         ref: maskInputRef as Ref<HTMLInputElement> | undefined,
         placeholder: '0 €',
-        onChange: props.onChange,
         onBlur: props.onBlur,
       }}
     />
