@@ -328,7 +328,7 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
                 defaultValue: control._defaultValues.events?.[eventIndex]?.audienceOverride || '',
               }}
               options={[
-                ...Object.values(AudienceSchema.Values).map((audience) => {
+                ...AudienceSchema.options.map((audience) => {
                   return {
                     label: t(`model.audience.enum.${audience}`),
                     value: audience,

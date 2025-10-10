@@ -429,7 +429,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             <div className={fr.cx('fr-col-12')}>
               <Checkbox
                 legend="Légende pour l’ensemble des champs"
-                options={Object.values(DeclarationTypeSchema.Values).map((declarationType) => {
+                options={DeclarationTypeSchema.options.map((declarationType) => {
                   return {
                     label: t(`model.declarationType.enum.${declarationType}`),
                     nativeInputProps: {
@@ -628,7 +628,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                   defaultValue: control._defaultValues.eventSerie?.performanceType || '',
                                 }}
                                 options={[
-                                  ...Object.values(PerformanceTypeSchema.Values).map((performanceType) => {
+                                  ...PerformanceTypeSchema.options.map((performanceType) => {
                                     return {
                                       label: t(`model.performanceType.enum.${performanceType}`),
                                       value: performanceType,
@@ -857,7 +857,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                   defaultValue: control._defaultValues.eventSerie?.audience || '',
                                 }}
                                 options={[
-                                  ...Object.values(AudienceSchema.Values).map((audience) => {
+                                  ...AudienceSchema.options.map((audience) => {
                                     return {
                                       label: t(`model.audience.enum.${audience}`),
                                       value: audience,

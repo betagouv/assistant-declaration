@@ -114,7 +114,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
                 defaultValue: control._defaultValues.ticketingSystemName || '',
               }}
               options={[
-                ...Object.values(TicketingSystemNameSchema.Values).map((ticketingSystemName) => {
+                ...TicketingSystemNameSchema.options.map((ticketingSystemName) => {
                   return {
                     label: t(`model.ticketingSystemName.enum.${ticketingSystemName}`),
                     value: ticketingSystemName,
