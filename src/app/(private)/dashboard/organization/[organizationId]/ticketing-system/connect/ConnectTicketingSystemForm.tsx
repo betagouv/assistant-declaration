@@ -52,7 +52,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
     resolver: zodResolver(ConnectTicketingSystemSchema),
     defaultValues: {
       organizationId: props.prefill?.organizationId,
-      ticketingSystemName: TicketingSystemNameSchema.Values.BILLETWEB,
+      ticketingSystemName: TicketingSystemNameSchema.enum.BILLETWEB,
       ...props.prefill,
     },
   });

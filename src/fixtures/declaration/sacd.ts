@@ -16,7 +16,7 @@ export const sacdDeclarations: SacdDeclarationSchemaType[] = [
       ...declarations[2].eventSerie,
       producerOfficialId: '123456789',
       producerName: 'Les studios Culture',
-      performanceType: PerformanceTypeSchema.Values.DANCE,
+      performanceType: PerformanceTypeSchema.enum.DANCE,
       place: places[2],
       placeCapacity: 100,
     },

@@ -34,7 +34,7 @@ NormalStory.args = {
   eventSerie: eventsSeries[0],
   eventsWrappers: eventsWrappers,
   currentDeclaration: 'sacem',
-  transmittedDeclarations: [DeclarationTypeSchema.Values.SACD],
+  transmittedDeclarations: [DeclarationTypeSchema.enum.SACD],
 };
 NormalStory.play = async ({ canvasElement }) => {
   await playFindElement(canvasElement);

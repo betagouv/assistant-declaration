@@ -133,9 +133,9 @@ export function eventPrismaToModel(event: Event): EventSchemaType {
 export function declarationTypePrismaToModel(declarationType: DeclarationType): DeclarationTypeSchemaType {
   switch (declarationType) {
     case 'SACEM':
-      return DeclarationTypeSchema.Values.SACEM;
+      return DeclarationTypeSchema.enum.SACEM;
     case 'SACD':
-      return DeclarationTypeSchema.Values.SACD;
+      return DeclarationTypeSchema.enum.SACD;
     default:
       throw new Error(`declaration type not handled`);
   }

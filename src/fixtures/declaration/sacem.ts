@@ -14,7 +14,7 @@ export const sacemDeclarations: SacemDeclarationSchemaType[] = [
     ...declarations[2],
     eventSerie: {
       ...declarations[2].eventSerie,
-      performanceType: PerformanceTypeSchema.Values.DANCE,
+      performanceType: PerformanceTypeSchema.enum.DANCE,
       place: places[2],
       placeCapacity: 100,
     },

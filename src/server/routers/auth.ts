@@ -46,7 +46,7 @@ export const authRouter = router({
           firstname: input.firstname,
           lastname: input.lastname,
           email: input.email,
-          status: UserStatusSchema.Values.REGISTERED,
+          status: UserStatusSchema.enum.REGISTERED,
           Secrets: {
             create: {
               passwordHash: passwordHash,
@@ -60,7 +60,7 @@ export const authRouter = router({
 
       const verificationToken = await tx.verificationToken.create({
         data: {
-          action: VerificationTokenActionSchema.Values.SIGN_UP,
+          action: VerificationTokenActionSchema.enum.SIGN_UP,
           token: uuidv4(),
           identifier: createdUser.id,
           expires: expiresAt,
@@ -81,7 +81,7 @@ export const authRouter = router({
   confirmSignUp: publicProcedure.input(ConfirmSignUpSchema).mutation(async ({ ctx, input }) => {
     const verificationToken = await prisma.verificationToken.findFirst({
       where: {
-        action: VerificationTokenActionSchema.Values.SIGN_UP,
+        action: VerificationTokenActionSchema.enum.SIGN_UP,
         token: input.token,
       },
     });
@@ -146,7 +146,7 @@ export const authRouter = router({
 
     const verificationToken = await prisma.verificationToken.create({
       data: {
-        action: VerificationTokenActionSchema.Values.RESET_PASSWORD,
+        action: VerificationTokenActionSchema.enum.RESET_PASSWORD,
         token: uuidv4(),
         identifier: user.id,
         expires: expiresAt,
@@ -170,7 +170,7 @@ export const authRouter = router({
   resetPassword: publicProcedure.input(ResetPasswordSchema).mutation(async ({ ctx, input }) => {
     const verificationToken = await prisma.verificationToken.findFirst({
       where: {
-        action: VerificationTokenActionSchema.Values.RESET_PASSWORD,
+        action: VerificationTokenActionSchema.enum.RESET_PASSWORD,
         token: input.token,
       },
     });

@@ -13,6 +13,9 @@ import {
   PerformanceTypeSchema,
 } from '@ad/src/models/entities/event';
 
+
+PerformanceTypeSchema.
+
 export const eventsSeries: EventSerieSchemaType[] = [
   EventSerieSchema.parse({
     id: 'd79cb3ba-745e-5d9a-8903-4a02327a7e01',
@@ -21,11 +24,11 @@ export const eventsSeries: EventSerieSchemaType[] = [
     name: 'Le cracheur de feu',
     producerOfficialId: '123456789',
     producerName: 'Les studios Culture',
-    performanceType: PerformanceTypeSchema.Values.OUTDOOR_PERFORMANCE,
-    expectedDeclarationTypes: [DeclarationTypeSchema.Values.SACEM],
+    performanceType: PerformanceTypeSchema.enum.OUTDOOR_PERFORMANCE,
+    expectedDeclarationTypes: [DeclarationTypeSchema.enum.SACEM],
     placeId: places[0].id,
     placeCapacity: 240,
-    audience: AudienceSchema.Values.ALL,
+    audience: AudienceSchema.enum.ALL,
     ticketingRevenueTaxRate: 0.055,
     expensesExcludingTaxes: 2500,
     introductionFeesExpensesExcludingTaxes: 400,
@@ -40,11 +43,11 @@ export const eventsSeries: EventSerieSchemaType[] = [
     name: 'Il était une fois...',
     producerOfficialId: '123456780',
     producerName: 'Les studios de Bretagne',
-    performanceType: PerformanceTypeSchema.Values.POPULAR_AND_JAZZ_MUSIC,
-    expectedDeclarationTypes: [DeclarationTypeSchema.Values.SACEM, DeclarationTypeSchema.Values.SACD],
+    performanceType: PerformanceTypeSchema.enum.POPULAR_AND_JAZZ_MUSIC,
+    expectedDeclarationTypes: [DeclarationTypeSchema.enum.SACEM, DeclarationTypeSchema.enum.SACD],
     placeId: places[1].id,
     placeCapacity: 124,
-    audience: AudienceSchema.Values.YOUNG,
+    audience: AudienceSchema.enum.YOUNG,
     ticketingRevenueTaxRate: 0.055,
     expensesExcludingTaxes: 1300,
     introductionFeesExpensesExcludingTaxes: 200,
@@ -60,10 +63,10 @@ export const eventsSeries: EventSerieSchemaType[] = [
     producerOfficialId: null,
     producerName: null,
     performanceType: null,
-    expectedDeclarationTypes: [DeclarationTypeSchema.Values.SACEM],
+    expectedDeclarationTypes: [DeclarationTypeSchema.enum.SACEM],
     placeId: null,
     placeCapacity: null,
-    audience: AudienceSchema.Values.ALL,
+    audience: AudienceSchema.enum.ALL,
     ticketingRevenueTaxRate: 0.055,
     expensesExcludingTaxes: 0,
     introductionFeesExpensesExcludingTaxes: 0,
@@ -127,7 +130,7 @@ export const events: EventSchemaType[] = [
     paidTickets: 43,
     placeOverrideId: null,
     placeCapacityOverride: 92,
-    audienceOverride: AudienceSchema.Values.YOUNG,
+    audienceOverride: AudienceSchema.enum.YOUNG,
     ticketingRevenueTaxRateOverride: null,
     createdAt: new Date('December 17, 2024 03:24:00 UTC'),
     updatedAt: new Date('December 18, 2024 04:33:00 UTC'),
@@ -186,8 +189,8 @@ export const eventsSeriesWrappers: EventSerieWrapperSchemaType[] = [
     place: places[0],
     partialDeclarations: [
       {
-        type: DeclarationTypeSchema.Values.SACEM,
-        status: DeclarationStatusSchema.Values.PROCESSED,
+        type: DeclarationTypeSchema.enum.SACEM,
+        status: DeclarationStatusSchema.enum.PROCESSED,
         transmittedAt: null,
       },
     ],
@@ -206,8 +209,8 @@ export const eventsSeriesWrappers: EventSerieWrapperSchemaType[] = [
     place: null,
     partialDeclarations: [
       {
-        type: DeclarationTypeSchema.Values.SACEM,
-        status: DeclarationStatusSchema.Values.PENDING,
+        type: DeclarationTypeSchema.enum.SACEM,
+        status: DeclarationStatusSchema.enum.PENDING,
         transmittedAt: new Date('December 31, 2024 10:00:00 UTC'),
       },
     ],
