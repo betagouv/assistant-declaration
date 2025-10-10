@@ -14,11 +14,9 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
     officialId: true,
     sacdId: true,
   })
-    .merge(
-      z.object({
-        headquartersAddress: AddressSchema,
-      })
-    )
+    .extend({
+      headquartersAddress: AddressSchema,
+    })
     .strip(),
   eventSerie: StricterEventSerieSchema.pick({
     id: true,
@@ -51,7 +49,7 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
       freeTickets: true,
       paidTickets: true,
     })
-      .merge(
+      .extend(
         EventSchema.pick({
           // Since that's overrides there are not required
           placeCapacityOverride: true,
@@ -59,7 +57,7 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
           ticketingRevenueTaxRateOverride: true,
         })
       )
-      .merge(
+      .extend(
         z.object({
           placeOverride: PlaceSchema.nullable(),
         })
@@ -82,12 +80,12 @@ export const FlattenSacdEventSchema = StricterEventSchema.pick({
   .extend({
     place: PlaceSchema,
   })
-  .merge(
+  .extend(
     EventSchema.pick({
       endAt: true,
     })
   )
-  .merge(
+  .extend(
     StricterEventSerieSchema.pick({
       placeCapacity: true,
       audience: true,

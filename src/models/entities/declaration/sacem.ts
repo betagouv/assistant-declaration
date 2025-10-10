@@ -47,7 +47,7 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
       freeTickets: true,
       paidTickets: true,
     })
-      .merge(
+      .extend(
         EventSchema.pick({
           consumptionsRevenueTaxRate: true,
           cateringRevenueTaxRate: true,
@@ -59,11 +59,9 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
           ticketingRevenueTaxRateOverride: true,
         })
       )
-      .merge(
-        z.object({
-          placeOverride: PlaceSchema.nullable(),
-        })
-      )
+      .extend({
+        placeOverride: PlaceSchema.nullable(),
+      })
       .strip()
   ),
 });
@@ -89,7 +87,7 @@ export const FlattenSacemEventSchema = StricterEventSchema.pick({
   .extend({
     place: PlaceSchema,
   })
-  .merge(
+  .extend(
     EventSchema.pick({
       consumptionsRevenueTaxRate: true,
       cateringRevenueTaxRate: true,
@@ -97,7 +95,7 @@ export const FlattenSacemEventSchema = StricterEventSchema.pick({
       otherRevenueTaxRate: true,
     })
   )
-  .merge(
+  .extend(
     StricterEventSerieSchema.pick({
       placeCapacity: true,
       audience: true,

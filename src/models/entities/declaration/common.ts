@@ -16,11 +16,9 @@ export const DeclarationSchema = applyTypedParsers(
         officialHeadquartersId: true,
         sacemId: true,
         sacdId: true,
-      }).merge(
-        z.object({
-          headquartersAddress: AddressSchema,
-        })
-      ),
+      }).extend({
+        headquartersAddress: AddressSchema,
+      }),
       eventSerie: EventSerieSchema.pick({
         id: true,
         name: true,
@@ -65,11 +63,9 @@ export const DeclarationSchema = applyTypedParsers(
           placeCapacityOverride: true,
           audienceOverride: true,
           ticketingRevenueTaxRateOverride: true,
-        }).merge(
-          z.object({
-            placeOverride: PlaceSchema.nullable(),
-          })
-        )
+        }).extend({
+          placeOverride: PlaceSchema.nullable(),
+        })
       ),
     })
     .strict()
