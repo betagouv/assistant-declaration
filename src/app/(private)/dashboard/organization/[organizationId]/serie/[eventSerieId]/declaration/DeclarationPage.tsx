@@ -1038,7 +1038,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                                   return (
                                     <Input
-                                      label="Dépenses globales HT"
+                                      label="Frais d'approche HT"
                                       state={!!error ? 'error' : undefined}
                                       stateRelatedMessage={error?.message}
                                       nativeInputProps={{
@@ -1061,7 +1061,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                                   return (
                                     <Input
-                                      label="Dépenses globales HT"
+                                      label="Frais spécifiques au cirque HT"
                                       state={!!error ? 'error' : undefined}
                                       stateRelatedMessage={error?.message}
                                       nativeInputProps={{

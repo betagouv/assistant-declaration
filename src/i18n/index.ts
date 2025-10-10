@@ -78,10 +78,12 @@ i18next.use(LanguageDetector).init(
                 { locale }
               );
             } else if (format === 'amount') {
+              const hasDecimals = value % 1 !== 0; // If not an integer we make sure it will always show the 2 decimals (for example `4.20` instead of `4.2`)
+
               return new Intl.NumberFormat(lng, {
                 style: 'currency',
                 currency: 'EUR', // The currency is unique for this application
-                minimumFractionDigits: 2,
+                minimumFractionDigits: hasDecimals ? 2 : 0,
                 maximumFractionDigits: 2,
               }).format(value);
             } else if (format === 'amountWithNoDecimal') {

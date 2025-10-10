@@ -83,3 +83,31 @@ export function getEventsKeyFigures(
 
   return keyFigures;
 }
+
+export function getSacemEventsKeyFigures(events: FlattenSacemEventSchemaType[]) {
+  const keyFigures = {
+    nonTicketingRevenueIncludingTaxes: 0,
+    nonTicketingRevenueExcludingTaxes: 0,
+    nonTicketingRevenueTaxes: 0,
+  };
+
+  for (const event of events) {
+    keyFigures.nonTicketingRevenueIncludingTaxes +=
+      event.consumptionsRevenueIncludingTaxes +
+      event.cateringRevenueIncludingTaxes +
+      event.programSalesRevenueIncludingTaxes +
+      event.otherRevenueIncludingTaxes;
+    keyFigures.nonTicketingRevenueExcludingTaxes +=
+      event.consumptionsRevenueExcludingTaxes +
+      event.cateringRevenueExcludingTaxes +
+      event.programSalesRevenueExcludingTaxes +
+      event.otherRevenueExcludingTaxes;
+  }
+
+  keyFigures.nonTicketingRevenueTaxes = getTaxAmountFromIncludingAndExcludingTaxesAmounts(
+    keyFigures.nonTicketingRevenueIncludingTaxes,
+    keyFigures.nonTicketingRevenueExcludingTaxes
+  );
+
+  return keyFigures;
+}

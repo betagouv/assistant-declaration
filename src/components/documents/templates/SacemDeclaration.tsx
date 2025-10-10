@@ -7,7 +7,7 @@ import { PageLayout } from '@ad/src/components/documents/layouts/PageLayout';
 import { StandardLayout } from '@ad/src/components/documents/layouts/StandardLayout';
 import { layoutStyles, styles } from '@ad/src/components/documents/layouts/standard';
 import { getTaxAmountFromIncludingAndExcludingTaxesAmounts } from '@ad/src/core/declaration';
-import { getEventsKeyFigures, getFlattenEventsForSacemDeclaration } from '@ad/src/core/declaration/format';
+import { getEventsKeyFigures, getFlattenEventsForSacemDeclaration, getSacemEventsKeyFigures } from '@ad/src/core/declaration/format';
 import { useServerTranslation } from '@ad/src/i18n/index';
 import { SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -61,6 +61,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
 
   const flattenEvents = getFlattenEventsForSacemDeclaration(props.sacemDeclaration);
   const flattenEventsKeyFigures = getEventsKeyFigures(flattenEvents);
+  const extraKeyFigures = getSacemEventsKeyFigures(flattenEvents);
 
   const ascendingFlattenEvents = flattenEvents.sort((a, b) => +a.startAt - +b.startAt);
   const firstEvent = ascendingFlattenEvents[0];
@@ -147,13 +148,19 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
             <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEventsKeyFigures.ticketingRevenueExcludingTaxes }))}</Text>
           </View>
           <View style={styles.gridItem}>
-            <Text style={styles.label}>Recettes autres HT</Text>
-            <Text>TODO</Text>
+            <Text style={styles.label}>Recette hors-billetterie HT</Text>
+            <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: extraKeyFigures.nonTicketingRevenueExcludingTaxes }))}</Text>
           </View>
           <View style={styles.gridItem}>
-            <Text style={styles.label}>Dépenses HT</Text>
+            <Text style={styles.label}>Dépenses totales HT</Text>
+            <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: props.sacemDeclaration.eventSerie.expensesExcludingTaxes }))}</Text>
+          </View>
+          <View style={styles.gridItem}>
+            <Text style={styles.label}>Frais d&apos;approche HT</Text>
             <Text>
-              TODO {escapeFormattedNumberForPdf(t('currency.amount', { amount: props.sacemDeclaration.eventSerie.expensesExcludingTaxes }))}
+              {escapeFormattedNumberForPdf(
+                t('currency.amount', { amount: props.sacemDeclaration.eventSerie.introductionFeesExpensesExcludingTaxes })
+              )}
             </Text>
           </View>
         </View>
@@ -181,7 +188,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
         <Text style={styles.h4}>Représentations - {props.sacemDeclaration.eventSerie.name}</Text>
         <View style={styles.gridContainer}>
           <View style={styles.gridItem}>
-            <Table weightings={[3, 1.2, 3, 1.25, 1, 1, 1, 1]} tdStyle={{ padding: 5 }}>
+            <Table weightings={[2.7, 1.2, 2.7, 1.45, 0.8, 1, 1, 2, 2]} tdStyle={{ padding: 5 }}>
               <TableHeader fixed>
                 <TableCell>Date et heure</TableCell>
                 <TableCell>Audience</TableCell>
@@ -189,9 +196,11 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 <TableCell>Entrées</TableCell>
                 <TableCell style={{ justifyContent: 'flex-end' }}>Jauge</TableCell>
                 {/* <TableCell style={{ justifyContent: 'flex-end' }}>Taux de TVA</TableCell> */}
-                <TableCell style={{ justifyContent: 'flex-end' }}>Montant HT</TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>Montant de la TVA</TableCell>
-                <TableCell style={{ justifyContent: 'flex-end' }}>Montant TTC</TableCell>
+                <TableCell style={{ justifyContent: 'flex-end' }}>Billetterie HT</TableCell>
+                {/* <TableCell style={{ justifyContent: 'flex-end' }}>Montant de la TVA</TableCell> */}
+                <TableCell style={{ justifyContent: 'flex-end' }}>Billetterie TTC</TableCell>
+                <TableCell style={{ justifyContent: 'flex-end' }}>Hors-billetterie HT</TableCell>
+                <TableCell style={{ justifyContent: 'flex-end' }}>Hors-billetterie TTC</TableCell>
               </TableHeader>
               {ascendingFlattenEvents.map((flattenEvent, index) => (
                 <TableRow
@@ -244,7 +253,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                   <TableCell style={{ justifyContent: 'flex-end' }}>
                     <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.ticketingRevenueExcludingTaxes }))}</Text>
                   </TableCell>
-                  <TableCell style={{ justifyContent: 'flex-end' }}>
+                  {/* <TableCell style={{ justifyContent: 'flex-end' }}>
                     <Text>
                       {escapeFormattedNumberForPdf(
                         t('currency.amount', {
@@ -255,9 +264,33 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                         })
                       )}
                     </Text>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell style={{ justifyContent: 'flex-end' }}>
                     <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.ticketingRevenueIncludingTaxes }))}</Text>
+                  </TableCell>
+                  <TableCell>
+                    <View style={{ width: '100%', textAlign: 'right' }}>
+                      <Text>
+                        Conso. {escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.consumptionsRevenueExcludingTaxes }))}
+                      </Text>
+                      <Text>Rest. {escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.cateringRevenueExcludingTaxes }))}</Text>
+                      <Text>
+                        Prog. {escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.programSalesRevenueExcludingTaxes }))}
+                      </Text>
+                      <Text>Autre {escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.otherRevenueExcludingTaxes }))}</Text>
+                    </View>
+                  </TableCell>
+                  <TableCell>
+                    <View style={{ width: '100%', textAlign: 'right' }}>
+                      <Text>
+                        Conso. {escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.consumptionsRevenueIncludingTaxes }))}
+                      </Text>
+                      <Text>Rest. {escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.cateringRevenueIncludingTaxes }))}</Text>
+                      <Text>
+                        Prog. {escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.programSalesRevenueIncludingTaxes }))}
+                      </Text>
+                      <Text>Autre {escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEvent.otherRevenueIncludingTaxes }))}</Text>
+                    </View>
                   </TableCell>
                 </TableRow>
               ))}
@@ -273,11 +306,11 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                   </View>
                 </TableCell>
                 <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
-                <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
+                {/* <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell> */}
                 <TableCell style={{ ...sacemTableLayoutStyles.totalCell, justifyContent: 'flex-end' }}>
                   <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEventsKeyFigures.ticketingRevenueExcludingTaxes }))}</Text>
                 </TableCell>
-                <TableCell style={{ ...sacemTableLayoutStyles.totalCell, justifyContent: 'flex-end' }}>
+                {/* <TableCell style={{ ...sacemTableLayoutStyles.totalCell, justifyContent: 'flex-end' }}>
                   <Text>
                     {escapeFormattedNumberForPdf(
                       t('currency.amount', {
@@ -285,9 +318,15 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                       })
                     )}
                   </Text>
-                </TableCell>
+                </TableCell> */}
                 <TableCell style={{ ...sacemTableLayoutStyles.totalCell, justifyContent: 'flex-end' }}>
                   <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEventsKeyFigures.ticketingRevenueIncludingTaxes }))}</Text>
+                </TableCell>
+                <TableCell style={{ ...sacemTableLayoutStyles.totalCell, justifyContent: 'flex-end' }}>
+                  <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: extraKeyFigures.nonTicketingRevenueExcludingTaxes }))}</Text>
+                </TableCell>
+                <TableCell style={{ ...sacemTableLayoutStyles.totalCell, justifyContent: 'flex-end' }}>
+                  <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: extraKeyFigures.nonTicketingRevenueIncludingTaxes }))}</Text>
                 </TableCell>
               </TableRow>
             </Table>
