@@ -17,7 +17,7 @@ import { usePrevious } from 'react-use';
 import { DeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPageContext';
 import { trpc } from '@ad/src/client/trpcClient';
 import { AddressField } from '@ad/src/components/AddressField';
-import { useAmountInput } from '@ad/src/components/AmountInput';
+import { AmountInput } from '@ad/src/components/AmountInput';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { Button } from '@ad/src/components/Button';
 import { CompanyField } from '@ad/src/components/CompanyField';
@@ -25,8 +25,8 @@ import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventsFieldsets } from '@ad/src/components/EventsFieldsets';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { officialHeadquartersIdMask } from '@ad/src/components/OfficialHeadquartersIdField';
-import { useSacdIdInput } from '@ad/src/components/SacdIdField';
-import { useSacemIdInput } from '@ad/src/components/SacemIdField';
+import { SacdIdInput } from '@ad/src/components/SacdIdField';
+import { SacemIdInput } from '@ad/src/components/SacemIdField';
 import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
 import { currentTaxRates } from '@ad/src/core/declaration';
@@ -265,31 +265,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       setCircusSpecificExpensesExcludingTaxes: (value: number) => setValue('eventSerie.circusSpecificExpensesExcludingTaxes', value),
     };
   }, [setValue]);
-
-  const { inputRef: sacemIdMaskInputRef } = useSacemIdInput({
-    defaultValue: control._defaultValues.organization?.sacemId?.toString() ?? '',
-    onChange: setters.setSacemId,
-  });
-
-  const { inputRef: sacdIdMaskInputRef } = useSacdIdInput({
-    defaultValue: control._defaultValues.organization?.sacdId?.toString() ?? '',
-    onChange: setters.setSacdId,
-  });
-
-  const { inputRef: expensesExcludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.eventSerie?.expensesExcludingTaxes ?? 0,
-    onChange: setters.setExpensesExcludingTaxes,
-  });
-
-  const { inputRef: introductionFeesExpensesExcludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.eventSerie?.introductionFeesExpensesExcludingTaxes ?? 0,
-    onChange: setters.setIntroductionFeesExpensesExcludingTaxes,
-  });
-
-  const { inputRef: circusSpecificExpensesExcludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.eventSerie?.circusSpecificExpensesExcludingTaxes ?? 0,
-    onChange: setters.setCircusSpecificExpensesExcludingTaxes,
-  });
 
   const { computedStartAt, computedEndAt, eventsKeyFigures } = useMemo(() => {
     // TODO: this should be based on form data, not the one from the API (since it needs to use local state)
@@ -602,19 +577,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                   control={control}
                                   name="organization.sacemId"
                                   defaultValue={control._defaultValues.organization?.sacemId ?? ''}
-                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                                    return (
-                                      <Input
-                                        label="Identifiant Sacem"
-                                        state={!!error ? 'error' : undefined}
-                                        stateRelatedMessage={error?.message}
-                                        nativeInputProps={{
-                                          ref: sacemIdMaskInputRef as Ref<HTMLInputElement> | undefined,
-                                          placeholder: '000000',
-                                          onBlur: onBlur,
-                                        }}
-                                      />
-                                    );
+                                  render={({ field, fieldState: { error } }) => {
+                                    return <SacemIdInput {...field} label="Identifiant Sacem" errorMessage={error?.message} />;
                                   }}
                                 />
                               </div>
@@ -627,19 +591,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                   control={control}
                                   name="organization.sacdId"
                                   defaultValue={control._defaultValues.organization?.sacdId ?? ''}
-                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                                    return (
-                                      <Input
-                                        label="Identifiant SACD"
-                                        state={!!error ? 'error' : undefined}
-                                        stateRelatedMessage={error?.message}
-                                        nativeInputProps={{
-                                          ref: sacdIdMaskInputRef as Ref<HTMLInputElement> | undefined,
-                                          placeholder: '000000',
-                                          onBlur: onBlur,
-                                        }}
-                                      />
-                                    );
+                                  render={({ field, fieldState: { error } }) => {
+                                    return <SacdIdInput {...field} label="Identifiant SACD" errorMessage={error?.message} />;
                                   }}
                                 />
                               </div>
@@ -1012,19 +965,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 control={control}
                                 name="eventSerie.expensesExcludingTaxes"
                                 defaultValue={control._defaultValues.eventSerie?.expensesExcludingTaxes ?? 0}
-                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                                  return (
-                                    <Input
-                                      label="Dépenses globales HT"
-                                      state={!!error ? 'error' : undefined}
-                                      stateRelatedMessage={error?.message}
-                                      nativeInputProps={{
-                                        ref: expensesExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                                        placeholder: '0 €',
-                                        onBlur: onBlur,
-                                      }}
-                                    />
-                                  );
+                                render={({ field, fieldState: { error } }) => {
+                                  return <AmountInput {...field} label="Dépenses globales HT" signed={false} errorMessage={error?.message} />;
                                 }}
                               />
                             </div>
@@ -1035,19 +977,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 control={control}
                                 name="eventSerie.introductionFeesExpensesExcludingTaxes"
                                 defaultValue={control._defaultValues.eventSerie?.introductionFeesExpensesExcludingTaxes ?? 0}
-                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                                  return (
-                                    <Input
-                                      label="Frais d'approche HT"
-                                      state={!!error ? 'error' : undefined}
-                                      stateRelatedMessage={error?.message}
-                                      nativeInputProps={{
-                                        ref: introductionFeesExpensesExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                                        placeholder: '0 €',
-                                        onBlur: onBlur,
-                                      }}
-                                    />
-                                  );
+                                render={({ field, fieldState: { error } }) => {
+                                  return <AmountInput {...field} label="Frais d'approche HT" signed={false} errorMessage={error?.message} />;
                                 }}
                               />
                             </div>
@@ -1058,18 +989,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 control={control}
                                 name="eventSerie.circusSpecificExpensesExcludingTaxes"
                                 defaultValue={control._defaultValues.eventSerie?.circusSpecificExpensesExcludingTaxes ?? 0}
-                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                render={({ field, fieldState: { error } }) => {
                                   return (
-                                    <Input
-                                      label="Frais spécifiques au cirque HT"
-                                      state={!!error ? 'error' : undefined}
-                                      stateRelatedMessage={error?.message}
-                                      nativeInputProps={{
-                                        ref: circusSpecificExpensesExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                                        placeholder: '0 €',
-                                        onBlur: onBlur,
-                                      }}
-                                    />
+                                    <AmountInput {...field} label="Frais spécifiques au cirque HT" signed={false} errorMessage={error?.message} />
                                   );
                                 }}
                               />

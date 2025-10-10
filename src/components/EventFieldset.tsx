@@ -1,14 +1,15 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { Select } from '@codegouvfr/react-dsfr/SelectNext';
 import addressFormatter from '@fragaria/address-formatter';
 import { Autocomplete } from '@mui/material';
-import { Ref, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Control, Controller, FieldErrors, UseFormRegister, UseFormSetValue, UseFormTrigger } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { AddressField } from '@ad/src/components/AddressField';
-import { useAmountInput } from '@ad/src/components/AmountInput';
+import { AmountInput } from '@ad/src/components/AmountInput';
 import { currentTaxRates } from '@ad/src/core/declaration';
 import { FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
@@ -29,65 +30,17 @@ export interface EventFieldsetProps {
 export function EventFieldset({ control, register, setValue, trigger, eventIndex, name, placeholder, errors, readonly }: EventFieldsetProps) {
   const { t } = useTranslation('common');
 
-  // To ease the UX we use input masks
-  const setters = useMemo(() => {
-    return {
-      setTicketingRevenueExcludingTaxes: (value: number) => setValue(`${name}.ticketingRevenueExcludingTaxes`, value),
-      setTicketingRevenueIncludingTaxes: (value: number) => setValue(`${name}.ticketingRevenueIncludingTaxes`, value),
-      setConsumptionsRevenueExcludingTaxes: (value: number) => setValue(`${name}.consumptionsRevenueExcludingTaxes`, value),
-      setConsumptionsRevenueIncludingTaxes: (value: number) => setValue(`${name}.consumptionsRevenueIncludingTaxes`, value),
-      setCateringRevenueExcludingTaxes: (value: number) => setValue(`${name}.cateringRevenueExcludingTaxes`, value),
-      setCateringRevenueIncludingTaxes: (value: number) => setValue(`${name}.cateringRevenueIncludingTaxes`, value),
-      setProgramSalesRevenueExcludingTaxes: (value: number) => setValue(`${name}.programSalesRevenueExcludingTaxes`, value),
-      setProgramSalesRevenueIncludingTaxes: (value: number) => setValue(`${name}.programSalesRevenueIncludingTaxes`, value),
-      setOtherRevenueExcludingTaxes: (value: number) => setValue(`${name}.otherRevenueExcludingTaxes`, value),
-      setOtherRevenueIncludingTaxes: (value: number) => setValue(`${name}.otherRevenueIncludingTaxes`, value),
-    };
-  }, [setValue]);
-
-  const { inputRef: ticketingRevenueExcludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.ticketingRevenueExcludingTaxes ?? 0,
-    onChange: setters.setTicketingRevenueExcludingTaxes,
-  });
-  const { inputRef: ticketingRevenueIncludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.ticketingRevenueIncludingTaxes ?? 0,
-    onChange: setters.setTicketingRevenueIncludingTaxes,
-  });
-  const { inputRef: consumptionsRevenueExcludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.consumptionsRevenueExcludingTaxes ?? 0,
-    onChange: setters.setConsumptionsRevenueExcludingTaxes,
-  });
-  const { inputRef: consumptionsRevenueIncludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.consumptionsRevenueIncludingTaxes ?? 0,
-    onChange: setters.setConsumptionsRevenueIncludingTaxes,
-  });
-  const { inputRef: cateringRevenueExcludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.cateringRevenueExcludingTaxes ?? 0,
-    onChange: setters.setCateringRevenueExcludingTaxes,
-  });
-  const { inputRef: cateringRevenueIncludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.cateringRevenueIncludingTaxes ?? 0,
-    onChange: setters.setCateringRevenueIncludingTaxes,
-  });
-  const { inputRef: programSalesRevenueExcludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.programSalesRevenueExcludingTaxes ?? 0,
-    onChange: setters.setProgramSalesRevenueExcludingTaxes,
-  });
-  const { inputRef: programSalesRevenueIncludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.programSalesRevenueIncludingTaxes ?? 0,
-    onChange: setters.setProgramSalesRevenueIncludingTaxes,
-  });
-  const { inputRef: otherRevenueExcludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.otherRevenueExcludingTaxes ?? 0,
-    onChange: setters.setOtherRevenueExcludingTaxes,
-  });
-  const { inputRef: otherRevenueIncludingTaxesMaskInputRef } = useAmountInput({
-    defaultValue: control._defaultValues.events?.[eventIndex]?.otherRevenueIncludingTaxes ?? 0,
-    onChange: setters.setOtherRevenueIncludingTaxes,
-  });
+  const errorMessage = useMemo(() => errors?.root?.message ?? errors?.message, [errors]);
 
   return (
     <>
+      {errorMessage && (
+        <div className={fr.cx('fr-grid-row')}>
+          <div className={fr.cx('fr-col-12', 'fr-mb-4v')}>
+            <Alert severity="error" small={true} description={errorMessage} />
+          </div>
+        </div>
+      )}
       <div className={fr.cx('fr-grid-row')}>
         <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
           <div className={fr.cx('fr-fieldset__element')}>
@@ -164,19 +117,8 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
             <Controller
               control={control}
               name={`${name}.ticketingRevenueExcludingTaxes`}
-              render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                return (
-                  <Input
-                    label="Montant HT"
-                    state={!!error ? 'error' : undefined}
-                    stateRelatedMessage={error?.message}
-                    nativeInputProps={{
-                      ref: ticketingRevenueExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                      placeholder: '0 €',
-                      onBlur: onBlur,
-                    }}
-                  />
-                );
+              render={({ field, fieldState: { error } }) => {
+                return <AmountInput {...field} label="Billetterie HT" signed={false} errorMessage={error?.message} />;
               }}
             />
           </div>
@@ -186,19 +128,8 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
             <Controller
               control={control}
               name={`${name}.ticketingRevenueIncludingTaxes`}
-              render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                return (
-                  <Input
-                    label="Montant TTC"
-                    state={!!error ? 'error' : undefined}
-                    stateRelatedMessage={error?.message}
-                    nativeInputProps={{
-                      ref: ticketingRevenueIncludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                      placeholder: '0 €',
-                      onBlur: onBlur,
-                    }}
-                  />
-                );
+              render={({ field, fieldState: { error } }) => {
+                return <AmountInput {...field} label="Billetterie TTC" signed={false} errorMessage={error?.message} />;
               }}
             />
           </div>
@@ -438,19 +369,8 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
               <Controller
                 control={control}
                 name={`${name}.consumptionsRevenueExcludingTaxes`}
-                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                  return (
-                    <Input
-                      label="Consommation HT"
-                      state={!!error ? 'error' : undefined}
-                      stateRelatedMessage={error?.message}
-                      nativeInputProps={{
-                        ref: consumptionsRevenueExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                        placeholder: '0 €',
-                        onBlur: onBlur,
-                      }}
-                    />
-                  );
+                render={({ field, fieldState: { error } }) => {
+                  return <AmountInput {...field} label="Consommation HT" signed={false} errorMessage={error?.message} />;
                 }}
               />
             </div>
@@ -460,19 +380,8 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
               <Controller
                 control={control}
                 name={`${name}.consumptionsRevenueIncludingTaxes`}
-                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                  return (
-                    <Input
-                      label="Consommation TTC"
-                      state={!!error ? 'error' : undefined}
-                      stateRelatedMessage={error?.message}
-                      nativeInputProps={{
-                        ref: consumptionsRevenueIncludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                        placeholder: '0 €',
-                        onBlur: onBlur,
-                      }}
-                    />
-                  );
+                render={({ field, fieldState: { error } }) => {
+                  return <AmountInput {...field} label="Consommation TTC" signed={false} errorMessage={error?.message} />;
                 }}
               />
             </div>
@@ -482,19 +391,8 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
               <Controller
                 control={control}
                 name={`${name}.cateringRevenueExcludingTaxes`}
-                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                  return (
-                    <Input
-                      label="Restauration HT"
-                      state={!!error ? 'error' : undefined}
-                      stateRelatedMessage={error?.message}
-                      nativeInputProps={{
-                        ref: cateringRevenueExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                        placeholder: '0 €',
-                        onBlur: onBlur,
-                      }}
-                    />
-                  );
+                render={({ field, fieldState: { error } }) => {
+                  return <AmountInput {...field} label="Restauration HT" signed={false} errorMessage={error?.message} />;
                 }}
               />
             </div>
@@ -504,19 +402,8 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
               <Controller
                 control={control}
                 name={`${name}.cateringRevenueIncludingTaxes`}
-                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                  return (
-                    <Input
-                      label="Restauration TTC"
-                      state={!!error ? 'error' : undefined}
-                      stateRelatedMessage={error?.message}
-                      nativeInputProps={{
-                        ref: cateringRevenueIncludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                        placeholder: '0 €',
-                        onBlur: onBlur,
-                      }}
-                    />
-                  );
+                render={({ field, fieldState: { error } }) => {
+                  return <AmountInput {...field} label="Restauration TTC" signed={false} errorMessage={error?.message} />;
                 }}
               />
             </div>
@@ -526,19 +413,8 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
               <Controller
                 control={control}
                 name={`${name}.programSalesRevenueExcludingTaxes`}
-                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                  return (
-                    <Input
-                      label="Vente prog. HT"
-                      state={!!error ? 'error' : undefined}
-                      stateRelatedMessage={error?.message}
-                      nativeInputProps={{
-                        ref: programSalesRevenueExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                        placeholder: '0 €',
-                        onBlur: onBlur,
-                      }}
-                    />
-                  );
+                render={({ field, fieldState: { error } }) => {
+                  return <AmountInput {...field} label="Vente prog. HT" signed={false} errorMessage={error?.message} />;
                 }}
               />
             </div>
@@ -548,19 +424,8 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
               <Controller
                 control={control}
                 name={`${name}.programSalesRevenueIncludingTaxes`}
-                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                  return (
-                    <Input
-                      label="Vente prog. TTC"
-                      state={!!error ? 'error' : undefined}
-                      stateRelatedMessage={error?.message}
-                      nativeInputProps={{
-                        ref: programSalesRevenueIncludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                        placeholder: '0 €',
-                        onBlur: onBlur,
-                      }}
-                    />
-                  );
+                render={({ field, fieldState: { error } }) => {
+                  return <AmountInput {...field} label="Vente prog. TTC" signed={false} errorMessage={error?.message} />;
                 }}
               />
             </div>
@@ -570,19 +435,8 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
               <Controller
                 control={control}
                 name={`${name}.otherRevenueExcludingTaxes`}
-                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                  return (
-                    <Input
-                      label="Autre recette HT"
-                      state={!!error ? 'error' : undefined}
-                      stateRelatedMessage={error?.message}
-                      nativeInputProps={{
-                        ref: otherRevenueExcludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                        placeholder: '0 €',
-                        onBlur: onBlur,
-                      }}
-                    />
-                  );
+                render={({ field, fieldState: { error } }) => {
+                  return <AmountInput {...field} label="Autre recette HT" signed={false} errorMessage={error?.message} />;
                 }}
               />
             </div>
@@ -592,19 +446,8 @@ export function EventFieldset({ control, register, setValue, trigger, eventIndex
               <Controller
                 control={control}
                 name={`${name}.otherRevenueIncludingTaxes`}
-                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                  return (
-                    <Input
-                      label="Autre recette TTC"
-                      state={!!error ? 'error' : undefined}
-                      stateRelatedMessage={error?.message}
-                      nativeInputProps={{
-                        ref: otherRevenueIncludingTaxesMaskInputRef as Ref<HTMLInputElement> | undefined,
-                        placeholder: '0 €',
-                        onBlur: onBlur,
-                      }}
-                    />
-                  );
+                render={({ field, fieldState: { error } }) => {
+                  return <AmountInput {...field} label="Autre recette TTC" signed={false} errorMessage={error?.message} />;
                 }}
               />
             </div>

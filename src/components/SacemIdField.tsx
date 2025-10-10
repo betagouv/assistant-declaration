@@ -1,5 +1,6 @@
+import { Input } from '@codegouvfr/react-dsfr/Input';
 import { FactoryOpts } from 'imask';
-import { useEffect } from 'react';
+import { Ref, useEffect } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 import { useIMask } from 'react-imask';
 
@@ -31,4 +32,30 @@ export function useSacemIdInput({ defaultValue, onChange }: UseSacemIdInputProps
   }, [defaultValue, setUnmaskedValue]);
 
   return { inputRef: inputRef };
+}
+
+interface SacemIdInputProps extends ControllerRenderProps<any, string> {
+  label: string;
+  errorMessage?: string;
+}
+
+export function SacemIdInput(props: SacemIdInputProps) {
+  const { inputRef: maskInputRef } = useSacemIdInput({
+    defaultValue: props.value,
+    onChange: props.onChange,
+  });
+
+  return (
+    <Input
+      label={props.label}
+      state={!!props.errorMessage ? 'error' : undefined}
+      stateRelatedMessage={props.errorMessage}
+      nativeInputProps={{
+        ref: maskInputRef as Ref<HTMLInputElement> | undefined,
+        placeholder: '000000',
+        onChange: props.onChange,
+        onBlur: props.onBlur,
+      }}
+    />
+  );
 }

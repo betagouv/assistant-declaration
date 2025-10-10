@@ -34,11 +34,13 @@ export function EventsFieldsets({ control, register, setValue, trigger, placehol
     });
   }, [fields, errors]);
 
+  const errorMessage = useMemo(() => errors?.root?.message ?? errors?.message, [errors]);
+
   return (
     <div className={fr.cx('fr-grid-row')}>
-      {errors?.message && (
-        <div className={fr.cx('fr-col-12')}>
-          <Alert severity="error" small={true} description={errors.message} />
+      {errorMessage && (
+        <div className={fr.cx('fr-col-12', 'fr-mb-4v')}>
+          <Alert severity="error" small={true} description={errorMessage} />
         </div>
       )}
       {eventsWithErrorLogic.length > 0 ? (

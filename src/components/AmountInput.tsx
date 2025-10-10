@@ -1,7 +1,8 @@
 'use client';
 
+import { Input } from '@codegouvfr/react-dsfr/Input';
 import { FactoryOpts, InputMask } from 'imask';
-import { useCallback, useEffect } from 'react';
+import { Ref, useCallback, useEffect } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 import { useIMask } from 'react-imask';
 
@@ -73,4 +74,32 @@ export function useAmountInput({ defaultValue, onChange, signed }: UseAmountInpu
   }, [defaultValue, setUnmaskedValue]);
 
   return { inputRef: inputRef };
+}
+
+interface AmountInputProps extends ControllerRenderProps<any, string> {
+  label: string;
+  signed?: boolean;
+  errorMessage?: string;
+}
+
+export function AmountInput(props: AmountInputProps) {
+  const { inputRef: maskInputRef } = useAmountInput({
+    defaultValue: props.value,
+    onChange: props.onChange,
+    signed: props.signed,
+  });
+
+  return (
+    <Input
+      label={props.label}
+      state={!!props.errorMessage ? 'error' : undefined}
+      stateRelatedMessage={props.errorMessage}
+      nativeInputProps={{
+        ref: maskInputRef as Ref<HTMLInputElement> | undefined,
+        placeholder: '0 €',
+        onChange: props.onChange,
+        onBlur: props.onBlur,
+      }}
+    />
+  );
 }
