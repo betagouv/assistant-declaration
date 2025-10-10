@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
-import { EventSchema, StricterEventSchema, StricterEventSerieSchema } from '@ad/src/models/entities/event';
+import { EventSchema, StricterEventSchema, StricterEventSerieSchema, assertValidExpenses } from '@ad/src/models/entities/event';
 import { StricterOrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceSchema } from '@ad/src/models/entities/place';
 
@@ -23,13 +23,13 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
     ticketingRevenueTaxRate: true,
     expensesExcludingTaxes: true,
     introductionFeesExpensesExcludingTaxes: true,
-    circusSpecificExpensesExcludingTaxes: true,
   })
-    .merge(
-      z.object({
-        place: PlaceSchema,
-      })
-    )
+    .extend({
+      place: PlaceSchema,
+    })
+    .superRefine((data, ctx) => {
+      assertValidExpenses(data, ctx); // Had to be reapplied since we picked up a few properties
+    })
     .strip(),
   events: z.array(
     StricterEventSchema.pick({

@@ -86,13 +86,13 @@ export function assertValidExpenses(
   data: {
     expensesExcludingTaxes: number;
     introductionFeesExpensesExcludingTaxes: number;
-    circusSpecificExpensesExcludingTaxes: number | null;
+    circusSpecificExpensesExcludingTaxes?: number | null;
   },
   ctx: z.RefinementCtx
 ) {
   let partialExpenses = data.introductionFeesExpensesExcludingTaxes;
 
-  if (data.circusSpecificExpensesExcludingTaxes !== null) {
+  if (data.circusSpecificExpensesExcludingTaxes !== undefined && data.circusSpecificExpensesExcludingTaxes !== null) {
     partialExpenses += data.circusSpecificExpensesExcludingTaxes;
   }
 

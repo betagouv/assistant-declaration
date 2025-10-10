@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { AddressSchema } from '@ad/src/models/entities/address';
-import { EventSchema, EventSerieSchema, StricterEventSerieSchema } from '@ad/src/models/entities/event';
+import { EventSchema, EventSerieSchema, StricterEventSerieSchema, assertValidExpenses } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceSchema } from '@ad/src/models/entities/place';
 import { applyTypedParsers } from '@ad/src/utils/zod';
@@ -34,11 +34,13 @@ export const DeclarationSchema = applyTypedParsers(
         expensesExcludingTaxes: true,
         introductionFeesExpensesExcludingTaxes: true,
         circusSpecificExpensesExcludingTaxes: true,
-      }).merge(
-        z.object({
+      })
+        .extend({
           place: PlaceSchema.nullable(),
         })
-      ),
+        .superRefine((data, ctx) => {
+          assertValidExpenses(data, ctx); // Had to be reapplied since we picked up a few properties
+        }),
       events: z.array(
         EventSchema.pick({
           id: true,
