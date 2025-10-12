@@ -23,6 +23,7 @@ import { prisma } from '@ad/src/prisma/client';
 import { declarationPrismaToModel } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
+import { getSimpleArraysDiff, sortSimpleArraysDiff } from '@ad/src/utils/comparaison';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export const declarationRouter = router({
@@ -464,256 +465,411 @@ export const declarationRouter = router({
     };
   }),
   fillDeclaration: privateProcedure.input(FillDeclarationSchema).mutation(async ({ ctx, input }) => {
-    const eventSerie = await prisma.eventSerie.findUnique({
-      where: {
-        id: input.eventSerieId,
-      },
-      select: {
-        id: true,
-        name: true,
-        ticketingSystem: {
+    const returnedEventSerie = await prisma.$transaction(async (tx) => {
+      const eventSerie = await tx.eventSerie.findUnique({
+        where: {
+          id: input.eventSerieId,
+        },
+        select: {
+          id: true,
+          name: true,
+          placeId: true,
+          ticketingSystem: {
+            select: {
+              organization: {
+                select: {
+                  id: true,
+                  name: true,
+                  officialId: true,
+                  officialHeadquartersId: true,
+                  sacemId: true,
+                  sacdId: true,
+                  headquartersAddress: true,
+                },
+              },
+            },
+          },
+          Event: {
+            select: {
+              placeOverrideId: true,
+            },
+          },
+          EventSerieDeclaration: {
+            select: {
+              id: true,
+              transmittedAt: true,
+            },
+          },
+        },
+      });
+
+      if (!eventSerie) {
+        throw eventSerieNotFoundError;
+      }
+
+      // Before returning, make sure the caller has rights on this authority ;)
+      if (!(await isUserACollaboratorPartOfOrganization(eventSerie.ticketingSystem.organization.id, ctx.user.id))) {
+        throw organizationCollaboratorRoleRequiredError;
+      }
+
+      // TODO: maybe we could allow the user to add data if he just added an organism...
+      // but for simplicity for now we consider he had to select all organisms correctly before the first transmission
+      // Note: we do not consider status "PENDING/PROCESSED" as creation means an attempt has been done
+      if (eventSerie.EventSerieDeclaration.length > 0) {
+        throw transmittedDeclarationCannotBeUpdatedError;
+      }
+
+      // Make sure it has at least a valid structure even if partially filled
+      const agnosticDeclaration = DeclarationSchema.parse({
+        organization: {
+          id: eventSerie.ticketingSystem.organization.id,
+          name: eventSerie.ticketingSystem.organization.name,
+          officialId: eventSerie.ticketingSystem.organization.officialId,
+          officialHeadquartersId: eventSerie.ticketingSystem.organization.officialHeadquartersId,
+          headquartersAddress: eventSerie.ticketingSystem.organization.headquartersAddress,
+          sacemId: eventSerie.ticketingSystem.organization.sacemId,
+          sacdId: eventSerie.ticketingSystem.organization.sacdId,
+        },
+        eventSerie: {
+          id: eventSerie.id,
+          name: eventSerie.name,
+          producerOfficialId: input.eventSerie.producer?.officialId ?? null,
+          producerName: input.eventSerie.producer?.name ?? null,
+          performanceType: input.eventSerie.performanceType,
+          expectedDeclarationTypes: input.eventSerie.expectedDeclarationTypes,
+          place: null, // TODO: need association properly
+          placeCapacity: input.eventSerie.placeCapacity,
+          audience: input.eventSerie.audience,
+          ticketingRevenueTaxRate: input.eventSerie.ticketingRevenueTaxRate,
+          expensesExcludingTaxes: input.eventSerie.expensesExcludingTaxes,
+          introductionFeesExpensesExcludingTaxes: input.eventSerie.introductionFeesExpensesExcludingTaxes,
+          circusSpecificExpensesExcludingTaxes: input.eventSerie.circusSpecificExpensesExcludingTaxes,
+        },
+        events: input.events.map((event) => {
+          return {
+            id: event.id,
+            startAt: event.startAt,
+            endAt: event.endAt,
+            ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
+            ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
+            consumptionsRevenueIncludingTaxes: event.consumptionsRevenueIncludingTaxes,
+            consumptionsRevenueExcludingTaxes: event.consumptionsRevenueExcludingTaxes,
+            // consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate,
+            consumptionsRevenueTaxRate: null,
+            cateringRevenueIncludingTaxes: event.cateringRevenueIncludingTaxes,
+            cateringRevenueExcludingTaxes: event.cateringRevenueExcludingTaxes,
+            // cateringRevenueTaxRate: event.cateringRevenueTaxRate,
+            cateringRevenueTaxRate: null,
+            programSalesRevenueIncludingTaxes: event.programSalesRevenueIncludingTaxes,
+            programSalesRevenueExcludingTaxes: event.programSalesRevenueExcludingTaxes,
+            // programSalesRevenueTaxRate: event.programSalesRevenueTaxRate,
+            programSalesRevenueTaxRate: null,
+            otherRevenueIncludingTaxes: event.otherRevenueIncludingTaxes,
+            otherRevenueExcludingTaxes: event.otherRevenueExcludingTaxes,
+            // otherRevenueTaxRate: event.otherRevenueTaxRate,
+            otherRevenueTaxRate: null,
+            freeTickets: event.freeTickets,
+            paidTickets: event.paidTickets,
+            placeOverride: null, // TODO: need association properly
+            placeCapacityOverride: event.placeCapacityOverride,
+            audienceOverride: event.audienceOverride,
+            // ticketingRevenueTaxRateOverride: event.ticketingRevenueTaxRateOverride,
+            ticketingRevenueTaxRateOverride: null,
+          };
+        }),
+      });
+
+      const oldPlacesIds = new Set<string>();
+      const newPlacesIds = new Set<string>();
+
+      eventSerie.placeId && oldPlacesIds.add(eventSerie.placeId);
+      eventSerie.Event.forEach((event) => event.placeOverrideId && oldPlacesIds.add(event.placeOverrideId));
+
+      let defaultPlaceId: string | null = null;
+
+      // Only consider it if both values are provided
+      if (input.eventSerie.place.name !== null && input.eventSerie.place.address !== null) {
+        // The place is based on raw data and not unique ID because it would be too complicated to ensure in case the user type it again without selecting the autocomplete menu
+        const existingPlace = await tx.place.findFirst({
+          where: {
+            EventSerie: {
+              every: {
+                ticketingSystem: {
+                  organizationId: eventSerie.ticketingSystem.organization.id, // Ensure not messing with places from other companies
+                },
+              },
+            },
+            name: input.eventSerie.place.name,
+            address: {
+              street: input.eventSerie.place.address.street,
+              city: input.eventSerie.place.address.city,
+              postalCode: input.eventSerie.place.address.postalCode,
+              countryCode: input.eventSerie.place.address.countryCode,
+              subdivision: input.eventSerie.place.address.subdivision,
+            },
+          },
           select: {
-            organization: {
+            id: true,
+          },
+        });
+
+        if (existingPlace) {
+          defaultPlaceId = existingPlace.id;
+        } else {
+          const defaultPlace = await tx.place.create({
+            data: {
+              name: input.eventSerie.place.name,
+              address: {
+                create: {
+                  street: input.eventSerie.place.address.street,
+                  city: input.eventSerie.place.address.city,
+                  postalCode: input.eventSerie.place.address.postalCode,
+                  countryCode: input.eventSerie.place.address.countryCode,
+                  subdivision: input.eventSerie.place.address.subdivision,
+                },
+              },
+            },
+          });
+
+          defaultPlaceId = defaultPlace.id;
+        }
+      }
+
+      defaultPlaceId && newPlacesIds.add(defaultPlaceId);
+
+      // Do the same for each event, and reuse the default place if same values
+      for (const event of input.events) {
+        let eventPlaceId: string | null = null; // If none it would reuse the default specified
+
+        if (event.placeOverride.name !== null && event.placeOverride.address !== null) {
+          if (
+            input.eventSerie.place.name !== null &&
+            input.eventSerie.place.address !== null &&
+            event.placeOverride.name === input.eventSerie.place.name &&
+            event.placeOverride.address.street === input.eventSerie.place.address.street &&
+            event.placeOverride.address.city === input.eventSerie.place.address.city &&
+            event.placeOverride.address.postalCode === input.eventSerie.place.address.postalCode &&
+            event.placeOverride.address.countryCode === input.eventSerie.place.address.countryCode &&
+            event.placeOverride.address.subdivision === input.eventSerie.place.address.subdivision
+          ) {
+            eventPlaceId = defaultPlaceId;
+          } else {
+            const existingPlace = await tx.place.findFirst({
+              where: {
+                EventSerie: {
+                  every: {
+                    ticketingSystem: {
+                      organizationId: eventSerie.ticketingSystem.organization.id, // Ensure not messing with places from other companies
+                    },
+                  },
+                },
+                name: event.placeOverride.name,
+                address: {
+                  street: event.placeOverride.address.street,
+                  city: event.placeOverride.address.city,
+                  postalCode: event.placeOverride.address.postalCode,
+                  countryCode: event.placeOverride.address.countryCode,
+                  subdivision: event.placeOverride.address.subdivision,
+                },
+              },
               select: {
                 id: true,
-                name: true,
-                officialId: true,
-                officialHeadquartersId: true,
-                sacemId: true,
-                sacdId: true,
-                headquartersAddress: true,
+              },
+            });
+
+            if (existingPlace) {
+              eventPlaceId = existingPlace.id;
+            } else {
+              // We create them directly so on the upcoming event place search it may be reused
+              const eventPlace = await tx.place.create({
+                data: {
+                  name: event.placeOverride.name,
+                  address: {
+                    create: {
+                      street: event.placeOverride.address.street,
+                      city: event.placeOverride.address.city,
+                      postalCode: event.placeOverride.address.postalCode,
+                      countryCode: event.placeOverride.address.countryCode,
+                      subdivision: event.placeOverride.address.subdivision,
+                    },
+                  },
+                },
+              });
+
+              eventPlaceId = eventPlace.id;
+            }
+          }
+        }
+
+        await tx.event.update({
+          where: {
+            id: event.id,
+            eventSerieId: eventSerie.id, // Ensure scope
+          },
+          data: {
+            startAt: event.startAt,
+            endAt: event.endAt,
+            ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
+            ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
+            // ticketingRevenueDefinedTaxRate: event.ticketingRevenueDefinedTaxRate, // Not used for now
+            consumptionsRevenueIncludingTaxes: event.consumptionsRevenueIncludingTaxes,
+            consumptionsRevenueExcludingTaxes: event.consumptionsRevenueExcludingTaxes,
+            consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate,
+            cateringRevenueIncludingTaxes: event.cateringRevenueIncludingTaxes,
+            cateringRevenueExcludingTaxes: event.cateringRevenueExcludingTaxes,
+            cateringRevenueTaxRate: event.cateringRevenueTaxRate,
+            programSalesRevenueIncludingTaxes: event.programSalesRevenueIncludingTaxes,
+            programSalesRevenueExcludingTaxes: event.programSalesRevenueExcludingTaxes,
+            programSalesRevenueTaxRate: event.programSalesRevenueTaxRate,
+            otherRevenueIncludingTaxes: event.otherRevenueIncludingTaxes,
+            otherRevenueExcludingTaxes: event.otherRevenueExcludingTaxes,
+            otherRevenueTaxRate: event.otherRevenueTaxRate,
+            freeTickets: event.freeTickets,
+            paidTickets: event.paidTickets,
+            placeOverrideId: eventPlaceId,
+            // For override values, set them null if they equal the default ones
+            placeCapacityOverride: event.placeCapacityOverride === agnosticDeclaration.eventSerie.placeCapacity ? null : event.placeCapacityOverride,
+            audienceOverride: event.audienceOverride === agnosticDeclaration.eventSerie.audience ? null : event.audienceOverride,
+            ticketingRevenueTaxRateOverride:
+              event.ticketingRevenueTaxRateOverride === agnosticDeclaration.eventSerie.ticketingRevenueTaxRate
+                ? null
+                : event.ticketingRevenueTaxRateOverride,
+          },
+        });
+
+        eventPlaceId && newPlacesIds.add(eventPlaceId);
+      }
+
+      // If some places are no longer used we make sure removing them if not used by other event series
+      const placesIdsDiffResult = getSimpleArraysDiff([...oldPlacesIds.values()], [...newPlacesIds.values()]);
+      const sortedPlacesIdsDiffResult = sortSimpleArraysDiff(placesIdsDiffResult);
+
+      for (const removedPlaceId of sortedPlacesIdsDiffResult.removed) {
+        if (oldPlaceId !== defaultPlaceId && defaultPlaceId !== null) {
+          const count = await tx.place.count({
+            where: {
+              // TODO:
+              // TODO:
+              // TODO:
+              // TODO:
+            },
+          });
+        }
+      }
+
+      // TODO: it should be an arrays of old places depending on events too...
+      // TODO: if no default place... maybe consider the one from the first event? maybe not... since it can be avoided
+
+      // TODO: SacdDeclarationSchema does not allow null place... how to do it in the case of not providing it, promite one :/ ?
+      // because it's allowed for agnostic declaration... it should be handled or we are fine?
+      // it may be weird forcing the default whereas the user did not set it up...
+
+      const updatedEventSerie = await tx.eventSerie.update({
+        where: {
+          id: eventSerie.id,
+        },
+        data: {
+          producerOfficialId: agnosticDeclaration.eventSerie.producerOfficialId,
+          producerName: agnosticDeclaration.eventSerie.producerName,
+          performanceType: agnosticDeclaration.eventSerie.performanceType,
+          expectedDeclarationTypes: agnosticDeclaration.eventSerie.expectedDeclarationTypes,
+          placeCapacity: agnosticDeclaration.eventSerie.placeCapacity,
+          audience: agnosticDeclaration.eventSerie.audience,
+          ticketingRevenueTaxRate: agnosticDeclaration.eventSerie.ticketingRevenueTaxRate,
+          expensesExcludingTaxes: agnosticDeclaration.eventSerie.expensesExcludingTaxes,
+          introductionFeesExpensesExcludingTaxes: agnosticDeclaration.eventSerie.introductionFeesExpensesExcludingTaxes,
+          circusSpecificExpensesExcludingTaxes: agnosticDeclaration.eventSerie.circusSpecificExpensesExcludingTaxes,
+        },
+        select: {
+          id: true,
+          internalTicketingSystemId: true,
+          ticketingSystemId: true,
+          name: true,
+          producerOfficialId: true,
+          producerName: true,
+          performanceType: true,
+          expectedDeclarationTypes: true,
+          placeId: true,
+          placeCapacity: true,
+          audience: true,
+          ticketingRevenueTaxRate: true,
+          expensesExcludingTaxes: true,
+          introductionFeesExpensesExcludingTaxes: true,
+          circusSpecificExpensesExcludingTaxes: true,
+          createdAt: true,
+          updatedAt: true,
+          ticketingSystem: {
+            select: {
+              organization: {
+                select: {
+                  id: true,
+                  name: true,
+                  officialId: true,
+                  officialHeadquartersId: true,
+                  headquartersAddressId: true,
+                  sacemId: true,
+                  sacdId: true,
+                  createdAt: true,
+                  updatedAt: true,
+                  headquartersAddress: true,
+                },
+              },
+            },
+          },
+          place: {
+            select: {
+              id: true,
+              name: true,
+              address: true,
+            },
+          },
+          Event: {
+            select: {
+              id: true,
+              internalTicketingSystemId: true,
+              eventSerieId: true,
+              startAt: true,
+              endAt: true,
+              ticketingRevenueIncludingTaxes: true,
+              ticketingRevenueExcludingTaxes: true,
+              ticketingRevenueDefinedTaxRate: true,
+              consumptionsRevenueIncludingTaxes: true,
+              consumptionsRevenueExcludingTaxes: true,
+              consumptionsRevenueTaxRate: true,
+              cateringRevenueIncludingTaxes: true,
+              cateringRevenueExcludingTaxes: true,
+              cateringRevenueTaxRate: true,
+              programSalesRevenueIncludingTaxes: true,
+              programSalesRevenueExcludingTaxes: true,
+              programSalesRevenueTaxRate: true,
+              otherRevenueIncludingTaxes: true,
+              otherRevenueExcludingTaxes: true,
+              otherRevenueTaxRate: true,
+              freeTickets: true,
+              paidTickets: true,
+              placeOverrideId: true,
+              placeCapacityOverride: true,
+              audienceOverride: true,
+              ticketingRevenueTaxRateOverride: true,
+              createdAt: true,
+              updatedAt: true,
+              placeOverride: {
+                select: {
+                  id: true,
+                  name: true,
+                  address: true,
+                },
               },
             },
           },
         },
-        EventSerieDeclaration: {
-          select: {
-            id: true,
-            transmittedAt: true,
-          },
-        },
-      },
-    });
+      });
 
-    if (!eventSerie) {
-      throw eventSerieNotFoundError;
-    }
-
-    // Before returning, make sure the caller has rights on this authority ;)
-    if (!(await isUserACollaboratorPartOfOrganization(eventSerie.ticketingSystem.organization.id, ctx.user.id))) {
-      throw organizationCollaboratorRoleRequiredError;
-    }
-
-    // TODO: maybe we could allow the user to add data if he just added an organism...
-    // but for simplicity for now we consider he had to select all organisms correctly before the first transmission
-    // Note: we do not consider status "PENDING/PROCESSED" as creation means an attempt has been done
-    if (eventSerie.EventSerieDeclaration.length > 0) {
-      throw transmittedDeclarationCannotBeUpdatedError;
-    }
-
-    // Make sure it has at least a valid structure even if partially filled
-    const agnosticDeclaration = DeclarationSchema.parse({
-      organization: {
-        id: eventSerie.ticketingSystem.organization.id,
-        name: eventSerie.ticketingSystem.organization.name,
-        officialId: eventSerie.ticketingSystem.organization.officialId,
-        officialHeadquartersId: eventSerie.ticketingSystem.organization.officialHeadquartersId,
-        headquartersAddress: eventSerie.ticketingSystem.organization.headquartersAddress,
-        sacemId: eventSerie.ticketingSystem.organization.sacemId,
-        sacdId: eventSerie.ticketingSystem.organization.sacdId,
-      },
-      eventSerie: {
-        id: eventSerie.id,
-        name: eventSerie.name,
-        producerOfficialId: input.eventSerie.producer?.officialId ?? null,
-        producerName: input.eventSerie.producer?.name ?? null,
-        performanceType: input.eventSerie.performanceType,
-        expectedDeclarationTypes: input.eventSerie.expectedDeclarationTypes,
-        place: null, // TODO: need association properly
-        placeCapacity: input.eventSerie.placeCapacity,
-        audience: input.eventSerie.audience,
-        ticketingRevenueTaxRate: input.eventSerie.ticketingRevenueTaxRate,
-        expensesExcludingTaxes: input.eventSerie.expensesExcludingTaxes,
-        introductionFeesExpensesExcludingTaxes: input.eventSerie.introductionFeesExpensesExcludingTaxes,
-        circusSpecificExpensesExcludingTaxes: input.eventSerie.circusSpecificExpensesExcludingTaxes,
-      },
-      events: input.events.map((event) => {
-        return {
-          id: event.id,
-          startAt: event.startAt,
-          endAt: event.endAt,
-          ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
-          ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
-          consumptionsRevenueIncludingTaxes: event.consumptionsRevenueIncludingTaxes,
-          consumptionsRevenueExcludingTaxes: event.consumptionsRevenueExcludingTaxes,
-          // consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate,
-          consumptionsRevenueTaxRate: null,
-          cateringRevenueIncludingTaxes: event.cateringRevenueIncludingTaxes,
-          cateringRevenueExcludingTaxes: event.cateringRevenueExcludingTaxes,
-          // cateringRevenueTaxRate: event.cateringRevenueTaxRate,
-          cateringRevenueTaxRate: null,
-          programSalesRevenueIncludingTaxes: event.programSalesRevenueIncludingTaxes,
-          programSalesRevenueExcludingTaxes: event.programSalesRevenueExcludingTaxes,
-          // programSalesRevenueTaxRate: event.programSalesRevenueTaxRate,
-          programSalesRevenueTaxRate: null,
-          otherRevenueIncludingTaxes: event.otherRevenueIncludingTaxes,
-          otherRevenueExcludingTaxes: event.otherRevenueExcludingTaxes,
-          // otherRevenueTaxRate: event.otherRevenueTaxRate,
-          otherRevenueTaxRate: null,
-          freeTickets: event.freeTickets,
-          paidTickets: event.paidTickets,
-          placeOverride: null, // TODO: need association properly
-          placeCapacityOverride: event.placeCapacityOverride,
-          audienceOverride: event.audienceOverride,
-          // ticketingRevenueTaxRateOverride: event.ticketingRevenueTaxRateOverride,
-          ticketingRevenueTaxRateOverride: null,
-        };
-      }),
-    });
-
-    //
-    //
-    // circus expenses cannot be greater than expenses, same for introduction fees, use zod
-    // and both cannot be higher than the total...
-    //
-    //
-
-    // TODO:
-    // TODO: should we ensure format for each organism?
-    // ... to allow users saving the form even if not complete fully
-    // TODO:
-
-    // // Then ensure it's correctly fulfilled for each declaration expected
-    // for (const declarationType of agnosticDeclaration.eventSerie.expectedDeclarationTypes) {
-    //   switch (declarationType) {
-    //     case 'SACEM':
-    //       SacemDeclarationSchema.parse(agnosticDeclaration);
-    //       break;
-    //     case 'SACD':
-    //       SacdDeclarationSchema.parse(agnosticDeclaration);
-    //       break;
-    //     default:
-    //       throw new Error(`declaration type not handled`);
-    //   }
-    // }
-
-    // TODO:
-    // TODO:
-    // TODO: ensure UUID are scoped...
-    // TODO: place should be an input (if modified and linked to other, create a new one)
-    // TODO:
-    // TODO:
-
-    // TODO:
-    // TODO:
-    // TODO: create place if needed, same for events or their places + update events
-    // TODO:
-
-    const updatedEventSerie = await prisma.eventSerie.update({
-      where: {
-        id: eventSerie.id,
-      },
-      data: {
-        producerOfficialId: input.eventSerie.producer?.officialId ?? null,
-        producerName: input.eventSerie.producer?.name ?? null,
-        performanceType: input.eventSerie.performanceType,
-        expectedDeclarationTypes: input.eventSerie.expectedDeclarationTypes,
-        // TODO:
-        // placeId: input.eventSerie.placeId,
-        placeCapacity: input.eventSerie.placeCapacity,
-        audience: input.eventSerie.audience,
-        ticketingRevenueTaxRate: input.eventSerie.ticketingRevenueTaxRate,
-        expensesExcludingTaxes: input.eventSerie.expensesExcludingTaxes,
-        introductionFeesExpensesExcludingTaxes: input.eventSerie.introductionFeesExpensesExcludingTaxes,
-        circusSpecificExpensesExcludingTaxes: input.eventSerie.circusSpecificExpensesExcludingTaxes,
-      },
-      select: {
-        id: true,
-        internalTicketingSystemId: true,
-        ticketingSystemId: true,
-        name: true,
-        producerOfficialId: true,
-        producerName: true,
-        performanceType: true,
-        expectedDeclarationTypes: true,
-        placeId: true,
-        placeCapacity: true,
-        audience: true,
-        ticketingRevenueTaxRate: true,
-        expensesExcludingTaxes: true,
-        introductionFeesExpensesExcludingTaxes: true,
-        circusSpecificExpensesExcludingTaxes: true,
-        createdAt: true,
-        updatedAt: true,
-        ticketingSystem: {
-          select: {
-            organization: {
-              select: {
-                id: true,
-                name: true,
-                officialId: true,
-                officialHeadquartersId: true,
-                headquartersAddressId: true,
-                sacemId: true,
-                sacdId: true,
-                createdAt: true,
-                updatedAt: true,
-                headquartersAddress: true,
-              },
-            },
-          },
-        },
-        place: {
-          select: {
-            id: true,
-            name: true,
-            address: true,
-          },
-        },
-        Event: {
-          select: {
-            id: true,
-            internalTicketingSystemId: true,
-            eventSerieId: true,
-            startAt: true,
-            endAt: true,
-            ticketingRevenueIncludingTaxes: true,
-            ticketingRevenueExcludingTaxes: true,
-            ticketingRevenueDefinedTaxRate: true,
-            consumptionsRevenueIncludingTaxes: true,
-            consumptionsRevenueExcludingTaxes: true,
-            consumptionsRevenueTaxRate: true,
-            cateringRevenueIncludingTaxes: true,
-            cateringRevenueExcludingTaxes: true,
-            cateringRevenueTaxRate: true,
-            programSalesRevenueIncludingTaxes: true,
-            programSalesRevenueExcludingTaxes: true,
-            programSalesRevenueTaxRate: true,
-            otherRevenueIncludingTaxes: true,
-            otherRevenueExcludingTaxes: true,
-            otherRevenueTaxRate: true,
-            freeTickets: true,
-            paidTickets: true,
-            placeOverrideId: true,
-            placeCapacityOverride: true,
-            audienceOverride: true,
-            ticketingRevenueTaxRateOverride: true,
-            createdAt: true,
-            updatedAt: true,
-            placeOverride: {
-              select: {
-                id: true,
-                name: true,
-                address: true,
-              },
-            },
-          },
-        },
-      },
+      return updatedEventSerie;
     });
 
     return {
-      declaration: declarationPrismaToModel(updatedEventSerie),
+      declaration: declarationPrismaToModel(returnedEventSerie),
     };
   }),
 });

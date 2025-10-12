@@ -218,3 +218,90 @@ export function formatDiffResultLog<ReferenceProperty, Model, DoNotReportDiffere
 
   return `added: ${counts.added} | removed: ${counts.removed} | updated: ${counts.updated} | unchanged: ${counts.unchanged}`;
 }
+
+export type GetSimpleArraysDiffResult<T> = {
+  state: DiffState;
+  value: T;
+};
+
+// We cannot reuse the `getDiff()` logic because it's based on using objects, so doing it
+export function getSimpleArraysDiff<T extends string | number>(before: T[], after: T[]): GetSimpleArraysDiffResult<T>[] {
+  const result: GetSimpleArraysDiffResult<T>[] = [];
+
+  result.push(
+    ...after
+      .filter((x) => !before.includes(x))
+      .map((value): GetSimpleArraysDiffResult<T> => {
+        return {
+          state: 'added' as DiffState,
+          value: value,
+        };
+      })
+  );
+
+  result.push(
+    ...before
+      .filter((x) => !after.includes(x))
+      .map((value): GetSimpleArraysDiffResult<T> => {
+        return {
+          state: 'removed' as DiffState,
+          value: value,
+        };
+      })
+  );
+
+  result.push(
+    ...before
+      .filter((x) => after.includes(x))
+      .map((value): GetSimpleArraysDiffResult<T> => {
+        const beforeIndex = before.indexOf(value);
+        const afterIndex = after.indexOf(value);
+
+        return {
+          state: (beforeIndex !== afterIndex ? 'updated' : 'unchanged') as DiffState,
+          value: value,
+        };
+      })
+  );
+
+  return result;
+}
+
+export type SortSimpleArraysDiffResult<T> = {
+  added: T[];
+  removed: T[];
+  updated: T[];
+  unchanged: T[];
+};
+
+export function sortSimpleArraysDiff<T extends string | number>(result: GetSimpleArraysDiffResult<T>[]): SortSimpleArraysDiffResult<T> {
+  const sortedResult: SortSimpleArraysDiffResult<T> = {
+    added: [],
+    removed: [],
+    updated: [],
+    unchanged: [],
+  };
+
+  for (const item of result) {
+    switch (item.state) {
+      case 'added':
+        sortedResult.added.push(item.value);
+        break;
+      case 'removed':
+        sortedResult.removed.push(item.value);
+        break;
+      case 'updated':
+        sortedResult.updated.push(item.value);
+        break;
+      case 'unchanged':
+        sortedResult.unchanged.push(item.value);
+        break;
+    }
+  }
+
+  return sortedResult;
+}
+
+export function formatSimpleArraysDiffResultLog<T extends string | number>(result: SortSimpleArraysDiffResult<T>) {
+  return `added: ${result.added.length} | removed: ${result.removed.length} | updated: ${result.updated.length} | unchanged: ${result.unchanged.length}`;
+}
