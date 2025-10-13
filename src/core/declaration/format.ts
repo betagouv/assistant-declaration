@@ -7,6 +7,8 @@ export function getFlattenEventsForSacemDeclaration(declaration: SacemDeclaratio
   const flattenEvents: FlattenSacemEventSchemaType[] = [];
 
   for (const originalEvent of declaration.events) {
+    originalEvent.audienceOverride;
+
     flattenEvents.push({
       startAt: originalEvent.startAt,
       ticketingRevenueIncludingTaxes: originalEvent.ticketingRevenueIncludingTaxes,

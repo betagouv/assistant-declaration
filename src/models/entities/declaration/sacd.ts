@@ -55,13 +55,11 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
           placeCapacityOverride: true,
           audienceOverride: true,
           ticketingRevenueTaxRateOverride: true,
-        })
+        }).shape
       )
-      .extend(
-        z.object({
-          placeOverride: PlaceSchema.nullable(),
-        })
-      )
+      .extend({
+        placeOverride: PlaceSchema.nullable(),
+      })
       .strip()
   ),
 });
@@ -83,12 +81,12 @@ export const FlattenSacdEventSchema = StricterEventSchema.pick({
   .extend(
     EventSchema.pick({
       endAt: true,
-    })
+    }).shape
   )
   .extend(
     StricterEventSerieSchema.pick({
       placeCapacity: true,
       audience: true,
-    })
+    }).shape
   );
 export type FlattenSacdEventSchemaType = z.infer<typeof FlattenSacdEventSchema>;

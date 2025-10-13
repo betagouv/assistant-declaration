@@ -57,7 +57,7 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
           placeCapacityOverride: true,
           audienceOverride: true,
           ticketingRevenueTaxRateOverride: true,
-        })
+        }).shape
       )
       .extend({
         placeOverride: PlaceSchema.nullable(),
@@ -93,12 +93,12 @@ export const FlattenSacemEventSchema = StricterEventSchema.pick({
       cateringRevenueTaxRate: true,
       programSalesRevenueTaxRate: true,
       otherRevenueTaxRate: true,
-    })
+    }).shape
   )
   .extend(
     StricterEventSerieSchema.pick({
       placeCapacity: true,
       audience: true,
-    })
+    }).shape
   );
 export type FlattenSacemEventSchemaType = z.infer<typeof FlattenSacemEventSchema>;

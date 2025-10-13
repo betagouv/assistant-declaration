@@ -4,13 +4,12 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { Ref } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
 import { Button } from '@ad/src/components/Button';
-import { useOfficialIdInput } from '@ad/src/components/OfficialIdField';
+import { OfficialIdInput } from '@ad/src/components/OfficialIdField';
 import { CreateOrganizationPrefillSchemaType, CreateOrganizationSchema, CreateOrganizationSchemaType } from '@ad/src/models/actions/organization';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
@@ -60,22 +59,8 @@ export function CreateOrganizationForm(props: CreateOrganizationFormProps) {
               control={control}
               name="officialId"
               defaultValue={control._defaultValues.officialId || ''}
-              render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                const { inputRef } = useOfficialIdInput({ value: value, onChange: onChange });
-
-                return (
-                  <Input
-                    label="N° Siren"
-                    state={!!error ? 'error' : undefined}
-                    stateRelatedMessage={error?.message}
-                    nativeInputProps={{
-                      ref: inputRef as Ref<HTMLInputElement> | undefined,
-                      placeholder: '111 222 333',
-                      onBlur: onBlur,
-                    }}
-                  />
-                );
+              render={({ field, fieldState: { error } }) => {
+                return <OfficialIdInput {...field} label="N° Siren" errorMessage={error?.message} />;
               }}
             />
           </div>
