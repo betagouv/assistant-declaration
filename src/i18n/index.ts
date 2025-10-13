@@ -4,6 +4,7 @@ import { fr as frDateLocale } from 'date-fns/locale/fr';
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { z } from 'zod';
+import { $ZodIssue, $ZodIssueCode } from 'zod/v4/core';
 
 import frCommonTranslations from '@ad/src/i18n/fr/common.json';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
@@ -187,10 +188,10 @@ export const useServerTranslation = getServerTranslation;
 // Bind zod validation errors to i18next to reuse translations (on frontend and backend)
 //
 
-export const getIssueTranslationWithSubpath = (issue: z.ZodIssueOptionalMessage, subpath: string | null, parameters: any): string | null => {
+export const getIssueTranslationWithSubpath = (issue: $ZodIssue, subpath: string | null, parameters: any): string | null => {
   // For custom error the usual zod code is similar to the "error ID" (or error type)
-  let code: z.ZodIssueOptionalMessage['code'];
-  if (issue.code === z.ZodIssueCode.custom) {
+  let code: $ZodIssueCode;
+  if (issue.code === 'custom') {
     code = issue.params?.type || 'unknown';
   } else {
     code = issue.code;
@@ -202,13 +203,13 @@ export const getIssueTranslationWithSubpath = (issue: z.ZodIssueOptionalMessage,
   return translation !== fullI18nPath ? translation : null;
 };
 
-export const formatMessageFromIssue = (issue: z.ZodIssueOptionalMessage): string | null => {
+export const formatMessageFromIssue = (issue: $ZodIssue): string | null => {
   const { code, path, message, ...potentialParameters } = issue;
 
   // Since there is no issue code for "required/nonempty" and we have to use `min(1)`
   // We need to distinguish them during translation: `0..1` for a required field, `2+` for the minimum rule
   // Note: we could have kept just one and managing it by keeping in mind for a specific field...
-  if (issue.code === z.ZodIssueCode.too_small && issue.type === 'string') {
+  if (issue.code === 'too_small' && issue.origin === 'string') {
     (potentialParameters as any).count = issue.minimum;
   }
 
