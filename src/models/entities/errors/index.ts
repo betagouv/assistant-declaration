@@ -40,6 +40,10 @@ const { t } = getServerTranslation('common', {
   lng: 'en',
 });
 
+// Factorize the message when using `ctx.issues.push()` where the input is expected
+// Note: passing `undefined` could lead to more complicated debugging
+export const inputReplacementForSensitiveData = { _internal: 'the original input for this validation is masked due to being sensitive' };
+
 //
 // Errors definition
 //

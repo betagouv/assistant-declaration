@@ -41,7 +41,10 @@ export const ConnectTicketingSystemSchema = applyTypedParsers(
         data.apiAccessKey &&
         !domainNameRegexp.test(data.apiAccessKey)
       ) {
-        ctx.addIssue(customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError));
+        ctx.issues.push({
+          ...customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError),
+          input: data.apiAccessKey,
+        });
       }
     })
   )
@@ -79,7 +82,10 @@ export const UpdateTicketingSystemSchema = applyTypedParsers(
         data.apiAccessKey &&
         !domainNameRegexp.test(data.apiAccessKey)
       ) {
-        ctx.addIssue(customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError));
+        ctx.issues.push({
+          ...customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError),
+          input: data.apiAccessKey,
+        });
       }
     })
   )

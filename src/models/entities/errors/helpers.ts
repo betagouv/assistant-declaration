@@ -1,6 +1,5 @@
 import { CustomErrorInterface, CustomErrorProperties } from 'ts-custom-error';
-import z from 'zod';
-import { $ZodIssueCustom, $ZodRawIssue } from 'zod/v4/core';
+import { z } from 'zod';
 
 import { i18n } from '@ad/src/i18n';
 import { CustomError } from '@ad/src/models/entities/errors';
@@ -9,9 +8,9 @@ export interface ZodIssueOptions {
   overridePath?: string[];
 }
 
-export function customErrorToZodIssue(customError: CustomErrorInterface & CustomErrorProperties, options?: ZodIssueOptions): $ZodIssueCustom {
+export function customErrorToZodIssue(customError: CustomErrorInterface & CustomErrorProperties, options?: ZodIssueOptions): z.core.$ZodIssueCustom {
   return {
-    path: options?.overridePath || undefined,
+    path: options?.overridePath ?? [],
     code: 'custom',
     params: {
       type: customError.code,

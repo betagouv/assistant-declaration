@@ -4,7 +4,6 @@ import { fr as frDateLocale } from 'date-fns/locale/fr';
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { z } from 'zod';
-import { $ZodIssue, $ZodIssueCode } from 'zod/v4/core';
 
 import frCommonTranslations from '@ad/src/i18n/fr/common.json';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
@@ -188,9 +187,9 @@ export const useServerTranslation = getServerTranslation;
 // Bind zod validation errors to i18next to reuse translations (on frontend and backend)
 //
 
-export const getIssueTranslationWithSubpath = (issue: $ZodIssue, subpath: string | null, parameters: any): string | null => {
+export const getIssueTranslationWithSubpath = (issue: z.core.$ZodRawIssue, subpath: string | null, parameters: any): string | null => {
   // For custom error the usual zod code is similar to the "error ID" (or error type)
-  let code: $ZodIssueCode;
+  let code: z.core.$ZodIssueCode;
   if (issue.code === 'custom') {
     code = issue.params?.type || 'unknown';
   } else {
@@ -203,46 +202,50 @@ export const getIssueTranslationWithSubpath = (issue: $ZodIssue, subpath: string
   return translation !== fullI18nPath ? translation : null;
 };
 
-export const formatMessageFromIssue = (issue: $ZodIssue): string | null => {
+export const formatMessageFromIssue = (issue: z.core.$ZodRawIssue): string | null => {
   const { code, path, message, ...potentialParameters } = issue;
 
-  // Since there is no issue code for "required/nonempty" and we have to use `min(1)`
-  // We need to distinguish them during translation: `0..1` for a required field, `2+` for the minimum rule
-  // Note: we could have kept just one and managing it by keeping in mind for a specific field...
-  if (issue.code === 'too_small' && issue.origin === 'string') {
-    (potentialParameters as any).count = issue.minimum;
-  }
+  if (path) {
+    // Since there is no issue code for "required/nonempty" and we have to use `min(1)`
+    // We need to distinguish them during translation: `0..1` for a required field, `2+` for the minimum rule
+    // Note: we could have kept just one and managing it by keeping in mind for a specific field...
+    if (issue.code === 'too_small' && issue.origin === 'string') {
+      (potentialParameters as any).count = issue.minimum;
+    }
 
-  // Skip number since arrays have no sense for i18n paths
-  const valuablePathParts = path.filter((v) => typeof v === 'string') as string[];
+    // Skip number since arrays have no sense for i18n paths
+    const valuablePathParts = path.filter((v) => typeof v === 'string') as string[];
 
-  // Check for an exact match, if not, try finding the error in a more general context (upper layers)
-  let translation: string | null = null;
-  for (let i = 0; i < valuablePathParts.length; i++) {
-    const currentValuablePathParts = valuablePathParts.slice(i);
-    const formattedI18nSubpath = currentValuablePathParts.join('.');
+    // Check for an exact match, if not, try finding the error in a more general context (upper layers)
+    let translation: string | null = null;
+    for (let i = 0; i < valuablePathParts.length; i++) {
+      const currentValuablePathParts = valuablePathParts.slice(i);
+      const formattedI18nSubpath = currentValuablePathParts.join('.');
 
-    translation = getIssueTranslationWithSubpath(issue, formattedI18nSubpath, potentialParameters);
+      translation = getIssueTranslationWithSubpath(issue, formattedI18nSubpath, potentialParameters);
 
-    // Also check it's not an object if not end i18n translation
-    if (!!translation && typeof translation !== 'object') {
-      return translation;
+      // Also check it's not an object if not end i18n translation
+      if (!!translation && typeof translation !== 'object') {
+        return translation;
+      }
     }
   }
 
   return null;
 };
 
-const customErrorMap: z.ZodErrorMap = (issue, ctx) => {
+const customErrorMap: z.core.$ZodErrorMap = (issue) => {
   const retrievedTranslation = formatMessageFromIssue(issue);
 
+  // If no translation found with use the one from zod as fallback, and worst case we use the raw technical code
+  // ---
+  // Our errors are lowercase to combine them as we want
+  // In this case, for field highligh we want the sentence to be uppercase on the first letter
   return {
-    // If no translation found with use the one from zod as fallback
-    // ---
-    // Our errors are lowercase to combine them as we want
-    // In this case, for field highligh we want the sentence to be uppercase on the first letter
-    message: retrievedTranslation ? capitalizeFirstLetter(retrievedTranslation) : ctx.defaultError,
+    message: retrievedTranslation ? capitalizeFirstLetter(retrievedTranslation) : issue.message ?? issue.code,
   };
 };
 
-z.setErrorMap(customErrorMap);
+z.config({
+  customError: customErrorMap,
+});

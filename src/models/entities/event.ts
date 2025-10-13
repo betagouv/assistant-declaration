@@ -97,7 +97,14 @@ export function assertValidExpenses(
   }
 
   if (data.expensesExcludingTaxes < partialExpenses) {
-    ctx.addIssue(customErrorToZodIssue(eventSeriePartialExpensesGreatherThanTotalError));
+    ctx.issues.push({
+      ...customErrorToZodIssue(eventSeriePartialExpensesGreatherThanTotalError),
+      input: {
+        expensesExcludingTaxes: data.expensesExcludingTaxes,
+        introductionFeesExpensesExcludingTaxes: data.introductionFeesExpensesExcludingTaxes,
+        circusSpecificExpensesExcludingTaxes: data.circusSpecificExpensesExcludingTaxes,
+      },
+    });
   }
 }
 
