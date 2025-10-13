@@ -9,7 +9,7 @@ import {
   DeclarationWrapperSchemaType,
 } from '@ad/src/models/entities/declaration/common';
 
-const eventsWithPlace = [
+export const eventsWithPlace: DeclarationSchemaType['events'] = [
   { ...events[0], placeOverride: places[1] },
   { ...events[1], placeOverride: null },
   { ...events[2], placeOverride: places[2] },

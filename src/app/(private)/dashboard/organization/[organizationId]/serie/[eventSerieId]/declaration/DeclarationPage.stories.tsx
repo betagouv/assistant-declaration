@@ -1,14 +1,10 @@
 import { Meta, StoryFn } from '@storybook/react';
 
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
-// import { playFindMainTitle } from '@ad/.storybook/testing';
+import { playFindMainTitle } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
 import { DeclarationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPage';
-import { DeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPageContext';
-import { Normal as DeclarationHeaderNormalStory } from '@ad/src/components/DeclarationHeader.stories';
 import { declarations, declarationsWrappers } from '@ad/src/fixtures/declaration/common';
-import { eventsSeries, eventsWrappers } from '@ad/src/fixtures/event';
-import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
 type ComponentType = typeof DeclarationPage;
@@ -67,17 +63,10 @@ NormalStory.parameters = {
   },
 };
 NormalStory.play = async ({ canvasElement }) => {
-  // await playFindMainTitle(canvasElement, /cracheur/i);
+  await playFindMainTitle(canvasElement, /cracheur/i);
 };
 
-export const Normal = prepareStory(NormalStory, {
-  childrenContext: {
-    context: DeclarationPageContext,
-    value: {
-      ContextualDeclarationHeader: DeclarationHeaderNormalStory,
-    },
-  },
-});
+export const Normal = prepareStory(NormalStory);
 
 const TransmittedStory = Template.bind({});
 TransmittedStory.args = {
@@ -89,17 +78,10 @@ TransmittedStory.parameters = {
   },
 };
 TransmittedStory.play = async ({ canvasElement }) => {
-  // await playFindMainTitle(canvasElement, /cracheur/i);
+  await playFindMainTitle(canvasElement, /cracheur/i);
 };
 
-export const Transmitted = prepareStory(TransmittedStory, {
-  childrenContext: {
-    context: DeclarationPageContext,
-    value: {
-      ContextualDeclarationHeader: DeclarationHeaderNormalStory,
-    },
-  },
-});
+export const Transmitted = prepareStory(TransmittedStory);
 
 const NotFoundStory = Template.bind({});
 NotFoundStory.args = {
@@ -111,17 +93,10 @@ NotFoundStory.parameters = {
   },
 };
 NotFoundStory.play = async ({ canvasElement }) => {
-  // await playFindMainTitle(canvasElement, /cracheur/i);
+  await playFindMainTitle(canvasElement, /cracheur/i);
 };
 
-export const NotFound = prepareStory(NotFoundStory, {
-  childrenContext: {
-    context: DeclarationPageContext,
-    value: {
-      ContextualDeclarationHeader: DeclarationHeaderNormalStory,
-    },
-  },
-});
+export const NotFound = prepareStory(NotFoundStory);
 
 const WithLayoutStory = Template.bind({});
 WithLayoutStory.args = {
@@ -132,15 +107,9 @@ WithLayoutStory.parameters = {
   ...NormalStory.parameters,
 };
 WithLayoutStory.play = async ({ canvasElement }) => {
-  // await playFindMainTitle(canvasElement, /cracheur/i);
+  await playFindMainTitle(canvasElement, /cracheur/i);
 };
 
 export const WithLayout = prepareStory(WithLayoutStory, {
   layoutStory: PrivateLayoutAsCollaboratorStory,
-  childrenContext: {
-    context: DeclarationPageContext,
-    value: {
-      ContextualDeclarationHeader: DeclarationHeaderNormalStory,
-    },
-  },
 });
