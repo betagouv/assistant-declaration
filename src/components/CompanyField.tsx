@@ -54,17 +54,14 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
           setSuggestionsLoading(false);
         }
       } else {
-        console.log(3333);
-        console.log(defaultSuggestions);
-
         // When there is no input value, we make sure to at least propose initial suggestions to help the user
         setSearchCompanyQuerySuggestions(defaultSuggestions);
       }
     },
-    [setSuggestionsLoading, searchCompanySuggestions, defaultSuggestions]
+    [setSuggestionsLoading, defaultSuggestions]
   );
 
-  const debouncedHandleCompanyQuery = useMemo(() => debounce(handleSearchCompanyQueryChange, 500), []);
+  const debouncedHandleCompanyQuery = useMemo(() => debounce(handleSearchCompanyQueryChange, 500), [handleSearchCompanyQueryChange]);
   useEffect(() => {
     return () => {
       debouncedHandleCompanyQuery.cancel();

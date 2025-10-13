@@ -304,7 +304,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     [setSnackbarAlert, handleCloseSnackbar]
   );
 
-  const debouncedDisplayDefaultImpactMessage = useMemo(() => debounce(displayDefaultImpactMessage, 1500), []);
+  const debouncedDisplayDefaultImpactMessage = useMemo(() => debounce(displayDefaultImpactMessage, 1500), [displayDefaultImpactMessage]);
   useEffect(() => {
     return () => {
       debouncedDisplayDefaultImpactMessage.cancel();
@@ -345,9 +345,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         }
       });
 
-      displayDefaultImpactMessage(modifiedEvents, events.length);
+      debouncedDisplayDefaultImpactMessage(modifiedEvents, events.length);
     }
-  }, [previousPlaceAddress, currentPlaceAddress, getValues, setValue, displayDefaultImpactMessage]);
+  }, [previousPlaceAddress, currentPlaceAddress, getValues, setValue, debouncedDisplayDefaultImpactMessage]);
 
   const currentPlaceCapacity = watch('eventSerie.placeCapacity');
   const previousPlaceCapacity = usePrevious(currentPlaceCapacity);
@@ -363,9 +363,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         }
       });
 
-      displayDefaultImpactMessage(modifiedEvents, events.length);
+      debouncedDisplayDefaultImpactMessage(modifiedEvents, events.length);
     }
-  }, [previousPlaceCapacity, currentPlaceCapacity, getValues, setValue, displayDefaultImpactMessage]);
+  }, [previousPlaceCapacity, currentPlaceCapacity, getValues, setValue, debouncedDisplayDefaultImpactMessage]);
 
   const currentAudience = watch('eventSerie.audience');
   const previousAudience = usePrevious(currentAudience);
@@ -381,9 +381,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         }
       });
 
-      displayDefaultImpactMessage(modifiedEvents, events.length);
+      debouncedDisplayDefaultImpactMessage(modifiedEvents, events.length);
     }
-  }, [previousAudience, currentAudience, getValues, setValue, displayDefaultImpactMessage]);
+  }, [previousAudience, currentAudience, getValues, setValue, debouncedDisplayDefaultImpactMessage]);
 
   const currentTicketingRevenueTaxRate = watch('eventSerie.ticketingRevenueTaxRate');
   const previousTicketingRevenueTaxRate = usePrevious(currentTicketingRevenueTaxRate);
@@ -399,9 +399,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         }
       });
 
-      displayDefaultImpactMessage(modifiedEvents, events.length);
+      debouncedDisplayDefaultImpactMessage(modifiedEvents, events.length);
     }
-  }, [previousTicketingRevenueTaxRate, currentTicketingRevenueTaxRate, getValues, setValue, displayDefaultImpactMessage]);
+  }, [previousTicketingRevenueTaxRate, currentTicketingRevenueTaxRate, getValues, setValue, debouncedDisplayDefaultImpactMessage]);
 
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
@@ -988,7 +988,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             </div>
           </>
         ) : (
-          <div className={fr.cx('fr-col-12')}>Aucune représentation n'est associée à ce spectacle, il n'y a donc pas de déclaration à faire.</div>
+          <div className={fr.cx('fr-col-12')}>
+            Aucune représentation n&apos;est associée à ce spectacle, il n&apos;y a donc pas de déclaration à faire.
+          </div>
         )}
       </div>
       {!!snackbarAlert && (

@@ -39,10 +39,10 @@ export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
         setSuggestionsLoading(false);
       }
     },
-    [setSuggestionsLoading, searchAddressSuggestions]
+    [setSuggestionsLoading]
   );
 
-  const debouncedHandleAddressQuery = useMemo(() => debounce(handleSearchAddressQueryChange, 500), []);
+  const debouncedHandleAddressQuery = useMemo(() => debounce(handleSearchAddressQueryChange, 500), [handleSearchAddressQueryChange]);
   useEffect(() => {
     return () => {
       debouncedHandleAddressQuery.cancel();

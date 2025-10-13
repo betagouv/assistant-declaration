@@ -168,7 +168,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
           <View style={{ ...styles.gridItem, textAlign: 'right', paddingRight: '6vw', paddingTop: 10 }}>
             <Text>Je certifie l&apos;exactitude des renseignements ci-joint.</Text>
             <Text style={{ marginTop: 10 }}>
-              Fait via <Link src={linkRegistry.get('home', undefined, { absolute: true })}>l'Assistant déclaration</Link>, le{' '}
+              Fait via <Link src={linkRegistry.get('home', undefined, { absolute: true })}>l&apos;Assistant déclaration</Link>, le{' '}
               {t('date.short', { date: new Date() })}
             </Text>
             <Text
