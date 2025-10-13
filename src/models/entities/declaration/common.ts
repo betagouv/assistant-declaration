@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { AddressSchema } from '@ad/src/models/entities/address';
 import { EventSchema, EventSerieSchema, StricterEventSerieSchema, assertValidExpenses } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
-import { PlaceSchema } from '@ad/src/models/entities/place';
+import { PlaceInputSchema, PlaceSchema } from '@ad/src/models/entities/place';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
 export const DeclarationSchema = applyTypedParsers(
@@ -71,6 +71,27 @@ export const DeclarationSchema = applyTypedParsers(
     .strict()
 );
 export type DeclarationSchemaType = z.infer<typeof DeclarationSchema>;
+
+export const DeclarationInputSchema = applyTypedParsers(
+  z
+    .object({
+      organization: DeclarationSchema.shape.organization,
+      eventSerie: DeclarationSchema.shape.eventSerie
+        .extend({
+          place: PlaceInputSchema,
+        })
+        .superRefine((data, ctx) => {
+          assertValidExpenses(data, ctx); // TODO: maybe already kept those `shape.eventSerie`, should be tested
+        }),
+      events: z.array(
+        DeclarationSchema.shape.events.element.extend({
+          placeOverride: PlaceInputSchema,
+        })
+      ),
+    })
+    .strict()
+);
+export type DeclarationInputSchemaType = z.infer<typeof DeclarationInputSchema>;
 
 export const DeclarationWrapperSchema = applyTypedParsers(
   z

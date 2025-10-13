@@ -7,7 +7,7 @@ import { getSacdClient } from '@ad/src/core/declaration/sacd';
 import { Attachment as EmailAttachment, mailer } from '@ad/src/emails/mailer';
 import { FillDeclarationSchema, GetDeclarationSchema, TransmitDeclarationSchema } from '@ad/src/models/actions/declaration';
 import { DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
-import { DeclarationSchema, DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
+import { DeclarationInputSchema, DeclarationSchema, DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
 import { SacdDeclarationSchema, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { SacemDeclarationSchema, SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import {
@@ -19,6 +19,7 @@ import {
   sacemDeclarationUnsuccessfulError,
   transmittedDeclarationCannotBeUpdatedError,
 } from '@ad/src/models/entities/errors';
+import { PlaceSchemaType } from '@ad/src/models/entities/place';
 import { prisma } from '@ad/src/prisma/client';
 import { declarationPrismaToModel } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
@@ -520,7 +521,7 @@ export const declarationRouter = router({
       }
 
       // Make sure it has at least a valid structure even if partially filled
-      const agnosticDeclaration = DeclarationSchema.parse({
+      const agnosticDeclaration = DeclarationInputSchema.parse({
         organization: {
           id: eventSerie.ticketingSystem.organization.id,
           name: eventSerie.ticketingSystem.organization.name,
@@ -537,7 +538,10 @@ export const declarationRouter = router({
           producerName: input.eventSerie.producer?.name ?? null,
           performanceType: input.eventSerie.performanceType,
           expectedDeclarationTypes: input.eventSerie.expectedDeclarationTypes,
-          place: null, // TODO: need association properly
+          place: {
+            name: input.eventSerie.place.name,
+            address: input.eventSerie.place.address,
+          },
           placeCapacity: input.eventSerie.placeCapacity,
           audience: input.eventSerie.audience,
           ticketingRevenueTaxRate: input.eventSerie.ticketingRevenueTaxRate,
@@ -570,7 +574,10 @@ export const declarationRouter = router({
             otherRevenueTaxRate: null,
             freeTickets: event.freeTickets,
             paidTickets: event.paidTickets,
-            placeOverride: null, // TODO: need association properly
+            placeOverride: {
+              name: event.placeOverride.name,
+              address: event.placeOverride.address,
+            },
             placeCapacityOverride: event.placeCapacityOverride,
             audienceOverride: event.audienceOverride,
             // ticketingRevenueTaxRateOverride: event.ticketingRevenueTaxRateOverride,
@@ -585,10 +592,10 @@ export const declarationRouter = router({
       eventSerie.placeId && oldPlacesIds.add(eventSerie.placeId);
       eventSerie.Event.forEach((event) => event.placeOverrideId && oldPlacesIds.add(event.placeOverrideId));
 
-      let defaultPlaceId: string | null = null;
+      let defaultPlace: PlaceSchemaType | null = null;
 
       // Only consider it if both values are provided
-      if (input.eventSerie.place.name !== null && input.eventSerie.place.address !== null) {
+      if (agnosticDeclaration.eventSerie.place.name !== null && agnosticDeclaration.eventSerie.place.address !== null) {
         // The place is based on raw data and not unique ID because it would be too complicated to ensure in case the user type it again without selecting the autocomplete menu
         const existingPlace = await tx.place.findFirst({
           where: {
@@ -599,60 +606,86 @@ export const declarationRouter = router({
                 },
               },
             },
-            name: input.eventSerie.place.name,
+            name: agnosticDeclaration.eventSerie.place.name,
             address: {
-              street: input.eventSerie.place.address.street,
-              city: input.eventSerie.place.address.city,
-              postalCode: input.eventSerie.place.address.postalCode,
-              countryCode: input.eventSerie.place.address.countryCode,
-              subdivision: input.eventSerie.place.address.subdivision,
+              street: agnosticDeclaration.eventSerie.place.address.street,
+              city: agnosticDeclaration.eventSerie.place.address.city,
+              postalCode: agnosticDeclaration.eventSerie.place.address.postalCode,
+              countryCode: agnosticDeclaration.eventSerie.place.address.countryCode,
+              subdivision: agnosticDeclaration.eventSerie.place.address.subdivision,
             },
           },
           select: {
             id: true,
+            address: {
+              select: {
+                id: true,
+              },
+            },
           },
         });
 
         if (existingPlace) {
-          defaultPlaceId = existingPlace.id;
+          defaultPlace = {
+            id: existingPlace.id,
+            name: agnosticDeclaration.eventSerie.place.name,
+            address: {
+              id: existingPlace.address.id,
+              ...agnosticDeclaration.eventSerie.place.address,
+            },
+          };
         } else {
-          const defaultPlace = await tx.place.create({
+          const createdDefaultPlace = await tx.place.create({
             data: {
-              name: input.eventSerie.place.name,
+              name: agnosticDeclaration.eventSerie.place.name,
               address: {
                 create: {
-                  street: input.eventSerie.place.address.street,
-                  city: input.eventSerie.place.address.city,
-                  postalCode: input.eventSerie.place.address.postalCode,
-                  countryCode: input.eventSerie.place.address.countryCode,
-                  subdivision: input.eventSerie.place.address.subdivision,
+                  street: agnosticDeclaration.eventSerie.place.address.street,
+                  city: agnosticDeclaration.eventSerie.place.address.city,
+                  postalCode: agnosticDeclaration.eventSerie.place.address.postalCode,
+                  countryCode: agnosticDeclaration.eventSerie.place.address.countryCode,
+                  subdivision: agnosticDeclaration.eventSerie.place.address.subdivision,
+                },
+              },
+            },
+            select: {
+              id: true,
+              address: {
+                select: {
+                  id: true,
                 },
               },
             },
           });
 
-          defaultPlaceId = defaultPlace.id;
+          defaultPlace = {
+            id: createdDefaultPlace.id,
+            name: agnosticDeclaration.eventSerie.place.name,
+            address: {
+              id: createdDefaultPlace.address.id,
+              ...agnosticDeclaration.eventSerie.place.address,
+            },
+          };
         }
       }
 
-      defaultPlaceId && newPlacesIds.add(defaultPlaceId);
+      defaultPlace && newPlacesIds.add(defaultPlace.id);
 
       // Do the same for each event, and reuse the default place if same values
-      for (const event of input.events) {
-        let eventPlaceId: string | null = null; // If none it would reuse the default specified
+      for (const event of agnosticDeclaration.events) {
+        let eventPlace: PlaceSchemaType | null = null; // If none it would reuse the default specified
 
         if (event.placeOverride.name !== null && event.placeOverride.address !== null) {
           if (
-            input.eventSerie.place.name !== null &&
-            input.eventSerie.place.address !== null &&
-            event.placeOverride.name === input.eventSerie.place.name &&
-            event.placeOverride.address.street === input.eventSerie.place.address.street &&
-            event.placeOverride.address.city === input.eventSerie.place.address.city &&
-            event.placeOverride.address.postalCode === input.eventSerie.place.address.postalCode &&
-            event.placeOverride.address.countryCode === input.eventSerie.place.address.countryCode &&
-            event.placeOverride.address.subdivision === input.eventSerie.place.address.subdivision
+            defaultPlace !== null &&
+            event.placeOverride.name === defaultPlace.name &&
+            event.placeOverride.address.street === defaultPlace.address.street &&
+            event.placeOverride.address.city === defaultPlace.address.city &&
+            event.placeOverride.address.postalCode === defaultPlace.address.postalCode &&
+            event.placeOverride.address.countryCode === defaultPlace.address.countryCode &&
+            event.placeOverride.address.subdivision === defaultPlace.address.subdivision
           ) {
-            eventPlaceId = defaultPlaceId;
+            eventPlace = null; // Should not override the default if same values
           } else {
             const existingPlace = await tx.place.findFirst({
               where: {
@@ -674,14 +707,26 @@ export const declarationRouter = router({
               },
               select: {
                 id: true,
+                address: {
+                  select: {
+                    id: true,
+                  },
+                },
               },
             });
 
             if (existingPlace) {
-              eventPlaceId = existingPlace.id;
+              eventPlace = {
+                id: existingPlace.id,
+                name: event.placeOverride.name,
+                address: {
+                  id: existingPlace.address.id,
+                  ...event.placeOverride.address,
+                },
+              };
             } else {
               // We create them directly so on the upcoming event place search it may be reused
-              const eventPlace = await tx.place.create({
+              const createdEventPlace = await tx.place.create({
                 data: {
                   name: event.placeOverride.name,
                   address: {
@@ -694,13 +739,39 @@ export const declarationRouter = router({
                     },
                   },
                 },
+                select: {
+                  id: true,
+                  address: {
+                    select: {
+                      id: true,
+                    },
+                  },
+                },
               });
 
-              eventPlaceId = eventPlace.id;
+              eventPlace = {
+                id: createdEventPlace.id,
+                name: event.placeOverride.name,
+                address: {
+                  id: createdEventPlace.address.id,
+                  ...event.placeOverride.address,
+                },
+              };
             }
+          }
+
+          // In case the user has just defined specific places for each representation instead of using a default place
+          // we promote the first one as default to be sure validation for each organism it will work since we expect a default to simplify validation/usage
+          // Note: no need to promote other overrides like audience... since they are not optional in the database
+          if (defaultPlace === null && eventPlace !== null) {
+            defaultPlace = eventPlace;
+
+            // The event place is no longer an override in this case
+            eventPlace = null;
           }
         }
 
+        // TODO: in the future we could compare input and what is in database to annoying unnecessary database requests
         await tx.event.update({
           where: {
             id: event.id,
@@ -726,7 +797,7 @@ export const declarationRouter = router({
             otherRevenueTaxRate: event.otherRevenueTaxRate,
             freeTickets: event.freeTickets,
             paidTickets: event.paidTickets,
-            placeOverrideId: eventPlaceId,
+            placeOverrideId: eventPlace?.id ?? null,
             // For override values, set them null if they equal the default ones
             placeCapacityOverride: event.placeCapacityOverride === agnosticDeclaration.eventSerie.placeCapacity ? null : event.placeCapacityOverride,
             audienceOverride: event.audienceOverride === agnosticDeclaration.eventSerie.audience ? null : event.audienceOverride,
@@ -737,32 +808,8 @@ export const declarationRouter = router({
           },
         });
 
-        eventPlaceId && newPlacesIds.add(eventPlaceId);
+        eventPlace && newPlacesIds.add(eventPlace.id);
       }
-
-      // If some places are no longer used we make sure removing them if not used by other event series
-      const placesIdsDiffResult = getSimpleArraysDiff([...oldPlacesIds.values()], [...newPlacesIds.values()]);
-      const sortedPlacesIdsDiffResult = sortSimpleArraysDiff(placesIdsDiffResult);
-
-      for (const removedPlaceId of sortedPlacesIdsDiffResult.removed) {
-        if (oldPlaceId !== defaultPlaceId && defaultPlaceId !== null) {
-          const count = await tx.place.count({
-            where: {
-              // TODO:
-              // TODO:
-              // TODO:
-              // TODO:
-            },
-          });
-        }
-      }
-
-      // TODO: it should be an arrays of old places depending on events too...
-      // TODO: if no default place... maybe consider the one from the first event? maybe not... since it can be avoided
-
-      // TODO: SacdDeclarationSchema does not allow null place... how to do it in the case of not providing it, promite one :/ ?
-      // because it's allowed for agnostic declaration... it should be handled or we are fine?
-      // it may be weird forcing the default whereas the user did not set it up...
 
       const updatedEventSerie = await tx.eventSerie.update({
         where: {
@@ -864,6 +911,56 @@ export const declarationRouter = router({
           },
         },
       });
+
+      // If some places are no longer used we make sure removing them if not used by other event series
+      // Note: since all have been already detached, we can safely consider the following request without ignoring current event serie and events
+      const placesIdsDiffResult = getSimpleArraysDiff([...oldPlacesIds.values()], [...newPlacesIds.values()]);
+      const sortedPlacesIdsDiffResult = sortSimpleArraysDiff(placesIdsDiffResult);
+
+      if (sortedPlacesIdsDiffResult.removed.length > 0) {
+        const placesToRemove = await tx.place.findMany({
+          where: {
+            id: {
+              in: sortedPlacesIdsDiffResult.removed,
+            },
+            AND: {
+              OR: [
+                {
+                  EventSerie: {
+                    none: {
+                      ticketingSystem: {
+                        organizationId: eventSerie.ticketingSystem.organization.id,
+                      },
+                    },
+                  },
+                },
+                {
+                  Event: {
+                    none: {
+                      eventSerie: {
+                        ticketingSystem: {
+                          organizationId: eventSerie.ticketingSystem.organization.id,
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        await tx.place.deleteMany({
+          where: {
+            id: {
+              in: placesToRemove.map((pTR) => pTR.id),
+            },
+          },
+        });
+      }
 
       return updatedEventSerie;
     });
