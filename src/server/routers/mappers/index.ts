@@ -62,7 +62,10 @@ export function placePrismaToModel(
 }
 
 export function ticketingSystemPrismaToModel(
-  ticketingSystem: Omit<TicketingSystem, 'lastProcessingError' | 'lastProcessingErrorAt' | 'apiAccessKey' | 'apiSecretKey'>
+  ticketingSystem: Omit<
+    TicketingSystem,
+    'forceNextSynchronizationFrom' | 'lastProcessingError' | 'lastProcessingErrorAt' | 'apiAccessKey' | 'apiSecretKey'
+  >
 ): TicketingSystemSchemaType {
   return {
     id: ticketingSystem.id,

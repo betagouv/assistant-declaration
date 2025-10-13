@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { minutesToMilliseconds, subMonths } from 'date-fns';
+import { isAfter, min, minutesToMilliseconds, subMonths } from 'date-fns';
 
 import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
 import { anotherTicketingSystemSynchronizationOngoingError, noValidTicketingSystemError } from '@ad/src/models/entities/errors';
@@ -26,6 +26,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
       apiAccessKey: true,
       apiSecretKey: true,
       lastSynchronizationAt: true,
+      forceNextSynchronizationFrom: true,
     },
   });
 
@@ -54,7 +55,16 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
       await Promise.all(
         ticketingSystems.map(async (ticketingSystem) => {
           const ticketingSystemClient = getTicketingSystemClient(ticketingSystem, userId);
-          const newSynchronizationStartingDate = ticketingSystem.lastSynchronizationAt || oldestAllowedDate;
+
+          // We allow forcing a date not seeable by the user in case of connector fix that should require a resync from an older moment
+          // Note: forcing cannot be after the last synchronization because it could miss information
+          let newSynchronizationStartingDate: Date;
+          if (ticketingSystem.forceNextSynchronizationFrom && ticketingSystem.lastSynchronizationAt) {
+            newSynchronizationStartingDate = min([ticketingSystem.lastSynchronizationAt, ticketingSystem.forceNextSynchronizationFrom]);
+          } else {
+            newSynchronizationStartingDate =
+              ticketingSystem.forceNextSynchronizationFrom ?? ticketingSystem.lastSynchronizationAt ?? oldestAllowedDate;
+          }
 
           try {
             const remoteEventsSeries = await ticketingSystemClient.getEventsSeries(newSynchronizationStartingDate);
@@ -86,6 +96,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 internalTicketingSystemId: true,
                 name: true,
                 ticketingRevenueTaxRate: true,
+                lastManualUpdateAt: true,
                 Event: {
                   select: {
                     id: true,
@@ -106,6 +117,15 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
             const eventsSeriesTicketingSystemIdToDatabaseId: Map<string, string> = new Map();
             const eventsTicketingSystemIdToDatabaseId: typeof eventsSeriesTicketingSystemIdToDatabaseId = new Map();
 
+            // Once manually patched we don't want to override data with synchronization to avoid loosing corrected data
+            const eventsSeriesTicketingSystemIdsToSkip = new Set<string>();
+            storedEventsSeries.forEach(
+              (sES) =>
+                sES.lastManualUpdateAt &&
+                isAfter(currentSynchronizationStartingDate, sES.lastManualUpdateAt) &&
+                eventsSeriesTicketingSystemIdsToSkip.add(sES.internalTicketingSystemId)
+            );
+
             // We perform multiple diffs for each type to be sure processing them easily
             // Because a diff on 2 huge objects would imply understand in depth the returned differences (array order, which sub-subproperty has been modified or created...)
             const storedLiteEventsSeries = new Map<LiteEventSerieSchemaType['internalTicketingSystemId'], LiteEventSerieSchemaType>();
@@ -121,6 +141,10 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
 
             // Format all from stored entities
             for (const storedEventsSerie of storedEventsSeries) {
+              if (eventsSeriesTicketingSystemIdsToSkip.has(storedEventsSerie.internalTicketingSystemId)) {
+                continue;
+              }
+
               eventsSeriesTicketingSystemIdToDatabaseId.set(storedEventsSerie.internalTicketingSystemId, storedEventsSerie.id);
 
               // To make the diff we compare only meaningful properties
@@ -153,6 +177,10 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
 
             // Format all from remote entities
             for (const remoteEventsSerieWrapper of remoteEventsSeries) {
+              if (eventsSeriesTicketingSystemIdsToSkip.has(remoteEventsSerieWrapper.serie.internalTicketingSystemId)) {
+                continue;
+              }
+
               remoteLiteEventsSeries.set(remoteEventsSerieWrapper.serie.internalTicketingSystemId, remoteEventsSerieWrapper.serie);
 
               for (const remoteEventWrapper of remoteEventsSerieWrapper.events) {
@@ -177,6 +205,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 producerName: null,
                 performanceType: null,
                 expectedDeclarationTypes: [],
+                lastManualUpdateAt: null,
                 placeId: null,
                 placeCapacity: null,
                 audience: 'ALL',
@@ -307,6 +336,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               },
               data: {
                 lastSynchronizationAt: currentSynchronizationStartingDate,
+                forceNextSynchronizationFrom: null,
               },
             });
           } catch (error) {

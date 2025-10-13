@@ -152,14 +152,15 @@ enum TicketingSystemName {
 }
 
 model TicketingSystem {
-  id                    String              @id @default(uuid()) @db.Uuid
-  organizationId        String              @db.Uuid
-  name                  TicketingSystemName
-  apiAccessKey          String?
-  apiSecretKey          String?
-  lastSynchronizationAt DateTime?
-  lastProcessingError   String?
-  lastProcessingErrorAt DateTime?
+  id                           String              @id @default(uuid()) @db.Uuid
+  organizationId               String              @db.Uuid
+  name                         TicketingSystemName
+  apiAccessKey                 String?
+  apiSecretKey                 String?
+  lastSynchronizationAt        DateTime?
+  forceNextSynchronizationFrom DateTime?
+  lastProcessingError          String?
+  lastProcessingErrorAt        DateTime?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
@@ -236,6 +237,7 @@ model EventSerie {
   performanceType           PerformanceType?
   expectedDeclarationTypes  DeclarationType[]
   // image Attachment
+  lastManualUpdateAt        DateTime?
 
   // Properties specific to when it's performed
   placeId                                String?  @db.Uuid
