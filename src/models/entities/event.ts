@@ -28,40 +28,6 @@ export const PerformanceTypeSchema = z.enum([
 ]);
 export type PerformanceTypeSchemaType = z.infer<typeof PerformanceTypeSchema>;
 
-export const LiteEventSerieSchema = applyTypedParsers(
-  z
-    .object({
-      internalTicketingSystemId: z.string().min(1),
-      name: z.string().min(1),
-      startAt: z.date(),
-      endAt: z.date(),
-      ticketingRevenueTaxRate: z.number().nonnegative(),
-    })
-    .strict()
-);
-export type LiteEventSerieSchemaType = z.infer<typeof LiteEventSerieSchema>;
-
-export const LiteEventSchema = applyTypedParsers(
-  z
-    .object({
-      internalTicketingSystemId: z.string().min(1),
-      startAt: z.date(),
-      endAt: z.date(),
-    })
-    .strict()
-);
-export type LiteEventSchemaType = z.infer<typeof LiteEventSchema>;
-
-export const LiteEventSerieWrapperSchema = applyTypedParsers(
-  z
-    .object({
-      serie: LiteEventSerieSchema,
-      events: z.array(LiteEventSchema),
-    })
-    .strict()
-);
-export type LiteEventSerieWrapperSchemaType = z.infer<typeof LiteEventSerieWrapperSchema>;
-
 export const StricterEventSerieSchema = z.object({
   id: z.uuid(),
   internalTicketingSystemId: z.string().min(1),
@@ -201,3 +167,42 @@ export const EventWrapperSchema = applyTypedParsers(
     .strict()
 );
 export type EventWrapperSchemaType = z.infer<typeof EventWrapperSchema>;
+
+export const LiteEventSerieSchema = applyTypedParsers(
+  z
+    .object({
+      internalTicketingSystemId: EventSerieSchema.shape.internalTicketingSystemId,
+      name: EventSerieSchema.shape.name,
+      // The default values (location/venue...) should not be aggregated/computed within ticketing system connector
+      // Instead the logic of parsing their results is responsible of it to have something equivalent (within `synchronize.ts`)
+    })
+    .strict()
+);
+export type LiteEventSerieSchemaType = z.infer<typeof LiteEventSerieSchema>;
+
+export const LiteEventSchema = applyTypedParsers(
+  z
+    .object({
+      internalTicketingSystemId: EventSchema.shape.internalTicketingSystemId,
+      startAt: z.date(),
+      endAt: z.date().nullable(),
+      ticketingRevenueIncludingTaxes: EventSchema.shape.ticketingRevenueIncludingTaxes,
+      ticketingRevenueExcludingTaxes: EventSchema.shape.ticketingRevenueExcludingTaxes,
+      ticketingRevenueTaxRate: EventSchema.shape.ticketingRevenueTaxRateOverride.nullable(),
+      freeTickets: EventSchema.shape.freeTickets,
+      paidTickets: EventSchema.shape.paidTickets,
+      // TODO: in the future try to retrieve the location/venue (but we should ensure valid address to not with those variating from 1 character...)
+    })
+    .strict()
+);
+export type LiteEventSchemaType = z.infer<typeof LiteEventSchema>;
+
+export const LiteEventSerieWrapperSchema = applyTypedParsers(
+  z
+    .object({
+      serie: LiteEventSerieSchema,
+      events: z.array(LiteEventSchema),
+    })
+    .strict()
+);
+export type LiteEventSerieWrapperSchemaType = z.infer<typeof LiteEventSerieWrapperSchema>;

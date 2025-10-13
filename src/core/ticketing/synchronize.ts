@@ -3,16 +3,7 @@ import { minutesToMilliseconds, subMonths } from 'date-fns';
 
 import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
 import { anotherTicketingSystemSynchronizationOngoingError, noValidTicketingSystemError } from '@ad/src/models/entities/errors';
-import {
-  LiteEventSalesSchema,
-  LiteEventSalesSchemaType,
-  LiteEventSchema,
-  LiteEventSchemaType,
-  LiteEventSerieSchema,
-  LiteEventSerieSchemaType,
-  LiteTicketCategorySchema,
-  LiteTicketCategorySchemaType,
-} from '@ad/src/models/entities/event';
+import { LiteEventSchema, LiteEventSchemaType, LiteEventSerieSchema, LiteEventSerieSchemaType } from '@ad/src/models/entities/event';
 import { prisma } from '@ad/src/prisma/client';
 import { assertUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -71,8 +62,8 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               (eventsSerie) => eventsSerie.serie.internalTicketingSystemId
             );
 
-            // We do not manage deletions since we fetch get last updated events to not flood the third-party
-            // It could be possible on a regular basis (7 days?) to also check for events series consistency
+            // We do not manage deletions since we fetch last updated events to not flood the third-party
+            // Note: it could be possible on a regular basis (7 days?) to also check for events series consistency
             const storedEventsSeries = await tx.eventSerie.findMany({
               where: {
                 internalTicketingSystemId: {
@@ -94,33 +85,18 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 id: true,
                 internalTicketingSystemId: true,
                 name: true,
-                startAt: true,
-                endAt: true,
-                taxRate: true,
+                ticketingRevenueTaxRate: true,
                 Event: {
                   select: {
                     id: true,
                     internalTicketingSystemId: true,
                     startAt: true,
                     endAt: true,
-                    EventCategoryTickets: {
-                      select: {
-                        id: true,
-                        total: true,
-                        totalOverride: true,
-                        priceOverride: true,
-                        categoryId: true,
-                      },
-                    },
-                  },
-                },
-                TicketCategory: {
-                  select: {
-                    id: true,
-                    internalTicketingSystemId: true,
-                    name: true,
-                    description: true,
-                    price: true,
+                    ticketingRevenueIncludingTaxes: true,
+                    ticketingRevenueExcludingTaxes: true,
+                    ticketingRevenueTaxRateOverride: true,
+                    freeTickets: true,
+                    paidTickets: true,
                   },
                 },
               },
@@ -129,20 +105,11 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
             // Since uniqueness is for some tables based on values into other tables, we have to keep a map of the ticketing system IDs and our IDs to perform some database mutations
             const eventsSeriesTicketingSystemIdToDatabaseId: Map<string, string> = new Map();
             const eventsTicketingSystemIdToDatabaseId: typeof eventsSeriesTicketingSystemIdToDatabaseId = new Map();
-            const ticketCategoriesTicketingSystemIdToDatabaseId: typeof eventsSeriesTicketingSystemIdToDatabaseId = new Map();
 
             // We perform multiple diffs for each type to be sure processing them easily
             // Because a diff on 2 huge objects would imply understand in depth the returned differences (array order, which sub-subproperty has been modified or created...)
             const storedLiteEventsSeries = new Map<LiteEventSerieSchemaType['internalTicketingSystemId'], LiteEventSerieSchemaType>();
             const remoteLiteEventsSeries: typeof storedLiteEventsSeries = new Map();
-
-            const storedLiteTicketCategories = new Map<
-              LiteTicketCategorySchemaType['internalTicketingSystemId'],
-              LiteTicketCategorySchemaType & {
-                internalEventSerieTicketingSystemId: LiteEventSerieSchemaType['internalTicketingSystemId'];
-              }
-            >();
-            const remoteLiteTicketCategories: typeof storedLiteTicketCategories = new Map();
 
             const storedLiteEvents = new Map<
               LiteEventSchemaType['internalTicketingSystemId'],
@@ -151,12 +118,6 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               }
             >();
             const remoteLiteEvents: typeof storedLiteEvents = new Map();
-
-            const storedLiteEventSales = new Map<
-              LiteEventSalesSchemaType['internalEventTicketingSystemId'] & LiteEventSalesSchemaType['internalTicketCategoryTicketingSystemId'],
-              LiteEventSalesSchemaType
-            >();
-            const remoteLiteEventSales: typeof storedLiteEventSales = new Map();
 
             // Format all from stored entities
             for (const storedEventsSerie of storedEventsSeries) {
@@ -168,9 +129,6 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 LiteEventSerieSchema.parse({
                   internalTicketingSystemId: storedEventsSerie.internalTicketingSystemId,
                   name: storedEventsSerie.name,
-                  startAt: storedEventsSerie.startAt,
-                  endAt: storedEventsSerie.endAt,
-                  taxRate: storedEventsSerie.taxRate.toNumber(),
                 })
               );
 
@@ -183,35 +141,11 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                     internalTicketingSystemId: storedEvent.internalTicketingSystemId,
                     startAt: storedEvent.startAt,
                     endAt: storedEvent.endAt,
-                  }),
-                });
-
-                for (const storedEventCategoryTickets of storedEvent.EventCategoryTickets) {
-                  const storedTicketCategory = storedEventsSerie.TicketCategory.find((tC) => tC.id === storedEventCategoryTickets.categoryId);
-
-                  assert(storedTicketCategory);
-
-                  storedLiteEventSales.set(
-                    `${storedEvent.internalTicketingSystemId}_${storedTicketCategory.internalTicketingSystemId}`, // Concatenation for uniqueness
-                    LiteEventSalesSchema.parse({
-                      internalEventTicketingSystemId: storedEvent.internalTicketingSystemId,
-                      internalTicketCategoryTicketingSystemId: storedTicketCategory.internalTicketingSystemId,
-                      total: storedEventCategoryTickets.total,
-                    })
-                  );
-                }
-              }
-
-              for (const storedTicketCategory of storedEventsSerie.TicketCategory) {
-                ticketCategoriesTicketingSystemIdToDatabaseId.set(storedTicketCategory.internalTicketingSystemId, storedTicketCategory.id);
-
-                storedLiteTicketCategories.set(storedTicketCategory.internalTicketingSystemId, {
-                  internalEventSerieTicketingSystemId: storedEventsSerie.internalTicketingSystemId,
-                  ...LiteTicketCategorySchema.parse({
-                    internalTicketingSystemId: storedTicketCategory.internalTicketingSystemId,
-                    name: storedTicketCategory.name,
-                    description: storedTicketCategory.description,
-                    price: storedTicketCategory.price.toNumber(),
+                    ticketingRevenueIncludingTaxes: storedEvent.ticketingRevenueIncludingTaxes.toNumber(),
+                    ticketingRevenueExcludingTaxes: storedEvent.ticketingRevenueExcludingTaxes.toNumber(),
+                    ticketingRevenueTaxRate: (storedEvent.ticketingRevenueTaxRateOverride ?? storedEventsSerie.ticketingRevenueTaxRate).toNumber(),
+                    freeTickets: storedEvent.freeTickets,
+                    paidTickets: storedEvent.paidTickets,
                   }),
                 });
               }
@@ -221,25 +155,11 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
             for (const remoteEventsSerieWrapper of remoteEventsSeries) {
               remoteLiteEventsSeries.set(remoteEventsSerieWrapper.serie.internalTicketingSystemId, remoteEventsSerieWrapper.serie);
 
-              for (const remoteTicketCategory of remoteEventsSerieWrapper.ticketCategories) {
-                remoteLiteTicketCategories.set(remoteTicketCategory.internalTicketingSystemId, {
-                  internalEventSerieTicketingSystemId: remoteEventsSerieWrapper.serie.internalTicketingSystemId,
-                  ...remoteTicketCategory,
-                });
-              }
-
               for (const remoteEventWrapper of remoteEventsSerieWrapper.events) {
                 remoteLiteEvents.set(remoteEventWrapper.internalTicketingSystemId, {
                   internalEventSerieTicketingSystemId: remoteEventsSerieWrapper.serie.internalTicketingSystemId,
                   ...remoteEventWrapper,
                 });
-              }
-
-              for (const remoteEventSales of remoteEventsSerieWrapper.sales) {
-                remoteLiteEventSales.set(
-                  `${remoteEventSales.internalEventTicketingSystemId}_${remoteEventSales.internalTicketCategoryTicketingSystemId}`, // Concatenation for uniqueness
-                  remoteEventSales
-                );
               }
             }
 
