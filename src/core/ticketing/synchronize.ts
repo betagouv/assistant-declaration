@@ -1,13 +1,30 @@
 import { Prisma } from '@prisma/client';
 import { isAfter, min, minutesToMilliseconds, subMonths } from 'date-fns';
+import { z } from 'zod';
 
 import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
 import { anotherTicketingSystemSynchronizationOngoingError, noValidTicketingSystemError } from '@ad/src/models/entities/errors';
-import { LiteEventSchema, LiteEventSchemaType, LiteEventSerieSchema, LiteEventSerieSchemaType } from '@ad/src/models/entities/event';
+import {
+  EventSerieSchema,
+  LiteEventSchema,
+  LiteEventSchemaType,
+  LiteEventSerieSchema,
+  LiteEventSerieSchemaType,
+} from '@ad/src/models/entities/event';
 import { prisma } from '@ad/src/prisma/client';
 import { assertUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { getDiff, sortDiffWithKeys } from '@ad/src/utils/comparaison';
+import { applyTypedParsers } from '@ad/src/utils/zod';
+
+const LiteEventSerieManagingDefaultsSchema = applyTypedParsers(
+  LiteEventSerieSchema.extend({
+    ticketingRevenueTaxRate: EventSerieSchema.shape.ticketingRevenueTaxRate,
+  })
+);
+export type LiteEventSerieManagingDefaultsSchemaType = z.infer<typeof LiteEventSerieManagingDefaultsSchema>;
+
+const defaultConnectorEventSerieTaxRate = 0.055;
 
 export async function synchronizeDataFromTicketingSystems(organizationId: string, userId: string): Promise<void> {
   await assertUserACollaboratorPartOfOrganization(organizationId, userId);
@@ -128,7 +145,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
 
             // We perform multiple diffs for each type to be sure processing them easily
             // Because a diff on 2 huge objects would imply understand in depth the returned differences (array order, which sub-subproperty has been modified or created...)
-            const storedLiteEventsSeries = new Map<LiteEventSerieSchemaType['internalTicketingSystemId'], LiteEventSerieSchemaType>();
+            const storedLiteEventsSeries = new Map<LiteEventSerieSchemaType['internalTicketingSystemId'], LiteEventSerieManagingDefaultsSchemaType>();
             const remoteLiteEventsSeries: typeof storedLiteEventsSeries = new Map();
 
             const storedLiteEvents = new Map<
@@ -150,9 +167,10 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               // To make the diff we compare only meaningful properties
               storedLiteEventsSeries.set(
                 storedEventsSerie.internalTicketingSystemId,
-                LiteEventSerieSchema.parse({
+                LiteEventSerieManagingDefaultsSchema.parse({
                   internalTicketingSystemId: storedEventsSerie.internalTicketingSystemId,
                   name: storedEventsSerie.name,
+                  ticketingRevenueTaxRate: storedEventsSerie.ticketingRevenueTaxRate.toNumber(),
                 })
               );
 
@@ -167,7 +185,9 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                     endAt: storedEvent.endAt,
                     ticketingRevenueIncludingTaxes: storedEvent.ticketingRevenueIncludingTaxes.toNumber(),
                     ticketingRevenueExcludingTaxes: storedEvent.ticketingRevenueExcludingTaxes.toNumber(),
-                    ticketingRevenueTaxRate: (storedEvent.ticketingRevenueTaxRateOverride ?? storedEventsSerie.ticketingRevenueTaxRate).toNumber(),
+                    ticketingRevenueTaxRate: storedEvent.ticketingRevenueTaxRateOverride
+                      ? storedEvent.ticketingRevenueTaxRateOverride.toNumber()
+                      : null,
                     freeTickets: storedEvent.freeTickets,
                     paidTickets: storedEvent.paidTickets,
                   }),
@@ -181,12 +201,20 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 continue;
               }
 
-              remoteLiteEventsSeries.set(remoteEventsSerieWrapper.serie.internalTicketingSystemId, remoteEventsSerieWrapper.serie);
+              // For consistency in our logic we assume a default tax rate and force `null` on event if same value
+              remoteLiteEventsSeries.set(remoteEventsSerieWrapper.serie.internalTicketingSystemId, {
+                ...remoteEventsSerieWrapper.serie,
+                ticketingRevenueTaxRate: defaultConnectorEventSerieTaxRate,
+              });
 
               for (const remoteEventWrapper of remoteEventsSerieWrapper.events) {
                 remoteLiteEvents.set(remoteEventWrapper.internalTicketingSystemId, {
                   internalEventSerieTicketingSystemId: remoteEventsSerieWrapper.serie.internalTicketingSystemId,
                   ...remoteEventWrapper,
+                  ticketingRevenueTaxRate:
+                    remoteEventWrapper.ticketingRevenueTaxRate === defaultConnectorEventSerieTaxRate
+                      ? null
+                      : remoteEventWrapper.ticketingRevenueTaxRate,
                 });
               }
             }
@@ -209,7 +237,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 placeId: null,
                 placeCapacity: null,
                 audience: 'ALL',
-                ticketingRevenueTaxRate: 0.055, // Use this one as default
+                ticketingRevenueTaxRate: addedEventSerie.model.ticketingRevenueTaxRate,
                 expensesExcludingTaxes: 0,
                 introductionFeesExpensesExcludingTaxes: 0,
                 circusSpecificExpensesExcludingTaxes: null,
@@ -236,6 +264,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 },
                 data: {
                   name: updatedEventSerie.model.name,
+                  ticketingRevenueTaxRate: updatedEventSerie.model.ticketingRevenueTaxRate,
                 },
               });
             }
@@ -278,7 +307,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                   placeOverrideId: undefined,
                   placeCapacityOverride: null,
                   audienceOverride: null,
-                  ticketingRevenueTaxRateOverride: null,
+                  ticketingRevenueTaxRateOverride: addedEvent.model.ticketingRevenueTaxRate,
                 },
                 select: {
                   id: true,
