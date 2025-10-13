@@ -50,7 +50,7 @@ export const JsonEventSchema = applyTypedParsers(
       }, z.coerce.date().nullable()),
       multiple: safeCoerceToBoolean(z.boolean()),
       // place: z.string().transform(transformStringOrNull),
-      // shop: z.string().url(),
+      // shop: z.url(),
       tax_rate: z.coerce.number(),
       // online: safeCoerceToBoolean(z.boolean()),
       // tags: z.preprocess(
@@ -65,8 +65,8 @@ export const JsonEventSchema = applyTypedParsers(
       //   },
       //   z.array(z.string().min(1))
       // ),
-      // image: emptyStringtoNullPreprocessor(z.string().url().nullable()),
-      // cover: emptyStringtoNullPreprocessor(z.string().url().nullable()),
+      // image: emptyStringtoNullPreprocessor(z.url().nullable()),
+      // cover: emptyStringtoNullPreprocessor(z.url().nullable()),
       // confirmation_message: z.string().transform(transformStringOrNull),
     })
     .strip()
@@ -127,8 +127,8 @@ export const JsonEventAttendeeSchema = applyTypedParsers(
       // authorization_code: z.string().transform(transformStringOrNull),
       // pass: z.unknown(), // Can be "0" or "428942988"...
       // disabled: z.unknown(), // Integer enum
-      // product_management: z.string().url(),
-      // product_download: z.string().url(),
+      // product_management: z.url(),
+      // product_download: z.url(),
       // order_id: z.string().min(1),
       // order_ext_id: z.string().min(1),
       // order_firstname: z.string().transform(transformStringOrNull),
@@ -145,7 +145,7 @@ export const JsonEventAttendeeSchema = applyTypedParsers(
       //   return value === '' ? null : value;
       // }, z.coerce.date().nullable()),
       // order_accreditation: z.unknown(), // Integer enum
-      // order_management: z.string().url(),
+      // order_management: z.url(),
       // order_language: z.string().transform(transformStringOrNull),
       // custom_order: z.record(z.string().min(1), z.unknown()).optional(),
     })
