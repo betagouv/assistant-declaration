@@ -826,6 +826,7 @@ export const declarationRouter = router({
           expensesExcludingTaxes: agnosticDeclaration.eventSerie.expensesExcludingTaxes,
           introductionFeesExpensesExcludingTaxes: agnosticDeclaration.eventSerie.introductionFeesExpensesExcludingTaxes,
           circusSpecificExpensesExcludingTaxes: agnosticDeclaration.eventSerie.circusSpecificExpensesExcludingTaxes,
+          lastManualUpdateAt: new Date(),
         },
         select: {
           id: true,

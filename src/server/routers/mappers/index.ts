@@ -78,7 +78,7 @@ export function ticketingSystemPrismaToModel(
   };
 }
 
-export function eventSeriePrismaToModel(eventSerie: EventSerie): EventSerieSchemaType {
+export function eventSeriePrismaToModel(eventSerie: Omit<EventSerie, 'lastManualUpdateAt'>): EventSerieSchemaType {
   return {
     id: eventSerie.id,
     internalTicketingSystemId: eventSerie.internalTicketingSystemId,
@@ -145,7 +145,7 @@ export function declarationTypePrismaToModel(declarationType: DeclarationType): 
 }
 
 export function declarationPrismaToModel(
-  eventSerie: EventSerie & {
+  eventSerie: Omit<EventSerie, 'lastManualUpdateAt'> & {
     ticketingSystem: {
       organization: Organization & {
         headquartersAddress: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;

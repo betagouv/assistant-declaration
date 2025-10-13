@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { isAfter, min, minutesToMilliseconds, subMonths } from 'date-fns';
+import { min, minutesToMilliseconds, subMonths } from 'date-fns';
 import { z } from 'zod';
 
 import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
@@ -136,12 +136,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
 
             // Once manually patched we don't want to override data with synchronization to avoid loosing corrected data
             const eventsSeriesTicketingSystemIdsToSkip = new Set<string>();
-            storedEventsSeries.forEach(
-              (sES) =>
-                sES.lastManualUpdateAt &&
-                isAfter(currentSynchronizationStartingDate, sES.lastManualUpdateAt) &&
-                eventsSeriesTicketingSystemIdsToSkip.add(sES.internalTicketingSystemId)
-            );
+            storedEventsSeries.forEach((sES) => sES.lastManualUpdateAt && eventsSeriesTicketingSystemIdsToSkip.add(sES.internalTicketingSystemId));
 
             // We perform multiple diffs for each type to be sure processing them easily
             // Because a diff on 2 huge objects would imply understand in depth the returned differences (array order, which sub-subproperty has been modified or created...)
