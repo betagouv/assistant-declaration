@@ -14,7 +14,6 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { usePrevious } from 'react-use';
 
-import { DeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPageContext';
 import { trpc } from '@ad/src/client/trpcClient';
 import { AddressField } from '@ad/src/components/AddressField';
 import { AmountInput } from '@ad/src/components/AmountInput';
@@ -44,7 +43,6 @@ export interface DeclarationPageProps {
 
 export function DeclarationPage({ params: { organizationId, eventSerieId } }: DeclarationPageProps) {
   const { t } = useTranslation('common');
-  const { ContextualDeclarationHeader } = useContext(DeclarationPageContext);
 
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
