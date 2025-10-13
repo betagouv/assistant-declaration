@@ -48,7 +48,7 @@ export const ConnectTicketingSystemSchema = applyTypedParsers(
 );
 export type ConnectTicketingSystemSchemaType = z.infer<typeof ConnectTicketingSystemSchema>;
 
-export const ConnectTicketingSystemPrefillSchema = zx.deepPartial(rawConnectTicketingSystemSchema);
+export const ConnectTicketingSystemPrefillSchema = zx.deepPartial(rawConnectTicketingSystemSchema, 'applyToOutputType');
 export type ConnectTicketingSystemPrefillSchemaType = z.infer<typeof ConnectTicketingSystemPrefillSchema>;
 
 export const ListTicketingSystemsSchema = GetterInputSchema.extend({
@@ -58,7 +58,7 @@ export const ListTicketingSystemsSchema = GetterInputSchema.extend({
 }).strict();
 export type ListTicketingSystemsSchemaType = z.infer<typeof ListTicketingSystemsSchema>;
 
-export const ListTicketingSystemsPrefillSchema = zx.deepPartial(ListTicketingSystemsSchema);
+export const ListTicketingSystemsPrefillSchema = zx.deepPartial(ListTicketingSystemsSchema, 'applyToOutputType');
 export type ListTicketingSystemsPrefillSchemaType = z.infer<typeof ListTicketingSystemsPrefillSchema>;
 
 const rawUpdateTicketingSystemSchema = applyTypedParsers(
@@ -86,7 +86,7 @@ export const UpdateTicketingSystemSchema = applyTypedParsers(
 );
 export type UpdateTicketingSystemSchemaType = z.infer<typeof UpdateTicketingSystemSchema>;
 
-export const UpdateTicketingSystemPrefillSchema = zx.deepPartial(rawUpdateTicketingSystemSchema);
+export const UpdateTicketingSystemPrefillSchema = zx.deepPartial(rawUpdateTicketingSystemSchema, 'applyToOutputType');
 export type UpdateTicketingSystemPrefillSchemaType = z.infer<typeof UpdateTicketingSystemPrefillSchema>;
 
 export const DisconnectTicketingSystemSchema = applyTypedParsers(
@@ -96,5 +96,5 @@ export const DisconnectTicketingSystemSchema = applyTypedParsers(
 );
 export type DisconnectTicketingSystemSchemaType = z.infer<typeof DisconnectTicketingSystemSchema>;
 
-export const DisconnectTicketingSystemPrefillSchema = zx.deepPartial(DisconnectTicketingSystemSchema);
+export const DisconnectTicketingSystemPrefillSchema = zx.deepPartial(DisconnectTicketingSystemSchema, 'applyToOutputType');
 export type DisconnectTicketingSystemPrefillSchemaType = z.infer<typeof DisconnectTicketingSystemPrefillSchema>;

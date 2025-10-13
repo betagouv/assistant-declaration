@@ -19,7 +19,7 @@ export const GetDeclarationSchema = z
   .strict();
 export type GetDeclarationSchemaType = z.infer<typeof GetDeclarationSchema>;
 
-export const GetDeclarationPrefillSchema = zx.deepPartial(GetDeclarationSchema);
+export const GetDeclarationPrefillSchema = zx.deepPartial(GetDeclarationSchema, 'applyToOutputType');
 export type GetDeclarationPrefillSchemaType = z.infer<typeof GetDeclarationPrefillSchema>;
 
 export const FillDeclarationSchema = z
@@ -83,5 +83,5 @@ export const FillDeclarationSchema = z
   .strict();
 export type FillDeclarationSchemaType = z.infer<typeof FillDeclarationSchema>;
 
-export const FillDeclarationPrefillSchema = zx.deepPartial(FillDeclarationSchema);
+export const FillDeclarationPrefillSchema = zx.deepPartial(FillDeclarationSchema, 'applyToOutputType');
 export type FillDeclarationPrefillSchemaType = z.infer<typeof FillDeclarationPrefillSchema>;
