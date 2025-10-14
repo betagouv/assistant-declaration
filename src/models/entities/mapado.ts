@@ -34,7 +34,11 @@ export const JsonTicketSchema = applyTypedParsers(
   z
     .object({
       status: z.enum(['payed', 'refunded', 'booked', 'cancelled']),
-      ticketPrice: z.string().min(1).nullable(),
+      facialValue: z.number().int().nonnegative(), // Cents
+      // facialFeeValue: z.number().int().nonnegative(), // Cents
+      // paidValue: z.number().nonnegative(), // Not cents
+      // feeValue: z.number().nonnegative(), // Not cents
+      // priceVat: z.number().nonnegative(), // Not cents
       eventDate: z.string().min(1),
       isValid: z.boolean(),
       imported: z.boolean(),
@@ -77,7 +81,7 @@ export const JsonEventDateSchema = applyTypedParsers(
       startDate: z.coerce.date().nullable(),
       endDate: z.coerce.date().nullable(),
       startOfEventDay: z.coerce.date().nullable(),
-      endOfEventDay: z.coerce.date().nullable(),
+      // endOfEventDay: z.coerce.date().nullable(),
       ticketPriceList: z.array(
         z.object({
           id: z.number().int().nonnegative(),

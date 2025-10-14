@@ -214,7 +214,7 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
       // Uniqueness is required for us to compare easily the differences
       const fallbackEventTicketingSystemId = `fallback_${event.id}_0`;
 
-      let schemaEvents: Map<LiteEventSchemaType['internalTicketingSystemId'], LiteEventSchemaType> = new Map();
+      const schemaEvents: Map<LiteEventSchemaType['internalTicketingSystemId'], LiteEventSchemaType> = new Map();
       if (event.multiple === false) {
         // We make sure of this logic to no miss something
         assert(dates.length === 0, `event ${event.id} is not multiple but has sessions`);
