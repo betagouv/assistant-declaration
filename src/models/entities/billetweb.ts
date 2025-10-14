@@ -120,13 +120,13 @@ export const JsonEventAttendeeSchema = applyTypedParsers(
       // ticket: z.string().min(1), // Enum? "Plein"...
       // category: z.string().transform(transformStringOrNull),
       ticket_id: z.string().min(1),
-      // price: z.coerce.number(),
+      price: z.coerce.number().nonnegative(),
       // seating_location: z.string().transform(transformStringOrNull),
       // last_update: z.coerce.date(),
       // reduction_code: z.string().transform(transformStringOrNull),
       // authorization_code: z.string().transform(transformStringOrNull),
       // pass: z.unknown(), // Can be "0" or "428942988"...
-      // disabled: z.unknown(), // Integer enum
+      disabled: safeCoerceToBoolean(z.boolean()), // "1" if refund, "0" otherwise
       // product_management: z.url(),
       // product_download: z.url(),
       // order_id: z.string().min(1),
@@ -138,7 +138,7 @@ export const JsonEventAttendeeSchema = applyTypedParsers(
       // order_paid: safeCoerceToBoolean(z.boolean()),
       // order_payment_type: z.string().min(1), // Enum? "web"...
       // order_origin: z.string().min(1), // Enum? "web"...
-      // order_price: z.coerce.number(),
+      // order_price: z.coerce.number(), // The amount contains the total if multiple tickets bought
       order_session: z.string().min(1),
       // session_start: z.preprocess((value) => {
       //   // Don't understand why?

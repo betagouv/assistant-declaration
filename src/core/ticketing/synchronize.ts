@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { min, minutesToMilliseconds, subMonths } from 'date-fns';
 import { z } from 'zod';
 
+import { truncateFloatAmountNumber } from '@ad/src/core/declaration';
 import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
 import { anotherTicketingSystemSynchronizationOngoingError, noValidTicketingSystemError } from '@ad/src/models/entities/errors';
 import {
@@ -210,6 +211,9 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                     remoteEventWrapper.ticketingRevenueTaxRate === defaultConnectorEventSerieTaxRate
                       ? null
                       : remoteEventWrapper.ticketingRevenueTaxRate,
+                  // Make sure of 2 decimals for the comparaison to be right since they are stored like that in database
+                  ticketingRevenueExcludingTaxes: truncateFloatAmountNumber(remoteEventWrapper.ticketingRevenueExcludingTaxes),
+                  ticketingRevenueIncludingTaxes: truncateFloatAmountNumber(remoteEventWrapper.ticketingRevenueIncludingTaxes),
                 });
               }
             }
