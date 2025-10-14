@@ -286,6 +286,7 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
         }
 
         // Note: the commission for this ticket category that can be retrieved from `/event/${eventId}/tickets` is NOT deductible, so keeping direct price we have here
+        // TODO: should retrieve commission from the ticket category
         const ticketPriceIncludingTaxes = attendee.price;
 
         if (ticketPriceIncludingTaxes === 0) {

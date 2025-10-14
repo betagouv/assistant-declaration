@@ -147,7 +147,7 @@ export type JsonListEventsResponseSchemaType = z.infer<typeof JsonListEventsResp
 export const JsonListTicketsResponseSchema = applyTypedParsers(
   z
     .object({
-      query: z.record(z.unknown(), z.unknown()),
+      query: z.record(z.string(), z.unknown()),
       pagination: z.object({
         next: z.url().nullable(),
       }),
