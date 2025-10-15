@@ -10,6 +10,7 @@ import {
   JsonGetEventsOccurencesResponseSchema,
   JsonGetEventsResponseSchema,
   JsonGetEventsResponseSchemaType,
+  JsonGetTicketCategoriesResponseSchema,
 } from '@ad/src/models/entities/billetweb';
 import { billetwebFirewallError, missingBilletwebEventsRightsError } from '@ad/src/models/entities/errors';
 import { LiteEventSchema, LiteEventSchemaType, LiteEventSerieSchema, LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
@@ -214,6 +215,9 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
       // Uniqueness is required for us to compare easily the differences
       const fallbackEventTicketingSystemId = `fallback_${event.id}_0`;
 
+      // That's an indication for the event but technically each ticket category may have its own so the calculation of excluding taxes will go through all tickets
+      const indicativeTaxRate = event.tax_rate / 100;
+
       const schemaEvents: Map<LiteEventSchemaType['internalTicketingSystemId'], LiteEventSchemaType> = new Map();
       if (event.multiple === false) {
         // We make sure of this logic to no miss something
@@ -227,7 +231,7 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
             endAt: event.end,
             ticketingRevenueIncludingTaxes: 0,
             ticketingRevenueExcludingTaxes: 0,
-            ticketingRevenueTaxRate: event.tax_rate / 100,
+            ticketingRevenueTaxRate: indicativeTaxRate,
             freeTickets: 0,
             paidTickets: 0,
           })
@@ -242,13 +246,42 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
               endAt: date.end,
               ticketingRevenueIncludingTaxes: 0,
               ticketingRevenueExcludingTaxes: 0,
-              ticketingRevenueTaxRate: event.tax_rate / 100,
+              ticketingRevenueTaxRate: indicativeTaxRate,
               freeTickets: 0,
               paidTickets: 0,
             })
           );
         });
       }
+
+      const ticketCategoriesResponse = await this.rateLimitedFetch(this.formatUrl(`/event/${eventId}/tickets`, {}), {
+        method: 'GET',
+      });
+
+      if (!ticketCategoriesResponse.ok) {
+        const error = await ticketCategoriesResponse.text();
+
+        this.assertErrorResponseIsNotFirewall(error);
+
+        throw error;
+      }
+
+      const ticketCategoriesDataJson = await ticketCategoriesResponse.json();
+      const ticketCategories = JsonGetTicketCategoriesResponseSchema.parse(ticketCategoriesDataJson);
+
+      const ticketCategoryIdToCommissionAndTaxRate = new Map<
+        string,
+        {
+          taxRate: number;
+          commission: number;
+        }
+      >();
+      ticketCategories.forEach((ticketCategory) =>
+        ticketCategoryIdToCommissionAndTaxRate.set(ticketCategory.id, {
+          taxRate: (ticketCategory.tax ?? event.tax_rate) / 100, // According to the Billetweb documentation, if filled it overrides the one from the event layer
+          commission: ticketCategory.commission === false ? 0 : ticketCategory.commission,
+        })
+      );
 
       const attendeesResponse = await this.rateLimitedFetch(
         this.formatUrl(`/event/${eventId}/attendees`, {
@@ -285,25 +318,24 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
           throw new Error('a sold ticket should always match an existing event');
         }
 
-        // Note: the commission for this ticket category that can be retrieved from `/event/${eventId}/tickets` is NOT deductible, so keeping direct price we have here
-        // TODO: should retrieve commission from the ticket category
-        const ticketPriceIncludingTaxes = attendee.price;
+        const relatedTicketCategory = ticketCategoryIdToCommissionAndTaxRate.get(attendee.ticket_id);
+        if (!relatedTicketCategory) {
+          throw new Error('a sold ticket should always match a ticket category');
+        }
+
+        // Commission must be deduced when declaring from our platform
+        const ticketPriceIncludingTaxes = attendee.price - relatedTicketCategory.commission;
 
         if (ticketPriceIncludingTaxes === 0) {
           relatedEvent.freeTickets++;
         } else {
           relatedEvent.paidTickets++;
-          relatedEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes; // Excluding taxes will be calculated on the total after to avoid float shifts
+          relatedEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes;
+          relatedEvent.ticketingRevenueExcludingTaxes += getExcludingTaxesAmountFromIncludingTaxesAmount(
+            ticketPriceIncludingTaxes,
+            relatedTicketCategory.taxRate
+          );
         }
-      }
-
-      const schemaEventsArray = Array.from(schemaEvents.values());
-
-      for (const schemaEvent of schemaEventsArray) {
-        schemaEvent.ticketingRevenueExcludingTaxes = getExcludingTaxesAmountFromIncludingTaxesAmount(
-          schemaEvent.ticketingRevenueIncludingTaxes,
-          schemaEvent.ticketingRevenueTaxRate ?? 0
-        );
       }
 
       eventsSeriesWrappers.push({
@@ -311,7 +343,7 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
           internalTicketingSystemId: event.id,
           name: event.name,
         }),
-        events: schemaEventsArray,
+        events: Array.from(schemaEvents.values()),
       });
     });
 

@@ -95,7 +95,7 @@ export const JsonTicketCategorySchema = applyTypedParsers(
       //   return value === '' ? null : value;
       // }, z.coerce.date().nullable()),
       // form: z.string().min(1),
-      // tax: z.string().transform(transformStringOrNull),
+      tax: emptyStringtoNullPreprocessor(z.coerce.number().nullable()),
       commission: z.number().nonnegative().or(z.literal(false)),
     })
     .strip()
