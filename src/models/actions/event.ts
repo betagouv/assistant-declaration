@@ -1,4 +1,3 @@
-import { zx } from '@traversable/zod';
 import z from 'zod';
 
 import { GetterInputSchema } from '@ad/src/models/actions/common';
@@ -12,7 +11,7 @@ export const SynchronizeDataFromTicketingSystemsSchema = z
   .strict();
 export type SynchronizeDataFromTicketingSystemsSchemaType = z.infer<typeof SynchronizeDataFromTicketingSystemsSchema>;
 
-export const SynchronizeDataFromTicketingSystemsPrefillSchema = zx.deepPartial(SynchronizeDataFromTicketingSystemsSchema, 'applyToOutputType');
+export const SynchronizeDataFromTicketingSystemsPrefillSchema = SynchronizeDataFromTicketingSystemsSchema.partial();
 export type SynchronizeDataFromTicketingSystemsPrefillSchemaType = z.infer<typeof SynchronizeDataFromTicketingSystemsPrefillSchema>;
 
 export const GetEventSerieSchema = z
@@ -22,7 +21,7 @@ export const GetEventSerieSchema = z
   .strict();
 export type GetEventSerieSchemaType = z.infer<typeof GetEventSerieSchema>;
 
-export const GetEventSeriePrefillSchema = zx.deepPartial(GetEventSerieSchema, 'applyToOutputType');
+export const GetEventSeriePrefillSchema = GetEventSerieSchema.partial();
 export type GetEventSeriePrefillSchemaType = z.infer<typeof GetEventSeriePrefillSchema>;
 
 export const ListEventsSeriesSchema = GetterInputSchema.extend({
@@ -32,7 +31,7 @@ export const ListEventsSeriesSchema = GetterInputSchema.extend({
 }).strict();
 export type ListEventsSeriesSchemaType = z.infer<typeof ListEventsSeriesSchema>;
 
-export const ListEventsSeriesPrefillSchema = zx.deepPartial(ListEventsSeriesSchema, 'applyToOutputType');
+export const ListEventsSeriesPrefillSchema = ListEventsSeriesSchema.partial();
 export type ListEventsSeriesPrefillSchemaType = z.infer<typeof ListEventsSeriesPrefillSchema>;
 
 export const ListEventsSchema = GetterInputSchema.extend({

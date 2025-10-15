@@ -1,4 +1,3 @@
-import { zx } from '@traversable/zod';
 import z from 'zod';
 
 import { EventSchema, EventSerieSchema, StricterEventSerieSchema, assertValidExpenses } from '@ad/src/models/entities/event';
@@ -19,7 +18,7 @@ export const GetDeclarationSchema = z
   .strict();
 export type GetDeclarationSchemaType = z.infer<typeof GetDeclarationSchema>;
 
-export const GetDeclarationPrefillSchema = zx.deepPartial(GetDeclarationSchema, 'applyToOutputType');
+export const GetDeclarationPrefillSchema = GetDeclarationSchema.partial();
 export type GetDeclarationPrefillSchemaType = z.infer<typeof GetDeclarationPrefillSchema>;
 
 export const FillDeclarationSchema = z
@@ -83,5 +82,5 @@ export const FillDeclarationSchema = z
   .strict();
 export type FillDeclarationSchemaType = z.infer<typeof FillDeclarationSchema>;
 
-export const FillDeclarationPrefillSchema = zx.deepPartial(FillDeclarationSchema, 'applyToOutputType');
+export const FillDeclarationPrefillSchema = FillDeclarationSchema.partial();
 export type FillDeclarationPrefillSchemaType = z.infer<typeof FillDeclarationPrefillSchema>;
