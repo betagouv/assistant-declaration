@@ -11,7 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertProps, Autocomplete, Snackbar, Tooltip } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import debounce from 'lodash.debounce';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { usePrevious } from 'react-use';
@@ -62,6 +62,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
   const aggregatedQueries = new AggregatedQueries(getDeclaration);
 
+  const formContainerRef = useRef<HTMLFormElement | null>(null); // This is used to trigger the form submit with a button outside of it
   const [formInitialized, setFormInitialized] = useState<boolean>(false);
 
   const {
@@ -464,10 +465,12 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0rem 1rem' }}>
-              <h1 className={fr.cx('fr-h3', 'fr-mb-2v')}>{declaration.eventSerie.name}</h1>
+              <h1 className={fr.cx('fr-h3', 'fr-mb-2v')} data-sentry-mask>
+                {declaration.eventSerie.name}
+              </h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 {watch('eventSerie.expectedDeclarationTypes').map((declarationType) => {
-                  return <Tag>{t(`model.declarationType.enum.${declarationType}`)}</Tag>;
+                  return <Tag key={declarationType}>{t(`model.declarationType.enum.${declarationType}`)}</Tag>;
                 })}
                 <Tag
                   iconId="fr-icon-add-circle-line"
@@ -485,7 +488,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           <ul className={fr.cx('fr-btns-group', 'fr-btns-group--inline')} style={{ marginLeft: 'auto' }}>
             <li>
               <Button
-                type="submit"
+                onClick={() => {
+                  formContainerRef.current?.requestSubmit();
+                }}
                 priority="secondary"
                 loading={fillDeclaration.isPending}
                 nativeButtonProps={{
@@ -497,40 +502,42 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             </li>
             <li>
               <Tooltip title={isDirty ? `Pour télédéclarer vous devez d'abord enregistrer vos dernières modifications` : ''}>
-                <Button
-                  disabled={isDirty}
-                  onClick={() => {
-                    showConfirmationDialog({
-                      description: (
-                        <>
-                          Êtes-vous sûr de vouloir transmettre ces informations à la SACEM pour le spectacle{' '}
-                          <span className={fr.cx('fr-text--bold')} data-sentry-mask>
-                            {declaration.eventSerie.name}
-                          </span>{' '}
-                          ?
-                          <br />
-                          <br />
-                          <span style={{ fontStyle: 'italic' }}>
-                            Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou amendement de la
-                            déclaration, il faudra directement contacter votre interlocuteur SACEM.
-                          </span>
-                        </>
-                      ),
-                      onConfirm: async () => {
-                        const result = await transmitDeclaration.mutateAsync({
-                          eventSerieId: eventSerieId,
-                        });
+                <span>
+                  <Button
+                    disabled={isDirty}
+                    onClick={() => {
+                      showConfirmationDialog({
+                        description: (
+                          <>
+                            Êtes-vous sûr de vouloir transmettre ces informations à la SACEM pour le spectacle{' '}
+                            <span className={fr.cx('fr-text--bold')} data-sentry-mask>
+                              {declaration.eventSerie.name}
+                            </span>{' '}
+                            ?
+                            <br />
+                            <br />
+                            <span style={{ fontStyle: 'italic' }}>
+                              Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou amendement de la
+                              déclaration, il faudra directement contacter votre interlocuteur SACEM.
+                            </span>
+                          </>
+                        ),
+                        onConfirm: async () => {
+                          const result = await transmitDeclaration.mutateAsync({
+                            eventSerieId: eventSerieId,
+                          });
 
-                        push(['trackEvent', 'declaration', 'transmit']);
-                      },
-                    });
-                  }}
-                  nativeButtonProps={{
-                    className: fr.cx('fr-m-2v'),
-                  }}
-                >
-                  Déclarer
-                </Button>
+                          push(['trackEvent', 'declaration', 'transmit']);
+                        },
+                      });
+                    }}
+                    nativeButtonProps={{
+                      className: fr.cx('fr-m-2v'),
+                    }}
+                  >
+                    Déclarer
+                  </Button>
+                </span>
               </Tooltip>
             </li>
           </ul>
@@ -542,7 +549,13 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             <>
               <div className={fr.cx('fr-col-12')}>
                 <div className={fr.cx('fr-col-12')}>
-                  <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="connecter un système de billetterie">
+                  <BaseForm
+                    handleSubmit={handleSubmit}
+                    onSubmit={onSubmit}
+                    control={control}
+                    ariaLabel="connecter un système de billetterie"
+                    innerRef={formContainerRef}
+                  >
                     <div className={fr.cx('fr-col-12')}>
                       <fieldset className={fr.cx('fr-fieldset')}>
                         <div className={fr.cx('fr-fieldset__element')}>
@@ -1096,7 +1109,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                     nativeInputProps: {
                                       name: `checkbox-${declarationType}`,
                                       value: declarationType,
-                                      defaultChecked: value.includes(declarationType),
+                                      checked: value.includes(declarationType),
                                       onChange: (event) => {
                                         const newSelectedDeclarationsTypes = new Set<DeclarationTypeSchemaType>(value);
 
