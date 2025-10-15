@@ -324,7 +324,9 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
         }
 
         // Commission must be deduced when declaring from our platform
-        const ticketPriceIncludingTaxes = attendee.price - relatedTicketCategory.commission;
+        // Note: if for whatever reason the buyer bad a 100% voucher code, we assume commission would not be applied entierly
+        // TODO: this should be check... if ticket sold "40 cents" with voucher, and the category commission is "50 cents", do they reduce commission or not?
+        const ticketPriceIncludingTaxes = Math.max(attendee.price - relatedTicketCategory.commission, 0);
 
         if (ticketPriceIncludingTaxes === 0) {
           relatedEvent.freeTickets++;

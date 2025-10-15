@@ -297,7 +297,7 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
         await sleep(50);
       }
 
-      let taxRate: number | null = null;
+      let indicativeTaxRate: number | null = null;
 
       // Note: a ticket category being free may have a 0% tax rate instead of being aligned with others, to take into account this case
       // it's easier having them at the end (because if only free categories, the tax rate should be 0, not null)
@@ -306,27 +306,29 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
       for (const ticket of ticketsSortedWithDescendingTaxRates) {
         let ticketVatRate = ticket.vat_rate;
 
-        if (taxRate !== null) {
+        if (indicativeTaxRate !== null) {
           // See comment about sorting tickets to understand why alignin tax rates when price is 0
           if (ticket.ticket_price === 0 && ticketVatRate === 0) {
-            ticketVatRate = taxRate;
+            ticketVatRate = indicativeTaxRate;
           }
 
           // If the event mixes multiple tax rates set it to null since we are not managing this
           // Unfortunately it will cause the excluding taxes total being wrong but we are fine letting the end user correcting this
-          if (taxRate !== ticketVatRate) {
-            taxRate = null;
+          if (indicativeTaxRate !== ticketVatRate) {
+            indicativeTaxRate = null;
 
             break;
           }
         }
 
-        taxRate = ticketVatRate;
+        indicativeTaxRate = ticketVatRate;
       }
 
-      schemaEvent.ticketingRevenueTaxRate = taxRate;
+      schemaEvent.ticketingRevenueTaxRate = indicativeTaxRate;
 
       for (const ticket of eventTickets) {
+        const ticketVatRate = ticket.vat_rate;
+
         // Note: `resold` means another ticket has been issued to replace this one, so skipping it too
         if (ticket.ticket_status !== 'valid') {
           continue;
@@ -340,14 +342,10 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
           schemaEvent.freeTickets++;
         } else {
           schemaEvent.paidTickets++;
-          schemaEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes; // Excluding taxes will be calculated on the total after to avoid float shifts
+          schemaEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes;
+          schemaEvent.ticketingRevenueExcludingTaxes += getExcludingTaxesAmountFromIncludingTaxesAmount(ticketPriceIncludingTaxes, ticketVatRate);
         }
       }
-
-      schemaEvent.ticketingRevenueExcludingTaxes = getExcludingTaxesAmountFromIncludingTaxesAmount(
-        schemaEvent.ticketingRevenueIncludingTaxes,
-        schemaEvent.ticketingRevenueTaxRate ?? 0
-      );
 
       eventsSeriesWrappers.push({
         serie: LiteEventSerieSchema.parse({

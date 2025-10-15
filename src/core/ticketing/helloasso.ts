@@ -267,7 +267,8 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       const startDate = new Date(formResult.data.startDate);
       const endDate = formResult.data.endDate ? new Date(formResult.data.endDate) : null;
 
-      let taxRate: number | null = null;
+      let indicativeTaxRate: number | null = null;
+      const tierdIdToTaxRate = new Map<number, number>();
 
       if (formResult.data.tiers) {
         // Note: a tier being free may have a 0% tax rate instead of being aligned with others, to take into account this case
@@ -282,22 +283,24 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
 
           let tierVatRate = tier.vatRate / 100; // Receiving 5.50 for 5.5%
 
-          if (taxRate !== null) {
+          tierdIdToTaxRate.set(tier.id, tierVatRate);
+
+          if (indicativeTaxRate !== null) {
             // See comment about sorting tiers to understand why alignin tax rates when price is 0
             if (tier.price === 0 && tierVatRate === 0) {
-              tierVatRate = taxRate;
+              tierVatRate = indicativeTaxRate;
             }
 
             // If the event mixes multiple tax rates set it to null since we are not managing this
             // Unfortunately it will cause the excluding taxes total being wrong but we are fine letting the end user correcting this
-            if (taxRate !== tierVatRate) {
-              taxRate = null;
+            if (indicativeTaxRate !== tierVatRate) {
+              indicativeTaxRate = null;
 
               break;
             }
           }
 
-          taxRate = tierVatRate;
+          indicativeTaxRate = tierVatRate;
         }
       }
 
@@ -309,7 +312,7 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         endAt: endDate,
         ticketingRevenueIncludingTaxes: 0,
         ticketingRevenueExcludingTaxes: 0,
-        ticketingRevenueTaxRate: taxRate,
+        ticketingRevenueTaxRate: indicativeTaxRate,
         freeTickets: 0,
         paidTickets: 0,
       });
@@ -374,20 +377,22 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       }
 
       for (const ticketItem of soldItems) {
+        assert(ticketItem.tierId, 'the tier ID should be set on tickets');
+
+        const tierTaxRate = tierdIdToTaxRate.get(ticketItem.tierId);
+
+        assert(tierTaxRate !== undefined, 'the tier tax rate should be retrieved');
+
         const ticketPriceIncludingTaxes = ticketItem.amount / 100; // 2000 is 20€
 
         if (ticketPriceIncludingTaxes === 0) {
           schemaEvent.freeTickets++;
         } else {
           schemaEvent.paidTickets++;
-          schemaEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes; // Excluding taxes will be calculated on the total after to avoid float shifts
+          schemaEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes;
+          schemaEvent.ticketingRevenueExcludingTaxes += getExcludingTaxesAmountFromIncludingTaxesAmount(ticketPriceIncludingTaxes, tierTaxRate);
         }
       }
-
-      schemaEvent.ticketingRevenueExcludingTaxes = getExcludingTaxesAmountFromIncludingTaxesAmount(
-        schemaEvent.ticketingRevenueIncludingTaxes,
-        schemaEvent.ticketingRevenueTaxRate ?? 0
-      );
 
       eventsSeriesWrappers.push({
         serie: LiteEventSerieSchema.parse({

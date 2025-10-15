@@ -203,7 +203,7 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
             schemaEvent.freeTickets += price.quantity;
           } else {
             schemaEvent.paidTickets += price.quantity;
-            schemaEvent.ticketingRevenueIncludingTaxes += price.revenue; // Excluding taxes will be calculated on the total after to avoid float shifts
+            schemaEvent.ticketingRevenueIncludingTaxes += price.revenue; // Excluding taxes will be calculated on the total since constant for a same event
           }
         }
 

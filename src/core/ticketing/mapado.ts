@@ -214,7 +214,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             itemsPerPage: this.itemsPerPageToAvoidPagination,
             ...{
               fields:
-                '@id,startDate,endDate,startOfEventDay,ticketPriceList{id,type,name,description,currency,facialValue,tax{rate,countryCode},valueIncvat}',
+                '@id,startDate,endDate,startOfEventDay,ticketPriceList{@id,id,type,name,description,currency,facialValue,tax{rate,countryCode},valueIncvat}',
             },
           },
         });
@@ -225,6 +225,8 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
         const eventDatesData = JsonGetEventDatesResponseSchema.parse(eventDatesResult.data);
         this.assertCollectionResponseValid(eventDatesData);
+
+        const ticketPriceIdToTaxRate = new Map<string, number>();
 
         for (const eventDate of eventDatesData['hydra:member']) {
           // `startDate` is mandatory so falling back to `startOfEventDay` if needed (`endDate` is optional on our side so not using something not meaningful)
@@ -238,7 +240,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             return;
           }
 
-          let taxRate: number | null = null;
+          let indicativeTaxRate: number | null = null;
 
           // Note: a ticket category being free may have a 0% tax rate instead of being aligned with others, to take into account this case
           // it's easier having them at the end (because if only free categories, the tax rate should be 0, not null)
@@ -255,22 +257,24 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
             let ticketPriceVatRate = ticketPrice.tax.rate;
 
-            if (taxRate !== null) {
+            ticketPriceIdToTaxRate.set(ticketPrice['@id'], ticketPriceVatRate);
+
+            if (indicativeTaxRate !== null) {
               // See comment about sorting ticketPrices to understand why alignin tax rates when price is 0
               if (ticketPrice.facialValue === 0 && ticketPriceVatRate === 0) {
-                ticketPriceVatRate = taxRate;
+                ticketPriceVatRate = indicativeTaxRate;
               }
 
               // If the event mixes multiple tax rates set it to null since we are not managing this
               // Unfortunately it will cause the excluding taxes total being wrong but we are fine letting the end user correcting this
-              if (taxRate !== ticketPriceVatRate) {
-                taxRate = null;
+              if (indicativeTaxRate !== ticketPriceVatRate) {
+                indicativeTaxRate = null;
 
                 break;
               }
             }
 
-            taxRate = ticketPriceVatRate;
+            indicativeTaxRate = ticketPriceVatRate;
           }
 
           // [WORKAROUND] `@id` is a combination, we prefer to focus on the raw `id` but this one is not directly gettable for the `EventDate` entity
@@ -286,7 +290,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
               endAt: safeEndDate,
               ticketingRevenueIncludingTaxes: 0,
               ticketingRevenueExcludingTaxes: 0,
-              ticketingRevenueTaxRate: taxRate,
+              ticketingRevenueTaxRate: indicativeTaxRate,
               freeTickets: 0,
               paidTickets: 0,
             })
@@ -307,7 +311,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
               ticketing: ticketing['@id'],
               itemsPerPage: 10_000, // After testing we saw this limit was not erroring the Mapado API
               page: ticketsCurrentPage,
-              ...{ fields: 'status,facialValue,eventDate,isValid,imported' },
+              ...{ fields: 'status,facialValue,ticketPrice,eventDate,isValid,imported' },
             },
           });
 
@@ -337,6 +341,18 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             continue;
           }
 
+          // Some tickets have no ticket category, which is weird (they even don't have an order)
+          // For now we saw them when they are imported into Mapado from somewhere else, for now we chose to skip them from being used as entry in our application
+          // TODO: if they need to be taken into account, what tax rate to apply? The indicative one? But at risk... better the the user adjust amounts manually to include external things?
+          if (ticket.ticketPrice === null) {
+            if (ticket.imported) {
+              continue;
+            } else {
+              // If it's a case not known for now, throw an error
+              throw new Error(`a ticket has no "ticketPrice" whereas it has not been manually imported mapado, this should be investigated`);
+            }
+          }
+
           // [WORKAROUND] `eventDate` is a combination, we want the raw `id` to try matching event date we have already parsed
           const eventDateMatch = ticket.eventDate.match(/\/v1\/event_dates\/(\d+)/);
           assert(eventDateMatch && eventDateMatch[1]);
@@ -348,26 +364,23 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             throw new Error('a sold ticket should always match an existing event');
           }
 
-          // Note: it's unclear if the property `paidValue` (not cents) is always the same than `facialValue` (cents) and if
-          // they indeed equal the paid amount by the user (deducing any voucher code) and not just forwarding the original ticket category price
+          const ticketTaxRate = ticketPriceIdToTaxRate.get(ticket.ticketPrice);
+          if (ticketTaxRate === undefined) {
+            throw new Error('a sold ticket should always match a ticket category');
+          }
+
+          // TODO: it's unclear if the property `paidValue` (not cents) is always the same than `facialValue` (cents), and if the commission is deduced
+          // Note: we confirmed the ticket `facialValue` may be different han the ticket category `facialValue`, but is it due to dynamic price or it really represents the paid amount
           const ticketPriceIncludingTaxes = ticket.facialValue / 100; // 2000 is 20€
 
           if (ticketPriceIncludingTaxes === 0) {
             relatedEvent.freeTickets++;
           } else {
             relatedEvent.paidTickets++;
-            relatedEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes; // Excluding taxes will be calculated on the total after to avoid float shifts
+            relatedEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes;
+            relatedEvent.ticketingRevenueExcludingTaxes += getExcludingTaxesAmountFromIncludingTaxesAmount(ticketPriceIncludingTaxes, ticketTaxRate);
           }
         }
-      }
-
-      const schemaEventsArray = Array.from(schemaEvents.values());
-
-      for (const schemaEvent of schemaEventsArray) {
-        schemaEvent.ticketingRevenueExcludingTaxes = getExcludingTaxesAmountFromIncludingTaxesAmount(
-          schemaEvent.ticketingRevenueIncludingTaxes,
-          schemaEvent.ticketingRevenueTaxRate ?? 0
-        );
       }
 
       // [WORKAROUND] `@id` is a combination, we prefer to focus on the raw `id` but this one is not directly gettable for the `Ticketing` entity
@@ -380,7 +393,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           internalTicketingSystemId: ticketingMatch[1],
           name: ticketing.title,
         }),
-        events: schemaEventsArray,
+        events: Array.from(schemaEvents.values()),
       });
     });
 
