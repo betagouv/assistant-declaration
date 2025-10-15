@@ -7,42 +7,41 @@ import debounce from 'lodash.debounce';
 import { FocusEventHandler, PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { CompanySuggestion } from '@ad/src/client/api-gouv-fr';
-import { officialIdMask } from '@ad/src/components/OfficialIdField';
+import { officialHeadquartersIdMask } from '@ad/src/components/OfficialHeadquartersIdField';
 import { searchCompanySuggestions } from '@ad/src/proxies/api-gouv.fr';
 import { formatMaskedValue } from '@ad/src/utils/imask';
 
-export interface Company {
-  officialId: string;
-  name: string;
+export interface CompanyHeadquarters {
+  officialHeadquartersId: string;
 }
 
-export interface CompanyFieldProps {
-  value?: Company | null;
+export interface CompanyHeadquartersFieldProps {
+  value?: CompanyHeadquarters | null;
   inputProps: Pick<InputProps, 'label' | 'nativeInputProps'>;
-  onChange: (newValue: Company | null) => void;
+  onChange: (newValue: (CompanyHeadquarters & { name: string }) | null) => void;
   onBlur: FocusEventHandler<HTMLDivElement>;
-  defaultSuggestions?: Company[];
+  defaultSuggestions?: CompanyHeadquarters[];
   errorMessage?: string;
 }
 
-export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
-  // In the following headquarters address and ID can be ommitted because if coming from the value and not listed it won't be used
+export function CompanyHeadquartersField(props: PropsWithChildren<CompanyHeadquartersFieldProps>) {
+  // In the following headquarters address and ID and the name can be ommitted because if coming from the value and not listed it won't be used
   // We provide it just for the Autocomplete component to take the right type without casting
   const [defaultSuggestions] = useState<CompanySuggestion[]>(
     props.defaultSuggestions?.map((dS) => {
-      return { ...dS, officialHeadquartersId: '', inlineHeadquartersAddress: '' };
+      return { ...dS, officialId: '', name: '', inlineHeadquartersAddress: '' };
     }) ?? []
   );
-  const [searchCompanyQuerySuggestions, setSearchCompanyQuerySuggestions] = useState<CompanySuggestion[]>(defaultSuggestions);
+  const [searchCompanyHeadquartersQuerySuggestions, setSearchCompanyHeadquartersQuerySuggestions] = useState<CompanySuggestion[]>(defaultSuggestions);
   const [watchedInputValue, setWatchedInputValue] = useState<string>('');
   const [suggestionsLoading, setSuggestionsLoading] = useState<boolean>(false);
 
   const adjustedValue = useMemo(
-    () => (props.value ? { ...props.value, officialHeadquartersId: '', inlineHeadquartersAddress: '' } : null),
+    () => (props.value ? { ...props.value, officialId: '', name: '', inlineHeadquartersAddress: '' } : null),
     [props.value]
   );
 
-  const handleSearchCompanyQueryChange = useCallback(
+  const handleSearchCompanyHeadquartersQueryChange = useCallback(
     async (query: string) => {
       setWatchedInputValue(query);
 
@@ -52,29 +51,32 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
 
           const suggestions = await searchCompanySuggestions(query);
 
-          setSearchCompanyQuerySuggestions(suggestions);
+          setSearchCompanyHeadquartersQuerySuggestions(suggestions);
         } finally {
           setSuggestionsLoading(false);
         }
       } else {
         // When there is no input value, we make sure to at least propose initial suggestions to help the user
-        setSearchCompanyQuerySuggestions(defaultSuggestions);
+        setSearchCompanyHeadquartersQuerySuggestions(defaultSuggestions);
       }
     },
     [setSuggestionsLoading, defaultSuggestions]
   );
 
-  const debouncedHandleCompanyQuery = useMemo(() => debounce(handleSearchCompanyQueryChange, 500), [handleSearchCompanyQueryChange]);
+  const debouncedHandleCompanyHeadquartersQuery = useMemo(
+    () => debounce(handleSearchCompanyHeadquartersQueryChange, 500),
+    [handleSearchCompanyHeadquartersQueryChange]
+  );
   useEffect(() => {
     return () => {
-      debouncedHandleCompanyQuery.cancel();
+      debouncedHandleCompanyHeadquartersQuery.cancel();
     };
-  }, [debouncedHandleCompanyQuery]);
+  }, [debouncedHandleCompanyHeadquartersQuery]);
 
   return (
     <Autocomplete
       value={adjustedValue}
-      options={searchCompanyQuerySuggestions}
+      options={searchCompanyHeadquartersQuerySuggestions}
       renderInput={({ InputProps, disabled, id, inputProps }) => {
         return (
           <Input
@@ -99,7 +101,7 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
             <div>
               <span className={fr.cx('fr-text--bold')}>{option.name}</span>
               &nbsp;
-              <span style={{ fontStyle: 'italic' }}>(SIREN {formatMaskedValue(officialIdMask, option.officialId)})</span>
+              <span style={{ fontStyle: 'italic' }}>(SIRET {formatMaskedValue(officialHeadquartersIdMask, option.officialHeadquartersId)})</span>
               <br />
               <span>{option.inlineHeadquartersAddress}</span>
             </div>
@@ -108,18 +110,18 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
       }}
       isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // Since it relies on intermediate objects we provide a hard way (no unique ID for those)
       getOptionLabel={(option) => {
-        return `${option.name} (${formatMaskedValue(officialIdMask, option.officialId)})`;
+        return formatMaskedValue(officialHeadquartersIdMask, option.officialHeadquartersId);
       }}
       onInputChange={(event, newInputValue, reason) => {
         if (reason === 'input') {
-          handleSearchCompanyQueryChange(newInputValue);
+          handleSearchCompanyHeadquartersQueryChange(newInputValue);
         }
       }}
       onChange={(event, newValue) => {
         props.onChange(
           newValue
             ? {
-                officialId: newValue.officialId,
+                officialHeadquartersId: newValue.officialHeadquartersId,
                 name: newValue.name,
               }
             : null
@@ -130,7 +132,7 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
       selectOnFocus
       handleHomeEndKeys
       loadingText="Recherche en cours..."
-      noOptionsText="Aucune suggestion d'entreprise"
+      noOptionsText="Aucune suggestion d'établissement d'entreprise"
       fullWidth
     />
   );

@@ -4,8 +4,7 @@ import { OrganizationSchema } from '@ad/src/models/entities/organization';
 
 export const CreateOrganizationSchema = z.object({
   name: OrganizationSchema.shape.name,
-  officialId: OrganizationSchema.shape.officialId,
-  // TODO: within another PR?
+  officialHeadquartersId: OrganizationSchema.shape.officialHeadquartersId,
 });
 export type CreateOrganizationSchemaType = z.infer<typeof CreateOrganizationSchema>;
 

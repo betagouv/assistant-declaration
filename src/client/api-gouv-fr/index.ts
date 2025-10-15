@@ -6,7 +6,10 @@ export interface CompanyApiResult {
   nom_raison_sociale: string;
   sigle: string | null;
   siege: {
-    geo_adresse: string;
+    geo_id: string | null;
+    geo_adresse: string | null;
+    adresse: string;
+    siret: string;
   };
 }
 
@@ -20,6 +23,7 @@ export interface CompanyApiSearchCompanySuggestionsResponse {
 
 export interface CompanySuggestion {
   officialId: string;
+  officialHeadquartersId: string;
   name: string;
   inlineHeadquartersAddress: string;
 }
@@ -45,8 +49,9 @@ export async function searchCompanySuggestions(query: string): Promise<CompanySu
     return data.results.map((result) => {
       return {
         officialId: result.siren,
+        officialHeadquartersId: result.siege.siret,
         name: result.nom_raison_sociale,
-        inlineHeadquartersAddress: result.siege.geo_adresse,
+        inlineHeadquartersAddress: result.siege.geo_adresse ?? result.siege.adresse, // For foreign companies registered the beautified `geo_adresse` is null, so using ugly `adresse`
       };
     });
   } else {

@@ -48,7 +48,7 @@ const FilledStory = Template.bind({});
 FilledStory.args = {
   prefill: CreateOrganizationPrefillSchema.parse({
     name: 'Ma salle de spectacle',
-    officialId: '123456789',
+    officialHeadquartersId: '12345678900011',
   }),
 };
 FilledStory.parameters = { ...defaultMswParameters };

@@ -7,6 +7,7 @@ const mock_searchCompanySuggestions: typeof real_searchCompanySuggestions = asyn
   return [
     {
       officialId: '130025265',
+      officialHeadquartersId: '13002526500013',
       name: 'DIRECTION INTERMINISTERIELLE DU NUMERIQUE',
       inlineHeadquartersAddress: '20 Avenue de Ségur 75007 Paris',
     },
