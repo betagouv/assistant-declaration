@@ -204,13 +204,15 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               });
 
               for (const remoteEventWrapper of remoteEventsSerieWrapper.events) {
+                let ticketingRevenueTaxRate: number | null;
+
+                // Since `null` is considered as not overriden in database, when receiving `null` from the connector we assume it's 0%
+                ticketingRevenueTaxRate = remoteEventWrapper.ticketingRevenueTaxRate ?? 0;
+
                 remoteLiteEvents.set(remoteEventWrapper.internalTicketingSystemId, {
                   internalEventSerieTicketingSystemId: remoteEventsSerieWrapper.serie.internalTicketingSystemId,
                   ...remoteEventWrapper,
-                  ticketingRevenueTaxRate:
-                    remoteEventWrapper.ticketingRevenueTaxRate === defaultConnectorEventSerieTaxRate
-                      ? null
-                      : remoteEventWrapper.ticketingRevenueTaxRate,
+                  ticketingRevenueTaxRate: ticketingRevenueTaxRate === defaultConnectorEventSerieTaxRate ? null : ticketingRevenueTaxRate,
                   // Make sure of 2 decimals for the comparaison to be right since they are stored like that in database
                   ticketingRevenueExcludingTaxes: truncateFloatAmountNumber(remoteEventWrapper.ticketingRevenueExcludingTaxes),
                   ticketingRevenueIncludingTaxes: truncateFloatAmountNumber(remoteEventWrapper.ticketingRevenueIncludingTaxes),
