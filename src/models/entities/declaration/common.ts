@@ -32,13 +32,9 @@ export const DeclarationSchema = applyTypedParsers(
         expensesExcludingTaxes: true,
         introductionFeesExpensesExcludingTaxes: true,
         circusSpecificExpensesExcludingTaxes: true,
-      })
-        .extend({
-          place: PlaceSchema.nullable(),
-        })
-        .superRefine((data, ctx) => {
-          assertValidExpenses(data, ctx); // Had to be reapplied since we picked up a few properties
-        }),
+      }).safeExtend({
+        place: PlaceSchema.nullable(),
+      }),
       events: z.array(
         EventSchema.pick({
           id: true,
@@ -81,7 +77,7 @@ export const DeclarationInputSchema = applyTypedParsers(
           place: PlaceInputSchema,
         })
         .superRefine((data, ctx) => {
-          assertValidExpenses(data, ctx); // TODO: maybe already kept those `shape.eventSerie`, should be tested
+          assertValidExpenses(data, ctx); // Needed since `extend` reset refinements
         }),
       events: z.array(
         DeclarationSchema.shape.events.element.extend({

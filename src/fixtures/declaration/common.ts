@@ -9,10 +9,16 @@ import {
   DeclarationWrapperSchemaType,
 } from '@ad/src/models/entities/declaration/common';
 
+const partialEvents = events.map((event) => {
+  const { internalTicketingSystemId, eventSerieId, placeOverrideId, createdAt, updatedAt, ...partialEvent } = event;
+
+  return partialEvent;
+});
+
 export const eventsWithPlace: DeclarationSchemaType['events'] = [
-  { ...events[0], placeOverride: places[1] },
-  { ...events[1], placeOverride: null },
-  { ...events[2], placeOverride: places[2] },
+  { ...partialEvents[0], placeOverride: places[1] },
+  { ...partialEvents[1], placeOverride: null },
+  { ...partialEvents[2], placeOverride: places[2] },
 ];
 
 export const declarations: DeclarationSchemaType[] = [

@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { EventSchema, EventSerieSchema, StricterEventSerieSchema, assertValidExpenses } from '@ad/src/models/entities/event';
+import { EventSchema, EventSerieSchema, StricterEventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceInputSchema } from '@ad/src/models/entities/place';
 
@@ -37,19 +37,15 @@ export const FillDeclarationSchema = z
       expensesExcludingTaxes: true,
       introductionFeesExpensesExcludingTaxes: true,
       circusSpecificExpensesExcludingTaxes: true,
-    })
-      .extend({
-        place: PlaceInputSchema,
-        producer: z
-          .object({
-            officialId: StricterEventSerieSchema.shape.producerOfficialId,
-            name: StricterEventSerieSchema.shape.producerName,
-          })
-          .nullable(),
-      })
-      .superRefine((data, ctx) => {
-        assertValidExpenses(data, ctx); // Had to be reapplied since we picked up a few properties
-      }),
+    }).safeExtend({
+      place: PlaceInputSchema,
+      producer: z
+        .object({
+          officialId: StricterEventSerieSchema.shape.producerOfficialId,
+          name: StricterEventSerieSchema.shape.producerName,
+        })
+        .nullable(),
+    }),
     events: z.array(
       EventSchema.pick({
         id: true,
