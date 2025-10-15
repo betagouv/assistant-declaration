@@ -513,7 +513,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                       </div>
                     </fieldset>
                     <fieldset className={fr.cx('fr-fieldset')}>
-                      <h2 className={fr.cx('fr-h4')}>Général</h2>
+                      <div className={fr.cx('fr-fieldset__element')}>
+                        <h2 className={fr.cx('fr-h4')}>Général</h2>
+                      </div>
                       <div className={fr.cx('fr-col-12')}>
                         <div className={fr.cx('fr-grid-row')}>
                           {/*
@@ -739,12 +741,16 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             </div>
                           )}
                         </div>
-                        <hr className={fr.cx('fr-my-3v')} />
+                        <div className={fr.cx('fr-fieldset__element')}>
+                          <hr className={fr.cx('fr-my-3v')} />
+                        </div>
                         <div className={fr.cx('fr-grid-row')}>
                           <div className={fr.cx('fr-col-12')}>
-                            <p style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
-                              Ces informations sont reportées sur toutes les séances, vous pouvez toujours les modifier pour chaque séance.
-                            </p>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <p style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+                                Ces informations sont reportées sur toutes les séances, vous pouvez toujours les modifier pour chaque séance.
+                              </p>
+                            </div>
                           </div>
                           <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
                             <div className={fr.cx('fr-fieldset__element')}>
@@ -976,7 +982,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                     </fieldset>
                     <fieldset className={fr.cx('fr-fieldset')}>
                       <div className={fr.cx('fr-col-12')}>
-                        <hr className={fr.cx('fr-my-3v')} />
+                        <div className={fr.cx('fr-fieldset__element')}>
+                          <hr className={fr.cx('fr-my-3v')} />
+                        </div>
                         <EventsFieldsets
                           control={control}
                           register={register}

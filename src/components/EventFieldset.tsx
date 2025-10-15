@@ -35,9 +35,11 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
 
   return (
     <>
-      <h2 className={fr.cx('fr-h4')} data-sentry-mask>
-        Séance du {t('date.shortWithTime', { date: watch(`${name}.startAt`) })}
-      </h2>
+      <div className={fr.cx('fr-fieldset__element')}>
+        <h2 className={fr.cx('fr-h4')} data-sentry-mask>
+          Séance du {t('date.shortWithTime', { date: watch(`${name}.startAt`) })}
+        </h2>
+      </div>
       {errorMessage && (
         <div className={fr.cx('fr-grid-row')}>
           <div className={fr.cx('fr-col-12', 'fr-mb-4v')}>
@@ -47,8 +49,10 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
       )}
       <div className={fr.cx('fr-grid-row')}>
         <div className={fr.cx('fr-col-12')}>
-          <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
-            Général
+          <div className={fr.cx('fr-fieldset__element')}>
+            <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+              Général
+            </div>
           </div>
         </div>
       </div>
@@ -281,8 +285,10 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
       </div>
       <div className={fr.cx('fr-grid-row')}>
         <div className={fr.cx('fr-col-12')}>
-          <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
-            Billetterie
+          <div className={fr.cx('fr-fieldset__element')}>
+            <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+              Billetterie
+            </div>
           </div>
         </div>
       </div>
@@ -384,8 +390,10 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
         <>
           <div className={fr.cx('fr-grid-row')}>
             <div className={fr.cx('fr-col-12')}>
-              <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
-                Recettes hors billetterie
+              <div className={fr.cx('fr-fieldset__element')}>
+                <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+                  Recettes hors billetterie
+                </div>
               </div>
             </div>
           </div>
