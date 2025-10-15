@@ -19,6 +19,7 @@
       "alreadyExistingTicketingSystem": "un système de billetterie est déjà connecté avec ces identifiants",
       "anotherOrganizationAlreadyHasThisOfficialId": "une autre organisation utilise déjà ce numéro Siren, veuillez vous rapprocher du reste de votre équipe ou contactez notre support",
       "anotherTicketingSystemSynchronizationOngoing": "une autre synchronisation des données est déjà en cours",
+      "atLeastOneDeclarationTypeToTransmit": "vous devez au moins sélectionner un organisme pour télédéclarer",
       "atLeastOneEventToTransmit": "votre spectacle doit contenir au minimum une représentation pour être déclaré auprès d'un organisme",
       "authCredentialsRequired": "vous devez fournir vos informations de connexion pour poursuivre",
       "authFatal": "une erreur inattendue est survenue, merci de contacter le support",

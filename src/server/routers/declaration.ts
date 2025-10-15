@@ -12,6 +12,7 @@ import { SacdDeclarationSchema, SacdDeclarationSchemaType } from '@ad/src/models
 import { SacemDeclarationSchema, SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import {
   BusinessError,
+  atLeastOneDeclarationTypeToTransmitError,
   atLeastOneEventToTransmitError,
   eventSerieNotFoundError,
   organizationCollaboratorRoleRequiredError,
@@ -157,6 +158,10 @@ export const declarationRouter = router({
 
     const declarationsToDeclare: [DeclarationTypeSchemaType, SacemDeclarationSchemaType | SacdDeclarationSchemaType][] = [];
 
+    if (agnosticDeclaration.eventSerie.expectedDeclarationTypes.length === 0) {
+      throw atLeastOneDeclarationTypeToTransmitError;
+    }
+
     for (const declarationType of agnosticDeclaration.eventSerie.expectedDeclarationTypes) {
       // If that's a retry, we make sure not transmitting again to organisms
       if (eventSerie.EventSerieDeclaration.find((eSD) => eSD.type === declarationType)?.status === 'PROCESSED') {
@@ -191,7 +196,7 @@ export const declarationRouter = router({
     for (const [declarationType, declarationToDeclare] of declarationsToDeclare) {
       try {
         if (declarationToDeclare === sacemDeclaration) {
-          const eventPlacePostalCode: string = sacemDeclaration.eventSerie.place.id; // TODO: get details
+          const eventPlacePostalCode: string = sacemDeclaration.eventSerie.place.address.postalCode;
 
           const sacemAgency = await prisma.sacemAgency.findFirst({
             where: {

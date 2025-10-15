@@ -188,6 +188,10 @@ export const transmittedDeclarationCannotBeUpdatedError = new BusinessError(
   'transmittedDeclarationCannotBeUpdated',
   t('errors.custom.transmittedDeclarationCannotBeUpdated')
 );
+export const atLeastOneDeclarationTypeToTransmitError = new BusinessError(
+  'atLeastOneDeclarationTypeToTransmit',
+  t('errors.custom.atLeastOneDeclarationTypeToTransmit')
+);
 export const atLeastOneEventToTransmitError = new BusinessError('atLeastOneEventToTransmit', t('errors.custom.atLeastOneEventToTransmit'));
 export const sacemAgencyNotFoundError = new BusinessError('sacemAgencyNotFound', t('errors.custom.sacemAgencyNotFound'));
 export const sacemDeclarationUnsuccessfulError = new BusinessError('sacemDeclarationUnsuccessful', t('errors.custom.sacemDeclarationUnsuccessful'));
