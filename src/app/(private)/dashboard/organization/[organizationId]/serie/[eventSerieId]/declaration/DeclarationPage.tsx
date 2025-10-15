@@ -747,7 +747,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                         <div className={fr.cx('fr-grid-row')}>
                           <div className={fr.cx('fr-col-12')}>
                             <div className={fr.cx('fr-fieldset__element')}>
-                              <p style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+                              <p className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
                                 Ces informations sont reportées sur toutes les séances, vous pouvez toujours les modifier pour chaque séance.
                               </p>
                             </div>
