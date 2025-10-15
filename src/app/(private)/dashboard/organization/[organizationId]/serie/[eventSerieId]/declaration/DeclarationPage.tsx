@@ -3,10 +3,12 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { Input } from '@codegouvfr/react-dsfr/Input';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Select } from '@codegouvfr/react-dsfr/SelectNext';
+import { Tag } from '@codegouvfr/react-dsfr/Tag';
 import addressFormatter from '@fragaria/address-formatter';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Alert, AlertProps, Autocomplete, Snackbar } from '@mui/material';
+import { Alert, AlertProps, Autocomplete, Snackbar, Tooltip } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import debounce from 'lodash.debounce';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -36,6 +38,11 @@ import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models
 import { AudienceSchema, PerformanceTypeSchema } from '@ad/src/models/entities/event';
 import { formatMaskedValue } from '@ad/src/utils/imask';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
+
+const declarationTypesModal = createModal({
+  id: 'declaration-types-modal',
+  isOpenedByDefault: false,
+});
 
 export interface DeclarationPageProps {
   params: { organizationId: string; eventSerieId: string };
@@ -264,6 +271,11 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             };
           }),
         });
+
+        // If no declaration types we invite the user to select one through the window
+        if (getDeclaration.data.declarationWrapper.declaration.eventSerie.expectedDeclarationTypes.length === 0) {
+          declarationTypesModal.open();
+        }
       }
     }
   }, [getDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
@@ -428,110 +440,117 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     );
   }
 
-  console.log(1111111);
-
   const declarationWrapper = getDeclaration.data!.declarationWrapper;
   const declaration = declarationWrapper.declaration;
 
   return (
-    <div className={fr.cx('fr-container', 'fr-py-12v')} style={{ height: '100%' }}>
-      <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')} style={{ height: '100%' }}>
-        {declaration.events.length > 0 ? (
-          <>
-            <div className={fr.cx('fr-col-12')}>
+    <div style={{ width: '100%' }}>
+      <div
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 450,
+          backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.default,
+        }}
+      >
+        <div
+          className={fr.cx('fr-container', 'fr-py-6v')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem 2rem',
+            flexWrap: 'wrap',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0rem 1rem' }}>
+              <h1 className={fr.cx('fr-h3', 'fr-mb-2v')}>{declaration.eventSerie.name}</h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {watch('eventSerie.expectedDeclarationTypes').map((declarationType) => {
+                  return <Tag>{t(`model.declarationType.enum.${declarationType}`)}</Tag>;
+                })}
+                <Tag
+                  iconId="fr-icon-add-circle-line"
+                  linkProps={{
+                    href: '#',
+                    onClick: declarationTypesModal.open,
+                  }}
+                >
+                  Éditer
+                </Tag>
+              </div>
+            </div>
+            <div className={fr.cx('fr-mt-1v')}>Vérifiez et complétez les informations pour déclarer ce spectacle.</div>
+          </div>
+          <ul className={fr.cx('fr-btns-group', 'fr-btns-group--inline')} style={{ marginLeft: 'auto' }}>
+            <li>
+              <Button
+                type="submit"
+                priority="secondary"
+                loading={fillDeclaration.isPending}
+                nativeButtonProps={{
+                  className: fr.cx('fr-m-2v'),
+                }}
+              >
+                Enregistrer
+              </Button>
+            </li>
+            <li>
+              <Tooltip title={isDirty ? `Pour télédéclarer vous devez d'abord enregistrer vos dernières modifications` : ''}>
+                <Button
+                  disabled={isDirty}
+                  onClick={() => {
+                    showConfirmationDialog({
+                      description: (
+                        <>
+                          Êtes-vous sûr de vouloir transmettre ces informations à la SACEM pour le spectacle{' '}
+                          <span className={fr.cx('fr-text--bold')} data-sentry-mask>
+                            {declaration.eventSerie.name}
+                          </span>{' '}
+                          ?
+                          <br />
+                          <br />
+                          <span style={{ fontStyle: 'italic' }}>
+                            Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou amendement de la
+                            déclaration, il faudra directement contacter votre interlocuteur SACEM.
+                          </span>
+                        </>
+                      ),
+                      onConfirm: async () => {
+                        const result = await transmitDeclaration.mutateAsync({
+                          eventSerieId: eventSerieId,
+                        });
+
+                        push(['trackEvent', 'declaration', 'transmit']);
+                      },
+                    });
+                  }}
+                  nativeButtonProps={{
+                    className: fr.cx('fr-m-2v'),
+                  }}
+                >
+                  Déclarer
+                </Button>
+              </Tooltip>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div className={fr.cx('fr-container', 'fr-py-12v')} style={{ height: '100%' }}>
+        <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')} style={{ height: '100%' }}>
+          {declaration.events.length > 0 ? (
+            <>
               <div className={fr.cx('fr-col-12')}>
-                <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="connecter un système de billetterie">
-                  <div className={fr.cx('fr-col-12')}>
-                    <fieldset className={fr.cx('fr-fieldset')}>
-                      <p>TODO: set in modal</p>
-                      <Controller
-                        control={control}
-                        name="eventSerie.expectedDeclarationTypes"
-                        render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => {
-                          return (
-                            <Checkbox
-                              legend="Choisir le ou les organismes auxquels déclarer ce spectacle :"
-                              state={!!error ? 'error' : undefined}
-                              stateRelatedMessage={error?.message}
-                              options={DeclarationTypeSchema.options.map((declarationType) => {
-                                return {
-                                  label: t(`model.declarationType.enum.${declarationType}`),
-                                  nativeInputProps: {
-                                    name: `checkbox-${declarationType}`,
-                                    value: declarationType,
-                                    defaultChecked: value.includes(declarationType),
-                                    onChange: (event) => {
-                                      const newSelectedDeclarationsTypes = new Set<DeclarationTypeSchemaType>(value);
-
-                                      if (event.target.checked) {
-                                        newSelectedDeclarationsTypes.add(declarationType);
-                                      } else {
-                                        newSelectedDeclarationsTypes.delete(declarationType);
-                                      }
-
-                                      onChange([...newSelectedDeclarationsTypes.values()]);
-                                    },
-                                    onBlur: onBlur,
-                                  },
-                                };
-                              })}
-                              orientation="vertical"
-                            />
-                          );
-                        }}
-                      />
-                    </fieldset>
-                    <fieldset className={fr.cx('fr-fieldset')}>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <ul className={fr.cx('fr-btns-group')}>
-                          <li>
-                            <Button type="submit" loading={fillDeclaration.isPending}>
-                              Enregistrer
-                            </Button>
-                          </li>
-                          <li>
-                            <Button
-                              disabled={isDirty}
-                              onClick={() => {
-                                showConfirmationDialog({
-                                  description: (
-                                    <>
-                                      Êtes-vous sûr de vouloir transmettre ces informations à la SACEM pour le spectacle{' '}
-                                      <span className={fr.cx('fr-text--bold')} data-sentry-mask>
-                                        {declaration.eventSerie.name}
-                                      </span>{' '}
-                                      ?
-                                      <br />
-                                      <br />
-                                      <span style={{ fontStyle: 'italic' }}>
-                                        Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou
-                                        amendement de la déclaration, il faudra directement contacter votre interlocuteur SACEM.
-                                      </span>
-                                    </>
-                                  ),
-                                  onConfirm: async () => {
-                                    const result = await transmitDeclaration.mutateAsync({
-                                      eventSerieId: eventSerieId,
-                                    });
-
-                                    push(['trackEvent', 'declaration', 'transmit']);
-                                  },
-                                });
-                              }}
-                            >
-                              Déclarer
-                            </Button>
-                          </li>
-                        </ul>
-                      </div>
-                    </fieldset>
-                    <fieldset className={fr.cx('fr-fieldset')}>
-                      <div className={fr.cx('fr-fieldset__element')}>
-                        <h2 className={fr.cx('fr-h4')}>Général</h2>
-                      </div>
-                      <div className={fr.cx('fr-col-12')}>
-                        <div className={fr.cx('fr-grid-row')}>
-                          {/*
+                <div className={fr.cx('fr-col-12')}>
+                  <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="connecter un système de billetterie">
+                    <div className={fr.cx('fr-col-12')}>
+                      <fieldset className={fr.cx('fr-fieldset')}>
+                        <div className={fr.cx('fr-fieldset__element')}>
+                          <h2 className={fr.cx('fr-h4')}>Général</h2>
+                        </div>
+                        <div className={fr.cx('fr-col-12')}>
+                          <div className={fr.cx('fr-grid-row')}>
+                            {/*
                           <div className={fr.cx('fr-col-7', 'fr-col-md-5')}>
                             <div className={fr.cx('fr-fieldset__element')}>
                               <Input
@@ -555,84 +574,84 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             </div>
                           </div>
                            */}
-                          {watch('eventSerie.expectedDeclarationTypes').includes('SACEM') && (
-                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            {watch('eventSerie.expectedDeclarationTypes').includes('SACEM') && (
+                              <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                                <div className={fr.cx('fr-fieldset__element')}>
+                                  <Controller
+                                    control={control}
+                                    name="organization.sacemId"
+                                    render={({ field, fieldState: { error } }) => {
+                                      return <SacemIdInput {...field} label="Identifiant Sacem" errorMessage={error?.message} />;
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                            {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
+                              <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                                <div className={fr.cx('fr-fieldset__element')}>
+                                  <Controller
+                                    control={control}
+                                    name="organization.sacdId"
+                                    render={({ field, fieldState: { error } }) => {
+                                      return <SacdIdInput {...field} label="Identifiant SACD" errorMessage={error?.message} />;
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className={fr.cx('fr-grid-row')}>
+                            <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Controller
                                   control={control}
-                                  name="organization.sacemId"
-                                  render={({ field, fieldState: { error } }) => {
-                                    return <SacemIdInput {...field} label="Identifiant Sacem" errorMessage={error?.message} />;
+                                  name="eventSerie.producer"
+                                  defaultValue={null}
+                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                    return (
+                                      <CompanyField
+                                        value={value}
+                                        defaultSuggestions={declarationWrapper.placeholder.producer}
+                                        inputProps={{
+                                          label: 'Raison sociale du producteur',
+                                          nativeInputProps: {
+                                            placeholder: 'Recherche',
+                                          },
+                                        }}
+                                        onChange={(newValue) => {
+                                          onChange(newValue);
+                                        }}
+                                        onBlur={onBlur}
+                                        errorMessage={error?.message}
+                                      />
+                                    );
                                   }}
                                 />
                               </div>
                             </div>
-                          )}
-                          {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
-                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
                               <div className={fr.cx('fr-fieldset__element')}>
-                                <Controller
-                                  control={control}
-                                  name="organization.sacdId"
-                                  render={({ field, fieldState: { error } }) => {
-                                    return <SacdIdInput {...field} label="Identifiant SACD" errorMessage={error?.message} />;
+                                <Select
+                                  label="Genre"
+                                  state={!!errors.eventSerie?.performanceType ? 'error' : undefined}
+                                  stateRelatedMessage={errors?.eventSerie?.performanceType?.message}
+                                  nativeSelectProps={{
+                                    ...register('eventSerie.performanceType'),
+                                    defaultValue: control._defaultValues.eventSerie?.performanceType || '',
                                   }}
+                                  options={[
+                                    ...PerformanceTypeSchema.options.map((performanceType) => {
+                                      return {
+                                        label: t(`model.performanceType.enum.${performanceType}`),
+                                        value: performanceType,
+                                      };
+                                    }),
+                                  ].sort((a, b) => a.label.localeCompare(b.label))}
                                 />
                               </div>
                             </div>
-                          )}
-                        </div>
-                        <div className={fr.cx('fr-grid-row')}>
-                          <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Controller
-                                control={control}
-                                name="eventSerie.producer"
-                                defaultValue={null}
-                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                                  return (
-                                    <CompanyField
-                                      value={value}
-                                      defaultSuggestions={declarationWrapper.placeholder.producer}
-                                      inputProps={{
-                                        label: 'Raison sociale du producteur',
-                                        nativeInputProps: {
-                                          placeholder: 'Recherche',
-                                        },
-                                      }}
-                                      onChange={(newValue) => {
-                                        onChange(newValue);
-                                      }}
-                                      onBlur={onBlur}
-                                      errorMessage={error?.message}
-                                    />
-                                  );
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Select
-                                label="Genre"
-                                state={!!errors.eventSerie?.performanceType ? 'error' : undefined}
-                                stateRelatedMessage={errors?.eventSerie?.performanceType?.message}
-                                nativeSelectProps={{
-                                  ...register('eventSerie.performanceType'),
-                                  defaultValue: control._defaultValues.eventSerie?.performanceType || '',
-                                }}
-                                options={[
-                                  ...PerformanceTypeSchema.options.map((performanceType) => {
-                                    return {
-                                      label: t(`model.performanceType.enum.${performanceType}`),
-                                      value: performanceType,
-                                    };
-                                  }),
-                                ].sort((a, b) => a.label.localeCompare(b.label))}
-                              />
-                            </div>
-                          </div>
-                          {/*
+                            {/*
                           <div className={fr.cx('fr-col-12', 'fr-col-md-7')}>
                             <div className={fr.cx('fr-fieldset__element')}>
                               <Input
@@ -658,8 +677,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             </div>
                           </div>
                            */}
-                        </div>
-                        {/*
+                          </div>
+                          {/*
                         <div className={fr.cx('fr-grid-row')}>
                           <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
                             <div className={fr.cx('fr-fieldset__element')}>
@@ -715,359 +734,407 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           </div>
                         </div>
                         */}
-                        <div className={fr.cx('fr-grid-row')}>
-                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Controller
-                                control={control}
-                                name="eventSerie.expensesExcludingTaxes"
-                                render={({ field, fieldState: { error } }) => {
-                                  return <AmountInput {...field} label="Dépenses globales HT" signed={false} errorMessage={error?.message} />;
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Controller
-                                control={control}
-                                name="eventSerie.expensesIncludingTaxes"
-                                render={({ field, fieldState: { error } }) => {
-                                  return <AmountInput {...field} label="Dépenses globales TTC" signed={false} errorMessage={error?.message} />;
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Controller
-                                control={control}
-                                name="eventSerie.introductionFeesExpensesExcludingTaxes"
-                                render={({ field, fieldState: { error } }) => {
-                                  return <AmountInput {...field} label="Frais d'approche HT" signed={false} errorMessage={error?.message} />;
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Controller
-                                control={control}
-                                name="eventSerie.introductionFeesExpensesIncludingTaxes"
-                                render={({ field, fieldState: { error } }) => {
-                                  return <AmountInput {...field} label="Frais d'approche TTC" signed={false} errorMessage={error?.message} />;
-                                }}
-                              />
-                            </div>
-                          </div>
-                          {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
-                            <>
-                              <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                                <div className={fr.cx('fr-fieldset__element')}>
-                                  <Controller
-                                    control={control}
-                                    name="eventSerie.circusSpecificExpensesExcludingTaxes"
-                                    render={({ field, fieldState: { error } }) => {
-                                      return (
-                                        <AmountInput {...field} label="Frais spécifiques au cirque HT" signed={false} errorMessage={error?.message} />
-                                      );
-                                    }}
-                                  />
-                                </div>
+                          <div className={fr.cx('fr-grid-row')}>
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="eventSerie.expensesExcludingTaxes"
+                                  render={({ field, fieldState: { error } }) => {
+                                    return <AmountInput {...field} label="Dépenses globales HT" signed={false} errorMessage={error?.message} />;
+                                  }}
+                                />
                               </div>
-                              <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                                <div className={fr.cx('fr-fieldset__element')}>
-                                  <Controller
-                                    control={control}
-                                    name="eventSerie.circusSpecificExpensesIncludingTaxes"
-                                    render={({ field, fieldState: { error } }) => {
-                                      return (
-                                        <AmountInput
-                                          {...field}
-                                          label="Frais spécifiques au cirque TTC"
-                                          signed={false}
-                                          errorMessage={error?.message}
-                                        />
-                                      );
-                                    }}
-                                  />
-                                </div>
+                            </div>
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="eventSerie.expensesIncludingTaxes"
+                                  render={({ field, fieldState: { error } }) => {
+                                    return <AmountInput {...field} label="Dépenses globales TTC" signed={false} errorMessage={error?.message} />;
+                                  }}
+                                />
                               </div>
-                            </>
-                          )}
-                        </div>
-                        <div className={fr.cx('fr-fieldset__element')}>
-                          <hr className={fr.cx('fr-my-3v')} />
-                        </div>
-                        <div className={fr.cx('fr-grid-row')}>
-                          <div className={fr.cx('fr-col-12')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <p className={fr.cx('fr-mb-8v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
-                                Ces informations sont reportées sur toutes les séances, vous pouvez toujours les modifier pour chaque séance.
-                              </p>
                             </div>
-                          </div>
-                          <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Select
-                                label="Audience"
-                                state={!!errors.eventSerie?.audience ? 'error' : undefined}
-                                stateRelatedMessage={errors?.eventSerie?.audience?.message}
-                                nativeSelectProps={{
-                                  ...register('eventSerie.audience'),
-                                  defaultValue: control._defaultValues.eventSerie?.audience || '',
-                                }}
-                                options={[
-                                  ...AudienceSchema.options.map((audience) => {
-                                    return {
-                                      label: t(`model.audience.enum.${audience}`),
-                                      value: audience,
-                                    };
-                                  }),
-                                ].sort((a, b) => a.label.localeCompare(b.label))}
-                              />
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="eventSerie.introductionFeesExpensesExcludingTaxes"
+                                  render={({ field, fieldState: { error } }) => {
+                                    return <AmountInput {...field} label="Frais d'approche HT" signed={false} errorMessage={error?.message} />;
+                                  }}
+                                />
+                              </div>
                             </div>
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="eventSerie.introductionFeesExpensesIncludingTaxes"
+                                  render={({ field, fieldState: { error } }) => {
+                                    return <AmountInput {...field} label="Frais d'approche TTC" signed={false} errorMessage={error?.message} />;
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
+                              <>
+                                <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                                  <div className={fr.cx('fr-fieldset__element')}>
+                                    <Controller
+                                      control={control}
+                                      name="eventSerie.circusSpecificExpensesExcludingTaxes"
+                                      render={({ field, fieldState: { error } }) => {
+                                        return (
+                                          <AmountInput
+                                            {...field}
+                                            label="Frais spécifiques au cirque HT"
+                                            signed={false}
+                                            errorMessage={error?.message}
+                                          />
+                                        );
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                                <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                                  <div className={fr.cx('fr-fieldset__element')}>
+                                    <Controller
+                                      control={control}
+                                      name="eventSerie.circusSpecificExpensesIncludingTaxes"
+                                      render={({ field, fieldState: { error } }) => {
+                                        return (
+                                          <AmountInput
+                                            {...field}
+                                            label="Frais spécifiques au cirque TTC"
+                                            signed={false}
+                                            errorMessage={error?.message}
+                                          />
+                                        );
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              </>
+                            )}
                           </div>
-                          <div className={fr.cx('fr-col-4', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Select
-                                label="Taux de TVA"
-                                state={!!errors.eventSerie?.ticketingRevenueTaxRate ? 'error' : undefined}
-                                stateRelatedMessage={errors?.eventSerie?.ticketingRevenueTaxRate?.message}
-                                nativeSelectProps={{
-                                  ...register('eventSerie.ticketingRevenueTaxRate', {
-                                    valueAsNumber: true,
-                                  }),
-                                  defaultValue: (control._defaultValues.eventSerie?.ticketingRevenueTaxRate ?? currentTaxRates[0]).toString(),
-                                }}
-                                options={currentTaxRates.map((taxRate) => {
-                                  return {
-                                    label: t('number.percent', {
-                                      percentage: taxRate,
+                          <div className={fr.cx('fr-fieldset__element')}>
+                            <hr className={fr.cx('fr-my-3v')} />
+                          </div>
+                          <div className={fr.cx('fr-grid-row')}>
+                            <div className={fr.cx('fr-col-12')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <p className={fr.cx('fr-mb-8v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+                                  Ces informations sont reportées sur toutes les séances, vous pouvez toujours les modifier pour chaque séance.
+                                </p>
+                              </div>
+                            </div>
+                            <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Select
+                                  label="Audience"
+                                  state={!!errors.eventSerie?.audience ? 'error' : undefined}
+                                  stateRelatedMessage={errors?.eventSerie?.audience?.message}
+                                  nativeSelectProps={{
+                                    ...register('eventSerie.audience'),
+                                    defaultValue: control._defaultValues.eventSerie?.audience || '',
+                                  }}
+                                  options={[
+                                    ...AudienceSchema.options.map((audience) => {
+                                      return {
+                                        label: t(`model.audience.enum.${audience}`),
+                                        value: audience,
+                                      };
                                     }),
-                                    value: taxRate.toString(),
+                                  ].sort((a, b) => a.label.localeCompare(b.label))}
+                                />
+                              </div>
+                            </div>
+                            <div className={fr.cx('fr-col-4', 'fr-col-md-3')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Select
+                                  label="Taux de TVA"
+                                  state={!!errors.eventSerie?.ticketingRevenueTaxRate ? 'error' : undefined}
+                                  stateRelatedMessage={errors?.eventSerie?.ticketingRevenueTaxRate?.message}
+                                  nativeSelectProps={{
+                                    ...register('eventSerie.ticketingRevenueTaxRate', {
+                                      valueAsNumber: true,
+                                    }),
+                                    defaultValue: (control._defaultValues.eventSerie?.ticketingRevenueTaxRate ?? currentTaxRates[0]).toString(),
+                                  }}
+                                  options={currentTaxRates.map((taxRate) => {
+                                    return {
+                                      label: t('number.percent', {
+                                        percentage: taxRate,
+                                      }),
+                                      value: taxRate.toString(),
+                                    };
+                                  })}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-grid-row')}>
+                            <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="eventSerie.place.name"
+                                  defaultValue={control._defaultValues.eventSerie?.place?.name ?? null}
+                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                    return (
+                                      <Autocomplete
+                                        disablePortal
+                                        options={declarationWrapper.placeholder.place}
+                                        value={value}
+                                        renderInput={({ InputProps, disabled, id, inputProps }) => {
+                                          return (
+                                            <Input
+                                              ref={InputProps.ref}
+                                              label="Intitulé du lieu"
+                                              id={id}
+                                              disabled={disabled}
+                                              state={!!error ? 'error' : undefined}
+                                              stateRelatedMessage={error?.message}
+                                              nativeInputProps={{
+                                                ...inputProps,
+                                                placeholder: 'Saisie ou recherche',
+                                              }}
+                                            />
+                                          );
+                                        }}
+                                        renderOption={(props, option) => {
+                                          const { key, ...otherProps } = props;
+
+                                          return (
+                                            <li key={key} {...otherProps} data-sentry-mask>
+                                              <span className={fr.cx('fr-text--bold')}>{option.name}</span>
+                                              &nbsp;
+                                              <span style={{ fontStyle: 'italic' }}>
+                                                (
+                                                {addressFormatter
+                                                  .format({
+                                                    street: option.address.street,
+                                                    city: option.address.city,
+                                                    postcode: option.address.postalCode,
+                                                    state: option.address.subdivision,
+                                                    countryCode: option.address.countryCode,
+                                                  })
+                                                  .trim()}
+                                                )
+                                              </span>
+                                            </li>
+                                          );
+                                        }}
+                                        isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // TODO
+                                        getOptionLabel={(option) => {
+                                          if (typeof option === 'string') {
+                                            // Value selected with enter, right from the input
+                                            return option;
+                                          } else {
+                                            return option.name;
+                                          }
+                                        }}
+                                        onInputChange={(event: React.SyntheticEvent<Element, Event>, newValue: string) => {
+                                          setValue('eventSerie.place.name', newValue, { shouldDirty: true });
+                                        }}
+                                        onChange={(event, newValue) => {
+                                          if (newValue) {
+                                            if (typeof newValue === 'string') {
+                                              onChange(newValue);
+                                            } else {
+                                              onChange(newValue.name);
+
+                                              // Override the current address used
+                                              setValue('eventSerie.place.address', newValue.address, { shouldDirty: true });
+                                            }
+                                          } else {
+                                            setValue('eventSerie.place.name', null, { shouldDirty: true });
+                                          }
+                                        }}
+                                        onBlur={onBlur}
+                                        freeSolo
+                                        selectOnFocus
+                                        handleHomeEndKeys
+                                        fullWidth
+                                      />
+                                    );
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <div className={fr.cx('fr-col-8', 'fr-col-md-5')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="eventSerie.place.address"
+                                  defaultValue={null}
+                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                    return (
+                                      <AddressField
+                                        value={value}
+                                        inputProps={{
+                                          label: 'Adresse du lieu',
+                                          nativeInputProps: {
+                                            placeholder: 'Recherche',
+                                          },
+                                        }}
+                                        onChange={(newValue) => {
+                                          onChange(newValue);
+                                        }}
+                                        onBlur={onBlur}
+                                        errorMessage={error?.message}
+                                      />
+                                    );
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="eventSerie.placeCapacity"
+                                  defaultValue={control._defaultValues.eventSerie?.placeCapacity ?? 0}
+                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                    return (
+                                      <Autocomplete
+                                        options={declarationWrapper.placeholder.placeCapacity}
+                                        freeSolo
+                                        onBlur={onBlur}
+                                        value={value ?? 0}
+                                        onInputChange={(event, newValue, reason) => {
+                                          onChange(parseInt(newValue, 10)); // Needed since underlying it's managing string only
+                                        }}
+                                        renderInput={({ InputProps, disabled, id, inputProps }) => {
+                                          return (
+                                            <Input
+                                              ref={InputProps.ref}
+                                              label="Jauge"
+                                              id={id}
+                                              disabled={disabled}
+                                              state={!!error ? 'error' : undefined}
+                                              stateRelatedMessage={error?.message}
+                                              nativeInputProps={{
+                                                ...inputProps,
+                                                type: 'number',
+                                                placeholder: '0',
+                                                step: 1,
+                                                min: 0,
+                                                onWheel: (event) => {
+                                                  // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
+
+                                                  // `event.currentTarget` is a callable type but is targetting the MUI element
+                                                  // whereas `event.target` targets the input element but does not have the callable type, so casting
+                                                  (event.target as HTMLInputElement).blur();
+                                                },
+                                              }}
+                                            />
+                                          );
+                                        }}
+                                        renderOption={(props, option) => {
+                                          // Just needed for the Sentry mask
+                                          return (
+                                            <li {...props} key={option} data-sentry-mask>
+                                              {option}
+                                            </li>
+                                          );
+                                        }}
+                                        getOptionLabel={(option) => {
+                                          if (typeof option === 'string') {
+                                            // Value selected with enter, right from the input
+                                            return option;
+                                          } else {
+                                            return option.toString();
+                                          }
+                                        }}
+                                      />
+                                    );
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </fieldset>
+                      <fieldset className={fr.cx('fr-fieldset')}>
+                        <div className={fr.cx('fr-col-12')}>
+                          <div className={fr.cx('fr-fieldset__element')}>
+                            <hr className={fr.cx('fr-my-3v')} />
+                          </div>
+                          <EventsFieldsets
+                            control={control}
+                            register={register}
+                            setValue={setValue}
+                            watch={watch}
+                            trigger={trigger}
+                            placeholder={declarationWrapper.placeholder}
+                            errors={errors.events}
+                            readonly={false}
+                          />
+                        </div>
+                      </fieldset>
+                      <declarationTypesModal.Component title="Paramètres de déclaration">
+                        <Controller
+                          control={control}
+                          name="eventSerie.expectedDeclarationTypes"
+                          render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => {
+                            return (
+                              <Checkbox
+                                legend={
+                                  <>
+                                    Auprès de quels <span className={fr.cx('fr-text--bold')}>organismes devez-vous déclarer ?</span>
+                                  </>
+                                }
+                                state={!!error ? 'error' : undefined}
+                                stateRelatedMessage={error?.message}
+                                options={DeclarationTypeSchema.options.map((declarationType) => {
+                                  return {
+                                    label: t(`model.declarationType.enum.${declarationType}`),
+                                    nativeInputProps: {
+                                      name: `checkbox-${declarationType}`,
+                                      value: declarationType,
+                                      defaultChecked: value.includes(declarationType),
+                                      onChange: (event) => {
+                                        const newSelectedDeclarationsTypes = new Set<DeclarationTypeSchemaType>(value);
+
+                                        if (event.target.checked) {
+                                          newSelectedDeclarationsTypes.add(declarationType);
+                                        } else {
+                                          newSelectedDeclarationsTypes.delete(declarationType);
+                                        }
+
+                                        onChange([...newSelectedDeclarationsTypes.values()]);
+                                      },
+                                      onBlur: onBlur,
+                                    },
                                   };
                                 })}
+                                orientation="vertical"
                               />
-                            </div>
-                          </div>
-                        </div>
-                        <div className={fr.cx('fr-grid-row')}>
-                          <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Controller
-                                control={control}
-                                name="eventSerie.place.name"
-                                defaultValue={control._defaultValues.eventSerie?.place?.name ?? null}
-                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                                  return (
-                                    <Autocomplete
-                                      disablePortal
-                                      options={declarationWrapper.placeholder.place}
-                                      value={value}
-                                      renderInput={({ InputProps, disabled, id, inputProps }) => {
-                                        return (
-                                          <Input
-                                            ref={InputProps.ref}
-                                            label="Intitulé du lieu"
-                                            id={id}
-                                            disabled={disabled}
-                                            state={!!error ? 'error' : undefined}
-                                            stateRelatedMessage={error?.message}
-                                            nativeInputProps={{
-                                              ...inputProps,
-                                              placeholder: 'Saisie ou recherche',
-                                            }}
-                                          />
-                                        );
-                                      }}
-                                      renderOption={(props, option) => {
-                                        const { key, ...otherProps } = props;
-
-                                        return (
-                                          <li key={key} {...otherProps} data-sentry-mask>
-                                            <span className={fr.cx('fr-text--bold')}>{option.name}</span>
-                                            &nbsp;
-                                            <span style={{ fontStyle: 'italic' }}>
-                                              (
-                                              {addressFormatter
-                                                .format({
-                                                  street: option.address.street,
-                                                  city: option.address.city,
-                                                  postcode: option.address.postalCode,
-                                                  state: option.address.subdivision,
-                                                  countryCode: option.address.countryCode,
-                                                })
-                                                .trim()}
-                                              )
-                                            </span>
-                                          </li>
-                                        );
-                                      }}
-                                      isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // TODO
-                                      getOptionLabel={(option) => {
-                                        if (typeof option === 'string') {
-                                          // Value selected with enter, right from the input
-                                          return option;
-                                        } else {
-                                          return option.name;
-                                        }
-                                      }}
-                                      onInputChange={(event: React.SyntheticEvent<Element, Event>, newValue: string) => {
-                                        setValue('eventSerie.place.name', newValue, { shouldDirty: true });
-                                      }}
-                                      onChange={(event, newValue) => {
-                                        if (newValue) {
-                                          if (typeof newValue === 'string') {
-                                            onChange(newValue);
-                                          } else {
-                                            onChange(newValue.name);
-
-                                            // Override the current address used
-                                            setValue('eventSerie.place.address', newValue.address, { shouldDirty: true });
-                                          }
-                                        } else {
-                                          setValue('eventSerie.place.name', null, { shouldDirty: true });
-                                        }
-                                      }}
-                                      onBlur={onBlur}
-                                      freeSolo
-                                      selectOnFocus
-                                      handleHomeEndKeys
-                                      fullWidth
-                                    />
-                                  );
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className={fr.cx('fr-col-8', 'fr-col-md-5')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Controller
-                                control={control}
-                                name="eventSerie.place.address"
-                                defaultValue={null}
-                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                                  return (
-                                    <AddressField
-                                      value={value}
-                                      inputProps={{
-                                        label: 'Adresse du lieu',
-                                        nativeInputProps: {
-                                          placeholder: 'Recherche',
-                                        },
-                                      }}
-                                      onChange={(newValue) => {
-                                        onChange(newValue);
-                                      }}
-                                      onBlur={onBlur}
-                                      errorMessage={error?.message}
-                                    />
-                                  );
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Controller
-                                control={control}
-                                name="eventSerie.placeCapacity"
-                                defaultValue={control._defaultValues.eventSerie?.placeCapacity ?? 0}
-                                render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-                                  return (
-                                    <Autocomplete
-                                      options={declarationWrapper.placeholder.placeCapacity}
-                                      freeSolo
-                                      onBlur={onBlur}
-                                      value={value ?? 0}
-                                      onInputChange={(event, newValue, reason) => {
-                                        onChange(parseInt(newValue, 10)); // Needed since underlying it's managing string only
-                                      }}
-                                      renderInput={({ InputProps, disabled, id, inputProps }) => {
-                                        return (
-                                          <Input
-                                            ref={InputProps.ref}
-                                            label="Jauge"
-                                            id={id}
-                                            disabled={disabled}
-                                            state={!!error ? 'error' : undefined}
-                                            stateRelatedMessage={error?.message}
-                                            nativeInputProps={{
-                                              ...inputProps,
-                                              type: 'number',
-                                              placeholder: '0',
-                                              step: 1,
-                                              min: 0,
-                                              onWheel: (event) => {
-                                                // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
-
-                                                // `event.currentTarget` is a callable type but is targetting the MUI element
-                                                // whereas `event.target` targets the input element but does not have the callable type, so casting
-                                                (event.target as HTMLInputElement).blur();
-                                              },
-                                            }}
-                                          />
-                                        );
-                                      }}
-                                      renderOption={(props, option) => {
-                                        // Just needed for the Sentry mask
-                                        return (
-                                          <li {...props} key={option} data-sentry-mask>
-                                            {option}
-                                          </li>
-                                        );
-                                      }}
-                                      getOptionLabel={(option) => {
-                                        if (typeof option === 'string') {
-                                          // Value selected with enter, right from the input
-                                          return option;
-                                        } else {
-                                          return option.toString();
-                                        }
-                                      }}
-                                    />
-                                  );
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </fieldset>
-                    <fieldset className={fr.cx('fr-fieldset')}>
-                      <div className={fr.cx('fr-col-12')}>
-                        <div className={fr.cx('fr-fieldset__element')}>
-                          <hr className={fr.cx('fr-my-3v')} />
-                        </div>
-                        <EventsFieldsets
-                          control={control}
-                          register={register}
-                          setValue={setValue}
-                          watch={watch}
-                          trigger={trigger}
-                          placeholder={declarationWrapper.placeholder}
-                          errors={errors.events}
-                          readonly={false}
+                            );
+                          }}
                         />
-                      </div>
-                    </fieldset>
-                  </div>
-                </BaseForm>
+                      </declarationTypesModal.Component>
+                    </div>
+                  </BaseForm>
+                </div>
               </div>
+            </>
+          ) : (
+            <div className={fr.cx('fr-col-12')}>
+              Aucune représentation n&apos;est associée à ce spectacle, il n&apos;y a donc pas de déclaration à faire.
             </div>
-          </>
-        ) : (
-          <div className={fr.cx('fr-col-12')}>
-            Aucune représentation n&apos;est associée à ce spectacle, il n&apos;y a donc pas de déclaration à faire.
-          </div>
+          )}
+        </div>
+        {!!snackbarAlert && (
+          <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={4000}>
+            {snackbarAlert}
+          </Snackbar>
         )}
       </div>
-      {!!snackbarAlert && (
-        <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={4000}>
-          {snackbarAlert}
-        </Snackbar>
-      )}
     </div>
   );
 }
