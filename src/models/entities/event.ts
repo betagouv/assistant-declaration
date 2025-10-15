@@ -41,8 +41,11 @@ export const StricterEventSerieSchema = z.object({
   placeCapacity: z.number().int().nonnegative(),
   audience: AudienceSchema,
   ticketingRevenueTaxRate: z.number().nonnegative(),
+  expensesIncludingTaxes: z.number().nonnegative(),
   expensesExcludingTaxes: z.number().nonnegative(),
+  introductionFeesExpensesIncludingTaxes: z.number().nonnegative(),
   introductionFeesExpensesExcludingTaxes: z.number().nonnegative(),
+  circusSpecificExpensesIncludingTaxes: z.number().nonnegative(),
   circusSpecificExpensesExcludingTaxes: z.number().nonnegative(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -50,25 +53,47 @@ export const StricterEventSerieSchema = z.object({
 
 export function assertValidExpenses(
   data: {
+    expensesIncludingTaxes: number;
     expensesExcludingTaxes: number;
+    introductionFeesExpensesIncludingTaxes: number;
     introductionFeesExpensesExcludingTaxes: number;
+    circusSpecificExpensesIncludingTaxes?: number | null;
     circusSpecificExpensesExcludingTaxes?: number | null;
   },
   ctx: z.RefinementCtx
 ) {
-  let partialExpenses = data.introductionFeesExpensesExcludingTaxes;
+  // Excluding taxes
+  let partialExpensesExcludingTaxes = data.introductionFeesExpensesExcludingTaxes;
 
   if (data.circusSpecificExpensesExcludingTaxes !== undefined && data.circusSpecificExpensesExcludingTaxes !== null) {
-    partialExpenses += data.circusSpecificExpensesExcludingTaxes;
+    partialExpensesExcludingTaxes += data.circusSpecificExpensesExcludingTaxes;
   }
 
-  if (data.expensesExcludingTaxes < partialExpenses) {
+  if (data.expensesExcludingTaxes < partialExpensesExcludingTaxes) {
     ctx.issues.push({
       ...customErrorToZodIssue(eventSeriePartialExpensesGreatherThanTotalError),
       input: {
         expensesExcludingTaxes: data.expensesExcludingTaxes,
         introductionFeesExpensesExcludingTaxes: data.introductionFeesExpensesExcludingTaxes,
         circusSpecificExpensesExcludingTaxes: data.circusSpecificExpensesExcludingTaxes,
+      },
+    });
+  }
+
+  // Including taxes
+  let partialExpensesIncludingTaxes = data.introductionFeesExpensesIncludingTaxes;
+
+  if (data.circusSpecificExpensesIncludingTaxes !== undefined && data.circusSpecificExpensesIncludingTaxes !== null) {
+    partialExpensesIncludingTaxes += data.circusSpecificExpensesIncludingTaxes;
+  }
+
+  if (data.expensesIncludingTaxes < partialExpensesIncludingTaxes) {
+    ctx.issues.push({
+      ...customErrorToZodIssue(eventSeriePartialExpensesGreatherThanTotalError),
+      input: {
+        expensesIncludingTaxes: data.expensesIncludingTaxes,
+        introductionFeesExpensesIncludingTaxes: data.introductionFeesExpensesIncludingTaxes,
+        circusSpecificExpensesIncludingTaxes: data.circusSpecificExpensesIncludingTaxes,
       },
     });
   }
@@ -81,6 +106,7 @@ export const EventSerieSchema = applyTypedParsers(
     performanceType: StricterEventSerieSchema.shape.performanceType.nullable(),
     placeId: StricterEventSerieSchema.shape.placeId.nullable(),
     placeCapacity: StricterEventSerieSchema.shape.placeCapacity.nullable(),
+    circusSpecificExpensesIncludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesIncludingTaxes.nullable(),
     circusSpecificExpensesExcludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesExcludingTaxes.nullable(),
   })
     .superRefine((data, ctx) => {

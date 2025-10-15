@@ -244,8 +244,11 @@ model EventSerie {
   placeCapacity                          Int?
   audience                               Audience @default(ALL)
   ticketingRevenueTaxRate                Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
+  expensesIncludingTaxes                 Decimal  @db.Decimal(10, 2)
   expensesExcludingTaxes                 Decimal  @db.Decimal(10, 2)
+  introductionFeesExpensesIncludingTaxes Decimal  @db.Decimal(10, 2)
   introductionFeesExpensesExcludingTaxes Decimal  @db.Decimal(10, 2)
+  circusSpecificExpensesIncludingTaxes   Decimal? @db.Decimal(10, 2)
   circusSpecificExpensesExcludingTaxes   Decimal? @db.Decimal(10, 2)
 
   createdAt DateTime @default(now())

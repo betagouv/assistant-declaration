@@ -21,7 +21,9 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
     placeCapacity: true,
     audience: true,
     ticketingRevenueTaxRate: true,
+    expensesIncludingTaxes: true,
     expensesExcludingTaxes: true,
+    introductionFeesExpensesIncludingTaxes: true,
     introductionFeesExpensesExcludingTaxes: true,
   })
     .extend({

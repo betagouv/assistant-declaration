@@ -92,8 +92,12 @@ export function eventSeriePrismaToModel(eventSerie: Omit<EventSerie, 'lastManual
     placeCapacity: eventSerie.placeCapacity,
     audience: eventSerie.audience,
     ticketingRevenueTaxRate: eventSerie.ticketingRevenueTaxRate.toNumber(),
+    expensesIncludingTaxes: eventSerie.expensesIncludingTaxes.toNumber(),
     expensesExcludingTaxes: eventSerie.expensesExcludingTaxes.toNumber(),
+    introductionFeesExpensesIncludingTaxes: eventSerie.introductionFeesExpensesIncludingTaxes.toNumber(),
     introductionFeesExpensesExcludingTaxes: eventSerie.introductionFeesExpensesExcludingTaxes.toNumber(),
+    circusSpecificExpensesIncludingTaxes:
+      eventSerie.circusSpecificExpensesIncludingTaxes !== null ? eventSerie.circusSpecificExpensesIncludingTaxes.toNumber() : null,
     circusSpecificExpensesExcludingTaxes:
       eventSerie.circusSpecificExpensesExcludingTaxes !== null ? eventSerie.circusSpecificExpensesExcludingTaxes.toNumber() : null,
     createdAt: eventSerie.createdAt,

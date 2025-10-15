@@ -29,8 +29,11 @@ export const DeclarationSchema = applyTypedParsers(
         placeCapacity: true,
         audience: true,
         ticketingRevenueTaxRate: true,
+        expensesIncludingTaxes: true,
         expensesExcludingTaxes: true,
+        introductionFeesExpensesIncludingTaxes: true,
         introductionFeesExpensesExcludingTaxes: true,
+        circusSpecificExpensesIncludingTaxes: true,
         circusSpecificExpensesExcludingTaxes: true,
       }).safeExtend({
         place: PlaceSchema.nullable(),

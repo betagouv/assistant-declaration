@@ -148,18 +148,38 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
             <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEventsKeyFigures.ticketingRevenueExcludingTaxes }))}</Text>
           </View>
           <View style={styles.gridItem}>
+            <Text style={styles.label}>Recette billetterie TTC</Text>
+            <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: flattenEventsKeyFigures.ticketingRevenueIncludingTaxes }))}</Text>
+          </View>
+          <View style={styles.gridItem}>
             <Text style={styles.label}>Recette hors-billetterie HT</Text>
             <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: extraKeyFigures.nonTicketingRevenueExcludingTaxes }))}</Text>
+          </View>
+          <View style={styles.gridItem}>
+            <Text style={styles.label}>Recette hors-billetterie TTC</Text>
+            <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: extraKeyFigures.nonTicketingRevenueIncludingTaxes }))}</Text>
           </View>
           <View style={styles.gridItem}>
             <Text style={styles.label}>Dépenses totales HT</Text>
             <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: props.sacemDeclaration.eventSerie.expensesExcludingTaxes }))}</Text>
           </View>
           <View style={styles.gridItem}>
+            <Text style={styles.label}>Dépenses totales TTC</Text>
+            <Text>{escapeFormattedNumberForPdf(t('currency.amount', { amount: props.sacemDeclaration.eventSerie.expensesIncludingTaxes }))}</Text>
+          </View>
+          <View style={styles.gridItem}>
             <Text style={styles.label}>Frais d&apos;approche HT</Text>
             <Text>
               {escapeFormattedNumberForPdf(
                 t('currency.amount', { amount: props.sacemDeclaration.eventSerie.introductionFeesExpensesExcludingTaxes })
+              )}
+            </Text>
+          </View>
+          <View style={styles.gridItem}>
+            <Text style={styles.label}>Frais d&apos;approche TTC</Text>
+            <Text>
+              {escapeFormattedNumberForPdf(
+                t('currency.amount', { amount: props.sacemDeclaration.eventSerie.introductionFeesExpensesIncludingTaxes })
               )}
             </Text>
           </View>

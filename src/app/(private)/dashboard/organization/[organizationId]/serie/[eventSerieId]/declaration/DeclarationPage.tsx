@@ -118,8 +118,11 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           placeCapacity: result.declaration.eventSerie.placeCapacity,
           audience: result.declaration.eventSerie.audience,
           ticketingRevenueTaxRate: result.declaration.eventSerie.ticketingRevenueTaxRate,
+          expensesIncludingTaxes: result.declaration.eventSerie.expensesIncludingTaxes,
           expensesExcludingTaxes: result.declaration.eventSerie.expensesExcludingTaxes,
+          introductionFeesExpensesIncludingTaxes: result.declaration.eventSerie.introductionFeesExpensesIncludingTaxes,
           introductionFeesExpensesExcludingTaxes: result.declaration.eventSerie.introductionFeesExpensesExcludingTaxes,
+          circusSpecificExpensesIncludingTaxes: result.declaration.eventSerie.circusSpecificExpensesIncludingTaxes,
           circusSpecificExpensesExcludingTaxes: result.declaration.eventSerie.circusSpecificExpensesExcludingTaxes,
         },
         events: result.declaration.events.map((event) => {
@@ -205,9 +208,13 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             placeCapacity: getDeclaration.data.declarationWrapper.declaration.eventSerie.placeCapacity,
             audience: getDeclaration.data.declarationWrapper.declaration.eventSerie.audience,
             ticketingRevenueTaxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.ticketingRevenueTaxRate,
+            expensesIncludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expensesIncludingTaxes,
             expensesExcludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expensesExcludingTaxes,
+            introductionFeesExpensesIncludingTaxes:
+              getDeclaration.data.declarationWrapper.declaration.eventSerie.introductionFeesExpensesIncludingTaxes,
             introductionFeesExpensesExcludingTaxes:
               getDeclaration.data.declarationWrapper.declaration.eventSerie.introductionFeesExpensesExcludingTaxes,
+            circusSpecificExpensesIncludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesIncludingTaxes,
             circusSpecificExpensesExcludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesExcludingTaxes,
           },
           events: getDeclaration.data.declarationWrapper.declaration.events.map((event) => {
@@ -718,6 +725,17 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             <div className={fr.cx('fr-fieldset__element')}>
                               <Controller
                                 control={control}
+                                name="eventSerie.expensesIncludingTaxes"
+                                render={({ field, fieldState: { error } }) => {
+                                  return <AmountInput {...field} label="Dépenses globales TTC" signed={false} errorMessage={error?.message} />;
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Controller
+                                control={control}
                                 name="eventSerie.introductionFeesExpensesExcludingTaxes"
                                 render={({ field, fieldState: { error } }) => {
                                   return <AmountInput {...field} label="Frais d'approche HT" signed={false} errorMessage={error?.message} />;
@@ -725,20 +743,51 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               />
                             </div>
                           </div>
-                          {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
-                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                              <div className={fr.cx('fr-fieldset__element')}>
-                                <Controller
-                                  control={control}
-                                  name="eventSerie.circusSpecificExpensesExcludingTaxes"
-                                  render={({ field, fieldState: { error } }) => {
-                                    return (
-                                      <AmountInput {...field} label="Frais spécifiques au cirque HT" signed={false} errorMessage={error?.message} />
-                                    );
-                                  }}
-                                />
-                              </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Controller
+                                control={control}
+                                name="eventSerie.introductionFeesExpensesIncludingTaxes"
+                                render={({ field, fieldState: { error } }) => {
+                                  return <AmountInput {...field} label="Frais d'approche TTC" signed={false} errorMessage={error?.message} />;
+                                }}
+                              />
                             </div>
+                          </div>
+                          {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
+                            <>
+                              <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                                <div className={fr.cx('fr-fieldset__element')}>
+                                  <Controller
+                                    control={control}
+                                    name="eventSerie.circusSpecificExpensesExcludingTaxes"
+                                    render={({ field, fieldState: { error } }) => {
+                                      return (
+                                        <AmountInput {...field} label="Frais spécifiques au cirque HT" signed={false} errorMessage={error?.message} />
+                                      );
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                              <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                                <div className={fr.cx('fr-fieldset__element')}>
+                                  <Controller
+                                    control={control}
+                                    name="eventSerie.circusSpecificExpensesIncludingTaxes"
+                                    render={({ field, fieldState: { error } }) => {
+                                      return (
+                                        <AmountInput
+                                          {...field}
+                                          label="Frais spécifiques au cirque TTC"
+                                          signed={false}
+                                          errorMessage={error?.message}
+                                        />
+                                      );
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </>
                           )}
                         </div>
                         <div className={fr.cx('fr-fieldset__element')}>
@@ -747,7 +796,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                         <div className={fr.cx('fr-grid-row')}>
                           <div className={fr.cx('fr-col-12')}>
                             <div className={fr.cx('fr-fieldset__element')}>
-                              <p className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+                              <p className={fr.cx('fr-mb-8v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
                                 Ces informations sont reportées sur toutes les séances, vous pouvez toujours les modifier pour chaque séance.
                               </p>
                             </div>
