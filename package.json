@@ -177,7 +177,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^4.0.1",
+    "@chromatic-com/storybook": "^4.1.1",
     "@glen/jest-raw-loader": "^2.0.0",
     "@hey-api/openapi-ts": "^0.76.0",
     "@hookform/devtools": "^4.4.0",
@@ -223,7 +223,7 @@
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
     "@vueless/storybook-dark-mode": "^9.0.5",
-    "chromatic": "^11.20.0",
+    "chromatic": "^13.3.0",
     "concurrently": "^9.1.0",
     "copy-webpack-plugin": "^12.0.2",
     "cross-env": "^7.0.3",
