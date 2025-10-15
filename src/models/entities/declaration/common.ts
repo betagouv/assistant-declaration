@@ -31,10 +31,13 @@ export const DeclarationSchema = applyTypedParsers(
         ticketingRevenueTaxRate: true,
         expensesIncludingTaxes: true,
         expensesExcludingTaxes: true,
+        expensesTaxRate: true,
         introductionFeesExpensesIncludingTaxes: true,
         introductionFeesExpensesExcludingTaxes: true,
+        introductionFeesExpensesTaxRate: true,
         circusSpecificExpensesIncludingTaxes: true,
         circusSpecificExpensesExcludingTaxes: true,
+        circusSpecificExpensesTaxRate: true,
       }).safeExtend({
         place: PlaceSchema.nullable(),
       }),

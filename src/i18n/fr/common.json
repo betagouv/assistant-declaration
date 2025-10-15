@@ -154,6 +154,32 @@
         },
         "too_big": "il ne peut y avoir que {{maximum}} représentations au maximum"
       },
+      "eventSerie": {
+        "circusSpecificExpensesExcludingTaxes": {
+          "invalid_type": "le montant HT doit être un nombre entier",
+          "too_small": "le montant HT doit être supérieur à {{minimum}} euro"
+        },
+        "circusSpecificExpensesIncludingTaxes": {
+          "invalid_type": "le montant TTC doit être un nombre entier",
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
+        "expensesExcludingTaxes": {
+          "invalid_type": "le montant HT doit être un nombre entier",
+          "too_small": "le montant HT doit être supérieur à {{minimum}} euro"
+        },
+        "expensesIncludingTaxes": {
+          "invalid_type": "le montant TTC doit être un nombre entier",
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        },
+        "introductionFeesExcludingTaxes": {
+          "invalid_type": "le montant HT doit être un nombre entier",
+          "too_small": "le montant HT doit être supérieur à {{minimum}} euro"
+        },
+        "introductionFeesIncludingTaxes": {
+          "invalid_type": "le montant TTC doit être un nombre entier",
+          "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
+        }
+      },
       "firstname": {
         "too_small_one": "le prénom est requis"
       },

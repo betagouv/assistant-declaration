@@ -43,10 +43,13 @@ export const StricterEventSerieSchema = z.object({
   ticketingRevenueTaxRate: z.number().nonnegative(),
   expensesIncludingTaxes: z.number().nonnegative(),
   expensesExcludingTaxes: z.number().nonnegative(),
+  expensesTaxRate: z.number().nonnegative(),
   introductionFeesExpensesIncludingTaxes: z.number().nonnegative(),
   introductionFeesExpensesExcludingTaxes: z.number().nonnegative(),
+  introductionFeesExpensesTaxRate: z.number().nonnegative(),
   circusSpecificExpensesIncludingTaxes: z.number().nonnegative(),
   circusSpecificExpensesExcludingTaxes: z.number().nonnegative(),
+  circusSpecificExpensesTaxRate: z.number().nonnegative(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -106,8 +109,11 @@ export const EventSerieSchema = applyTypedParsers(
     performanceType: StricterEventSerieSchema.shape.performanceType.nullable(),
     placeId: StricterEventSerieSchema.shape.placeId.nullable(),
     placeCapacity: StricterEventSerieSchema.shape.placeCapacity.nullable(),
+    expensesTaxRate: StricterEventSerieSchema.shape.expensesTaxRate.nullable(),
+    introductionFeesExpensesTaxRate: StricterEventSerieSchema.shape.introductionFeesExpensesTaxRate.nullable(),
     circusSpecificExpensesIncludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesIncludingTaxes.nullable(),
     circusSpecificExpensesExcludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesExcludingTaxes.nullable(),
+    circusSpecificExpensesTaxRate: StricterEventSerieSchema.shape.circusSpecificExpensesTaxRate.nullable(),
   })
     .superRefine((data, ctx) => {
       // Note: we could also check each amounts pair are respecting "excluding taxes <= including taxes" but since declarative it seems it can be avoided

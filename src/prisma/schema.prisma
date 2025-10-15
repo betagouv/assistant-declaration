@@ -246,10 +246,13 @@ model EventSerie {
   ticketingRevenueTaxRate                Decimal  @default(0) @db.Decimal(5, 4) // [WARNING] We store floats like 0.2, not 20 for 20%
   expensesIncludingTaxes                 Decimal  @db.Decimal(10, 2)
   expensesExcludingTaxes                 Decimal  @db.Decimal(10, 2)
+  expensesTaxRate                        Decimal? @db.Decimal(10, 2) // Optional if both amounts directly set
   introductionFeesExpensesIncludingTaxes Decimal  @db.Decimal(10, 2)
   introductionFeesExpensesExcludingTaxes Decimal  @db.Decimal(10, 2)
+  introductionFeesExpensesTaxRate        Decimal? @db.Decimal(10, 2) // Optional if both amounts directly set
   circusSpecificExpensesIncludingTaxes   Decimal? @db.Decimal(10, 2)
   circusSpecificExpensesExcludingTaxes   Decimal? @db.Decimal(10, 2)
+  circusSpecificExpensesTaxRate          Decimal? @db.Decimal(10, 2) // Optional if both amounts directly set
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

@@ -120,10 +120,13 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           ticketingRevenueTaxRate: result.declaration.eventSerie.ticketingRevenueTaxRate,
           expensesIncludingTaxes: result.declaration.eventSerie.expensesIncludingTaxes,
           expensesExcludingTaxes: result.declaration.eventSerie.expensesExcludingTaxes,
+          expensesTaxRate: result.declaration.eventSerie.expensesTaxRate,
           introductionFeesExpensesIncludingTaxes: result.declaration.eventSerie.introductionFeesExpensesIncludingTaxes,
           introductionFeesExpensesExcludingTaxes: result.declaration.eventSerie.introductionFeesExpensesExcludingTaxes,
+          introductionFeesExpensesTaxRate: result.declaration.eventSerie.introductionFeesExpensesTaxRate,
           circusSpecificExpensesIncludingTaxes: result.declaration.eventSerie.circusSpecificExpensesIncludingTaxes,
           circusSpecificExpensesExcludingTaxes: result.declaration.eventSerie.circusSpecificExpensesExcludingTaxes,
+          circusSpecificExpensesTaxRate: result.declaration.eventSerie.circusSpecificExpensesTaxRate,
         },
         events: result.declaration.events.map((event) => {
           const tmpEventAddress = event.placeOverride?.address ?? result.declaration.eventSerie.place?.address ?? null;
@@ -210,12 +213,15 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             ticketingRevenueTaxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.ticketingRevenueTaxRate,
             expensesIncludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expensesIncludingTaxes,
             expensesExcludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.expensesExcludingTaxes,
+            expensesTaxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.expensesTaxRate,
             introductionFeesExpensesIncludingTaxes:
               getDeclaration.data.declarationWrapper.declaration.eventSerie.introductionFeesExpensesIncludingTaxes,
             introductionFeesExpensesExcludingTaxes:
               getDeclaration.data.declarationWrapper.declaration.eventSerie.introductionFeesExpensesExcludingTaxes,
+            introductionFeesExpensesTaxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.introductionFeesExpensesTaxRate,
             circusSpecificExpensesIncludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesIncludingTaxes,
             circusSpecificExpensesExcludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesExcludingTaxes,
+            circusSpecificExpensesTaxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesTaxRate,
           },
           events: getDeclaration.data.declarationWrapper.declaration.events.map((event) => {
             const tmpEventAddress =
