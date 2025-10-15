@@ -513,24 +513,10 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                       </div>
                     </fieldset>
                     <fieldset className={fr.cx('fr-fieldset')}>
-                      <h2 className={fr.cx('fr-h4')}>Représentations</h2>
-                      <div className={fr.cx('fr-col-12')}>
-                        <EventsFieldsets
-                          control={control}
-                          register={register}
-                          setValue={setValue}
-                          watch={watch}
-                          trigger={trigger}
-                          placeholder={declarationWrapper.placeholder}
-                          errors={errors.events}
-                          readonly={false}
-                        />
-                      </div>
-                    </fieldset>
-                    <fieldset className={fr.cx('fr-fieldset')}>
                       <h2 className={fr.cx('fr-h4')}>Général</h2>
                       <div className={fr.cx('fr-col-12')}>
                         <div className={fr.cx('fr-grid-row')}>
+                          {/*
                           <div className={fr.cx('fr-col-7', 'fr-col-md-5')}>
                             <div className={fr.cx('fr-fieldset__element')}>
                               <Input
@@ -553,8 +539,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               />
                             </div>
                           </div>
+                           */}
                           {watch('eventSerie.expectedDeclarationTypes').includes('SACEM') && (
-                            <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Controller
                                   control={control}
@@ -567,7 +554,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             </div>
                           )}
                           {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
-                            <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Controller
                                   control={control}
@@ -580,7 +567,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             </div>
                           )}
                         </div>
-                        <hr className={fr.cx('fr-my-3v')} />
                         <div className={fr.cx('fr-grid-row')}>
                           <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
                             <div className={fr.cx('fr-fieldset__element')}>
@@ -631,6 +617,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               />
                             </div>
                           </div>
+                          {/*
                           <div className={fr.cx('fr-col-12', 'fr-col-md-7')}>
                             <div className={fr.cx('fr-fieldset__element')}>
                               <Input
@@ -655,8 +642,155 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               />
                             </div>
                           </div>
+                           */}
+                        </div>
+                        {/*
+                        <div className={fr.cx('fr-grid-row')}>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="Recette HT"
+                                disabled
+                                nativeInputProps={{
+                                  value: t('currency.amount', {
+                                    amount: eventsKeyFigures.ticketingRevenueExcludingTaxes,
+                                  }),
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="Recette TTC"
+                                disabled
+                                nativeInputProps={{
+                                  value: t('currency.amount', {
+                                    amount: eventsKeyFigures.ticketingRevenueIncludingTaxes,
+                                  }),
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="Entrées payantes"
+                                disabled
+                                nativeInputProps={{
+                                  value: t('number.default', {
+                                    number: eventsKeyFigures.paidTickets,
+                                  }),
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Input
+                                label="Entrées gratuites"
+                                disabled
+                                nativeInputProps={{
+                                  value: t('number.default', {
+                                    number: eventsKeyFigures.freeTickets,
+                                  }),
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        */}
+                        <div className={fr.cx('fr-grid-row')}>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Controller
+                                control={control}
+                                name="eventSerie.expensesExcludingTaxes"
+                                render={({ field, fieldState: { error } }) => {
+                                  return <AmountInput {...field} label="Dépenses globales HT" signed={false} errorMessage={error?.message} />;
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Controller
+                                control={control}
+                                name="eventSerie.introductionFeesExpensesExcludingTaxes"
+                                render={({ field, fieldState: { error } }) => {
+                                  return <AmountInput {...field} label="Frais d'approche HT" signed={false} errorMessage={error?.message} />;
+                                }}
+                              />
+                            </div>
+                          </div>
+                          {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="eventSerie.circusSpecificExpensesExcludingTaxes"
+                                  render={({ field, fieldState: { error } }) => {
+                                    return (
+                                      <AmountInput {...field} label="Frais spécifiques au cirque HT" signed={false} errorMessage={error?.message} />
+                                    );
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                         <hr className={fr.cx('fr-my-3v')} />
+                        <div className={fr.cx('fr-grid-row')}>
+                          <div className={fr.cx('fr-col-12')}>
+                            <p style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+                              Ces informations sont reportées sur toutes les séances, vous pouvez toujours les modifier pour chaque séance.
+                            </p>
+                          </div>
+                          <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Select
+                                label="Audience"
+                                state={!!errors.eventSerie?.audience ? 'error' : undefined}
+                                stateRelatedMessage={errors?.eventSerie?.audience?.message}
+                                nativeSelectProps={{
+                                  ...register('eventSerie.audience'),
+                                  defaultValue: control._defaultValues.eventSerie?.audience || '',
+                                }}
+                                options={[
+                                  ...AudienceSchema.options.map((audience) => {
+                                    return {
+                                      label: t(`model.audience.enum.${audience}`),
+                                      value: audience,
+                                    };
+                                  }),
+                                ].sort((a, b) => a.label.localeCompare(b.label))}
+                              />
+                            </div>
+                          </div>
+                          <div className={fr.cx('fr-col-4', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-fieldset__element')}>
+                              <Select
+                                label="Taux de TVA"
+                                state={!!errors.eventSerie?.ticketingRevenueTaxRate ? 'error' : undefined}
+                                stateRelatedMessage={errors?.eventSerie?.ticketingRevenueTaxRate?.message}
+                                nativeSelectProps={{
+                                  ...register('eventSerie.ticketingRevenueTaxRate', {
+                                    valueAsNumber: true,
+                                  }),
+                                  defaultValue: (control._defaultValues.eventSerie?.ticketingRevenueTaxRate ?? currentTaxRates[0]).toString(),
+                                }}
+                                options={currentTaxRates.map((taxRate) => {
+                                  return {
+                                    label: t('number.percent', {
+                                      percentage: taxRate,
+                                    }),
+                                    value: taxRate.toString(),
+                                  };
+                                })}
+                              />
+                            </div>
+                          </div>
+                        </div>
                         <div className={fr.cx('fr-grid-row')}>
                           <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
                             <div className={fr.cx('fr-fieldset__element')}>
@@ -838,146 +972,21 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             </div>
                           </div>
                         </div>
-                        <div className={fr.cx('fr-grid-row')}>
-                          <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Select
-                                label="Audience"
-                                state={!!errors.eventSerie?.audience ? 'error' : undefined}
-                                stateRelatedMessage={errors?.eventSerie?.audience?.message}
-                                nativeSelectProps={{
-                                  ...register('eventSerie.audience'),
-                                  defaultValue: control._defaultValues.eventSerie?.audience || '',
-                                }}
-                                options={[
-                                  ...AudienceSchema.options.map((audience) => {
-                                    return {
-                                      label: t(`model.audience.enum.${audience}`),
-                                      value: audience,
-                                    };
-                                  }),
-                                ].sort((a, b) => a.label.localeCompare(b.label))}
-                              />
-                            </div>
-                          </div>
-                          <div className={fr.cx('fr-col-4', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Select
-                                label="Taux de TVA"
-                                state={!!errors.eventSerie?.ticketingRevenueTaxRate ? 'error' : undefined}
-                                stateRelatedMessage={errors?.eventSerie?.ticketingRevenueTaxRate?.message}
-                                nativeSelectProps={{
-                                  ...register('eventSerie.ticketingRevenueTaxRate', {
-                                    valueAsNumber: true,
-                                  }),
-                                  defaultValue: (control._defaultValues.eventSerie?.ticketingRevenueTaxRate ?? currentTaxRates[0]).toString(),
-                                }}
-                                options={currentTaxRates.map((taxRate) => {
-                                  return {
-                                    label: t('number.percent', {
-                                      percentage: taxRate,
-                                    }),
-                                    value: taxRate.toString(),
-                                  };
-                                })}
-                              />
-                            </div>
-                          </div>
-                        </div>
+                      </div>
+                    </fieldset>
+                    <fieldset className={fr.cx('fr-fieldset')}>
+                      <div className={fr.cx('fr-col-12')}>
                         <hr className={fr.cx('fr-my-3v')} />
-                        <div className={fr.cx('fr-grid-row')}>
-                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Input
-                                label="Recette HT"
-                                disabled
-                                nativeInputProps={{
-                                  value: t('currency.amount', {
-                                    amount: eventsKeyFigures.ticketingRevenueExcludingTaxes,
-                                  }),
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Input
-                                label="Recette TTC"
-                                disabled
-                                nativeInputProps={{
-                                  value: t('currency.amount', {
-                                    amount: eventsKeyFigures.ticketingRevenueIncludingTaxes,
-                                  }),
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Input
-                                label="Entrées payantes"
-                                disabled
-                                nativeInputProps={{
-                                  value: t('number.default', {
-                                    number: eventsKeyFigures.paidTickets,
-                                  }),
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Input
-                                label="Entrées gratuites"
-                                disabled
-                                nativeInputProps={{
-                                  value: t('number.default', {
-                                    number: eventsKeyFigures.freeTickets,
-                                  }),
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className={fr.cx('fr-grid-row')}>
-                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Controller
-                                control={control}
-                                name="eventSerie.expensesExcludingTaxes"
-                                render={({ field, fieldState: { error } }) => {
-                                  return <AmountInput {...field} label="Dépenses globales HT" signed={false} errorMessage={error?.message} />;
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                            <div className={fr.cx('fr-fieldset__element')}>
-                              <Controller
-                                control={control}
-                                name="eventSerie.introductionFeesExpensesExcludingTaxes"
-                                render={({ field, fieldState: { error } }) => {
-                                  return <AmountInput {...field} label="Frais d'approche HT" signed={false} errorMessage={error?.message} />;
-                                }}
-                              />
-                            </div>
-                          </div>
-                          {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
-                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                              <div className={fr.cx('fr-fieldset__element')}>
-                                <Controller
-                                  control={control}
-                                  name="eventSerie.circusSpecificExpensesExcludingTaxes"
-                                  render={({ field, fieldState: { error } }) => {
-                                    return (
-                                      <AmountInput {...field} label="Frais spécifiques au cirque HT" signed={false} errorMessage={error?.message} />
-                                    );
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                        <EventsFieldsets
+                          control={control}
+                          register={register}
+                          setValue={setValue}
+                          watch={watch}
+                          trigger={trigger}
+                          placeholder={declarationWrapper.placeholder}
+                          errors={errors.events}
+                          readonly={false}
+                        />
                       </div>
                     </fieldset>
                   </div>

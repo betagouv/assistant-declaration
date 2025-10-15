@@ -35,6 +35,9 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
 
   return (
     <>
+      <h2 className={fr.cx('fr-h4')} data-sentry-mask>
+        Séance du {t('date.shortWithTime', { date: watch(`${name}.startAt`) })}
+      </h2>
       {errorMessage && (
         <div className={fr.cx('fr-grid-row')}>
           <div className={fr.cx('fr-col-12', 'fr-mb-4v')}>
@@ -43,95 +46,54 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
         </div>
       )}
       <div className={fr.cx('fr-grid-row')}>
-        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+        <div className={fr.cx('fr-col-12')}>
+          <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+            Général
+          </div>
+        </div>
+      </div>
+      <div className={fr.cx('fr-grid-row')}>
+        <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
           <div className={fr.cx('fr-fieldset__element')}>
-            <Controller
-              control={control}
-              name={`${name}.freeTickets`}
-              render={({ field: { ref, onChange, ...fieldOthers }, fieldState: { error } }) => {
-                return (
-                  <Input
-                    ref={ref}
-                    label="Billets gratuits"
-                    state={!!error ? 'error' : undefined}
-                    stateRelatedMessage={error?.message}
-                    nativeInputProps={{
-                      ...fieldOthers,
-                      type: 'number',
-                      placeholder: '0',
-                      step: 1,
-                      min: 0,
-                      onChange: (event) => {
-                        onChange(event.target.value === '' ? null : Number(event.target.value));
-                      },
-                      onWheel: (event) => {
-                        // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
-
-                        // `event.currentTarget` is a callable type but is targetting the MUI element
-                        // whereas `event.target` targets the input element but does not have the callable type, so casting
-                        (event.target as HTMLInputElement).blur();
-                      },
-                    }}
-                  />
-                );
+            <Select
+              label="Audience"
+              state={!!errors?.audienceOverride ? 'error' : undefined}
+              stateRelatedMessage={errors?.audienceOverride?.message}
+              nativeSelectProps={{
+                ...register(`${name}.audienceOverride`),
+                defaultValue: control._defaultValues.events?.[eventIndex]?.audienceOverride || '',
               }}
+              options={[
+                ...AudienceSchema.options.map((audience) => {
+                  return {
+                    label: t(`model.audience.enum.${audience}`),
+                    value: audience,
+                  };
+                }),
+              ].sort((a, b) => a.label.localeCompare(b.label))}
             />
           </div>
         </div>
-        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+        <div className={fr.cx('fr-col-4', 'fr-col-md-3')}>
           <div className={fr.cx('fr-fieldset__element')}>
-            <Controller
-              control={control}
-              name={`${name}.paidTickets`}
-              render={({ field: { ref, onChange, ...fieldOthers }, fieldState: { error } }) => {
-                return (
-                  <Input
-                    ref={ref}
-                    label="Billets payants"
-                    state={!!error ? 'error' : undefined}
-                    stateRelatedMessage={error?.message}
-                    nativeInputProps={{
-                      ...fieldOthers,
-                      type: 'number',
-                      placeholder: '0',
-                      step: 1,
-                      min: 0,
-                      onChange: (event) => {
-                        onChange(event.target.value === '' ? null : Number(event.target.value));
-                      },
-                      onWheel: (event) => {
-                        // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
-
-                        // `event.currentTarget` is a callable type but is targetting the MUI element
-                        // whereas `event.target` targets the input element but does not have the callable type, so casting
-                        (event.target as HTMLInputElement).blur();
-                      },
-                    }}
-                  />
-                );
+            <Select
+              label="Taux de TVA"
+              state={!!errors?.ticketingRevenueTaxRateOverride ? 'error' : undefined}
+              stateRelatedMessage={errors?.ticketingRevenueTaxRateOverride?.message}
+              nativeSelectProps={{
+                ...register(`${name}.ticketingRevenueTaxRateOverride`, {
+                  valueAsNumber: true,
+                }),
+                defaultValue: (control._defaultValues.events?.[eventIndex]?.ticketingRevenueTaxRateOverride ?? currentTaxRates[0]).toString(),
               }}
-            />
-          </div>
-        </div>
-        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-          <div className={fr.cx('fr-fieldset__element')}>
-            <Controller
-              control={control}
-              name={`${name}.ticketingRevenueExcludingTaxes`}
-              render={({ field, fieldState: { error } }) => {
-                return <AmountInput {...field} label="Billetterie HT" signed={false} errorMessage={error?.message} />;
-              }}
-            />
-          </div>
-        </div>
-        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-          <div className={fr.cx('fr-fieldset__element')}>
-            <Controller
-              control={control}
-              name={`${name}.ticketingRevenueIncludingTaxes`}
-              render={({ field, fieldState: { error } }) => {
-                return <AmountInput {...field} label="Billetterie TTC" signed={false} errorMessage={error?.message} />;
-              }}
+              options={currentTaxRates.map((taxRate) => {
+                return {
+                  label: t('number.percent', {
+                    percentage: taxRate,
+                  }),
+                  value: taxRate.toString(),
+                };
+              })}
             />
           </div>
         </div>
@@ -318,142 +280,206 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
         </div>
       </div>
       <div className={fr.cx('fr-grid-row')}>
-        <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
+        <div className={fr.cx('fr-col-12')}>
+          <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+            Billetterie
+          </div>
+        </div>
+      </div>
+      <div className={fr.cx('fr-grid-row')}>
+        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
           <div className={fr.cx('fr-fieldset__element')}>
-            <Select
-              label="Audience"
-              state={!!errors?.audienceOverride ? 'error' : undefined}
-              stateRelatedMessage={errors?.audienceOverride?.message}
-              nativeSelectProps={{
-                ...register(`${name}.audienceOverride`),
-                defaultValue: control._defaultValues.events?.[eventIndex]?.audienceOverride || '',
+            <Controller
+              control={control}
+              name={`${name}.freeTickets`}
+              render={({ field: { ref, onChange, ...fieldOthers }, fieldState: { error } }) => {
+                return (
+                  <Input
+                    ref={ref}
+                    label="Billets gratuits"
+                    state={!!error ? 'error' : undefined}
+                    stateRelatedMessage={error?.message}
+                    nativeInputProps={{
+                      ...fieldOthers,
+                      type: 'number',
+                      placeholder: '0',
+                      step: 1,
+                      min: 0,
+                      onChange: (event) => {
+                        onChange(event.target.value === '' ? null : Number(event.target.value));
+                      },
+                      onWheel: (event) => {
+                        // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
+
+                        // `event.currentTarget` is a callable type but is targetting the MUI element
+                        // whereas `event.target` targets the input element but does not have the callable type, so casting
+                        (event.target as HTMLInputElement).blur();
+                      },
+                    }}
+                  />
+                );
               }}
-              options={[
-                ...AudienceSchema.options.map((audience) => {
-                  return {
-                    label: t(`model.audience.enum.${audience}`),
-                    value: audience,
-                  };
-                }),
-              ].sort((a, b) => a.label.localeCompare(b.label))}
             />
           </div>
         </div>
-        <div className={fr.cx('fr-col-4', 'fr-col-md-3')}>
+        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
           <div className={fr.cx('fr-fieldset__element')}>
-            <Select
-              label="Taux de TVA"
-              state={!!errors?.ticketingRevenueTaxRateOverride ? 'error' : undefined}
-              stateRelatedMessage={errors?.ticketingRevenueTaxRateOverride?.message}
-              nativeSelectProps={{
-                ...register(`${name}.ticketingRevenueTaxRateOverride`, {
-                  valueAsNumber: true,
-                }),
-                defaultValue: (control._defaultValues.events?.[eventIndex]?.ticketingRevenueTaxRateOverride ?? currentTaxRates[0]).toString(),
+            <Controller
+              control={control}
+              name={`${name}.paidTickets`}
+              render={({ field: { ref, onChange, ...fieldOthers }, fieldState: { error } }) => {
+                return (
+                  <Input
+                    ref={ref}
+                    label="Billets payants"
+                    state={!!error ? 'error' : undefined}
+                    stateRelatedMessage={error?.message}
+                    nativeInputProps={{
+                      ...fieldOthers,
+                      type: 'number',
+                      placeholder: '0',
+                      step: 1,
+                      min: 0,
+                      onChange: (event) => {
+                        onChange(event.target.value === '' ? null : Number(event.target.value));
+                      },
+                      onWheel: (event) => {
+                        // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
+
+                        // `event.currentTarget` is a callable type but is targetting the MUI element
+                        // whereas `event.target` targets the input element but does not have the callable type, so casting
+                        (event.target as HTMLInputElement).blur();
+                      },
+                    }}
+                  />
+                );
               }}
-              options={currentTaxRates.map((taxRate) => {
-                return {
-                  label: t('number.percent', {
-                    percentage: taxRate,
-                  }),
-                  value: taxRate.toString(),
-                };
-              })}
+            />
+          </div>
+        </div>
+        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Controller
+              control={control}
+              name={`${name}.ticketingRevenueExcludingTaxes`}
+              render={({ field, fieldState: { error } }) => {
+                return <AmountInput {...field} label="Montant HT" signed={false} errorMessage={error?.message} />;
+              }}
+            />
+          </div>
+        </div>
+        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Controller
+              control={control}
+              name={`${name}.ticketingRevenueIncludingTaxes`}
+              render={({ field, fieldState: { error } }) => {
+                return <AmountInput {...field} label="Montant TTC" signed={false} errorMessage={error?.message} />;
+              }}
             />
           </div>
         </div>
       </div>
       {watch('eventSerie.expectedDeclarationTypes').includes('SACEM') && (
-        <div className={fr.cx('fr-grid-row')}>
-          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.consumptionsRevenueExcludingTaxes`}
-                render={({ field, fieldState: { error } }) => {
-                  return <AmountInput {...field} label="Consommation HT" signed={false} errorMessage={error?.message} />;
-                }}
-              />
+        <>
+          <div className={fr.cx('fr-grid-row')}>
+            <div className={fr.cx('fr-col-12')}>
+              <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+                Recettes hors billetterie
+              </div>
             </div>
           </div>
-          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.consumptionsRevenueIncludingTaxes`}
-                render={({ field, fieldState: { error } }) => {
-                  return <AmountInput {...field} label="Consommation TTC" signed={false} errorMessage={error?.message} />;
-                }}
-              />
+          <div className={fr.cx('fr-grid-row')}>
+            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.consumptionsRevenueExcludingTaxes`}
+                  render={({ field, fieldState: { error } }) => {
+                    return <AmountInput {...field} label="Consommation HT" signed={false} errorMessage={error?.message} />;
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.consumptionsRevenueIncludingTaxes`}
+                  render={({ field, fieldState: { error } }) => {
+                    return <AmountInput {...field} label="Consommation TTC" signed={false} errorMessage={error?.message} />;
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.cateringRevenueExcludingTaxes`}
+                  render={({ field, fieldState: { error } }) => {
+                    return <AmountInput {...field} label="Restauration HT" signed={false} errorMessage={error?.message} />;
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.cateringRevenueIncludingTaxes`}
+                  render={({ field, fieldState: { error } }) => {
+                    return <AmountInput {...field} label="Restauration TTC" signed={false} errorMessage={error?.message} />;
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.programSalesRevenueExcludingTaxes`}
+                  render={({ field, fieldState: { error } }) => {
+                    return <AmountInput {...field} label="Vente prog. HT" signed={false} errorMessage={error?.message} />;
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.programSalesRevenueIncludingTaxes`}
+                  render={({ field, fieldState: { error } }) => {
+                    return <AmountInput {...field} label="Vente prog. TTC" signed={false} errorMessage={error?.message} />;
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.otherRevenueExcludingTaxes`}
+                  render={({ field, fieldState: { error } }) => {
+                    return <AmountInput {...field} label="Autre recette HT" signed={false} errorMessage={error?.message} />;
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.otherRevenueIncludingTaxes`}
+                  render={({ field, fieldState: { error } }) => {
+                    return <AmountInput {...field} label="Autre recette TTC" signed={false} errorMessage={error?.message} />;
+                  }}
+                />
+              </div>
             </div>
           </div>
-          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.cateringRevenueExcludingTaxes`}
-                render={({ field, fieldState: { error } }) => {
-                  return <AmountInput {...field} label="Restauration HT" signed={false} errorMessage={error?.message} />;
-                }}
-              />
-            </div>
-          </div>
-          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.cateringRevenueIncludingTaxes`}
-                render={({ field, fieldState: { error } }) => {
-                  return <AmountInput {...field} label="Restauration TTC" signed={false} errorMessage={error?.message} />;
-                }}
-              />
-            </div>
-          </div>
-          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.programSalesRevenueExcludingTaxes`}
-                render={({ field, fieldState: { error } }) => {
-                  return <AmountInput {...field} label="Vente prog. HT" signed={false} errorMessage={error?.message} />;
-                }}
-              />
-            </div>
-          </div>
-          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.programSalesRevenueIncludingTaxes`}
-                render={({ field, fieldState: { error } }) => {
-                  return <AmountInput {...field} label="Vente prog. TTC" signed={false} errorMessage={error?.message} />;
-                }}
-              />
-            </div>
-          </div>
-          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.otherRevenueExcludingTaxes`}
-                render={({ field, fieldState: { error } }) => {
-                  return <AmountInput {...field} label="Autre recette HT" signed={false} errorMessage={error?.message} />;
-                }}
-              />
-            </div>
-          </div>
-          <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.otherRevenueIncludingTaxes`}
-                render={({ field, fieldState: { error } }) => {
-                  return <AmountInput {...field} label="Autre recette TTC" signed={false} errorMessage={error?.message} />;
-                }}
-              />
-            </div>
-          </div>
-        </div>
+        </>
       )}
     </>
   );
