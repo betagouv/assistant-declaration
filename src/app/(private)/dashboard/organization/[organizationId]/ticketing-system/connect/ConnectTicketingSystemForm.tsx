@@ -162,6 +162,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
               </div>
               <div className={fr.cx('fr-fieldset__element')}>
                 <Alert
+                  as="h2"
                   severity="info"
                   small={false}
                   title="Tutoriel de branchement"

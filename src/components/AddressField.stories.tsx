@@ -1,5 +1,5 @@
 import { Meta, StoryFn } from '@storybook/react';
-import { within } from 'storybook/test';
+import { screen, userEvent, within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { AddressField } from '@ad/src/components/AddressField';
@@ -16,7 +16,7 @@ export default {
 } as Meta<ComponentType>;
 
 async function playFindLabel(canvasElement: HTMLElement): Promise<HTMLElement> {
-  return await within(canvasElement).findByLabelText(/ville/i);
+  return await within(canvasElement).findByText(/address/i);
 }
 
 const Template: StoryFn<ComponentType> = (args) => {
@@ -41,6 +41,13 @@ WithQueryStory.args = {
 };
 WithQueryStory.play = async ({ canvasElement }) => {
   await playFindLabel(canvasElement);
+
+  const canvas = within(canvasElement);
+  const input = await canvas.findByRole('combobox');
+
+  await userEvent.type(input, 'moulin');
+
+  await screen.findByText(/rennes/i);
 };
 
 export const WithQuery = prepareStory(WithQueryStory);
