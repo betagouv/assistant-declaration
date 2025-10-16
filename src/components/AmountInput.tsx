@@ -97,6 +97,9 @@ export function AmountInput(props: AmountInputProps) {
         ref: maskInputRef as Ref<HTMLInputElement> | undefined,
         placeholder: '0 €',
         onBlur: props.onBlur,
+        onFocusCapture: (event) => {
+          event.target.select(); // For the ease of modification select the whole on focus
+        },
       }}
     />
   );

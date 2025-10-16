@@ -247,6 +247,9 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                             placeholder: '0',
                             step: 1,
                             min: 0,
+                            onFocusCapture: (event) => {
+                              event.target.select(); // For the ease of modification select the whole on focus
+                            },
                             onWheel: (event) => {
                               // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
 
@@ -312,6 +315,9 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                       onChange: (event) => {
                         onChange(event.target.value === '' ? null : Number(event.target.value));
                       },
+                      onFocusCapture: (event) => {
+                        event.target.select(); // For the ease of modification select the whole on focus
+                      },
                       onWheel: (event) => {
                         // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
 
@@ -346,6 +352,9 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                       min: 0,
                       onChange: (event) => {
                         onChange(event.target.value === '' ? null : Number(event.target.value));
+                      },
+                      onFocusCapture: (event) => {
+                        event.target.select(); // For the ease of modification select the whole on focus
                       },
                       onWheel: (event) => {
                         // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
