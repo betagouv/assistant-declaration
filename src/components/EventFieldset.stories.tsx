@@ -1,11 +1,12 @@
 import { Meta, StoryFn } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import { within } from 'storybook/test';
+import { z } from 'zod';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { EventFieldset } from '@ad/src/components/EventFieldset';
 import { declarationsWrappers, eventsWithPlace } from '@ad/src/fixtures/declaration/common';
-import { FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { FillDeclarationSchema } from '@ad/src/models/actions/declaration';
 
 type ComponentType = typeof EventFieldset;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
@@ -18,7 +19,9 @@ export default {
   }),
 } as Meta<ComponentType>;
 
-const eventsInputs: FillDeclarationSchemaType['events'] = eventsWithPlace.map((event) => {
+type FillDeclarationSchemaInputType = z.input<typeof FillDeclarationSchema>;
+
+const eventsInputs: FillDeclarationSchemaInputType['events'] = eventsWithPlace.map((event) => {
   return {
     ...event,
     placeOverride: event.placeOverride ?? {
@@ -29,7 +32,7 @@ const eventsInputs: FillDeclarationSchemaType['events'] = eventsWithPlace.map((e
 });
 
 const Template: StoryFn<ComponentType> = (args) => {
-  const { control, register, setValue, watch, trigger } = useForm<FillDeclarationSchemaType>({
+  const { control, register, setValue, watch, trigger } = useForm<FillDeclarationSchemaInputType>({
     defaultValues: {
       eventSerie: {
         expectedDeclarationTypes: [],
