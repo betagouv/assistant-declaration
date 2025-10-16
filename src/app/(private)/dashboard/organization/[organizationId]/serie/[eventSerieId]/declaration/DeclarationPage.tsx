@@ -286,7 +286,20 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
         // If no declaration types we invite the user to select one through the window
         if (getDeclaration.data.declarationWrapper.declaration.eventSerie.expectedDeclarationTypes.length === 0) {
-          declarationTypesModal.open();
+          // [WORKAROUND] The DSFR may not be initialized yet so opening the modal will throw an error reading on a null object
+          // The idea is to mimic the logic of `react-dsfr` but to wait for the null object to be ready
+          if ((window as any).dsfr) {
+            const modalOpeningInterval = setInterval(() => {
+              const modalElement = document.getElementById(declarationTypesModal.id);
+              const dsfrReadyElement = (window as any).dsfr(modalElement);
+
+              if (dsfrReadyElement) {
+                clearInterval(modalOpeningInterval);
+
+                declarationTypesModal.open();
+              }
+            }, 200);
+          }
         }
       }
     }
