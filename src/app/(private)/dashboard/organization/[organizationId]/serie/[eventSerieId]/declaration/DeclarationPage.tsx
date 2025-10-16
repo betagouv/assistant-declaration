@@ -78,16 +78,24 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     watch,
     trigger,
     reset,
-  } = useForm<FillDeclarationSchemaType>({
+  } = useForm({
     resolver: zodResolver(FillDeclarationSchema),
     defaultValues: {
-      // ...prefill,
       eventSerieId: eventSerieId,
       eventSerie: {
+        producer: null,
         expectedDeclarationTypes: [],
+        performanceType: null,
+        place: {
+          name: null,
+          address: null,
+        },
+        placeCapacity: 0,
+        ticketingRevenueTaxRate: currentTaxRates[0],
       },
       events: [], // To avoid being "undefined"
-    }, // The rest will be set with data fetched
+      // ...prefill,
+    },
   });
 
   // Due to the UI having tabs to switch between different declarations, we make sure the user is aware of loosing modifications
@@ -627,7 +635,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.producer"
-                                  defaultValue={null}
                                   render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                                     return (
                                       <CompanyField
@@ -658,7 +665,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                   stateRelatedMessage={errors?.eventSerie?.performanceType?.message}
                                   nativeSelectProps={{
                                     ...register('eventSerie.performanceType'),
-                                    defaultValue: control._defaultValues.eventSerie?.performanceType || '',
                                   }}
                                   options={[
                                     ...PerformanceTypeSchema.options.map((performanceType) => {
@@ -859,7 +865,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                   stateRelatedMessage={errors?.eventSerie?.audience?.message}
                                   nativeSelectProps={{
                                     ...register('eventSerie.audience'),
-                                    defaultValue: control._defaultValues.eventSerie?.audience || '',
                                   }}
                                   options={[
                                     ...AudienceSchema.options.map((audience) => {
@@ -882,7 +887,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                     ...register('eventSerie.ticketingRevenueTaxRate', {
                                       valueAsNumber: true,
                                     }),
-                                    defaultValue: (control._defaultValues.eventSerie?.ticketingRevenueTaxRate ?? currentTaxRates[0]).toString(),
                                   }}
                                   options={currentTaxRates.map((taxRate) => {
                                     return {
@@ -902,7 +906,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.place.name"
-                                  defaultValue={control._defaultValues.eventSerie?.place?.name ?? null}
                                   render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                                     return (
                                       <Autocomplete
@@ -990,7 +993,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.place.address"
-                                  defaultValue={null}
                                   render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                                     return (
                                       <AddressField
@@ -1017,7 +1019,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.placeCapacity"
-                                  defaultValue={control._defaultValues.eventSerie?.placeCapacity ?? 0}
                                   render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                                     return (
                                       <Autocomplete

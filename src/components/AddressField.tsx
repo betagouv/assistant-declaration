@@ -8,11 +8,11 @@ import debounce from 'lodash.debounce';
 import { FocusEventHandler, PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { BanAddress } from '@ad/src/client/national-address-base';
-import { AddressInputSchemaType, AddressSchemaType } from '@ad/src/models/entities/address';
+import { AddressInputSchemaType } from '@ad/src/models/entities/address';
 import { searchAddressSuggestions } from '@ad/src/proxies/national-address-base';
 
 export interface AddressFieldProps {
-  value?: Omit<AddressSchemaType, 'id'> | null;
+  value?: Omit<AddressInputSchemaType, 'id'> | null;
   inputProps: Pick<InputProps, 'label' | 'nativeInputProps'>;
   onChange: (newValue: AddressInputSchemaType | null) => void;
   onBlur: FocusEventHandler<HTMLDivElement>;

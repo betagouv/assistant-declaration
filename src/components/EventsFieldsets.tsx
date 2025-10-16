@@ -2,20 +2,23 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { useMemo } from 'react';
 import { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormTrigger, UseFormWatch, useFieldArray } from 'react-hook-form';
+import { z } from 'zod';
 
 import { EventFieldset } from '@ad/src/components/EventFieldset';
-import { FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { FillDeclarationSchema } from '@ad/src/models/actions/declaration';
 import { DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
 import { RowForForm } from '@ad/src/utils/validation';
 
+type FillDeclarationSchemaInputType = z.input<typeof FillDeclarationSchema>;
+
 export interface EventsFieldsetsProps {
-  control: Control<FillDeclarationSchemaType, any>;
-  register: UseFormRegister<FillDeclarationSchemaType>;
-  setValue: UseFormSetValue<FillDeclarationSchemaType>;
-  watch: UseFormWatch<FillDeclarationSchemaType>;
-  trigger: UseFormTrigger<FillDeclarationSchemaType>;
+  control: Control<FillDeclarationSchemaInputType, any>;
+  register: UseFormRegister<FillDeclarationSchemaInputType>;
+  setValue: UseFormSetValue<FillDeclarationSchemaInputType>;
+  watch: UseFormWatch<FillDeclarationSchemaInputType>;
+  trigger: UseFormTrigger<FillDeclarationSchemaInputType>;
   placeholder: DeclarationWrapperSchemaType['placeholder'];
-  errors: FieldErrors<FillDeclarationSchemaType>['events'];
+  errors: FieldErrors<FillDeclarationSchemaInputType>['events'];
   readonly?: boolean;
 }
 

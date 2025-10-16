@@ -7,24 +7,27 @@ import { Autocomplete } from '@mui/material';
 import { useMemo } from 'react';
 import { Control, Controller, FieldErrors, UseFormRegister, UseFormSetValue, UseFormTrigger, UseFormWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
 import { AddressField } from '@ad/src/components/AddressField';
 import { AmountInput } from '@ad/src/components/AmountInput';
 import { currentTaxRates } from '@ad/src/core/declaration';
-import { FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { FillDeclarationSchema } from '@ad/src/models/actions/declaration';
 import { DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
 import { AudienceSchema } from '@ad/src/models/entities/event';
 
+type FillDeclarationSchemaInputType = z.input<typeof FillDeclarationSchema>;
+
 export interface EventFieldsetProps {
-  control: Control<FillDeclarationSchemaType, any>;
-  register: UseFormRegister<FillDeclarationSchemaType>;
-  setValue: UseFormSetValue<FillDeclarationSchemaType>;
-  watch: UseFormWatch<FillDeclarationSchemaType>;
-  trigger: UseFormTrigger<FillDeclarationSchemaType>;
+  control: Control<FillDeclarationSchemaInputType, any>;
+  register: UseFormRegister<FillDeclarationSchemaInputType>;
+  setValue: UseFormSetValue<FillDeclarationSchemaInputType>;
+  watch: UseFormWatch<FillDeclarationSchemaInputType>;
+  trigger: UseFormTrigger<FillDeclarationSchemaInputType>;
   eventIndex: number;
   name: `events.${number}`;
   placeholder: DeclarationWrapperSchemaType['placeholder'];
-  errors: FieldErrors<NonNullable<FillDeclarationSchemaType>['events']>[0];
+  errors: FieldErrors<NonNullable<FillDeclarationSchemaInputType>['events']>[0];
   readonly?: boolean;
 }
 
@@ -65,7 +68,6 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
               stateRelatedMessage={errors?.audienceOverride?.message}
               nativeSelectProps={{
                 ...register(`${name}.audienceOverride`),
-                defaultValue: control._defaultValues.events?.[eventIndex]?.audienceOverride || '',
               }}
               options={[
                 ...AudienceSchema.options.map((audience) => {
@@ -88,7 +90,6 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                 ...register(`${name}.ticketingRevenueTaxRateOverride`, {
                   valueAsNumber: true,
                 }),
-                defaultValue: (control._defaultValues.events?.[eventIndex]?.ticketingRevenueTaxRateOverride ?? currentTaxRates[0]).toString(),
               }}
               options={currentTaxRates.map((taxRate) => {
                 return {
@@ -108,7 +109,6 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             <Controller
               control={control}
               name={`${name}.placeOverride.name`}
-              defaultValue={control._defaultValues.events?.[eventIndex]?.placeOverride?.name ?? null}
               render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                 return (
                   <Autocomplete
@@ -196,7 +196,6 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             <Controller
               control={control}
               name={`${name}.placeOverride.address`}
-              defaultValue={null}
               render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                 return (
                   <AddressField
@@ -223,7 +222,6 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             <Controller
               control={control}
               name={`${name}.placeCapacityOverride`}
-              defaultValue={control._defaultValues.eventSerie?.placeCapacity ?? 0}
               render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
                 return (
                   <Autocomplete
