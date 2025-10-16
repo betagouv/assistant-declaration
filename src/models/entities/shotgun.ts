@@ -21,8 +21,8 @@ export const JsonEventSchema = applyTypedParsers(
     //     id: z.number().int().nonnegative(),
     //     name: z.string().min(1),
     //     slug: z.string().min(1),
-    //     avatar: z.string().url(),
-    //     url: z.string().url(),
+    //     avatar: z.url(),
+    //     url: z.url(),
     //   })
     // ),
     // genres: z.array(
@@ -32,9 +32,9 @@ export const JsonEventSchema = applyTypedParsers(
     // ),
     leftTicketsCount: z.number().int(), // Added `.nonnegative()` at start but for whatever reason it can be `-1`
     // description: z.string().min(1),
-    // coverUrl: z.string().url(),
-    // coverThumbnailUrl: z.string().url(),
-    // url: z.string().url(),
+    // coverUrl: z.url(),
+    // coverThumbnailUrl: z.url(),
+    // url: z.url(),
     // addressVisibility: z.enum(['public', 'secret', 'private']),
     // geolocation: z.object({
     //   street: z.string().min(1),
@@ -103,7 +103,7 @@ export const JsonTicketSchema = applyTypedParsers(
     // event_creation_date: z.coerce.date(),
     // event_publication_date: z.coerce.date(),
     // event_launch_date: z.coerce.date(),
-    // buyer_email: z.string().email(),
+    // buyer_email: z.email(),
     // buyer_first_name: z.string().min(1),
     // buyer_last_name: z.string().min(1),
     // buyer_gender: z.enum(['male', 'female']),
@@ -147,9 +147,9 @@ export type JsonListEventsResponseSchemaType = z.infer<typeof JsonListEventsResp
 export const JsonListTicketsResponseSchema = applyTypedParsers(
   z
     .object({
-      query: z.record(z.unknown(), z.unknown()),
+      query: z.record(z.string(), z.unknown()),
       pagination: z.object({
-        next: z.string().url().nullable(),
+        next: z.url().nullable(),
       }),
       data: z.array(JsonTicketSchema),
     })

@@ -4,7 +4,7 @@ import { Button } from '@codegouvfr/react-dsfr/Button';
 import { TRPCClientErrorLike } from '@trpc/client';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import z, { ZodIssue } from 'zod';
+import { z } from 'zod';
 
 import { formatMessageFromIssue } from '@ad/src/i18n';
 import { CustomError, internalServerErrorError, unexpectedErrorError } from '@ad/src/models/entities/errors';
@@ -33,11 +33,11 @@ export function ErrorAlert(props: ErrorAlertProps) {
 
         if (trpcError.data && 'zodError' in trpcError.data && Array.isArray(trpcError.data.zodError)) {
           // Format to benefit from all the typings
-          const zodError = new z.ZodError(trpcError.data.zodError as ZodIssue[]);
+          const zodError = new z.ZodError(trpcError.data.zodError as z.core.$ZodIssue[]);
 
           for (const issue of zodError.issues) {
             // As fallback display the error message from the server, should be good enough but can be in another language
-            errs.push(formatMessageFromIssue(issue) || issue.message);
+            errs.push(formatMessageFromIssue(issue as z.core.$ZodRawIssue) || issue.message);
           }
         } else if (trpcError.data && 'customError' in trpcError.data && trpcError.data.customError !== null) {
           const customErrorPayload = trpcError.data.customError as CustomError;

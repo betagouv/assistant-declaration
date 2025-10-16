@@ -30,7 +30,7 @@ export function SignInPage() {
             <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-grid-row--middle')}>
               <div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
                 <h1 className={fr.cx('fr-h2')}>Simplifiez vos déclarations de spectacle</h1>
-                <p>L&apos;Assistant déclaration collecte les données de billetterie afin de simplifier vos déclarations SACEM, SACD, ASTP, CNM.</p>
+                <p>L&apos;Assistant déclaration collecte les données de billetterie afin de simplifier vos déclarations Sacem et SACD.</p>
                 <NextLink href={linkRegistry.get('about', undefined)} className={fr.cx('fr-link')}>
                   <span className={fr.cx('fr-icon--sm', 'fr-icon-arrow-right-line')} style={{ marginRight: 5 }} />
                   En savoir plus

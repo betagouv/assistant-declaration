@@ -7,7 +7,7 @@ export enum PaginationSize {
 }
 
 // Impossible to use an enum with integers, so using the native enum way
-export const PaginationSizeSchema = z.nativeEnum(PaginationSize);
+export const PaginationSizeSchema = z.enum(PaginationSize);
 export type PaginationSizeSchemaType = z.infer<typeof PaginationSizeSchema>;
 
 export const GetterInputSchema = z

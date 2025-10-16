@@ -95,6 +95,7 @@ export async function seedDatabase(prismaClient: PrismaClient) {
       apiAccessKey: 'failing-one',
       apiSecretKey: 'failing-one',
       lastSynchronizationAt: null,
+      forceNextSynchronizationFrom: null,
       lastProcessingError: null,
       lastProcessingErrorAt: null,
     },

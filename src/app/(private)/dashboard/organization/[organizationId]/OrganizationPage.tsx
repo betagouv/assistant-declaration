@@ -131,13 +131,13 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
     return (listEventsSeries.data?.eventsSeriesWrappers || []).filter((eventSerieWrapper) => {
       switch (listFilter) {
         case ListFilter.ARCHIVED_ONLY:
-          return isBefore(eventSerieWrapper.serie.endAt, archivedThreshold);
+          return isBefore(eventSerieWrapper.computedEndAt, archivedThreshold);
         case ListFilter.ENDED_ONLY:
-          return isBefore(eventSerieWrapper.serie.endAt, currentDate) && !isBefore(eventSerieWrapper.serie.endAt, archivedThreshold);
+          return isBefore(eventSerieWrapper.computedEndAt, currentDate) && !isBefore(eventSerieWrapper.computedEndAt, archivedThreshold);
         case ListFilter.CURRENT_ONLY:
-          return isBefore(eventSerieWrapper.serie.startAt, currentDate) && !isBefore(eventSerieWrapper.serie.endAt, currentDate);
+          return isBefore(eventSerieWrapper.computedStartAt, currentDate) && !isBefore(eventSerieWrapper.computedEndAt, currentDate);
         case ListFilter.FUTURE_ONLY:
-          return !isBefore(eventSerieWrapper.serie.startAt, currentDate);
+          return !isBefore(eventSerieWrapper.computedStartAt, currentDate);
         default:
           return true;
       }
@@ -276,25 +276,9 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                           <div key={eventsSeriesWrapper.serie.id} className={fr.cx('fr-py-2v')}>
                             <EventSerieCard
                               wrapper={eventsSeriesWrapper}
-                              sacemDeclarationLink={linkRegistry.get('declaration', {
+                              declarationLink={linkRegistry.get('declaration', {
                                 organizationId: organizationId,
                                 eventSerieId: eventsSeriesWrapper.serie.id,
-                                declarationType: 'sacem',
-                              })}
-                              sacdDeclarationLink={linkRegistry.get('declaration', {
-                                organizationId: organizationId,
-                                eventSerieId: eventsSeriesWrapper.serie.id,
-                                declarationType: 'sacd',
-                              })}
-                              astpDeclarationLink={linkRegistry.get('declaration', {
-                                organizationId: organizationId,
-                                eventSerieId: eventsSeriesWrapper.serie.id,
-                                declarationType: 'astp',
-                              })}
-                              cnmDeclarationLink={linkRegistry.get('declaration', {
-                                organizationId: organizationId,
-                                eventSerieId: eventsSeriesWrapper.serie.id,
-                                declarationType: 'cnm',
                               })}
                             />
                           </div>

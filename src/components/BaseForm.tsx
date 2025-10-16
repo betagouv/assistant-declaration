@@ -97,6 +97,7 @@ export function BaseForm<FormSchemaType extends FieldValues>(props: PropsWithChi
 
   return (
     <>
+      {/* [WARNING] Using it with the browser extension may slow down a lot when typing quickly in inputs, feeling re-rendering would be the issue but it's not */}
       {/* <DevTool control={props.control} /> */}
 
       <form onSubmit={onSubmit} aria-label={props.ariaLabel} style={props.style} ref={setMultipleRefs}>

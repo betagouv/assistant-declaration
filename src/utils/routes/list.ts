@@ -34,17 +34,10 @@ export const localizedRoutes = {
     }
   ),
   declaration: defineLocalizedRoute(
-    { organizationId: param.path.string, eventSerieId: param.path.string, declarationType: param.path.string },
+    { organizationId: param.path.string, eventSerieId: param.path.string },
     {
-      en: (p) => `/dashboard/organization/${p.organizationId}/serie/${p.eventSerieId}/declaration/${p.declarationType}`,
-      fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}/serie/${p.eventSerieId}/declaration/${p.declarationType}`,
-    }
-  ),
-  declarationPdf: defineLocalizedRoute(
-    { eventSerieId: param.path.string, type: param.query.string, download: param.query.optional.boolean },
-    {
-      en: (p) => `/api/declaration/${p.eventSerieId}`,
-      fr: (p) => `/api/declaration/${p.eventSerieId}`,
+      en: (p) => `/dashboard/organization/${p.organizationId}/serie/${p.eventSerieId}/declaration`,
+      fr: (p) => `/tableau-de-bord/organisation/${p.organizationId}/serie/${p.eventSerieId}/declaration`,
     }
   ),
   docsBilletwebConnection: defineLocalizedRoute(
@@ -242,7 +235,6 @@ export const routes = {
     accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.en),
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.en),
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.en),
-    declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.en),
     docsBilletwebConnection: defineRoute(localizedRoutes.docsBilletwebConnection.params, localizedRoutes.docsBilletwebConnection.paths.en),
     docsHelloassoConnection: defineRoute(localizedRoutes.docsHelloassoConnection.params, localizedRoutes.docsHelloassoConnection.paths.en),
     docsMapadoConnection: defineRoute(localizedRoutes.docsMapadoConnection.params, localizedRoutes.docsMapadoConnection.paths.en),
@@ -271,7 +263,6 @@ export const routes = {
     accountSettings: defineRoute(localizedRoutes.accountSettings.params, localizedRoutes.accountSettings.paths.fr),
     dashboard: defineRoute(localizedRoutes.dashboard.params, localizedRoutes.dashboard.paths.fr),
     declaration: defineRoute(localizedRoutes.declaration.params, localizedRoutes.declaration.paths.fr),
-    declarationPdf: defineRoute(localizedRoutes.declarationPdf.params, localizedRoutes.declarationPdf.paths.fr),
     docsBilletwebConnection: defineRoute(localizedRoutes.docsBilletwebConnection.params, localizedRoutes.docsBilletwebConnection.paths.fr),
     docsHelloassoConnection: defineRoute(localizedRoutes.docsHelloassoConnection.params, localizedRoutes.docsHelloassoConnection.paths.fr),
     docsMapadoConnection: defineRoute(localizedRoutes.docsMapadoConnection.params, localizedRoutes.docsMapadoConnection.paths.fr),

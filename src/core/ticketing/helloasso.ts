@@ -1,6 +1,6 @@
 import { eachOfLimit } from 'async';
 import Bottleneck from 'bottleneck';
-import { addDays, addYears, hoursToMilliseconds, minutesToMilliseconds, secondsToMilliseconds, set } from 'date-fns';
+import { addYears, hoursToMilliseconds, minutesToMilliseconds, secondsToMilliseconds } from 'date-fns';
 import { ClientCredentials } from 'simple-oauth2';
 
 import { HelloAssoApiV5ModelsStatisticsItem, HelloAssoApiV5ModelsStatisticsOrder } from '@ad/src/client/helloasso';
@@ -11,18 +11,9 @@ import {
   getOrganizationsByOrganizationSlugOrders,
   getUsersMeOrganizations,
 } from '@ad/src/client/helloasso/sdk.gen';
+import { getExcludingTaxesAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
-import { helloassoMissingTierError } from '@ad/src/models/entities/errors';
-import {
-  LiteEventSalesSchema,
-  LiteEventSalesSchemaType,
-  LiteEventSchema,
-  LiteEventSchemaType,
-  LiteEventSerieSchema,
-  LiteEventSerieWrapperSchemaType,
-  LiteTicketCategorySchema,
-  LiteTicketCategorySchemaType,
-} from '@ad/src/models/entities/event';
+import { LiteEventSchema, LiteEventSerieSchema, LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
 import { JsonTokenSchema } from '@ad/src/models/entities/helloasso';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
@@ -268,82 +259,63 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       }
 
       assert(formResult.data);
-
-      const schemaEvents: LiteEventSchemaType[] = [];
-      const schemaTicketCategories: Map<LiteTicketCategorySchemaType['internalTicketingSystemId'], LiteTicketCategorySchemaType> = new Map();
-      const schemaEventSales: Map<
-        LiteEventSalesSchemaType['internalEventTicketingSystemId'] & LiteEventSalesSchemaType['internalTicketCategoryTicketingSystemId'],
-        LiteEventSalesSchemaType
-      > = new Map();
-
       assert(formResult.data.formSlug);
       assert(formResult.data.title);
       assert(formResult.data.currency === 'EUR');
       assert(formResult.data.startDate);
 
       const startDate = new Date(formResult.data.startDate);
+      const endDate = formResult.data.endDate ? new Date(formResult.data.endDate) : null;
 
-      let endDate: Date;
-      if (formResult.data.endDate !== null) {
-        endDate = new Date(formResult.data.endDate);
-      } else {
-        // Doing as ticketing system Mapado that is setting by default the end date to the end of the night
-        endDate = set(addDays(startDate, 1), { hours: 5, minutes: 0, seconds: 0, milliseconds: 0 });
-      }
-
-      // It's important to note Shotgun is having only "1 event serie = 1 event" (there is no multiple representations for the same serie)
-      // We could have tried to merged them based on naming but it's kind of tricky before knowing well their customer usage of it
-      schemaEvents.push(
-        LiteEventSchema.parse({
-          internalTicketingSystemId: formResult.data.formSlug,
-          startAt: startDate,
-          endAt: endDate,
-        })
-      );
-
-      let taxRate: number | null = null;
-
-      const dynamicTierIds: number[] = [];
+      let indicativeTaxRate: number | null = null;
+      const tierdIdToTaxRate = new Map<number, number>();
 
       if (formResult.data.tiers) {
-        for (const tier of formResult.data.tiers) {
+        // Note: a tier being free may have a 0% tax rate instead of being aligned with others, to take into account this case
+        // it's easier having them at the end (because if only free tiers, the tax rate should be 0, not null)
+        const tiersSortedWithDescendingTaxRates = formResult.data.tiers.sort((a, b) => +b.vatRate - +a.vatRate);
+
+        for (const tier of tiersSortedWithDescendingTaxRates) {
           if (tier.tierType !== 'Registration') {
             // It seems other types should be ignored to only keep ones related to events
             continue;
           }
 
-          const tierVatRate = tier.vatRate / 100; // Receiving 5.50 for 5.5%
+          let tierVatRate = tier.vatRate / 100; // Receiving 5.50 for 5.5%
 
-          // TODO: for now we manage a unique tax rate per event serie whereas it should be by ticket category
-          if (taxRate === null) {
-            taxRate = tierVatRate;
-          } else if (taxRate !== tierVatRate) {
-            // throw new Error(`an event serie should have the same tax rate for all categories`)
+          tierdIdToTaxRate.set(tier.id, tierVatRate);
 
-            // [WORKAROUND] Until we decide the right way to do, just keep a tax rate none null
-            taxRate = Math.max(taxRate, tierVatRate);
+          if (indicativeTaxRate !== null) {
+            // See comment about sorting tiers to understand why alignin tax rates when price is 0
+            if (tier.price === 0 && tierVatRate === 0) {
+              tierVatRate = indicativeTaxRate;
+            }
+
+            // If the event mixes multiple tax rates set it to null since we are not managing this
+            // Unfortunately it will cause the excluding taxes total being wrong but we are fine letting the end user correcting this
+            if (indicativeTaxRate !== tierVatRate) {
+              indicativeTaxRate = null;
+
+              break;
+            }
           }
 
-          // If there is no price on the tier, it means it's a "pay as you go" so ticket categories will be created
-          // while retrieving bought tickets for this tier
-          if (tier.price === null) {
-            dynamicTierIds.push(tier.id);
-
-            continue;
-          }
-
-          const ticketCategory = LiteTicketCategorySchema.parse({
-            internalTicketingSystemId: tier.id.toString(),
-            name: tier.label ?? `Tarif n°${tier.id}`,
-            description: null,
-            price: tier.price !== null ? tier.price / 100 : 0, // 2000 is 20€
-          });
-
-          schemaTicketCategories.set(ticketCategory.internalTicketingSystemId, ticketCategory);
+          indicativeTaxRate = tierVatRate;
         }
       }
 
-      const sortedDynamicTierIds = dynamicTierIds.sort(); // To always have the same labels on virtual ticket categories
+      // It's important to note HelloAsso is having only "1 event serie = 1 event" (there is no multiple representations for the same serie)
+      // We could have tried to merged them based on naming but it's kind of tricky before knowing well their customer usage of it
+      const schemaEvent = LiteEventSchema.parse({
+        internalTicketingSystemId: formResult.data.formSlug,
+        startAt: startDate,
+        endAt: endDate,
+        ticketingRevenueIncludingTaxes: 0,
+        ticketingRevenueExcludingTaxes: 0,
+        ticketingRevenueTaxRate: indicativeTaxRate,
+        freeTickets: 0,
+        paidTickets: 0,
+      });
 
       // Retrieve tickets to count the totals
       // TODO: it's not the exact type due to missing one from their OpenAPI schema, but almost the same so reusing it
@@ -404,84 +376,30 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         soldItemsCurrentCursor = soldItemsResultData.pagination.continuationToken;
       }
 
-      // HelloAsso does not allow modifying a ticket category once there is an order for it
-      // but since it allows a "pay as you want" type of ticket, we have to use our own duplication logic
-      // to split all those different amounts
-      // TODO: for now we are not managing discounts on the ticket category price, this should end with duplication logic
       for (const ticketItem of soldItems) {
-        let eventSalesId: string;
+        assert(ticketItem.tierId, 'the tier ID should be set on tickets');
 
-        // Consider "pay as you want" specifically to create virtual categories, and consider the rest as having its tier existing
-        if (ticketItem.priceCategory === 'Pwyw') {
-          const dynamicTierIdIndex = ticketItem.tierId !== null ? sortedDynamicTierIds.indexOf(ticketItem.tierId) : -1;
+        const tierTaxRate = tierdIdToTaxRate.get(ticketItem.tierId);
 
-          if (dynamicTierIdIndex === -1) {
-            throw new Error(`the "pay as you want" ticket should be bound to a tier`);
-          }
+        assert(tierTaxRate !== undefined, 'the tier tax rate should be retrieved');
 
-          const virtualTicketCategoryId = `${ticketItem.tierId}_${ticketItem.amount}`;
+        const ticketPriceIncludingTaxes = ticketItem.amount / 100; // 2000 is 20€
 
-          // If not existing create this virtual ticket category
-          if (!schemaTicketCategories.has(virtualTicketCategoryId)) {
-            const ticketCategory = LiteTicketCategorySchema.parse({
-              internalTicketingSystemId: virtualTicketCategoryId,
-              name: `${ticketItem.name ?? `Tarif libre`} (n°${dynamicTierIdIndex + 1})`,
-              description: null,
-              price: ticketItem.amount / 100, // 2000 is 20€
-            });
-
-            schemaTicketCategories.set(ticketCategory.internalTicketingSystemId, ticketCategory);
-          }
-
-          eventSalesId = virtualTicketCategoryId;
+        if (ticketPriceIncludingTaxes === 0) {
+          schemaEvent.freeTickets++;
         } else {
-          assert(ticketItem.tierId !== null);
-
-          eventSalesId = ticketItem.tierId.toString();
-        }
-
-        const ticketCategory = schemaTicketCategories.get(eventSalesId);
-
-        if (!ticketCategory) {
-          // TODO: it's weird the tier is not retrieved in the public form request
-          // we did contact the HelloAsso support, waiting for an explanation how to manage this
-          // In the meantime we are fine since after tests it happened old forms not in our synchronization scope
-          // but still we set a proper error in case it's more common than expected
-          throw helloassoMissingTierError;
-        }
-
-        assert(ticketCategory);
-
-        // Since there is only 1 event per "event serie" for HelloAsso, no need to complexify their map key
-        let eventSales = schemaEventSales.get(eventSalesId);
-
-        if (!eventSales) {
-          schemaEventSales.set(
-            ticketCategory.internalTicketingSystemId,
-            LiteEventSalesSchema.parse({
-              internalEventTicketingSystemId: formResult.data.formSlug,
-              internalTicketCategoryTicketingSystemId: ticketCategory.internalTicketingSystemId,
-              total: 1,
-            })
-          );
-        } else {
-          eventSales.total += 1;
+          schemaEvent.paidTickets++;
+          schemaEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes;
+          schemaEvent.ticketingRevenueExcludingTaxes += getExcludingTaxesAmountFromIncludingTaxesAmount(ticketPriceIncludingTaxes, tierTaxRate);
         }
       }
-
-      assert(taxRate !== null);
 
       eventsSeriesWrappers.push({
         serie: LiteEventSerieSchema.parse({
           internalTicketingSystemId: formResult.data.formSlug,
           name: formResult.data.title,
-          startAt: startDate,
-          endAt: endDate,
-          taxRate: taxRate,
         }),
-        events: schemaEvents,
-        ticketCategories: Array.from(schemaTicketCategories.values()),
-        sales: Array.from(schemaEventSales.values()),
+        events: [schemaEvent],
       });
     });
 

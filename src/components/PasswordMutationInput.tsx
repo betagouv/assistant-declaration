@@ -39,7 +39,7 @@ export function PasswordMutationInput({ label, error, nativeInputProps: { onChan
 
     if (!result.success) {
       for (const issue of result.error.issues) {
-        if (issue.code === z.ZodIssueCode.custom && issue.params?.type) {
+        if (issue.code === 'custom' && issue.params?.type) {
           switch (issue.params.type) {
             case passwordRequiresANumericError.code:
               values.numericValid = false;

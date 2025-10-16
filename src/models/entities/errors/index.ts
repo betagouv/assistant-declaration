@@ -40,6 +40,10 @@ const { t } = getServerTranslation('common', {
   lng: 'en',
 });
 
+// Factorize the message when using `ctx.issues.push()` where the input is expected
+// Note: passing `undefined` could lead to more complicated debugging
+export const inputReplacementForSensitiveData = { _internal: 'the original input for this validation is masked due to being sensitive' };
+
 //
 // Errors definition
 //
@@ -71,12 +75,6 @@ export const passwordRequiresASpecialCharactersError = new BusinessError(
   'passwordRequiresASpecialCharacters',
   t('errors.validation.newPassword.passwordRequiresASpecialCharacters')
 );
-export const phoneCombinationInvalidError = new BusinessError('phoneCombinationInvalid', t('errors.validation.phone.phoneCombinationInvalid'));
-export const phoneCombinationInvalidWithLeadingZeroWarningError = new BusinessError(
-  'phoneCombinationInvalidWithLeadingZeroWarning',
-  t('errors.validation.phone.phoneCombinationInvalidWithLeadingZeroWarning')
-);
-export const phoneInvalidError = new BusinessError('phoneInvalid', t('errors.validation.phone.phoneInvalid'));
 export const countryInvalidError = new BusinessError('countryInvalid', t('errors.validation.address.countryCode.countryInvalid'));
 
 // File management
@@ -119,6 +117,12 @@ export const userNotFoundError = new BusinessError('userNotFound', t('errors.cus
 
 // Organization
 export const officialIdMustBe9DigitsError = new BusinessError('officialIdMustBe9Digits', t('errors.validation.officialId.officialIdMustBe9Digits'));
+export const officialIdHeadquartersMustBe14DigitsError = new BusinessError(
+  'officialIdHeadquartersMustBe14Digits',
+  t('errors.validation.officialHeadquartersId.officialHeadquartersIdMustBe14Digits')
+);
+export const sacemIdMustBeDigitsError = new BusinessError('sacemIdMustBeDigits', t('errors.validation.sacemId.sacemIdMustBeDigits'));
+export const sacdIdMustBeDigitsError = new BusinessError('sacdIdMustBeDigits', t('errors.validation.sacdId.sacdIdMustBeDigits'));
 export const anotherOrganizationAlreadyHasThisOfficialIdError = new BusinessError(
   'anotherOrganizationAlreadyHasThisOfficialId',
   t('errors.custom.anotherOrganizationAlreadyHasThisOfficialId')
@@ -169,27 +173,27 @@ export const shotgunTooMuchToRetrieveError = new BusinessError('shotgunTooMuchTo
 
 // Event serie
 export const eventSerieNotFoundError = new BusinessError('eventSerieNotFound', t('errors.custom.eventSerieNotFound'));
+export const eventSeriePartialExpensesGreatherThanTotalError = new BusinessError(
+  'eventSeriePartialExpensesGreatherThanTotal',
+  t('errors.custom.eventSeriePartialExpensesGreatherThanTotal')
+);
 
 // Event category tickets
 export const cannotMutateTicketingDataOnceDeclaredError = new BusinessError(
   'cannotMutateTicketingDataOnceDeclared',
   t('errors.custom.cannotMutateTicketingDataOnceDeclared')
 );
-export const eventCategoryTicketsNotFoundError = new BusinessError('eventCategoryTicketsNotFound', t('errors.custom.eventCategoryTicketsNotFound'));
 
 // Declaration
 export const transmittedDeclarationCannotBeUpdatedError = new BusinessError(
   'transmittedDeclarationCannotBeUpdated',
   t('errors.custom.transmittedDeclarationCannotBeUpdated')
 );
-export const duplicateFluxEntryCategoryLabelError = new BusinessError(
-  'duplicateFluxEntryCategoryLabel',
-  t('errors.validation.accountingEntries.duplicateFluxEntryCategoryLabel')
+export const atLeastOneDeclarationTypeToTransmitError = new BusinessError(
+  'atLeastOneDeclarationTypeToTransmit',
+  t('errors.custom.atLeastOneDeclarationTypeToTransmit')
 );
-export const duplicateEntryCategoryLabelError = new BusinessError(
-  'duplicateEntryCategoryLabel',
-  t('errors.validation.accountingEntries.duplicateEntryCategoryLabel')
-);
+export const atLeastOneEventToTransmitError = new BusinessError('atLeastOneEventToTransmit', t('errors.custom.atLeastOneEventToTransmit'));
 export const sacemAgencyNotFoundError = new BusinessError('sacemAgencyNotFound', t('errors.custom.sacemAgencyNotFound'));
 export const sacemDeclarationUnsuccessfulError = new BusinessError('sacemDeclarationUnsuccessful', t('errors.custom.sacemDeclarationUnsuccessful'));
 export const sacdDeclarationIncorrectDeclarantError = new BusinessError(

@@ -1,19 +1,11 @@
 import { Client, createClient, createConfig } from '@hey-api/client-fetch';
 import slugify from '@sindresorhus/slugify';
-import { addDays, addMinutes, addYears, fromUnixTime, getUnixTime, isAfter, isBefore, set, subMonths } from 'date-fns';
+import { addMinutes, addYears, fromUnixTime, getUnixTime, subMonths } from 'date-fns';
 
 import { getClosingStatements } from '@ad/src/client/supersoniks';
+import { getExcludingTaxesAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
-import {
-  LiteEventSalesSchema,
-  LiteEventSalesSchemaType,
-  LiteEventSchema,
-  LiteEventSchemaType,
-  LiteEventSerieSchema,
-  LiteEventSerieWrapperSchemaType,
-  LiteTicketCategorySchema,
-  LiteTicketCategorySchemaType,
-} from '@ad/src/models/entities/event';
+import { LiteEventSchema, LiteEventSchemaType, LiteEventSerieSchema, LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
 import { JsonCollectionSchemaType, JsonGetClosingStatementsResponseSchema, JsonStatementSchemaType } from '@ad/src/models/entities/supersoniks';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
@@ -156,10 +148,6 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
     for (const [nonUniqueSerieId, serie] of series) {
       const schemaEvents: LiteEventSchemaType[] = [];
-      const schemaTicketCategories: LiteTicketCategorySchemaType[] = [];
-      const schemaEventSales: LiteEventSalesSchemaType[] = [];
-
-      let taxRate: number | null = null;
 
       for (const statement of serie.statements) {
         // Only consider event type (we did not face another type for now, but just in case)
@@ -171,33 +159,25 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
 
         const startDate = fromUnixTime(statement.session.start_date);
 
-        let endDate: Date;
+        let endDate: Date | null;
         if (statement.session.end_date !== null) {
           endDate = fromUnixTime(statement.session.end_date);
         } else if (statement.session.settings.duration !== null) {
           endDate = addMinutes(startDate, statement.session.settings.duration);
         } else {
-          // Doing as ticketing system Mapado that is setting by default the end date to the end of the night
-          endDate = set(addDays(startDate, 1), { hours: 5, minutes: 0, seconds: 0, milliseconds: 0 });
+          endDate = null;
         }
 
-        schemaEvents.push(
-          LiteEventSchema.parse({
-            internalTicketingSystemId: uniqueSessionId,
-            startAt: startDate,
-            endAt: endDate,
-          })
-        );
-
-        // Now since internally we manage a unique tax rate per event serie, we make sure all sessions are using the same
-        if (taxRate === null) {
-          taxRate = statement.session.settings.tax.rate;
-        } else if (taxRate !== statement.session.settings.tax.rate) {
-          // throw new Error(`an event serie should have the same tax rate for all sessions of a serie`)
-
-          // [WORKAROUND] Until we decide the right way to do, just keep a tax rate not null
-          taxRate = Math.max(taxRate, statement.session.settings.tax.rate);
-        }
+        const schemaEvent = LiteEventSchema.parse({
+          internalTicketingSystemId: uniqueSessionId,
+          startAt: startDate,
+          endAt: endDate,
+          ticketingRevenueIncludingTaxes: 0,
+          ticketingRevenueExcludingTaxes: 0,
+          ticketingRevenueTaxRate: statement.session.settings.tax.rate,
+          freeTickets: 0,
+          paidTickets: 0,
+        });
 
         // Supersoniks allow selling on partner platforms like FNAC/Digitick/Ticketmaster... so we look at those too
         // but we skip partial reimbursements from Supersoniks for now (see details below)
@@ -215,125 +195,32 @@ export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
           return false;
         });
 
-        // To not mess with slug and multiple occurences having spaces to be trimmed
-        // we use the slug from here because in some cases there are duplicates but with doubled spaces within the title
-        const enhancedPrices = allPrices.map((price) => {
-          const title = price.title.trim();
+        for (const price of allPrices) {
+          // TODO: are reductions accounted into `price.revenue`? Or within "prices" above that can be negative? Need to check with the Supersoniks team...
+          const ticketCategoryIncludingTaxes = price.amount;
 
-          return {
-            ...price,
-            title: title,
-            slug: slugify(title),
-          };
-        });
-
-        // Merge duplicates entries since for some reasons Supersoniks is displaying sometimes
-        // different entries with the same title and price (doing so will help below since renaming similar ones if different prices...)
-        const uniqueEnhancedPrices: typeof enhancedPrices = [];
-
-        for (const price of enhancedPrices) {
-          const existing = uniqueEnhancedPrices.find((uEP) => uEP.amount === price.amount && uEP.slug === price.slug);
-
-          if (existing) {
-            existing.quantity += price.quantity;
-            existing.revenue += price.revenue;
+          if (ticketCategoryIncludingTaxes === 0) {
+            schemaEvent.freeTickets += price.quantity;
           } else {
-            uniqueEnhancedPrices.push({ ...price });
+            schemaEvent.paidTickets += price.quantity;
+            schemaEvent.ticketingRevenueIncludingTaxes += price.revenue; // Excluding taxes will be calculated on the total since constant for a same event
           }
         }
 
-        // Detect duplicates on titles before looping to adjust logic from the first duplicate occurence
-        const renamedTicketCategoriesCounts = new Map<string, number>();
-        const slugs = uniqueEnhancedPrices.map((uniqueEnhancedPrice) => uniqueEnhancedPrice.slug);
-        const duplicates = slugs.filter((slug, i, arr) => arr.indexOf(slug) !== i);
-        const uniqueDuplicates = [...new Set(duplicates)];
+        schemaEvent.ticketingRevenueExcludingTaxes = getExcludingTaxesAmountFromIncludingTaxesAmount(
+          schemaEvent.ticketingRevenueIncludingTaxes,
+          schemaEvent.ticketingRevenueTaxRate ?? 0
+        );
 
-        // The Supersoniks logic differs from ours since it exposes a category price per event date
-        // whereas we consider it per event serie... We try to merge those that are the same hoping it will work in most case
-        for (const enhancedPrice of uniqueEnhancedPrices) {
-          // They do not expose internal ID so we consider using the name as slug
-          // but we have in addition to add the serie ID to make it unique during comparaisons (since across series they are likely to have the same name)
-          //
-          // Also, Supersoniks may list multiple internal prices with the same name for the same session if the price
-          // has changed over time so we have to differenciate them since they have different prices
-          // Note: we applied the suffix on all (not just 2+) because in case the order change in the API we want the "first one" to be correctly consistently patched
-          let fallbackTicketCategoryId: string = `fallback_${nonUniqueSerieId}_${enhancedPrice.slug}`;
-
-          if (uniqueDuplicates.includes(enhancedPrice.slug)) {
-            const previousOccurencesCount = renamedTicketCategoriesCounts.get(enhancedPrice.slug) ?? 0;
-            const currentOccurencesCount = previousOccurencesCount + 1;
-
-            fallbackTicketCategoryId = `${fallbackTicketCategoryId}_${enhancedPrice.amount}`;
-            enhancedPrice.title = `${enhancedPrice.title} (n°${currentOccurencesCount})`;
-
-            renamedTicketCategoriesCounts.set(enhancedPrice.slug, currentOccurencesCount);
-          }
-
-          fallbackTicketCategoryId = this.formatForUniqueness(fallbackTicketCategoryId);
-
-          let ticketCategory = schemaTicketCategories.find((schemaTicketCategory) => {
-            // Will only be true for ticket categories across sessions having 1 price over the serie period
-            return schemaTicketCategory.internalTicketingSystemId === fallbackTicketCategoryId && schemaTicketCategory.price === enhancedPrice.amount;
-          });
-
-          if (!ticketCategory) {
-            ticketCategory = LiteTicketCategorySchema.parse({
-              internalTicketingSystemId: fallbackTicketCategoryId,
-              name: enhancedPrice.title,
-              description: null,
-              price: enhancedPrice.amount,
-            });
-
-            schemaTicketCategories.push(ticketCategory);
-          }
-
-          let relatedEventSales = schemaEventSales.find((eventSales) => {
-            return (
-              eventSales.internalEventTicketingSystemId === uniqueSessionId &&
-              eventSales.internalTicketCategoryTicketingSystemId === fallbackTicketCategoryId
-            );
-          });
-
-          assert(!relatedEventSales);
-
-          schemaEventSales.push(
-            LiteEventSalesSchema.parse({
-              internalEventTicketingSystemId: uniqueSessionId,
-              internalTicketCategoryTicketingSystemId: fallbackTicketCategoryId,
-              total: enhancedPrice.quantity,
-            })
-          );
-        }
+        schemaEvents.push(schemaEvent);
       }
-
-      // Calculate the date range for the event serie
-      let serieStartDate: Date | null = null;
-      let serieEndDate: Date | null = null;
-
-      for (const schemaEvent of schemaEvents) {
-        if (serieStartDate === null || isBefore(schemaEvent.startAt, serieStartDate)) {
-          serieStartDate = schemaEvent.startAt;
-        }
-
-        if (serieEndDate === null || isAfter(schemaEvent.endAt, serieEndDate)) {
-          serieEndDate = schemaEvent.endAt;
-        }
-      }
-
-      assert(serieStartDate !== null && serieEndDate !== null);
-      assert(taxRate !== null);
 
       eventsSeriesWrappers.push({
         serie: LiteEventSerieSchema.parse({
           internalTicketingSystemId: this.formatForUniqueness(nonUniqueSerieId),
           name: serie.name,
-          startAt: serieStartDate,
-          endAt: serieEndDate,
-          taxRate: taxRate,
         }),
         events: schemaEvents,
-        ticketCategories: schemaTicketCategories,
-        sales: Array.from(schemaEventSales.values()),
       });
     }
 

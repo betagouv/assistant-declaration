@@ -52,7 +52,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
     resolver: zodResolver(ConnectTicketingSystemSchema),
     defaultValues: {
       organizationId: props.prefill?.organizationId,
-      ticketingSystemName: TicketingSystemNameSchema.Values.BILLETWEB,
+      ticketingSystemName: TicketingSystemNameSchema.enum.BILLETWEB,
       ...props.prefill,
     },
   });
@@ -96,7 +96,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
 
     // Reset the value if the field is not required so it's not passed when submitting (empty string will be converted to null)
     if (!required) {
-      setValue('apiAccessKey', '');
+      setValue('apiAccessKey', '', { shouldDirty: true });
     }
   }, [watchedTicketingSystemName, setValue]);
 
@@ -114,7 +114,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
                 defaultValue: control._defaultValues.ticketingSystemName || '',
               }}
               options={[
-                ...Object.values(TicketingSystemNameSchema.Values).map((ticketingSystemName) => {
+                ...TicketingSystemNameSchema.options.map((ticketingSystemName) => {
                   return {
                     label: t(`model.ticketingSystemName.enum.${ticketingSystemName}`),
                     value: ticketingSystemName,
@@ -162,6 +162,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
               </div>
               <div className={fr.cx('fr-fieldset__element')}>
                 <Alert
+                  as="h2"
                   severity="info"
                   small={false}
                   title="Tutoriel de branchement"
