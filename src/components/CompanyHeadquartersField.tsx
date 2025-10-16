@@ -77,6 +77,7 @@ export function CompanyHeadquartersField(props: PropsWithChildren<CompanyHeadqua
     <Autocomplete
       value={adjustedValue}
       options={searchCompanyHeadquartersQuerySuggestions}
+      filterOptions={(options, state) => options} // We want to show results from the API without any additional filtering from MUI
       renderInput={({ InputProps, disabled, id, inputProps }) => {
         return (
           <Input
@@ -108,7 +109,6 @@ export function CompanyHeadquartersField(props: PropsWithChildren<CompanyHeadqua
           </li>
         );
       }}
-      isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // Since it relies on intermediate objects we provide a hard way (no unique ID for those)
       getOptionLabel={(option) => {
         return formatMaskedValue(officialHeadquartersIdMask, option.officialHeadquartersId);
       }}

@@ -3,7 +3,7 @@ export const baseUrl = 'https://recherche-entreprises.api.gouv.fr';
 export interface CompanyApiResult {
   siren: string;
   nom_complet: string; // That's a concatenation of the official name and the "sigle" when specified
-  nom_raison_sociale: string;
+  nom_raison_sociale: string | null;
   sigle: string | null;
   siege: {
     geo_id: string | null;
@@ -50,7 +50,7 @@ export async function searchCompanySuggestions(query: string): Promise<CompanySu
       return {
         officialId: result.siren,
         officialHeadquartersId: result.siege.siret,
-        name: result.nom_raison_sociale,
+        name: result.nom_raison_sociale ?? result.nom_complet,
         inlineHeadquartersAddress: result.siege.geo_adresse ?? result.siege.adresse, // For foreign companies registered the beautified `geo_adresse` is null, so using ugly `adresse`
       };
     });
