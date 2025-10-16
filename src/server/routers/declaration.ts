@@ -502,7 +502,16 @@ export const declarationRouter = router({
                   officialHeadquartersId: true,
                   sacemId: true,
                   sacdId: true,
-                  headquartersAddress: true,
+                  headquartersAddress: {
+                    select: {
+                      id: true,
+                      street: true,
+                      city: true,
+                      postalCode: true,
+                      subdivision: true,
+                      countryCode: true,
+                    },
+                  },
                 },
               },
             },
