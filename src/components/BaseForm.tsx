@@ -1,5 +1,6 @@
+import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { DevTool } from '@hookform/devtools';
-import { Alert, Grid } from '@mui/material';
 import * as Sentry from '@sentry/nextjs';
 import { Mutex } from 'locks';
 import { CSSProperties, FormEventHandler, MutableRefObject, PropsWithChildren, useMemo, useRef, useState } from 'react';
@@ -99,25 +100,30 @@ export function BaseForm<FormSchemaType extends FieldValues>(props: PropsWithChi
       {/* <DevTool control={props.control} /> */}
 
       <form onSubmit={onSubmit} aria-label={props.ariaLabel} style={props.style} ref={setMultipleRefs}>
-        <Grid container spacing={2}>
+        <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
           {!!onSubmitError && (
-            <Grid item xs={12} sx={{ py: 2 }}>
+            <div className={fr.cx('fr-col-12', 'fr-py-4v')}>
               <ErrorAlert errors={[onSubmitError]} />
-            </Grid>
+            </div>
           )}
 
           {validationErrorsCount > 0 && (
-            <Grid item xs={12} sx={{ py: 2 }}>
-              <Alert severity="error">
-                {validationErrors && '' in validationErrors
-                  ? capitalizeFirstLetter(validationErrors['']?.message as string) // Uppercase first letter since our errors are lowercase by default for flexibility
-                  : t('components.BaseForm.form_contains_errors', { count: validationErrorsCount })}
-              </Alert>
-            </Grid>
+            <div className={fr.cx('fr-col-12', 'fr-py-4v')}>
+              <Alert
+                severity="error"
+                small={false}
+                title="Une erreur est survenue"
+                description={
+                  validationErrors && '' in validationErrors
+                    ? capitalizeFirstLetter(validationErrors['']?.message as string) // Uppercase first letter since our errors are lowercase by default for flexibility
+                    : t('components.BaseForm.form_contains_errors', { count: validationErrorsCount })
+                }
+              />
+            </div>
           )}
 
           {props.children}
-        </Grid>
+        </div>
       </form>
     </>
   );

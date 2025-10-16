@@ -4,3 +4,17 @@
   object-fit: contain;
   object-position: left center;
 }
+
+.logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+
+  a {
+    background: none;
+
+    &::after {
+      display: none;
+    }
+  }
+}

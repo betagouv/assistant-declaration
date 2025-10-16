@@ -9,7 +9,7 @@ type ComponentType = typeof AboutPage;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Pages/Home',
+  title: 'Pages/About',
   component: AboutPage,
   ...generateMetaDefault({
     parameters: {},

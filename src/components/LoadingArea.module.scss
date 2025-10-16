@@ -1,0 +1,18 @@
+.container {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.spinner {
+  transition: opacity 0.5s ease-in-out;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

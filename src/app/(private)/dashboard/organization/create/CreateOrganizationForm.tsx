@@ -1,15 +1,15 @@
 'use client';
 
+import { fr } from '@codegouvfr/react-dsfr';
+import { Input } from '@codegouvfr/react-dsfr/Input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Save } from '@mui/icons-material';
-import { Button, Grid, TextField } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
-import { createOfficialIdMaskInput } from '@ad/src/components/OfficialIdField';
+import { Button } from '@ad/src/components/Button';
+import { CompanyHeadquartersField } from '@ad/src/components/CompanyHeadquartersField';
 import { CreateOrganizationPrefillSchemaType, CreateOrganizationSchema, CreateOrganizationSchemaType } from '@ad/src/models/actions/organization';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
@@ -26,6 +26,7 @@ export function CreateOrganizationForm(props: CreateOrganizationFormProps) {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
     control,
   } = useForm<CreateOrganizationSchemaType>({
     resolver: zodResolver(CreateOrganizationSchema),
@@ -42,49 +43,62 @@ export function CreateOrganizationForm(props: CreateOrganizationFormProps) {
 
   return (
     <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="créer une organisation">
-      <Grid item xs={12}>
-        <TextField type="text" label="Nom" {...register('name')} error={!!errors.name} helperText={errors?.name?.message} fullWidth />
-      </Grid>
-      <Grid item xs={12}>
-        <Controller
-          control={control}
-          name="officialId"
-          defaultValue={control._defaultValues.officialId || ''}
-          render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
-            // Needed to listen for unmasked value
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            const component = useMemo(
-              () =>
-                createOfficialIdMaskInput({
-                  onAccept: (unmaskedValue) => {
-                    onChange(unmaskedValue);
-                  },
-                }),
-              [onChange]
-            );
+      <div className={fr.cx('fr-col-12')}>
+        <fieldset className={fr.cx('fr-fieldset')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Controller
+              control={control}
+              name="officialHeadquartersId"
+              render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                return (
+                  <CompanyHeadquartersField
+                    value={value ? { officialHeadquartersId: value } : null}
+                    defaultSuggestions={[]}
+                    inputProps={{
+                      label: 'N° Siret',
+                      nativeInputProps: {
+                        placeholder: "Recherche par identifiant ou nom de l'entreprise",
+                      },
+                    }}
+                    onChange={(newValue) => {
+                      if (newValue) {
+                        onChange(newValue.officialHeadquartersId);
 
-            return (
-              <TextField
-                type="text"
-                label="N° Siren"
-                value={value}
-                onBlur={onBlur}
-                error={!!error}
-                helperText={error?.message}
-                fullWidth
-                InputProps={{
-                  inputComponent: component,
-                }}
-              />
-            );
-          }}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <Button type="submit" loading={createOrganization.isPending} size="large" variant="contained" startIcon={<Save />} fullWidth>
-          Sauvegarder
-        </Button>
-      </Grid>
+                        // Fill in the name input, the user will still be able to adjust it
+                        setValue('name', newValue.name, { shouldDirty: true });
+                      } else {
+                        onChange(null); // Do not override the name in this case
+                      }
+                    }}
+                    onBlur={onBlur}
+                    errorMessage={error?.message}
+                  />
+                );
+              }}
+            />
+          </div>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Input
+              label="Nom"
+              state={!!errors.name ? 'error' : undefined}
+              stateRelatedMessage={errors?.name?.message}
+              nativeInputProps={{
+                ...register('name'),
+              }}
+            />
+          </div>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <ul className={fr.cx('fr-btns-group')}>
+              <li>
+                <Button type="submit" loading={createOrganization.isPending}>
+                  <span className={fr.cx('fr-icon-save-3-fill')} style={{ marginRight: 5 }} aria-hidden="true"></span>
+                  Sauvegarder
+                </Button>
+              </li>
+            </ul>
+          </div>
+        </fieldset>
+      </div>
     </BaseForm>
   );
 }

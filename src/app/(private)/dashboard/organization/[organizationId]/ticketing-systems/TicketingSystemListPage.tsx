@@ -1,7 +1,7 @@
 'use client';
 
-import { AddCircleOutline } from '@mui/icons-material';
-import { Button, Grid, Typography } from '@mui/material';
+import { fr } from '@codegouvfr/react-dsfr';
+import { cx } from '@codegouvfr/react-dsfr/tools/cx';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { useCallback } from 'react';
@@ -10,7 +10,6 @@ import { trpc } from '@ad/src/client/trpcClient';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { TicketingSystemCard } from '@ad/src/components/TicketingSystemCard';
-import { centeredAlertContainerGridProps, centeredContainerGridProps, ulComponentResetStyles } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 
@@ -45,49 +44,46 @@ export function TicketingSystemListPage({ params: { organizationId } }: Ticketin
 
   if (aggregatedQueries.hasError) {
     return (
-      <Grid container {...centeredAlertContainerGridProps}>
-        <ErrorAlert errors={aggregatedQueries.errors} refetchs={aggregatedQueries.refetchs} />
-      </Grid>
+      <div className={fr.cx('fr-container', 'fr-py-12v')}>
+        <div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+          <div className={fr.cx('fr-col-md-8', 'fr-col-lg-6')}>
+            <ErrorAlert errors={aggregatedQueries.errors} refetchs={aggregatedQueries.refetchs} />
+          </div>
+        </div>
+      </div>
     );
   } else if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="page" />;
   }
 
   return (
-    <>
-      <Grid container {...centeredContainerGridProps} alignContent="flex-start">
-        <Grid container spacing={1} sx={{ pb: 3 }}>
-          <Grid item xs={12} md={7} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography component="h1" variant="h5">
-              Mes billetteries connectées
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'right' }}>
-            <Button
-              component={NextLink}
-              href={linkRegistry.get('ticketingSystemConnection', { organizationId: organizationId })}
-              size="large"
-              variant="contained"
-              startIcon={<AddCircleOutline />}
-            >
-              Connecter une billetterie
-            </Button>
-          </Grid>
-        </Grid>
-        {ticketingSystems.length ? (
-          <Grid container component="ul" spacing={3} sx={ulComponentResetStyles}>
-            {ticketingSystems.map((ticketingSystem) => (
-              <Grid key={ticketingSystem.id} item component="li" xs={12} sm={6}>
-                <TicketingSystemCard ticketingSystem={ticketingSystem} disconnectAction={() => disconnectTicketingSystemAction(ticketingSystem.id)} />
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Grid item xs={12}>
-            <Typography variant="body2">Aucune billetterie n&apos;est pour l&apos;instant connectée</Typography>
-          </Grid>
-        )}
-      </Grid>
-    </>
+    <div className={fr.cx('fr-container', 'fr-py-12v')}>
+      <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-pb-6v')}>
+        <div className={fr.cx('fr-col-12', 'fr-col-md-7')} style={{ display: 'flex', alignItems: 'center' }}>
+          <h1 className={fr.cx('fr-h5', 'fr-m-0')}>Mes billetteries connectées</h1>
+        </div>
+        <div className={fr.cx('fr-col-12', 'fr-col-md-5')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'right' }}>
+          <NextLink href={linkRegistry.get('ticketingSystemConnection', { organizationId: organizationId })} className={fr.cx('fr-btn')}>
+            <span className={fr.cx('fr-icon-add-circle-line')} style={{ marginRight: 5 }} aria-hidden="true"></span>
+            Connecter une billetterie
+          </NextLink>
+        </div>
+      </div>
+      {ticketingSystems.length ? (
+        <ul className={cx('ulReset', fr.cx('fr-grid-row', 'fr-grid-row--gutters'))}>
+          {ticketingSystems.map((ticketingSystem) => (
+            <li key={ticketingSystem.id} className={fr.cx('fr-col-12', 'fr-col-sm-6')}>
+              <TicketingSystemCard ticketingSystem={ticketingSystem} disconnectAction={() => disconnectTicketingSystemAction(ticketingSystem.id)} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+          <div className={fr.cx('fr-col-12')}>
+            <p>Aucune billetterie n&apos;est pour l&apos;instant connectée</p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

@@ -1,9 +1,10 @@
-import { Button } from '@mui/material';
+import { fr } from '@codegouvfr/react-dsfr';
 import { Meta, StoryFn } from '@storybook/react';
 import { useState } from 'react';
 import { within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
+import { Button } from '@ad/src/components/Button';
 import { ClipboardTicketingEventsSales } from '@ad/src/components/ClipboardTicketingEventsSales';
 import { ClipboardTrigger } from '@ad/src/components/ClipboardTrigger';
 import { eventsWrappers } from '@ad/src/fixtures/event';
@@ -34,8 +35,9 @@ const Template: StoryFn<ComponentType> = (args) => {
         onClick={async () => {
           setTriggerCopy(true);
         }}
-        variant="contained"
-        sx={{ width: 'fit-content', mt: 3 }}
+        nativeButtonProps={{
+          className: fr.cx('fr-mt-6v'),
+        }}
       >
         Copy
       </Button>

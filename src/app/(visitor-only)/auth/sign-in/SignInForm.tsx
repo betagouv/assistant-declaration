@@ -1,31 +1,21 @@
 'use client';
 
+import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
+import { Input } from '@codegouvfr/react-dsfr/Input';
+import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import {
-  Alert,
-  Button,
-  Checkbox,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  Grid,
-  IconButton,
-  InputAdornment,
-  Link,
-  TextField,
-  Typography,
-} from '@mui/material';
 import { Mutex } from 'locks';
 import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
+import { Button } from '@ad/src/components/Button';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SignInPrefillSchemaType, SignInSchema, SignInSchemaType } from '@ad/src/models/actions/auth';
@@ -182,94 +172,91 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
     }
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleMouseDownPassword = () => setShowPassword(!showPassword);
-
   if (!readyToDisplay) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   }
 
   return (
     <BaseForm handleSubmit={enhancedHandleSubmit} onSubmit={onSubmit} control={control} ariaLabel="se connecter" innerRef={formContainerRef}>
-      {(!!error || !!confirmSignUpError || showSessionEndBlock || showConfirmedBlock) && (
-        <Grid item xs={12}>
-          {!!error && <ErrorAlert errors={[error]} />}
-          {!!confirmSignUpError && <ErrorAlert errors={[confirmSignUpError]} />}
-          {showSessionEndBlock && <Alert severity="success">Vous avez bien été déconnecté</Alert>}
-          {showConfirmedBlock && (
-            <Alert severity="success">
-              Votre inscription est finalisée, vous pouvez dès à présent vous connecter pour accéder au tableau de bord.
-            </Alert>
+      <div className={fr.cx('fr-col-12')}>
+        <fieldset className={fr.cx('fr-fieldset')}>
+          {(!!error || !!confirmSignUpError || showSessionEndBlock || showConfirmedBlock) && (
+            <div className={fr.cx('fr-fieldset__element')}>
+              {!!error && <ErrorAlert errors={[error]} />}
+              {!!confirmSignUpError && <ErrorAlert errors={[confirmSignUpError]} />}
+              {showSessionEndBlock && <Alert severity="success" small={false} title="Succès" description="Vous avez bien été déconnecté" />}
+              {showConfirmedBlock && (
+                <Alert
+                  severity="success"
+                  small={false}
+                  title="Succès"
+                  description="Votre inscription est finalisée, vous pouvez dès à présent vous connecter pour accéder au tableau de bord."
+                />
+              )}
+            </div>
           )}
-        </Grid>
-      )}
-      <Grid item xs={12}>
-        <TextField type="email" label="Email" {...register('email')} error={!!errors.email} helperText={errors?.email?.message} fullWidth />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          type={showPassword ? 'text' : 'password'}
-          label="Mot de passe"
-          {...register('password')}
-          autoComplete="current-password"
-          error={!!errors.password}
-          helperText={errors?.password?.message}
-          fullWidth
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="changer la visibilité du mot de passe"
-                  onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                >
-                  {showPassword ? <Visibility /> : <VisibilityOff />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Grid>
-      <Grid item xs={12} sx={{ display: 'none' }}>
-        <FormControl error={!!errors.rememberMe}>
-          {/* TODO: really manage "rememberMe" */}
-          <FormControlLabel label="Rester connecté" control={<Checkbox {...register('rememberMe')} defaultChecked />} />
-          <FormHelperText>{errors?.rememberMe?.message}</FormHelperText>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12}>
-        <Button type="submit" loading={mutex.isLocked} size="large" variant="contained" fullWidth>
-          Se connecter
-        </Button>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography color="textSecondary" variant="body2">
-          <Link component={NextLink} href={linkRegistry.get('forgottenPassword', undefined)} variant="subtitle2" underline="none">
-            Mot de passe oublié ?
-          </Link>
-        </Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Divider variant="fullWidth" sx={{ p: 0, my: 1 }} />
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h4" sx={{ mb: 2 }}>
-          Vous n&apos;avez pas de compte ?
-        </Typography>
-        <Button
-          component={NextLink}
-          href={linkRegistry.get('signUp', undefined)}
-          size="large"
-          variant="outlined"
-          fullWidth
-          sx={{
-            backgroundImage: 'none !important',
-          }}
-        >
-          Créer un compte
-        </Button>
-      </Grid>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Input
+              label="Email"
+              state={!!errors.email ? 'error' : undefined}
+              stateRelatedMessage={errors?.email?.message}
+              nativeInputProps={{
+                type: 'email',
+                ...register('email'),
+              }}
+            />
+          </div>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <PasswordInput
+              label="Mot de passe"
+              messages={errors?.password ? [{ severity: 'error', message: errors?.password?.message }] : []}
+              nativeInputProps={{
+                ...register('password'),
+                autoComplete: 'current-password',
+              }}
+            />
+          </div>
+          <div className={fr.cx('fr-fieldset__element')} style={{ display: 'none' }}>
+            <Checkbox
+              options={[
+                {
+                  label: 'Se souvenir de moi',
+                  nativeInputProps: {
+                    ...register('rememberMe'),
+                    value: 'true',
+                  },
+                },
+              ]}
+              state={!!errors.rememberMe ? 'error' : undefined}
+              stateRelatedMessage={errors?.rememberMe?.message}
+              small
+            />
+          </div>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <ul className={fr.cx('fr-btns-group')}>
+              <li>
+                <Button type="submit" loading={mutex.isLocked}>
+                  Se connecter
+                </Button>
+              </li>
+            </ul>
+          </div>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <NextLink href={linkRegistry.get('forgottenPassword', undefined)} className={fr.cx('fr-link')}>
+              Mot de passe oublié ?
+            </NextLink>
+          </div>
+        </fieldset>
+        <hr />
+        <h2 className={fr.cx('fr-h4')}>Vous n&apos;avez pas de compte ?</h2>
+        <ul className={fr.cx('fr-btns-group')}>
+          <li>
+            <NextLink href={linkRegistry.get('signUp', undefined)} className={fr.cx('fr-btn', 'fr-btn--secondary')}>
+              Créer un compte
+            </NextLink>
+          </li>
+        </ul>
+      </div>
     </BaseForm>
   );
 }

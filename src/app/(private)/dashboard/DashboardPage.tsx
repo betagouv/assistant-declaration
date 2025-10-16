@@ -1,14 +1,14 @@
 'use client';
 
-import { Button, Container, Grid, Typography } from '@mui/material';
+import { fr } from '@codegouvfr/react-dsfr';
 import NextLink from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { trpc } from '@ad/src/client/trpcClient';
+import { Button } from '@ad/src/components/Button';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { useLiveChat } from '@ad/src/components/live-chat/useLiveChat';
-import { centeredAlertContainerGridProps } from '@ad/src/utils/grid';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export interface DashboardPageProps {}
@@ -22,9 +22,13 @@ export function DashboardPage(props: DashboardPageProps) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (error) {
     return (
-      <Grid container {...centeredAlertContainerGridProps}>
-        <ErrorAlert errors={[error]} refetchs={[refetch]} />
-      </Grid>
+      <div className={fr.cx('fr-container', 'fr-py-12v')}>
+        <div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+          <div className={fr.cx('fr-col-md-8', 'fr-col-lg-6')}>
+            <ErrorAlert errors={[error]} refetchs={[refetch]} />
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -44,35 +48,30 @@ export function DashboardPage(props: DashboardPageProps) {
   } else {
     // Simple user cannot see much
     return (
-      <Container
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          py: 3,
-        }}
-      >
-        <Grid container sx={{ justifyContent: 'center' }}>
-          <Grid item xs={12}>
-            <Typography component="h1" variant="h4" sx={{ textAlign: 'center', py: 2 }}>
-              Bienvenue sur la plateforme !
-            </Typography>
-            <Typography component="p" variant="body2" sx={{ textAlign: 'center', py: 2 }}>
-              Pour commencer à synchroniser votre billetterie pour les déclarations, votre compte doit être rattaché à une organisation.
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sx={{ pt: 3, pb: 1, textAlign: 'center' }}>
-            <Button component={NextLink} href={linkRegistry.get('organizationCreation', undefined)} size="large" variant="contained">
+      <div className={fr.cx('fr-container', 'fr-py-12v')} style={{ height: '100%' }}>
+        <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')} style={{ height: '100%' }}>
+          <div
+            className={fr.cx('fr-col-12')}
+            style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}
+          >
+            <h1 className={fr.cx('fr-h4')}>Bienvenue sur la plateforme !</h1>
+            <p>Pour commencer à synchroniser votre billetterie pour les déclarations, votre compte doit être rattaché à une organisation.</p>
+            <NextLink href={linkRegistry.get('organizationCreation', undefined)} className={fr.cx('fr-btn', 'fr-mt-8v')}>
               Créer une organisation sur la plateforme
-            </Button>
-          </Grid>
-          <Grid item xs={12} sx={{ pt: 1, pb: 3, textAlign: 'center' }}>
-            <Button onClick={showLiveChat} loading={isLiveChatLoading} size="large" variant="outlined">
+            </NextLink>
+            <Button
+              onClick={showLiveChat}
+              loading={isLiveChatLoading}
+              priority="secondary"
+              nativeButtonProps={{
+                className: fr.cx('fr-mt-4v'),
+              }}
+            >
               Demander à être rattaché(e) à une organisation créée par un collègue
             </Button>
-          </Grid>
-        </Grid>
-      </Container>
+          </div>
+        </div>
+      </div>
     );
   }
 }

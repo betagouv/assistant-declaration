@@ -127,6 +127,7 @@ export const multipleUserOrganizationsCreationError = new BusinessError(
   'multipleUserOrganizationsCreation',
   t('errors.custom.multipleUserOrganizationsCreation')
 );
+export const organizationMaskedAddressError = new BusinessError('organizationMaskedAddress', t('errors.custom.organizationMaskedAddress'));
 export const organizationNotFoundError = new BusinessError('organizationNotFound', t('errors.custom.organizationNotFound'));
 export const collaboratorCanOnlySeeOrganizationEventsSeriesError = new BusinessError(
   'collaboratorCanOnlySeeOrganizationEventsSeries',

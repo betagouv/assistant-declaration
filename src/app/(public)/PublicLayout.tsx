@@ -2,11 +2,10 @@
 
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { HeaderProps } from '@codegouvfr/react-dsfr/Header';
-import { ArrowForward } from '@mui/icons-material';
-import { Button } from '@mui/material';
 import { usePathname } from 'next/navigation';
 import { PropsWithChildren, useMemo } from 'react';
 
+import styles from '@ad/src/app/(public)/PublicLayout.module.scss';
 import '@ad/src/app/(public)/layout.scss';
 import { ContentWrapper } from '@ad/src/components/ContentWrapper';
 import { FlashMessage } from '@ad/src/components/FlashMessage';
@@ -34,18 +33,12 @@ export function PublicLayout(props: PropsWithChildren) {
   const stickyMenu = useMemo(() => pathname === linkRegistry.get('about', undefined), [pathname]);
 
   quickAccessItems.push({
-    iconId: undefined as any,
+    iconId: 'fr-icon-arrow-right-line',
     linkProps: {
+      className: styles.primaryLink,
       href: sessionWrapper.status === 'authenticated' ? linkRegistry.get('dashboard', undefined) : linkRegistry.get('signIn', undefined),
-      style: {
-        padding: 0,
-      },
     },
-    text: (
-      <Button component="span" size="small" variant="contained" startIcon={<ArrowForward />}>
-        Accès outil
-      </Button>
-    ),
+    text: 'Accès outil',
   });
 
   return (

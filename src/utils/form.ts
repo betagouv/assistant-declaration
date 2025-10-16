@@ -1,3 +1,4 @@
+import { FrCxArg } from '@codegouvfr/react-dsfr';
 import { TypographyProps } from '@mui/material';
 import { RegisterOptions } from 'react-hook-form';
 
@@ -24,3 +25,5 @@ export const formTitleProps: TypographyProps<'h1'> = {
     mb: 2,
   },
 };
+
+export const formTitleClasses: FrCxArg[] = ['fr-h4'];

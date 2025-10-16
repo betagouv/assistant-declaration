@@ -1,13 +1,15 @@
 'use client';
 
+import { fr } from '@codegouvfr/react-dsfr';
+import { Input } from '@codegouvfr/react-dsfr/Input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Grid, Link, TextField, Typography } from '@mui/material';
 import NextLink from 'next/link';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { BaseForm } from '@ad/src/components/BaseForm';
+import { Button } from '@ad/src/components/Button';
 import { RequestNewPasswordPrefillSchemaType, RequestNewPasswordSchema, RequestNewPasswordSchemaType } from '@ad/src/models/actions/auth';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
@@ -39,21 +41,31 @@ export function RetrievePasswordForm(props: RetrievePasswordFormProps) {
 
   return (
     <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="demander à réinitialiser son mot de passe">
-      <Grid item xs={12}>
-        <TextField type="email" label="Email" {...register('email')} error={!!errors.email} helperText={errors?.email?.message} fullWidth />
-      </Grid>
-      <Grid item xs={12}>
-        <Button type="submit" loading={requestNewPassword.isPending} size="large" variant="contained" fullWidth>
-          Valider
-        </Button>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography color="textSecondary" variant="body2">
-          <Link component={NextLink} href={linkRegistry.get('signIn', undefined)} variant="subtitle2" underline="none">
-            Retourner à la page de connexion
-          </Link>
-        </Typography>
-      </Grid>
+      <div className={fr.cx('fr-col-12')}>
+        <Input
+          label="Email"
+          state={!!errors.email ? 'error' : undefined}
+          stateRelatedMessage={errors?.email?.message}
+          nativeInputProps={{
+            type: 'email',
+            ...register('email'),
+          }}
+        />
+      </div>
+      <div className={fr.cx('fr-col-12')}>
+        <ul className={fr.cx('fr-btns-group')}>
+          <li>
+            <Button type="submit" loading={requestNewPassword.isPending}>
+              Valider
+            </Button>
+          </li>
+        </ul>
+      </div>
+      <div className={fr.cx('fr-col-12')}>
+        <NextLink href={linkRegistry.get('signIn', undefined)} className={fr.cx('fr-link')}>
+          Retourner à la page de connexion
+        </NextLink>
+      </div>
     </BaseForm>
   );
 }
