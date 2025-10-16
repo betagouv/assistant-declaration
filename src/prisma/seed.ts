@@ -58,6 +58,16 @@ export async function seedDatabase(prismaClient: PrismaClient) {
     data: {
       name: 'Les spectacles de Coucou',
       officialId: '123456789',
+      officialHeadquartersId: '12345678900011',
+      headquartersAddress: {
+        create: {
+          street: '1 rue de la Gare',
+          city: 'Rennes',
+          postalCode: '35000',
+          subdivision: '',
+          countryCode: 'FR',
+        },
+      },
     },
   });
 

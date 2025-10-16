@@ -37,6 +37,16 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
   workerSrcValues.push("'self'", 'blob:');
 }
 
+// Organization directory settings
+{
+  connectSrcValues.push('https://recherche-entreprises.api.gouv.fr/');
+}
+
+// National address base settings
+{
+  connectSrcValues.push('https://data.geopf.fr/');
+}
+
 if (process.env.NODE_ENV === 'development') {
   // Due to Next.js hot reload in development we need to allow `eval()`
   // Ref: https://github.com/vercel/next.js/issues/14221

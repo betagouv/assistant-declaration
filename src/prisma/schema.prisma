@@ -64,6 +64,7 @@ model Address {
   updatedAt DateTime @default(now()) @updatedAt
 
   SacdDeclarationOrganization SacdDeclarationOrganization[]
+  Organization                Organization?
 }
 
 enum PhoneType {
@@ -143,14 +144,18 @@ model LiveChatSettings {
 }
 
 model Organization {
-  id         String @id @default(uuid()) @db.Uuid
-  name       String
-  officialId String @unique
+  id                     String  @id @default(uuid()) @db.Uuid
+  name                   String
+  officialId             String  @unique
+  officialHeadquartersId String? @unique
+  headquartersAddressId  String? @unique @db.Uuid
 
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @default(now()) @updatedAt
-  TicketingSystem TicketingSystem[]
-  Collaborator    Collaborator[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  headquartersAddress Address?          @relation(fields: [headquartersAddressId], references: [id], onDelete: Cascade)
+  TicketingSystem     TicketingSystem[]
+  Collaborator        Collaborator[]
 }
 
 enum TicketingSystemName {
