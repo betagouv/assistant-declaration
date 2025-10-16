@@ -49,10 +49,13 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
     control,
     watch,
   } = useForm<ConnectTicketingSystemSchemaType>({
+    // Generic type needed due to `z.preprocess` breaking inference
     resolver: zodResolver(ConnectTicketingSystemSchema),
     defaultValues: {
-      organizationId: props.prefill?.organizationId,
+      organizationId: '',
       ticketingSystemName: TicketingSystemNameSchema.enum.BILLETWEB,
+      apiAccessKey: '',
+      apiSecretKey: '',
       ...props.prefill,
     },
   });
@@ -111,7 +114,6 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
               stateRelatedMessage={errors?.ticketingSystemName?.message}
               nativeSelectProps={{
                 ...register('ticketingSystemName'),
-                defaultValue: control._defaultValues.ticketingSystemName || '',
               }}
               options={[
                 ...TicketingSystemNameSchema.options.map((ticketingSystemName) => {

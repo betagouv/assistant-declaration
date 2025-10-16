@@ -28,9 +28,11 @@ export function CreateOrganizationForm(props: CreateOrganizationFormProps) {
     formState: { errors },
     setValue,
     control,
-  } = useForm<CreateOrganizationSchemaType>({
+  } = useForm({
     resolver: zodResolver(CreateOrganizationSchema),
     defaultValues: {
+      name: '',
+      officialHeadquartersId: '',
       ...props.prefill,
     },
   });

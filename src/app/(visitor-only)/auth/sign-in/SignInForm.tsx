@@ -87,10 +87,13 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<SignInSchemaType>({
+  } = useForm({
     resolver: zodResolver(SignInSchema),
-    defaultValues: prefill ?? {
-      email: loginHint ?? undefined,
+    defaultValues: {
+      email: loginHint ?? '',
+      password: '',
+      rememberMe: true,
+      ...prefill,
     },
   });
 
@@ -130,7 +133,7 @@ export function SignInForm({ prefill }: { prefill?: SignInPrefillSchemaType }) {
     return handleSubmit(...args);
   };
 
-  const onSubmit = async ({ email, password, rememberMe }: any) => {
+  const onSubmit = async ({ email, password, rememberMe }: SignInSchemaType) => {
     // If it's already running, quit
     if (!mutex.tryLock()) {
       return;

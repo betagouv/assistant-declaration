@@ -25,9 +25,13 @@ export function ChangePasswordForm(props: ChangePasswordFormProps) {
     formState: { errors },
     control,
     reset,
-  } = useForm<ChangePasswordSchemaType>({
+  } = useForm({
     resolver: zodResolver(ChangePasswordSchema),
-    defaultValues: props.prefill,
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      ...props.prefill,
+    },
   });
 
   const onSubmit = async (input: ChangePasswordSchemaType) => {
