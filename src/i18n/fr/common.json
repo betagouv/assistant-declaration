@@ -42,6 +42,7 @@
       "noAccountWithThisEmail": "aucun compte n'existe avec cette adresse email",
       "noValidTicketingSystem": "aucun système de billetterie n'est connecté",
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
+      "organizationMaskedAddress": "l'adresse de votre organisation est en \"non-diffusible\" dans l'annuaire des entreprises, veuillez contacter notre support pour que l'on fasse la création à votre place",
       "organizationNotFound": "aucune organisation trouvée",
       "sacemAgencyNotFound": "le code postal spécifié pour le lieu ne nous permet pas de savoir à quelle agence SACEM envoyer la déclaration. Veuillez le vérifier ou contacter notre support",
       "sacemDeclarationUnsuccessful": "nous n'avons pas réussi à transférer la déclaration à la SACEM. Merci de réessayer dans quelques secondes ou de nous contacter si le problème persiste",

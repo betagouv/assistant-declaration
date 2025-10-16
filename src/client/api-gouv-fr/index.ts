@@ -41,7 +41,7 @@ export async function searchCompanySuggestions(query: string): Promise<CompanySu
   url.searchParams.append('page', '1'); // Keep only top results as suggestions
   url.searchParams.append('per_page', '5');
 
-  const response = await window.fetch(url);
+  const response = await fetch(url);
 
   if (response.ok) {
     const data = (await response.json()) as CompanyApiSearchCompanySuggestionsResponse;

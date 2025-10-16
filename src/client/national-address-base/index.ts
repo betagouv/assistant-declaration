@@ -37,7 +37,7 @@ export async function searchAddressSuggestions(query: string): Promise<BanAddres
   url.searchParams.append('limit', '5'); // 5 is the default limit
   url.searchParams.append('autocomplete', '1');
 
-  const response = await window.fetch(url);
+  const response = await fetch(url);
 
   if (response.ok) {
     const data = (await response.json()) as LocationApiSearchAddressSuggestionsResponse;

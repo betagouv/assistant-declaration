@@ -3,6 +3,7 @@ import {
   anotherOrganizationAlreadyHasThisOfficialIdError,
   multipleUserOrganizationsCreationError,
   organizationCollaboratorRoleRequiredError,
+  organizationMaskedAddressError,
   organizationNotFoundError,
 } from '@ad/src/models/entities/errors';
 import { prisma } from '@ad/src/prisma/client';
@@ -56,6 +57,8 @@ export const organizationRouter = router({
 
     if (!expectedCompany || expectedCompany.inlineHeadquartersAddress === '') {
       throw new Error('the company headquarters id cannot be verified');
+    } else if (expectedCompany.inlineHeadquartersAddress === '[NON-DIFFUSIBLE]') {
+      throw organizationMaskedAddressError;
     }
 
     const officialId = expectedCompany.officialId;
