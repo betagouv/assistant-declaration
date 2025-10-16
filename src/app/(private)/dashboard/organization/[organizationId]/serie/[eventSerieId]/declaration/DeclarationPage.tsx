@@ -8,7 +8,7 @@ import { Select } from '@codegouvfr/react-dsfr/SelectNext';
 import { Tag } from '@codegouvfr/react-dsfr/Tag';
 import addressFormatter from '@fragaria/address-formatter';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Alert, AlertProps, Autocomplete, Snackbar, Tooltip } from '@mui/material';
+import { Alert, AlertProps, Autocomplete, Snackbar, Tooltip, useMediaQuery, useTheme } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import debounce from 'lodash.debounce';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -50,6 +50,9 @@ export interface DeclarationPageProps {
 
 export function DeclarationPage({ params: { organizationId, eventSerieId } }: DeclarationPageProps) {
   const { t } = useTranslation('common');
+
+  const theme = useTheme();
+  const smUp = useMediaQuery(theme.breakpoints.up('sm'));
 
   const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
@@ -555,6 +558,10 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                     control={control}
                     ariaLabel="connecter un système de billetterie"
                     innerRef={formContainerRef}
+                    style={{
+                      // When scrolling to the beginning of the form the error alert will be hidden by the sticky event serie element, so we use CSS to shift a bit the Y target position
+                      scrollMarginTop: smUp ? 200 : 320,
+                    }}
                   >
                     <div className={fr.cx('fr-col-12')}>
                       <fieldset className={fr.cx('fr-fieldset')}>
