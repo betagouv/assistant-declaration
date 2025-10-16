@@ -44,7 +44,7 @@ export async function searchAddressSuggestions(query: string): Promise<BanAddres
 
     return data.features.map((feature) => {
       return {
-        street: feature.properties.street,
+        street: feature.properties.name,
         postalCode: feature.properties.postcode,
         city: feature.properties.city,
         subdivision: '', // Not provided by the API, we are fine not specifying the region on address in France
