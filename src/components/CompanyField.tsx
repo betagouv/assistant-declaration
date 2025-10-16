@@ -6,9 +6,8 @@ import Autocomplete from '@mui/material/Autocomplete';
 import debounce from 'lodash.debounce';
 import { FocusEventHandler, PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { CompanySuggestion } from '@ad/src/client/api-gouv-fr';
+import { CompanySuggestion, searchCompanySuggestions } from '@ad/src/client/api-gouv-fr';
 import { officialIdMask } from '@ad/src/components/OfficialIdField';
-import { searchCompanySuggestions } from '@ad/src/proxies/api-gouv.fr';
 import { formatMaskedValue } from '@ad/src/utils/imask';
 
 export interface Company {
@@ -34,7 +33,6 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
     }) ?? []
   );
   const [searchCompanyQuerySuggestions, setSearchCompanyQuerySuggestions] = useState<CompanySuggestion[]>(defaultSuggestions);
-  const [watchedInputValue, setWatchedInputValue] = useState<string>('');
   const [suggestionsLoading, setSuggestionsLoading] = useState<boolean>(false);
 
   const adjustedValue = useMemo(
@@ -44,8 +42,6 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
 
   const handleSearchCompanyQueryChange = useCallback(
     async (query: string) => {
-      setWatchedInputValue(query);
-
       if (query !== '') {
         try {
           setSuggestionsLoading(true);
@@ -75,6 +71,7 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
     <Autocomplete
       value={adjustedValue}
       options={searchCompanyQuerySuggestions}
+      filterOptions={(options, state) => options} // We want to show results from the API without any additional filtering from MUI
       renderInput={({ InputProps, disabled, id, inputProps }) => {
         return (
           <Input
@@ -106,7 +103,6 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
           </li>
         );
       }}
-      isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // Since it relies on intermediate objects we provide a hard way (no unique ID for those)
       getOptionLabel={(option) => {
         return `${option.name} (${formatMaskedValue(officialIdMask, option.officialId)})`;
       }}

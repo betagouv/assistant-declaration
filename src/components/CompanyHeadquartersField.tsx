@@ -33,7 +33,6 @@ export function CompanyHeadquartersField(props: PropsWithChildren<CompanyHeadqua
     }) ?? []
   );
   const [searchCompanyHeadquartersQuerySuggestions, setSearchCompanyHeadquartersQuerySuggestions] = useState<CompanySuggestion[]>(defaultSuggestions);
-  const [watchedInputValue, setWatchedInputValue] = useState<string>('');
   const [suggestionsLoading, setSuggestionsLoading] = useState<boolean>(false);
 
   const adjustedValue = useMemo(
@@ -43,8 +42,6 @@ export function CompanyHeadquartersField(props: PropsWithChildren<CompanyHeadqua
 
   const handleSearchCompanyHeadquartersQueryChange = useCallback(
     async (query: string) => {
-      setWatchedInputValue(query);
-
       if (query !== '') {
         try {
           setSuggestionsLoading(true);

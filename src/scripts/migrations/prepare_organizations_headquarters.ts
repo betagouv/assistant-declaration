@@ -9,10 +9,10 @@ async function main() {
     where: {
       OR: [
         {
-          officialHeadquartersId: null,
+          officialHeadquartersId: null as any, // Casted since no longer truc for linter
         },
         {
-          headquartersAddressId: null,
+          headquartersAddressId: null as any, // Casted since no longer truc for linter
         },
       ],
     },
