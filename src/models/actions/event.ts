@@ -1,7 +1,7 @@
 import z from 'zod';
 
 import { GetterInputSchema } from '@ad/src/models/actions/common';
-import { EventCategoryTicketsSchema, EventSchema, EventSerieSchema, TicketCategorySchema } from '@ad/src/models/entities/event';
+import { EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 
 export const SynchronizeDataFromTicketingSystemsSchema = z
@@ -11,7 +11,7 @@ export const SynchronizeDataFromTicketingSystemsSchema = z
   .strict();
 export type SynchronizeDataFromTicketingSystemsSchemaType = z.infer<typeof SynchronizeDataFromTicketingSystemsSchema>;
 
-export const SynchronizeDataFromTicketingSystemsPrefillSchema = SynchronizeDataFromTicketingSystemsSchema.deepPartial();
+export const SynchronizeDataFromTicketingSystemsPrefillSchema = SynchronizeDataFromTicketingSystemsSchema.partial();
 export type SynchronizeDataFromTicketingSystemsPrefillSchemaType = z.infer<typeof SynchronizeDataFromTicketingSystemsPrefillSchema>;
 
 export const GetEventSerieSchema = z
@@ -21,7 +21,7 @@ export const GetEventSerieSchema = z
   .strict();
 export type GetEventSerieSchemaType = z.infer<typeof GetEventSerieSchema>;
 
-export const GetEventSeriePrefillSchema = GetEventSerieSchema.deepPartial();
+export const GetEventSeriePrefillSchema = GetEventSerieSchema.partial();
 export type GetEventSeriePrefillSchemaType = z.infer<typeof GetEventSeriePrefillSchema>;
 
 export const ListEventsSeriesSchema = GetterInputSchema.extend({
@@ -31,7 +31,7 @@ export const ListEventsSeriesSchema = GetterInputSchema.extend({
 }).strict();
 export type ListEventsSeriesSchemaType = z.infer<typeof ListEventsSeriesSchema>;
 
-export const ListEventsSeriesPrefillSchema = ListEventsSeriesSchema.deepPartial();
+export const ListEventsSeriesPrefillSchema = ListEventsSeriesSchema.partial();
 export type ListEventsSeriesPrefillSchemaType = z.infer<typeof ListEventsSeriesPrefillSchema>;
 
 export const ListEventsSchema = GetterInputSchema.extend({
@@ -40,23 +40,3 @@ export const ListEventsSchema = GetterInputSchema.extend({
   }),
 }).strict();
 export type ListEventsSchemaType = z.infer<typeof ListEventsSchema>;
-
-export const ListEventsPrefillSchema = ListEventsSchema.deepPartial();
-export type ListEventsPrefillSchemaType = z.infer<typeof ListEventsPrefillSchema>;
-
-export const UpdateEventCategoryTicketsSchema = z
-  .object({
-    eventCategoryTicketsId: EventCategoryTicketsSchema.shape.id.or(
-      z.object({
-        eventId: EventSchema.shape.id,
-        categoryId: TicketCategorySchema.shape.id,
-      })
-    ),
-    totalOverride: EventCategoryTicketsSchema.shape.totalOverride,
-    priceOverride: EventCategoryTicketsSchema.shape.priceOverride,
-  })
-  .strict();
-export type UpdateEventCategoryTicketsSchemaType = z.infer<typeof UpdateEventCategoryTicketsSchema>;
-
-export const UpdateEventCategoryTicketsPrefillSchema = UpdateEventCategoryTicketsSchema.deepPartial();
-export type UpdateEventCategoryTicketsPrefillSchemaType = z.infer<typeof UpdateEventCategoryTicketsPrefillSchema>;

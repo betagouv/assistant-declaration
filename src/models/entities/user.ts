@@ -1,6 +1,7 @@
 import z from 'zod';
 
 import {
+  inputReplacementForSensitiveData,
   passwordRequiresANumericError,
   passwordRequiresASpecialCharactersError,
   passwordRequiresHeightCharactersError,
@@ -16,26 +17,38 @@ export const UserPasswordSchema = z
   .min(1)
   .superRefine((data, ctx) => {
     if (data === data.toUpperCase() || data === data.toLowerCase()) {
-      ctx.addIssue(customErrorToZodIssue(passwordRequiresLowerAndUpperCharactersError));
+      ctx.issues.push({
+        ...customErrorToZodIssue(passwordRequiresLowerAndUpperCharactersError),
+        input: inputReplacementForSensitiveData,
+      });
     }
 
     if (data.length < 8) {
-      ctx.addIssue(customErrorToZodIssue(passwordRequiresHeightCharactersError));
+      ctx.issues.push({
+        ...customErrorToZodIssue(passwordRequiresHeightCharactersError),
+        input: inputReplacementForSensitiveData,
+      });
     }
 
     if (!/[0-9]+/.test(data)) {
-      ctx.addIssue(customErrorToZodIssue(passwordRequiresANumericError));
+      ctx.issues.push({
+        ...customErrorToZodIssue(passwordRequiresANumericError),
+        input: inputReplacementForSensitiveData,
+      });
     }
 
     if (!/[^a-zA-Z0-9]+/.test(data)) {
-      ctx.addIssue(customErrorToZodIssue(passwordRequiresASpecialCharactersError));
+      ctx.issues.push({
+        ...customErrorToZodIssue(passwordRequiresASpecialCharactersError),
+        input: inputReplacementForSensitiveData,
+      });
     }
   });
 export type UserPasswordSchemaType = z.infer<typeof UserPasswordSchema>;
 
 export const UserSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     firstname: z.string().min(1),
     lastname: z.string().min(1),
     email: z.string().min(1).email(),

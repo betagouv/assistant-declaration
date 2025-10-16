@@ -32,7 +32,14 @@ export function SignUpForm({ prefill, onSuccess }: { prefill?: SignUpPrefillSche
     control,
   } = useForm<SignUpSchemaType>({
     resolver: zodResolver(SignUpSchema),
-    defaultValues: prefill,
+    defaultValues: {
+      email: '',
+      password: '',
+      firstname: '',
+      lastname: '',
+      termsAccepted: true,
+      ...prefill,
+    },
   });
 
   const onSubmit = async (input: SignUpSchemaType) => {
@@ -100,7 +107,6 @@ export function SignUpForm({ prefill, onSuccess }: { prefill?: SignUpPrefillSche
                   ),
                   nativeInputProps: {
                     ...register('termsAccepted'),
-                    value: 'true',
                   },
                 },
               ]}

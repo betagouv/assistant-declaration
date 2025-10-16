@@ -33,18 +33,16 @@ export function CompanyHeadquartersField(props: PropsWithChildren<CompanyHeadqua
     }) ?? []
   );
   const [searchCompanyHeadquartersQuerySuggestions, setSearchCompanyHeadquartersQuerySuggestions] = useState<CompanySuggestion[]>(defaultSuggestions);
-  const [watchedInputValue, setWatchedInputValue] = useState<string>('');
   const [suggestionsLoading, setSuggestionsLoading] = useState<boolean>(false);
 
   const adjustedValue = useMemo(
     () => (props.value ? { ...props.value, officialId: '', name: '', inlineHeadquartersAddress: '' } : null),
     [props.value]
   );
+  const [inputValue, setInputValue] = useState('');
 
   const handleSearchCompanyHeadquartersQueryChange = useCallback(
     async (query: string) => {
-      setWatchedInputValue(query);
-
       if (query !== '') {
         try {
           setSuggestionsLoading(true);
@@ -76,6 +74,7 @@ export function CompanyHeadquartersField(props: PropsWithChildren<CompanyHeadqua
   return (
     <Autocomplete
       value={adjustedValue}
+      inputValue={inputValue}
       options={searchCompanyHeadquartersQuerySuggestions}
       filterOptions={(options, state) => options} // We want to show results from the API without any additional filtering from MUI
       renderInput={({ InputProps, disabled, id, inputProps }) => {
@@ -113,6 +112,8 @@ export function CompanyHeadquartersField(props: PropsWithChildren<CompanyHeadqua
         return formatMaskedValue(officialHeadquartersIdMask, option.officialHeadquartersId);
       }}
       onInputChange={(event, newInputValue, reason) => {
+        setInputValue(newInputValue);
+
         if (reason === 'input') {
           debouncedHandleCompanyHeadquartersQuery(newInputValue);
         }

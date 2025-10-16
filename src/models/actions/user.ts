@@ -10,23 +10,23 @@ export const UpdateProfileSchema = z
   .strict();
 export type UpdateProfileSchemaType = z.infer<typeof UpdateProfileSchema>;
 
-export const UpdateProfilePrefillSchema = UpdateProfileSchema.deepPartial();
+export const UpdateProfilePrefillSchema = UpdateProfileSchema.partial();
 export type UpdateProfilePrefillSchemaType = z.infer<typeof UpdateProfilePrefillSchema>;
 
 export const GetProfileSchema = z.object({}).strict();
 export type GetProfileSchemaType = z.infer<typeof GetProfileSchema>;
 
-export const GetProfilePrefillSchema = GetProfileSchema.deepPartial();
+export const GetProfilePrefillSchema = GetProfileSchema.partial();
 export type GetProfilePrefillSchemaType = z.infer<typeof GetProfilePrefillSchema>;
 
 export const GetInterfaceSessionSchema = z.object({}).strict();
 export type GetInterfaceSessionSchemaType = z.infer<typeof GetInterfaceSessionSchema>;
 
-export const GetInterfaceSessionPrefillSchema = GetInterfaceSessionSchema.deepPartial();
+export const GetInterfaceSessionPrefillSchema = GetInterfaceSessionSchema.partial();
 export type GetInterfaceSessionPrefillSchemaType = z.infer<typeof GetInterfaceSessionPrefillSchema>;
 
 export const GetLiveChatSettingsSchema = z.object({}).strict();
 export type GetLiveChatSettingsSchemaType = z.infer<typeof GetLiveChatSettingsSchema>;
 
-export const GetLiveChatSettingsPrefillSchema = GetLiveChatSettingsSchema.deepPartial();
+export const GetLiveChatSettingsPrefillSchema = GetLiveChatSettingsSchema.partial();
 export type GetLiveChatSettingsPrefillSchemaType = z.infer<typeof GetLiveChatSettingsPrefillSchema>;

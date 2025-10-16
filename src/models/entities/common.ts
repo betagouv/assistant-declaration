@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { officialIdMustBe9DigitsError } from '@ad/src/models/entities/errors';
 import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 
-export const DeclarationTypeSchema = z.enum(['SACEM', 'SACD', 'ASTP', 'CNM']);
+export const DeclarationTypeSchema = z.enum(['SACEM', 'SACD']);
 export type DeclarationTypeSchemaType = z.infer<typeof DeclarationTypeSchema>;
 
 export const DeclarationStatusSchema = z.enum(['PENDING', 'PROCESSED', 'CANCELED']);

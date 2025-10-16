@@ -14,9 +14,9 @@ import { applyTypedParsers } from '@ad/src/utils/zod';
 export const JsonPriceSchema = applyTypedParsers(
   z.object({
     // [IMPORTANT] We accept a negative amount/revenue since Supersoniks allows partial reimbursement, see details into the controller logic
-    amount: z.number(),
-    quantity: z.number().int().nonnegative(),
-    revenue: z.number(),
+    amount: z.number(), // Ticket category price
+    quantity: z.number().int().nonnegative(), // Number of sold tickets
+    revenue: z.number(), // Total revenue for this ticket category
     title: z.string().min(1),
   })
 );
@@ -53,13 +53,13 @@ export const JsonStatementSchema = applyTypedParsers(
             // }),
             // picture: z.object({
             //   fid: z.number().int().nonnegative(),
-            //   url: z.string().url(),
-            //   src: z.string().url(),
-            //   ratio_1x1_120: z.string().url(),
-            //   ratio_1x1_360: z.string().url(),
-            //   ratio_1x1_640: z.string().url(),
-            //   ratio_1x1_1000: z.string().url(),
-            //   ratio_1x1_1920: z.string().url(),
+            //   url: z.url(),
+            //   src: z.url(),
+            //   ratio_1x1_120: z.url(),
+            //   ratio_1x1_360: z.url(),
+            //   ratio_1x1_640: z.url(),
+            //   ratio_1x1_1000: z.url(),
+            //   ratio_1x1_1920: z.url(),
             // }),
             // site_link: z.string().transform(transformStringOrNull),
             // display: z.literal('default'),
@@ -159,7 +159,7 @@ export const JsonStatementSchema = applyTypedParsers(
         //   room_free_placing_add_on_key: z.string().min(1),
         //   room_free_placing_add_on_label: z.string().min(1),
         // }),
-        // public_link: z.string().url(),
+        // public_link: z.url(),
         id: z.number().int().nonnegative(),
         edito: z.object({
           // over_title: z.string().transform(transformStringOrNull),

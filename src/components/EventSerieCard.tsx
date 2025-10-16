@@ -10,21 +10,18 @@ import { EventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
 
 export interface EventSerieCardProps {
   wrapper: EventSerieWrapperSchemaType;
-  sacemDeclarationLink: string;
-  sacdDeclarationLink: string;
-  astpDeclarationLink: string;
-  cnmDeclarationLink: string;
+  declarationLink: string;
 }
 
 export function EventSerieCard(props: EventSerieCardProps) {
   const { t } = useTranslation('common');
 
   const onTheSameDay = useMemo(() => {
-    return isSameDay(props.wrapper.serie.startAt, props.wrapper.serie.endAt);
-  }, [props.wrapper.serie.startAt, props.wrapper.serie.endAt]);
+    return isSameDay(props.wrapper.computedStartAt, props.wrapper.computedEndAt);
+  }, [props.wrapper.computedStartAt, props.wrapper.computedEndAt]);
 
   return (
-    <NextLink href={props.sacemDeclarationLink} className={fr.cx('fr-link')}>
+    <NextLink href={props.declarationLink} className={fr.cx('fr-link')}>
       <Card
         variant="outlined"
         sx={{
@@ -39,8 +36,8 @@ export function EventSerieCard(props: EventSerieCardProps) {
                 {props.wrapper.serie.name}
               </div>
               <Tooltip
-                title={`Du ${t('date.longWithTime', { date: props.wrapper.serie.startAt })} au ${t('date.longWithTime', {
-                  date: props.wrapper.serie.endAt,
+                title={`Du ${t('date.longWithTime', { date: props.wrapper.computedStartAt })} au ${t('date.longWithTime', {
+                  date: props.wrapper.computedEndAt,
                 })}`}
                 data-sentry-mask
               >
@@ -52,9 +49,9 @@ export function EventSerieCard(props: EventSerieCardProps) {
                   data-sentry-mask
                 >
                   {onTheSameDay
-                    ? t('date.shortWithTime', { date: props.wrapper.serie.startAt })
-                    : `${t('date.short', { date: props.wrapper.serie.startAt })}  →  ${t('date.short', {
-                        date: props.wrapper.serie.endAt,
+                    ? t('date.shortWithTime', { date: props.wrapper.computedStartAt })
+                    : `${t('date.short', { date: props.wrapper.computedStartAt })}  →  ${t('date.short', {
+                        date: props.wrapper.computedEndAt,
                       })}`}
                 </Tag>
               </Tooltip>

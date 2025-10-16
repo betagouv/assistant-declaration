@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Declaration>
   <Header>
-    <dec_ref>712790</dec_ref>
+    <dec_ref>123456789</dec_ref>
     <dec_systeme>ASSISTANT_DECLARATION</dec_systeme>
     <dec_date>2025/02/18</dec_date>
     <dec_nb>3</dec_nb>
@@ -18,35 +18,32 @@
       <rep_nb>1</rep_nb>
       <rep_horaire>11:00</rep_horaire>
       <Billetterie>
-        <rep_mt_billets>441.71</rep_mt_billets>
-        <rep_tx_tva_billets>5.5</rep_tx_tva_billets>
-        <rep_mt_tva_billets>24.29</rep_mt_tva_billets>
-        <rep_nb_billets_pay>49</rep_nb_billets_pay>
-        <rep_nb_billets_exo>0</rep_nb_billets_exo>
+        <rep_mt_billets>100</rep_mt_billets>
+        <rep_mt_tva_billets>5.5</rep_mt_tva_billets>
+        <rep_nb_billets_pay>10</rep_nb_billets_pay>
+        <rep_nb_billets_exo>9</rep_nb_billets_exo>
       </Billetterie>
       <Exploitation>
-        <rep_mt_cession>0</rep_mt_cession>
-        <rep_tx_tva_cession>5.5</rep_tx_tva_cession>
-        <rep_mt_tva_cession>0</rep_mt_tva_cession>
-        <rep_mt_frais>1973.33</rep_mt_frais>
-        <rep_mt_apports_coprod>0</rep_mt_apports_coprod>
-        <rep_mt_garantie_rec>0</rep_mt_garantie_rec>
-        <rep_mt_autres>775</rep_mt_autres>
+        <rep_mt_depenses>2500</rep_mt_depenses>
+        <rep_mt_frais>400</rep_mt_frais>
       </Exploitation>
       <Salle>
-        <salle_nom>Salle Hermione</salle_nom>
+        <salle_nom>Salle principale</salle_nom>
+        <salle_jauge>240</salle_jauge>
       </Salle>
       <Diffuseur>
         <diff_nom>La Comédie-Française</diff_nom>
-        <diff_ville>Bordeaux</diff_ville>
+        <diff_type_ref>SIREN</diff_type_ref>
+        <diff_ref>123456789</diff_ref>
+        <diff_adresse_1>1 rue de la Gare</diff_adresse_1>
+        <diff_code_postal>35000</diff_code_postal>
+        <diff_ville>Rennes</diff_ville>
         <diff_pays>FR</diff_pays>
       </Diffuseur>
       <Producteur>
-        <prod_nom>Les spectacles d'Antan</prod_nom>
-        <prod_adresse_1>95 rue Saint-Antoine</prod_adresse_1>
-        <prod_code_postal>35000</prod_code_postal>
-        <prod_ville>Rennes</prod_ville>
-        <prod_pays>FR</prod_pays>
+        <prod_nom>Les studios Culture</prod_nom>
+        <prod_type_ref>SIREN</prod_type_ref>
+        <prod_ref>123456789</prod_ref>
       </Producteur>
     </Representation>
     <Representation>
@@ -60,27 +57,29 @@
       <rep_nb>1</rep_nb>
       <rep_horaire>15:00</rep_horaire>
       <Billetterie>
-        <rep_mt_billets>682.46</rep_mt_billets>
-        <rep_tx_tva_billets>5.5</rep_tx_tva_billets>
-        <rep_mt_tva_billets>37.54</rep_mt_tva_billets>
-        <rep_nb_billets_pay>36</rep_nb_billets_pay>
-        <rep_nb_billets_exo>0</rep_nb_billets_exo>
+        <rep_mt_billets>250</rep_mt_billets>
+        <rep_mt_tva_billets>13.75</rep_mt_tva_billets>
+        <rep_nb_billets_pay>43</rep_nb_billets_pay>
+        <rep_nb_billets_exo>35</rep_nb_billets_exo>
       </Billetterie>
       <Exploitation />
       <Salle>
-        <salle_nom>Salle Hermione</salle_nom>
+        <salle_nom>Salle Hector</salle_nom>
+        <salle_jauge>92</salle_jauge>
       </Salle>
       <Diffuseur>
         <diff_nom>La Comédie-Française</diff_nom>
-        <diff_ville>Bordeaux</diff_ville>
+        <diff_type_ref>SIREN</diff_type_ref>
+        <diff_ref>123456789</diff_ref>
+        <diff_adresse_1>1 rue de la Gare</diff_adresse_1>
+        <diff_code_postal>35000</diff_code_postal>
+        <diff_ville>Rennes</diff_ville>
         <diff_pays>FR</diff_pays>
       </Diffuseur>
       <Producteur>
-        <prod_nom>Les spectacles d'Antan</prod_nom>
-        <prod_adresse_1>95 rue Saint-Antoine</prod_adresse_1>
-        <prod_code_postal>35000</prod_code_postal>
-        <prod_ville>Rennes</prod_ville>
-        <prod_pays>FR</prod_pays>
+        <prod_nom>Les studios Culture</prod_nom>
+        <prod_type_ref>SIREN</prod_type_ref>
+        <prod_ref>123456789</prod_ref>
       </Producteur>
     </Representation>
     <Representation>
@@ -94,27 +93,29 @@
       <rep_nb>1</rep_nb>
       <rep_horaire>21:30</rep_horaire>
       <Billetterie>
-        <rep_mt_billets>789.57</rep_mt_billets>
-        <rep_tx_tva_billets>5.5</rep_tx_tva_billets>
-        <rep_mt_tva_billets>43.43</rep_mt_tva_billets>
-        <rep_nb_billets_pay>72</rep_nb_billets_pay>
-        <rep_nb_billets_exo>0</rep_nb_billets_exo>
+        <rep_mt_billets>1000</rep_mt_billets>
+        <rep_mt_tva_billets>21</rep_mt_tva_billets>
+        <rep_nb_billets_pay>99</rep_nb_billets_pay>
+        <rep_nb_billets_exo>86</rep_nb_billets_exo>
       </Billetterie>
       <Exploitation />
       <Salle>
-        <salle_nom>Salle Hermione</salle_nom>
+        <salle_nom>Dans la rue</salle_nom>
+        <salle_jauge>240</salle_jauge>
       </Salle>
       <Diffuseur>
         <diff_nom>La Comédie-Française</diff_nom>
-        <diff_ville>Bordeaux</diff_ville>
+        <diff_type_ref>SIREN</diff_type_ref>
+        <diff_ref>123456789</diff_ref>
+        <diff_adresse_1>1 rue de la Gare</diff_adresse_1>
+        <diff_code_postal>35000</diff_code_postal>
+        <diff_ville>Rennes</diff_ville>
         <diff_pays>FR</diff_pays>
       </Diffuseur>
       <Producteur>
-        <prod_nom>Les spectacles d'Antan</prod_nom>
-        <prod_adresse_1>95 rue Saint-Antoine</prod_adresse_1>
-        <prod_code_postal>35000</prod_code_postal>
-        <prod_ville>Rennes</prod_ville>
-        <prod_pays>FR</prod_pays>
+        <prod_nom>Les studios Culture</prod_nom>
+        <prod_type_ref>SIREN</prod_type_ref>
+        <prod_ref>123456789</prod_ref>
       </Producteur>
     </Representation>
   </Representations>

@@ -36,7 +36,7 @@ export function recursiveCountErrors(errors: FieldError | Merge<FieldError, Fiel
   return count;
 }
 
-export function emptyStringtoNullPreprocessor<T extends z.ZodString | z.ZodDate>(initialValidation: z.ZodNullable<T>) {
+export function emptyStringtoNullPreprocessor<T extends z.ZodString | z.ZodDate | z.ZodCoercedNumber>(initialValidation: z.ZodNullable<T>) {
   return z.preprocess((value) => {
     if (value === '') {
       return null;

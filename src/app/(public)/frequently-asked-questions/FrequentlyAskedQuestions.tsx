@@ -12,9 +12,8 @@ export function FrequentlyAskedQuestions() {
               <Accordion label="À quoi sert l'assistant ?">
                 L&apos;assistant aide les diffuseurs à réaliser les déclarations post-spectacles suivantes :
                 <ul>
-                  <li>État des recettes et des dépenses SACEM</li>
+                  <li>État des recettes et des dépenses Sacem</li>
                   <li>Bordereau de recettes et/ou dépenses SACD</li>
-                  <li>Taxe sur le spectacle CNM et ASTP</li>
                 </ul>
                 L&apos;assistant précalcule automatiquement la synthèse des données de billetteries d&apos;un spectacle : recette totale, nombre de
                 billets vendus, nombre d&apos;invitations, prix moyen du billet.
@@ -41,10 +40,10 @@ export function FrequentlyAskedQuestions() {
               </Accordion>
             </li>
             <li>
-              <Accordion label="Est-ce que je peux utiliser l'assistant pour remplir les formulaires SACEM, SACD, CNM, ASTP ?">
-                Oui l&apos;assistant s&apos;adapte aux pratiques déclaratives les plus répandues. Il permet de générer le formulaire PDF de la SACEM
+              <Accordion label="Est-ce que je peux utiliser l'assistant pour remplir les formulaires Sacem et SACD ?">
+                Oui l&apos;assistant s&apos;adapte aux pratiques déclaratives les plus répandues. Il permet de générer le formulaire PDF de la Sacem
                 et de la SACD, mais aussi de copier-coller la recette totale, le nombre de billets vendus, le nombre d&apos;invitations, nécessaires
-                aux formulaires en ligne CNM, ASTP et SACD.
+                aux formulaires en ligne SACD.
               </Accordion>
             </li>
             <li>
@@ -52,8 +51,7 @@ export function FrequentlyAskedQuestions() {
                 Non, l&apos;assistant ne permet pas de filtrer les déclarations à réaliser pour un spectacle. Même s&apos;il est possible
                 d&apos;établir des règles générales selon le genre du spectacle (musique, danse, théâtre...), il y a de nombreux cas particuliers (par
                 exemple pour les spectacles d&apos;humour) qui ne permettent pas de mettre en place une règle pour déterminer automatiquement si un
-                spectacle relève de la SACEM, de la SACD, du CNM et/ou de l&apos;ASTP. En cas de doute nous vous recommandons de contacter vos
-                gestionnaires de proximité.
+                spectacle relève de la Sacem ou de la SACD. En cas de doute nous vous recommandons de contacter vos gestionnaires de proximité.
               </Accordion>
             </li>
             <li>
@@ -77,7 +75,7 @@ export function FrequentlyAskedQuestions() {
               <Accordion label="Puis-je vérifier les données avant de les transmettre ?">
                 L&apos;assistant permet de vérifier la recette de billetterie pour un spectacle ainsi que de corriger ou ajouter des billets.
                 <br />
-                Il est aussi possible de prévisualiser les formulaires PDF remplis de la SACEM et de la SACD avant de les télécharger.
+                Il est aussi possible de prévisualiser les formulaires PDF remplis de la Sacem et de la SACD avant de les télécharger.
               </Accordion>
             </li>
             <li>

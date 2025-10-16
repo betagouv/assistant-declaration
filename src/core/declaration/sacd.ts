@@ -2,11 +2,11 @@ import crypto from 'crypto';
 import { formatInTimeZone } from 'date-fns-tz';
 import { create } from 'xmlbuilder2';
 
-import { getExcludingTaxesAmountFromIncludingTaxesAmount, getTaxAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
+import { getTaxAmountFromIncludingAndExcludingTaxesAmounts } from '@ad/src/core/declaration';
+import { getFlattenEventsForSacdDeclaration } from '@ad/src/core/declaration/format';
 import { getServerTranslation } from '@ad/src/i18n';
-import { SacdAccountingCategorySchema, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
+import { SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { sacdDeclarationIncorrectDeclarantError, sacdDeclarationUnsuccessfulError } from '@ad/src/models/entities/errors';
-import { EventSerieSchemaType, EventWrapperSchemaType } from '@ad/src/models/entities/event';
 import {
   JsonDeclarationParameterSchemaType,
   JsonDeclareResponseSchema,
@@ -23,12 +23,7 @@ export interface SacdClientInterface {
   login(): Promise<void>;
   logout(): Promise<void>;
   test(): Promise<void>;
-  declare(
-    declarantId: string,
-    eventSerie: EventSerieSchemaType,
-    wrappers: EventWrapperSchemaType[],
-    declaration: SacdDeclarationSchemaType
-  ): Promise<void>;
+  declare(declaration: SacdDeclarationSchemaType): Promise<void>;
 }
 
 export function getSacdClient(userId: string): SacdClientInterface {
@@ -155,21 +150,16 @@ export class SacdClient implements SacdClientInterface {
     const responseObject = JsonHelloWorldResponseSchema.parse(responseJson);
   }
 
-  public async declare(
-    declarantId: string,
-    eventSerie: EventSerieSchemaType,
-    wrappers: EventWrapperSchemaType[],
-    declaration: SacdDeclarationSchemaType
-  ) {
+  public async declare(declaration: SacdDeclarationSchemaType) {
     assert(this.authToken);
-    assert(wrappers.length > 0);
+    assert(declaration.events.length > 0);
 
     const queryParams = new URLSearchParams({
       key: this.consumerKey,
       token: this.getAccessToken(),
     });
 
-    const declarationParameter = prepareDeclarationParameter(declarantId, eventSerie, wrappers, declaration);
+    const declarationParameter = prepareDeclarationParameter(declaration);
 
     const bodyParams = new URLSearchParams(this.commonBodyParams);
     bodyParams.append('parameters[Declaration]', declarationParameter);
@@ -249,22 +239,16 @@ function formatTime(date: Date) {
   return formatInTimeZone(date, sacdApiTimezone, 'HH:mm');
 }
 
-export function prepareDeclarationParameter(
-  declarantId: string,
-  eventSerie: EventSerieSchemaType,
-  wrappers: EventWrapperSchemaType[],
-  declaration: SacdDeclarationSchemaType,
-  declarationAt?: Date
-): string {
+export function prepareDeclarationParameter(declaration: SacdDeclarationSchemaType, declarationAt?: Date): string {
   const { t } = getServerTranslation('common');
 
   const declarationParameter: JsonDeclarationParameterSchemaType = {
     Declaration: {
       Header: {
-        dec_ref: declarantId,
+        dec_ref: declaration.organization.sacdId,
         dec_systeme: 'ASSISTANT_DECLARATION',
         dec_date: formatDate(declarationAt ?? new Date()),
-        dec_nb: wrappers.length,
+        dec_nb: declaration.events.length,
       },
       Representations: {
         Representation: [],
@@ -272,130 +256,76 @@ export function prepareDeclarationParameter(
     },
   };
 
-  // Order events for the ease when debugging
-  const sortedWrappers = wrappers.sort((a, b) => a.event.startAt.getTime() - b.event.startAt.getTime());
+  const flattenEvents = getFlattenEventsForSacdDeclaration(declaration);
 
-  // After contacting the SACD support they said amounts scoped to the event serie should be filled only once
-  // on the first event of the serie (maybe they have case of people splitting them per event but we don't)
+  // Order events for the ease when debugging
+  const ascendingFlattenEvents = flattenEvents.sort((a, b) => +a.startAt - +b.startAt);
+
+  // Expenses are scoped to the event serie (not an event), since SACD set those fields on the event layer
+  // we chose to only fill those fields for the first event
   let eventSerieSpecificsFilled = false;
 
-  for (const wrapper of sortedWrappers) {
-    let totalIncludingTaxesAmount: number = 0;
-    let paidTickets: number = 0;
-    let freeTickets: number = 0;
-
-    for (const eventSale of wrapper.sales) {
-      const total = eventSale.eventCategoryTickets.totalOverride ?? eventSale.eventCategoryTickets.total;
-      const price = eventSale.eventCategoryTickets.priceOverride ?? eventSale.ticketCategory.price;
-
-      if (price === 0) {
-        freeTickets += total;
-      } else {
-        paidTickets += total;
-      }
-
-      totalIncludingTaxesAmount += total * price;
-    }
-
+  for (const flattenEvent of ascendingFlattenEvents) {
     const declarationParameterRepresentation: JsonDeclarationParameterSchemaType['Declaration']['Representations']['Representation'][0] = {
-      rep_ref_dec: formatString(`${eventSerie.id}_${wrapper.event.id}`),
+      rep_ref_dec: formatString(`${declaration.eventSerie.id}_${flattenEvent.id}`),
       rep_devise: 'EUR', // When synchronizing events series we refuse other currency so it's safe to be hardcoded for now
       rep_statut: 'DEF',
       rep_version: '1',
-      rep_titre: formatString(eventSerie.name),
-      rep_date_debut: formatDate(wrapper.event.startAt),
-      rep_date_fin: formatDate(wrapper.event.endAt),
+      rep_titre: formatString(declaration.eventSerie.name),
+      rep_date_debut: formatDate(flattenEvent.startAt),
+      rep_date_fin: formatDate(flattenEvent.endAt ?? flattenEvent.startAt), // SACD requires the end date (since it's not a datetime, we use as fallback the beginning date that should match the end for most of events)
       rep_nb: 1, // Since each event has a separate entity
-      rep_horaire: formatTime(wrapper.event.startAt),
+      rep_horaire: formatTime(flattenEvent.startAt),
       Billetterie: {
-        rep_mt_billets: formatAmountNumber(getExcludingTaxesAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate)),
-        rep_tx_tva_billets: 100 * eventSerie.taxRate, // Providing 5.5% as 5.5 instead of 0.055
-        rep_mt_tva_billets: formatAmountNumber(getTaxAmountFromIncludingTaxesAmount(totalIncludingTaxesAmount, eventSerie.taxRate)),
-        rep_nb_billets_pay: paidTickets,
-        rep_nb_billets_exo: freeTickets,
+        rep_mt_billets: formatAmountNumber(flattenEvent.ticketingRevenueExcludingTaxes),
+        rep_mt_tva_billets: getTaxAmountFromIncludingAndExcludingTaxesAmounts(
+          flattenEvent.ticketingRevenueIncludingTaxes,
+          flattenEvent.ticketingRevenueExcludingTaxes
+        ),
+        rep_nb_billets_pay: flattenEvent.paidTickets,
+        rep_nb_billets_exo: flattenEvent.freeTickets,
+        // ...(flattenEvent.ticketingRevenueTaxRate !== null
+        //   ? {
+        //       rep_tx_tva_billets: 100 * flattenEvent.ticketingRevenueTaxRate, // Providing 5.5% as 5.5 instead of 0.055
+        //     }
+        //   : {}),
       },
       Exploitation: {
         // expl_type_ref: 'TODO',
         // expl_ref: formatString('TODO'),
       },
       Salle: {
-        salle_nom: formatString(declaration.placeName),
-        // salle_jauge: 'TODO',
+        salle_nom: formatString(flattenEvent.place.name),
+        salle_jauge: flattenEvent.placeCapacity,
         // TODO: should this be for the event or for the event serie?
-        // Also, they seem to want it to be the total of tarifs devided by the capacity... so skipping it for now
+        // Also, they want the average of all public displayed tarifs, which is tricky since we don't manage this data... so skipping it for now
         // salle_prix_moyen: totalIncludingTaxesAmount / (freeTickets + paidTickets),
       },
       Diffuseur: {
-        diff_nom: formatString(declaration.organizationName),
-        // diff_type_ref: 'TODO',
-        // diff_ref: formatString('TODO'),
-        diff_ville: formatString(declaration.placeCity),
-        diff_pays: 'FR', // Not translating the country for now
+        diff_nom: formatString(declaration.organization.name),
+        diff_type_ref: 'SIREN',
+        diff_ref: formatString(declaration.organization.officialId),
+        diff_adresse_1: formatString(declaration.eventSerie.place.address.street),
+        diff_code_postal: formatString(declaration.eventSerie.place.address.postalCode),
+        diff_ville: formatString(declaration.eventSerie.place.address.city),
+        diff_pays: formatString(declaration.eventSerie.place.address.countryCode), // Not translating the country for now
       },
       Producteur: {
-        prod_nom: formatString(declaration.producer.name),
-        // prod_type_ref: 'TODO',
-        // prod_ref: formatString('TODO'),
-        prod_adresse_1: formatString(declaration.producer.headquartersAddress.street),
-        prod_code_postal: formatString(declaration.producer.headquartersAddress.postalCode),
-        prod_ville: formatString(declaration.producer.headquartersAddress.city),
-        prod_pays: formatString(declaration.producer.headquartersAddress.countryCode), // Not translating the country for now
+        prod_nom: formatString(declaration.eventSerie.producerName),
+        prod_type_ref: 'SIREN',
+        prod_ref: formatString(declaration.eventSerie.producerOfficialId),
       },
     };
 
     if (!eventSerieSpecificsFilled) {
       eventSerieSpecificsFilled = true;
 
-      const saleOfRights = declaration.accountingEntries.find(
-        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.SALE_OF_RIGHTS
+      // TODO: is cession all expenses in our... probably not, waiting for mockups
+      declarationParameterRepresentation.Exploitation.rep_mt_depenses = formatAmountNumber(
+        declaration.eventSerie.expensesExcludingTaxes - declaration.eventSerie.circusSpecificExpensesExcludingTaxes
       );
-      const saleOfRightsTaxRate = saleOfRights?.taxRate ?? 0;
-
-      declarationParameterRepresentation.Exploitation.rep_mt_cession = formatAmountNumber(
-        saleOfRights ? getExcludingTaxesAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate) : 0
-      );
-      declarationParameterRepresentation.Exploitation.rep_tx_tva_cession = 100 * saleOfRightsTaxRate; // Providing 5.5% as 5.5 instead of 0.055
-      declarationParameterRepresentation.Exploitation.rep_mt_tva_cession = formatAmountNumber(
-        saleOfRights ? getTaxAmountFromIncludingTaxesAmount(saleOfRights.includingTaxesAmount, saleOfRightsTaxRate) : 0
-      );
-
-      const introductionFees = declaration.accountingEntries.find(
-        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.INTRODUCTION_FEES
-      );
-      const introductionFeesTaxRate = introductionFees?.taxRate ?? 0;
-
       declarationParameterRepresentation.Exploitation.rep_mt_frais = formatAmountNumber(
-        introductionFees ? getExcludingTaxesAmountFromIncludingTaxesAmount(introductionFees.includingTaxesAmount, introductionFeesTaxRate) : 0
-      );
-
-      const coproductionContribution = declaration.accountingEntries.find(
-        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.COPRODUCTION_CONTRIBUTION
-      );
-      const coproductionContributionTaxRate = coproductionContribution?.taxRate ?? 0;
-
-      declarationParameterRepresentation.Exploitation.rep_mt_apports_coprod = formatAmountNumber(
-        coproductionContribution
-          ? getExcludingTaxesAmountFromIncludingTaxesAmount(coproductionContribution.includingTaxesAmount, coproductionContributionTaxRate)
-          : 0
-      );
-
-      const revenueGuarantee = declaration.accountingEntries.find(
-        (accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.REVENUE_GUARANTEE
-      );
-      const revenueGuaranteeTaxRate = revenueGuarantee?.taxRate ?? 0;
-
-      declarationParameterRepresentation.Exploitation.rep_mt_garantie_rec = formatAmountNumber(
-        revenueGuarantee ? getExcludingTaxesAmountFromIncludingTaxesAmount(revenueGuarantee.includingTaxesAmount, revenueGuaranteeTaxRate) : 0
-      );
-
-      // // The budget is not something we are collecting from declarants
-      // declarationParameterRepresentation.Exploitation.rep_mt_depenses = 'TODO';
-
-      const other = declaration.accountingEntries.find((accountingEntry) => accountingEntry.category === SacdAccountingCategorySchema.Values.OTHER);
-      const otherTaxRate = other?.taxRate ?? 0;
-
-      declarationParameterRepresentation.Exploitation.rep_mt_autres = formatAmountNumber(
-        other ? getExcludingTaxesAmountFromIncludingTaxesAmount(other.includingTaxesAmount, otherTaxRate) : 0
+        declaration.eventSerie.introductionFeesExpensesExcludingTaxes
       );
     }
 
@@ -421,12 +351,7 @@ export class MockSacdClient implements SacdClientInterface {
   public async logout(): Promise<void> {}
   public async test(): Promise<void> {}
 
-  public async declare(
-    declarantId: string,
-    eventSerie: EventSerieSchemaType,
-    wrappers: EventWrapperSchemaType[],
-    declaration: SacdDeclarationSchemaType
-  ): Promise<void> {
+  public async declare(declaration: SacdDeclarationSchemaType): Promise<void> {
     // Simulate loading
     await sleep(1000);
   }

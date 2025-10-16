@@ -23,10 +23,7 @@ const Template: StoryFn<ComponentType> = (args) => {
 const NormalStory = Template.bind({});
 NormalStory.args = {
   wrapper: eventsSeriesWrappers[0],
-  sacemDeclarationLink: '',
-  sacdDeclarationLink: '',
-  astpDeclarationLink: '',
-  cnmDeclarationLink: '',
+  declarationLink: '',
 };
 NormalStory.parameters = {};
 NormalStory.play = async ({ canvasElement }) => {

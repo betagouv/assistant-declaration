@@ -34,6 +34,11 @@ export const JsonTicketSchema = applyTypedParsers(
   z
     .object({
       status: z.enum(['payed', 'refunded', 'booked', 'cancelled']),
+      facialValue: z.number().int().nonnegative(), // Cents (may be different than the ticket price `facialValue`, it seems to confirm it's the amonut paid (or it was a dynamic price...))
+      // facialFeeValue: z.number().int().nonnegative(), // Cents
+      // paidValue: z.number().nonnegative(), // Not cents (equal to `facialValue / 100`)
+      // feeValue: z.number().nonnegative(), // Not cents (equal to `facialFeeValue / 100`) (never saw it different than 0 and it's not documented if it needs)
+      // priceVat: z.number().nonnegative(), // Not cents (seems always equal to `facialValue`)
       ticketPrice: z.string().min(1).nullable(),
       eventDate: z.string().min(1),
       isValid: z.boolean(),
@@ -77,9 +82,10 @@ export const JsonEventDateSchema = applyTypedParsers(
       startDate: z.coerce.date().nullable(),
       endDate: z.coerce.date().nullable(),
       startOfEventDay: z.coerce.date().nullable(),
-      endOfEventDay: z.coerce.date().nullable(),
+      // endOfEventDay: z.coerce.date().nullable(),
       ticketPriceList: z.array(
         z.object({
+          '@id': z.string().min(1),
           id: z.number().int().nonnegative(),
           type: z.enum([
             'default',

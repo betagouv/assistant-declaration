@@ -8,8 +8,8 @@ export type TicketingSystemNameSchemaType = z.infer<typeof TicketingSystemNameSc
 export const TicketingSystemSchema = applyTypedParsers(
   z
     .object({
-      id: z.string().uuid(),
-      organizationId: z.string().uuid(),
+      id: z.uuid(),
+      organizationId: z.uuid(),
       name: TicketingSystemNameSchema,
       lastSynchronizationAt: z.date().nullable(),
       createdAt: z.date(),
