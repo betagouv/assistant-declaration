@@ -149,8 +149,6 @@ model Organization {
   officialId             String  @unique
   officialHeadquartersId String  @unique
   headquartersAddressId  String? @unique @db.Uuid
-  sacemId                String? @unique
-  sacdId                 String? @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
