@@ -114,7 +114,7 @@ export function CompanyHeadquartersField(props: PropsWithChildren<CompanyHeadqua
       }}
       onInputChange={(event, newInputValue, reason) => {
         if (reason === 'input') {
-          handleSearchCompanyHeadquartersQueryChange(newInputValue);
+          debouncedHandleCompanyHeadquartersQuery(newInputValue);
         }
       }}
       onChange={(event, newValue) => {
