@@ -74,7 +74,9 @@ export function assertValidExpenses(
 
   if (data.expensesExcludingTaxes < partialExpensesExcludingTaxes) {
     ctx.issues.push({
-      ...customErrorToZodIssue(eventSeriePartialExpensesGreatherThanTotalError),
+      ...customErrorToZodIssue(eventSeriePartialExpensesGreatherThanTotalError, {
+        overridePath: ['expensesExcludingTaxes' satisfies keyof typeof data], // Concatenated to where the `superRefine` is applied
+      }),
       input: {
         expensesExcludingTaxes: data.expensesExcludingTaxes,
         introductionFeesExpensesExcludingTaxes: data.introductionFeesExpensesExcludingTaxes,
@@ -92,7 +94,9 @@ export function assertValidExpenses(
 
   if (data.expensesIncludingTaxes < partialExpensesIncludingTaxes) {
     ctx.issues.push({
-      ...customErrorToZodIssue(eventSeriePartialExpensesGreatherThanTotalError),
+      ...customErrorToZodIssue(eventSeriePartialExpensesGreatherThanTotalError, {
+        overridePath: ['expensesIncludingTaxes' satisfies keyof typeof data], // Concatenated to where the `superRefine` is applied
+      }),
       input: {
         expensesIncludingTaxes: data.expensesIncludingTaxes,
         introductionFeesExpensesIncludingTaxes: data.introductionFeesExpensesIncludingTaxes,

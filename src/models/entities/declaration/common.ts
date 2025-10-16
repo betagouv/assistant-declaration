@@ -38,9 +38,13 @@ export const DeclarationSchema = applyTypedParsers(
         circusSpecificExpensesIncludingTaxes: true,
         circusSpecificExpensesExcludingTaxes: true,
         circusSpecificExpensesTaxRate: true,
-      }).safeExtend({
-        place: PlaceSchema.nullable(),
-      }),
+      })
+        .extend({
+          place: PlaceSchema.nullable(),
+        })
+        .superRefine((data, ctx) => {
+          assertValidExpenses(data, ctx); // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
+        }),
       events: z.array(
         EventSchema.pick({
           id: true,
@@ -78,12 +82,31 @@ export const DeclarationInputSchema = applyTypedParsers(
   z
     .object({
       organization: DeclarationSchema.shape.organization,
-      eventSerie: DeclarationSchema.shape.eventSerie
+      eventSerie: EventSerieSchema.pick({
+        id: true,
+        name: true,
+        producerOfficialId: true,
+        producerName: true,
+        performanceType: true,
+        expectedDeclarationTypes: true,
+        placeCapacity: true,
+        audience: true,
+        ticketingRevenueTaxRate: true,
+        expensesIncludingTaxes: true,
+        expensesExcludingTaxes: true,
+        expensesTaxRate: true,
+        introductionFeesExpensesIncludingTaxes: true,
+        introductionFeesExpensesExcludingTaxes: true,
+        introductionFeesExpensesTaxRate: true,
+        circusSpecificExpensesIncludingTaxes: true,
+        circusSpecificExpensesExcludingTaxes: true,
+        circusSpecificExpensesTaxRate: true,
+      })
         .extend({
           place: PlaceInputSchema,
         })
         .superRefine((data, ctx) => {
-          assertValidExpenses(data, ctx); // Needed since `extend` reset refinements
+          assertValidExpenses(data, ctx); // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
         }),
       events: z.array(
         DeclarationSchema.shape.events.element.extend({
