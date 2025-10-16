@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
+import { OfficialHeadquartersIdSchema } from '@ad/src/models/entities/common';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 
 export const CreateOrganizationSchema = z.object({
   name: OrganizationSchema.shape.name,
-  officialId: OrganizationSchema.shape.officialId,
+  officialHeadquartersId: OfficialHeadquartersIdSchema,
 });
 export type CreateOrganizationSchemaType = z.infer<typeof CreateOrganizationSchema>;
 
