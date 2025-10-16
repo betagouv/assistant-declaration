@@ -147,7 +147,7 @@ model Organization {
   id                     String  @id @default(uuid()) @db.Uuid
   name                   String
   officialId             String  @unique
-  officialHeadquartersId String  @unique
+  officialHeadquartersId String? @unique
   headquartersAddressId  String? @unique @db.Uuid
 
   createdAt DateTime @default(now())
