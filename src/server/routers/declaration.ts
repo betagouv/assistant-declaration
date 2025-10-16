@@ -852,6 +852,7 @@ export const declarationRouter = router({
           producerName: agnosticDeclaration.eventSerie.producerName,
           performanceType: agnosticDeclaration.eventSerie.performanceType,
           expectedDeclarationTypes: agnosticDeclaration.eventSerie.expectedDeclarationTypes,
+          placeId: defaultPlace?.id ?? null,
           placeCapacity: agnosticDeclaration.eventSerie.placeCapacity,
           audience: agnosticDeclaration.eventSerie.audience,
           ticketingRevenueTaxRate: agnosticDeclaration.eventSerie.ticketingRevenueTaxRate,
