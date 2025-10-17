@@ -596,7 +596,22 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 clearErrors();
 
                                 for (const issue of parsedError.zodError) {
-                                  setError(issue.path.join('.') as FieldPath<FillDeclarationSchemaInputType>, {
+                                  let field = issue.path.join('.') as FieldPath<FillDeclarationSchemaInputType>;
+
+                                  // The `DeclarationSchema` is not exactly the same than `FillDeclarationSchema` so we hack
+                                  // a bit the field names to place at the right locations (this is mainly due for associations inputs)
+                                  // Note: error message may not be perfect but often it's due to missing property with `invalid_type` so it's acceptable to have a message really specific to this case
+                                  // (since otherwise this error should not happen from the UI in the normal flow)
+                                  if (field === 'eventSerie.place') {
+                                    field = 'eventSerie.place.name';
+                                  } else if (field.endsWith('.eventSerie.place')) {
+                                    field = field.replace(
+                                      '.placeOverride',
+                                      '.eventSerie.placeOverride.name'
+                                    ) as FieldPath<FillDeclarationSchemaInputType>;
+                                  }
+
+                                  setError(field, {
                                     type: 'validate',
                                     message: issue.message,
                                   });

@@ -66,6 +66,7 @@
     },
     "validation": {
       "address": {
+        "invalid_type": "l'adresse est requise",
         "city": {
           "too_big": "la ville doit faire {{maximum}} caractères maximum",
           "too_small_one": "la ville est requise"
@@ -235,6 +236,7 @@
         "too_small_one": "le mot de passe est requis"
       },
       "performanceType": {
+        "invalid_type": "le genre du spectacle est requis",
         "too_small_one": "le genre du spectacle est requis",
         "too_big": "le genre du spectacle doit faire {{maximum}} caractères maximum"
       },
@@ -249,32 +251,41 @@
         "too_small_one": "la capacité de la salle est requise"
       },
       "place": {
+        "invalid_type": "l'intitulé du lieu et son adresse sont requis",
         "name": {
           "too_big": "l'intitulé du lieu doit faire {{maximum}} caractères maximum",
           "too_small_one": "l'intitulé du lieu est requis"
         }
       },
       "placeOverride": {
+        "invalid_type": "l'intitulé du lieu et son adresse sont requis",
         "name": {
           "too_big": "l'intitulé du lieu doit faire {{maximum}} caractères maximum",
           "too_small_one": "l'intitulé du lieu est requis"
         }
       },
+      "producer": {
+        "invalid_type": "la raison sociale du producteur est requise"
+      },
       "producerOfficialId": {
+        "invalid_type": "le numéro Siren du producteur est requis",
         "officialIdMustBe9Digits": "le numéro Siren du producteur doit être composé de 9 chiffres",
         "too_big": "le numéro Siren du producteur doit faire {{maximum}} caractères maximum",
         "too_small_one": "le numéro Siren du producteur est requis"
       },
       "producerOfficialName": {
+        "invalid_type": "le code postal est requis",
         "too_small_one": "le code postal est requis"
       },
       "sacemId": {
         "sacemIdMustBeDigits": "l'identifiant Sacem doit être composé de 1 à 10 chiffres",
+        "invalid_type": "l'identifiant Sacem est requis",
         "too_big": "l'identifiant Sacem doit faire {{maximum}} caractères maximum",
         "too_small_one": "l'identifiant Sacem est requis"
       },
       "sacdId": {
         "sacdIdMustBeDigits": "l'identifiant SACD doit être composé de 1 à 10 chiffres",
+        "invalid_type": "l'identifiant SACD est requis",
         "too_big": "l'identifiant SACD doit faire {{maximum}} caractères maximum",
         "too_small_one": "l'identifiant SACD est requis"
       },
