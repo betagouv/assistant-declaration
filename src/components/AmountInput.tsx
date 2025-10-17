@@ -73,7 +73,7 @@ export function useAmountInput({ defaultValue, onChange, signed }: UseAmountInpu
   // The following is needed to synchronize "form state" into the masked input in case a `reset()` is used
   useEffect(() => {
     // Passing an empty string as mask when null does not trigger the onChange from `null` to empty string, which is good
-    setUnmaskedValue(defaultValue ? defaultValue.toString() : '');
+    setUnmaskedValue(defaultValue !== null ? defaultValue.toString() : '');
   }, [defaultValue, setUnmaskedValue]);
 
   return { inputRef: inputRef };

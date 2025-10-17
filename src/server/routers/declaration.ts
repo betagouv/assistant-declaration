@@ -1,6 +1,7 @@
 import { EventSerieDeclarationStatus } from '@prisma/client';
 import { renderToBuffer } from '@react-pdf/renderer';
 import slugify from '@sindresorhus/slugify';
+import { z } from 'zod';
 
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
 import { getSacdClient } from '@ad/src/core/declaration/sacd';
