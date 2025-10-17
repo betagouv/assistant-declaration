@@ -173,8 +173,20 @@ export function declarationPrismaToModel(
     })[];
   }
 ): DeclarationSchemaType {
-  const { headquartersAddressId, ...liteOrganization } = organizationPrismaToModel(eventSerie.ticketingSystem.organization);
-  const { placeId, ...liteEventSerie } = eventSeriePrismaToModel(eventSerie);
+  const {
+    headquartersAddressId,
+    createdAt: createdAtO,
+    updatedAt: updatedAtO,
+    ...liteOrganization
+  } = organizationPrismaToModel(eventSerie.ticketingSystem.organization);
+  const {
+    placeId,
+    internalTicketingSystemId,
+    ticketingSystemId,
+    createdAt: createdAtES,
+    updatedAt: updatedAtES,
+    ...liteEventSerie
+  } = eventSeriePrismaToModel(eventSerie);
 
   return {
     organization: {
@@ -186,7 +198,7 @@ export function declarationPrismaToModel(
       place: eventSerie.place ? placePrismaToModel(eventSerie.place) : null,
     },
     events: eventSerie.Event.map((event) => {
-      const { placeOverrideId, ...liteEvent } = eventPrismaToModel(event);
+      const { placeOverrideId, internalTicketingSystemId, eventSerieId, createdAt, updatedAt, ...liteEvent } = eventPrismaToModel(event);
 
       return {
         ...liteEvent,
