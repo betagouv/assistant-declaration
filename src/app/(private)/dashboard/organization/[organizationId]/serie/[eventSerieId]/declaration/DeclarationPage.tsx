@@ -82,6 +82,10 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     resolver: zodResolver(FillDeclarationSchema),
     defaultValues: {
       eventSerieId: eventSerieId,
+      organization: {
+        sacemId: null,
+        sacdId: null,
+      },
       eventSerie: {
         producer: null,
         expectedDeclarationTypes: [],
