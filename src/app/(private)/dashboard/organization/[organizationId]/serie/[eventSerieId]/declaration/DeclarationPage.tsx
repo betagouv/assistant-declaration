@@ -12,9 +12,10 @@ import { Alert, AlertProps, Autocomplete, Snackbar, Tooltip, useMediaQuery, useT
 import { push } from '@socialgouv/matomo-next';
 import debounce from 'lodash.debounce';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, FieldPath, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { usePrevious } from 'react-use';
+import { z } from 'zod';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { AddressField } from '@ad/src/components/AddressField';
@@ -35,9 +36,13 @@ import { getEventsKeyFigures } from '@ad/src/core/declaration/format';
 import { FillDeclarationSchema, FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { AddressInputSchemaType } from '@ad/src/models/entities/address';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
+import { BusinessZodError, invalidDeclarationFieldsToTransmitError } from '@ad/src/models/entities/errors';
 import { AudienceSchema, PerformanceTypeSchema } from '@ad/src/models/entities/event';
+import { parseError } from '@ad/src/utils/error';
 import { formatMaskedValue } from '@ad/src/utils/imask';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
+
+type FillDeclarationSchemaInputType = z.input<typeof FillDeclarationSchema>;
 
 const declarationTypesModal = createModal({
   id: 'declaration-types-modal',
@@ -78,6 +83,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     watch,
     trigger,
     reset,
+    setError,
+    clearErrors,
   } = useForm({
     resolver: zodResolver(FillDeclarationSchema),
     defaultValues: {
@@ -531,6 +538,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                   formContainerRef.current?.requestSubmit();
                 }}
                 priority="secondary"
+                disabled={transmitDeclaration.isPending}
                 loading={fillDeclaration.isPending}
                 nativeButtonProps={{
                   className: fr.cx('fr-m-2v'),
@@ -543,7 +551,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
               <Tooltip title={isDirty ? `Pour télédéclarer vous devez d'abord enregistrer vos dernières modifications` : ''}>
                 <span>
                   <Button
-                    disabled={isDirty}
+                    disabled={isDirty || fillDeclaration.isPending}
                     onClick={() => {
                       showConfirmationDialog({
                         description: (
@@ -562,9 +570,32 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           </>
                         ),
                         onConfirm: async () => {
-                          const result = await transmitDeclaration.mutateAsync({
-                            eventSerieId: eventSerieId,
-                          });
+                          try {
+                            const result = await transmitDeclaration.mutateAsync({
+                              eventSerieId: eventSerieId,
+                            });
+                          } catch (error) {
+                            if (error instanceof Error) {
+                              const parsedError = parseError(error);
+
+                              // It's taken into account an additional backend verification may fail when ensuring data will pass for each
+                              // chosen organisms... since it has the same structure than the `fillDeclaration` we patch errors onto the right fields
+                              // (still throwing the original issue so the `ErrorAlert` within the modal will display correctly)
+                              // Note: previous errors will be clean here (since the field would be missing in the array), how if using `fillDeclaration` it will clear them automatically
+                              if (parsedError instanceof BusinessZodError && parsedError.code === invalidDeclarationFieldsToTransmitError.code) {
+                                clearErrors();
+
+                                for (const issue of parsedError.zodError) {
+                                  setError(issue.path.join('.') as FieldPath<FillDeclarationSchemaInputType>, {
+                                    type: 'validate',
+                                    message: issue.message,
+                                  });
+                                }
+                              }
+                            }
+
+                            throw error;
+                          }
 
                           push(['trackEvent', 'declaration', 'transmit']);
                         },

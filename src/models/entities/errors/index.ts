@@ -1,5 +1,5 @@
 import { CustomError as LibraryCustomError } from 'ts-custom-error';
-import { ZodError } from 'zod';
+import { z } from 'zod';
 
 import { getServerTranslation } from '@ad/src/i18n';
 
@@ -38,14 +38,14 @@ export class BusinessError extends CustomError {
 export class BusinessZodError extends BusinessError {
   public constructor(
     businessError: BusinessError,
-    public zodError: ZodError,
+    public zodError: z.core.$ZodIssue[],
     public readonly httpCode?: number
   ) {
     super(businessError.code, businessError.message);
   }
 
   public cloneWithHttpCode(httpCode: number): BusinessError {
-    return new BusinessZodError(this.code, this.message, this.zodError, httpCode);
+    return new BusinessZodError(new BusinessError(this.code, this.message), this.zodError, httpCode);
   }
 
   public json(): object {

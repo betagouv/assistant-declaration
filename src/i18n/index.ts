@@ -234,7 +234,7 @@ export const formatMessageFromIssue = (issue: z.core.$ZodRawIssue): string | nul
   return null;
 };
 
-const customErrorMap: z.core.$ZodErrorMap = (issue) => {
+export const customErrorMap: z.core.$ZodErrorMap = (issue) => {
   const retrievedTranslation = formatMessageFromIssue(issue);
 
   // If no translation found with use the one from zod as fallback, and worst case we use the raw technical code

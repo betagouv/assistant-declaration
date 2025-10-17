@@ -12,9 +12,11 @@ import { SacdDeclarationSchema, SacdDeclarationSchemaType } from '@ad/src/models
 import { SacemDeclarationSchema, SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
 import {
   BusinessError,
+  BusinessZodError,
   atLeastOneDeclarationTypeToTransmitError,
   atLeastOneEventToTransmitError,
   eventSerieNotFoundError,
+  invalidDeclarationFieldsToTransmitError,
   organizationCollaboratorRoleRequiredError,
   sacemAgencyNotFoundError,
   sacemDeclarationUnsuccessfulError,
@@ -162,6 +164,8 @@ export const declarationRouter = router({
       throw atLeastOneDeclarationTypeToTransmitError;
     }
 
+    const validationIssues: z.core.$ZodIssue[] = [];
+
     for (const declarationType of agnosticDeclaration.eventSerie.expectedDeclarationTypes) {
       // If that's a retry, we make sure not transmitting again to organisms
       if (eventSerie.EventSerieDeclaration.find((eSD) => eSD.type === declarationType)?.status === 'PROCESSED') {
@@ -170,16 +174,28 @@ export const declarationRouter = router({
 
       switch (declarationType) {
         case 'SACEM':
-          sacemDeclaration = SacemDeclarationSchema.parse(agnosticDeclaration);
+          const sacemDeclarationParsing = SacemDeclarationSchema.safeParse(agnosticDeclaration);
 
-          declarationsToDeclare.push([declarationType, sacemDeclaration]);
+          if (!sacemDeclarationParsing.success) {
+            validationIssues.push(...sacemDeclarationParsing.error.issues);
+          } else {
+            sacemDeclaration = sacemDeclarationParsing.data;
+
+            declarationsToDeclare.push([declarationType, sacemDeclaration]);
+          }
 
           break;
         case 'SACD':
-          sacdDeclaration = SacdDeclarationSchema.parse(agnosticDeclaration);
+          const sacdDeclarationParsing = SacdDeclarationSchema.safeParse(agnosticDeclaration);
 
-          // Doing SACD declaration first because it's more likely to fail than sending the email as for Sacem
-          declarationsToDeclare.unshift([declarationType, sacdDeclaration]);
+          if (!sacdDeclarationParsing.success) {
+            validationIssues.push(...sacdDeclarationParsing.error.issues);
+          } else {
+            sacdDeclaration = sacdDeclarationParsing.data;
+
+            // Doing SACD declaration first because it's more likely to fail than sending the email as for Sacem
+            declarationsToDeclare.unshift([declarationType, sacdDeclaration]);
+          }
 
           break;
         default:
@@ -187,7 +203,11 @@ export const declarationRouter = router({
       }
     }
 
-    if (declarationsToDeclare.length === 0) {
+    if (validationIssues.length > 0) {
+      // Due to different organism validating the same field, it's possible a field name has multiple error items
+      // but we consider it fine, the last one will be displayed in the UI, and after the submit it would see the other one if any (of course, the combination across organisms must be possible, not "be string, and be number")
+      throw new BusinessZodError(invalidDeclarationFieldsToTransmitError, validationIssues);
+    } else if (declarationsToDeclare.length === 0) {
       throw new Error('should not resubmit as all declarations have been declared');
     } else if (agnosticDeclaration.events.length === 0) {
       throw atLeastOneEventToTransmitError;
