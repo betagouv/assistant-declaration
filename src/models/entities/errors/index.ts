@@ -1,4 +1,5 @@
 import { CustomError as LibraryCustomError } from 'ts-custom-error';
+import { ZodError } from 'zod';
 
 import { getServerTranslation } from '@ad/src/i18n';
 
@@ -31,6 +32,28 @@ export class BusinessError extends CustomError {
 
   public cloneWithHttpCode(httpCode: number): BusinessError {
     return new BusinessError(this.code, this.message, httpCode);
+  }
+}
+
+export class BusinessZodError extends BusinessError {
+  public constructor(
+    businessError: BusinessError,
+    public zodError: ZodError,
+    public readonly httpCode?: number
+  ) {
+    super(businessError.code, businessError.message);
+  }
+
+  public cloneWithHttpCode(httpCode: number): BusinessError {
+    return new BusinessZodError(this.code, this.message, this.zodError, httpCode);
+  }
+
+  public json(): object {
+    return {
+      code: this.code,
+      message: this.message,
+      zodError: this.zodError,
+    };
   }
 }
 
@@ -194,6 +217,10 @@ export const atLeastOneDeclarationTypeToTransmitError = new BusinessError(
   t('errors.custom.atLeastOneDeclarationTypeToTransmit')
 );
 export const atLeastOneEventToTransmitError = new BusinessError('atLeastOneEventToTransmit', t('errors.custom.atLeastOneEventToTransmit'));
+export const invalidDeclarationFieldsToTransmitError = new BusinessError(
+  'invalidDeclarationFieldsToTransmit',
+  t('errors.custom.invalidDeclarationFieldsToTransmit')
+);
 export const sacemAgencyNotFoundError = new BusinessError('sacemAgencyNotFound', t('errors.custom.sacemAgencyNotFound'));
 export const sacemDeclarationUnsuccessfulError = new BusinessError('sacemDeclarationUnsuccessful', t('errors.custom.sacemDeclarationUnsuccessful'));
 export const sacdDeclarationIncorrectDeclarantError = new BusinessError(

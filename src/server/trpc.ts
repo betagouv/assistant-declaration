@@ -15,7 +15,11 @@ const t = initTRPC
     errorFormatter(opts) {
       const { shape, error } = opts;
 
-      let acceptableZodError = error.cause instanceof ZodError && error.code === 'BAD_REQUEST' ? error.cause : null; // Only forward zod errors from input validation (others should be internal issues)
+      // Only forward zod errors from input validation (others should be internal issues)
+      // If for any reason you need to forward a zod error on the frontend (in case of multiple steps for a form validation)
+      // you can still wrap the error wirh `BusinessZodError` for transporting zod information
+      let acceptableZodError = error.cause instanceof ZodError && error.code === 'BAD_REQUEST' ? error.cause : null;
+
       let customError = error.cause instanceof CustomError ? error.cause : null;
 
       let errorData: Record<string, any>;

@@ -48,7 +48,10 @@ export function AmountMaskFactory(locale: string, signed?: boolean): FactoryOpts
   };
 }
 
-type SubformType = ControllerRenderProps<{ value: number | null }, 'value'>;
+// No way with generics on `ControllerRenderProps<A, B>` to allow any property name, so overriding their type with missing differences
+interface SubformType extends ControllerRenderProps<any, any> {
+  value: number | null;
+}
 
 interface UseAmountInputProps extends Pick<SubformType, 'onChange'> {
   defaultValue: SubformType['value'];

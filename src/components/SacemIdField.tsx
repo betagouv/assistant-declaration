@@ -13,7 +13,10 @@ export const sacemIdMask: FactoryOpts = {
   overwrite: 'shift',
 };
 
-type SubformType = ControllerRenderProps<{ value: string | null }, 'value'>;
+// No way with generics on `ControllerRenderProps<A, B>` to allow any property name, so overriding their type with missing differences
+interface SubformType extends ControllerRenderProps<any, any> {
+  value: string | null;
+}
 
 interface UseSacemIdInputProps extends Pick<SubformType, 'onChange'> {
   defaultValue: SubformType['value'];
