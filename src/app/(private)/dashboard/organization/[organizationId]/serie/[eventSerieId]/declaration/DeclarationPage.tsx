@@ -352,6 +352,17 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     [setSnackbarAlert, handleCloseSnackbar]
   );
 
+  // This is a workaround to not consider cloning main event serie values to events ones from the initial
+  // `reset()` that sets values from the API response. Using the ref won't trigger useless rerender
+  const formInitializedRef = useRef(false);
+  useEffect(() => {
+    if (!formInitializedRef.current && formInitialized) {
+      setTimeout(() => {
+        formInitializedRef.current = true;
+      }, 1500); // ~1 second seems a good timing before any human interaction with inputs is possible
+    }
+  }, [formInitialized]);
+
   const debouncedDisplayDefaultImpactMessage = useMemo(() => debounce(displayDefaultImpactMessage, 1500), [displayDefaultImpactMessage]);
   useEffect(() => {
     return () => {
@@ -363,7 +374,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const currentPlaceName = watch('eventSerie.place.name');
   const previousPlaceName = usePrevious(currentPlaceName);
   useEffect(() => {
-    if (previousPlaceName !== undefined && currentPlaceName !== previousPlaceName) {
+    if (formInitializedRef.current && currentPlaceName !== previousPlaceName) {
       const events = getValues('events');
       let modifiedEvents = 0;
 
@@ -381,7 +392,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const currentPlaceAddress = watch('eventSerie.place.address');
   const previousPlaceAddress = usePrevious(currentPlaceAddress);
   useEffect(() => {
-    if (previousPlaceAddress !== undefined && JSON.stringify(currentPlaceAddress) !== JSON.stringify(previousPlaceAddress)) {
+    if (formInitializedRef.current && JSON.stringify(currentPlaceAddress) !== JSON.stringify(previousPlaceAddress)) {
       const events = getValues('events');
       const previousPlaceAddressStringToCompare = JSON.stringify(previousPlaceAddress);
       let modifiedEvents = 0;
@@ -400,7 +411,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const currentPlaceCapacity = watch('eventSerie.placeCapacity');
   const previousPlaceCapacity = usePrevious(currentPlaceCapacity);
   useEffect(() => {
-    if (previousPlaceCapacity !== undefined && currentPlaceCapacity !== previousPlaceCapacity) {
+    if (formInitializedRef.current && currentPlaceCapacity !== previousPlaceCapacity) {
       const events = getValues('events');
       let modifiedEvents = 0;
 
@@ -418,7 +429,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const currentAudience = watch('eventSerie.audience');
   const previousAudience = usePrevious(currentAudience);
   useEffect(() => {
-    if (previousAudience !== undefined && currentAudience !== previousAudience) {
+    if (formInitializedRef.current && currentAudience !== previousAudience) {
       const events = getValues('events');
       let modifiedEvents = 0;
 
@@ -436,7 +447,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const currentTicketingRevenueTaxRate = watch('eventSerie.ticketingRevenueTaxRate');
   const previousTicketingRevenueTaxRate = usePrevious(currentTicketingRevenueTaxRate);
   useEffect(() => {
-    if (previousTicketingRevenueTaxRate !== undefined && currentTicketingRevenueTaxRate !== previousTicketingRevenueTaxRate) {
+    if (formInitializedRef.current && currentTicketingRevenueTaxRate !== previousTicketingRevenueTaxRate) {
       const events = getValues('events');
       let modifiedEvents = 0;
 
