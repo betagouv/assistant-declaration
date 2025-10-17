@@ -48,8 +48,10 @@ export function AmountMaskFactory(locale: string, signed?: boolean): FactoryOpts
   };
 }
 
-interface UseAmountInputProps extends Pick<ControllerRenderProps<any, string>, 'onChange'> {
-  defaultValue: number;
+type SubformType = ControllerRenderProps<{ value: number | null }, 'value'>;
+
+interface UseAmountInputProps extends Pick<SubformType, 'onChange'> {
+  defaultValue: SubformType['value'];
   signed?: boolean;
 }
 
@@ -67,15 +69,14 @@ export function useAmountInput({ defaultValue, onChange, signed }: UseAmountInpu
 
   // The following is needed to synchronize "form state" into the masked input in case a `reset()` is used
   useEffect(() => {
-    if (defaultValue != null) {
-      setUnmaskedValue(defaultValue.toString());
-    }
+    // Passing an empty string as mask when null does not trigger the onChange from `null` to empty string, which is good
+    setUnmaskedValue(defaultValue ? defaultValue.toString() : '');
   }, [defaultValue, setUnmaskedValue]);
 
   return { inputRef: inputRef };
 }
 
-interface AmountInputProps extends ControllerRenderProps<any, string> {
+interface AmountInputProps extends SubformType {
   label: string;
   signed?: boolean;
   errorMessage?: string;

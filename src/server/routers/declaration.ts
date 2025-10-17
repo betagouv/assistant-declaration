@@ -554,8 +554,8 @@ export const declarationRouter = router({
           officialId: eventSerie.ticketingSystem.organization.officialId,
           officialHeadquartersId: eventSerie.ticketingSystem.organization.officialHeadquartersId,
           headquartersAddress: eventSerie.ticketingSystem.organization.headquartersAddress,
-          sacemId: eventSerie.ticketingSystem.organization.sacemId,
-          sacdId: eventSerie.ticketingSystem.organization.sacdId,
+          sacemId: input.organization.sacemId ?? eventSerie.ticketingSystem.organization.sacemId,
+          sacdId: input.organization.sacdId ?? eventSerie.ticketingSystem.organization.sacdId,
         },
         eventSerie: {
           id: eventSerie.id,
@@ -841,6 +841,19 @@ export const declarationRouter = router({
         });
 
         eventPlace && newPlacesIds.add(eventPlace.id);
+      }
+
+      // Only update organization if properties have been set
+      if (agnosticDeclaration.organization.sacemId || agnosticDeclaration.organization.sacdId) {
+        await tx.organization.update({
+          where: {
+            id: eventSerie.ticketingSystem.organization.id,
+          },
+          data: {
+            sacemId: agnosticDeclaration.organization.sacemId ?? undefined,
+            sacdId: agnosticDeclaration.organization.sacdId ?? undefined,
+          },
+        });
       }
 
       const updatedEventSerie = await tx.eventSerie.update({

@@ -13,8 +13,10 @@ export const sacdIdMask: FactoryOpts = {
   overwrite: 'shift',
 };
 
-interface UseSacdIdInputProps extends Pick<ControllerRenderProps<any, string>, 'onChange'> {
-  defaultValue: ControllerRenderProps<any, string>['value'];
+type SubformType = ControllerRenderProps<{ value: string | null }, 'value'>;
+
+interface UseSacdIdInputProps extends Pick<SubformType, 'onChange'> {
+  defaultValue: SubformType['value'];
 }
 
 export function useSacdIdInput({ defaultValue, onChange }: UseSacdIdInputProps) {
@@ -26,15 +28,14 @@ export function useSacdIdInput({ defaultValue, onChange }: UseSacdIdInputProps) 
 
   // The following is needed to synchronize "form state" into the masked input in case a `reset()` is used
   useEffect(() => {
-    if (defaultValue != null) {
-      setUnmaskedValue(defaultValue);
-    }
+    // Passing an empty string as mask when null does not trigger the onChange from `null` to empty string, which is good
+    setUnmaskedValue(defaultValue ?? '');
   }, [defaultValue, setUnmaskedValue]);
 
   return { inputRef: inputRef };
 }
 
-interface SacdIdInputProps extends ControllerRenderProps<any, string> {
+interface SacdIdInputProps extends SubformType {
   label: string;
   errorMessage?: string;
 }
