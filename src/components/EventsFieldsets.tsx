@@ -64,7 +64,7 @@ export function EventsFieldsets({ control, register, setValue, watch, trigger, p
                     name={`events.${eventWithErrorLogic.index}`}
                     placeholder={placeholder}
                     errors={eventWithErrorLogic.errors}
-                    readonly={false}
+                    readonly={readonly}
                   />
                 </div>
               </div>

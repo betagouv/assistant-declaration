@@ -216,6 +216,10 @@ export const transmittedDeclarationCannotBeUpdatedError = new BusinessError(
   'transmittedDeclarationCannotBeUpdated',
   t('errors.custom.transmittedDeclarationCannotBeUpdated')
 );
+export const atLeastOneTransmissionHasFailedError = new BusinessError(
+  'atLeastOneTransmissionHasFailed',
+  t('errors.custom.atLeastOneTransmissionHasFailed')
+);
 export const atLeastOneDeclarationTypeToTransmitError = new BusinessError(
   'atLeastOneDeclarationTypeToTransmit',
   t('errors.custom.atLeastOneDeclarationTypeToTransmit')

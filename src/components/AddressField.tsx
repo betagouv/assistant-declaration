@@ -13,7 +13,7 @@ import { searchAddressSuggestions } from '@ad/src/proxies/national-address-base'
 
 export interface AddressFieldProps {
   value?: Omit<AddressInputSchemaType, 'id'> | null;
-  inputProps: Pick<InputProps, 'label' | 'nativeInputProps'>;
+  inputProps: Pick<InputProps, 'label' | 'nativeInputProps' | 'disabled'>;
   onChange: (newValue: AddressInputSchemaType | null) => void;
   onBlur: FocusEventHandler<HTMLDivElement>;
   errorMessage?: string;
@@ -56,14 +56,13 @@ export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
       inputValue={inputValue}
       options={searchAddressQuerySuggestions}
       filterOptions={(options, state) => options} // We want to show results from the API without any additional filtering from MUI
-      renderInput={({ InputProps, disabled, id, inputProps }) => {
+      renderInput={({ InputProps, id, inputProps }) => {
         // Unable to prevent the autocomplete for address from Chrome despite `autoComplete="false"` so giving up
         return (
           <Input
             {...props.inputProps}
             ref={InputProps.ref}
             id={id}
-            disabled={disabled}
             state={!!props.errorMessage ? 'error' : undefined}
             stateRelatedMessage={props.errorMessage}
             nativeInputProps={{

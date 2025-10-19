@@ -21,6 +21,7 @@
       "anotherTicketingSystemSynchronizationOngoing": "une autre synchronisation des données est déjà en cours",
       "atLeastOneDeclarationTypeToTransmit": "vous devez au moins sélectionner un organisme pour télédéclarer",
       "atLeastOneEventToTransmit": "votre spectacle doit contenir au minimum une représentation pour être déclaré auprès d'un organisme",
+      "atLeastOneTransmissionHasFailed": "un problème est survenu lors de la transmission de cette déclaration, veuillez retenter ou contacter notre support",
       "authCredentialsRequired": "vous devez fournir vos informations de connexion pour poursuivre",
       "authFatal": "une erreur inattendue est survenue, merci de contacter le support",
       "authNoCredentialsMatch": "les informations de connexion fournies sont incorrectes",

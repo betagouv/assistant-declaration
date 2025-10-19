@@ -426,6 +426,7 @@ export const declarationRouter = router({
             id: true,
             type: true,
             status: true,
+            lastTransmissionError: true,
           },
         },
       },
@@ -501,6 +502,13 @@ export const declarationRouter = router({
       declarationWrapper: {
         declaration: declarationPrismaToModel(eventSerie),
         placeholder: placeholder,
+        transmissions: eventSerie.EventSerieDeclaration.map((eSD) => {
+          return {
+            type: eSD.type,
+            status: eSD.status,
+            hasError: !!eSD.lastTransmissionError,
+          };
+        }),
       } satisfies DeclarationWrapperSchemaType,
     };
   }),

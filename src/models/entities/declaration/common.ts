@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { AddressSchema } from '@ad/src/models/entities/address';
+import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import { EventSchema, EventSerieSchema, StricterEventSerieSchema, assertValidExpenses } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceInputSchema, PlaceSchema } from '@ad/src/models/entities/place';
@@ -133,6 +134,13 @@ export const DeclarationWrapperSchema = applyTypedParsers(
         place: z.array(PlaceSchema),
         placeCapacity: z.array(StricterEventSerieSchema.shape.placeCapacity),
       }),
+      transmissions: z.array(
+        z.object({
+          type: DeclarationTypeSchema,
+          status: DeclarationStatusSchema,
+          hasError: z.boolean(),
+        })
+      ),
     })
     .strict()
 );

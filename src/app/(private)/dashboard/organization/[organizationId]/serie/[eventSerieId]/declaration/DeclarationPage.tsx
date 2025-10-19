@@ -36,7 +36,7 @@ import { getEventsKeyFigures } from '@ad/src/core/declaration/format';
 import { FillDeclarationSchema, FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
 import { AddressInputSchemaType } from '@ad/src/models/entities/address';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
-import { BusinessZodError, invalidDeclarationFieldsToTransmitError } from '@ad/src/models/entities/errors';
+import { BusinessZodError, atLeastOneTransmissionHasFailedError, invalidDeclarationFieldsToTransmitError } from '@ad/src/models/entities/errors';
 import { AudienceSchema, PerformanceTypeSchema } from '@ad/src/models/entities/event';
 import { parseError } from '@ad/src/utils/error';
 import { formatMaskedValue } from '@ad/src/utils/imask';
@@ -498,6 +498,21 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     }
   }, [previousTicketingRevenueTaxRate, currentTicketingRevenueTaxRate, getValues, setValue, debouncedDisplayDefaultImpactMessage]);
 
+  const { alreadyDeclared, erroredTransmission } = useMemo(() => {
+    return getDeclaration.data
+      ? {
+          alreadyDeclared: getDeclaration.data.declarationWrapper.transmissions.length > 0,
+          erroredTransmission:
+            getDeclaration.data.declarationWrapper.transmissions.findIndex(
+              (transmission) => transmission.status === 'PENDING' && transmission.hasError
+            ) !== -1,
+        }
+      : {
+          alreadyDeclared: false,
+          erroredTransmission: false,
+        };
+  }, [getDeclaration]);
+
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
@@ -541,116 +556,133 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
               </h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 {watch('eventSerie.expectedDeclarationTypes').map((declarationType) => {
-                  return <Tag key={declarationType}>{t(`model.declarationType.enum.${declarationType}`)}</Tag>;
+                  return (
+                    <Tag
+                      key={declarationType}
+                      {...((declarationWrapper.transmissions.findIndex((transmission) => transmission.type === declarationType) !== -1
+                        ? {
+                            iconId: fr.cx('fr-icon-checkbox-circle-line'),
+                          }
+                        : {}) as any)}
+                    >
+                      {t(`model.declarationType.enum.${declarationType}`)}
+                    </Tag>
+                  );
                 })}
-                <Tag
-                  iconId="fr-icon-add-circle-line"
-                  linkProps={{
-                    href: '#',
-                    onClick: declarationTypesModal.open,
-                  }}
-                >
-                  Éditer
-                </Tag>
+                {!alreadyDeclared && (
+                  <Tag
+                    iconId="fr-icon-add-circle-line"
+                    linkProps={{
+                      href: '#',
+                      onClick: declarationTypesModal.open,
+                    }}
+                  >
+                    Éditer
+                  </Tag>
+                )}
               </div>
             </div>
             <div className={fr.cx('fr-mt-1v')}>Vérifiez et complétez les informations pour déclarer ce spectacle.</div>
           </div>
-          <ul className={fr.cx('fr-btns-group', 'fr-btns-group--inline')} style={{ marginLeft: 'auto' }}>
-            <li>
-              <Button
-                onClick={() => {
-                  formContainerRef.current?.requestSubmit();
-                }}
-                priority="secondary"
-                disabled={transmitDeclaration.isPending}
-                loading={fillDeclaration.isPending}
-                nativeButtonProps={{
-                  className: fr.cx('fr-m-2v'),
-                }}
-              >
-                Enregistrer
-              </Button>
-            </li>
-            <li>
-              <Tooltip title={isDirty ? `Pour télédéclarer vous devez d'abord enregistrer vos dernières modifications` : ''}>
-                <span>
+          {(!alreadyDeclared || erroredTransmission) && (
+            <ul className={fr.cx('fr-btns-group', 'fr-btns-group--inline')} style={{ marginLeft: 'auto' }}>
+              {!alreadyDeclared && (
+                <li>
                   <Button
-                    disabled={isDirty || fillDeclaration.isPending}
                     onClick={() => {
-                      showConfirmationDialog({
-                        description: (
-                          <>
-                            Êtes-vous sûr de vouloir transmettre ces informations pour le spectacle{' '}
-                            <span className={fr.cx('fr-text--bold')} data-sentry-mask>
-                              {declaration.eventSerie.name}
-                            </span>{' '}
-                            ?
-                            <br />
-                            <br />
-                            <span style={{ fontStyle: 'italic' }}>
-                              Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou amendement de la
-                              déclaration, il faudra directement contacter votre interlocuteur de chaque organisme concerné.
-                            </span>
-                          </>
-                        ),
-                        onConfirm: async () => {
-                          try {
-                            const result = await transmitDeclaration.mutateAsync({
-                              eventSerieId: eventSerieId,
-                            });
-                          } catch (error) {
-                            if (error instanceof Error) {
-                              const parsedError = parseError(error);
-
-                              // It's taken into account an additional backend verification may fail when ensuring data will pass for each
-                              // chosen organisms... since it has the same structure than the `fillDeclaration` we patch errors onto the right fields
-                              // (still throwing the original issue so the `ErrorAlert` within the modal will display correctly)
-                              // Note: previous errors will be clean here (since the field would be missing in the array), how if using `fillDeclaration` it will clear them automatically
-                              if (parsedError instanceof BusinessZodError && parsedError.code === invalidDeclarationFieldsToTransmitError.code) {
-                                clearErrors();
-
-                                for (const issue of parsedError.zodError) {
-                                  let field = issue.path.join('.') as FieldPath<FillDeclarationSchemaInputType>;
-
-                                  // The `DeclarationSchema` is not exactly the same than `FillDeclarationSchema` so we hack
-                                  // a bit the field names to place at the right locations (this is mainly due for associations inputs)
-                                  // Note: error message may not be perfect but often it's due to missing property with `invalid_type` so it's acceptable to have a message really specific to this case
-                                  // (since otherwise this error should not happen from the UI in the normal flow)
-                                  if (field === 'eventSerie.place') {
-                                    field = 'eventSerie.place.name';
-                                  } else if (field.endsWith('.eventSerie.place')) {
-                                    field = field.replace(
-                                      '.placeOverride',
-                                      '.eventSerie.placeOverride.name'
-                                    ) as FieldPath<FillDeclarationSchemaInputType>;
-                                  }
-
-                                  setError(field, {
-                                    type: 'validate',
-                                    message: issue.message,
-                                  });
-                                }
-                              }
-                            }
-
-                            throw error;
-                          }
-
-                          push(['trackEvent', 'declaration', 'transmit']);
-                        },
-                      });
+                      formContainerRef.current?.requestSubmit();
                     }}
+                    priority="secondary"
+                    disabled={transmitDeclaration.isPending}
+                    loading={fillDeclaration.isPending}
                     nativeButtonProps={{
                       className: fr.cx('fr-m-2v'),
                     }}
                   >
-                    Déclarer
+                    Enregistrer
                   </Button>
-                </span>
-              </Tooltip>
-            </li>
-          </ul>
+                </li>
+              )}
+              <li>
+                <Tooltip title={isDirty ? `Pour télédéclarer vous devez d'abord enregistrer vos dernières modifications` : ''}>
+                  <span>
+                    <Button
+                      disabled={isDirty || fillDeclaration.isPending}
+                      onClick={() => {
+                        showConfirmationDialog({
+                          description: (
+                            <>
+                              Êtes-vous sûr de vouloir transmettre ces informations pour le spectacle{' '}
+                              <span className={fr.cx('fr-text--bold')} data-sentry-mask>
+                                {declaration.eventSerie.name}
+                              </span>{' '}
+                              ?
+                              <br />
+                              <br />
+                              <span style={{ fontStyle: 'italic' }}>
+                                Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou amendement de
+                                la déclaration, il faudra directement contacter votre interlocuteur de chaque organisme concerné.
+                              </span>
+                            </>
+                          ),
+                          onConfirm: async () => {
+                            try {
+                              const result = await transmitDeclaration.mutateAsync({
+                                eventSerieId: eventSerieId,
+                              });
+                            } catch (error) {
+                              if (error instanceof Error) {
+                                const parsedError = parseError(error);
+
+                                // It's taken into account an additional backend verification may fail when ensuring data will pass for each
+                                // chosen organisms... since it has the same structure than the `fillDeclaration` we patch errors onto the right fields
+                                // (still throwing the original issue so the `ErrorAlert` within the modal will display correctly)
+                                // Note: previous errors will be clean here (since the field would be missing in the array), how if using `fillDeclaration` it will clear them automatically
+                                if (parsedError instanceof BusinessZodError && parsedError.code === invalidDeclarationFieldsToTransmitError.code) {
+                                  clearErrors();
+
+                                  for (const issue of parsedError.zodError) {
+                                    let field = issue.path.join('.') as FieldPath<FillDeclarationSchemaInputType>;
+
+                                    // The `DeclarationSchema` is not exactly the same than `FillDeclarationSchema` so we hack
+                                    // a bit the field names to place at the right locations (this is mainly due for associations inputs)
+                                    // Note: error message may not be perfect but often it's due to missing property with `invalid_type` so it's acceptable to have a message really specific to this case
+                                    // (since otherwise this error should not happen from the UI in the normal flow)
+                                    if (field === 'eventSerie.place') {
+                                      field = 'eventSerie.place.name';
+                                    } else if (field.endsWith('.eventSerie.place')) {
+                                      field = field.replace(
+                                        '.placeOverride',
+                                        '.eventSerie.placeOverride.name'
+                                      ) as FieldPath<FillDeclarationSchemaInputType>;
+                                    }
+
+                                    setError(field, {
+                                      type: 'validate',
+                                      message: issue.message,
+                                    });
+                                  }
+                                }
+                              }
+
+                              throw error;
+                            }
+
+                            push(['trackEvent', 'declaration', 'transmit']);
+                          },
+                        });
+                      }}
+                      nativeButtonProps={{
+                        className: fr.cx('fr-m-2v'),
+                      }}
+                    >
+                      {erroredTransmission ? 'Réessayer de déclarer' : 'Déclarer'}
+                    </Button>
+                  </span>
+                </Tooltip>
+              </li>
+            </ul>
+          )}
         </div>
       </div>
       <div className={fr.cx('fr-container', 'fr-py-12v')} style={{ height: '100%' }}>
@@ -672,6 +704,11 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                   >
                     <div className={fr.cx('fr-col-12')}>
                       <fieldset className={fr.cx('fr-fieldset')}>
+                        {erroredTransmission && (
+                          <div className={fr.cx('fr-fieldset__element', 'fr-mb-8v')}>
+                            <ErrorAlert errors={[atLeastOneTransmissionHasFailedError]} />
+                          </div>
+                        )}
                         <div className={fr.cx('fr-fieldset__element')}>
                           <h2 className={fr.cx('fr-h4')}>Général</h2>
                         </div>
@@ -707,6 +744,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                   <Controller
                                     control={control}
                                     name="organization.sacemId"
+                                    disabled={alreadyDeclared}
                                     render={({ field, fieldState: { error } }) => {
                                       return <SacemIdInput {...field} label="Identifiant Sacem" errorMessage={error?.message} />;
                                     }}
@@ -720,6 +758,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                   <Controller
                                     control={control}
                                     name="organization.sacdId"
+                                    disabled={alreadyDeclared}
                                     render={({ field, fieldState: { error } }) => {
                                       return <SacdIdInput {...field} label="Identifiant SACD" errorMessage={error?.message} />;
                                     }}
@@ -734,13 +773,15 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.producer"
-                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                  disabled={alreadyDeclared}
+                                  render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
                                     return (
                                       <CompanyField
                                         value={value}
                                         defaultSuggestions={declarationWrapper.placeholder.producer}
                                         inputProps={{
                                           label: 'Raison sociale du producteur',
+                                          disabled: disabled,
                                           nativeInputProps: {
                                             placeholder: 'Recherche',
                                           },
@@ -760,6 +801,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Select
                                   label="Genre"
+                                  disabled={alreadyDeclared}
                                   state={!!errors.eventSerie?.performanceType ? 'error' : undefined}
                                   stateRelatedMessage={errors?.eventSerie?.performanceType?.message}
                                   nativeSelectProps={{
@@ -865,6 +907,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.expensesExcludingTaxes"
+                                  disabled={alreadyDeclared}
                                   render={({ field, fieldState: { error } }) => {
                                     return <AmountInput {...field} label="Dépenses globales HT" signed={false} errorMessage={error?.message} />;
                                   }}
@@ -876,6 +919,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.expensesIncludingTaxes"
+                                  disabled={alreadyDeclared}
                                   render={({ field, fieldState: { error } }) => {
                                     return <AmountInput {...field} label="Dépenses globales TTC" signed={false} errorMessage={error?.message} />;
                                   }}
@@ -887,6 +931,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.introductionFeesExpensesExcludingTaxes"
+                                  disabled={alreadyDeclared}
                                   render={({ field, fieldState: { error } }) => {
                                     return <AmountInput {...field} label="Frais d'approche HT" signed={false} errorMessage={error?.message} />;
                                   }}
@@ -898,6 +943,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.introductionFeesExpensesIncludingTaxes"
+                                  disabled={alreadyDeclared}
                                   render={({ field, fieldState: { error } }) => {
                                     return <AmountInput {...field} label="Frais d'approche TTC" signed={false} errorMessage={error?.message} />;
                                   }}
@@ -911,6 +957,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                     <Controller
                                       control={control}
                                       name="eventSerie.circusSpecificExpensesExcludingTaxes"
+                                      disabled={alreadyDeclared}
                                       render={({ field, fieldState: { error } }) => {
                                         return (
                                           <AmountInput
@@ -929,6 +976,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                     <Controller
                                       control={control}
                                       name="eventSerie.circusSpecificExpensesIncludingTaxes"
+                                      disabled={alreadyDeclared}
                                       render={({ field, fieldState: { error } }) => {
                                         return (
                                           <AmountInput
@@ -960,6 +1008,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Select
                                   label="Audience"
+                                  disabled={alreadyDeclared}
                                   state={!!errors.eventSerie?.audience ? 'error' : undefined}
                                   stateRelatedMessage={errors?.eventSerie?.audience?.message}
                                   nativeSelectProps={{
@@ -980,6 +1029,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Select
                                   label="Taux de TVA"
+                                  disabled={alreadyDeclared}
                                   state={!!errors.eventSerie?.ticketingRevenueTaxRate ? 'error' : undefined}
                                   stateRelatedMessage={errors?.eventSerie?.ticketingRevenueTaxRate?.message}
                                   nativeSelectProps={{
@@ -1005,13 +1055,15 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.place.name"
-                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                  disabled={alreadyDeclared}
+                                  render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
                                     return (
                                       <Autocomplete
                                         disablePortal
                                         options={declarationWrapper.placeholder.place}
                                         value={value}
                                         inputValue={value ?? ''}
+                                        disabled={disabled}
                                         renderInput={({ InputProps, disabled, id, inputProps }) => {
                                           return (
                                             <Input
@@ -1093,12 +1145,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.place.address"
-                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                  disabled={alreadyDeclared}
+                                  render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
                                     return (
                                       <AddressField
                                         value={value}
                                         inputProps={{
                                           label: 'Adresse du lieu',
+                                          disabled: disabled,
                                           nativeInputProps: {
                                             placeholder: 'Recherche',
                                           },
@@ -1119,7 +1173,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 <Controller
                                   control={control}
                                   name="eventSerie.placeCapacity"
-                                  render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+                                  disabled={alreadyDeclared}
+                                  render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
                                     return (
                                       <Autocomplete
                                         options={declarationWrapper.placeholder.placeCapacity}
@@ -1127,6 +1182,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                         onBlur={onBlur}
                                         value={value}
                                         inputValue={value ? value.toString() : ''}
+                                        disabled={disabled}
                                         onInputChange={(event, newValue, reason) => {
                                           const parsedValue = parseInt(newValue, 10);
 
@@ -1200,7 +1256,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             trigger={trigger}
                             placeholder={declarationWrapper.placeholder}
                             errors={errors.events}
-                            readonly={false}
+                            readonly={alreadyDeclared}
                           />
                         </div>
                       </fieldset>

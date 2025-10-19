@@ -52,6 +52,7 @@ export function SacemIdInput(props: SacemIdInputProps) {
   return (
     <Input
       label={props.label}
+      disabled={props.disabled}
       state={!!props.errorMessage ? 'error' : undefined}
       stateRelatedMessage={props.errorMessage}
       nativeInputProps={{

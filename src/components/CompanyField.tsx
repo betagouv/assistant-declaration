@@ -17,7 +17,7 @@ export interface Company {
 
 export interface CompanyFieldProps {
   value?: Company | null;
-  inputProps: Pick<InputProps, 'label' | 'nativeInputProps'>;
+  inputProps: Pick<InputProps, 'label' | 'nativeInputProps' | 'disabled'>;
   onChange: (newValue: Company | null) => void;
   onBlur: FocusEventHandler<HTMLDivElement>;
   defaultSuggestions?: Company[];
@@ -74,13 +74,12 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
       inputValue={inputValue}
       options={searchCompanyQuerySuggestions}
       filterOptions={(options, state) => options} // We want to show results from the API without any additional filtering from MUI
-      renderInput={({ InputProps, disabled, id, inputProps }) => {
+      renderInput={({ InputProps, id, inputProps }) => {
         return (
           <Input
             {...props.inputProps}
             ref={InputProps.ref}
             id={id}
-            disabled={disabled}
             state={!!props.errorMessage ? 'error' : undefined}
             stateRelatedMessage={props.errorMessage}
             nativeInputProps={{

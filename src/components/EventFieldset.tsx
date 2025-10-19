@@ -64,6 +64,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
           <div className={fr.cx('fr-fieldset__element')}>
             <Select
               label="Audience"
+              disabled={readonly}
               state={!!errors?.audienceOverride ? 'error' : undefined}
               stateRelatedMessage={errors?.audienceOverride?.message}
               nativeSelectProps={{
@@ -84,6 +85,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
           <div className={fr.cx('fr-fieldset__element')}>
             <Select
               label="Taux de TVA"
+              disabled={readonly}
               state={!!errors?.ticketingRevenueTaxRateOverride ? 'error' : undefined}
               stateRelatedMessage={errors?.ticketingRevenueTaxRateOverride?.message}
               nativeSelectProps={{
@@ -109,13 +111,15 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             <Controller
               control={control}
               name={`${name}.placeOverride.name`}
-              render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+              disabled={readonly}
+              render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
                 return (
                   <Autocomplete
                     disablePortal
                     options={placeholder.place}
                     value={value}
                     inputValue={value ?? ''}
+                    disabled={disabled}
                     renderInput={({ InputProps, disabled, id, inputProps }) => {
                       return (
                         <Input
@@ -197,12 +201,14 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             <Controller
               control={control}
               name={`${name}.placeOverride.address`}
-              render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+              disabled={readonly}
+              render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
                 return (
                   <AddressField
                     value={value}
                     inputProps={{
                       label: 'Adresse du lieu',
+                      disabled: disabled,
                       nativeInputProps: {
                         placeholder: 'Recherche',
                       },
@@ -223,7 +229,8 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             <Controller
               control={control}
               name={`${name}.placeCapacityOverride`}
-              render={({ field: { onChange, onBlur, value, ref }, fieldState: { error }, formState }) => {
+              disabled={readonly}
+              render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
                 return (
                   <Autocomplete
                     options={placeholder.placeCapacity}
@@ -231,6 +238,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                     onBlur={onBlur}
                     value={value}
                     inputValue={value ? value.toString() : ''}
+                    disabled={disabled}
                     onInputChange={(event, newValue, reason) => {
                       const parsedValue = parseInt(newValue, 10);
 
@@ -304,11 +312,13 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             <Controller
               control={control}
               name={`${name}.freeTickets`}
-              render={({ field: { ref, onChange, ...fieldOthers }, fieldState: { error } }) => {
+              disabled={readonly}
+              render={({ field: { ref, onChange, disabled, ...fieldOthers }, fieldState: { error } }) => {
                 return (
                   <Input
                     ref={ref}
                     label="Billets gratuits"
+                    disabled={disabled}
                     state={!!error ? 'error' : undefined}
                     stateRelatedMessage={error?.message}
                     nativeInputProps={{
@@ -342,11 +352,13 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             <Controller
               control={control}
               name={`${name}.paidTickets`}
-              render={({ field: { ref, onChange, ...fieldOthers }, fieldState: { error } }) => {
+              disabled={readonly}
+              render={({ field: { ref, onChange, disabled, ...fieldOthers }, fieldState: { error } }) => {
                 return (
                   <Input
                     ref={ref}
                     label="Billets payants"
+                    disabled={disabled}
                     state={!!error ? 'error' : undefined}
                     stateRelatedMessage={error?.message}
                     nativeInputProps={{
@@ -380,6 +392,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             <Controller
               control={control}
               name={`${name}.ticketingRevenueExcludingTaxes`}
+              disabled={readonly}
               render={({ field, fieldState: { error } }) => {
                 return <AmountInput {...field} label="Montant HT" signed={false} errorMessage={error?.message} />;
               }}
@@ -391,6 +404,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             <Controller
               control={control}
               name={`${name}.ticketingRevenueIncludingTaxes`}
+              disabled={readonly}
               render={({ field, fieldState: { error } }) => {
                 return <AmountInput {...field} label="Montant TTC" signed={false} errorMessage={error?.message} />;
               }}
@@ -415,6 +429,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                 <Controller
                   control={control}
                   name={`${name}.consumptionsRevenueExcludingTaxes`}
+                  disabled={readonly}
                   render={({ field, fieldState: { error } }) => {
                     return <AmountInput {...field} label="Consommation HT" signed={false} errorMessage={error?.message} />;
                   }}
@@ -426,6 +441,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                 <Controller
                   control={control}
                   name={`${name}.consumptionsRevenueIncludingTaxes`}
+                  disabled={readonly}
                   render={({ field, fieldState: { error } }) => {
                     return <AmountInput {...field} label="Consommation TTC" signed={false} errorMessage={error?.message} />;
                   }}
@@ -437,6 +453,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                 <Controller
                   control={control}
                   name={`${name}.cateringRevenueExcludingTaxes`}
+                  disabled={readonly}
                   render={({ field, fieldState: { error } }) => {
                     return <AmountInput {...field} label="Restauration HT" signed={false} errorMessage={error?.message} />;
                   }}
@@ -448,6 +465,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                 <Controller
                   control={control}
                   name={`${name}.cateringRevenueIncludingTaxes`}
+                  disabled={readonly}
                   render={({ field, fieldState: { error } }) => {
                     return <AmountInput {...field} label="Restauration TTC" signed={false} errorMessage={error?.message} />;
                   }}
@@ -459,6 +477,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                 <Controller
                   control={control}
                   name={`${name}.programSalesRevenueExcludingTaxes`}
+                  disabled={readonly}
                   render={({ field, fieldState: { error } }) => {
                     return <AmountInput {...field} label="Vente prog. HT" signed={false} errorMessage={error?.message} />;
                   }}
@@ -470,6 +489,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                 <Controller
                   control={control}
                   name={`${name}.programSalesRevenueIncludingTaxes`}
+                  disabled={readonly}
                   render={({ field, fieldState: { error } }) => {
                     return <AmountInput {...field} label="Vente prog. TTC" signed={false} errorMessage={error?.message} />;
                   }}
@@ -481,6 +501,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                 <Controller
                   control={control}
                   name={`${name}.otherRevenueExcludingTaxes`}
+                  disabled={readonly}
                   render={({ field, fieldState: { error } }) => {
                     return <AmountInput {...field} label="Autre recette HT" signed={false} errorMessage={error?.message} />;
                   }}
@@ -492,6 +513,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                 <Controller
                   control={control}
                   name={`${name}.otherRevenueIncludingTaxes`}
+                  disabled={readonly}
                   render={({ field, fieldState: { error } }) => {
                     return <AmountInput {...field} label="Autre recette TTC" signed={false} errorMessage={error?.message} />;
                   }}
