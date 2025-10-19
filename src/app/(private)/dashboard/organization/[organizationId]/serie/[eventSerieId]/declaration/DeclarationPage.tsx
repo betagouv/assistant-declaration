@@ -413,13 +413,28 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const currentPlaceAddress = watch('eventSerie.place.address');
   const previousPlaceAddress = usePrevious(currentPlaceAddress);
   useEffect(() => {
-    if (formInitializedRef.current && JSON.stringify(currentPlaceAddress) !== JSON.stringify(previousPlaceAddress)) {
+    if (
+      formInitializedRef.current &&
+      (typeof currentPlaceAddress !== typeof previousPlaceAddress ||
+        currentPlaceAddress?.street !== previousPlaceAddress?.street ||
+        currentPlaceAddress?.city !== previousPlaceAddress?.city ||
+        currentPlaceAddress?.postalCode !== previousPlaceAddress?.postalCode ||
+        currentPlaceAddress?.subdivision !== previousPlaceAddress?.subdivision ||
+        currentPlaceAddress?.countryCode !== previousPlaceAddress?.countryCode)
+    ) {
       const events = getValues('events');
-      const previousPlaceAddressStringToCompare = JSON.stringify(previousPlaceAddress);
       let modifiedEvents = 0;
 
       events.forEach((event, eventIndex) => {
-        if (event.placeOverride.address === null || JSON.stringify(event.placeOverride.address) === previousPlaceAddressStringToCompare) {
+        if (
+          event.placeOverride.address === null ||
+          (typeof event.placeOverride.address === typeof previousPlaceAddress &&
+            event.placeOverride.address?.street === previousPlaceAddress?.street &&
+            event.placeOverride.address?.city === previousPlaceAddress?.city &&
+            event.placeOverride.address?.postalCode === previousPlaceAddress?.postalCode &&
+            event.placeOverride.address?.subdivision === previousPlaceAddress?.subdivision &&
+            event.placeOverride.address?.countryCode === previousPlaceAddress?.countryCode)
+        ) {
           setValue(`events.${eventIndex}.placeOverride.address`, currentPlaceAddress, { shouldDirty: true });
           modifiedEvents++;
         }
