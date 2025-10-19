@@ -31,7 +31,7 @@ function mswCommonParameters(options: { transmitted: boolean; noEvent: boolean; 
           ...declarationsWrappers[0],
           declaration: adjustedDeclaration,
           transmissions:
-            options.transmitted || options.noEvent
+            options.transmitted && !options.noEvent
               ? declarationsWrappers[0].declaration.eventSerie.expectedDeclarationTypes.map((declarationType) => {
                   return options.transmissionError
                     ? {
@@ -99,6 +99,21 @@ TransmittedStory.play = async ({ canvasElement }) => {
 };
 
 export const Transmitted = prepareStory(TransmittedStory);
+
+const ErroredTransmissionStory = Template.bind({});
+ErroredTransmissionStory.args = {
+  ...NormalStory.args,
+};
+ErroredTransmissionStory.parameters = {
+  msw: {
+    handlers: [...mswCommonParameters({ transmitted: true, noEvent: false, transmissionError: true })],
+  },
+};
+ErroredTransmissionStory.play = async ({ canvasElement }) => {
+  await playFindMainTitle(canvasElement, /cracheur/i);
+};
+
+export const ErroredTransmission = prepareStory(ErroredTransmissionStory);
 
 const NotFoundStory = Template.bind({});
 NotFoundStory.args = {
