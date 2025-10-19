@@ -228,9 +228,13 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                     options={placeholder.placeCapacity}
                     freeSolo
                     onBlur={onBlur}
-                    value={value ?? 0}
+                    value={value}
+                    inputValue={value ? value.toString() : ''}
                     onInputChange={(event, newValue, reason) => {
-                      onChange(parseInt(newValue, 10)); // Needed since underlying it's managing string only
+                      const parsedValue = parseInt(newValue, 10);
+
+                      // The check is needed because the input value can be an empty string
+                      onChange(!isNaN(parsedValue) ? parsedValue : null);
                     }}
                     renderInput={({ InputProps, disabled, id, inputProps }) => {
                       return (

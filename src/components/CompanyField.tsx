@@ -108,7 +108,7 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
       }}
       onInputChange={(event, newInputValue, reason) => {
         if (reason === 'input') {
-          handleSearchCompanyQueryChange(newInputValue);
+          debouncedHandleCompanyQuery(newInputValue);
         }
       }}
       onChange={(event, newValue) => {
