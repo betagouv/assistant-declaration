@@ -2,7 +2,7 @@
 
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { FactoryOpts, InputMask } from 'imask';
-import { Ref, useCallback, useEffect } from 'react';
+import { Ref, useCallback, useEffect, useMemo } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 import { useIMask } from 'react-imask';
 
@@ -53,28 +53,32 @@ interface SubformType extends ControllerRenderProps<any, any> {
   value: number | null;
 }
 
-interface UseAmountInputProps extends Pick<SubformType, 'onChange'> {
-  defaultValue: SubformType['value'];
+interface UseAmountInputProps {
+  value: SubformType['value'];
+  onAccept(newValue: SubformType['value']): void;
   signed?: boolean;
 }
 
-export function useAmountInput({ defaultValue, onChange, signed }: UseAmountInputProps) {
-  const onAccept = useCallback<(value: InputMask<FactoryOpts>['value'], maskRef: InputMask<FactoryOpts>, e?: InputEvent) => void>(
+export function useAmountInput({ value, onAccept, signed }: UseAmountInputProps) {
+  const mask = useMemo(() => AmountMaskFactory(i18n.language, signed), [signed]);
+
+  const imaskOnAccept = useCallback<(value: InputMask<FactoryOpts>['value'], maskRef: InputMask<FactoryOpts>, e?: InputEvent) => void>(
     (maskedValue, mask, event) => {
-      onChange(parseFloat(mask.unmaskedValue)); // Needed since underlying it's managing string only
+      onAccept(parseFloat(mask.unmaskedValue)); // Needed since underlying it's managing string only
     },
-    [onChange]
+    [onAccept]
   );
 
-  const { ref: inputRef, setUnmaskedValue } = useIMask(AmountMaskFactory(i18n.language, signed), {
-    onAccept: onAccept,
+  const { ref: inputRef, setUnmaskedValue } = useIMask(mask, {
+    onAccept: imaskOnAccept,
   });
 
   // The following is needed to synchronize "form state" into the masked input in case a `reset()` is used
+  // TODO: there is a risk it does computation since modified on each typed character... don't know how to do it better for now
   useEffect(() => {
-    // Passing an empty string as mask when null does not trigger the onChange from `null` to empty string, which is good
-    setUnmaskedValue(defaultValue !== null ? defaultValue.toString() : '');
-  }, [defaultValue, setUnmaskedValue]);
+    // Passing an empty string as mask when null does not trigger the onAccept from `null` to empty string, which is good
+    setUnmaskedValue(value !== null ? value.toString() : '');
+  }, [value, setUnmaskedValue]);
 
   return { inputRef: inputRef };
 }
@@ -86,9 +90,18 @@ interface AmountInputProps extends SubformType {
 }
 
 export function AmountInput(props: AmountInputProps) {
+  const onAccept = useCallback<UseAmountInputProps['onAccept']>(
+    (newValue) => {
+      if (newValue !== props.value) {
+        props.onChange(newValue);
+      }
+    },
+    [props.onChange, props.value]
+  );
+
   const { inputRef: maskInputRef } = useAmountInput({
-    defaultValue: props.value,
-    onChange: props.onChange,
+    value: props.value,
+    onAccept: onAccept,
     signed: props.signed,
   });
 

@@ -5,6 +5,7 @@ import { playFindMainTitle } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
 import { DeclarationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPage';
 import { declarations, declarationsWrappers } from '@ad/src/fixtures/declaration/common';
+import { DeclarationStatusSchema } from '@ad/src/models/entities/common';
 import { getTRPCMock } from '@ad/src/server/mock/trpc';
 
 type ComponentType = typeof DeclarationPage;
@@ -18,18 +19,34 @@ export default {
   }),
 } as Meta<ComponentType>;
 
-function mswCommonParameters(options: { transmitted: boolean; noEvent: boolean }) {
-  const adjustedDeclaration = {
-    ...declarations[0],
-    transmittedAt: options.transmitted ? new Date('December 31, 2024 10:00:00 UTC') : null,
-  };
+function mswCommonParameters(options: { transmitted: boolean; noEvent: boolean; transmissionError: boolean }) {
+  const adjustedDeclaration = { ...declarationsWrappers[0].declaration, events: options.noEvent ? [] : declarationsWrappers[0].declaration.events };
 
   return [
     getTRPCMock({
       type: 'query',
       path: ['getDeclaration'],
       response: {
-        declarationWrapper: { ...declarationsWrappers[0], declaration: adjustedDeclaration },
+        declarationWrapper: {
+          ...declarationsWrappers[0],
+          declaration: adjustedDeclaration,
+          transmissions:
+            options.transmitted || options.noEvent
+              ? declarationsWrappers[0].declaration.eventSerie.expectedDeclarationTypes.map((declarationType) => {
+                  return options.transmissionError
+                    ? {
+                        type: declarationType,
+                        status: DeclarationStatusSchema.enum.PENDING,
+                        hasError: true,
+                      }
+                    : {
+                        type: declarationType,
+                        status: DeclarationStatusSchema.enum.PROCESSED,
+                        hasError: false,
+                      };
+                })
+              : [],
+        },
       },
     }),
     getTRPCMock({
@@ -59,7 +76,7 @@ NormalStory.args = {
 };
 NormalStory.parameters = {
   msw: {
-    handlers: [...mswCommonParameters({ transmitted: false, noEvent: false })],
+    handlers: [...mswCommonParameters({ transmitted: false, noEvent: false, transmissionError: false })],
   },
 };
 NormalStory.play = async ({ canvasElement }) => {
@@ -74,7 +91,7 @@ TransmittedStory.args = {
 };
 TransmittedStory.parameters = {
   msw: {
-    handlers: [...mswCommonParameters({ transmitted: true, noEvent: false })],
+    handlers: [...mswCommonParameters({ transmitted: true, noEvent: false, transmissionError: false })],
   },
 };
 TransmittedStory.play = async ({ canvasElement }) => {
@@ -89,7 +106,7 @@ NotFoundStory.args = {
 };
 NotFoundStory.parameters = {
   msw: {
-    handlers: [...mswCommonParameters({ transmitted: false, noEvent: true })],
+    handlers: [...mswCommonParameters({ transmitted: false, noEvent: true, transmissionError: false })],
   },
 };
 NotFoundStory.play = async ({ canvasElement }) => {
