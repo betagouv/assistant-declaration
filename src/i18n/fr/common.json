@@ -47,6 +47,8 @@
       "organizationCollaboratorRoleRequired": "vous devez faire partie de l'organisation pour effectuer cette action",
       "organizationMaskedAddress": "l'adresse de votre organisation est en \"non-diffusible\" dans l'annuaire des entreprises, veuillez contacter notre support pour que l'on fasse la création à votre place",
       "organizationNotFound": "aucune organisation trouvée",
+      "placeAddressRequiredIfAnyNameSpecified": "l'adresse du lieu est requise quand son intitulé est spécifié",
+      "placeNameRequiredIfAnyAddressSpecified": "l'intitulé du lieu est requis quand son adresse est spécifiée",
       "sacemAgencyNotFound": "le code postal spécifié pour le lieu ne nous permet pas de savoir à quelle agence Sacem envoyer la déclaration. Veuillez le vérifier ou contacter notre support",
       "sacemDeclarationUnsuccessful": "nous n'avons pas réussi à transférer la déclaration à la Sacem. Merci de réessayer dans quelques secondes ou de nous contacter si le problème persiste",
       "sacdDeclarationIncorrectDeclarant": "l'identifiant de déclarant SACD que vous avez configuré est incorrect, nous vous conseillons de le vérifier et de nous contacter si besoin",

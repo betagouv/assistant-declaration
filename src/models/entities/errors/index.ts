@@ -201,10 +201,14 @@ export const eventSeriePartialExpensesGreatherThanTotalError = new BusinessError
   t('errors.custom.eventSeriePartialExpensesGreatherThanTotal')
 );
 
-// Event category tickets
-export const cannotMutateTicketingDataOnceDeclaredError = new BusinessError(
-  'cannotMutateTicketingDataOnceDeclared',
-  t('errors.custom.cannotMutateTicketingDataOnceDeclared')
+// Place
+export const placeAddressRequiredIfAnyNameSpecifiedError = new BusinessError(
+  'placeAddressRequiredIfAnyNameSpecified',
+  t('errors.custom.placeAddressRequiredIfAnyNameSpecified')
+);
+export const placeNameRequiredIfAnyAddressSpecifiedError = new BusinessError(
+  'placeNameRequiredIfAnyAddressSpecified',
+  t('errors.custom.placeNameRequiredIfAnyAddressSpecified')
 );
 
 // Declaration
