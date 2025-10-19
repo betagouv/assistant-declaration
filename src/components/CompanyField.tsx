@@ -39,6 +39,7 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
     () => (props.value ? { ...props.value, officialHeadquartersId: '', inlineHeadquartersAddress: '' } : null),
     [props.value]
   );
+  const [inputValue, setInputValue] = useState('');
 
   const handleSearchCompanyQueryChange = useCallback(
     async (query: string) => {
@@ -70,6 +71,7 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
   return (
     <Autocomplete
       value={adjustedValue}
+      inputValue={inputValue}
       options={searchCompanyQuerySuggestions}
       filterOptions={(options, state) => options} // We want to show results from the API without any additional filtering from MUI
       renderInput={({ InputProps, disabled, id, inputProps }) => {
@@ -107,6 +109,8 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
         return `${option.name} (${formatMaskedValue(officialIdMask, option.officialId)})`;
       }}
       onInputChange={(event, newInputValue, reason) => {
+        setInputValue(newInputValue);
+
         if (reason === 'input') {
           debouncedHandleCompanyQuery(newInputValue);
         }

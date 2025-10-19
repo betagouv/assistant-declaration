@@ -115,6 +115,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                     disablePortal
                     options={placeholder.place}
                     value={value}
+                    inputValue={value ?? ''}
                     renderInput={({ InputProps, disabled, id, inputProps }) => {
                       return (
                         <Input

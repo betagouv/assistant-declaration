@@ -996,6 +996,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                         disablePortal
                                         options={declarationWrapper.placeholder.place}
                                         value={value}
+                                        inputValue={value ?? ''}
                                         renderInput={({ InputProps, disabled, id, inputProps }) => {
                                           return (
                                             <Input

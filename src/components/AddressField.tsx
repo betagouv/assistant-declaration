@@ -26,6 +26,7 @@ export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
   // In the following region context can be ommitted because if coming from the value and not listed it won't be used
   // We provide it just for the Autocomplete component to take the right type without casting
   const adjustedValue = useMemo(() => (props.value ? { ...props.value, regionContext: '' } : null), [props.value]);
+  const [inputValue, setInputValue] = useState('');
 
   const handleSearchAddressQueryChange = useCallback(
     async (query: string) => {
@@ -52,6 +53,7 @@ export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
   return (
     <Autocomplete
       value={adjustedValue}
+      inputValue={inputValue}
       options={searchAddressQuerySuggestions}
       filterOptions={(options, state) => options} // We want to show results from the API without any additional filtering from MUI
       renderInput={({ InputProps, disabled, id, inputProps }) => {
@@ -99,6 +101,8 @@ export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
           .replace(/[\r\n]+/g, ' ');
       }}
       onInputChange={(event, newInputValue, reason) => {
+        setInputValue(newInputValue);
+
         if (reason === 'input') {
           debouncedHandleAddressQuery(newInputValue);
         }
