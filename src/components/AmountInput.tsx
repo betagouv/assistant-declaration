@@ -89,32 +89,32 @@ interface AmountInputProps extends SubformType {
   errorMessage?: string;
 }
 
-export function AmountInput(props: AmountInputProps) {
+export function AmountInput({ value, signed, label, disabled, errorMessage, onChange, onBlur }: AmountInputProps) {
   const onAccept = useCallback<UseAmountInputProps['onAccept']>(
     (newValue) => {
-      if (newValue !== props.value) {
-        props.onChange(newValue);
+      if (newValue !== value) {
+        onChange(newValue);
       }
     },
-    [props.onChange, props.value]
+    [onChange, value]
   );
 
   const { inputRef: maskInputRef } = useAmountInput({
-    value: props.value,
+    value: value,
     onAccept: onAccept,
-    signed: props.signed,
+    signed: signed,
   });
 
   return (
     <Input
-      label={props.label}
-      disabled={props.disabled}
-      state={!!props.errorMessage ? 'error' : undefined}
-      stateRelatedMessage={props.errorMessage}
+      label={label}
+      disabled={disabled}
+      state={!!errorMessage ? 'error' : undefined}
+      stateRelatedMessage={errorMessage}
       nativeInputProps={{
         ref: maskInputRef as Ref<HTMLInputElement> | undefined,
         placeholder: '0 €',
-        onBlur: props.onBlur,
+        onBlur: onBlur,
         onFocusCapture: (event) => {
           event.target.select(); // For the ease of modification select the whole on focus
         },
