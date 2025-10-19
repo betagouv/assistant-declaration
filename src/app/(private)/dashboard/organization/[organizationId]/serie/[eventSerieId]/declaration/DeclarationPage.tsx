@@ -559,7 +559,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                   return (
                     <Tag
                       key={declarationType}
-                      {...((declarationWrapper.transmissions.findIndex((transmission) => transmission.type === declarationType) !== -1
+                      {...((declarationWrapper.transmissions.findIndex(
+                        (transmission) => transmission.type === declarationType && transmission.status === 'PROCESSED'
+                      ) !== -1
                         ? {
                             iconId: fr.cx('fr-icon-checkbox-circle-line'),
                           }
@@ -582,7 +584,17 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                 )}
               </div>
             </div>
-            <div className={fr.cx('fr-mt-1v')}>Vérifiez et complétez les informations pour déclarer ce spectacle.</div>
+            <div className={fr.cx('fr-mt-1v')}>
+              {alreadyDeclared ? (
+                <>
+                  {erroredTransmission
+                    ? "La télédéclaration ne s'est pas faite correctement, veuillez retenter."
+                    : 'La déclaration a correctement été transmise.'}
+                </>
+              ) : (
+                <>Vérifiez et complétez les informations pour déclarer ce spectacle.</>
+              )}
+            </div>
           </div>
           {(!alreadyDeclared || erroredTransmission) && (
             <ul className={fr.cx('fr-btns-group', 'fr-btns-group--inline')} style={{ marginLeft: 'auto' }}>

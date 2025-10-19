@@ -2,6 +2,7 @@ import { addresses } from '@ad/src/fixtures/address';
 import { events, eventsSeries } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
 import { places } from '@ad/src/fixtures/place';
+import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import {
   DeclarationSchema,
   DeclarationSchemaType,
@@ -140,6 +141,13 @@ export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
       place: [places[1]],
       placeCapacity: [declarations[0].eventSerie.placeCapacity!, declarations[1].eventSerie.placeCapacity!],
     },
+    transmissions: [
+      {
+        type: DeclarationTypeSchema.enum.SACEM,
+        status: DeclarationStatusSchema.enum.PROCESSED,
+        hasError: false,
+      },
+    ],
   }),
   DeclarationWrapperSchema.parse({
     declaration: declarations[1],
@@ -153,6 +161,7 @@ export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
       place: [places[2]],
       placeCapacity: [declarations[1].eventSerie.placeCapacity!],
     },
+    transmissions: [],
   }),
   DeclarationWrapperSchema.parse({
     declaration: declarations[2],
@@ -166,5 +175,12 @@ export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
       place: [places[0]],
       placeCapacity: [],
     },
+    transmissions: [
+      {
+        type: DeclarationTypeSchema.enum.SACEM,
+        status: DeclarationStatusSchema.enum.PENDING,
+        hasError: true,
+      },
+    ],
   }),
 ];
