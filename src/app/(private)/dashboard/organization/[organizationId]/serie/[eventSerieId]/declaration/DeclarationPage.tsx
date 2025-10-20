@@ -563,6 +563,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
               <h1 className={fr.cx('fr-h3', 'fr-mb-2v')} data-sentry-mask>
                 {declaration.eventSerie.name}
               </h1>
+              {/*
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 {watch('eventSerie.expectedDeclarationTypes').map((declarationType) => {
                   return (
@@ -592,6 +593,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                   </Tag>
                 )}
               </div>
+               */}
             </div>
             <div className={fr.cx('fr-mt-1v')}>
               {alreadyDeclared ? (
