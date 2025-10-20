@@ -1,10 +1,12 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
+import { cx } from '@codegouvfr/react-dsfr/tools/cx';
 import { useMemo } from 'react';
 import { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormTrigger, UseFormWatch, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 
 import { EventFieldset } from '@ad/src/components/EventFieldset';
+import styles from '@ad/src/components/EventsFieldsets.module.scss';
 import { FillDeclarationSchema } from '@ad/src/models/actions/declaration';
 import { DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
 import { RowForForm } from '@ad/src/utils/validation';
@@ -52,7 +54,7 @@ export function EventsFieldsets({ control, register, setValue, watch, trigger, p
           {eventsWithErrorLogic.map((eventWithErrorLogic) => {
             return (
               <div key={eventWithErrorLogic.index} className={fr.cx('fr-col-12')}>
-                {eventWithErrorLogic.index > 0 && <hr className={fr.cx('fr-my-3v')} />}
+                {eventWithErrorLogic.index > 0 && <hr className={cx(fr.cx('fr-my-3v'), styles.hr)} />}
                 <div className={fr.cx('fr-col-12')}>
                   <EventFieldset
                     control={control}
