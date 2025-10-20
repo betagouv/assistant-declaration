@@ -260,8 +260,11 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             introductionFeesExpensesExcludingTaxes:
               getDeclaration.data.declarationWrapper.declaration.eventSerie.introductionFeesExpensesExcludingTaxes,
             introductionFeesExpensesTaxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.introductionFeesExpensesTaxRate,
-            circusSpecificExpensesIncludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesIncludingTaxes,
-            circusSpecificExpensesExcludingTaxes: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesExcludingTaxes,
+            // To ease the user experience, make them 0 to avoid they fill it for SACD if not concerned
+            circusSpecificExpensesIncludingTaxes:
+              getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesIncludingTaxes ?? 0,
+            circusSpecificExpensesExcludingTaxes:
+              getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesExcludingTaxes ?? 0,
             circusSpecificExpensesTaxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesTaxRate,
           },
           events: getDeclaration.data.declarationWrapper.declaration.events.map((event) => {
