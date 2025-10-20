@@ -245,6 +245,11 @@ export const invalidDeclarationFieldsToTransmitError = new BusinessError(
 );
 export const sacemAgencyNotFoundError = new BusinessError('sacemAgencyNotFound', t('errors.custom.sacemAgencyNotFound'));
 export const sacemDeclarationUnsuccessfulError = new BusinessError('sacemDeclarationUnsuccessful', t('errors.custom.sacemDeclarationUnsuccessful'));
+export const sacdAgencyNotFoundError = new BusinessError('sacdAgencyNotFound', t('errors.custom.sacdAgencyNotFound'));
+export const sacdAttachmentsDeclarationUnsuccessfulError = new BusinessError(
+  'sacdAttachmentsDeclarationUnsuccessful',
+  t('errors.custom.sacdAttachmentsDeclarationUnsuccessful')
+);
 export const sacdDeclarationIncorrectDeclarantError = new BusinessError(
   'sacdDeclarationIncorrectDeclarant',
   t('errors.custom.sacdDeclarationIncorrectDeclarant')

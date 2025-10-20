@@ -4,6 +4,10 @@ import nodemailer, { Transporter } from 'nodemailer';
 import type { Options as MailOptions } from 'nodemailer/lib/mailer/index';
 import { Readable } from 'stream';
 
+import {
+  DeclarationAttachmentsToSacdAgencyEmail,
+  DeclarationAttachmentsToSacdAgencyEmailProps,
+} from '@ad/src/components/emails/templates/DeclarationAttachmentsToSacdAgency';
 import { DeclarationToSacemAgencyEmail, DeclarationToSacemAgencyEmailProps } from '@ad/src/components/emails/templates/DeclarationToSacemAgency';
 import { NewPasswordRequestEmail, NewPasswordRequestEmailProps } from '@ad/src/components/emails/templates/NewPasswordRequest';
 import { PasswordChangedEmail, PasswordChangedEmailProps } from '@ad/src/components/emails/templates/PasswordChanged';
@@ -196,6 +200,18 @@ export class Mailer {
       recipients: [parameters.recipient],
       subject: titles.WelcomeOrganizationCollaboratorEmail,
       emailComponent: WelcomeOrganizationCollaboratorEmail(parameters),
+    });
+  }
+
+  public async sendDeclarationAttachmentsToSacdAgency(
+    parameters: DeclarationAttachmentsToSacdAgencyEmailProps & { recipient: string; replyTo: string }
+  ) {
+    await this.send({
+      recipients: [parameters.recipient],
+      replyTo: parameters.replyTo,
+      subject: titles.DeclarationAttachmentsToSacdAgencyEmail,
+      emailComponent: DeclarationAttachmentsToSacdAgencyEmail(parameters),
+      attachments: parameters.attachments,
     });
   }
 
