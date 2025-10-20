@@ -1276,7 +1276,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                   <declarationTypesModal.Component
                     title="Paramètres de déclaration"
                     className={styles.declarationTypesModal}
-                    // className="saluttoi"
                     buttons={[
                       {
                         doClosesModal: true,
