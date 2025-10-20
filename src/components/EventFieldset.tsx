@@ -164,370 +164,372 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
           </div>
         </>
       )}
-      <Accordion label="Données pré-remplies" className={cx(styles.accordion, fr.cx('fr-mt-2v', 'fr-mb-12v'))}>
-        <div className={fr.cx('fr-grid-row')}>
-          <div className={fr.cx('fr-col-12')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <div className={fr.cx('fr-mb-2v', 'fr-mt-2v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
-                Général
+      <div className={fr.cx('fr-fieldset__element')}>
+        <Accordion label="Données pré-remplies" className={cx(styles.accordion, fr.cx('fr-mt-2v', 'fr-mb-12v'))}>
+          <div className={fr.cx('fr-grid-row')}>
+            <div className={fr.cx('fr-col-12')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <div className={fr.cx('fr-mb-2v', 'fr-mt-2v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
+                  Général
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className={fr.cx('fr-grid-row')}>
-          <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Select
-                label="Type de public"
-                disabled={readonly}
-                state={!!errors?.audienceOverride ? 'error' : undefined}
-                stateRelatedMessage={errors?.audienceOverride?.message}
-                nativeSelectProps={{
-                  ...register(`${name}.audienceOverride`),
-                }}
-                options={[
-                  ...AudienceSchema.options.map((audience) => {
-                    return {
-                      label: t(`model.audience.enum.${audience}`),
-                      value: audience,
-                    };
-                  }),
-                ].sort((a, b) => a.label.localeCompare(b.label))}
-              />
-            </div>
-          </div>
-        </div>
-        <div className={fr.cx('fr-grid-row')}>
-          <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.placeOverride.name`}
-                disabled={readonly}
-                render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
-                  return (
-                    <Autocomplete
-                      disablePortal
-                      options={placeholder.place}
-                      value={value}
-                      inputValue={value ?? ''}
-                      disabled={disabled}
-                      renderInput={({ InputProps, disabled, id, inputProps }) => {
-                        return (
-                          <Input
-                            ref={InputProps.ref}
-                            label="Intitulé du lieu de la représentation"
-                            id={id}
-                            disabled={disabled}
-                            state={!!error ? 'error' : undefined}
-                            stateRelatedMessage={error?.message}
-                            nativeInputProps={{
-                              ...inputProps,
-                              placeholder: 'Saisie ou recherche',
-                            }}
-                          />
-                        );
-                      }}
-                      renderOption={(props, option) => {
-                        const { key, ...otherProps } = props;
-
-                        return (
-                          <li key={key} {...otherProps} data-sentry-mask>
-                            <span className={fr.cx('fr-text--bold')}>{option.name}</span>
-                            &nbsp;
-                            <span style={{ fontStyle: 'italic' }}>
-                              (
-                              {addressFormatter
-                                .format({
-                                  street: option.address.street,
-                                  city: option.address.city,
-                                  postcode: option.address.postalCode,
-                                  state: option.address.subdivision,
-                                  countryCode: option.address.countryCode,
-                                })
-                                .trim()}
-                              )
-                            </span>
-                          </li>
-                        );
-                      }}
-                      isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // TODO
-                      getOptionLabel={(option) => {
-                        if (typeof option === 'string') {
-                          // Value selected with enter, right from the input
-                          return option;
-                        } else {
-                          return option.name;
-                        }
-                      }}
-                      onInputChange={(event: React.SyntheticEvent<Element, Event>, newValue: string) => {
-                        setValue(`${name}.placeOverride.name`, newValue, { shouldDirty: true });
-                      }}
-                      onChange={(event, newValue) => {
-                        if (newValue) {
-                          if (typeof newValue === 'string') {
-                            onChange(newValue);
-                          } else {
-                            onChange(newValue.name);
-
-                            // Override the current address used
-                            setValue(`${name}.placeOverride.address`, newValue.address, { shouldDirty: true });
-                          }
-                        } else {
-                          setValue(`${name}.placeOverride.name`, null, { shouldDirty: true });
-                        }
-                      }}
-                      onBlur={onBlur}
-                      freeSolo
-                      selectOnFocus
-                      handleHomeEndKeys
-                      fullWidth
-                    />
-                  );
-                }}
-              />
-            </div>
-          </div>
-          <div className={fr.cx('fr-col-8', 'fr-col-md-5')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.placeOverride.address`}
-                disabled={readonly}
-                render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
-                  return (
-                    <AddressField
-                      value={value}
-                      inputProps={{
-                        label: 'Adresse du lieu',
-                        disabled: disabled,
-                        nativeInputProps: {
-                          placeholder: 'Recherche',
-                        },
-                      }}
-                      onChange={(newValue) => {
-                        onChange(newValue);
-                      }}
-                      onBlur={onBlur}
-                      errorMessage={error?.message}
-                    />
-                  );
-                }}
-              />
-            </div>
-          </div>
-          <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.placeCapacityOverride`}
-                disabled={readonly}
-                render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
-                  return (
-                    <Autocomplete
-                      options={placeholder.placeCapacity}
-                      freeSolo
-                      onBlur={onBlur}
-                      value={value}
-                      inputValue={value ? value.toString() : ''}
-                      disabled={disabled}
-                      onInputChange={(event, newValue, reason) => {
-                        const parsedValue = parseInt(newValue, 10);
-
-                        // The check is needed because the input value can be an empty string
-                        onChange(!isNaN(parsedValue) ? parsedValue : null);
-                      }}
-                      renderInput={({ InputProps, disabled, id, inputProps }) => {
-                        return (
-                          <Input
-                            ref={InputProps.ref}
-                            label="Jauge"
-                            id={id}
-                            disabled={disabled}
-                            state={!!error ? 'error' : undefined}
-                            stateRelatedMessage={error?.message}
-                            nativeInputProps={{
-                              ...inputProps,
-                              type: 'number',
-                              placeholder: '0',
-                              step: 1,
-                              min: 0,
-                              onFocusCapture: (event) => {
-                                event.target.select(); // For the ease of modification select the whole on focus
-                              },
-                              onWheel: (event) => {
-                                // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
-
-                                // `event.currentTarget` is a callable type but is targetting the MUI element
-                                // whereas `event.target` targets the input element but does not have the callable type, so casting
-                                (event.target as HTMLInputElement).blur();
-                              },
-                            }}
-                          />
-                        );
-                      }}
-                      renderOption={(props, option) => {
-                        // Just needed for the Sentry mask
-                        return (
-                          <li {...props} key={option} data-sentry-mask>
-                            {option}
-                          </li>
-                        );
-                      }}
-                      getOptionLabel={(option) => {
-                        if (typeof option === 'string') {
-                          // Value selected with enter, right from the input
-                          return option;
-                        } else {
-                          return option.toString();
-                        }
-                      }}
-                    />
-                  );
-                }}
-              />
-            </div>
-          </div>
-        </div>
-        <div className={fr.cx('fr-grid-row')}>
-          <div className={fr.cx('fr-col-12')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <div className={fr.cx('fr-mb-2v', 'fr-mt-4v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
-                Billetterie
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className={fr.cx('fr-grid-row')}>
-          <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.freeTickets`}
-                disabled={readonly}
-                render={({ field: { ref, onChange, disabled, ...fieldOthers }, fieldState: { error } }) => {
-                  return (
-                    <Input
-                      ref={ref}
-                      label="Billets gratuits"
-                      disabled={disabled}
-                      state={!!error ? 'error' : undefined}
-                      stateRelatedMessage={error?.message}
-                      nativeInputProps={{
-                        ...fieldOthers,
-                        type: 'number',
-                        placeholder: '0',
-                        step: 1,
-                        min: 0,
-                        onChange: (event) => {
-                          onChange(event.target.value === '' ? null : Number(event.target.value));
-                        },
-                        onFocusCapture: (event) => {
-                          event.target.select(); // For the ease of modification select the whole on focus
-                        },
-                        onWheel: (event) => {
-                          // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
-
-                          // `event.currentTarget` is a callable type but is targetting the MUI element
-                          // whereas `event.target` targets the input element but does not have the callable type, so casting
-                          (event.target as HTMLInputElement).blur();
-                        },
-                      }}
-                    />
-                  );
-                }}
-              />
-            </div>
-          </div>
-          <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.paidTickets`}
-                disabled={readonly}
-                render={({ field: { ref, onChange, disabled, ...fieldOthers }, fieldState: { error } }) => {
-                  return (
-                    <Input
-                      ref={ref}
-                      label="Billets payants"
-                      disabled={disabled}
-                      state={!!error ? 'error' : undefined}
-                      stateRelatedMessage={error?.message}
-                      nativeInputProps={{
-                        ...fieldOthers,
-                        type: 'number',
-                        placeholder: '0',
-                        step: 1,
-                        min: 0,
-                        onChange: (event) => {
-                          onChange(event.target.value === '' ? null : Number(event.target.value));
-                        },
-                        onFocusCapture: (event) => {
-                          event.target.select(); // For the ease of modification select the whole on focus
-                        },
-                        onWheel: (event) => {
-                          // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
-
-                          // `event.currentTarget` is a callable type but is targetting the MUI element
-                          // whereas `event.target` targets the input element but does not have the callable type, so casting
-                          (event.target as HTMLInputElement).blur();
-                        },
-                      }}
-                    />
-                  );
-                }}
-              />
-            </div>
-          </div>
-          <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Select
-                label="Taux de TVA"
-                disabled={readonly}
-                state={!!errors?.ticketingRevenueTaxRateOverride ? 'error' : undefined}
-                stateRelatedMessage={errors?.ticketingRevenueTaxRateOverride?.message}
-                nativeSelectProps={{
-                  ...register(`${name}.ticketingRevenueTaxRateOverride`, {
-                    valueAsNumber: true,
-                  }),
-                }}
-                options={currentTaxRates.map((taxRate) => {
-                  return {
-                    label: t('number.percent', {
-                      percentage: taxRate,
+          <div className={fr.cx('fr-grid-row')}>
+            <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Select
+                  label="Type de public"
+                  disabled={readonly}
+                  state={!!errors?.audienceOverride ? 'error' : undefined}
+                  stateRelatedMessage={errors?.audienceOverride?.message}
+                  nativeSelectProps={{
+                    ...register(`${name}.audienceOverride`),
+                  }}
+                  options={[
+                    ...AudienceSchema.options.map((audience) => {
+                      return {
+                        label: t(`model.audience.enum.${audience}`),
+                        value: audience,
+                      };
                     }),
-                    value: taxRate.toString(),
-                  };
-                })}
-              />
+                  ].sort((a, b) => a.label.localeCompare(b.label))}
+                />
+              </div>
             </div>
           </div>
-          <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.ticketingRevenueExcludingTaxes`}
-                disabled={readonly}
-                render={({ field, fieldState: { error } }) => {
-                  return <AmountInput {...field} label="Montant HT" signed={false} errorMessage={error?.message} />;
-                }}
-              />
+          <div className={fr.cx('fr-grid-row')}>
+            <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.placeOverride.name`}
+                  disabled={readonly}
+                  render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
+                    return (
+                      <Autocomplete
+                        disablePortal
+                        options={placeholder.place}
+                        value={value}
+                        inputValue={value ?? ''}
+                        disabled={disabled}
+                        renderInput={({ InputProps, disabled, id, inputProps }) => {
+                          return (
+                            <Input
+                              ref={InputProps.ref}
+                              label="Intitulé du lieu de la représentation"
+                              id={id}
+                              disabled={disabled}
+                              state={!!error ? 'error' : undefined}
+                              stateRelatedMessage={error?.message}
+                              nativeInputProps={{
+                                ...inputProps,
+                                placeholder: 'Saisie ou recherche',
+                              }}
+                            />
+                          );
+                        }}
+                        renderOption={(props, option) => {
+                          const { key, ...otherProps } = props;
+
+                          return (
+                            <li key={key} {...otherProps} data-sentry-mask>
+                              <span className={fr.cx('fr-text--bold')}>{option.name}</span>
+                              &nbsp;
+                              <span style={{ fontStyle: 'italic' }}>
+                                (
+                                {addressFormatter
+                                  .format({
+                                    street: option.address.street,
+                                    city: option.address.city,
+                                    postcode: option.address.postalCode,
+                                    state: option.address.subdivision,
+                                    countryCode: option.address.countryCode,
+                                  })
+                                  .trim()}
+                                )
+                              </span>
+                            </li>
+                          );
+                        }}
+                        isOptionEqualToValue={(option, value) => JSON.stringify(option) === JSON.stringify(value)} // TODO
+                        getOptionLabel={(option) => {
+                          if (typeof option === 'string') {
+                            // Value selected with enter, right from the input
+                            return option;
+                          } else {
+                            return option.name;
+                          }
+                        }}
+                        onInputChange={(event: React.SyntheticEvent<Element, Event>, newValue: string) => {
+                          setValue(`${name}.placeOverride.name`, newValue, { shouldDirty: true });
+                        }}
+                        onChange={(event, newValue) => {
+                          if (newValue) {
+                            if (typeof newValue === 'string') {
+                              onChange(newValue);
+                            } else {
+                              onChange(newValue.name);
+
+                              // Override the current address used
+                              setValue(`${name}.placeOverride.address`, newValue.address, { shouldDirty: true });
+                            }
+                          } else {
+                            setValue(`${name}.placeOverride.name`, null, { shouldDirty: true });
+                          }
+                        }}
+                        onBlur={onBlur}
+                        freeSolo
+                        selectOnFocus
+                        handleHomeEndKeys
+                        fullWidth
+                      />
+                    );
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-8', 'fr-col-md-5')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.placeOverride.address`}
+                  disabled={readonly}
+                  render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
+                    return (
+                      <AddressField
+                        value={value}
+                        inputProps={{
+                          label: 'Adresse du lieu',
+                          disabled: disabled,
+                          nativeInputProps: {
+                            placeholder: 'Recherche',
+                          },
+                        }}
+                        onChange={(newValue) => {
+                          onChange(newValue);
+                        }}
+                        onBlur={onBlur}
+                        errorMessage={error?.message}
+                      />
+                    );
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.placeCapacityOverride`}
+                  disabled={readonly}
+                  render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
+                    return (
+                      <Autocomplete
+                        options={placeholder.placeCapacity}
+                        freeSolo
+                        onBlur={onBlur}
+                        value={value}
+                        inputValue={value ? value.toString() : ''}
+                        disabled={disabled}
+                        onInputChange={(event, newValue, reason) => {
+                          const parsedValue = parseInt(newValue, 10);
+
+                          // The check is needed because the input value can be an empty string
+                          onChange(!isNaN(parsedValue) ? parsedValue : null);
+                        }}
+                        renderInput={({ InputProps, disabled, id, inputProps }) => {
+                          return (
+                            <Input
+                              ref={InputProps.ref}
+                              label="Jauge"
+                              id={id}
+                              disabled={disabled}
+                              state={!!error ? 'error' : undefined}
+                              stateRelatedMessage={error?.message}
+                              nativeInputProps={{
+                                ...inputProps,
+                                type: 'number',
+                                placeholder: '0',
+                                step: 1,
+                                min: 0,
+                                onFocusCapture: (event) => {
+                                  event.target.select(); // For the ease of modification select the whole on focus
+                                },
+                                onWheel: (event) => {
+                                  // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
+
+                                  // `event.currentTarget` is a callable type but is targetting the MUI element
+                                  // whereas `event.target` targets the input element but does not have the callable type, so casting
+                                  (event.target as HTMLInputElement).blur();
+                                },
+                              }}
+                            />
+                          );
+                        }}
+                        renderOption={(props, option) => {
+                          // Just needed for the Sentry mask
+                          return (
+                            <li {...props} key={option} data-sentry-mask>
+                              {option}
+                            </li>
+                          );
+                        }}
+                        getOptionLabel={(option) => {
+                          if (typeof option === 'string') {
+                            // Value selected with enter, right from the input
+                            return option;
+                          } else {
+                            return option.toString();
+                          }
+                        }}
+                      />
+                    );
+                  }}
+                />
+              </div>
             </div>
           </div>
-          <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Controller
-                control={control}
-                name={`${name}.ticketingRevenueIncludingTaxes`}
-                disabled={readonly}
-                render={({ field, fieldState: { error } }) => {
-                  return <AmountInput {...field} label="Montant TTC" signed={false} errorMessage={error?.message} />;
-                }}
-              />
+          <div className={fr.cx('fr-grid-row')}>
+            <div className={fr.cx('fr-col-12')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <div className={fr.cx('fr-mb-2v', 'fr-mt-4v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
+                  Billetterie
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </Accordion>
+          <div className={fr.cx('fr-grid-row')}>
+            <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.freeTickets`}
+                  disabled={readonly}
+                  render={({ field: { ref, onChange, disabled, ...fieldOthers }, fieldState: { error } }) => {
+                    return (
+                      <Input
+                        ref={ref}
+                        label="Billets gratuits"
+                        disabled={disabled}
+                        state={!!error ? 'error' : undefined}
+                        stateRelatedMessage={error?.message}
+                        nativeInputProps={{
+                          ...fieldOthers,
+                          type: 'number',
+                          placeholder: '0',
+                          step: 1,
+                          min: 0,
+                          onChange: (event) => {
+                            onChange(event.target.value === '' ? null : Number(event.target.value));
+                          },
+                          onFocusCapture: (event) => {
+                            event.target.select(); // For the ease of modification select the whole on focus
+                          },
+                          onWheel: (event) => {
+                            // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
+
+                            // `event.currentTarget` is a callable type but is targetting the MUI element
+                            // whereas `event.target` targets the input element but does not have the callable type, so casting
+                            (event.target as HTMLInputElement).blur();
+                          },
+                        }}
+                      />
+                    );
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.paidTickets`}
+                  disabled={readonly}
+                  render={({ field: { ref, onChange, disabled, ...fieldOthers }, fieldState: { error } }) => {
+                    return (
+                      <Input
+                        ref={ref}
+                        label="Billets payants"
+                        disabled={disabled}
+                        state={!!error ? 'error' : undefined}
+                        stateRelatedMessage={error?.message}
+                        nativeInputProps={{
+                          ...fieldOthers,
+                          type: 'number',
+                          placeholder: '0',
+                          step: 1,
+                          min: 0,
+                          onChange: (event) => {
+                            onChange(event.target.value === '' ? null : Number(event.target.value));
+                          },
+                          onFocusCapture: (event) => {
+                            event.target.select(); // For the ease of modification select the whole on focus
+                          },
+                          onWheel: (event) => {
+                            // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
+
+                            // `event.currentTarget` is a callable type but is targetting the MUI element
+                            // whereas `event.target` targets the input element but does not have the callable type, so casting
+                            (event.target as HTMLInputElement).blur();
+                          },
+                        }}
+                      />
+                    );
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Select
+                  label="Taux de TVA"
+                  disabled={readonly}
+                  state={!!errors?.ticketingRevenueTaxRateOverride ? 'error' : undefined}
+                  stateRelatedMessage={errors?.ticketingRevenueTaxRateOverride?.message}
+                  nativeSelectProps={{
+                    ...register(`${name}.ticketingRevenueTaxRateOverride`, {
+                      valueAsNumber: true,
+                    }),
+                  }}
+                  options={currentTaxRates.map((taxRate) => {
+                    return {
+                      label: t('number.percent', {
+                        percentage: taxRate,
+                      }),
+                      value: taxRate.toString(),
+                    };
+                  })}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.ticketingRevenueExcludingTaxes`}
+                  disabled={readonly}
+                  render={({ field, fieldState: { error } }) => {
+                    return <AmountInput {...field} label="Montant HT" signed={false} errorMessage={error?.message} />;
+                  }}
+                />
+              </div>
+            </div>
+            <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
+              <div className={fr.cx('fr-fieldset__element')}>
+                <Controller
+                  control={control}
+                  name={`${name}.ticketingRevenueIncludingTaxes`}
+                  disabled={readonly}
+                  render={({ field, fieldState: { error } }) => {
+                    return <AmountInput {...field} label="Montant TTC" signed={false} errorMessage={error?.message} />;
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </Accordion>
+      </div>
     </>
   );
 }
