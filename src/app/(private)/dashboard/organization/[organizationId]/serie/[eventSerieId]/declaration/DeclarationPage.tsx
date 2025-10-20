@@ -11,6 +11,7 @@ import addressFormatter from '@fragaria/address-formatter';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertProps, Autocomplete, Snackbar, Tooltip, useMediaQuery, useTheme } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
+import { TRPCClientErrorLike } from '@trpc/client';
 import debounce from 'lodash.debounce';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, FieldPath, useForm } from 'react-hook-form';
@@ -31,7 +32,6 @@ import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { officialHeadquartersIdMask } from '@ad/src/components/OfficialHeadquartersIdField';
 import { SacdIdInput } from '@ad/src/components/SacdIdField';
 import { SacemIdInput } from '@ad/src/components/SacemIdField';
-import { useSingletonConfirmationDialog } from '@ad/src/components/modal/useModal';
 import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
 import { currentTaxRates } from '@ad/src/core/declaration';
 import { getEventsKeyFigures } from '@ad/src/core/declaration/format';
@@ -40,6 +40,7 @@ import { AddressInputSchemaType } from '@ad/src/models/entities/address';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { BusinessZodError, atLeastOneTransmissionHasFailedError, invalidDeclarationFieldsToTransmitError } from '@ad/src/models/entities/errors';
 import { AudienceSchema, PerformanceTypeSchema } from '@ad/src/models/entities/event';
+import { AppRouter } from '@ad/src/server/app-router';
 import { parseError } from '@ad/src/utils/error';
 import { formatMaskedValue } from '@ad/src/utils/imask';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
@@ -60,8 +61,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
   const theme = useTheme();
   const smUp = useMediaQuery(theme.breakpoints.up('sm'));
-
-  const { showConfirmationDialog } = useSingletonConfirmationDialog();
 
   const fillDeclaration = trpc.fillDeclaration.useMutation();
   const transmitDeclaration = trpc.transmitDeclaration.useMutation();
@@ -335,6 +334,8 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   useEffect(() => {
     setTmpExpectedDeclarationTypes(watch('eventSerie.expectedDeclarationTypes'));
   }, [watch('eventSerie.expectedDeclarationTypes'), setTmpExpectedDeclarationTypes]);
+
+  const [transmitDeclarationMutationError, setTransmitDeclarationMutationError] = useState<TRPCClientErrorLike<AppRouter> | Error | null>(null);
 
   const { computedStartAt, computedEndAt, eventsKeyFigures } = useMemo(() => {
     // TODO: this should be based on form data, not the one from the API (since it needs to use local state)
@@ -632,69 +633,50 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                   <span>
                     <Button
                       disabled={isDirty || fillDeclaration.isPending}
-                      onClick={() => {
-                        showConfirmationDialog({
-                          description: (
-                            <>
-                              Êtes-vous sûr de vouloir transmettre ces informations pour le spectacle{' '}
-                              <span className={fr.cx('fr-text--bold')} data-sentry-mask>
-                                {declaration.eventSerie.name}
-                              </span>{' '}
-                              ?
-                              <br />
-                              <br />
-                              <span style={{ fontStyle: 'italic' }}>
-                                Après envoi, aucune modification ne pourra être opérée depuis notre interface. Pour toute correction ou amendement de
-                                la déclaration, il faudra directement contacter votre interlocuteur de chaque organisme concerné.
-                              </span>
-                            </>
-                          ),
-                          onConfirm: async () => {
-                            try {
-                              const result = await transmitDeclaration.mutateAsync({
-                                eventSerieId: eventSerieId,
-                              });
-                            } catch (error) {
-                              if (error instanceof Error) {
-                                const parsedError = parseError(error);
+                      onClick={async () => {
+                        try {
+                          const result = await transmitDeclaration.mutateAsync({
+                            eventSerieId: eventSerieId,
+                          });
+                        } catch (error) {
+                          if (error instanceof Error) {
+                            const parsedError = parseError(error);
 
-                                // It's taken into account an additional backend verification may fail when ensuring data will pass for each
-                                // chosen organisms... since it has the same structure than the `fillDeclaration` we patch errors onto the right fields
-                                // (still throwing the original issue so the `ErrorAlert` within the modal will display correctly)
-                                // Note: previous errors will be clean here (since the field would be missing in the array), how if using `fillDeclaration` it will clear them automatically
-                                if (parsedError instanceof BusinessZodError && parsedError.code === invalidDeclarationFieldsToTransmitError.code) {
-                                  clearErrors();
+                            // It's taken into account an additional backend verification may fail when ensuring data will pass for each
+                            // chosen organisms... since it has the same structure than the `fillDeclaration` we patch errors onto the right fields
+                            // (still throwing the original issue so the `ErrorAlert` within the modal will display correctly)
+                            // Note: previous errors will be clean here (since the field would be missing in the array), how if using `fillDeclaration` it will clear them automatically
+                            if (parsedError instanceof BusinessZodError && parsedError.code === invalidDeclarationFieldsToTransmitError.code) {
+                              clearErrors();
 
-                                  for (const issue of parsedError.zodError) {
-                                    let field = issue.path.join('.') as FieldPath<FillDeclarationSchemaInputType>;
+                              for (const issue of parsedError.zodError) {
+                                let field = issue.path.join('.') as FieldPath<FillDeclarationSchemaInputType>;
 
-                                    // The `DeclarationSchema` is not exactly the same than `FillDeclarationSchema` so we hack
-                                    // a bit the field names to place at the right locations (this is mainly due for associations inputs)
-                                    // Note: error message may not be perfect but often it's due to missing property with `invalid_type` so it's acceptable to have a message really specific to this case
-                                    // (since otherwise this error should not happen from the UI in the normal flow)
-                                    if (field === 'eventSerie.place') {
-                                      field = 'eventSerie.place.name';
-                                    } else if (field.endsWith('.eventSerie.place')) {
-                                      field = field.replace(
-                                        '.placeOverride',
-                                        '.eventSerie.placeOverride.name'
-                                      ) as FieldPath<FillDeclarationSchemaInputType>;
-                                    }
-
-                                    setError(field, {
-                                      type: 'validate',
-                                      message: issue.message,
-                                    });
-                                  }
+                                // The `DeclarationSchema` is not exactly the same than `FillDeclarationSchema` so we hack
+                                // a bit the field names to place at the right locations (this is mainly due for associations inputs)
+                                // Note: error message may not be perfect but often it's due to missing property with `invalid_type` so it's acceptable to have a message really specific to this case
+                                // (since otherwise this error should not happen from the UI in the normal flow)
+                                if (field === 'eventSerie.place') {
+                                  field = 'eventSerie.place.name';
+                                } else if (field.endsWith('.eventSerie.place')) {
+                                  field = field.replace(
+                                    '.placeOverride',
+                                    '.eventSerie.placeOverride.name'
+                                  ) as FieldPath<FillDeclarationSchemaInputType>;
                                 }
+
+                                setError(field, {
+                                  type: 'validate',
+                                  message: issue.message,
+                                });
                               }
-
-                              throw error;
                             }
+                          }
 
-                            push(['trackEvent', 'declaration', 'transmit']);
-                          },
-                        });
+                          throw error;
+                        }
+
+                        push(['trackEvent', 'declaration', 'transmit']);
                       }}
                       nativeButtonProps={{
                         className: fr.cx('fr-m-2v'),
@@ -728,6 +710,11 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                   >
                     <div className={fr.cx('fr-col-12')}>
                       <fieldset className={fr.cx('fr-fieldset')}>
+                        {transmitDeclarationMutationError && (
+                          <div className={fr.cx('fr-fieldset__element', 'fr-mb-8v')}>
+                            <ErrorAlert errors={[transmitDeclarationMutationError]} />
+                          </div>
+                        )}
                         {erroredTransmission && (
                           <div className={fr.cx('fr-fieldset__element', 'fr-mb-8v')}>
                             <ErrorAlert errors={[atLeastOneTransmissionHasFailedError]} />
