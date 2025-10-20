@@ -764,7 +764,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                     name="organization.sacemId"
                                     disabled={alreadyDeclared}
                                     render={({ field, fieldState: { error } }) => {
-                                      return <SacemIdInput {...field} label="Identifiant Sacem" errorMessage={error?.message} />;
+                                      return <SacemIdInput {...field} label="Identifiant SACEM" errorMessage={error?.message} />;
                                     }}
                                   />
                                 </div>

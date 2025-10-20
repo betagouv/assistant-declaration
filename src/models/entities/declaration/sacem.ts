@@ -5,7 +5,7 @@ import { EventSchema, StricterEventSchema, StricterEventSerieSchema, assertValid
 import { StricterOrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceSchema } from '@ad/src/models/entities/place';
 
-// Here we take the original stored structure but forcing fields as required when needed by Sacem
+// Here we take the original stored structure but forcing fields as required when needed by SACEM
 export const SacemDeclarationSchema = DeclarationSchema.extend({
   organization: StricterOrganizationSchema.pick({
     id: true,

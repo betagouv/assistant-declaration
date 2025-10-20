@@ -50,8 +50,8 @@
       "organizationNotFound": "aucune organisation trouvée",
       "placeAddressRequiredIfAnyNameSpecified": "l'adresse du lieu est requise quand son intitulé est spécifié",
       "placeNameRequiredIfAnyAddressSpecified": "l'intitulé du lieu est requis quand son adresse est spécifiée",
-      "sacemAgencyNotFound": "le code postal spécifié pour le lieu ne nous permet pas de savoir à quelle agence Sacem envoyer la déclaration. Veuillez le vérifier ou contacter notre support",
-      "sacemDeclarationUnsuccessful": "nous n'avons pas réussi à transférer la déclaration à la Sacem. Merci de réessayer dans quelques secondes ou de nous contacter si le problème persiste",
+      "sacemAgencyNotFound": "le code postal spécifié pour le lieu ne nous permet pas de savoir à quelle agence SACEM envoyer la déclaration. Veuillez le vérifier ou contacter notre support",
+      "sacemDeclarationUnsuccessful": "nous n'avons pas réussi à transférer la déclaration à la SACEM. Merci de réessayer dans quelques secondes ou de nous contacter si le problème persiste",
       "sacdDeclarationIncorrectDeclarant": "l'identifiant de déclarant SACD que vous avez configuré est incorrect, nous vous conseillons de le vérifier et de nous contacter si besoin",
       "sacdDeclarationUnsuccessful": "la SACD nous a indiqué ne pas avoir complètement accepté votre déclaration. Nous vous conseillons de contacter votre interlocuteur SACD pour plus d'informations",
       "shotgunTooMuchToRetrieve": "vous avez trop de données à analyser et les récupérer pourrait affecter Shotgun. Bien que nous soyons déjà en discussions avec Shotgun pour autoriser la synchronization de structures à forte volumétrie, n'hésitez pas à contacter notre support pour appuyer la démarche",
@@ -281,10 +281,10 @@
         "too_small_one": "le code postal est requis"
       },
       "sacemId": {
-        "sacemIdMustBeDigits": "l'identifiant Sacem doit être composé de 1 à 10 chiffres",
-        "invalid_type": "l'identifiant Sacem est requis",
-        "too_big": "l'identifiant Sacem doit faire {{maximum}} caractères maximum",
-        "too_small_one": "l'identifiant Sacem est requis"
+        "sacemIdMustBeDigits": "l'identifiant SACEM doit être composé de 1 à 10 chiffres",
+        "invalid_type": "l'identifiant SACEM est requis",
+        "too_big": "l'identifiant SACEM doit faire {{maximum}} caractères maximum",
+        "too_small_one": "l'identifiant SACEM est requis"
       },
       "sacdId": {
         "sacdIdMustBeDigits": "l'identifiant SACD doit être composé de 1 à 10 chiffres",
@@ -338,7 +338,7 @@
     },
     "declarationType": {
       "enum": {
-        "SACEM": "Sacem",
+        "SACEM": "SACEM",
         "SACD": "SACD"
       }
     },

@@ -73,7 +73,7 @@ export function EventsFieldsets({ control, register, setValue, watch, trigger, p
         </>
       ) : (
         <div className={fr.cx('fr-col-12')}>
-          <p>Aucune date n&apos;a pu être récupérée pour ce spectacle. Il n&apos;y a donc aucune déclaration à faire à la Sacem.</p>
+          <p>Aucune date n&apos;a pu être récupérée pour ce spectacle. Il n&apos;y a donc aucune déclaration à faire à la SACEM.</p>
         </div>
       )}
     </div>
