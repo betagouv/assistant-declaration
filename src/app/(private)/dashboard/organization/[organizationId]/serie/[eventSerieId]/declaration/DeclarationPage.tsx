@@ -7,12 +7,14 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Select } from '@codegouvfr/react-dsfr/SelectNext';
 import { Tag } from '@codegouvfr/react-dsfr/Tag';
 import { cx } from '@codegouvfr/react-dsfr/tools/cx';
+import { useIsDark } from '@codegouvfr/react-dsfr/useIsDark';
 import addressFormatter from '@fragaria/address-formatter';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertProps, Autocomplete, Snackbar, Tooltip, useMediaQuery, useTheme } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import { TRPCClientErrorLike } from '@trpc/client';
 import debounce from 'lodash.debounce';
+import Image from 'next/image';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, FieldPath, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +22,7 @@ import { usePrevious } from 'react-use';
 import { z } from 'zod';
 
 import styles from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPage.module.scss';
+import sending from '@ad/src/assets/images/declaration/sending.svg';
 import { trpc } from '@ad/src/client/trpcClient';
 import { AddressField } from '@ad/src/components/AddressField';
 import { AmountInput } from '@ad/src/components/AmountInput';
@@ -52,12 +55,18 @@ const declarationTypesModal = createModal({
   isOpenedByDefault: false,
 });
 
+const transmissionConfirmationModal = createModal({
+  id: 'transmission-confirmation-modal',
+  isOpenedByDefault: true,
+});
+
 export interface DeclarationPageProps {
   params: { organizationId: string; eventSerieId: string };
 }
 
 export function DeclarationPage({ params: { organizationId, eventSerieId } }: DeclarationPageProps) {
   const { t } = useTranslation('common');
+  const { isDark } = useIsDark();
 
   const theme = useTheme();
   const smUp = useMediaQuery(theme.breakpoints.up('sm'));
@@ -125,6 +134,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
   const onSubmit = useCallback(
     async (input: FillDeclarationSchemaType) => {
+      // If modifying the declaration again we can get rid of any kept error from trying to declare
+      setTransmitDeclarationMutationError(null);
+
       const result = await fillDeclaration.mutateAsync(input);
 
       // Reset the form state so fields considered as "dirty" are no longer
@@ -638,9 +650,16 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           const result = await transmitDeclaration.mutateAsync({
                             eventSerieId: eventSerieId,
                           });
+
+                          // If an error was here remove it since successful
+                          setTransmitDeclarationMutationError(null);
+
+                          transmissionConfirmationModal.open();
                         } catch (error) {
                           if (error instanceof Error) {
                             const parsedError = parseError(error);
+
+                            setTransmitDeclarationMutationError(error);
 
                             // It's taken into account an additional backend verification may fail when ensuring data will pass for each
                             // chosen organisms... since it has the same structure than the `fillDeclaration` we patch errors onto the right fields
@@ -1341,6 +1360,43 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                       }}
                     />
                   </declarationTypesModal.Component>
+                  <transmissionConfirmationModal.Component
+                    title="Paramètres de déclaration"
+                    className={styles.transmissionConfirmationModal}
+                    buttons={[
+                      {
+                        doClosesModal: true,
+                        children: 'Ok',
+                      },
+                    ]}
+                  >
+                    <div>
+                      <div>
+                        <Image
+                          src={sending}
+                          alt=""
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'contain',
+                            filter: isDark ? 'invert(100%)' : undefined,
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <p className={fr.cx('fr-text--lead')}>
+                          {t('components.DeclarationPage.sent_declaration_to_organism', {
+                            count: watch('eventSerie.expectedDeclarationTypes').length,
+                          })}
+                        </p>
+                        <p className={fr.cx('fr-mb-0')}>
+                          {t('components.DeclarationPage.possible_information_request_from_organism', {
+                            count: watch('eventSerie.expectedDeclarationTypes').length,
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  </transmissionConfirmationModal.Component>
                 </div>
               </div>
             </>
