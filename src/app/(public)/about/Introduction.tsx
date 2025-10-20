@@ -48,7 +48,7 @@ export function Introduction() {
             }}
           />
           <p className={fr.cx('fr-mb-8v')} style={{ maxWidth: 600 }}>
-            L&apos;Assistant pour les déclarations du spectacle aide les diffuseurs de spectacles à remplir les formalités Sacem et SACD.
+            L&apos;Assistant pour les déclarations du spectacle aide les diffuseurs de spectacles à remplir les formalités SACEM et SACD.
             <br />
             Il réutilise les données de billetterie pour simplifier la saisie des informations attendues par les organismes.
           </p>

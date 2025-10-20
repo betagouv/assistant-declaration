@@ -235,7 +235,7 @@ export const declarationRouter = router({
             throw sacemAgencyNotFoundError;
           }
 
-          // We generate a PDF so the Sacem can deal with it easily (instead of setting the whole into the email text)
+          // We generate a PDF so the SACEM can deal with it easily (instead of setting the whole into the email text)
           const jsxDocument = SacemDeclarationDocument({
             sacemDeclaration: sacemDeclaration,
             signatory: `${originatorUser.firstname} ${originatorUser.lastname}`,
@@ -245,7 +245,7 @@ export const declarationRouter = router({
 
           const declarationAttachment: EmailAttachment = {
             contentType: 'application/pdf',
-            filename: `Déclaration Sacem - ${slugify(eventSerie.name)}.pdf`,
+            filename: `Déclaration SACEM - ${slugify(eventSerie.name)}.pdf`,
             content: declarationPdfBuffer,
             inline: false, // It will be attached, not specifically set somewhere in the content
           };
@@ -253,7 +253,7 @@ export const declarationRouter = router({
           try {
             await mailer.sendDeclarationToSacemAgency({
               recipient: sacemAgency.email,
-              replyTo: originatorUser.email, // We give the Sacem the possibility to directly converse with the declarer
+              replyTo: originatorUser.email, // We give the SACEM the possibility to directly converse with the declarer
               eventSerieName: sacemDeclaration.eventSerie.name,
               originatorFirstname: originatorUser.firstname,
               originatorLastname: originatorUser.lastname,

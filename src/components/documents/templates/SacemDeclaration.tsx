@@ -55,7 +55,7 @@ export interface SacemDeclarationDocumentProps {
 
 export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
   const { t } = useServerTranslation('common');
-  const title = `Déclaration Sacem - ${props.sacemDeclaration.eventSerie.name}`;
+  const title = `Déclaration SACEM - ${props.sacemDeclaration.eventSerie.name}`;
 
   assert(props.sacemDeclaration.events.length > 0, 'no event has no meaning');
 
@@ -96,7 +96,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 <Link src="https://www.sacem.fr">www.sacem.fr</Link> - Tél. <Link src="tel:+33147154715">01 47 15 47 15</Link>
               </Text>
               <Text style={{ ...layoutStyles.headerSubtitle, fontSize: 9, fontStyle: 'italic', marginTop: 5 }}>
-                Ce document doit être adressé à votre délégation Sacem avant le dernier jour du mois suivant la dernière représentation du spectacle.
+                Ce document doit être adressé à votre délégation SACEM avant le dernier jour du mois suivant la dernière représentation du spectacle.
               </Text>
             </View>
           </View>
