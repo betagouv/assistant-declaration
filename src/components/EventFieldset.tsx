@@ -271,8 +271,10 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                             } else {
                               onChange(newValue.name);
 
+                              const { id, ...newAddressInputValue } = newValue.address;
+
                               // Override the current address used
-                              setValue(`${name}.placeOverride.address`, newValue.address, { shouldDirty: true });
+                              setValue(`${name}.placeOverride.address`, newAddressInputValue, { shouldDirty: true });
                             }
                           } else {
                             setValue(`${name}.placeOverride.name`, null, { shouldDirty: true });

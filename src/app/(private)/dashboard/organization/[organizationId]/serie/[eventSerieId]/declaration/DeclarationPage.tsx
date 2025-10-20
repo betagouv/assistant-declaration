@@ -1156,8 +1156,10 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                             } else {
                                               onChange(newValue.name);
 
+                                              const { id, ...newAddressInputValue } = newValue.address;
+
                                               // Override the current address used
-                                              setValue('eventSerie.place.address', newValue.address, { shouldDirty: true });
+                                              setValue('eventSerie.place.address', newAddressInputValue, { shouldDirty: true });
                                             }
                                           } else {
                                             setValue('eventSerie.place.name', null, { shouldDirty: true });

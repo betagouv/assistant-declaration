@@ -492,8 +492,20 @@ export const declarationRouter = router({
           officialId: previousDeclaration.producerOfficialId,
           name: previousDeclaration.producerName,
         });
-      if (previousDeclaration.place && !placeholder.place.find((p) => p.id === previousDeclaration.place!.id))
-        placeholder.place.push(previousDeclaration.place);
+      if (previousDeclaration.place && !placeholder.place.find((p) => p.id === previousDeclaration.place!.id)) {
+        placeholder.place.push({
+          id: previousDeclaration.place.id,
+          name: previousDeclaration.place.name,
+          address: {
+            id: previousDeclaration.place.address.id,
+            street: previousDeclaration.place.address.street,
+            city: previousDeclaration.place.address.city,
+            postalCode: previousDeclaration.place.address.postalCode,
+            subdivision: previousDeclaration.place.address.subdivision,
+            countryCode: previousDeclaration.place.address.countryCode,
+          },
+        });
+      }
       if (previousDeclaration.placeCapacity && !placeholder.placeCapacity.includes(previousDeclaration.placeCapacity))
         placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
     }
