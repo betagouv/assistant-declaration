@@ -675,13 +675,17 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 // a bit the field names to place at the right locations (this is mainly due for associations inputs)
                                 // Note: error message may not be perfect but often it's due to missing property with `invalid_type` so it's acceptable to have a message really specific to this case
                                 // (since otherwise this error should not happen from the UI in the normal flow)
-                                if (field === 'eventSerie.place') {
+                                if ((field as string) === 'eventSerie.place') {
                                   field = 'eventSerie.place.name';
-                                } else if (field.endsWith('.eventSerie.place')) {
+                                } else if ((field as string).endsWith('.eventSerie.place')) {
                                   field = field.replace(
                                     '.placeOverride',
                                     '.eventSerie.placeOverride.name'
                                   ) as FieldPath<FillDeclarationSchemaInputType>;
+                                } else if ((field as string) === 'eventSerie.producerOfficialId') {
+                                  field = 'eventSerie.producer';
+                                } else if ((field as string) === 'eventSerie.producerName') {
+                                  field = 'eventSerie.producer'; // The above error about producer should aways be the one since they go by pair
                                 }
 
                                 setError(field, {

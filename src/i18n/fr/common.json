@@ -282,9 +282,9 @@
         "too_big": "le numéro Siren du producteur doit faire {{maximum}} caractères maximum",
         "too_small_one": "le numéro Siren du producteur est requis"
       },
-      "producerOfficialName": {
-        "invalid_type": "le code postal est requis",
-        "too_small_one": "le code postal est requis"
+      "producerName": {
+        "invalid_type": "la raison sociale du producteur est requise",
+        "too_small_one": "la raison sociale du producteur est requise"
       },
       "sacemId": {
         "sacemIdMustBeDigits": "l'identifiant SACEM doit être composé de 1 à 10 chiffres",
