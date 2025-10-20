@@ -53,7 +53,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
       <div className={fr.cx('fr-grid-row')}>
         <div className={fr.cx('fr-col-12')}>
           <div className={fr.cx('fr-fieldset__element')}>
-            <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
+            <div className={fr.cx('fr-mb-2v', 'fr-mt-4v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
               Général
             </div>
           </div>
@@ -277,7 +277,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
       <div className={fr.cx('fr-grid-row')}>
         <div className={fr.cx('fr-col-12')}>
           <div className={fr.cx('fr-fieldset__element')}>
-            <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
+            <div className={fr.cx('fr-mb-2v', 'fr-mt-4v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
               Billetterie
             </div>
           </div>
@@ -417,7 +417,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
           <div className={fr.cx('fr-grid-row')}>
             <div className={fr.cx('fr-col-12')}>
               <div className={fr.cx('fr-fieldset__element')}>
-                <div className={fr.cx('fr-mb-2v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
+                <div className={fr.cx('fr-mb-2v', 'fr-mt-4v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
                   Recettes hors billetterie
                 </div>
               </div>
