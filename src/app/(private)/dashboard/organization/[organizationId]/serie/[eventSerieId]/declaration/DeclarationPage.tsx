@@ -6,6 +6,7 @@ import { Input } from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Select } from '@codegouvfr/react-dsfr/SelectNext';
 import { Tag } from '@codegouvfr/react-dsfr/Tag';
+import { cx } from '@codegouvfr/react-dsfr/tools/cx';
 import addressFormatter from '@fragaria/address-formatter';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertProps, Autocomplete, Snackbar, Tooltip, useMediaQuery, useTheme } from '@mui/material';
@@ -1017,12 +1018,12 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             )}
                           </div>
                           <div className={fr.cx('fr-fieldset__element')}>
-                            <hr className={fr.cx('fr-my-3v')} />
+                            <hr className={cx(fr.cx('fr-my-3v'), styles.hr)} />
                           </div>
                           <div className={fr.cx('fr-grid-row')}>
                             <div className={fr.cx('fr-col-12')}>
                               <div className={fr.cx('fr-fieldset__element')}>
-                                <p className={fr.cx('fr-mb-8v')} style={{ color: fr.colors.decisions.text.label.blueCumulus.default }}>
+                                <p className={fr.cx('fr-mb-8v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
                                   Ces informations sont reportées sur toutes les séances, vous pouvez toujours les modifier pour chaque séance.
                                 </p>
                               </div>
@@ -1269,7 +1270,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                       <fieldset className={fr.cx('fr-fieldset')}>
                         <div className={fr.cx('fr-col-12')}>
                           <div className={fr.cx('fr-fieldset__element')}>
-                            <hr className={fr.cx('fr-my-3v')} />
+                            <hr className={cx(fr.cx('fr-my-3v'), styles.hr)} />
                           </div>
                           <EventsFieldsets
                             control={control}
