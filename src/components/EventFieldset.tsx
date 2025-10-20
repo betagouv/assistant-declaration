@@ -63,7 +63,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
         <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
           <div className={fr.cx('fr-fieldset__element')}>
             <Select
-              label="Audience"
+              label="Type de public"
               disabled={readonly}
               state={!!errors?.audienceOverride ? 'error' : undefined}
               stateRelatedMessage={errors?.audienceOverride?.message}
@@ -124,7 +124,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
                       return (
                         <Input
                           ref={InputProps.ref}
-                          label="Intitulé du lieu"
+                          label="Intitulé du lieu de la représentation"
                           id={id}
                           disabled={disabled}
                           state={!!error ? 'error' : undefined}

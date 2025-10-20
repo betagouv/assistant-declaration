@@ -239,19 +239,19 @@
         "too_small_one": "le mot de passe est requis"
       },
       "performanceType": {
-        "invalid_type": "le genre du spectacle est requis",
-        "too_small_one": "le genre du spectacle est requis",
-        "too_big": "le genre du spectacle doit faire {{maximum}} caractères maximum"
+        "invalid_type": "l'esthétique du spectacle est requise",
+        "too_small_one": "l'esthétique du spectacle est requise",
+        "too_big": "l'esthétique du spectacle doit faire {{maximum}} caractères maximum"
       },
       "placeCapacity": {
-        "invalid_type": "la capacité de la salle doit être un nombre entier",
-        "too_small": "la capacité de la salle doit être supérieure à {{minimum}}",
-        "too_small_one": "la capacité de la salle est requise"
+        "invalid_type": "la jauge du lieu doit être un nombre entier",
+        "too_small": "la jauge du lieu doit être supérieure à {{minimum}}",
+        "too_small_one": "la jauge du lieu est requise"
       },
       "placeCapacityOverride": {
-        "invalid_type": "la capacité de la salle doit être un nombre entier",
-        "too_small": "la capacité de la salle doit être supérieure à {{minimum}}",
-        "too_small_one": "la capacité de la salle est requise"
+        "invalid_type": "la jauge du lieu doit être un nombre entier",
+        "too_small": "la jauge du lieu doit être supérieure à {{minimum}}",
+        "too_small_one": "la jauge du lieu est requise"
       },
       "place": {
         "invalid_type": "l'intitulé du lieu et son adresse sont requis",

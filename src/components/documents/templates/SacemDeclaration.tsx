@@ -140,7 +140,7 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
             </Text>
           </View>
           <View style={styles.gridItem}>
-            <Text style={styles.label}>Genre du spectacle</Text>
+            <Text style={styles.label}>Esthétique du spectacle</Text>
             <Text>{t(`model.performanceType.enum.${props.sacemDeclaration.eventSerie.performanceType}`)}</Text>
           </View>
           <View style={styles.gridItem}>

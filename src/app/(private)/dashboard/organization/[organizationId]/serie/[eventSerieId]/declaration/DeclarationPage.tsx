@@ -782,6 +782,27 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           <div className={fr.cx('fr-grid-row')}>
                             <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
                               <div className={fr.cx('fr-fieldset__element')}>
+                                <Select
+                                  label="Esthétique du spectacle"
+                                  disabled={alreadyDeclared}
+                                  state={!!errors.eventSerie?.performanceType ? 'error' : undefined}
+                                  stateRelatedMessage={errors?.eventSerie?.performanceType?.message}
+                                  nativeSelectProps={{
+                                    ...register('eventSerie.performanceType'),
+                                  }}
+                                  options={[
+                                    ...PerformanceTypeSchema.options.map((performanceType) => {
+                                      return {
+                                        label: t(`model.performanceType.enum.${performanceType}`),
+                                        value: performanceType,
+                                      };
+                                    }),
+                                  ].sort((a, b) => a.label.localeCompare(b.label))}
+                                />
+                              </div>
+                            </div>
+                            <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
                                 <Controller
                                   control={control}
                                   name="eventSerie.producer"
@@ -806,27 +827,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                       />
                                     );
                                   }}
-                                />
-                              </div>
-                            </div>
-                            <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-                              <div className={fr.cx('fr-fieldset__element')}>
-                                <Select
-                                  label="Genre"
-                                  disabled={alreadyDeclared}
-                                  state={!!errors.eventSerie?.performanceType ? 'error' : undefined}
-                                  stateRelatedMessage={errors?.eventSerie?.performanceType?.message}
-                                  nativeSelectProps={{
-                                    ...register('eventSerie.performanceType'),
-                                  }}
-                                  options={[
-                                    ...PerformanceTypeSchema.options.map((performanceType) => {
-                                      return {
-                                        label: t(`model.performanceType.enum.${performanceType}`),
-                                        value: performanceType,
-                                      };
-                                    }),
-                                  ].sort((a, b) => a.label.localeCompare(b.label))}
                                 />
                               </div>
                             </div>
@@ -921,7 +921,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                   name="eventSerie.expensesExcludingTaxes"
                                   disabled={alreadyDeclared}
                                   render={({ field, fieldState: { error } }) => {
-                                    return <AmountInput {...field} label="Dépenses globales HT" signed={false} errorMessage={error?.message} />;
+                                    return <AmountInput {...field} label="Dépenses totales HT" signed={false} errorMessage={error?.message} />;
                                   }}
                                 />
                               </div>
@@ -933,7 +933,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                   name="eventSerie.expensesIncludingTaxes"
                                   disabled={alreadyDeclared}
                                   render={({ field, fieldState: { error } }) => {
-                                    return <AmountInput {...field} label="Dépenses globales TTC" signed={false} errorMessage={error?.message} />;
+                                    return <AmountInput {...field} label="Dépenses totales TTC" signed={false} errorMessage={error?.message} />;
                                   }}
                                 />
                               </div>
@@ -1019,7 +1019,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             <div className={fr.cx('fr-col-8', 'fr-col-md-3')}>
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Select
-                                  label="Audience"
+                                  label="Type de public"
                                   disabled={alreadyDeclared}
                                   state={!!errors.eventSerie?.audience ? 'error' : undefined}
                                   stateRelatedMessage={errors?.eventSerie?.audience?.message}
@@ -1080,7 +1080,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                           return (
                                             <Input
                                               ref={InputProps.ref}
-                                              label="Intitulé du lieu"
+                                              label="Intitulé du lieu de la représentation"
                                               id={id}
                                               disabled={disabled}
                                               state={!!error ? 'error' : undefined}
