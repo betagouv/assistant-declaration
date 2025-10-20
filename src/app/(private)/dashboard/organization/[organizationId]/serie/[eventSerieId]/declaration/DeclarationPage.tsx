@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { usePrevious } from 'react-use';
 import { z } from 'zod';
 
+import styles from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPage.module.scss';
 import { trpc } from '@ad/src/client/trpcClient';
 import { AddressField } from '@ad/src/components/AddressField';
 import { AmountInput } from '@ad/src/components/AmountInput';
@@ -325,6 +326,11 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       }
     }
   }, [getDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
+
+  const [tmpExpectedDeclarationTypes, setTmpExpectedDeclarationTypes] = useState<DeclarationTypeSchemaType[]>([]);
+  useEffect(() => {
+    setTmpExpectedDeclarationTypes(watch('eventSerie.expectedDeclarationTypes'));
+  }, [watch('eventSerie.expectedDeclarationTypes'), setTmpExpectedDeclarationTypes]);
 
   const { computedStartAt, computedEndAt, eventsKeyFigures } = useMemo(() => {
     // TODO: this should be based on form data, not the one from the API (since it needs to use local state)
@@ -1272,50 +1278,77 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           />
                         </div>
                       </fieldset>
-                      <declarationTypesModal.Component title="Paramètres de déclaration">
-                        <Controller
-                          control={control}
-                          name="eventSerie.expectedDeclarationTypes"
-                          render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => {
-                            return (
-                              <Checkbox
-                                legend={
-                                  <>
-                                    Auprès de quels <span className={fr.cx('fr-text--bold')}>organismes devez-vous déclarer ?</span>
-                                  </>
-                                }
-                                state={!!error ? 'error' : undefined}
-                                stateRelatedMessage={error?.message}
-                                options={DeclarationTypeSchema.options.map((declarationType) => {
-                                  return {
-                                    label: t(`model.declarationType.enum.${declarationType}`),
-                                    nativeInputProps: {
-                                      name: `checkbox-${declarationType}`,
-                                      value: declarationType,
-                                      checked: value.includes(declarationType),
-                                      onChange: (event) => {
-                                        const newSelectedDeclarationsTypes = new Set<DeclarationTypeSchemaType>(value);
-
-                                        if (event.target.checked) {
-                                          newSelectedDeclarationsTypes.add(declarationType);
-                                        } else {
-                                          newSelectedDeclarationsTypes.delete(declarationType);
-                                        }
-
-                                        onChange([...newSelectedDeclarationsTypes.values()]);
-                                      },
-                                      onBlur: onBlur,
-                                    },
-                                  };
-                                })}
-                                orientation="vertical"
-                              />
-                            );
-                          }}
-                        />
-                      </declarationTypesModal.Component>
                     </div>
                   </BaseForm>
+                  <declarationTypesModal.Component
+                    title="Paramètres de déclaration"
+                    className={styles.declarationTypesModal}
+                    buttons={[
+                      {
+                        doClosesModal: true,
+                        disabled: tmpExpectedDeclarationTypes.length === 0,
+                        children: "C'est parti !",
+                        onClick: () => {
+                          setValue(`eventSerie.expectedDeclarationTypes`, tmpExpectedDeclarationTypes, {
+                            shouldDirty: true,
+                          });
+                        },
+                      },
+                    ]}
+                  >
+                    <Controller
+                      control={control}
+                      name="eventSerie.expectedDeclarationTypes"
+                      render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => {
+                        return (
+                          <Checkbox
+                            legend={
+                              <h1 className={fr.cx('fr-h4')} style={{ fontWeight: '400px !important' }}>
+                                Auprès de quels <span className={fr.cx('fr-text--bold')}>organismes devez-vous déclarer ?</span>
+                              </h1>
+                            }
+                            state={!!error ? 'error' : undefined}
+                            stateRelatedMessage={error?.message}
+                            options={DeclarationTypeSchema.options.map((declarationType) => {
+                              return {
+                                label: (
+                                  <div>
+                                    {t(`model.declarationType.enum.${declarationType}`)}
+                                    <div style={{ color: fr.colors.decisions.text.mention.grey.default }}>
+                                      {declarationType === 'SACEM' && 'spectacles avec musique protégée'}
+                                      {declarationType === 'SACD' && 'spectacles avec texte, scénario ou chorégraphie protégés'}
+                                    </div>
+                                  </div>
+                                ),
+                                nativeInputProps: {
+                                  name: `checkbox-${declarationType}`,
+                                  value: declarationType,
+                                  // checked: value.includes(declarationType),
+                                  checked: tmpExpectedDeclarationTypes.includes(declarationType),
+                                  onChange: (event) => {
+                                    // const newSelectedDeclarationsTypes = new Set<DeclarationTypeSchemaType>(value);
+                                    const newSelectedDeclarationsTypes = new Set<DeclarationTypeSchemaType>(tmpExpectedDeclarationTypes);
+
+                                    if (event.target.checked) {
+                                      newSelectedDeclarationsTypes.add(declarationType);
+                                    } else {
+                                      newSelectedDeclarationsTypes.delete(declarationType);
+                                    }
+
+                                    // Must be validated by the
+                                    // onChange([...newSelectedDeclarationsTypes.values()]);
+                                    setTmpExpectedDeclarationTypes([...newSelectedDeclarationsTypes.values()]);
+                                  },
+                                  onBlur: onBlur,
+                                },
+                              };
+                            })}
+                            orientation="vertical"
+                          />
+                        );
+                      }}
+                    />
+                  </declarationTypesModal.Component>
                 </div>
               </div>
             </>
