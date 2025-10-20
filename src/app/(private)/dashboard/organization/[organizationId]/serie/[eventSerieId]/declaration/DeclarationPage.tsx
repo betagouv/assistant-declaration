@@ -1311,7 +1311,15 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             stateRelatedMessage={error?.message}
                             options={DeclarationTypeSchema.options.map((declarationType) => {
                               return {
-                                label: t(`model.declarationType.enum.${declarationType}`),
+                                label: (
+                                  <div>
+                                    {t(`model.declarationType.enum.${declarationType}`)}
+                                    <div style={{ color: fr.colors.decisions.text.mention.grey.default }}>
+                                      {declarationType === 'SACEM' && 'spectacles avec musique protégée'}
+                                      {declarationType === 'SACD' && 'spectacles avec texte, scénario ou chorégraphie protégés'}
+                                    </div>
+                                  </div>
+                                ),
                                 nativeInputProps: {
                                   name: `checkbox-${declarationType}`,
                                   value: declarationType,
