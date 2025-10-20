@@ -199,6 +199,16 @@ export class Mailer {
     });
   }
 
+  public async sendDeclarationAttachmentsToSacdAgency(parameters: DeclarationToSacemAgencyEmailProps & { recipient: string; replyTo: string }) {
+    await this.send({
+      recipients: [parameters.recipient],
+      replyTo: parameters.replyTo,
+      subject: titles.DeclarationToSacemAgencyEmail,
+      emailComponent: DeclarationToSacemAgencyEmail(parameters),
+      attachments: parameters.attachments,
+    });
+  }
+
   public async sendDeclarationToSacemAgency(parameters: DeclarationToSacemAgencyEmailProps & { recipient: string; replyTo: string }) {
     await this.send({
       recipients: [parameters.recipient],

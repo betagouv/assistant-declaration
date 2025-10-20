@@ -6,7 +6,7 @@ import { Attachment as EmailAttachment } from '@ad/src/emails/mailer';
 import { useServerTranslation } from '@ad/src/i18n';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
-export interface DeclarationToSacemAgencyEmailProps {
+export interface DeclarationAttachmentsToSacdAgencyEmailProps {
   eventSerieName: string;
   originatorFirstname: string;
   originatorLastname: string;
@@ -16,9 +16,9 @@ export interface DeclarationToSacemAgencyEmailProps {
   aboutUrl: string;
 }
 
-export function DeclarationToSacemAgencyEmail(props: DeclarationToSacemAgencyEmailProps) {
+export function DeclarationAttachmentsToSacdAgencyEmail(props: DeclarationAttachmentsToSacdAgencyEmailProps) {
   const { t } = useServerTranslation('common');
-  const title = titles.DeclarationToSacemAgencyEmail;
+  const title = titles.DeclarationAttachmentsToSacdAgencyEmail;
 
   assert(props.attachments.length > 0);
 
@@ -28,8 +28,9 @@ export function DeclarationToSacemAgencyEmail(props: DeclarationToSacemAgencyEma
         <h1>{title}</h1>
         <p>Bonjour,</p>
         <p>
-          Dans le cadre de notre mission de service public, nous vous transmettons la déclaration du spectacle{' '}
-          <span style={{ fontWeight: 'bold' }}>{props.eventSerieName}</span>. Cette télédéclaration a été effectuée par{' '}
+          Dans le cadre de notre mission de service public et suite à la déclaration du spectacle{' '}
+          <span style={{ fontWeight: 'bold' }}>{props.eventSerieName}</span> dans votre outil interne, nous vous transmettons en plus des pièces
+          justificatives ajoutées par{' '}
           <span style={{ fontWeight: 'bold' }}>
             {props.originatorFirstname} {props.originatorLastname}
           </span>{' '}
@@ -37,7 +38,7 @@ export function DeclarationToSacemAgencyEmail(props: DeclarationToSacemAgencyEma
         </p>
         <p
           dangerouslySetInnerHTML={{
-            __html: t('email.template.DeclarationToSacemAgencyEmail.attachmentsInThisEmail', { count: props.attachments.length }),
+            __html: t('email.template.DeclarationAttachmentsToSacdAgencyEmail.attachmentsInThisEmail', { count: props.attachments.length }),
           }}
         />
         <p>

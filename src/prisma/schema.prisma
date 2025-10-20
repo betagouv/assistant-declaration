@@ -329,6 +329,15 @@ model EventSerieDeclaration {
   @@unique([eventSerieId, type])
 }
 
+model SacdAgency {
+  id                                String   @id @default(uuid()) @db.Uuid
+  email                             String   @unique
+  matchingFrenchPostalCodesPrefixes String[] // Using prefix due to 2 digits for the "department" (3 for overseas ones), and full postal codes for a specific "department"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
 model SacemAgency {
   id                        String   @id @default(uuid()) @db.Uuid
   email                     String   @unique

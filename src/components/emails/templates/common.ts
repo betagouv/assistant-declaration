@@ -6,4 +6,5 @@ export const titles = {
   UserDeletedEmail: `Compte désactivé`,
   WelcomeOrganizationCollaboratorEmail: `Bienvenue !`,
   DeclarationToSacemAgencyEmail: `Nouvelle déclaration SACEM`,
+  DeclarationAttachmentsToSacdAgencyEmail: `Nouvelle déclaration SACD`,
 };

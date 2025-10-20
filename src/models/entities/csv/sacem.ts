@@ -5,9 +5,8 @@ export const CsvSacemAgencySchema = z
     LOCAL: z.string().trim().min(1),
     CP: z.string().trim().length(5),
     Mail: z
-      .string()
-      .trim()
       .email()
+      .trim()
       .transform((value) =>
         // Some emails are not lowercase
         value.toLowerCase()

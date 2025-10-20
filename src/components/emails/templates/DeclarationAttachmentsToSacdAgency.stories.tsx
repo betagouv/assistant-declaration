@@ -5,19 +5,19 @@ import { WithEmailRenderer } from '@ad/.storybook/WithEmailRenderer';
 import { commonEmailsParameters } from '@ad/.storybook/email';
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
-import { DeclarationToSacemAgencyEmail } from '@ad/src/components/emails/templates/DeclarationToSacemAgency';
+import { DeclarationAttachmentsToSacdAgencyEmail } from '@ad/src/components/emails/templates/DeclarationAttachmentsToSacdAgency';
 import { titles } from '@ad/src/components/emails/templates/common';
 import { emailAttachments } from '@ad/src/fixtures/attachment';
 import { eventsSeries } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
 import { users } from '@ad/src/fixtures/user';
 
-type ComponentType = typeof DeclarationToSacemAgencyEmail;
+type ComponentType = typeof DeclarationAttachmentsToSacdAgencyEmail;
 const { generateMetaDefault, prepareStory } = StoryHelperFactory<ComponentType>();
 
 export default {
-  title: 'Emails/Templates/DeclarationToSacemAgency',
-  component: DeclarationToSacemAgencyEmail,
+  title: 'Emails/Templates/DeclarationAttachmentsToSacdAgency',
+  component: DeclarationAttachmentsToSacdAgencyEmail,
   ...generateMetaDefault({
     parameters: {
       ...commonEmailsParameters,
@@ -31,7 +31,7 @@ export default {
 } as Meta<ComponentType>;
 
 const Template: StoryFn<ComponentType> = (args) => {
-  return <DeclarationToSacemAgencyEmail {...args} />;
+  return <DeclarationAttachmentsToSacdAgencyEmail {...args} />;
 };
 
 const NormalStory = Template.bind({});
@@ -55,7 +55,7 @@ const ClientOverviewStory = Template.bind({});
 ClientOverviewStory.args = {
   ...NormalStory.args,
 };
-ClientOverviewStory.decorators = [WithEmailRenderer, WithEmailClientOverviewFactory(titles.DeclarationToSacemAgencyEmail)];
+ClientOverviewStory.decorators = [WithEmailRenderer, WithEmailClientOverviewFactory(titles.DeclarationAttachmentsToSacdAgencyEmail)];
 ClientOverviewStory.play = async ({ canvasElement }) => {
   await playFindEmailStructure(canvasElement);
 };

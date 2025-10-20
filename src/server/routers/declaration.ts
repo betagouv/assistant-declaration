@@ -1,4 +1,4 @@
-import { EventSerieDeclarationStatus, Prisma } from '@prisma/client';
+import { EventSerieDeclarationStatus, Prisma, SacdAgency } from '@prisma/client';
 import { renderToBuffer } from '@react-pdf/renderer';
 import slugify from '@sindresorhus/slugify';
 import { secondsToMilliseconds } from 'date-fns';
@@ -21,6 +21,8 @@ import {
   eventSerieNotFoundError,
   invalidDeclarationFieldsToTransmitError,
   organizationCollaboratorRoleRequiredError,
+  sacdAgencyNotFoundError,
+  sacdAttachmentsDeclarationUnsuccessfulError,
   sacemAgencyNotFoundError,
   sacemDeclarationUnsuccessfulError,
   transmittedDeclarationCannotBeUpdatedError,
@@ -273,10 +275,69 @@ export const declarationRouter = router({
         } else if (declarationToDeclare === sacdDeclaration) {
           const sacdClient = getSacdClient(ctx.user.id);
 
+          // TODO:
+          // const sendAttachments  = sacdDeclaration.attachments.length > 0);
+          const sendAttachments = false;
+
+          // Before sending any information outside we make sure of all validation
+          let sacdAgency: Pick<SacdAgency, 'email'> | null = null;
+          if (sendAttachments) {
+            const eventPlacePostalCode: string = sacdDeclaration.eventSerie.place.address.postalCode;
+
+            sacdAgency = await prisma.sacdAgency.findFirst({
+              where: {
+                matchingFrenchPostalCodesPrefixes: {
+                  hasSome: [
+                    // SACD is providing only prefixes with 2, 3 or 5 digits, no need to look at others
+                    eventPlacePostalCode.substring(0, 2),
+                    eventPlacePostalCode.substring(0, 3),
+                    eventPlacePostalCode.substring(0, 5),
+                  ],
+                },
+              },
+              select: {
+                email: true,
+              },
+            });
+
+            if (!sacdAgency) {
+              throw sacdAgencyNotFoundError;
+            }
+          }
+
           // Since not tracking token expiration we log in again (but we could improve that)
           await sacdClient.login();
 
           await sacdClient.declare(sacdDeclaration);
+
+          if (sendAttachments) {
+            assert(sacdAgency);
+
+            const declarationAttachments: EmailAttachment[] = [
+              // TODO: ...
+            ];
+
+            try {
+              await mailer.sendDeclarationAttachmentsToSacdAgency({
+                recipient: sacdAgency.email,
+                replyTo: originatorUser.email, // We give the SACD the possibility to directly converse with the declarer
+                eventSerieName: sacdDeclaration.eventSerie.name,
+                originatorFirstname: originatorUser.firstname,
+                originatorLastname: originatorUser.lastname,
+                originatorEmail: originatorUser.email,
+                organizationName: sacdDeclaration.organization.name,
+                aboutUrl: linkRegistry.get('about', undefined, { absolute: true }),
+                attachments: declarationAttachments,
+              });
+            } catch (error) {
+              console.error(error);
+
+              // TODO: we have no way to retry email without resending data to the SACD API
+              // the ideal would be either to be able to check from their API first it exists, or that
+              // the attachments are soon transmit through API instead of separately through email
+              throw sacdAttachmentsDeclarationUnsuccessfulError;
+            }
+          }
         }
 
         // If successful mark the declaration as transmitted
