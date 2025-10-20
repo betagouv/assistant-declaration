@@ -81,29 +81,6 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             />
           </div>
         </div>
-        <div className={fr.cx('fr-col-4', 'fr-col-md-3')}>
-          <div className={fr.cx('fr-fieldset__element')}>
-            <Select
-              label="Taux de TVA"
-              disabled={readonly}
-              state={!!errors?.ticketingRevenueTaxRateOverride ? 'error' : undefined}
-              stateRelatedMessage={errors?.ticketingRevenueTaxRateOverride?.message}
-              nativeSelectProps={{
-                ...register(`${name}.ticketingRevenueTaxRateOverride`, {
-                  valueAsNumber: true,
-                }),
-              }}
-              options={currentTaxRates.map((taxRate) => {
-                return {
-                  label: t('number.percent', {
-                    percentage: taxRate,
-                  }),
-                  value: taxRate.toString(),
-                };
-              })}
-            />
-          </div>
-        </div>
       </div>
       <div className={fr.cx('fr-grid-row')}>
         <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
@@ -307,7 +284,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
         </div>
       </div>
       <div className={fr.cx('fr-grid-row')}>
-        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+        <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
           <div className={fr.cx('fr-fieldset__element')}>
             <Controller
               control={control}
@@ -347,7 +324,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             />
           </div>
         </div>
-        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+        <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
           <div className={fr.cx('fr-fieldset__element')}>
             <Controller
               control={control}
@@ -387,7 +364,30 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             />
           </div>
         </div>
-        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+        <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Select
+              label="Taux de TVA"
+              disabled={readonly}
+              state={!!errors?.ticketingRevenueTaxRateOverride ? 'error' : undefined}
+              stateRelatedMessage={errors?.ticketingRevenueTaxRateOverride?.message}
+              nativeSelectProps={{
+                ...register(`${name}.ticketingRevenueTaxRateOverride`, {
+                  valueAsNumber: true,
+                }),
+              }}
+              options={currentTaxRates.map((taxRate) => {
+                return {
+                  label: t('number.percent', {
+                    percentage: taxRate,
+                  }),
+                  value: taxRate.toString(),
+                };
+              })}
+            />
+          </div>
+        </div>
+        <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
           <div className={fr.cx('fr-fieldset__element')}>
             <Controller
               control={control}
@@ -399,7 +399,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
             />
           </div>
         </div>
-        <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+        <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
           <div className={fr.cx('fr-fieldset__element')}>
             <Controller
               control={control}

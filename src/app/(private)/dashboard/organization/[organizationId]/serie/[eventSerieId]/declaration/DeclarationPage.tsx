@@ -1051,7 +1051,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             <div className={fr.cx('fr-col-4', 'fr-col-md-3')}>
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Select
-                                  label="Taux de TVA"
+                                  label="Taux de TVA de la billetterie"
                                   disabled={alreadyDeclared}
                                   state={!!errors.eventSerie?.ticketingRevenueTaxRate ? 'error' : undefined}
                                   stateRelatedMessage={errors?.eventSerie?.ticketingRevenueTaxRate?.message}
