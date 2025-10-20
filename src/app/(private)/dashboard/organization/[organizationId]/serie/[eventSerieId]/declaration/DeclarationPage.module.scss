@@ -1,0 +1,23 @@
+.declarationTypesModal {
+  :global(.fr-modal__title) {
+    display: none !important;
+  }
+
+  :global(.fr-modal__header) {
+    button {
+      display: none;
+    }
+  }
+
+  :global(.fr-modal__content) {
+    margin-bottom: 0 !important;
+
+    h1 {
+      font-weight: 400 !important;
+    }
+  }
+
+  :global(.fr-modal__footer) {
+    margin: 0 !important;
+  }
+}
