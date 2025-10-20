@@ -24,9 +24,11 @@ export function EditProfileForm(props: EditProfileFormProps) {
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<UpdateProfileSchemaType>({
+  } = useForm({
     resolver: zodResolver(UpdateProfileSchema),
     defaultValues: {
+      firstname: '',
+      lastname: '',
       ...props.prefill,
     },
   });

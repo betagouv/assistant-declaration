@@ -107,6 +107,8 @@ export const organizationRouter = router({
         name: input.name,
         officialId: officialId,
         officialHeadquartersId: input.officialHeadquartersId,
+        sacemId: null,
+        sacdId: null,
         headquartersAddress: {
           create: {
             street: headquartersAddress.street,

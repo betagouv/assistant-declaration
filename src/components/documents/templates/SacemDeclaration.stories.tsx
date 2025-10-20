@@ -18,7 +18,7 @@ export default {
       ...commonDocumentsParameters,
       docs: {
         description: {
-          component: 'Document sent as declaration for SACEM.',
+          component: 'Document sent as declaration for Sacem.',
         },
       },
     },

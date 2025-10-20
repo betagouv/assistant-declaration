@@ -1,22 +1,31 @@
 import { Prisma } from '@prisma/client';
-import { minutesToMilliseconds, subMonths } from 'date-fns';
+import { min, minutesToMilliseconds, subMonths } from 'date-fns';
+import { z } from 'zod';
 
+import { truncateFloatAmountNumber } from '@ad/src/core/declaration';
 import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
 import { anotherTicketingSystemSynchronizationOngoingError, noValidTicketingSystemError } from '@ad/src/models/entities/errors';
 import {
-  LiteEventSalesSchema,
-  LiteEventSalesSchemaType,
+  EventSerieSchema,
   LiteEventSchema,
   LiteEventSchemaType,
   LiteEventSerieSchema,
   LiteEventSerieSchemaType,
-  LiteTicketCategorySchema,
-  LiteTicketCategorySchemaType,
 } from '@ad/src/models/entities/event';
 import { prisma } from '@ad/src/prisma/client';
 import { assertUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { getDiff, sortDiffWithKeys } from '@ad/src/utils/comparaison';
+import { applyTypedParsers } from '@ad/src/utils/zod';
+
+const LiteEventSerieManagingDefaultsSchema = applyTypedParsers(
+  LiteEventSerieSchema.extend({
+    ticketingRevenueTaxRate: EventSerieSchema.shape.ticketingRevenueTaxRate,
+  })
+);
+export type LiteEventSerieManagingDefaultsSchemaType = z.infer<typeof LiteEventSerieManagingDefaultsSchema>;
+
+const defaultConnectorEventSerieTaxRate = 0.055;
 
 export async function synchronizeDataFromTicketingSystems(organizationId: string, userId: string): Promise<void> {
   await assertUserACollaboratorPartOfOrganization(organizationId, userId);
@@ -35,6 +44,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
       apiAccessKey: true,
       apiSecretKey: true,
       lastSynchronizationAt: true,
+      forceNextSynchronizationFrom: true,
     },
   });
 
@@ -63,7 +73,16 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
       await Promise.all(
         ticketingSystems.map(async (ticketingSystem) => {
           const ticketingSystemClient = getTicketingSystemClient(ticketingSystem, userId);
-          const newSynchronizationStartingDate = ticketingSystem.lastSynchronizationAt || oldestAllowedDate;
+
+          // We allow forcing a date not seeable by the user in case of connector fix that should require a resync from an older moment
+          // Note: forcing cannot be after the last synchronization because it could miss information
+          let newSynchronizationStartingDate: Date;
+          if (ticketingSystem.forceNextSynchronizationFrom && ticketingSystem.lastSynchronizationAt) {
+            newSynchronizationStartingDate = min([ticketingSystem.lastSynchronizationAt, ticketingSystem.forceNextSynchronizationFrom]);
+          } else {
+            newSynchronizationStartingDate =
+              ticketingSystem.forceNextSynchronizationFrom ?? ticketingSystem.lastSynchronizationAt ?? oldestAllowedDate;
+          }
 
           try {
             const remoteEventsSeries = await ticketingSystemClient.getEventsSeries(newSynchronizationStartingDate);
@@ -71,8 +90,8 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               (eventsSerie) => eventsSerie.serie.internalTicketingSystemId
             );
 
-            // We do not manage deletions since we fetch get last updated events to not flood the third-party
-            // It could be possible on a regular basis (7 days?) to also check for events series consistency
+            // We do not manage deletions since we fetch last updated events to not flood the third-party
+            // Note: it could be possible on a regular basis (7 days?) to also check for events series consistency
             const storedEventsSeries = await tx.eventSerie.findMany({
               where: {
                 internalTicketingSystemId: {
@@ -94,33 +113,19 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 id: true,
                 internalTicketingSystemId: true,
                 name: true,
-                startAt: true,
-                endAt: true,
-                taxRate: true,
+                ticketingRevenueTaxRate: true,
+                lastManualUpdateAt: true,
                 Event: {
                   select: {
                     id: true,
                     internalTicketingSystemId: true,
                     startAt: true,
                     endAt: true,
-                    EventCategoryTickets: {
-                      select: {
-                        id: true,
-                        total: true,
-                        totalOverride: true,
-                        priceOverride: true,
-                        categoryId: true,
-                      },
-                    },
-                  },
-                },
-                TicketCategory: {
-                  select: {
-                    id: true,
-                    internalTicketingSystemId: true,
-                    name: true,
-                    description: true,
-                    price: true,
+                    ticketingRevenueIncludingTaxes: true,
+                    ticketingRevenueExcludingTaxes: true,
+                    ticketingRevenueTaxRateOverride: true,
+                    freeTickets: true,
+                    paidTickets: true,
                   },
                 },
               },
@@ -129,20 +134,15 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
             // Since uniqueness is for some tables based on values into other tables, we have to keep a map of the ticketing system IDs and our IDs to perform some database mutations
             const eventsSeriesTicketingSystemIdToDatabaseId: Map<string, string> = new Map();
             const eventsTicketingSystemIdToDatabaseId: typeof eventsSeriesTicketingSystemIdToDatabaseId = new Map();
-            const ticketCategoriesTicketingSystemIdToDatabaseId: typeof eventsSeriesTicketingSystemIdToDatabaseId = new Map();
+
+            // Once manually patched we don't want to override data with synchronization to avoid loosing corrected data
+            const eventsSeriesTicketingSystemIdsToSkip = new Set<string>();
+            storedEventsSeries.forEach((sES) => sES.lastManualUpdateAt && eventsSeriesTicketingSystemIdsToSkip.add(sES.internalTicketingSystemId));
 
             // We perform multiple diffs for each type to be sure processing them easily
             // Because a diff on 2 huge objects would imply understand in depth the returned differences (array order, which sub-subproperty has been modified or created...)
-            const storedLiteEventsSeries = new Map<LiteEventSerieSchemaType['internalTicketingSystemId'], LiteEventSerieSchemaType>();
+            const storedLiteEventsSeries = new Map<LiteEventSerieSchemaType['internalTicketingSystemId'], LiteEventSerieManagingDefaultsSchemaType>();
             const remoteLiteEventsSeries: typeof storedLiteEventsSeries = new Map();
-
-            const storedLiteTicketCategories = new Map<
-              LiteTicketCategorySchemaType['internalTicketingSystemId'],
-              LiteTicketCategorySchemaType & {
-                internalEventSerieTicketingSystemId: LiteEventSerieSchemaType['internalTicketingSystemId'];
-              }
-            >();
-            const remoteLiteTicketCategories: typeof storedLiteTicketCategories = new Map();
 
             const storedLiteEvents = new Map<
               LiteEventSchemaType['internalTicketingSystemId'],
@@ -152,25 +152,21 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
             >();
             const remoteLiteEvents: typeof storedLiteEvents = new Map();
 
-            const storedLiteEventSales = new Map<
-              LiteEventSalesSchemaType['internalEventTicketingSystemId'] & LiteEventSalesSchemaType['internalTicketCategoryTicketingSystemId'],
-              LiteEventSalesSchemaType
-            >();
-            const remoteLiteEventSales: typeof storedLiteEventSales = new Map();
-
             // Format all from stored entities
             for (const storedEventsSerie of storedEventsSeries) {
+              if (eventsSeriesTicketingSystemIdsToSkip.has(storedEventsSerie.internalTicketingSystemId)) {
+                continue;
+              }
+
               eventsSeriesTicketingSystemIdToDatabaseId.set(storedEventsSerie.internalTicketingSystemId, storedEventsSerie.id);
 
               // To make the diff we compare only meaningful properties
               storedLiteEventsSeries.set(
                 storedEventsSerie.internalTicketingSystemId,
-                LiteEventSerieSchema.parse({
+                LiteEventSerieManagingDefaultsSchema.parse({
                   internalTicketingSystemId: storedEventsSerie.internalTicketingSystemId,
                   name: storedEventsSerie.name,
-                  startAt: storedEventsSerie.startAt,
-                  endAt: storedEventsSerie.endAt,
-                  taxRate: storedEventsSerie.taxRate.toNumber(),
+                  ticketingRevenueTaxRate: storedEventsSerie.ticketingRevenueTaxRate.toNumber(),
                 })
               );
 
@@ -183,35 +179,13 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                     internalTicketingSystemId: storedEvent.internalTicketingSystemId,
                     startAt: storedEvent.startAt,
                     endAt: storedEvent.endAt,
-                  }),
-                });
-
-                for (const storedEventCategoryTickets of storedEvent.EventCategoryTickets) {
-                  const storedTicketCategory = storedEventsSerie.TicketCategory.find((tC) => tC.id === storedEventCategoryTickets.categoryId);
-
-                  assert(storedTicketCategory);
-
-                  storedLiteEventSales.set(
-                    `${storedEvent.internalTicketingSystemId}_${storedTicketCategory.internalTicketingSystemId}`, // Concatenation for uniqueness
-                    LiteEventSalesSchema.parse({
-                      internalEventTicketingSystemId: storedEvent.internalTicketingSystemId,
-                      internalTicketCategoryTicketingSystemId: storedTicketCategory.internalTicketingSystemId,
-                      total: storedEventCategoryTickets.total,
-                    })
-                  );
-                }
-              }
-
-              for (const storedTicketCategory of storedEventsSerie.TicketCategory) {
-                ticketCategoriesTicketingSystemIdToDatabaseId.set(storedTicketCategory.internalTicketingSystemId, storedTicketCategory.id);
-
-                storedLiteTicketCategories.set(storedTicketCategory.internalTicketingSystemId, {
-                  internalEventSerieTicketingSystemId: storedEventsSerie.internalTicketingSystemId,
-                  ...LiteTicketCategorySchema.parse({
-                    internalTicketingSystemId: storedTicketCategory.internalTicketingSystemId,
-                    name: storedTicketCategory.name,
-                    description: storedTicketCategory.description,
-                    price: storedTicketCategory.price.toNumber(),
+                    ticketingRevenueIncludingTaxes: storedEvent.ticketingRevenueIncludingTaxes.toNumber(),
+                    ticketingRevenueExcludingTaxes: storedEvent.ticketingRevenueExcludingTaxes.toNumber(),
+                    ticketingRevenueTaxRate: storedEvent.ticketingRevenueTaxRateOverride
+                      ? storedEvent.ticketingRevenueTaxRateOverride.toNumber()
+                      : null,
+                    freeTickets: storedEvent.freeTickets,
+                    paidTickets: storedEvent.paidTickets,
                   }),
                 });
               }
@@ -219,27 +193,30 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
 
             // Format all from remote entities
             for (const remoteEventsSerieWrapper of remoteEventsSeries) {
-              remoteLiteEventsSeries.set(remoteEventsSerieWrapper.serie.internalTicketingSystemId, remoteEventsSerieWrapper.serie);
-
-              for (const remoteTicketCategory of remoteEventsSerieWrapper.ticketCategories) {
-                remoteLiteTicketCategories.set(remoteTicketCategory.internalTicketingSystemId, {
-                  internalEventSerieTicketingSystemId: remoteEventsSerieWrapper.serie.internalTicketingSystemId,
-                  ...remoteTicketCategory,
-                });
+              if (eventsSeriesTicketingSystemIdsToSkip.has(remoteEventsSerieWrapper.serie.internalTicketingSystemId)) {
+                continue;
               }
 
+              // For consistency in our logic we assume a default tax rate and force `null` on event if same value
+              remoteLiteEventsSeries.set(remoteEventsSerieWrapper.serie.internalTicketingSystemId, {
+                ...remoteEventsSerieWrapper.serie,
+                ticketingRevenueTaxRate: defaultConnectorEventSerieTaxRate,
+              });
+
               for (const remoteEventWrapper of remoteEventsSerieWrapper.events) {
+                let ticketingRevenueTaxRate: number | null;
+
+                // Since `null` is considered as not overriden in database, when receiving `null` from the connector we assume it's 0%
+                ticketingRevenueTaxRate = remoteEventWrapper.ticketingRevenueTaxRate ?? 0;
+
                 remoteLiteEvents.set(remoteEventWrapper.internalTicketingSystemId, {
                   internalEventSerieTicketingSystemId: remoteEventsSerieWrapper.serie.internalTicketingSystemId,
                   ...remoteEventWrapper,
+                  ticketingRevenueTaxRate: ticketingRevenueTaxRate === defaultConnectorEventSerieTaxRate ? null : ticketingRevenueTaxRate,
+                  // Make sure of 2 decimals for the comparaison to be right since they are stored like that in database
+                  ticketingRevenueExcludingTaxes: truncateFloatAmountNumber(remoteEventWrapper.ticketingRevenueExcludingTaxes),
+                  ticketingRevenueIncludingTaxes: truncateFloatAmountNumber(remoteEventWrapper.ticketingRevenueIncludingTaxes),
                 });
-              }
-
-              for (const remoteEventSales of remoteEventsSerieWrapper.sales) {
-                remoteLiteEventSales.set(
-                  `${remoteEventSales.internalEventTicketingSystemId}_${remoteEventSales.internalTicketCategoryTicketingSystemId}`, // Concatenation for uniqueness
-                  remoteEventSales
-                );
               }
             }
 
@@ -253,9 +230,21 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 internalTicketingSystemId: addedEventSerie.model.internalTicketingSystemId,
                 ticketingSystemId: ticketingSystem.id,
                 name: addedEventSerie.model.name,
-                startAt: addedEventSerie.model.startAt,
-                endAt: addedEventSerie.model.endAt,
-                taxRate: addedEventSerie.model.taxRate,
+                producerOfficialId: null,
+                producerName: null,
+                performanceType: null,
+                expectedDeclarationTypes: [],
+                lastManualUpdateAt: null,
+                placeId: null,
+                placeCapacity: null,
+                audience: 'ALL',
+                ticketingRevenueTaxRate: addedEventSerie.model.ticketingRevenueTaxRate,
+                expensesIncludingTaxes: 0,
+                expensesExcludingTaxes: 0,
+                introductionFeesExpensesIncludingTaxes: 0,
+                introductionFeesExpensesExcludingTaxes: 0,
+                circusSpecificExpensesIncludingTaxes: null,
+                circusSpecificExpensesExcludingTaxes: null,
               })),
               skipDuplicates: true,
               select: {
@@ -279,97 +268,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 },
                 data: {
                   name: updatedEventSerie.model.name,
-                  startAt: updatedEventSerie.model.startAt,
-                  endAt: updatedEventSerie.model.endAt,
-                  taxRate: updatedEventSerie.model.taxRate,
-                },
-              });
-            }
-
-            // Then make the diff of events sales
-            const eventSalesDiffResult = getDiff(storedLiteEventSales, remoteLiteEventSales);
-            const sortedEventSalesDiffResult = sortDiffWithKeys(eventSalesDiffResult);
-
-            // We set the bindings removal at top of operations because it would fail if the removal is due to an associated entity being deleted (due to the `onDelete` of the database)
-            // (we cannot only on the database `onDelete` since a binding can be removed without affecting associated entities, we have to keep this removal loop)
-            for (const removedEventSales of sortedEventSalesDiffResult.removed) {
-              const eventId = eventsTicketingSystemIdToDatabaseId.get(removedEventSales.model.internalEventTicketingSystemId);
-              const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(removedEventSales.model.internalTicketCategoryTicketingSystemId);
-
-              assert(eventId, 'dddddddd');
-              assert(categoryId, 'eeeee');
-
-              await tx.eventCategoryTickets.delete({
-                where: {
-                  eventId_categoryId: {
-                    eventId: eventId,
-                    categoryId: categoryId,
-                  },
-                },
-              });
-            }
-
-            // Then make the diff of tickets categories (we are sure they are bound to an event serie due to returned serie wrappers)
-            const ticketCategoriesDiffResult = getDiff(storedLiteTicketCategories, remoteLiteTicketCategories);
-            const sortedTicketCategoriesDiffResult = sortDiffWithKeys(ticketCategoriesDiffResult);
-
-            for (const addedTicketCategory of sortedTicketCategoriesDiffResult.added) {
-              const newTicketCategory = await tx.ticketCategory.create({
-                data: {
-                  internalTicketingSystemId: addedTicketCategory.model.internalTicketingSystemId,
-                  eventSerie: {
-                    connect: {
-                      ticketingSystemId_internalTicketingSystemId: {
-                        internalTicketingSystemId: addedTicketCategory.model.internalEventSerieTicketingSystemId,
-                        ticketingSystemId: ticketingSystem.id,
-                      },
-                    },
-                  },
-                  name: addedTicketCategory.model.name,
-                  description: addedTicketCategory.model.description,
-                  price: addedTicketCategory.model.price,
-                },
-                select: {
-                  id: true,
-                  internalTicketingSystemId: true,
-                },
-              });
-
-              // Update the mappings only for creation
-              ticketCategoriesTicketingSystemIdToDatabaseId.set(newTicketCategory.internalTicketingSystemId, newTicketCategory.id);
-            }
-
-            for (const updatedTicketCategory of sortedTicketCategoriesDiffResult.updated) {
-              const eventSerieId = eventsSeriesTicketingSystemIdToDatabaseId.get(updatedTicketCategory.model.internalEventSerieTicketingSystemId);
-
-              assert(eventSerieId);
-
-              await tx.ticketCategory.update({
-                where: {
-                  eventSerieId_internalTicketingSystemId: {
-                    internalTicketingSystemId: updatedTicketCategory.model.internalTicketingSystemId,
-                    eventSerieId: eventSerieId,
-                  },
-                },
-                data: {
-                  name: updatedTicketCategory.model.name,
-                  description: updatedTicketCategory.model.description,
-                  price: updatedTicketCategory.model.price,
-                },
-              });
-            }
-
-            for (const removedTicketCategory of sortedTicketCategoriesDiffResult.removed) {
-              const eventSerieId = eventsSeriesTicketingSystemIdToDatabaseId.get(removedTicketCategory.model.internalEventSerieTicketingSystemId);
-
-              assert(eventSerieId);
-
-              await tx.ticketCategory.delete({
-                where: {
-                  eventSerieId_internalTicketingSystemId: {
-                    internalTicketingSystemId: removedTicketCategory.model.internalTicketingSystemId,
-                    eventSerieId: eventSerieId,
-                  },
+                  ticketingRevenueTaxRate: updatedEventSerie.model.ticketingRevenueTaxRate,
                 },
               });
             }
@@ -392,6 +291,27 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                   },
                   startAt: addedEvent.model.startAt,
                   endAt: addedEvent.model.endAt,
+                  ticketingRevenueIncludingTaxes: 0,
+                  ticketingRevenueExcludingTaxes: 0,
+                  ticketingRevenueDefinedTaxRate: false, // For now we disable the usage of tax rate as a coefficient (both amounts must be provided)
+                  consumptionsRevenueIncludingTaxes: 0,
+                  consumptionsRevenueExcludingTaxes: 0,
+                  consumptionsRevenueTaxRate: null,
+                  cateringRevenueIncludingTaxes: 0,
+                  cateringRevenueExcludingTaxes: 0,
+                  cateringRevenueTaxRate: null,
+                  programSalesRevenueIncludingTaxes: 0,
+                  programSalesRevenueExcludingTaxes: 0,
+                  programSalesRevenueTaxRate: null,
+                  otherRevenueIncludingTaxes: 0,
+                  otherRevenueExcludingTaxes: 0,
+                  otherRevenueTaxRate: null,
+                  freeTickets: addedEvent.model.freeTickets,
+                  paidTickets: addedEvent.model.paidTickets,
+                  placeOverrideId: undefined,
+                  placeCapacityOverride: null,
+                  audienceOverride: null,
+                  ticketingRevenueTaxRateOverride: addedEvent.model.ticketingRevenueTaxRate,
                 },
                 select: {
                   id: true,
@@ -418,6 +338,11 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 data: {
                   startAt: updatedEvent.model.startAt,
                   endAt: updatedEvent.model.endAt,
+                  ticketingRevenueIncludingTaxes: updatedEvent.model.ticketingRevenueIncludingTaxes,
+                  ticketingRevenueExcludingTaxes: updatedEvent.model.ticketingRevenueExcludingTaxes,
+                  ticketingRevenueTaxRateOverride: updatedEvent.model.ticketingRevenueTaxRate,
+                  freeTickets: updatedEvent.model.freeTickets,
+                  paidTickets: updatedEvent.model.paidTickets,
                 },
               });
             }
@@ -437,44 +362,6 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               });
             }
 
-            for (const addedEventSales of sortedEventSalesDiffResult.added) {
-              const eventId = eventsTicketingSystemIdToDatabaseId.get(addedEventSales.model.internalEventTicketingSystemId);
-              const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(addedEventSales.model.internalTicketCategoryTicketingSystemId);
-
-              assert(eventId);
-              assert(categoryId);
-
-              await tx.eventCategoryTickets.create({
-                data: {
-                  total: addedEventSales.model.total,
-                  totalOverride: null,
-                  priceOverride: null,
-                  eventId: eventId,
-                  categoryId: categoryId,
-                },
-              });
-            }
-
-            for (const updatedEventSales of sortedEventSalesDiffResult.updated) {
-              const eventId = eventsTicketingSystemIdToDatabaseId.get(updatedEventSales.model.internalEventTicketingSystemId);
-              const categoryId = ticketCategoriesTicketingSystemIdToDatabaseId.get(updatedEventSales.model.internalTicketCategoryTicketingSystemId);
-
-              assert(eventId);
-              assert(categoryId);
-
-              await tx.eventCategoryTickets.update({
-                where: {
-                  eventId_categoryId: {
-                    eventId: eventId,
-                    categoryId: categoryId,
-                  },
-                },
-                data: {
-                  total: updatedEventSales.model.total,
-                },
-              });
-            }
-
             // Store this synchronization date to only fetch the differences next time
             await tx.ticketingSystem.update({
               where: {
@@ -482,6 +369,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               },
               data: {
                 lastSynchronizationAt: currentSynchronizationStartingDate,
+                forceNextSynchronizationFrom: null,
               },
             });
           } catch (error) {

@@ -3,18 +3,10 @@ import { addYears } from 'date-fns';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 
+import { getExcludingTaxesAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
 import { shotgunTooMuchToRetrieveError } from '@ad/src/models/entities/errors';
-import {
-  LiteEventSalesSchema,
-  LiteEventSalesSchemaType,
-  LiteEventSchema,
-  LiteEventSchemaType,
-  LiteEventSerieSchema,
-  LiteEventSerieWrapperSchemaType,
-  LiteTicketCategorySchema,
-  LiteTicketCategorySchemaType,
-} from '@ad/src/models/entities/event';
+import { LiteEventSchema, LiteEventSerieSchema, LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
 import {
   JsonEventSchemaType,
   JsonListEventsResponseSchema,
@@ -250,42 +242,18 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
     // Get all data to be returned and compared with stored data we have
     // Note: for now we do not parallelize to not flood the ticketing system
     await eachOfLimit(wantedEvents, 1, async (event) => {
-      const schemaEvents: LiteEventSchemaType[] = [];
-      const schemaTicketCategories: Map<LiteTicketCategorySchemaType['internalTicketingSystemId'], LiteTicketCategorySchemaType> = new Map();
-      const schemaEventSales: Map<
-        LiteEventSalesSchemaType['internalEventTicketingSystemId'] & LiteEventSalesSchemaType['internalTicketCategoryTicketingSystemId'],
-        LiteEventSalesSchemaType
-      > = new Map();
-
       // It's important to note Shotgun is having only "1 event serie = 1 event" (there is no multiple representations for the same serie)
       // We could have tried to merged them based on naming but it's kind of tricky before knowing well their customer usage of it
-      schemaEvents.push(
-        LiteEventSchema.parse({
-          internalTicketingSystemId: event.id.toString(),
-          startAt: event.startTime,
-          endAt: event.endTime,
-        })
-      );
-
-      let taxRate: number | null = null;
-
-      for (const deal of event.deals) {
-        // The price to declare is the one without fees for the organization and user
-        // Note: `deal.price` already excludes `deal.organizer_fees` and `deal.user_fees` (confirmed by their support)
-        const price = deal.price;
-
-        // It seems the subcategory is often used for `Cat. 1`...
-        const ticketCategoryName = deal.subcategory ? `${deal.name} - ${deal.subcategory.name}` : deal.name;
-
-        const ticketCategory = LiteTicketCategorySchema.parse({
-          internalTicketingSystemId: deal.product_id.toString(),
-          name: ticketCategoryName,
-          description: deal.description,
-          price: price,
-        });
-
-        schemaTicketCategories.set(ticketCategory.internalTicketingSystemId, ticketCategory);
-      }
+      const schemaEvent = LiteEventSchema.parse({
+        internalTicketingSystemId: event.id.toString(),
+        startAt: event.startTime,
+        endAt: event.endTime,
+        ticketingRevenueIncludingTaxes: 0,
+        ticketingRevenueExcludingTaxes: 0,
+        ticketingRevenueTaxRate: null, // May be patched by going through all tickets
+        freeTickets: 0,
+        paidTickets: 0,
+      });
 
       const eventTickets: JsonTicketSchemaType[] = [];
 
@@ -329,66 +297,62 @@ export class ShotgunTicketingSystemClient implements TicketingSystemClient {
         await sleep(50);
       }
 
-      for (const ticket of eventTickets) {
-        // Now since internally we manage a unique tax rate per event serie, we make sure all prices are using the same
-        // [IMPORTANT] We gather this info before filtering by status, because the rare case of an event with no valid ticket (likely a future event)
-        // we would have the tax rate as `null`, which we consider as an error
-        if (taxRate === null) {
-          taxRate = ticket.vat_rate;
-        } else if (taxRate !== ticket.vat_rate) {
-          // throw new Error(`an event serie should have the same tax rate for all dates and prices`)
+      let indicativeTaxRate: number | null = null;
 
-          // [WORKAROUND] Until we decide the right way to do, just keep a tax rate none null
-          taxRate = Math.max(taxRate, ticket.vat_rate);
+      // Note: a ticket category being free may have a 0% tax rate instead of being aligned with others, to take into account this case
+      // it's easier having them at the end (because if only free categories, the tax rate should be 0, not null)
+      const ticketsSortedWithDescendingTaxRates = eventTickets.sort((a, b) => +b.vat_rate - +a.vat_rate);
+
+      for (const ticket of ticketsSortedWithDescendingTaxRates) {
+        let ticketVatRate = ticket.vat_rate;
+
+        if (indicativeTaxRate !== null) {
+          // See comment about sorting tickets to understand why alignin tax rates when price is 0
+          if (ticket.ticket_price === 0 && ticketVatRate === 0) {
+            ticketVatRate = indicativeTaxRate;
+          }
+
+          // If the event mixes multiple tax rates set it to null since we are not managing this
+          // Unfortunately it will cause the excluding taxes total being wrong but we are fine letting the end user correcting this
+          if (indicativeTaxRate !== ticketVatRate) {
+            indicativeTaxRate = null;
+
+            break;
+          }
         }
+
+        indicativeTaxRate = ticketVatRate;
+      }
+
+      schemaEvent.ticketingRevenueTaxRate = indicativeTaxRate;
+
+      for (const ticket of eventTickets) {
+        const ticketVatRate = ticket.vat_rate;
 
         // Note: `resold` means another ticket has been issued to replace this one, so skipping it too
         if (ticket.ticket_status !== 'valid') {
           continue;
         }
 
-        const correspondingTicketCategory = schemaTicketCategories.get(ticket.product_id.toString());
+        // The price to declare is the one without fees for the organization and user
+        // Note: `ticket_price` already excludes `organizer_fees` and `user_fees` (confirmed by their support)
+        const ticketPriceIncludingTaxes = ticket.ticket_price;
 
-        assert(correspondingTicketCategory);
-
-        const eventId = event.id.toString();
-        const ticketCategoryId = ticket.product_id.toString();
-        const uniqueId = `${eventId}_${ticketCategoryId}`;
-        const eventSales = schemaEventSales.get(uniqueId);
-
-        if (!eventSales) {
-          // We make sure the event has been properly retrieved
-          const relatedEvent = schemaEvents.find((event) => event.internalTicketingSystemId === eventId);
-          if (!relatedEvent) {
-            throw new Error('a sold ticket should always match an existing event');
-          }
-
-          schemaEventSales.set(
-            uniqueId,
-            LiteEventSalesSchema.parse({
-              internalEventTicketingSystemId: eventId,
-              internalTicketCategoryTicketingSystemId: ticketCategoryId,
-              total: 1,
-            })
-          );
+        if (ticketPriceIncludingTaxes === 0) {
+          schemaEvent.freeTickets++;
         } else {
-          eventSales.total += 1;
+          schemaEvent.paidTickets++;
+          schemaEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes;
+          schemaEvent.ticketingRevenueExcludingTaxes += getExcludingTaxesAmountFromIncludingTaxesAmount(ticketPriceIncludingTaxes, ticketVatRate);
         }
       }
-
-      assert(taxRate !== null);
 
       eventsSeriesWrappers.push({
         serie: LiteEventSerieSchema.parse({
           internalTicketingSystemId: event.id.toString(),
           name: event.name,
-          startAt: event.startTime,
-          endAt: event.endTime,
-          taxRate: taxRate,
         }),
-        events: schemaEvents,
-        ticketCategories: Array.from(schemaTicketCategories.values()),
-        sales: Array.from(schemaEventSales.values()),
+        events: [schemaEvent],
       });
     });
 

@@ -4,12 +4,13 @@ import { Button } from '@codegouvfr/react-dsfr/Button';
 import { TRPCClientErrorLike } from '@trpc/client';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import z, { ZodIssue } from 'zod';
+import { z } from 'zod';
 
 import { formatMessageFromIssue } from '@ad/src/i18n';
 import { CustomError, internalServerErrorError, unexpectedErrorError } from '@ad/src/models/entities/errors';
 import { formatMessageFromCustomError } from '@ad/src/models/entities/errors/helpers';
 import { AppRouter } from '@ad/src/server/app-router';
+import { parseError } from '@ad/src/utils/error';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
 
 // import { QueryObserverResult, RefetchOptions } from '@tansack/query-core';
@@ -31,19 +32,15 @@ export function ErrorAlert(props: ErrorAlertProps) {
       if (error instanceof Error && error.name === 'TRPCClientError') {
         const trpcError = error as unknown as TRPCClientErrorLike<AppRouter>;
 
-        if (trpcError.data && 'zodError' in trpcError.data && Array.isArray(trpcError.data.zodError)) {
-          // Format to benefit from all the typings
-          const zodError = new z.ZodError(trpcError.data.zodError as ZodIssue[]);
+        const parsedError = parseError(trpcError);
 
-          for (const issue of zodError.issues) {
+        if (parsedError instanceof z.ZodError) {
+          for (const issue of parsedError.issues) {
             // As fallback display the error message from the server, should be good enough but can be in another language
-            errs.push(formatMessageFromIssue(issue) || issue.message);
+            errs.push(formatMessageFromIssue(issue as z.core.$ZodRawIssue) || issue.message);
           }
-        } else if (trpcError.data && 'customError' in trpcError.data && trpcError.data.customError !== null) {
-          const customErrorPayload = trpcError.data.customError as CustomError;
-          const customError = new CustomError(customErrorPayload.code, customErrorPayload.message);
-
-          errs.push(formatMessageFromCustomError(customError) || customError.message);
+        } else if (parsedError instanceof CustomError) {
+          errs.push(formatMessageFromCustomError(parsedError) || parsedError.message);
         } else {
           // If not a validation error (`ZodError`), nor a business error (`BusinessError`), consider it as a server error that can be retried
           containsRetriableServerError = true;

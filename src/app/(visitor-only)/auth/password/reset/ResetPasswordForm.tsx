@@ -21,9 +21,13 @@ export function ResetPasswordForm({ prefill }: { prefill?: ResetPasswordPrefillS
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<ResetPasswordSchemaType>({
+  } = useForm({
     resolver: zodResolver(ResetPasswordSchema),
-    defaultValues: prefill,
+    defaultValues: {
+      token: '',
+      password: '',
+      ...prefill,
+    },
   });
 
   const onSubmit = async (input: ResetPasswordSchemaType) => {

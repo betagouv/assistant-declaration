@@ -8,7 +8,7 @@ export const UserInterfaceOrganizationSchema = applyTypedParsers(
     .object({
       id: OrganizationSchema.shape.id,
       name: OrganizationSchema.shape.name,
-      collaboratorId: z.string().uuid(),
+      collaboratorId: z.uuid(),
     })
     .strict()
 );

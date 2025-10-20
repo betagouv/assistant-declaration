@@ -26,9 +26,12 @@ export function RetrievePasswordForm(props: RetrievePasswordFormProps) {
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<RequestNewPasswordSchemaType>({
+  } = useForm({
     resolver: zodResolver(RequestNewPasswordSchema),
-    defaultValues: props.prefill,
+    defaultValues: {
+      email: '',
+      ...props.prefill,
+    },
   });
 
   const onSubmit = async (input: RequestNewPasswordSchemaType) => {

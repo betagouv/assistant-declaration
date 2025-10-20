@@ -1,15 +1,14 @@
 import { z } from 'zod';
 
-import { OfficialHeadquartersIdSchema } from '@ad/src/models/entities/common';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 
 export const CreateOrganizationSchema = z.object({
   name: OrganizationSchema.shape.name,
-  officialHeadquartersId: OfficialHeadquartersIdSchema,
+  officialHeadquartersId: OrganizationSchema.shape.officialHeadquartersId,
 });
 export type CreateOrganizationSchemaType = z.infer<typeof CreateOrganizationSchema>;
 
-export const CreateOrganizationPrefillSchema = CreateOrganizationSchema.deepPartial();
+export const CreateOrganizationPrefillSchema = CreateOrganizationSchema.partial();
 export type CreateOrganizationPrefillSchemaType = z.infer<typeof CreateOrganizationPrefillSchema>;
 
 export const GetOrganizationSchema = z
@@ -19,5 +18,5 @@ export const GetOrganizationSchema = z
   .strict();
 export type GetOrganizationSchemaType = z.infer<typeof GetOrganizationSchema>;
 
-export const GetOrganizationPrefillSchema = GetOrganizationSchema.deepPartial();
+export const GetOrganizationPrefillSchema = GetOrganizationSchema.partial();
 export type GetOrganizationPrefillSchemaType = z.infer<typeof GetOrganizationPrefillSchema>;

@@ -4,7 +4,7 @@ import { CountryCodeSchema } from '@ad/src/models/entities/country';
 
 export const AddressSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     street: z.string().min(1).max(200),
     city: z.string().min(1).max(200),
     postalCode: z.string().min(1).max(20),

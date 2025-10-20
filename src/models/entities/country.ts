@@ -6,7 +6,10 @@ import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 
 export const CountryCodeSchema = z.string().superRefine((countryCode, ctx) => {
   if (!countries[countryCode]) {
-    ctx.addIssue(customErrorToZodIssue(countryInvalidError));
+    ctx.issues.push({
+      ...customErrorToZodIssue(countryInvalidError),
+      input: countryCode,
+    });
   }
 });
 export type CountryCodeSchemaType = z.infer<typeof CountryCodeSchema>;

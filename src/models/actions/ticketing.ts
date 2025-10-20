@@ -40,14 +40,17 @@ export const ConnectTicketingSystemSchema = applyTypedParsers(
         data.apiAccessKey &&
         !domainNameRegexp.test(data.apiAccessKey)
       ) {
-        ctx.addIssue(customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError));
+        ctx.issues.push({
+          ...customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError),
+          input: data.apiAccessKey,
+        });
       }
     })
   )
 );
 export type ConnectTicketingSystemSchemaType = z.infer<typeof ConnectTicketingSystemSchema>;
 
-export const ConnectTicketingSystemPrefillSchema = rawConnectTicketingSystemSchema.deepPartial();
+export const ConnectTicketingSystemPrefillSchema = rawConnectTicketingSystemSchema.partial();
 export type ConnectTicketingSystemPrefillSchemaType = z.infer<typeof ConnectTicketingSystemPrefillSchema>;
 
 export const ListTicketingSystemsSchema = GetterInputSchema.extend({
@@ -57,7 +60,7 @@ export const ListTicketingSystemsSchema = GetterInputSchema.extend({
 }).strict();
 export type ListTicketingSystemsSchemaType = z.infer<typeof ListTicketingSystemsSchema>;
 
-export const ListTicketingSystemsPrefillSchema = ListTicketingSystemsSchema.deepPartial();
+export const ListTicketingSystemsPrefillSchema = ListTicketingSystemsSchema.partial();
 export type ListTicketingSystemsPrefillSchemaType = z.infer<typeof ListTicketingSystemsPrefillSchema>;
 
 const rawUpdateTicketingSystemSchema = applyTypedParsers(
@@ -78,14 +81,17 @@ export const UpdateTicketingSystemSchema = applyTypedParsers(
         data.apiAccessKey &&
         !domainNameRegexp.test(data.apiAccessKey)
       ) {
-        ctx.addIssue(customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError));
+        ctx.issues.push({
+          ...customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError),
+          input: data.apiAccessKey,
+        });
       }
     })
   )
 );
 export type UpdateTicketingSystemSchemaType = z.infer<typeof UpdateTicketingSystemSchema>;
 
-export const UpdateTicketingSystemPrefillSchema = rawUpdateTicketingSystemSchema.deepPartial();
+export const UpdateTicketingSystemPrefillSchema = rawUpdateTicketingSystemSchema.partial();
 export type UpdateTicketingSystemPrefillSchemaType = z.infer<typeof UpdateTicketingSystemPrefillSchema>;
 
 export const DisconnectTicketingSystemSchema = applyTypedParsers(
@@ -95,5 +101,5 @@ export const DisconnectTicketingSystemSchema = applyTypedParsers(
 );
 export type DisconnectTicketingSystemSchemaType = z.infer<typeof DisconnectTicketingSystemSchema>;
 
-export const DisconnectTicketingSystemPrefillSchema = DisconnectTicketingSystemSchema.deepPartial();
+export const DisconnectTicketingSystemPrefillSchema = DisconnectTicketingSystemSchema.partial();
 export type DisconnectTicketingSystemPrefillSchemaType = z.infer<typeof DisconnectTicketingSystemPrefillSchema>;

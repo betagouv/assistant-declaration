@@ -1,4 +1,5 @@
 import { CustomError as LibraryCustomError } from 'ts-custom-error';
+import { z } from 'zod';
 
 import { getServerTranslation } from '@ad/src/i18n';
 
@@ -34,11 +35,37 @@ export class BusinessError extends CustomError {
   }
 }
 
+export class BusinessZodError extends BusinessError {
+  public constructor(
+    businessError: BusinessError,
+    public zodError: z.core.$ZodIssue[],
+    public readonly httpCode?: number
+  ) {
+    super(businessError.code, businessError.message);
+  }
+
+  public cloneWithHttpCode(httpCode: number): BusinessError {
+    return new BusinessZodError(new BusinessError(this.code, this.message), this.zodError, httpCode);
+  }
+
+  public json(): object {
+    return {
+      code: this.code,
+      message: this.message,
+      zodError: this.zodError,
+    };
+  }
+}
+
 // The logged errors (console or API) are written by default in english (but will take french if english not filled)
 // but the displayer/frontend is able to translate the content thanks to the error code
 const { t } = getServerTranslation('common', {
   lng: 'en',
 });
+
+// Factorize the message when using `ctx.issues.push()` where the input is expected
+// Note: passing `undefined` could lead to more complicated debugging
+export const inputReplacementForSensitiveData = { _internal: 'the original input for this validation is masked due to being sensitive' };
 
 //
 // Errors definition
@@ -71,12 +98,6 @@ export const passwordRequiresASpecialCharactersError = new BusinessError(
   'passwordRequiresASpecialCharacters',
   t('errors.validation.newPassword.passwordRequiresASpecialCharacters')
 );
-export const phoneCombinationInvalidError = new BusinessError('phoneCombinationInvalid', t('errors.validation.phone.phoneCombinationInvalid'));
-export const phoneCombinationInvalidWithLeadingZeroWarningError = new BusinessError(
-  'phoneCombinationInvalidWithLeadingZeroWarning',
-  t('errors.validation.phone.phoneCombinationInvalidWithLeadingZeroWarning')
-);
-export const phoneInvalidError = new BusinessError('phoneInvalid', t('errors.validation.phone.phoneInvalid'));
 export const countryInvalidError = new BusinessError('countryInvalid', t('errors.validation.address.countryCode.countryInvalid'));
 
 // File management
@@ -119,6 +140,12 @@ export const userNotFoundError = new BusinessError('userNotFound', t('errors.cus
 
 // Organization
 export const officialIdMustBe9DigitsError = new BusinessError('officialIdMustBe9Digits', t('errors.validation.officialId.officialIdMustBe9Digits'));
+export const officialIdHeadquartersMustBe14DigitsError = new BusinessError(
+  'officialIdHeadquartersMustBe14Digits',
+  t('errors.validation.officialHeadquartersId.officialHeadquartersIdMustBe14Digits')
+);
+export const sacemIdMustBeDigitsError = new BusinessError('sacemIdMustBeDigits', t('errors.validation.sacemId.sacemIdMustBeDigits'));
+export const sacdIdMustBeDigitsError = new BusinessError('sacdIdMustBeDigits', t('errors.validation.sacdId.sacdIdMustBeDigits'));
 export const anotherOrganizationAlreadyHasThisOfficialIdError = new BusinessError(
   'anotherOrganizationAlreadyHasThisOfficialId',
   t('errors.custom.anotherOrganizationAlreadyHasThisOfficialId')
@@ -169,26 +196,38 @@ export const shotgunTooMuchToRetrieveError = new BusinessError('shotgunTooMuchTo
 
 // Event serie
 export const eventSerieNotFoundError = new BusinessError('eventSerieNotFound', t('errors.custom.eventSerieNotFound'));
-
-// Event category tickets
-export const cannotMutateTicketingDataOnceDeclaredError = new BusinessError(
-  'cannotMutateTicketingDataOnceDeclared',
-  t('errors.custom.cannotMutateTicketingDataOnceDeclared')
+export const eventSeriePartialExpensesGreatherThanTotalError = new BusinessError(
+  'eventSeriePartialExpensesGreatherThanTotal',
+  t('errors.custom.eventSeriePartialExpensesGreatherThanTotal')
 );
-export const eventCategoryTicketsNotFoundError = new BusinessError('eventCategoryTicketsNotFound', t('errors.custom.eventCategoryTicketsNotFound'));
+
+// Place
+export const placeAddressRequiredIfAnyNameSpecifiedError = new BusinessError(
+  'placeAddressRequiredIfAnyNameSpecified',
+  t('errors.custom.placeAddressRequiredIfAnyNameSpecified')
+);
+export const placeNameRequiredIfAnyAddressSpecifiedError = new BusinessError(
+  'placeNameRequiredIfAnyAddressSpecified',
+  t('errors.custom.placeNameRequiredIfAnyAddressSpecified')
+);
 
 // Declaration
 export const transmittedDeclarationCannotBeUpdatedError = new BusinessError(
   'transmittedDeclarationCannotBeUpdated',
   t('errors.custom.transmittedDeclarationCannotBeUpdated')
 );
-export const duplicateFluxEntryCategoryLabelError = new BusinessError(
-  'duplicateFluxEntryCategoryLabel',
-  t('errors.validation.accountingEntries.duplicateFluxEntryCategoryLabel')
+export const atLeastOneTransmissionHasFailedError = new BusinessError(
+  'atLeastOneTransmissionHasFailed',
+  t('errors.custom.atLeastOneTransmissionHasFailed')
 );
-export const duplicateEntryCategoryLabelError = new BusinessError(
-  'duplicateEntryCategoryLabel',
-  t('errors.validation.accountingEntries.duplicateEntryCategoryLabel')
+export const atLeastOneDeclarationTypeToTransmitError = new BusinessError(
+  'atLeastOneDeclarationTypeToTransmit',
+  t('errors.custom.atLeastOneDeclarationTypeToTransmit')
+);
+export const atLeastOneEventToTransmitError = new BusinessError('atLeastOneEventToTransmit', t('errors.custom.atLeastOneEventToTransmit'));
+export const invalidDeclarationFieldsToTransmitError = new BusinessError(
+  'invalidDeclarationFieldsToTransmit',
+  t('errors.custom.invalidDeclarationFieldsToTransmit')
 );
 export const sacemAgencyNotFoundError = new BusinessError('sacemAgencyNotFound', t('errors.custom.sacemAgencyNotFound'));
 export const sacemDeclarationUnsuccessfulError = new BusinessError('sacemDeclarationUnsuccessful', t('errors.custom.sacemDeclarationUnsuccessful'));

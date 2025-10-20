@@ -36,41 +36,17 @@ export class MockTicketingSystemClient implements TicketingSystemClient {
         serie: {
           internalTicketingSystemId: 's1',
           name: 'Mon premier coucou',
-          startAt: set(new Date(0), { year: 2024, month: 11, date: 18 }),
-          endAt: set(new Date(0), { year: 2024, month: 11, date: 30 }),
-          taxRate: 0.055,
         },
         events: [
           {
             internalTicketingSystemId: 'e1-1',
             startAt: set(new Date(0), { year: 2024, month: 11, date: 18 }),
             endAt: set(new Date(0), { year: 2024, month: 11, date: 19 }),
-          },
-        ],
-        ticketCategories: [
-          {
-            internalTicketingSystemId: 't1-1',
-            name: 'Place adulte',
-            description: 'Suite à votre achat, vous recevrez par email votre place',
-            price: 12,
-          },
-          {
-            internalTicketingSystemId: 't1-2',
-            name: 'Place enfant',
-            description: 'Suite à votre achat, vous recevrez par email votre place',
-            price: 6,
-          },
-        ],
-        sales: [
-          {
-            internalEventTicketingSystemId: 'e1-1',
-            internalTicketCategoryTicketingSystemId: 't1-1',
-            total: 13,
-          },
-          {
-            internalEventTicketingSystemId: 'e1-1',
-            internalTicketCategoryTicketingSystemId: 't1-2',
-            total: 23,
+            ticketingRevenueExcludingTaxes: 100,
+            ticketingRevenueIncludingTaxes: 105.5,
+            ticketingRevenueTaxRate: 0.055,
+            freeTickets: 23,
+            paidTickets: 10,
           },
         ],
       },
@@ -78,67 +54,27 @@ export class MockTicketingSystemClient implements TicketingSystemClient {
         serie: {
           internalTicketingSystemId: 's2',
           name: 'Un coucou au soleil',
-          startAt: set(new Date(0), { year: 2024, month: 12, date: 1 }),
-          endAt: set(new Date(0), { year: 2024, month: 12, date: 20 }),
-          taxRate: 0.055,
         },
         events: [
           {
             internalTicketingSystemId: 'e2-1',
             startAt: set(new Date(0), { year: 2024, month: 12, date: 1 }),
             endAt: set(new Date(0), { year: 2024, month: 12, date: 1 }),
+            ticketingRevenueExcludingTaxes: 250,
+            ticketingRevenueIncludingTaxes: 263.75,
+            ticketingRevenueTaxRate: null,
+            freeTickets: 35,
+            paidTickets: 43,
           },
           {
             internalTicketingSystemId: 'e2-2',
             startAt: set(new Date(0), { year: 2024, month: 12, date: 19 }),
             endAt: set(new Date(0), { year: 2024, month: 12, date: 19 }),
-          },
-        ],
-        ticketCategories: [
-          {
-            internalTicketingSystemId: 't2-1',
-            name: 'Place adulte',
-            description: null,
-            price: 20,
-          },
-          {
-            internalTicketingSystemId: 't2-2',
-            name: 'Place enfant',
-            description: null,
-            price: 5,
-          },
-          {
-            internalTicketingSystemId: 't2-3',
-            name: 'Adhérent',
-            description: 'Tarif réservé aux adhérents de la saison 2024/2025',
-            price: 12,
-          },
-        ],
-        sales: [
-          {
-            internalEventTicketingSystemId: 'e2-1',
-            internalTicketCategoryTicketingSystemId: 't2-1',
-            total: 40,
-          },
-          {
-            internalEventTicketingSystemId: 'e2-1',
-            internalTicketCategoryTicketingSystemId: 't2-2',
-            total: 5,
-          },
-          {
-            internalEventTicketingSystemId: 'e2-2',
-            internalTicketCategoryTicketingSystemId: 't2-1',
-            total: 30,
-          },
-          {
-            internalEventTicketingSystemId: 'e2-2',
-            internalTicketCategoryTicketingSystemId: 't2-3',
-            total: 5,
-          },
-          {
-            internalEventTicketingSystemId: 'e2-2',
-            internalTicketCategoryTicketingSystemId: 't2-2',
-            total: 3,
+            ticketingRevenueExcludingTaxes: 1000,
+            ticketingRevenueIncludingTaxes: 1055,
+            ticketingRevenueTaxRate: null,
+            freeTickets: 86,
+            paidTickets: 99,
           },
         ],
       },

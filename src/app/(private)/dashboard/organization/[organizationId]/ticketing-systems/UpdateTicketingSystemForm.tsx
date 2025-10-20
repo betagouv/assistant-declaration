@@ -38,11 +38,14 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
     control,
     watch,
   } = useForm<UpdateTicketingSystemSchemaType>({
+    // Generic type needed due to `z.preprocess` breaking inference
     resolver: zodResolver(UpdateTicketingSystemSchema),
     defaultValues: {
-      ...props.prefill,
       ticketingSystemId: props.ticketingSystem.id,
       ticketingSystemName: props.ticketingSystem.name,
+      apiAccessKey: '',
+      apiSecretKey: '',
+      ...props.prefill,
     },
   });
 
@@ -85,6 +88,7 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
           </div>
           <div className={fr.cx('fr-fieldset__element')}>
             <Alert
+              as="h2"
               severity="info"
               small={false}
               title="Tutoriel de branchement"
