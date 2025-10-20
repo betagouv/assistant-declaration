@@ -1300,6 +1300,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                   </BaseForm>
                   <declarationTypesModal.Component
                     title="Paramètres de déclaration"
+                    concealingBackdrop={false}
                     className={styles.declarationTypesModal}
                     buttons={[
                       {
