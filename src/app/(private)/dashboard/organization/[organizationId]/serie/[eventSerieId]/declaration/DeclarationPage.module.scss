@@ -22,6 +22,37 @@
   }
 }
 
+.transmissionConfirmationModal {
+  :global(.fr-modal__title) {
+    display: none !important;
+  }
+
+  :global(.fr-modal__footer) {
+    margin: 0 !important;
+  }
+
+  :global(.fr-modal__content) {
+    & > div:not(.fr-modal__title) {
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+      gap: 1rem;
+
+      & > div:nth-child(0) {
+        width: 45%;
+      }
+
+      & > div:nth-child(1) {
+        width: 55%;
+      }
+    }
+  }
+
+  :global(.fr-modal__content) {
+    margin-bottom: 0 !important;
+  }
+}
+
 .hr {
   background-image: linear-gradient(0deg, var(--border-default-blue-france), var(--border-default-blue-france)) !important;
 }

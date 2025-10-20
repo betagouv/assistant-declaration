@@ -7,6 +7,12 @@
     "BaseForm": {
       "form_contains_errors_one": "Impossible de valider le formulaire. Le champ invalide a été marqué en rouge.",
       "form_contains_errors_other": "Impossible de valider le formulaire. Les champs invalides ont été marqués en rouge."
+    },
+    "DeclarationPage": {
+      "sent_declaration_to_organism_one": "Votre déclaration a bien été envoyée à l'organisme !",
+      "sent_declaration_to_organism_other": "Votre déclaration a bien été envoyée aux organismes !",
+      "possible_information_request_from_organism_one": "Si des précisions sont nécessaires, l'organisme vous contactera par courriel.",
+      "possible_information_request_from_organism_other": "Si des précisions sont nécessaires, les organismes vous contacteront par courriel."
     }
   },
   "currency": {
