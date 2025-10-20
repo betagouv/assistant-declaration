@@ -1302,6 +1302,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                     buttons={[
                       {
                         doClosesModal: true,
+                        disabled: tmpExpectedDeclarationTypes.length === 0,
                         children: "C'est parti !",
                         onClick: () => {
                           setValue(`eventSerie.expectedDeclarationTypes`, tmpExpectedDeclarationTypes, {
