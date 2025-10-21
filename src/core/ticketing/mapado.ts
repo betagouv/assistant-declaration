@@ -341,10 +341,10 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             continue;
           }
 
-          // Some tickets have no ticket category, which is weird (they even don't have an order)
+          // Some tickets have no ticket category or no price, which is weird (they even don't have an order)
           // For now we saw them when they are imported into Mapado from somewhere else, for now we chose to skip them from being used as entry in our application
-          // TODO: if they need to be taken into account, what tax rate to apply? The indicative one? But at risk... better the the user adjust amounts manually to include external things?
-          if (ticket.ticketPrice === null) {
+          // TODO: if they need to be taken into account, what data to apply...? Better the user adjust amounts manually to include external things?
+          if (ticket.ticketPrice === null || ticket.facialValue === null) {
             if (ticket.imported) {
               continue;
             } else {
