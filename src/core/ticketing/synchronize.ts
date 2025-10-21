@@ -291,8 +291,8 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                   },
                   startAt: addedEvent.model.startAt,
                   endAt: addedEvent.model.endAt,
-                  ticketingRevenueIncludingTaxes: 0,
-                  ticketingRevenueExcludingTaxes: 0,
+                  ticketingRevenueIncludingTaxes: addedEvent.model.ticketingRevenueIncludingTaxes,
+                  ticketingRevenueExcludingTaxes: addedEvent.model.ticketingRevenueExcludingTaxes,
                   ticketingRevenueDefinedTaxRate: false, // For now we disable the usage of tax rate as a coefficient (both amounts must be provided)
                   consumptionsRevenueIncludingTaxes: 0,
                   consumptionsRevenueExcludingTaxes: 0,
