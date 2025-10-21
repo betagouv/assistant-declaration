@@ -226,7 +226,13 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
         const eventDatesData = JsonGetEventDatesResponseSchema.parse(eventDatesResult.data);
         this.assertCollectionResponseValid(eventDatesData);
 
-        const ticketPriceIdToTaxRate = new Map<string, number>();
+        const ticketPriceIdToTaxRateAndAmount = new Map<
+          string,
+          {
+            taxRate: number;
+            amount: number;
+          }
+        >();
 
         for (const eventDate of eventDatesData['hydra:member']) {
           // `startDate` is mandatory so falling back to `startOfEventDay` if needed (`endDate` is optional on our side so not using something not meaningful)
@@ -257,7 +263,10 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
             let ticketPriceVatRate = ticketPrice.tax.rate;
 
-            ticketPriceIdToTaxRate.set(ticketPrice['@id'], ticketPriceVatRate);
+            ticketPriceIdToTaxRateAndAmount.set(ticketPrice['@id'], {
+              taxRate: ticketPriceVatRate,
+              amount: ticketPrice.facialValue / 100, // 2000 is 20€
+            });
 
             if (indicativeTaxRate !== null) {
               // See comment about sorting ticketPrices to understand why alignin tax rates when price is 0
@@ -346,16 +355,34 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             continue;
           }
 
-          // Some tickets have no ticket category or no price, which is weird (they even don't have an order)
+          // Some tickets have no ticket category, which is weird (they even don't have an order)
           // For now we saw them when they are imported into Mapado from somewhere else, for now we chose to skip them from being used as entry in our application
-          // TODO: if they need to be taken into account, what data to apply...? Better the user adjust amounts manually to include external things?
-          if (ticket.ticketPrice === null || ticket.facialValue === null) {
+          // TODO: if they need to be taken into account, what tax rate to apply? The indicative one? But at risk... better the the user adjust amounts manually to include external things?
+          if (ticket.ticketPrice === null) {
             if (ticket.imported) {
               continue;
             } else {
               // If it's a case not known for now, throw an error
               throw new Error(`a ticket has no "ticketPrice" whereas it has not been manually imported mapado, this should be investigated`);
             }
+          }
+
+          const ticketPriceProperties = ticketPriceIdToTaxRateAndAmount.get(ticket.ticketPrice);
+          if (ticketPriceProperties === undefined) {
+            throw new Error('a sold ticket should always match a ticket category');
+          }
+
+          // For whatever reason some valid tickets have all amounts null despite NOT being imported and NOT being refunded or so
+          // In this case since it's not clear what's the origin of the problem, we take the amount on the bound `ticketPrice`
+          //
+          // Note: it's unclear if the property `paidValue` (not cents) is always the same than `facialValue` (cents), and if the commission is deduced
+          // but we confirmed the ticket `facialValue` may be different han the ticket category `facialValue`, but is it due to dynamic price or it really represents the paid amount
+          // (we kept using the `facialValue` property since that's the only one available on the `ticketPrice` used as fallback)
+          let ticketPriceIncludingTaxes: number;
+          if (ticket.facialValue === null) {
+            ticketPriceIncludingTaxes = ticketPriceProperties.amount;
+          } else {
+            ticketPriceIncludingTaxes = ticket.facialValue / 100; // 2000 is 20€
           }
 
           // [WORKAROUND] `eventDate` is a combination, we want the raw `id` to try matching event date we have already parsed
@@ -369,21 +396,15 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             throw new Error('a sold ticket should always match an existing event');
           }
 
-          const ticketTaxRate = ticketPriceIdToTaxRate.get(ticket.ticketPrice);
-          if (ticketTaxRate === undefined) {
-            throw new Error('a sold ticket should always match a ticket category');
-          }
-
-          // TODO: it's unclear if the property `paidValue` (not cents) is always the same than `facialValue` (cents), and if the commission is deduced
-          // Note: we confirmed the ticket `facialValue` may be different han the ticket category `facialValue`, but is it due to dynamic price or it really represents the paid amount
-          const ticketPriceIncludingTaxes = ticket.facialValue / 100; // 2000 is 20€
-
           if (ticketPriceIncludingTaxes === 0) {
             relatedEvent.freeTickets++;
           } else {
             relatedEvent.paidTickets++;
             relatedEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes;
-            relatedEvent.ticketingRevenueExcludingTaxes += getExcludingTaxesAmountFromIncludingTaxesAmount(ticketPriceIncludingTaxes, ticketTaxRate);
+            relatedEvent.ticketingRevenueExcludingTaxes += getExcludingTaxesAmountFromIncludingTaxesAmount(
+              ticketPriceIncludingTaxes,
+              ticketPriceProperties.taxRate
+            );
           }
         }
       }
