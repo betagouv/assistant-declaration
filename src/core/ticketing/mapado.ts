@@ -246,13 +246,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             return;
           }
 
-          let indicativeTaxRate: number | null = null;
-
-          // Note: a ticket category being free may have a 0% tax rate instead of being aligned with others, to take into account this case
-          // it's easier having them at the end (because if only free categories, the tax rate should be 0, not null)
-          const ticketPriceListSortedWithDescendingTaxRates = eventDate.ticketPriceList.sort((a, b) => +b.tax.rate - +a.tax.rate);
-
-          for (const ticketPrice of ticketPriceListSortedWithDescendingTaxRates) {
+          for (const ticketPrice of eventDate.ticketPriceList) {
             // At the beginning of the synchronization we made sure keeping only live performances taking place in France
             // but it appears multiple prices could use tax rates from different countries (outside France), which could be problematic
             // in our interface and for the user to reason
@@ -261,16 +255,26 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
               throw foreignTaxRateOnPriceError;
             }
 
-            let ticketPriceVatRate = ticketPrice.tax.rate;
-
             ticketPriceIdToTaxRateAndAmount.set(ticketPrice['@id'], {
-              taxRate: ticketPriceVatRate,
+              taxRate: ticketPrice.tax.rate,
               amount: ticketPrice.facialValue / 100, // 2000 is 20€
             });
+          }
+
+          let indicativeTaxRate: number | null = null;
+
+          // Note: a ticket category being free may have a 0% tax rate instead of being aligned with others, to take into account this case
+          // it's easier having them at the end (because if only free categories, the tax rate should be 0, not null)
+          const validTicketPriceListSortedWithDescendingTaxRates = Array.from(ticketPriceIdToTaxRateAndAmount.values()).sort(
+            (a, b) => +b.taxRate - +a.taxRate
+          );
+
+          for (const ticketPrice of validTicketPriceListSortedWithDescendingTaxRates) {
+            let ticketPriceVatRate = ticketPrice.taxRate;
 
             if (indicativeTaxRate !== null) {
               // See comment about sorting ticketPrices to understand why alignin tax rates when price is 0
-              if (ticketPrice.facialValue === 0 && ticketPriceVatRate === 0) {
+              if (ticketPrice.amount === 0 && ticketPriceVatRate === 0) {
                 ticketPriceVatRate = indicativeTaxRate;
               }
 
@@ -325,7 +329,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
               ticketing: ticketing['@id'],
               itemsPerPage: 10_000, // After testing we saw this limit was not erroring the Mapado API
               page: ticketsCurrentPage,
-              ...{ fields: 'status,facialValue,ticketPrice,eventDate,isValid,imported' },
+              ...{ fields: '@id,status,facialValue,ticketPrice,eventDate,isValid,imported' },
             },
           });
 
@@ -369,6 +373,10 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
           const ticketPriceProperties = ticketPriceIdToTaxRateAndAmount.get(ticket.ticketPrice);
           if (ticketPriceProperties === undefined) {
+            console.warn(
+              'make sure you are not debugging just a few event dates on the ticketing entity, because getting tickets is scoped to all dates'
+            );
+
             throw new Error('a sold ticket should always match a ticket category');
           }
 

@@ -268,26 +268,37 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       const endDate = formResult.data.endDate ? new Date(formResult.data.endDate) : null;
 
       let indicativeTaxRate: number | null = null;
-      const tierdIdToTaxRate = new Map<number, number>();
+      const tierdIdToTaxRateAndAmount = new Map<
+        number,
+        {
+          taxRate: number;
+          amount: number | null;
+        }
+      >();
 
       if (formResult.data.tiers) {
-        // Note: a tier being free may have a 0% tax rate instead of being aligned with others, to take into account this case
-        // it's easier having them at the end (because if only free tiers, the tax rate should be 0, not null)
-        const tiersSortedWithDescendingTaxRates = formResult.data.tiers.sort((a, b) => +b.vatRate - +a.vatRate);
-
-        for (const tier of tiersSortedWithDescendingTaxRates) {
+        for (const tier of formResult.data.tiers) {
           if (tier.tierType !== 'Registration') {
             // It seems other types should be ignored to only keep ones related to events
             continue;
           }
 
-          let tierVatRate = tier.vatRate / 100; // Receiving 5.50 for 5.5%
+          tierdIdToTaxRateAndAmount.set(tier.id, {
+            taxRate: tier.vatRate / 100, // Receiving 5.50 for 5.5%
+            amount: tier.price ? tier.price / 100 : null, // 2000 is 20€
+          });
+        }
 
-          tierdIdToTaxRate.set(tier.id, tierVatRate);
+        // Note: a tier being free may have a 0% tax rate instead of being aligned with others, to take into account this case
+        // it's easier having them at the end (because if only free tiers, the tax rate should be 0, not null)
+        const validTiersSortedWithDescendingTaxRates = Array.from(tierdIdToTaxRateAndAmount.values()).sort((a, b) => +b.taxRate - +a.taxRate);
+
+        for (const tier of validTiersSortedWithDescendingTaxRates) {
+          let tierVatRate = tier.taxRate;
 
           if (indicativeTaxRate !== null) {
             // See comment about sorting tiers to understand why alignin tax rates when price is 0
-            if (tier.price === 0 && tierVatRate === 0) {
+            if (tier.amount === 0 && tier.taxRate === 0) {
               tierVatRate = indicativeTaxRate;
             }
 
@@ -379,9 +390,9 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       for (const ticketItem of soldItems) {
         assert(ticketItem.tierId, 'the tier ID should be set on tickets');
 
-        const tierTaxRate = tierdIdToTaxRate.get(ticketItem.tierId);
+        const tierProperties = tierdIdToTaxRateAndAmount.get(ticketItem.tierId);
 
-        assert(tierTaxRate !== undefined, 'the tier tax rate should be retrieved');
+        assert(tierProperties !== undefined, 'the tier tax rate should be retrieved');
 
         const ticketPriceIncludingTaxes = ticketItem.amount / 100; // 2000 is 20€
 
@@ -390,7 +401,10 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         } else {
           schemaEvent.paidTickets++;
           schemaEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes;
-          schemaEvent.ticketingRevenueExcludingTaxes += getExcludingTaxesAmountFromIncludingTaxesAmount(ticketPriceIncludingTaxes, tierTaxRate);
+          schemaEvent.ticketingRevenueExcludingTaxes += getExcludingTaxesAmountFromIncludingTaxesAmount(
+            ticketPriceIncludingTaxes,
+            tierProperties.taxRate
+          );
         }
       }
 

@@ -33,6 +33,7 @@ export type JsonRecentTicketSchemaType = z.infer<typeof JsonRecentTicketSchema>;
 export const JsonTicketSchema = applyTypedParsers(
   z
     .object({
+      '@id': z.string().min(1),
       status: z.enum(['payed', 'refunded', 'booked', 'cancelled']),
       facialValue: z.number().int().nonnegative().nullable(), // Cents (may be different than the ticket price `facialValue`, it seems to confirm it's the amonut paid (or it was a dynamic price...))
       // facialFeeValue: z.number().int().nonnegative().nullable(), // Cents
