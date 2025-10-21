@@ -236,7 +236,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           // We faced some organizations having ticketings being `type: 'dated_events'` but that had no date at all
           // We cannot say if it's normal or a bug due to a Mapado evolution, but since some had those ticketings already closed
           // they had no way to change their type to `undated_event` or `offer`... so we just skip them
-          if (!safeStartDate || !safeEndDate) {
+          if (!safeStartDate) {
             return;
           }
 
@@ -295,6 +295,11 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
               paidTickets: 0,
             })
           );
+        }
+
+        // If all dates have been skipped, no need to retrieve other informations
+        if (schemaEvents.size === 0) {
+          return;
         }
 
         // Now retrieve all tickets for this event serie to bind them to the correct event date
