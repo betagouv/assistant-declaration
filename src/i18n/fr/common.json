@@ -246,6 +246,7 @@
       },
       "performanceType": {
         "invalid_type": "l'esthétique du spectacle est requise",
+        "invalid_value": "l'esthétique du spectacle est requise",
         "too_small_one": "l'esthétique du spectacle est requise",
         "too_big": "l'esthétique du spectacle doit faire {{maximum}} caractères maximum"
       },
