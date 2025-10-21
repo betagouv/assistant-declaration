@@ -220,7 +220,7 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                     <Alert
                       severity="info"
                       small={true}
-                      description={`Vous avez synchronisé vos données de billeterie ${t('date.relative', { date: lastSynchronizationAt })}.`}
+                      description={`Vous avez synchronisé vos données de billetterie ${t('date.relative', { date: lastSynchronizationAt })}.`}
                       className={fr.cx('fr-mb-2v')}
                     />
                   )}
