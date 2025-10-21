@@ -235,7 +235,7 @@ export const declarationRouter = router({
             throw sacemAgencyNotFoundError;
           }
 
-          // We generate a PDF so the Sacem can deal with it easily (instead of setting the whole into the email text)
+          // We generate a PDF so the SACEM can deal with it easily (instead of setting the whole into the email text)
           const jsxDocument = SacemDeclarationDocument({
             sacemDeclaration: sacemDeclaration,
             signatory: `${originatorUser.firstname} ${originatorUser.lastname}`,
@@ -245,7 +245,7 @@ export const declarationRouter = router({
 
           const declarationAttachment: EmailAttachment = {
             contentType: 'application/pdf',
-            filename: `Déclaration Sacem - ${slugify(eventSerie.name)}.pdf`,
+            filename: `Déclaration SACEM - ${slugify(eventSerie.name)}.pdf`,
             content: declarationPdfBuffer,
             inline: false, // It will be attached, not specifically set somewhere in the content
           };
@@ -253,7 +253,7 @@ export const declarationRouter = router({
           try {
             await mailer.sendDeclarationToSacemAgency({
               recipient: sacemAgency.email,
-              replyTo: originatorUser.email, // We give the Sacem the possibility to directly converse with the declarer
+              replyTo: originatorUser.email, // We give the SACEM the possibility to directly converse with the declarer
               eventSerieName: sacemDeclaration.eventSerie.name,
               originatorFirstname: originatorUser.firstname,
               originatorLastname: originatorUser.lastname,
@@ -492,8 +492,20 @@ export const declarationRouter = router({
           officialId: previousDeclaration.producerOfficialId,
           name: previousDeclaration.producerName,
         });
-      if (previousDeclaration.place && !placeholder.place.find((p) => p.id === previousDeclaration.place!.id))
-        placeholder.place.push(previousDeclaration.place);
+      if (previousDeclaration.place && !placeholder.place.find((p) => p.id === previousDeclaration.place!.id)) {
+        placeholder.place.push({
+          id: previousDeclaration.place.id,
+          name: previousDeclaration.place.name,
+          address: {
+            id: previousDeclaration.place.address.id,
+            street: previousDeclaration.place.address.street,
+            city: previousDeclaration.place.address.city,
+            postalCode: previousDeclaration.place.address.postalCode,
+            subdivision: previousDeclaration.place.address.subdivision,
+            countryCode: previousDeclaration.place.address.countryCode,
+          },
+        });
+      }
       if (previousDeclaration.placeCapacity && !placeholder.placeCapacity.includes(previousDeclaration.placeCapacity))
         placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
     }
