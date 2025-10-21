@@ -374,8 +374,8 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
             });
           } catch (error) {
             if (error instanceof Error) {
-              // Keep track of the error
-              await tx.ticketingSystem.update({
+              // Keep track of the error, not using database because the transaction will be canceled
+              await prisma.ticketingSystem.update({
                 where: {
                   id: ticketingSystem.id,
                 },
