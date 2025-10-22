@@ -1,3 +1,4 @@
+import { fromZonedTime } from 'date-fns-tz';
 import { z } from 'zod';
 
 import { emptyStringtoNullPreprocessor, safeCoerceToBoolean, transformStringOrNull } from '@ad/src/utils/validation';
@@ -11,12 +12,22 @@ import { applyTypedParsers } from '@ad/src/utils/zod';
 // This is the best way to make the production not breaking for unused fields during validation.
 //
 
+function transformBilletwebDate(value: Date): Date {
+  // Converts to UTC Date since Billetweb always transmit in the french timezone
+  return fromZonedTime(value, 'Europe/Paris');
+}
+
+// Not able to use signature overload of implementation inside `.transform()`, maybe a zod error
+function transformBilletwebDateOrNull(value: Date | null): Date | null {
+  return value ? transformBilletwebDate(value) : null;
+}
+
 export const JsonEventOccurenceSchema = applyTypedParsers(
   z
     .object({
       id: z.string().min(1),
-      start: z.coerce.date(),
-      end: z.coerce.date(),
+      start: z.coerce.date().transform(transformBilletwebDate),
+      end: z.coerce.date().transform(transformBilletwebDate),
       // name: z.string().transform(transformStringOrNull),
       // place: z.string().transform(transformStringOrNull),
       // description: z.string().transform(transformStringOrNull),
@@ -25,7 +36,7 @@ export const JsonEventOccurenceSchema = applyTypedParsers(
       // last_update: z.preprocess((value) => {
       //   // Some old entries do not have this field initialized (dated ~2018)
       //   return value === '0000-00-00 00:00:00' ? null : value;
-      // }, z.coerce.date().nullable()),
+      // }, z.coerce.date().nullable().transform(transformBilletwebDateOrNull)),
       // quota: z.coerce.number().nonnegative(),
       // total_sales: z.coerce.number().nonnegative(),
       // tickets: z.record(z.string().min(1), z.string().min(1)),
@@ -43,11 +54,11 @@ export const JsonEventSchema = applyTypedParsers(
       start: z.preprocess((value) => {
         // Some old entries do not have this field initialized (dated ~2018)
         return value === '0000-00-00 00:00:00' ? null : value;
-      }, z.coerce.date().nullable()),
+      }, z.coerce.date().nullable().transform(transformBilletwebDateOrNull)),
       end: z.preprocess((value) => {
         // Some old entries do not have this field initialized (dated ~2018)
         return value === '0000-00-00 00:00:00' ? null : value;
-      }, z.coerce.date().nullable()),
+      }, z.coerce.date().nullable().transform(transformBilletwebDateOrNull)),
       multiple: safeCoerceToBoolean(z.boolean()),
       // place: z.string().transform(transformStringOrNull),
       // shop: z.url(),
@@ -89,11 +100,11 @@ export const JsonTicketCategorySchema = applyTypedParsers(
       // start_time: z.preprocess((value) => {
       //   // Don't understand why?
       //   return value === '' ? null : value;
-      // }, z.coerce.date().nullable()),
+      // }, z.coerce.date().nullable().transform(transformBilletwebDateOrNull)),
       // end_time: z.preprocess((value) => {
       //   // Don't understand why?
       //   return value === '' ? null : value;
-      // }, z.coerce.date().nullable()),
+      // }, z.coerce.date().nullable().transform(transformBilletwebDateOrNull)),
       // form: z.string().min(1),
       tax: emptyStringtoNullPreprocessor(z.coerce.number().nullable()),
       commission: z.number().nonnegative().or(z.literal(false)),
@@ -113,7 +124,7 @@ export const JsonEventAttendeeSchema = applyTypedParsers(
       // used_date: z.preprocess((value) => {
       //   // It's used as a placeholder when `used` is false
       //   return value === '0000-00-00 00:00:00' ? null : value;
-      // }, z.coerce.date().nullable()),
+      // }, z.coerce.date().nullable().transform(transformBilletwebDateOrNull)),
       // email: z.string().transform(transformStringOrNull),
       // firstname: z.string().transform(transformStringOrNull),
       // name: z.string().transform(transformStringOrNull),
@@ -122,7 +133,7 @@ export const JsonEventAttendeeSchema = applyTypedParsers(
       ticket_id: z.string().min(1),
       price: z.coerce.number().nonnegative(),
       // seating_location: z.string().transform(transformStringOrNull),
-      // last_update: z.coerce.date(),
+      // last_update: z.coerce.date().transform(transformBilletwebDate),
       // reduction_code: z.string().transform(transformStringOrNull),
       // authorization_code: z.string().transform(transformStringOrNull),
       // pass: z.unknown(), // Can be "0" or "428942988"...
@@ -134,7 +145,7 @@ export const JsonEventAttendeeSchema = applyTypedParsers(
       // order_firstname: z.string().transform(transformStringOrNull),
       // order_name: z.string().transform(transformStringOrNull),
       // order_email: z.string().transform(transformStringOrNull),
-      // order_date: z.coerce.date(),
+      // order_date: z.coerce.date().transform(transformBilletwebDate),
       // order_paid: safeCoerceToBoolean(z.boolean()),
       // order_payment_type: z.string().min(1), // Enum? "web"...
       // order_origin: z.string().min(1), // Enum? "web"...
@@ -143,7 +154,7 @@ export const JsonEventAttendeeSchema = applyTypedParsers(
       // session_start: z.preprocess((value) => {
       //   // Don't understand why?
       //   return value === '' ? null : value;
-      // }, z.coerce.date().nullable()),
+      // }, z.coerce.date().nullable().transform(transformBilletwebDateOrNull)),
       // order_accreditation: z.unknown(), // Integer enum
       // order_management: z.url(),
       // order_language: z.string().transform(transformStringOrNull),
@@ -157,7 +168,7 @@ export const JsonAttendeeSchema = applyTypedParsers(
   JsonEventAttendeeSchema.extend({
     event: z.string().min(1),
     // event_name: z.string().min(1),
-    // event_start: z.coerce.date(),
+    // event_start: z.coerce.date().transform(transformBilletwebDate),
   }).strip()
 );
 export type JsonAttendeeSchemaType = z.infer<typeof JsonAttendeeSchema>;
