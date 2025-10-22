@@ -278,9 +278,8 @@ export function prepareDeclarationParameter(declaration: SacdDeclarationSchemaTy
       rep_horaire: formatTime(flattenEvent.startAt),
       Billetterie: {
         rep_mt_billets: formatAmountNumber(flattenEvent.ticketingRevenueExcludingTaxes),
-        rep_mt_tva_billets: getTaxAmountFromIncludingAndExcludingTaxesAmounts(
-          flattenEvent.ticketingRevenueIncludingTaxes,
-          flattenEvent.ticketingRevenueExcludingTaxes
+        rep_mt_tva_billets: formatAmountNumber(
+          getTaxAmountFromIncludingAndExcludingTaxesAmounts(flattenEvent.ticketingRevenueIncludingTaxes, flattenEvent.ticketingRevenueExcludingTaxes)
         ),
         rep_nb_billets_pay: flattenEvent.paidTickets,
         rep_nb_billets_exo: flattenEvent.freeTickets,
