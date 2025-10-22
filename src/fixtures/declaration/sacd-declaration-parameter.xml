@@ -18,8 +18,8 @@
       <rep_nb>1</rep_nb>
       <rep_horaire>11:00</rep_horaire>
       <Billetterie>
-        <rep_mt_billets>100</rep_mt_billets>
-        <rep_mt_tva_billets>5.5</rep_mt_tva_billets>
+        <rep_mt_billets>899.12</rep_mt_billets>
+        <rep_mt_tva_billets>18.88</rep_mt_tva_billets>
         <rep_nb_billets_pay>10</rep_nb_billets_pay>
         <rep_nb_billets_exo>9</rep_nb_billets_exo>
       </Billetterie>

@@ -52,7 +52,15 @@ describe('prepareDeclarationParameter', () => {
     async () => {
       const declarationAt = set(new Date(0), { year: 2025, month: 1, date: 18 });
 
-      const xml = prepareDeclarationParameter(sacdDeclarations[0], declarationAt);
+      const declaration = JSON.parse(JSON.stringify(sacdDeclarations[0])); // Deep copy
+
+      // Use tricky float amounts to confirm they will be formatted correctly
+      // (the tax amount should be `18.879999999999995` to be converted to `18.88`)
+      declaration.events[0].ticketingRevenueExcludingTaxes = 899.12;
+      declaration.events[0].ticketingRevenueIncludingTaxes = 918.0;
+      declaration.events[0].ticketingRevenueTaxRate = 0.021;
+
+      const xml = prepareDeclarationParameter(declaration, declarationAt);
 
       expect(xml).toBe(
         declarationParameterXml.replace('encoding="utf-8" ?>', 'encoding="utf-8"?>').replaceAll('<Exploitation />', '<Exploitation/>').trim()
