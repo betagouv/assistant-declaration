@@ -2,7 +2,13 @@ import { z } from 'zod';
 
 import { AddressSchema } from '@ad/src/models/entities/address';
 import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
-import { EventSchema, EventSerieSchema, StricterEventSerieSchema, assertValidExpenses } from '@ad/src/models/entities/event';
+import {
+  EventSchema,
+  EventSerieSchema,
+  StricterEventSerieSchema,
+  assertAmountsRespectTaxLogic,
+  assertValidExpenses,
+} from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceInputSchema, PlaceSchema } from '@ad/src/models/entities/place';
 import { applyTypedParsers } from '@ad/src/utils/zod';
@@ -44,7 +50,11 @@ export const DeclarationSchema = applyTypedParsers(
           place: PlaceSchema.nullable(),
         })
         .superRefine((data, ctx) => {
-          assertValidExpenses(data, ctx); // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
+          // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
+          assertValidExpenses(data, ctx);
+          assertAmountsRespectTaxLogic(data, 'expensesExcludingTaxes', 'expensesIncludingTaxes', ctx);
+          assertAmountsRespectTaxLogic(data, 'introductionFeesExpensesExcludingTaxes', 'introductionFeesExpensesIncludingTaxes', ctx);
+          assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
         }),
       events: z.array(
         EventSchema.pick({
@@ -70,9 +80,18 @@ export const DeclarationSchema = applyTypedParsers(
           placeCapacityOverride: true,
           audienceOverride: true,
           ticketingRevenueTaxRateOverride: true,
-        }).extend({
-          placeOverride: PlaceSchema.nullable(),
         })
+          .extend({
+            placeOverride: PlaceSchema.nullable(),
+          })
+          .superRefine((data, ctx) => {
+            // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
+            assertAmountsRespectTaxLogic(data, 'ticketingRevenueExcludingTaxes', 'ticketingRevenueIncludingTaxes', ctx);
+            assertAmountsRespectTaxLogic(data, 'consumptionsRevenueExcludingTaxes', 'consumptionsRevenueIncludingTaxes', ctx);
+            assertAmountsRespectTaxLogic(data, 'cateringRevenueExcludingTaxes', 'cateringRevenueIncludingTaxes', ctx);
+            assertAmountsRespectTaxLogic(data, 'programSalesRevenueExcludingTaxes', 'programSalesRevenueIncludingTaxes', ctx);
+            assertAmountsRespectTaxLogic(data, 'otherRevenueExcludingTaxes', 'otherRevenueIncludingTaxes', ctx);
+          })
       ),
     })
     .strict()
@@ -107,12 +126,48 @@ export const DeclarationInputSchema = applyTypedParsers(
           place: PlaceInputSchema,
         })
         .superRefine((data, ctx) => {
-          assertValidExpenses(data, ctx); // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
+          // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
+          assertValidExpenses(data, ctx);
+          assertAmountsRespectTaxLogic(data, 'expensesExcludingTaxes', 'expensesIncludingTaxes', ctx);
+          assertAmountsRespectTaxLogic(data, 'introductionFeesExpensesExcludingTaxes', 'introductionFeesExpensesIncludingTaxes', ctx);
+          assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
         }),
       events: z.array(
-        DeclarationSchema.shape.events.element.extend({
-          placeOverride: PlaceInputSchema,
+        EventSchema.pick({
+          id: true,
+          startAt: true,
+          endAt: true,
+          ticketingRevenueIncludingTaxes: true,
+          ticketingRevenueExcludingTaxes: true,
+          consumptionsRevenueIncludingTaxes: true,
+          consumptionsRevenueExcludingTaxes: true,
+          consumptionsRevenueTaxRate: true,
+          cateringRevenueIncludingTaxes: true,
+          cateringRevenueExcludingTaxes: true,
+          cateringRevenueTaxRate: true,
+          programSalesRevenueIncludingTaxes: true,
+          programSalesRevenueExcludingTaxes: true,
+          programSalesRevenueTaxRate: true,
+          otherRevenueIncludingTaxes: true,
+          otherRevenueExcludingTaxes: true,
+          otherRevenueTaxRate: true,
+          freeTickets: true,
+          paidTickets: true,
+          placeCapacityOverride: true,
+          audienceOverride: true,
+          ticketingRevenueTaxRateOverride: true,
         })
+          .extend({
+            placeOverride: PlaceInputSchema,
+          })
+          .superRefine((data, ctx) => {
+            // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
+            assertAmountsRespectTaxLogic(data, 'ticketingRevenueExcludingTaxes', 'ticketingRevenueIncludingTaxes', ctx);
+            assertAmountsRespectTaxLogic(data, 'consumptionsRevenueExcludingTaxes', 'consumptionsRevenueIncludingTaxes', ctx);
+            assertAmountsRespectTaxLogic(data, 'cateringRevenueExcludingTaxes', 'cateringRevenueIncludingTaxes', ctx);
+            assertAmountsRespectTaxLogic(data, 'programSalesRevenueExcludingTaxes', 'programSalesRevenueIncludingTaxes', ctx);
+            assertAmountsRespectTaxLogic(data, 'otherRevenueExcludingTaxes', 'otherRevenueIncludingTaxes', ctx);
+          })
       ),
     })
     .strict()

@@ -2,7 +2,13 @@ import { z } from 'zod';
 
 import { AddressSchema } from '@ad/src/models/entities/address';
 import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
-import { EventSchema, StricterEventSchema, StricterEventSerieSchema, assertValidExpenses } from '@ad/src/models/entities/event';
+import {
+  EventSchema,
+  StricterEventSchema,
+  StricterEventSerieSchema,
+  assertAmountsRespectTaxLogic,
+  assertValidExpenses,
+} from '@ad/src/models/entities/event';
 import { StricterOrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceSchema } from '@ad/src/models/entities/place';
 
@@ -39,7 +45,11 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
       place: PlaceSchema,
     })
     .superRefine((data, ctx) => {
-      assertValidExpenses(data, ctx); // Had to be reapplied since we picked up a few properties
+      // Had to be reapplied since we picked up a few properties
+      assertValidExpenses(data, ctx);
+      assertAmountsRespectTaxLogic(data, 'expensesExcludingTaxes', 'expensesIncludingTaxes', ctx);
+      assertAmountsRespectTaxLogic(data, 'introductionFeesExpensesExcludingTaxes', 'introductionFeesExpensesIncludingTaxes', ctx);
+      assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
     })
     .strip(),
   events: z.array(
@@ -62,6 +72,10 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
       )
       .extend({
         placeOverride: PlaceSchema.nullable(),
+      })
+      .superRefine((data, ctx) => {
+        // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
+        assertAmountsRespectTaxLogic(data, 'ticketingRevenueExcludingTaxes', 'ticketingRevenueIncludingTaxes', ctx);
       })
       .strip()
   ),
