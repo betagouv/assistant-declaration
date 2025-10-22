@@ -126,6 +126,13 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                     ticketingRevenueTaxRateOverride: true,
                     freeTickets: true,
                     paidTickets: true,
+                    lastManualTicketingDataUpdateAt: true,
+                  },
+                },
+                EventSerieDeclaration: {
+                  select: {
+                    id: true,
+                    status: true,
                   },
                 },
               },
@@ -135,9 +142,20 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
             const eventsSeriesTicketingSystemIdToDatabaseId: Map<string, string> = new Map();
             const eventsTicketingSystemIdToDatabaseId: typeof eventsSeriesTicketingSystemIdToDatabaseId = new Map();
 
-            // Once manually patched we don't want to override data with synchronization to avoid loosing corrected data
+            // Once an event serie transmitted or being transmitted we don't want to override data with synchronization to avoid loosing corrected data and dealing with new event on it that would mess with what has been declared
             const eventsSeriesTicketingSystemIdsToSkip = new Set<string>();
-            storedEventsSeries.forEach((sES) => sES.lastManualUpdateAt && eventsSeriesTicketingSystemIdsToSkip.add(sES.internalTicketingSystemId));
+            storedEventsSeries.forEach(
+              (sES) => sES.EventSerieDeclaration.length > 0 && eventsSeriesTicketingSystemIdsToSkip.add(sES.internalTicketingSystemId)
+            );
+
+            // Once ticketing data is manually patched we don't want to override it with synchronization to avoid loosing corrected data
+            // Note: doing at the tinier scope is the best to allow new events from the ticketing system to be synchronized, but also if some are modified despite we only updated the location or so
+            const eventsTicketingSystemIdsToSkip = new Set<string>();
+            storedEventsSeries.forEach((sES) => {
+              sES.Event.forEach((event) => {
+                event.lastManualTicketingDataUpdateAt && eventsTicketingSystemIdsToSkip.add(event.internalTicketingSystemId);
+              });
+            });
 
             // We perform multiple diffs for each type to be sure processing them easily
             // Because a diff on 2 huge objects would imply understand in depth the returned differences (array order, which sub-subproperty has been modified or created...)
@@ -328,23 +346,27 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
 
               assert(eventSerieId);
 
-              await tx.event.update({
-                where: {
-                  eventSerieId_internalTicketingSystemId: {
-                    internalTicketingSystemId: updatedEvent.model.internalTicketingSystemId,
-                    eventSerieId: eventSerieId,
+              const eventTicketingDataImmutableNow = eventsTicketingSystemIdsToSkip.has(updatedEvent.model.internalTicketingSystemId);
+
+              if (!eventTicketingDataImmutableNow) {
+                await tx.event.update({
+                  where: {
+                    eventSerieId_internalTicketingSystemId: {
+                      internalTicketingSystemId: updatedEvent.model.internalTicketingSystemId,
+                      eventSerieId: eventSerieId,
+                    },
                   },
-                },
-                data: {
-                  startAt: updatedEvent.model.startAt,
-                  endAt: updatedEvent.model.endAt,
-                  ticketingRevenueIncludingTaxes: updatedEvent.model.ticketingRevenueIncludingTaxes,
-                  ticketingRevenueExcludingTaxes: updatedEvent.model.ticketingRevenueExcludingTaxes,
-                  ticketingRevenueTaxRateOverride: updatedEvent.model.ticketingRevenueTaxRate,
-                  freeTickets: updatedEvent.model.freeTickets,
-                  paidTickets: updatedEvent.model.paidTickets,
-                },
-              });
+                  data: {
+                    startAt: updatedEvent.model.startAt,
+                    endAt: updatedEvent.model.endAt,
+                    ticketingRevenueIncludingTaxes: updatedEvent.model.ticketingRevenueIncludingTaxes,
+                    ticketingRevenueExcludingTaxes: updatedEvent.model.ticketingRevenueExcludingTaxes,
+                    ticketingRevenueTaxRateOverride: updatedEvent.model.ticketingRevenueTaxRate,
+                    freeTickets: updatedEvent.model.freeTickets,
+                    paidTickets: updatedEvent.model.paidTickets,
+                  },
+                });
+              }
             }
 
             for (const removedEvent of sortedEventsDiffResult.removed) {

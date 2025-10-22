@@ -109,7 +109,7 @@ export function eventSeriePrismaToModel(eventSerie: Omit<EventSerie, 'lastManual
   };
 }
 
-export function eventPrismaToModel(event: Event): EventSchemaType {
+export function eventPrismaToModel(event: Omit<Event, 'lastManualTicketingDataUpdateAt'>): EventSchemaType {
   return {
     id: event.id,
     internalTicketingSystemId: event.internalTicketingSystemId,
@@ -164,7 +164,7 @@ export function declarationPrismaToModel(
           address: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
         })
       | null;
-    Event: (Event & {
+    Event: (Omit<Event, 'lastManualTicketingDataUpdateAt'> & {
       placeOverride:
         | (Pick<Place, 'id' | 'name'> & {
             address: Pick<Address, 'id' | 'street' | 'city' | 'postalCode' | 'countryCode' | 'subdivision'>;
