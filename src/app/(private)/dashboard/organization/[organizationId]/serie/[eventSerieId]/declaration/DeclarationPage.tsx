@@ -342,10 +342,12 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     }
   }, [getDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
 
+  const expectedDeclarationTypes = watch('eventSerie.expectedDeclarationTypes');
+
   const [tmpExpectedDeclarationTypes, setTmpExpectedDeclarationTypes] = useState<DeclarationTypeSchemaType[]>([]);
   useEffect(() => {
-    setTmpExpectedDeclarationTypes(watch('eventSerie.expectedDeclarationTypes'));
-  }, [watch('eventSerie.expectedDeclarationTypes'), setTmpExpectedDeclarationTypes]);
+    setTmpExpectedDeclarationTypes(expectedDeclarationTypes);
+  }, [expectedDeclarationTypes, setTmpExpectedDeclarationTypes]);
 
   const [transmitDeclarationMutationError, setTransmitDeclarationMutationError] = useState<TRPCClientErrorLike<AppRouter> | Error | null>(null);
 
@@ -579,7 +581,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
               </h1>
               {/*
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                {watch('eventSerie.expectedDeclarationTypes').map((declarationType) => {
+                {expectedDeclarationTypes.map((declarationType) => {
                   return (
                     <Tag
                       key={declarationType}
@@ -772,7 +774,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             </div>
                           </div>
                            */}
-                            {watch('eventSerie.expectedDeclarationTypes').includes('SACEM') && (
+                            {expectedDeclarationTypes.includes('SACEM') && (
                               <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
                                 <div className={fr.cx('fr-fieldset__element')}>
                                   <Controller
@@ -786,7 +788,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 </div>
                               </div>
                             )}
-                            {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
+                            {expectedDeclarationTypes.includes('SACD') && (
                               <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
                                 <div className={fr.cx('fr-fieldset__element')}>
                                   <Controller
@@ -984,7 +986,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 />
                               </div>
                             </div>
-                            {watch('eventSerie.expectedDeclarationTypes').includes('SACD') && (
+                            {expectedDeclarationTypes.includes('SACD') && (
                               <>
                                 <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
                                   <div className={fr.cx('fr-fieldset__element')}>
@@ -1394,12 +1396,12 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                       <div>
                         <p className={fr.cx('fr-text--lead')}>
                           {t('components.DeclarationPage.sent_declaration_to_organism', {
-                            count: watch('eventSerie.expectedDeclarationTypes').length,
+                            count: expectedDeclarationTypes.length,
                           })}
                         </p>
                         <p className={fr.cx('fr-mb-0')}>
                           {t('components.DeclarationPage.possible_information_request_from_organism', {
-                            count: watch('eventSerie.expectedDeclarationTypes').length,
+                            count: expectedDeclarationTypes.length,
                           })}
                         </p>
                       </div>
