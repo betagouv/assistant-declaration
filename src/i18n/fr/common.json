@@ -187,11 +187,11 @@
           "invalid_type": "le montant TTC doit être un nombre entier",
           "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
         },
-        "introductionFeesExcludingTaxes": {
+        "introductionFeesExpensesExcludingTaxes": {
           "invalid_type": "le montant HT doit être un nombre entier",
           "too_small": "le montant HT doit être supérieur à {{minimum}} euro"
         },
-        "introductionFeesIncludingTaxes": {
+        "introductionFeesExpensesIncludingTaxes": {
           "invalid_type": "le montant TTC doit être un nombre entier",
           "too_small": "le montant TTC doit être supérieur à {{minimum}} euro"
         }
