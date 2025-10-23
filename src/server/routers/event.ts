@@ -42,28 +42,30 @@ export const eventRouter = router({
     });
 
     return {
-      eventsSeriesWrappers: eventsSeries.map((eventsSerie): EventSerieWrapperSchemaType => {
-        // Fallback to old dates since it should not happen often
-        const computedStartAt = eventsSerie.Event.length > 0 ? eventsSerie.Event[0].startAt : new Date(0);
-        const computedEndAt =
-          eventsSerie.Event.length > 0
-            ? eventsSerie.Event[eventsSerie.Event.length - 1].endAt ?? eventsSerie.Event[eventsSerie.Event.length - 1].startAt
-            : new Date(0);
+      eventsSeriesWrappers: eventsSeries
+        .map((eventsSerie): EventSerieWrapperSchemaType => {
+          // Fallback to old dates since it should not happen often
+          const computedStartAt = eventsSerie.Event.length > 0 ? eventsSerie.Event[0].startAt : new Date(0);
+          const computedEndAt =
+            eventsSerie.Event.length > 0
+              ? eventsSerie.Event[eventsSerie.Event.length - 1].endAt ?? eventsSerie.Event[eventsSerie.Event.length - 1].startAt
+              : new Date(0);
 
-        return {
-          serie: eventSeriePrismaToModel(eventsSerie),
-          computedStartAt: computedStartAt,
-          computedEndAt: computedEndAt,
-          place: null, // TODO: to remove?
-          partialDeclarations: eventsSerie.EventSerieDeclaration.map((declaration) => {
-            return {
-              type: declarationTypePrismaToModel(declaration.type),
-              status: DeclarationStatusSchema.parse(declaration.status),
-              transmittedAt: declaration.transmittedAt,
-            };
-          }),
-        };
-      }),
+          return {
+            serie: eventSeriePrismaToModel(eventsSerie),
+            computedStartAt: computedStartAt,
+            computedEndAt: computedEndAt,
+            place: null, // TODO: to remove?
+            partialDeclarations: eventsSerie.EventSerieDeclaration.map((declaration) => {
+              return {
+                type: declarationTypePrismaToModel(declaration.type),
+                status: DeclarationStatusSchema.parse(declaration.status),
+                transmittedAt: declaration.transmittedAt,
+              };
+            }),
+          };
+        })
+        .sort((a, b) => +b.computedEndAt - +a.computedEndAt),
     };
   }),
 });
