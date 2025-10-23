@@ -380,18 +380,24 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             throw new Error('a sold ticket should always match a ticket category');
           }
 
-          // For whatever reason some valid tickets have all amounts null despite NOT being imported and NOT being refunded or so
-          // In this case since it's not clear what's the origin of the problem, we take the amount on the bound `ticketPrice`
+          // For whatever reason some valid tickets have all amounts:
+          // - null despite NOT being imported and NOT being refunded or so
+          // - negative despite NOT being imported and NOT being refunded or so
+          //
+          // Maybe it's the case when they migrate a customer from another ticketing system and some informations are wrongly applied
+          // Since it's not clear what's the origin of the problem, we take the amount on the bound `ticketPrice`
           //
           // Note: it's unclear if the property `paidValue` (not cents) is always the same than `facialValue` (cents), and if the commission is deduced
           // but we confirmed the ticket `facialValue` may be different han the ticket category `facialValue`, but is it due to dynamic price or it really represents the paid amount
           // (we kept using the `facialValue` property since that's the only one available on the `ticketPrice` used as fallback)
           let ticketPriceIncludingTaxes: number;
-          if (ticket.facialValue === null) {
+          if (ticket.facialValue === null || ticket.facialValue < 0) {
             ticketPriceIncludingTaxes = ticketPriceProperties.amount;
           } else {
             ticketPriceIncludingTaxes = ticket.facialValue / 100; // 2000 is 20€
           }
+
+          assert(ticketPriceIncludingTaxes >= 0, 'ticket price must be non-negative');
 
           // [WORKAROUND] `eventDate` is a combination, we want the raw `id` to try matching event date we have already parsed
           const eventDateMatch = ticket.eventDate.match(/\/v1\/event_dates\/(\d+)/);
