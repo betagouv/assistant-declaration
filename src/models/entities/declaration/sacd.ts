@@ -56,7 +56,6 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
     StricterEventSchema.pick({
       id: true,
       startAt: true,
-      endAt: true,
       ticketingRevenueIncludingTaxes: true,
       ticketingRevenueExcludingTaxes: true,
       freeTickets: true,
@@ -64,6 +63,7 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
     })
       .extend(
         EventSchema.pick({
+          endAt: true,
           // Since that's overrides there are not required
           placeCapacityOverride: true,
           audienceOverride: true,
