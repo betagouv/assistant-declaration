@@ -317,6 +317,8 @@ export const declarationRouter = router({
               eventSerieId: agnosticDeclaration.eventSerie.id,
               type: declarationType,
               status: EventSerieDeclarationStatus.PENDING,
+              lastTransmissionError: lastTransmissionError,
+              lastTransmissionErrorAt: lastTransmissionErrorAt,
             },
             update: {
               lastTransmissionError: lastTransmissionError,
