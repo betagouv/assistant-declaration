@@ -647,6 +647,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                   <span>
                     <Button
                       disabled={isDirty || fillDeclaration.isPending}
+                      loading={transmitDeclaration.isPending}
                       onClick={async () => {
                         try {
                           const result = await transmitDeclaration.mutateAsync({
