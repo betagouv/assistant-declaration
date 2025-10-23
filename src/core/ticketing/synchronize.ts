@@ -216,21 +216,23 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               }
 
               // For consistency in our logic we assume a default tax rate and force `null` on event if same value
+              const defaultTicketingEventSerieTaxRate = defaultConnectorEventSerieTaxRate;
+
               remoteLiteEventsSeries.set(remoteEventsSerieWrapper.serie.internalTicketingSystemId, {
                 ...remoteEventsSerieWrapper.serie,
-                ticketingRevenueTaxRate: defaultConnectorEventSerieTaxRate,
+                ticketingRevenueTaxRate: defaultTicketingEventSerieTaxRate,
               });
 
               for (const remoteEventWrapper of remoteEventsSerieWrapper.events) {
-                let ticketingRevenueTaxRate: number | null;
-
-                // Since `null` is considered as not overriden in database, when receiving `null` from the connector we assume it's 0%
-                ticketingRevenueTaxRate = remoteEventWrapper.ticketingRevenueTaxRate ?? 0;
-
                 remoteLiteEvents.set(remoteEventWrapper.internalTicketingSystemId, {
                   internalEventSerieTicketingSystemId: remoteEventsSerieWrapper.serie.internalTicketingSystemId,
                   ...remoteEventWrapper,
-                  ticketingRevenueTaxRate: ticketingRevenueTaxRate === defaultConnectorEventSerieTaxRate ? null : ticketingRevenueTaxRate,
+                  // Since `null` is considered as not overriden in database, when receiving `null` from the connector it falls back to the event serie default value
+                  ticketingRevenueTaxRate:
+                    remoteEventWrapper.ticketingRevenueTaxRate === null ||
+                    remoteEventWrapper.ticketingRevenueTaxRate === defaultTicketingEventSerieTaxRate
+                      ? null
+                      : remoteEventWrapper.ticketingRevenueTaxRate,
                   // Make sure of 2 decimals for the comparaison to be right since they are stored like that in database
                   ticketingRevenueExcludingTaxes: truncateFloatAmountNumber(remoteEventWrapper.ticketingRevenueExcludingTaxes),
                   ticketingRevenueIncludingTaxes: truncateFloatAmountNumber(remoteEventWrapper.ticketingRevenueIncludingTaxes),
