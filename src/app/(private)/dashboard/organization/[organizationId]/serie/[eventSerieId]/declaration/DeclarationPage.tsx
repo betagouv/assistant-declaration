@@ -699,6 +699,12 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           }
 
                           throw error;
+                        } finally {
+                          // If something has been transferred to an organism we make all the data immutable
+                          // Since the `transmitDeclaration` endpoint won't return about the state of all pending declarations
+                          // we make sure the global getter will, to make disabled all the form, but also to display the global error
+                          // Note: error from `transmitDeclaration` can colocate with the one of the failed declaration from the getter, but we are fine for now with it since no other proposition
+                          getDeclaration.refetch(); // No need to be async since that's just for UI refresh
                         }
 
                         push(['trackEvent', 'declaration', 'transmit']);
