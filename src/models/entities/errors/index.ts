@@ -117,6 +117,20 @@ export const organizationCollaboratorRoleRequiredError = new BusinessError(
   t('errors.custom.organizationCollaboratorRoleRequired')
 );
 
+// Amount
+export const nonZeroExcludingTaxesAmountRequiresNonZeroIncludingTaxesAmountError = new BusinessError(
+  'nonZeroExcludingTaxesAmountRequiresNonZeroIncludingTaxesAmount',
+  t('errors.custom.nonZeroExcludingTaxesAmountRequiresNonZeroIncludingTaxesAmount')
+);
+export const nonZeroIncludingTaxesAmountRequiresNonZeroExcludingTaxesAmountError = new BusinessError(
+  'nonZeroIncludingTaxesAmountRequiresNonZeroExcludingTaxesAmount',
+  t('errors.custom.nonZeroIncludingTaxesAmountRequiresNonZeroExcludingTaxesAmount')
+);
+export const includingTaxesAmountCannotBeLowerThanExcludingTaxesAmountError = new BusinessError(
+  'includingTaxesAmountCannotBeLowerThanExcludingTaxesAmount',
+  t('errors.custom.includingTaxesAmountCannotBeLowerThanExcludingTaxesAmount')
+);
+
 // Sign up
 export const accountAlreadyWithThisEmailError = new BusinessError('accountAlreadyWithThisEmail', t('errors.custom.accountAlreadyWithThisEmail'));
 

@@ -2,6 +2,7 @@ import { EventSerieDeclarationStatus, Prisma } from '@prisma/client';
 import { renderToBuffer } from '@react-pdf/renderer';
 import slugify from '@sindresorhus/slugify';
 import { secondsToMilliseconds } from 'date-fns';
+import diff from 'microdiff';
 import { z } from 'zod';
 
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
@@ -24,11 +25,13 @@ import {
   sacemDeclarationUnsuccessfulError,
   transmittedDeclarationCannotBeUpdatedError,
 } from '@ad/src/models/entities/errors';
+import { EventSchemaType, EventSerieSchemaType } from '@ad/src/models/entities/event';
 import { PlaceSchemaType } from '@ad/src/models/entities/place';
 import { prisma } from '@ad/src/prisma/client';
 import { declarationPrismaToModel } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { getSimpleArraysDiff, sortSimpleArraysDiff } from '@ad/src/utils/comparaison';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
@@ -314,6 +317,8 @@ export const declarationRouter = router({
               eventSerieId: agnosticDeclaration.eventSerie.id,
               type: declarationType,
               status: EventSerieDeclarationStatus.PENDING,
+              lastTransmissionError: lastTransmissionError,
+              lastTransmissionErrorAt: lastTransmissionErrorAt,
             },
             update: {
               lastTransmissionError: lastTransmissionError,
@@ -535,6 +540,7 @@ export const declarationRouter = router({
             id: true,
             name: true,
             placeId: true,
+            ticketingRevenueTaxRate: true,
             ticketingSystem: {
               select: {
                 organization: {
@@ -561,7 +567,14 @@ export const declarationRouter = router({
             },
             Event: {
               select: {
+                id: true,
                 placeOverrideId: true,
+                // Properties below are used to know if they have been updated
+                ticketingRevenueIncludingTaxes: true,
+                ticketingRevenueExcludingTaxes: true,
+                ticketingRevenueTaxRateOverride: true,
+                freeTickets: true,
+                paidTickets: true,
               },
             },
             EventSerieDeclaration: {
@@ -655,8 +668,7 @@ export const declarationRouter = router({
               },
               placeCapacityOverride: event.placeCapacityOverride,
               audienceOverride: event.audienceOverride,
-              // ticketingRevenueTaxRateOverride: event.ticketingRevenueTaxRateOverride,
-              ticketingRevenueTaxRateOverride: null,
+              ticketingRevenueTaxRateOverride: event.ticketingRevenueTaxRateOverride,
             };
           }),
         });
@@ -846,7 +858,34 @@ export const declarationRouter = router({
             }
           }
 
-          // TODO: in the future we could compare input and what is in database to annoying unnecessary database requests
+          // If ticketing data has been modified we set a boolean so they won't be overriden on the next synchronization
+          const storedEvent = eventSerie.Event.find((eSE) => eSE.id === event.id);
+
+          assert(storedEvent);
+
+          const storedLiteFlattenEvent: Pick<
+            EventSchemaType,
+            'ticketingRevenueIncludingTaxes' | 'ticketingRevenueExcludingTaxes' | 'freeTickets' | 'paidTickets'
+          > &
+            Pick<EventSerieSchemaType, 'ticketingRevenueTaxRate'> = {
+            ticketingRevenueIncludingTaxes: storedEvent.ticketingRevenueIncludingTaxes.toNumber(),
+            ticketingRevenueExcludingTaxes: storedEvent.ticketingRevenueExcludingTaxes.toNumber(),
+            ticketingRevenueTaxRate: (storedEvent.ticketingRevenueTaxRateOverride ?? eventSerie.ticketingRevenueTaxRate).toNumber(),
+            freeTickets: storedEvent.freeTickets,
+            paidTickets: storedEvent.paidTickets,
+          };
+
+          const inputLiteFlattenEvent: typeof storedLiteFlattenEvent = {
+            ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
+            ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
+            ticketingRevenueTaxRate: event.ticketingRevenueTaxRateOverride ?? agnosticDeclaration.eventSerie.ticketingRevenueTaxRate,
+            freeTickets: event.freeTickets,
+            paidTickets: event.paidTickets,
+          };
+
+          const eventDifferences = diff(storedLiteFlattenEvent, inputLiteFlattenEvent);
+          const eventTicketingDataToBecomeImmutable = eventDifferences.length > 0;
+
           await tx.event.update({
             where: {
               id: event.id,
@@ -881,6 +920,7 @@ export const declarationRouter = router({
                 event.ticketingRevenueTaxRateOverride === agnosticDeclaration.eventSerie.ticketingRevenueTaxRate
                   ? null
                   : event.ticketingRevenueTaxRateOverride,
+              lastManualTicketingDataUpdateAt: eventTicketingDataToBecomeImmutable ? new Date() : undefined, // If not detected this time keep the previous value to not loose track of manual updates
             },
           });
 

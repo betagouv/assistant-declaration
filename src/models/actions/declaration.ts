@@ -1,6 +1,12 @@
 import z from 'zod';
 
-import { EventSchema, EventSerieSchema, StricterEventSerieSchema, assertValidExpenses } from '@ad/src/models/entities/event';
+import {
+  EventSchema,
+  EventSerieSchema,
+  StricterEventSerieSchema,
+  assertAmountsRespectTaxLogic,
+  assertValidExpenses,
+} from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceInputSchema } from '@ad/src/models/entities/place';
 
@@ -54,7 +60,11 @@ export const FillDeclarationSchema = z
           .nullable(),
       })
       .superRefine((data, ctx) => {
-        assertValidExpenses(data, ctx); // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
+        // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
+        assertValidExpenses(data, ctx);
+        assertAmountsRespectTaxLogic(data, 'expensesExcludingTaxes', 'expensesIncludingTaxes', ctx);
+        assertAmountsRespectTaxLogic(data, 'introductionFeesExpensesExcludingTaxes', 'introductionFeesExpensesIncludingTaxes', ctx);
+        assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
       }),
     events: z.array(
       EventSchema.pick({

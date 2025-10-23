@@ -33,13 +33,16 @@ export type JsonRecentTicketSchemaType = z.infer<typeof JsonRecentTicketSchema>;
 export const JsonTicketSchema = applyTypedParsers(
   z
     .object({
+      // [IMPORTANT] We wanted to set all amounts as `.nonnegative()` but for some reasons Mapado have tickets
+      // having a negative price despite not being refunded, and despite the category price is 0€ ...
+      // We will just make sure to readjust them correctly
       '@id': z.string().min(1),
       status: z.enum(['payed', 'refunded', 'booked', 'cancelled']),
-      facialValue: z.number().int().nonnegative().nullable(), // Cents (may be different than the ticket price `facialValue`, it seems to confirm it's the amonut paid (or it was a dynamic price...))
-      // facialFeeValue: z.number().int().nonnegative().nullable(), // Cents
-      // paidValue: z.number().nonnegative().nullable(), // Not cents (equal to `facialValue / 100`)
-      // feeValue: z.number().nonnegative().nullable(), // Not cents (equal to `facialFeeValue / 100`) (never saw it different than 0 and it's not documented if it needs)
-      // priceVat: z.number().nonnegative().nullable(), // Not cents (seems always equal to `facialValue`)
+      facialValue: z.number().int().nullable(), // Cents (may be different than the ticket price `facialValue`, it seems to confirm it's the amonut paid (or it was a dynamic price...))
+      // facialFeeValue: z.number().int().nullable(), // Cents
+      // paidValue: z.number().nullable(), // Not cents (equal to `facialValue / 100`)
+      // feeValue: z.number().nullable(), // Not cents (equal to `facialFeeValue / 100`) (never saw it different than 0 and it's not documented if it needs)
+      // priceVat: z.number().nullable(), // Not cents (seems always equal to `facialValue`)
       ticketPrice: z.string().min(1).nullable(),
       eventDate: z.string().min(1),
       isValid: z.boolean(),

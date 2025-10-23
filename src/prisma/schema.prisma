@@ -288,6 +288,7 @@ model Event {
   otherRevenueTaxRate               Decimal?  @db.Decimal(10, 2) // Optional if both amounts directly set
   freeTickets                       Int
   paidTickets                       Int
+  lastManualTicketingDataUpdateAt   DateTime?
 
   // Each event has following properties but they are defined at
   // the event serie level, here it's to override in case of specifics

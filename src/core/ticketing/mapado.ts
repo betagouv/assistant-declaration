@@ -123,34 +123,42 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
 
     let ticketingsToSynchronize: JsonTicketingSchemaType[];
     if (uniqueShortEventDatesIds.length > 0) {
-      const recentlyPurchasedEventDatesResult = await getEventDateCollection({
-        client: this.client,
-        query: {
-          '@id': uniqueShortEventDatesIds.join(','),
-          itemsPerPage: this.itemsPerPageToAvoidPagination,
-          ...{ fields: 'ticketing' },
-        },
-      });
+      const ticketingIdsToSynchronize = new Set<string>();
 
-      if (recentlyPurchasedEventDatesResult.error) {
-        throw recentlyPurchasedEventDatesResult.error;
+      // Despite reducing the ID length, a few organizations have reached `414 Request-URI Too Large` so we chunk them by groups
+      const chunkSize = 500;
+      const chunks: (typeof uniqueShortEventDatesIds)[] = [];
+
+      for (let i = 0; i < uniqueShortEventDatesIds.length; i += chunkSize) {
+        chunks.push(uniqueShortEventDatesIds.slice(i, i + chunkSize));
       }
 
-      const recentlyPurchasedEventDatesData = JsonGetRecentPurchasedEventDatesResponseSchema.parse(recentlyPurchasedEventDatesResult.data);
+      for (const chunkOfUniqueShortEventDatesIds of chunks) {
+        const recentlyPurchasedEventDatesResult = await getEventDateCollection({
+          client: this.client,
+          query: {
+            '@id': chunkOfUniqueShortEventDatesIds.join(','),
+            itemsPerPage: this.itemsPerPageToAvoidPagination,
+            ...{ fields: 'ticketing' },
+          },
+        });
 
-      this.assertCollectionResponseValid(recentlyPurchasedEventDatesData);
+        if (recentlyPurchasedEventDatesResult.error) {
+          throw recentlyPurchasedEventDatesResult.error;
+        }
 
-      // We did not get ticketings as associations in the previous call otherwise it would return a lot of copies
-      const ticketingIdsToSynchronize: string[] = [
-        ...new Set(
-          recentlyPurchasedEventDatesData['hydra:member'].map((eventDate) => {
-            return eventDate.ticketing;
-          })
-        ),
-      ];
+        const recentlyPurchasedEventDatesData = JsonGetRecentPurchasedEventDatesResponseSchema.parse(recentlyPurchasedEventDatesResult.data);
+
+        this.assertCollectionResponseValid(recentlyPurchasedEventDatesData);
+
+        // We did not get ticketings as associations in the previous call otherwise it would return a lot of copies
+        recentlyPurchasedEventDatesData['hydra:member'].forEach((eventDate) => {
+          ticketingIdsToSynchronize.add(eventDate.ticketing);
+        });
+      }
 
       // As for the `event_dates` endpoint and just in case we use the short IDs to avoid `414 Request-URI Too Large`
-      const shortTicketingIdsToSynchronize = ticketingIdsToSynchronize.map((id) => id.replace(/^\/v1\/ticketings\//, ''));
+      const shortTicketingIdsToSynchronize = [...ticketingIdsToSynchronize].map((id) => id.replace(/^\/v1\/ticketings\//, ''));
 
       const ticketingsResult = await getTicketingCollection({
         client: this.client,
@@ -380,18 +388,24 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
             throw new Error('a sold ticket should always match a ticket category');
           }
 
-          // For whatever reason some valid tickets have all amounts null despite NOT being imported and NOT being refunded or so
-          // In this case since it's not clear what's the origin of the problem, we take the amount on the bound `ticketPrice`
+          // For whatever reason some valid tickets have all amounts:
+          // - null despite NOT being imported and NOT being refunded or so
+          // - negative despite NOT being imported and NOT being refunded or so
+          //
+          // Maybe it's the case when they migrate a customer from another ticketing system and some informations are wrongly applied
+          // Since it's not clear what's the origin of the problem, we take the amount on the bound `ticketPrice`
           //
           // Note: it's unclear if the property `paidValue` (not cents) is always the same than `facialValue` (cents), and if the commission is deduced
           // but we confirmed the ticket `facialValue` may be different han the ticket category `facialValue`, but is it due to dynamic price or it really represents the paid amount
           // (we kept using the `facialValue` property since that's the only one available on the `ticketPrice` used as fallback)
           let ticketPriceIncludingTaxes: number;
-          if (ticket.facialValue === null) {
+          if (ticket.facialValue === null || ticket.facialValue < 0) {
             ticketPriceIncludingTaxes = ticketPriceProperties.amount;
           } else {
             ticketPriceIncludingTaxes = ticket.facialValue / 100; // 2000 is 20€
           }
+
+          assert(ticketPriceIncludingTaxes >= 0, 'ticket price must be non-negative');
 
           // [WORKAROUND] `eventDate` is a combination, we want the raw `id` to try matching event date we have already parsed
           const eventDateMatch = ticket.eventDate.match(/\/v1\/event_dates\/(\d+)/);

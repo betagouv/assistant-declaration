@@ -1,8 +1,12 @@
 import z from 'zod';
 
 import { DeclarationStatusSchema, DeclarationTypeSchema, OfficialIdSchema } from '@ad/src/models/entities/common';
-import { DeclarationSchema } from '@ad/src/models/entities/declaration/common';
-import { eventSeriePartialExpensesGreatherThanTotalError } from '@ad/src/models/entities/errors';
+import {
+  eventSeriePartialExpensesGreatherThanTotalError,
+  includingTaxesAmountCannotBeLowerThanExcludingTaxesAmountError,
+  nonZeroExcludingTaxesAmountRequiresNonZeroIncludingTaxesAmountError,
+  nonZeroIncludingTaxesAmountRequiresNonZeroExcludingTaxesAmountError,
+} from '@ad/src/models/entities/errors';
 import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 import { PlaceSchema } from '@ad/src/models/entities/place';
 import { applyTypedParsers } from '@ad/src/utils/zod';
@@ -106,6 +110,62 @@ export function assertValidExpenses(
   }
 }
 
+export function assertAmountsRespectTaxLogic<T extends object, KExcl extends keyof T, KIncl extends keyof T>(
+  data: T & { [P in KExcl | KIncl]: number | null },
+  excludingTaxesAmountKey: KExcl,
+  includingTaxesAmountKey: KIncl,
+  ctx: z.RefinementCtx
+) {
+  // Cannot provide just one of the two amounts, without respecting a few rules of tax logic
+  const excludingTaxesAmount: number | null = data[excludingTaxesAmountKey];
+  const includingTaxesAmount: number | null = data[includingTaxesAmountKey];
+
+  const inputForErrors = {
+    [excludingTaxesAmountKey]: excludingTaxesAmount,
+    [includingTaxesAmountKey]: includingTaxesAmount,
+  };
+
+  if (excludingTaxesAmount === null && includingTaxesAmount === null) {
+    return;
+  } else if (includingTaxesAmount === null) {
+    ctx.issues.push({
+      path: [includingTaxesAmountKey], // Concatenated to where the `superRefine` is applied
+      code: 'invalid_type',
+      expected: 'number',
+      input: inputForErrors,
+    });
+  } else if (excludingTaxesAmount === null) {
+    ctx.issues.push({
+      path: [excludingTaxesAmountKey], // Concatenated to where the `superRefine` is applied
+      code: 'invalid_type',
+      expected: 'number',
+      input: inputForErrors,
+    });
+  } else if (excludingTaxesAmount > 0 && includingTaxesAmount === 0) {
+    ctx.issues.push({
+      ...customErrorToZodIssue(nonZeroExcludingTaxesAmountRequiresNonZeroIncludingTaxesAmountError, {
+        overridePath: [includingTaxesAmountKey as string],
+      }),
+      input: inputForErrors,
+    });
+  } else if (excludingTaxesAmount === 0 && includingTaxesAmount > 0) {
+    ctx.issues.push({
+      ...customErrorToZodIssue(nonZeroIncludingTaxesAmountRequiresNonZeroExcludingTaxesAmountError, {
+        overridePath: [excludingTaxesAmountKey as string],
+      }),
+      input: inputForErrors,
+    });
+  } else if (includingTaxesAmount < excludingTaxesAmount) {
+    // It must be greater or equal
+    ctx.issues.push({
+      ...customErrorToZodIssue(includingTaxesAmountCannotBeLowerThanExcludingTaxesAmountError, {
+        overridePath: [includingTaxesAmountKey as string],
+      }),
+      input: inputForErrors,
+    });
+  }
+}
+
 export const EventSerieSchema = applyTypedParsers(
   StricterEventSerieSchema.extend({
     producerOfficialId: StricterEventSerieSchema.shape.producerOfficialId.nullable(),
@@ -120,9 +180,10 @@ export const EventSerieSchema = applyTypedParsers(
     circusSpecificExpensesTaxRate: StricterEventSerieSchema.shape.circusSpecificExpensesTaxRate.nullable(),
   })
     .superRefine((data, ctx) => {
-      // Note: we could also check each amounts pair are respecting "excluding taxes <= including taxes" but since declarative it seems it can be avoided
-      // ... for now it should be fine since we did not chose if tax rate would be use to automate calculation or not
       assertValidExpenses(data, ctx);
+      assertAmountsRespectTaxLogic(data, 'expensesExcludingTaxes', 'expensesIncludingTaxes', ctx);
+      assertAmountsRespectTaxLogic(data, 'introductionFeesExpensesExcludingTaxes', 'introductionFeesExpensesIncludingTaxes', ctx);
+      assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
     })
     .strict()
 );
@@ -190,7 +251,15 @@ export const EventSchema = applyTypedParsers(
     placeCapacityOverride: StricterEventSchema.shape.placeCapacityOverride.nullable(),
     audienceOverride: StricterEventSchema.shape.audienceOverride.nullable(),
     ticketingRevenueTaxRateOverride: StricterEventSchema.shape.ticketingRevenueTaxRateOverride.nullable(),
-  }).strict()
+  })
+    .superRefine((data, ctx) => {
+      assertAmountsRespectTaxLogic(data, 'ticketingRevenueExcludingTaxes', 'ticketingRevenueIncludingTaxes', ctx);
+      assertAmountsRespectTaxLogic(data, 'consumptionsRevenueExcludingTaxes', 'consumptionsRevenueIncludingTaxes', ctx);
+      assertAmountsRespectTaxLogic(data, 'cateringRevenueExcludingTaxes', 'cateringRevenueIncludingTaxes', ctx);
+      assertAmountsRespectTaxLogic(data, 'programSalesRevenueExcludingTaxes', 'programSalesRevenueIncludingTaxes', ctx);
+      assertAmountsRespectTaxLogic(data, 'otherRevenueExcludingTaxes', 'otherRevenueIncludingTaxes', ctx);
+    })
+    .strict()
 );
 export type EventSchemaType = z.infer<typeof EventSchema>;
 
