@@ -215,8 +215,12 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                 continue;
               }
 
-              // For consistency in our logic we assume a default tax rate and force `null` on event if same value
-              const defaultTicketingEventSerieTaxRate = defaultConnectorEventSerieTaxRate;
+              // For consistency in our logic we assume a default tax rate as fallback if none was already set
+              // (it allows keeping any manual update in the default event serie value)
+              const storedLiteEventSerie = storedLiteEventsSeries.get(remoteEventsSerieWrapper.serie.internalTicketingSystemId);
+              const defaultTicketingEventSerieTaxRate = storedLiteEventSerie
+                ? storedLiteEventSerie.ticketingRevenueTaxRate
+                : defaultConnectorEventSerieTaxRate;
 
               remoteLiteEventsSeries.set(remoteEventsSerieWrapper.serie.internalTicketingSystemId, {
                 ...remoteEventsSerieWrapper.serie,
