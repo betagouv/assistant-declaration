@@ -48,7 +48,7 @@ const tusServer = new Server({
     // (it's easier for the frontend to manipulate the URL directly while keeping the same UUID before/during/after the upload)
     return uuidv4();
   },
-  async onUploadCreate(req, res, upload) {
+  async onUploadCreate(req, upload) {
     // TODO: in case the upload comes from the backend, we should add an authentication check with a custom JWT...
 
     console.debug('checking pre-create authorization to upload');
@@ -97,7 +97,7 @@ const tusServer = new Server({
 
     // Check if the user must be authenticated
     if (attachmentKind.requiresAuthToUpload) {
-      const nextjsReq = req as NextApiRequest;
+      const nextjsReq = req as unknown as NextApiRequest; // Runtime should work despite missing properties in the Tus request type
       const token = await nextAuthGetToken({ req: nextjsReq, secret: nextAuthOptions.secret });
 
       if (!token) {
@@ -107,9 +107,11 @@ const tusServer = new Server({
 
     console.debug('upload authorization granted');
 
-    return res;
+    return {
+      metadata: upload.metadata,
+    };
   },
-  async onUploadFinish(req, res, upload) {
+  async onUploadFinish(req, upload) {
     // TODO: an error in this block responds a 500 HTTP code but Uppy on the frontend still triggers `upload-successs`
 
     // Mime type check could just use a partial buffer for the file but in all cases uploading to the database cannot be streamed...
@@ -130,7 +132,7 @@ const tusServer = new Server({
       const mimeLookup = mime.lookup(attachmentPath); // Returns false if no matching at all
 
       if (mimeLookup !== upload.metadata?.type && mimeLookup !== false) {
-        throw { status_code: 500, body: `the file format does not match the announced MIME type` };
+        return { status_code: 500, body: `the file format does not match the announced MIME type` };
       }
     }
 
@@ -154,18 +156,20 @@ const tusServer = new Server({
       },
     });
 
-    // // `tus` is not designed so we can modify the payload... otherwise we end with: "Cannot set headers after they are sent to the client"
-    // // so we inform the frontend of internal meta through headers
-    // res.setHeader(uploadSuccessHeaders.internalMetaId, attachment.id);
-    // res.setHeader(uploadSuccessHeaders.internalMetaUrl, `https://TODO.com/${attachment.id}?mysecret=1111`);
-
     // If uploaded to the database we remove the file locally for security purpose
     // Notes:
     // - files not finished will be erased/lost at the next deployment (the risk is mitigated to be read on disk since incomplete files)
     // - files in the database not submitted through a business form will be removed thanks to a cron job
     fs.unlink(attachmentPath, () => {});
 
-    return res;
+    return {
+      // headers: {
+      //   // It would be a way to pass to the frontend meaningful information, but it was not used in our previous
+      //   // implementation due to missing ability to modify headers. Not using the following since working as it was
+      //   [uploadSuccessHeaders.internalMetaId]: attachment.id,
+      //   [uploadSuccessHeaders.internalMetaUrl]: `https://TODO.com/${attachment.id}?mysecret=1111`
+      // }
+    };
   },
 });
 
