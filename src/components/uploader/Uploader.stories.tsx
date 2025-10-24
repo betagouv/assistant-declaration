@@ -1,5 +1,5 @@
 import { Meta, StoryFn } from '@storybook/react';
-import { rest } from 'msw';
+import { HttpResponse, delay, http } from 'msw';
 import { within } from 'storybook/test';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
@@ -22,65 +22,66 @@ export default {
 const defaultMswParameters = {
   msw: {
     handlers: [
-      rest.post(`${mockBaseUrl}/api/upload`, (req, res, ctx) => {
-        return res(
-          ctx.status(201),
-          ctx.set(
-            'Access-Control-Expose-Headers',
-            'Authorization, Content-Type, Location, Tus-Extension, Tus-Max-Size, Tus-Resumable, Tus-Version, Upload-Concat, Upload-Defer-Length, Upload-Length, Upload-Metadata, Upload-Offset, X-HTTP-Method-Override, X-Requested-With, X-Forwarded-Host, X-Forwarded-Proto, Forwarded'
-          ),
-          ctx.set('Content-Length', '0'),
-          ctx.set('Location', `${mockBaseUrl}/api/upload/00000000-0000-0000-0000-000000000000`),
-          ctx.set('Tus-Resumable', '1.0.0')
-        );
+      http.post(`${mockBaseUrl}/api/upload`, (info) => {
+        return new HttpResponse(null, {
+          status: 201,
+          headers: {
+            'Access-Control-Expose-Headers':
+              'Authorization, Content-Type, Location, Tus-Extension, Tus-Max-Size, Tus-Resumable, Tus-Version, Upload-Concat, Upload-Defer-Length, Upload-Length, Upload-Metadata, Upload-Offset, X-HTTP-Method-Override, X-Requested-With, X-Forwarded-Host, X-Forwarded-Proto, Forwarded',
+            'Content-Length': '0',
+            Location: `${mockBaseUrl}/api/upload/00000000-0000-0000-0000-000000000000`,
+            'Tus-Resumable': '1.0.0',
+          },
+        });
       }),
-      rest.head(`${mockBaseUrl}/api/upload/:uploadId`, (req, res, ctx) => {
-        return res(
-          ctx.status(200),
-          ctx.set(
-            'Access-Control-Expose-Headers',
-            'Authorization, Content-Type, Location, Tus-Extension, Tus-Max-Size, Tus-Resumable, Tus-Version, Upload-Concat, Upload-Defer-Length, Upload-Length, Upload-Metadata, Upload-Offset, X-HTTP-Method-Override, X-Requested-With, X-Forwarded-Host, X-Forwarded-Proto, Forwarded'
-          ),
-          ctx.set('Content-Length', '16171'),
-          ctx.set('Upload-Offset', '36'),
-          ctx.set('Upload-Length', '16171'),
-          ctx.set(
-            'Upload-Metadata',
-            'caption ,filename bG9sLmpwZw==,filetype aW1hZ2UvanBlZw==,name bG9sLmpwZw==,relativePath bnVsbA==,type aW1hZ2UvanBlZw=='
-          ),
-          ctx.set('Tus-Resumable', '1.0.0')
-        );
+      http.head(`${mockBaseUrl}/api/upload/:uploadId`, (info) => {
+        return new HttpResponse(null, {
+          status: 200,
+          headers: {
+            'Access-Control-Expose-Headers':
+              'Authorization, Content-Type, Location, Tus-Extension, Tus-Max-Size, Tus-Resumable, Tus-Version, Upload-Concat, Upload-Defer-Length, Upload-Length, Upload-Metadata, Upload-Offset, X-HTTP-Method-Override, X-Requested-With, X-Forwarded-Host, X-Forwarded-Proto, Forwarded',
+            'Content-Length': '16171',
+            'Upload-Offset': '36',
+            'Upload-Length': '16171',
+            'Upload-Metadata':
+              'caption ,filename bG9sLmpwZw==,filetype aW1hZ2UvanBlZw==,name bG9sLmpwZw==,relativePath bnVsbA==,type aW1hZ2UvanBlZw==',
+            'Tus-Resumable': '1.0.0',
+          },
+        });
       }),
-      rest.patch(`${mockBaseUrl}/api/upload/:uploadId`, (req, res, ctx) => {
-        return res(
-          ctx.delay(1000), // Set a delay so the loader can be seen
-          ctx.status(204),
-          ctx.set(
-            'Access-Control-Expose-Headers',
-            'Authorization, Content-Type, Location, Tus-Extension, Tus-Max-Size, Tus-Resumable, Tus-Version, Upload-Concat, Upload-Defer-Length, Upload-Length, Upload-Metadata, Upload-Offset, X-HTTP-Method-Override, X-Requested-With, X-Forwarded-Host, X-Forwarded-Proto, Forwarded'
-          ),
-          ctx.set('Upload-Offset', '16171'),
-          ctx.set('Tus-Resumable', '1.0.0')
-        );
+      http.patch(`${mockBaseUrl}/api/upload/:uploadId`, async (info) => {
+        await delay(1000); // Set a delay so the loader can be seen
+
+        return new HttpResponse(null, {
+          status: 204,
+          headers: {
+            'Access-Control-Expose-Headers':
+              'Authorization, Content-Type, Location, Tus-Extension, Tus-Max-Size, Tus-Resumable, Tus-Version, Upload-Concat, Upload-Defer-Length, Upload-Length, Upload-Metadata, Upload-Offset, X-HTTP-Method-Override, X-Requested-With, X-Forwarded-Host, X-Forwarded-Proto, Forwarded',
+            'Upload-Offset': '16171',
+            'Tus-Resumable': '1.0.0',
+          },
+        });
       }),
-      rest.options(`${mockBaseUrl}/api/upload/:uploadId`, (req, res, ctx) => {
-        return res(
-          ctx.status(200),
-          ctx.set('Content-Type', 'application/offset+octet-stream'),
-          ctx.set('Upload-Offset', '0'),
-          ctx.set('Tus-Resumable', '1.0.0')
-        );
+      http.options(`${mockBaseUrl}/api/upload/:uploadId`, (info) => {
+        return new HttpResponse(null, {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/offset+octet-stream',
+            'Upload-Offset': '0',
+            'Tus-Resumable': '1.0.0',
+          },
+        });
       }),
-      rest.delete(`${mockBaseUrl}/api/upload/:uploadId`, (req, res, ctx) => {
-        return res(
-          ctx.status(204),
-          ctx.set(
-            'Access-Control-Expose-Headers',
-            'Authorization, Content-Type, Location, Tus-Extension, Tus-Max-Size, Tus-Resumable, Tus-Version, Upload-Concat, Upload-Defer-Length, Upload-Length, Upload-Metadata, Upload-Offset, X-HTTP-Method-Override, X-Requested-With, X-Forwarded-Host, X-Forwarded-Proto, Forwarded'
-          ),
-          ctx.set('Content-Length', '0'),
-          ctx.set('Tus-Resumable', '1.0.0')
-        );
+      http.delete(`${mockBaseUrl}/api/upload/:uploadId`, (info) => {
+        return new HttpResponse(null, {
+          status: 204,
+          headers: {
+            'Access-Control-Expose-Headers':
+              'Authorization, Content-Type, Location, Tus-Extension, Tus-Max-Size, Tus-Resumable, Tus-Version, Upload-Concat, Upload-Defer-Length, Upload-Length, Upload-Metadata, Upload-Offset, X-HTTP-Method-Override, X-Requested-With, X-Forwarded-Host, X-Forwarded-Proto, Forwarded',
+            'Content-Length': '0',
+            'Tus-Resumable': '1.0.0',
+          },
+        });
       }),
     ],
   },
@@ -92,7 +93,7 @@ const Template: StoryFn<ComponentType> = (args) => {
 
 const NormalStory = Template.bind({});
 NormalStory.args = {
-  attachmentKindRequirements: attachmentKindList[AttachmentKindSchema.Values.AUTHORITY_LOGO],
+  attachmentKindRequirements: attachmentKindList[AttachmentKindSchema.enum.EVENT_SERIE_DOCUMENT],
   maxFiles: 1,
 };
 NormalStory.parameters = { ...defaultMswParameters };

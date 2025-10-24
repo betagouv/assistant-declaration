@@ -38,7 +38,7 @@ export const uppyFiles: UppyFile[] = [
     name: 'sample-1.jpg',
     extension: 'jpg',
     meta: {
-      kind: 'AUTHORITY_LOGO',
+      kind: 'EVENT_SERIE_DOCUMENT',
       relativePath: null,
       name: 'sample-1.jpg',
       type: 'image/jpeg',
