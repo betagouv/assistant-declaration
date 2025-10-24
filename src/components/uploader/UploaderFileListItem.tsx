@@ -6,15 +6,15 @@ import IconButton from '@mui/material/IconButton';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import { UppyFile } from '@uppy/core';
 import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { FileIcon } from '@ad/src/components/FileIcon';
+import { EnhancedUppyFile } from '@ad/src/utils/uppy';
 
 export interface UploaderFileListItemProps {
-  file: UppyFile;
+  file: EnhancedUppyFile;
   onCancel: () => void;
   onRemove: () => void;
   onRetry: () => void;
@@ -46,7 +46,7 @@ export function UploaderFileListItem(props: UploaderFileListItemProps) {
       <ListItem
         secondaryAction={
           <>
-            {props.file.progress && props.file.progress.percentage < 100 ? (
+            {props.file.progress?.percentage !== undefined && props.file.progress.percentage < 100 ? (
               <>
                 <IconButton edge="end" aria-label={`fichier en cours de transmission`} sx={{ ml: 2 }}>
                   {/* TODO: `IconButton` should be `ListItemIcon` here but struggled to make it aligned so leaving it for now */}
@@ -100,9 +100,9 @@ export function UploaderFileListItem(props: UploaderFileListItemProps) {
         {error && (
           <ErrorAlert
             errors={[error]}
-            sx={{
-              ml: 3,
-              mr: 7, // Since with an error there is 2 icons in the "absolute area" we adjust manually
+            style={{
+              marginLeft: '1.5rem',
+              marginRight: '3.5rem', // Since with an error there is 2 icons in the "absolute area" we adjust manually
             }}
           />
         )}

@@ -1,13 +1,13 @@
 import List from '@mui/material/List';
-import { UppyFile } from '@uppy/core';
 
 import { UploaderFileListItem } from '@ad/src/components/uploader/UploaderFileListItem';
+import { EnhancedUppyFile } from '@ad/src/utils/uppy';
 
 export interface UploaderFileListProps {
-  files: UppyFile[];
-  onCancel: (file: UppyFile) => void;
-  onRemove: (file: UppyFile) => void;
-  onRetry: (file: UppyFile) => void;
+  files: EnhancedUppyFile[];
+  onCancel: (file: EnhancedUppyFile) => void;
+  onRemove: (file: EnhancedUppyFile) => void;
+  onRetry: (file: EnhancedUppyFile) => void;
 }
 
 export function UploaderFileList(props: UploaderFileListProps) {

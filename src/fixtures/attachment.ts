@@ -1,9 +1,9 @@
-import { UppyFile } from '@uppy/core';
 import { base64StringToBlob } from 'blob-util';
 
 import { Attachment as EmailAttachment } from '@ad/src/emails/mailer';
 import { imageB64Data, imageContentType } from '@ad/src/fixtures/image';
 import { UiAttachmentSchemaType } from '@ad/src/models/entities/attachment';
+import { EnhancedUppyFile } from '@ad/src/utils/uppy';
 
 export const uiAttachments: UiAttachmentSchemaType[] = [
   {
@@ -31,7 +31,7 @@ export const uiAttachments: UiAttachmentSchemaType[] = [
 
 const blob = base64StringToBlob(imageB64Data, imageContentType);
 
-export const uppyFiles: UppyFile[] = [
+export const uppyFiles: EnhancedUppyFile[] = [
   {
     source: 'Dashboard',
     id: 'uppy-a/jpg-1e-image/jpeg-16171-1556651302320',
@@ -61,6 +61,7 @@ export const uppyFiles: UppyFile[] = [
       uploadURL: 'http://localhost:3000/api/upload/e44117d7-ef80-4cd4-bb1a-8378adbf8bb2',
     },
     isPaused: false,
+    isGhost: false,
   },
 ];
 

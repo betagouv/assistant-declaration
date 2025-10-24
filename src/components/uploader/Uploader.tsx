@@ -1,14 +1,13 @@
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import Uppy, { ErrorResponse, FileProgress, FileRemoveReason, State, SuccessResponse, UploadResult, Uppy as UppyEntity, UppyFile } from '@uppy/core';
+import Uppy, { ErrorResponse, FileRemoveReason, State, UploadResult } from '@uppy/core';
 import '@uppy/core/dist/style.min.css';
 import DragDrop from '@uppy/drag-drop';
-import en_US from '@uppy/locales/lib/en_US';
 import fr_FR from '@uppy/locales/lib/fr_FR';
 import Tus from '@uppy/tus';
-import { FileKind, mimeData } from 'human-filetypes';
-import { MutableRefObject, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { FileProgress } from '@uppy/utils';
+import { FileKind } from 'human-filetypes';
+import { RefObject, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
@@ -18,6 +17,7 @@ import { AttachmentKindRequirementsSchemaType, UiAttachmentSchemaType } from '@a
 import { mockBaseUrl, shouldTargetMock } from '@ad/src/server/mock/environment';
 import { getExtensionsFromFileKinds, getFileIdFromUrl, getFileKindFromMime, getMimesFromFileKinds } from '@ad/src/utils/attachment';
 import { bitsFor } from '@ad/src/utils/bits';
+import { EnhancedUppyEntity, EnhancedUppyFile } from '@ad/src/utils/uppy';
 import { getBaseUrl } from '@ad/src/utils/url';
 
 export const UploaderContext = createContext({
@@ -52,8 +52,8 @@ export function Uploader({
   const dragAndDropRef = useRef<HTMLElement | null>(null); // This is used to scroll to the error message
   const [globalError, setGlobalError] = useState<Error | null>(null);
 
-  const [uppy, setUppy] = useState<UppyEntity>(() => setupUppy({ attachmentKindRequirements, initialState, minFiles, maxFiles }));
-  const [files, setFiles] = useState<UppyFile[]>(() => uppy.getFiles());
+  const [uppy, setUppy] = useState<EnhancedUppyEntity>(() => setupUppy({ attachmentKindRequirements, initialState, minFiles, maxFiles }));
+  const [files, setFiles] = useState<EnhancedUppyFile[]>(() => uppy.getFiles());
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -61,19 +61,19 @@ export function Uploader({
       setFiles(uppy.getFiles());
     };
 
-    const handleFileAdded = (file: UppyFile) => {
+    const handleFileAdded = (file: EnhancedUppyFile) => {
       updateFiles();
     };
 
-    const handleFileRemoved = (file: UppyFile, reason: FileRemoveReason) => {
+    const handleFileRemoved = (file: EnhancedUppyFile, reason: FileRemoveReason) => {
       updateFiles();
     };
 
-    const handleUploadProgress = (file: UppyFile | undefined, progress: FileProgress) => {
+    const handleUploadProgress = (file: EnhancedUppyFile | undefined, progress: FileProgress) => {
       updateFiles();
     };
 
-    const handleUploadSuccess = async (file: UppyFile | undefined, response: SuccessResponse) => {
+    const handleUploadSuccess = async (file: EnhancedUppyFile | undefined, response: SuccessResponse) => {
       if (!file || !response.uploadURL) {
         return;
       }
@@ -85,11 +85,11 @@ export function Uploader({
       updateFiles();
     };
 
-    const handleUploadError = (file: UppyFile | undefined, error: Error, response: ErrorResponse | undefined) => {
+    const handleUploadError = (file: EnhancedUppyFile | undefined, error: Error, response: ErrorResponse | undefined) => {
       updateFiles();
     };
 
-    const handleRestrictionFailed = (file: UppyFile | undefined, error: Error) => {
+    const handleRestrictionFailed = (file: EnhancedUppyFile | undefined, error: Error) => {
       setGlobalError(error);
 
       dragAndDropRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -119,7 +119,12 @@ export function Uploader({
     // Make sure to notify only if it changes... but it rerenders the parent... maybe better to have the reference? not sure...
 
     const registerListeners = () => {
-      // All possibility listed on https://github.com/transloadit/uppy/blob/master/website/src/docs/uppy.md#events
+      // All possibility listed on https://uppy.io/docs/uppy/#events
+      uppy.on('file-added', (aaa: EnhancedUppyFile) => {
+        //
+        aaa;
+      });
+
       uppy.on('file-added', handleFileAdded);
       uppy.on('file-removed', handleFileRemoved);
       uppy.on('upload-progress', handleUploadProgress);
@@ -161,21 +166,21 @@ export function Uploader({
   }, [isUploading, isUploadingChanged]);
 
   const cancelUpload = useCallback(
-    (file: UppyFile) => {
+    (file: EnhancedUppyFile) => {
       uppy.removeFile(file.id);
     },
     [uppy]
   );
 
   const removeFile = useCallback(
-    (file: UppyFile) => {
+    (file: EnhancedUppyFile) => {
       uppy.removeFile(file.id);
     },
     [uppy]
   );
 
   const retryUpload = useCallback(
-    async (file: UppyFile) => {
+    async (file: EnhancedUppyFile) => {
       if ((file as any).response.postUploadHookFailure === true) {
         // Reuse the logic after the Uppy logic succeeds
         const internalId = (file as any).meta.internalMeta.id as string;
@@ -228,7 +233,7 @@ export function Uploader({
   );
 }
 
-function setupUppy(props: Pick<UploaderProps, 'attachmentKindRequirements' | 'initialState' | 'minFiles' | 'maxFiles'>): UppyEntity {
+function setupUppy(props: Pick<UploaderProps, 'attachmentKindRequirements' | 'initialState' | 'minFiles' | 'maxFiles'>): EnhancedUppyEntity {
   const instance = new Uppy({
     id: 'uppy',
     autoProceed: true,
@@ -255,7 +260,7 @@ function setupUppy(props: Pick<UploaderProps, 'attachmentKindRequirements' | 'in
   return instance;
 }
 
-function setupTus(uppy: UppyEntity) {
+function setupTus(uppy: EnhancedUppyEntity) {
   // The maximum chunk size is really important depending on the backend limits:
   // - Google Storage recommends 8 MiB when uploading with chunks directly on them
   // - Istio could have some limitations but we didn't find what they are
@@ -264,7 +269,7 @@ function setupTus(uppy: UppyEntity) {
   // - Since we use a `tus` server on Scalingo we will set a reasonnable limit (5 MiB)
   const chunkSize = 5 * bitsFor.MiB;
 
-  const baseUrl = shouldTargetMock() ? mockBaseUrl : getBaseUrl();
+  const baseUrl = shouldTargetMock ? mockBaseUrl : getBaseUrl();
 
   uppy.use(Tus, {
     endpoint: `${baseUrl}/api/upload`,
@@ -286,7 +291,7 @@ function setupTus(uppy: UppyEntity) {
   });
 }
 
-function setupDragDrop(uppy: UppyEntity, dragAndDropRef: MutableRefObject<HTMLElement | null>) {
+function setupDragDrop(uppy: EnhancedUppyEntity, dragAndDropRef: RefObject<HTMLElement | null>) {
   uppy.use(DragDrop, {
     target: dragAndDropRef.current || undefined,
     height: '100%',
@@ -301,7 +306,7 @@ function getLocale(): any {
 
 async function reusableUploadSuccessCallback(
   uppy: Uppy,
-  file: UppyFile,
+  file: EnhancedUppyFile,
   response: SuccessResponse,
   internalId: string,
   onCommittedFilesChanged: UploaderProps['onCommittedFilesChanged'],
