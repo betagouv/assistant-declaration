@@ -5,7 +5,6 @@ import '@uppy/core/dist/style.min.css';
 import DragDrop from '@uppy/drag-drop';
 import fr_FR from '@uppy/locales/lib/fr_FR';
 import Tus from '@uppy/tus';
-import { FileProgress, FileProgressStarted } from '@uppy/utils';
 import { FileKind } from 'human-filetypes';
 import { RefObject, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +16,7 @@ import { AttachmentKindRequirementsSchemaType, UiAttachmentSchemaType } from '@a
 import { mockBaseUrl, shouldTargetMock } from '@ad/src/server/mock/environment';
 import { getExtensionsFromFileKinds, getFileIdFromUrl, getFileKindFromMime, getMimesFromFileKinds } from '@ad/src/utils/attachment';
 import { bitsFor } from '@ad/src/utils/bits';
-import { EnhancedUppyEntity, EnhancedUppyEventMap, EnhancedUppyFile } from '@ad/src/utils/uppy';
+import { AdditionalMetaFields, EnhancedUppyEntity, EnhancedUppyEventMap, EnhancedUppyFile, ResponseBody } from '@ad/src/utils/uppy';
 import { getBaseUrl } from '@ad/src/utils/url';
 
 export const UploaderContext = createContext({
@@ -105,9 +104,9 @@ export function Uploader({
       'info-visible': () => {
         const { info } = uppy.getState();
 
-        if (info) {
-          console.log(`${info.message} ${info.details}`);
-        }
+        info.forEach((infoItem) => {
+          console.log(infoItem.details ? `${infoItem.message} ${infoItem.details}` : infoItem.message);
+        });
       },
       'info-hidden': () => {
         setGlobalError(null);
@@ -221,7 +220,7 @@ export function Uploader({
           </Box>
           {globalError && (
             <>
-              <ErrorAlert errors={[globalError]} sx={{ mt: 1 }} />
+              <ErrorAlert errors={[globalError]} style={{ marginTop: '0.5rem' }} />
             </>
           )}
           {files.length > 0 && (
@@ -236,7 +235,7 @@ export function Uploader({
 }
 
 function setupUppy(props: Pick<UploaderProps, 'attachmentKindRequirements' | 'initialState' | 'minFiles' | 'maxFiles'>): EnhancedUppyEntity {
-  const instance = new Uppy({
+  const instance = new Uppy<AdditionalMetaFields, ResponseBody>({
     id: 'uppy',
     autoProceed: true,
     locale: getLocale(),
@@ -307,7 +306,7 @@ function getLocale(): any {
 }
 
 async function reusableUploadSuccessCallback(
-  uppy: Uppy,
+  uppy: EnhancedUppyEntity,
   file: EnhancedUppyFile,
   response: SuccessResponse,
   internalId: string,

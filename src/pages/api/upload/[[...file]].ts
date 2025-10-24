@@ -157,7 +157,7 @@ const tusServer = new Server({
     // // `tus` is not designed so we can modify the payload... otherwise we end with: "Cannot set headers after they are sent to the client"
     // // so we inform the frontend of internal meta through headers
     // res.setHeader(uploadSuccessHeaders.internalMetaId, attachment.id);
-    // res.setHeader(uploadSuccessHeaders.internalMetaUrl, `https//TODO.com/${attachment.id}?mysecret=1111`);
+    // res.setHeader(uploadSuccessHeaders.internalMetaUrl, `https://TODO.com/${attachment.id}?mysecret=1111`);
 
     // If uploaded to the database we remove the file locally for security purpose
     // Notes:
