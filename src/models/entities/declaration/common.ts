@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 import { AddressSchema } from '@ad/src/models/entities/address';
-import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
+import { AttachmentInputSchema } from '@ad/src/models/entities/attachment';
+import { DeclarationAttachmentTypeSchema, DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import {
   EventSchema,
   EventSerieSchema,
@@ -45,6 +46,7 @@ export const DeclarationSchema = applyTypedParsers(
         circusSpecificExpensesIncludingTaxes: true,
         circusSpecificExpensesExcludingTaxes: true,
         circusSpecificExpensesTaxRate: true,
+        attachments: true,
       })
         .extend({
           place: PlaceSchema.nullable(),
@@ -124,6 +126,12 @@ export const DeclarationInputSchema = applyTypedParsers(
       })
         .extend({
           place: PlaceInputSchema,
+          attachments: z.array(
+            z.object({
+              id: AttachmentInputSchema,
+              type: DeclarationAttachmentTypeSchema,
+            })
+          ),
         })
         .superRefine((data, ctx) => {
           // `.pick` won't propagate picked `.superRefine` so we have to apply it here again

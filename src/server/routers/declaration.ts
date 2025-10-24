@@ -8,7 +8,13 @@ import { z } from 'zod';
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
 import { getSacdClient } from '@ad/src/core/declaration/sacd';
 import { Attachment as EmailAttachment, mailer } from '@ad/src/emails/mailer';
-import { FillDeclarationSchema, GetDeclarationSchema, TransmitDeclarationSchema } from '@ad/src/models/actions/declaration';
+import {
+  FillDeclarationSchema,
+  GetDeclarationSchema,
+  TransmitDeclarationSchema,
+  fillDeclarationAttachmentsMax,
+} from '@ad/src/models/actions/declaration';
+import { AttachmentKindSchema } from '@ad/src/models/entities/attachment';
 import { DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { DeclarationInputSchema, DeclarationSchema, DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
 import { SacdDeclarationSchema, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
@@ -30,6 +36,7 @@ import {
 import { EventSchemaType, EventSerieSchemaType } from '@ad/src/models/entities/event';
 import { PlaceSchemaType } from '@ad/src/models/entities/place';
 import { prisma } from '@ad/src/prisma/client';
+import { formatSafeAttachmentsToProcess } from '@ad/src/server/routers/common/attachment';
 import { declarationPrismaToModel } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
@@ -487,6 +494,19 @@ export const declarationRouter = router({
             },
           },
         },
+        AttachmentsOnEventSeries: {
+          select: {
+            type: true,
+            attachment: {
+              select: {
+                id: true,
+                contentType: true,
+                name: true,
+                size: true,
+              },
+            },
+          },
+        },
         EventSerieDeclaration: {
           select: {
             id: true,
@@ -576,6 +596,16 @@ export const declarationRouter = router({
         placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
     }
 
+    // Since attachments URLs are generated on the fly asynchronously, we calculate them outside `declarationPrismaToModel()`
+    const attachmentsWithTypes = await Promise.all(
+      eventSerie.AttachmentsOnEventSeries.map(async (aOES) => {
+        return {
+          type: xxx,
+          attachment: await attachmentPrismaToModel(aOES.attachment),
+        };
+      })
+    );
+
     return {
       declarationWrapper: {
         declaration: declarationPrismaToModel(eventSerie),
@@ -636,6 +666,16 @@ export const declarationRouter = router({
                 ticketingRevenueTaxRateOverride: true,
                 freeTickets: true,
                 paidTickets: true,
+              },
+            },
+            AttachmentsOnEventSeries: {
+              select: {
+                type: true,
+                attachment: {
+                  select: {
+                    id: true,
+                  },
+                },
               },
             },
             EventSerieDeclaration: {
@@ -733,6 +773,20 @@ export const declarationRouter = router({
             };
           }),
         });
+
+        // const { attachmentsToAdd, markNewAttachmentsAsUsed } = await formatSafeAttachmentsToProcess(
+        //   AttachmentKindSchema.enum.EVENT_SERIE_DOCUMENT,
+        //   [input.attachmentId], // TODO: neeeeeeeeeeeeeeeeWWWWWWWWWWW
+        //   eventSerie.AttachmentsOnEventSeries.map((aOES) => aOES.attachment.id),
+        //   {
+        //     // TODO:
+        //     // TODO:
+        //     // TODO: to set above or below agnostic entity?
+        //     // TODO:
+        //     // TODO:
+        //     maxAttachmentsTotal: fillDeclarationAttachmentsMax,
+        //   }
+        // );
 
         const oldPlacesIds = new Set<string>();
         const newPlacesIds = new Set<string>();
@@ -1109,6 +1163,19 @@ export const declarationRouter = router({
                     id: true,
                     name: true,
                     address: true,
+                  },
+                },
+              },
+            },
+            AttachmentsOnEventSeries: {
+              select: {
+                type: true,
+                attachment: {
+                  select: {
+                    id: true,
+                    contentType: true,
+                    name: true,
+                    size: true,
                   },
                 },
               },

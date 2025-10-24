@@ -1,6 +1,7 @@
 import z from 'zod';
 
-import { DeclarationStatusSchema, DeclarationTypeSchema, OfficialIdSchema } from '@ad/src/models/entities/common';
+import { AttachmentSchema } from '@ad/src/models/entities/attachment';
+import { DeclarationAttachmentTypeSchema, DeclarationStatusSchema, DeclarationTypeSchema, OfficialIdSchema } from '@ad/src/models/entities/common';
 import {
   eventSeriePartialExpensesGreatherThanTotalError,
   includingTaxesAmountCannotBeLowerThanExcludingTaxesAmountError,
@@ -54,6 +55,12 @@ export const StricterEventSerieSchema = z.object({
   circusSpecificExpensesIncludingTaxes: z.number().nonnegative(),
   circusSpecificExpensesExcludingTaxes: z.number().nonnegative(),
   circusSpecificExpensesTaxRate: z.number().nonnegative(),
+  attachments: z.array(
+    z.object({
+      id: AttachmentSchema.shape.id,
+      type: DeclarationAttachmentTypeSchema,
+    })
+  ),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

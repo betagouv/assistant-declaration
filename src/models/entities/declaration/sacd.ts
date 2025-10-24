@@ -40,6 +40,7 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
     introductionFeesExpensesExcludingTaxes: true,
     circusSpecificExpensesIncludingTaxes: true,
     circusSpecificExpensesExcludingTaxes: true,
+    attachments: true,
   })
     .extend({
       place: PlaceSchema,
