@@ -8,7 +8,13 @@ import { z } from 'zod';
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
 import { getSacdClient } from '@ad/src/core/declaration/sacd';
 import { Attachment as EmailAttachment, mailer } from '@ad/src/emails/mailer';
-import { FillDeclarationSchema, GetDeclarationSchema, TransmitDeclarationSchema } from '@ad/src/models/actions/declaration';
+import {
+  FillDeclarationSchema,
+  GetDeclarationSchema,
+  TransmitDeclarationSchema,
+  fillDeclarationAttachmentsMax,
+} from '@ad/src/models/actions/declaration';
+import { AttachmentKindSchema } from '@ad/src/models/entities/attachment';
 import { DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { DeclarationInputSchema, DeclarationSchema, DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
 import { SacdDeclarationSchema, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
@@ -30,7 +36,8 @@ import {
 import { EventSchemaType, EventSerieSchemaType } from '@ad/src/models/entities/event';
 import { PlaceSchemaType } from '@ad/src/models/entities/place';
 import { prisma } from '@ad/src/prisma/client';
-import { declarationPrismaToModel } from '@ad/src/server/routers/mappers';
+import { formatSafeAttachmentsToProcess } from '@ad/src/server/routers/common/attachment';
+import { attachmentOnEventSeriePrismaToModel, attachmentPrismaToModel, declarationPrismaToModel } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -129,6 +136,12 @@ export const declarationRouter = router({
                 address: true,
               },
             },
+          },
+        },
+        AttachmentsOnEventSeries: {
+          select: {
+            attachmentId: true,
+            type: true,
           },
         },
         EventSerieDeclaration: {
@@ -487,6 +500,20 @@ export const declarationRouter = router({
             },
           },
         },
+        AttachmentsOnEventSeries: {
+          select: {
+            attachmentId: true,
+            type: true,
+            attachment: {
+              select: {
+                id: true,
+                contentType: true,
+                name: true,
+                size: true,
+              },
+            },
+          },
+        },
         EventSerieDeclaration: {
           select: {
             id: true,
@@ -576,9 +603,29 @@ export const declarationRouter = router({
         placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
     }
 
+    // Attachments links must be generated on the fly asynchronously, that's why they are mapped separately than the rest (outside `declarationPrismaToModel()`)
+    const attachmentsWithTypes = await Promise.all(
+      eventSerie.AttachmentsOnEventSeries.map(async (aOES) => {
+        const { id, type } = attachmentOnEventSeriePrismaToModel(aOES);
+
+        return {
+          ...(await attachmentPrismaToModel(aOES.attachment)),
+          type: type,
+        };
+      })
+    );
+
+    const declarationModel = declarationPrismaToModel(eventSerie);
+
     return {
       declarationWrapper: {
-        declaration: declarationPrismaToModel(eventSerie),
+        declaration: {
+          ...declarationModel,
+          eventSerie: {
+            ...declarationModel.eventSerie,
+            attachments: attachmentsWithTypes,
+          },
+        },
         placeholder: placeholder,
         transmissions: eventSerie.EventSerieDeclaration.map((eSD) => {
           return {
@@ -636,6 +683,16 @@ export const declarationRouter = router({
                 ticketingRevenueTaxRateOverride: true,
                 freeTickets: true,
                 paidTickets: true,
+              },
+            },
+            AttachmentsOnEventSeries: {
+              select: {
+                type: true,
+                attachment: {
+                  select: {
+                    id: true,
+                  },
+                },
               },
             },
             EventSerieDeclaration: {
@@ -697,6 +754,7 @@ export const declarationRouter = router({
             circusSpecificExpensesIncludingTaxes: input.eventSerie.circusSpecificExpensesIncludingTaxes,
             circusSpecificExpensesExcludingTaxes: input.eventSerie.circusSpecificExpensesExcludingTaxes,
             circusSpecificExpensesTaxRate: input.eventSerie.circusSpecificExpensesTaxRate,
+            attachments: input.eventSerie.attachments,
           },
           events: input.events.map((event) => {
             return {
@@ -733,6 +791,66 @@ export const declarationRouter = router({
             };
           }),
         });
+
+        // The security about attaching documents is managed in the following helper
+        const { attachmentsToAdd, attachmentsToRemove, attachmentsUnchanged, markNewAttachmentsAsUsed } = await formatSafeAttachmentsToProcess(
+          AttachmentKindSchema.enum.EVENT_SERIE_DOCUMENT,
+          agnosticDeclaration.eventSerie.attachments.map((attachment) => attachment.id),
+          eventSerie.AttachmentsOnEventSeries.map((aOES) => aOES.attachment.id),
+          {
+            maxAttachmentsTotal: fillDeclarationAttachmentsMax,
+            prismaInstance: tx,
+          }
+        );
+
+        if (attachmentsToAdd.length > 0) {
+          await tx.attachmentsOnEventSeries.createMany({
+            skipDuplicates: true,
+            data: attachmentsToAdd.map((attachmentId) => {
+              const attachmentWithType = agnosticDeclaration.eventSerie.attachments.find((eSA) => eSA.id === attachmentId);
+
+              assert(attachmentWithType);
+
+              return {
+                eventSerieId: eventSerie.id,
+                attachmentId: attachmentId,
+                type: attachmentWithType.type,
+              };
+            }),
+          });
+        }
+
+        if (attachmentsToRemove.length > 0) {
+          await tx.attachmentsOnEventSeries.deleteMany({
+            where: {
+              eventSerieId: eventSerie.id,
+              attachmentId: {
+                in: attachmentsToRemove.map((attachmentId) => attachmentId),
+              },
+            },
+          });
+        }
+
+        await markNewAttachmentsAsUsed();
+
+        // An attachment unchanged could still receive an update about its own type
+        for (const unchangedAttachmentId of attachmentsUnchanged) {
+          const attachmentWithType = agnosticDeclaration.eventSerie.attachments.find((eSA) => eSA.id === unchangedAttachmentId);
+
+          assert(attachmentWithType);
+
+          await tx.attachmentsOnEventSeries.update({
+            where: {
+              eventSerieId_attachmentId: {
+                eventSerieId: eventSerie.id,
+                attachmentId: unchangedAttachmentId,
+              },
+            },
+            data: {
+              type: attachmentWithType.type,
+            },
+          });
+        }
 
         const oldPlacesIds = new Set<string>();
         const newPlacesIds = new Set<string>();
@@ -1113,6 +1231,20 @@ export const declarationRouter = router({
                 },
               },
             },
+            AttachmentsOnEventSeries: {
+              select: {
+                attachmentId: true,
+                type: true,
+                attachment: {
+                  select: {
+                    id: true,
+                    contentType: true,
+                    name: true,
+                    size: true,
+                  },
+                },
+              },
+            },
           },
         });
 
@@ -1174,8 +1306,28 @@ export const declarationRouter = router({
       }
     );
 
+    // Attachments links must be generated on the fly asynchronously, that's why they are mapped separately than the rest (outside `declarationPrismaToModel()`)
+    const attachmentsWithTypes = await Promise.all(
+      returnedEventSerie.AttachmentsOnEventSeries.map(async (aOES) => {
+        const { id, type } = attachmentOnEventSeriePrismaToModel(aOES);
+
+        return {
+          ...(await attachmentPrismaToModel(aOES.attachment)),
+          type: type,
+        };
+      })
+    );
+
+    const declarationModel = declarationPrismaToModel(returnedEventSerie);
+
     return {
-      declaration: declarationPrismaToModel(returnedEventSerie),
+      declaration: {
+        ...declarationModel,
+        eventSerie: {
+          ...declarationModel.eventSerie,
+          attachments: attachmentsWithTypes,
+        },
+      } satisfies DeclarationWrapperSchemaType['declaration'],
     };
   }),
 });

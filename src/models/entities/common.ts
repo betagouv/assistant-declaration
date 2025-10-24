@@ -9,6 +9,9 @@ export type DeclarationTypeSchemaType = z.infer<typeof DeclarationTypeSchema>;
 export const DeclarationStatusSchema = z.enum(['PENDING', 'PROCESSED', 'CANCELED']);
 export type DeclarationStatusSchemaType = z.infer<typeof DeclarationStatusSchema>;
 
+export const DeclarationAttachmentTypeSchema = z.enum(['ARTISTIC_CONTRACT', 'PERFORMED_WORK_PROGRAM', 'REVENUE_STATEMENT', 'OTHER']);
+export type DeclarationAttachmentTypeSchemaType = z.infer<typeof DeclarationAttachmentTypeSchema>;
+
 export const OfficialIdSchema = z
   .string()
   .min(1)

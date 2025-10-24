@@ -1,5 +1,7 @@
 import z from 'zod';
 
+import { AttachmentInputSchema } from '@ad/src/models/entities/attachment';
+import { DeclarationAttachmentTypeSchema } from '@ad/src/models/entities/common';
 import {
   EventSchema,
   EventSerieSchema,
@@ -27,6 +29,7 @@ export type GetDeclarationSchemaType = z.infer<typeof GetDeclarationSchema>;
 export const GetDeclarationPrefillSchema = GetDeclarationSchema.partial();
 export type GetDeclarationPrefillSchemaType = z.infer<typeof GetDeclarationPrefillSchema>;
 
+export const fillDeclarationAttachmentsMax = 100;
 export const FillDeclarationSchema = z
   .object({
     eventSerieId: EventSerieSchema.shape.id,
@@ -58,6 +61,12 @@ export const FillDeclarationSchema = z
             name: StricterEventSerieSchema.shape.producerName,
           })
           .nullable(),
+        attachments: z.array(
+          z.object({
+            id: AttachmentInputSchema,
+            type: DeclarationAttachmentTypeSchema,
+          })
+        ),
       })
       .superRefine((data, ctx) => {
         // `.pick` won't propagate picked `.superRefine` so we have to apply it here again

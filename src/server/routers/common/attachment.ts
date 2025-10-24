@@ -1,6 +1,5 @@
-import { AttachmentStatus } from '@prisma/client';
+import { AttachmentStatus, Prisma } from '@prisma/client';
 import { getUnixTime, minutesToSeconds } from 'date-fns';
-import { diff } from 'fast-array-diff';
 import { SignJWT, jwtVerify } from 'jose';
 import isJwtTokenExpired from 'jwt-check-expiry';
 import * as tus from 'tus-js-client';
@@ -10,6 +9,7 @@ import { fileUploadError, tooManyUploadedFilesError } from '@ad/src/models/entit
 import { prisma } from '@ad/src/prisma/client';
 import { getFileIdFromUrl } from '@ad/src/utils/attachment';
 import { bitsFor } from '@ad/src/utils/bits';
+import { getSimpleArraysDiff, sortSimpleArraysDiff } from '@ad/src/utils/comparaison';
 import { getListeningPort, getLocalHostname } from '@ad/src/utils/url';
 import { getBaseUrl } from '@ad/src/utils/url';
 
@@ -91,12 +91,14 @@ export async function verifySignedAttachmentLink(
 
 export interface SafeAttachmentsToProcessOptions {
   maxAttachmentsTotal?: number;
+  prismaInstance?: Prisma.TransactionClient;
 }
 
 export interface SafeAttachmentsToProcess {
   markNewAttachmentsAsUsed: () => Promise<void>;
   attachmentsToAdd: string[];
   attachmentsToRemove: string[];
+  attachmentsUnchanged: string[];
 }
 
 export async function formatSafeAttachmentsToProcess(
@@ -105,6 +107,8 @@ export async function formatSafeAttachmentsToProcess(
   existingAttachmentsIds: string[],
   options?: SafeAttachmentsToProcessOptions
 ): Promise<SafeAttachmentsToProcess> {
+  const prismaInstance = options?.prismaInstance ?? prisma;
+
   // Remove duplicates
   inputAttachmentsIds = [...new Set(inputAttachmentsIds)];
   existingAttachmentsIds = [...new Set(existingAttachmentsIds)];
@@ -115,13 +119,14 @@ export async function formatSafeAttachmentsToProcess(
     }
   }
 
-  const { removed, added } = diff(existingAttachmentsIds, inputAttachmentsIds);
+  const diffResult = getSimpleArraysDiff(existingAttachmentsIds, inputAttachmentsIds);
+  const sortedDiffResult = sortSimpleArraysDiff(diffResult);
 
-  if (added.length) {
-    const existingAttachments = await prisma.attachment.findMany({
+  if (sortedDiffResult.added.length > 0) {
+    const existingAttachments = await prismaInstance.attachment.findMany({
       where: {
         id: {
-          in: inputAttachmentsIds,
+          in: sortedDiffResult.added,
         },
         kind: attachmentKind,
         status: AttachmentStatus.PENDING_UPLOAD,
@@ -130,29 +135,33 @@ export async function formatSafeAttachmentsToProcess(
 
     // If it does not match there are multiple possibilities, all suspicious:
     // - the user tries to bind a different kind of document (maybe to bypass upload restrictions)
-    // - the user tries to bind a document already bound, it could be an attempt to "steal" another document by making it visible on the hacker's account
-    if (existingAttachments.length !== inputAttachmentsIds.length) {
+    // - the user tries to bind a document already bound, it could be an attempt to "steal" another document by making it visible on the hacker's account (but this one is already considered "valid")
+    // - the user tries to bind a document not bound, but pending uploads are removed after a few days and their UUID is unguessable
+    if (existingAttachments.length !== sortedDiffResult.added.length) {
       throw fileUploadError;
     }
   }
 
   return {
-    attachmentsToAdd: added,
-    attachmentsToRemove: removed,
-    markNewAttachmentsAsUsed: added.length
-      ? async () => {
-          await prisma.attachment.updateMany({
-            data: {
-              status: AttachmentStatus.VALID,
-            },
-            where: {
-              id: {
-                in: added,
+    attachmentsToAdd: sortedDiffResult.added,
+    attachmentsToRemove: sortedDiffResult.removed,
+    attachmentsUnchanged: sortedDiffResult.unchanged.concat(sortedDiffResult.updated), // Those "updated" during the diff is just about the array index being different
+    markNewAttachmentsAsUsed:
+      sortedDiffResult.added.length > 0
+        ? async () => {
+            // Files unbound from any business entity will be clean up by a regular cron job
+            await prismaInstance.attachment.updateMany({
+              data: {
+                status: AttachmentStatus.VALID,
               },
-            },
-          });
-        }
-      : async () => {},
+              where: {
+                id: {
+                  in: sortedDiffResult.added,
+                },
+              },
+            });
+          }
+        : async () => {},
   };
 }
 

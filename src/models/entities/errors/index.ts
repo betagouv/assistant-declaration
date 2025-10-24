@@ -105,6 +105,7 @@ export const fileAccessLinkHasExpiredError = new BusinessError('fileAccessLinkHa
 export const fileAccessNotAuthorizedError = new BusinessError('fileAccessNotAuthorized', t('errors.custom.fileAccessNotAuthorized'));
 export const fileIdMalformatedError = new BusinessError('fileIdMalformated', t('errors.custom.fileIdMalformated'));
 export const fileNotFoundError = new BusinessError('fileNotFound', t('errors.custom.fileNotFound'));
+export const fileRetriableUploadError = new BusinessError('fileRetriableUpload', t('errors.custom.fileRetriableUpload'));
 export const fileUploadError = new BusinessError('fileUpload', t('errors.custom.fileUpload'));
 export const tooManyUploadedFilesError = new BusinessError('tooManyUploadedFiles', t('errors.custom.tooManyUploadedFiles'));
 

@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { FileIcon } from '@ad/src/components/FileIcon';
+import { BusinessError, fileRetriableUploadError } from '@ad/src/models/entities/errors';
 import { EnhancedUppyFile } from '@ad/src/utils/uppy';
 
 export interface UploaderFileListItemProps {
@@ -20,78 +21,36 @@ export interface UploaderFileListItemProps {
   onRetry: () => void;
 }
 
-export function UploaderFileListItem(props: UploaderFileListItemProps) {
+export function UploaderFileListItem({ file, onCancel, onRemove, onRetry }: UploaderFileListItemProps) {
   const { t } = useTranslation('common');
 
   const itemRef = useRef<HTMLLIElement | null>(null); // This is used to scroll to the error messages
 
   const { error } = useMemo(() => {
-    // Ideally this should be taken from the `upload-error` specific error... but it's unclear how they are formatted (and they are not accessible from `file`)
+    // The error must be a string according to how Uppy made the typing, so from the `upload-error` callback
+    // we may pass a the custom error code to reuse the right error from here
+    let parsedError: BusinessError | Error | null = null;
 
-    let usableError: Error | null = null;
-
-    if (props.file.response && props.file.response.status >= 500) {
-      usableError = new Error(`Une erreur s'est produite au moment de transférer ce fichier, vous pouvez retenter le transfert.`);
+    if (file.error) {
+      parsedError = file.error === fileRetriableUploadError.code ? fileRetriableUploadError : new Error(file.error);
 
       itemRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
 
     return {
-      error: usableError,
+      error: parsedError,
     };
-  }, [props.file.response]);
+  }, [file.error]);
 
   return (
     <>
-      <ListItem
-        secondaryAction={
-          <>
-            {props.file.progress?.percentage !== undefined && props.file.progress.percentage < 100 ? (
-              <>
-                <IconButton edge="end" aria-label={`fichier en cours de transmission`} sx={{ ml: 2 }}>
-                  {/* TODO: `IconButton` should be `ListItemIcon` here but struggled to make it aligned so leaving it for now */}
-                  {/* Sometimes, either because the file is too little or because of server configuration
-                  no update of the progress is done. So we consider showing an infinite loader if 0%.
-
-                  Like that if no update will appear until 100% there is a sense of loading, and if there is a progress update
-                  the determinate loader should move fast from 0% to get simulate a smooth progress. */}
-                  <CircularProgress
-                    size={24}
-                    aria-label={`fichier en cours de transmission`}
-                    {...(props.file.progress.percentage > 0
-                      ? {
-                          variant: 'determinate',
-                          value: props.file.progress.percentage,
-                        }
-                      : {})}
-                  />
-                </IconButton>
-                <IconButton onClick={props.onCancel} edge="end" aria-label="annuler" sx={{ ml: 2 }}>
-                  <HighlightOffIcon />
-                </IconButton>
-              </>
-            ) : (
-              <>
-                {error && (
-                  <IconButton onClick={props.onRetry} edge="end" aria-label="réessayer" sx={{ ml: 2 }}>
-                    <ReplayIcon />
-                  </IconButton>
-                )}
-                <IconButton onClick={props.onRemove} edge="end" aria-label="supprimer" sx={{ ml: 2 }}>
-                  <DeleteIcon />
-                </IconButton>
-              </>
-            )}
-          </>
-        }
-        ref={itemRef}
-      >
+      <ListItem ref={itemRef}>
         <ListItemIcon className="disabledA11y" sx={{ minWidth: 0, width: 30, mr: 2 }}>
-          <FileIcon extension={props.file.extension} />
+          <FileIcon contentType={file.type} />
         </ListItemIcon>
         <ListItemText
-          primary={props.file.name}
-          secondary={t('file.size', { size: props.file.size })}
+          primary={file.name}
+          secondary={t('file.size', { size: file.size })}
           sx={{
             flexShrink: 0, // Like that if there is an error the block won't compress the filename
           }}
@@ -105,6 +64,42 @@ export function UploaderFileListItem(props: UploaderFileListItemProps) {
               marginRight: '3.5rem', // Since with an error there is 2 icons in the "absolute area" we adjust manually
             }}
           />
+        )}
+        {file.progress?.percentage !== undefined && file.progress.percentage < 100 ? (
+          <>
+            <IconButton edge="end" aria-label={`fichier en cours de transmission`} sx={{ ml: 2 }}>
+              {/* TODO: `IconButton` should be `ListItemIcon` here but struggled to make it aligned so leaving it for now */}
+              {/* Sometimes, either because the file is too little or because of server configuration
+                  no update of the progress is done. So we consider showing an infinite loader if 0%.
+
+                  Like that if no update will appear until 100% there is a sense of loading, and if there is a progress update
+                  the determinate loader should move fast from 0% to get simulate a smooth progress. */}
+              <CircularProgress
+                size={24}
+                aria-label={`fichier en cours de transmission`}
+                {...(file.progress.percentage > 0
+                  ? {
+                      variant: 'determinate',
+                      value: file.progress.percentage,
+                    }
+                  : {})}
+              />
+            </IconButton>
+            <IconButton onClick={onCancel} edge="end" aria-label="annuler" sx={{ ml: 2 }}>
+              <HighlightOffIcon />
+            </IconButton>
+          </>
+        ) : (
+          <>
+            {error && (
+              <IconButton onClick={onRetry} edge="end" aria-label="réessayer" sx={{ ml: 2 }}>
+                <ReplayIcon />
+              </IconButton>
+            )}
+            <IconButton onClick={onRemove} edge="end" aria-label="supprimer" sx={{ ml: 2 }}>
+              <DeleteIcon />
+            </IconButton>
+          </>
         )}
       </ListItem>
     </>

@@ -1,24 +1,26 @@
-import List from '@mui/material/List';
+import List, { ListProps } from '@mui/material/List';
 
 import { FileListItem } from '@ad/src/components/FileListItem';
 import { UiAttachmentSchemaType } from '@ad/src/models/entities/attachment';
 
-export interface FileListProps {
-  files: UiAttachmentSchemaType[];
-  onRemove: (file: UiAttachmentSchemaType) => Promise<void>;
+export interface FileListProps<T extends UiAttachmentSchemaType> {
+  files: T[];
+  onRemove: (file: T) => Promise<void>;
+  additionalSection?: (file: T) => React.JSX.Element;
   readonly?: boolean;
+  style?: ListProps['sx'];
 }
 
-export function FileList(props: FileListProps) {
+export function FileList<T extends UiAttachmentSchemaType>({ files, onRemove, additionalSection, readonly, style }: FileListProps<T>) {
   return (
     <>
-      <List dense={true}>
-        {props.files.map((file) => {
+      <List dense={true} sx={style}>
+        {files.map((file) => {
           const remove = async () => {
-            await props.onRemove(file);
+            await onRemove(file);
           };
 
-          return <FileListItem key={file.id} file={file} onRemove={remove} readonly={props.readonly} />;
+          return <FileListItem key={file.id} file={file} onRemove={remove} additionalSection={additionalSection} readonly={readonly} />;
         })}
       </List>
     </>

@@ -1,8 +1,9 @@
 import { addresses } from '@ad/src/fixtures/address';
+import { uiAttachments } from '@ad/src/fixtures/attachment';
 import { events, eventsSeries } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
 import { places } from '@ad/src/fixtures/place';
-import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
+import { DeclarationAttachmentTypeSchema, DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import {
   DeclarationSchema,
   DeclarationSchemaType,
@@ -53,6 +54,7 @@ export const declarations: DeclarationSchemaType[] = [
       circusSpecificExpensesIncludingTaxes: eventsSeries[0].circusSpecificExpensesIncludingTaxes,
       circusSpecificExpensesExcludingTaxes: eventsSeries[0].circusSpecificExpensesExcludingTaxes,
       circusSpecificExpensesTaxRate: eventsSeries[0].circusSpecificExpensesTaxRate,
+      attachments: eventsSeries[0].attachments,
     },
     events: [eventsWithPlace[0], eventsWithPlace[1], eventsWithPlace[2]],
   }),
@@ -86,6 +88,7 @@ export const declarations: DeclarationSchemaType[] = [
       circusSpecificExpensesIncludingTaxes: eventsSeries[1].circusSpecificExpensesIncludingTaxes,
       circusSpecificExpensesExcludingTaxes: eventsSeries[1].circusSpecificExpensesExcludingTaxes,
       circusSpecificExpensesTaxRate: eventsSeries[1].circusSpecificExpensesTaxRate,
+      attachments: eventsSeries[1].attachments,
     },
     events: [eventsWithPlace[1], eventsWithPlace[2]],
   }),
@@ -119,6 +122,7 @@ export const declarations: DeclarationSchemaType[] = [
       circusSpecificExpensesIncludingTaxes: eventsSeries[2].circusSpecificExpensesIncludingTaxes,
       circusSpecificExpensesExcludingTaxes: eventsSeries[2].circusSpecificExpensesExcludingTaxes,
       circusSpecificExpensesTaxRate: eventsSeries[2].circusSpecificExpensesTaxRate,
+      attachments: eventsSeries[2].attachments,
     },
     events: [eventsWithPlace[2]],
   }),
@@ -126,7 +130,22 @@ export const declarations: DeclarationSchemaType[] = [
 
 export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
   DeclarationWrapperSchema.parse({
-    declaration: declarations[0],
+    declaration: {
+      ...declarations[0],
+      eventSerie: {
+        ...declarations[0].eventSerie,
+        attachments: [
+          {
+            ...uiAttachments[0],
+            type: DeclarationAttachmentTypeSchema.enum.ARTISTIC_CONTRACT,
+          },
+          {
+            ...uiAttachments[1],
+            type: DeclarationAttachmentTypeSchema.enum.PERFORMED_WORK_PROGRAM,
+          },
+        ],
+      },
+    },
     placeholder: {
       producer: [
         {
@@ -150,7 +169,18 @@ export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
     ],
   }),
   DeclarationWrapperSchema.parse({
-    declaration: declarations[1],
+    declaration: {
+      ...declarations[1],
+      eventSerie: {
+        ...declarations[1].eventSerie,
+        attachments: [
+          {
+            ...uiAttachments[0],
+            type: DeclarationAttachmentTypeSchema.enum.OTHER,
+          },
+        ],
+      },
+    },
     placeholder: {
       producer: [
         {
@@ -164,7 +194,13 @@ export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
     transmissions: [],
   }),
   DeclarationWrapperSchema.parse({
-    declaration: declarations[2],
+    declaration: {
+      ...declarations[2],
+      eventSerie: {
+        ...declarations[2].eventSerie,
+        attachments: [],
+      },
+    },
     placeholder: {
       producer: [
         {

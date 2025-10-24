@@ -112,11 +112,7 @@ const FailedStory = Template.bind({});
 FailedStory.args = {
   file: {
     ...uppyFiles[0],
-    response: {
-      body: {},
-      status: 500,
-      uploadURL: 'http://localhost:3000/api/upload/e44117d7-ef80-4cd4-bb1a-8378adbf8bb2',
-    },
+    error: 'this is a random error message',
   },
   onCancel: () => {},
   onRemove: () => {},

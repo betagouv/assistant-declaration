@@ -1,6 +1,7 @@
 import { AttachmentStatus } from '@prisma/client';
 import { FileStore } from '@tus/file-store';
 import { Server } from '@tus/server';
+import * as cookie from 'cookie';
 import fs from 'fs';
 import { fromMime } from 'human-filetypes';
 import { filetypeinfo } from 'magic-bytes.js';
@@ -97,7 +98,16 @@ const tusServer = new Server({
 
     // Check if the user must be authenticated
     if (attachmentKind.requiresAuthToUpload) {
-      const nextjsReq = req as unknown as NextApiRequest; // Runtime should work despite missing properties in the Tus request type
+      // Despite missing properties in the Tus request type it should work
+      // since they both are based on the underlying "http" module `IncomingMessage` type
+      const nextjsReq = req as unknown as NextApiRequest;
+
+      // Still, Tus does not parse cookies from headers to set them as separate property, so we simulate it so "next-auth" can analyze them
+      const cookiesHeader = req.headers.get('cookie');
+      if (cookiesHeader) {
+        nextjsReq.cookies = cookie.parse(cookiesHeader);
+      }
+
       const token = await nextAuthGetToken({ req: nextjsReq, secret: nextAuthOptions.secret });
 
       if (!token) {

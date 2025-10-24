@@ -1,4 +1,4 @@
-import List from '@mui/material/List';
+import List, { ListProps } from '@mui/material/List';
 
 import { UploaderFileListItem } from '@ad/src/components/uploader/UploaderFileListItem';
 import { EnhancedUppyFile } from '@ad/src/utils/uppy';
@@ -8,12 +8,13 @@ export interface UploaderFileListProps {
   onCancel: (file: EnhancedUppyFile) => void;
   onRemove: (file: EnhancedUppyFile) => void;
   onRetry: (file: EnhancedUppyFile) => void;
+  style?: ListProps['sx'];
 }
 
 export function UploaderFileList(props: UploaderFileListProps) {
   return (
     <>
-      <List dense={true}>
+      <List dense={true} sx={props.style}>
         {props.files.map((file) => {
           const cancel = () => {
             props.onCancel(file);

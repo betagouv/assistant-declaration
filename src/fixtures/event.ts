@@ -1,5 +1,6 @@
+import { uiAttachments } from '@ad/src/fixtures/attachment';
 import { places } from '@ad/src/fixtures/place';
-import { DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
+import { DeclarationAttachmentTypeSchema, DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import {
   AudienceSchema,
   EventSchema,
@@ -36,6 +37,16 @@ export const eventsSeries: EventSerieSchemaType[] = [
     circusSpecificExpensesIncludingTaxes: 0,
     circusSpecificExpensesExcludingTaxes: 0,
     circusSpecificExpensesTaxRate: 0.2,
+    attachments: [
+      {
+        id: uiAttachments[0].id,
+        type: DeclarationAttachmentTypeSchema.enum.ARTISTIC_CONTRACT,
+      },
+      {
+        id: uiAttachments[1].id,
+        type: DeclarationAttachmentTypeSchema.enum.PERFORMED_WORK_PROGRAM,
+      },
+    ],
     createdAt: new Date('December 17, 2024 03:24:00 UTC'),
     updatedAt: new Date('December 18, 2024 04:33:00 UTC'),
   }),
@@ -61,6 +72,12 @@ export const eventsSeries: EventSerieSchemaType[] = [
     circusSpecificExpensesIncludingTaxes: 384,
     circusSpecificExpensesExcludingTaxes: 320,
     circusSpecificExpensesTaxRate: 0.2,
+    attachments: [
+      {
+        id: uiAttachments[0].id,
+        type: DeclarationAttachmentTypeSchema.enum.OTHER,
+      },
+    ],
     createdAt: new Date('December 17, 2024 03:24:00 UTC'),
     updatedAt: new Date('December 18, 2024 04:33:00 UTC'),
   }),
@@ -86,6 +103,7 @@ export const eventsSeries: EventSerieSchemaType[] = [
     circusSpecificExpensesIncludingTaxes: 0,
     circusSpecificExpensesExcludingTaxes: 0,
     circusSpecificExpensesTaxRate: null,
+    attachments: [],
     createdAt: new Date('December 17, 2024 03:24:00 UTC'),
     updatedAt: new Date('December 18, 2024 04:33:00 UTC'),
   }),

@@ -44,6 +44,7 @@
       "fileAccessNotAuthorized": "vous n'êtes pas autorisé à lire ce fichier",
       "fileIdMalformated": "l'identifiant du fichier est malformé",
       "fileNotFound": "aucun fichier n'a été trouvé",
+      "fileRetriableUpload": "une erreur s'est produite au moment de transférer ce fichier, vous pouvez retenter le transfert",
       "fileUpload": "une erreur a été détecté concernant la transmission de documents",
       "foreignTaxRateOnPrice": "nous ne gérons actuellement pas les spectacles joués en France qui ont le taux de TVA d'un pays étranger. Veuillez contacter notre support afin de nous décrire votre spécificité, pour que nous puissions améliorer notre plateforme",
       "helloassoMissingTier": "malheureusement nous n'arrivons pas à récupérer l'un des tarifs de vos événements auprès de HelloAsso. Veuillez contacter notre support pour que l'on puisse investiguer cette anomalie",
@@ -377,6 +378,14 @@
         "ALL": "Tout public",
         "YOUNG": "Jeune public",
         "SCHOOL": "Scolaire"
+      }
+    },
+    "declarationAttachmentType": {
+      "enum": {
+        "ARTISTIC_CONTRACT": "Contrat artistique",
+        "OTHER": "Autre document",
+        "PERFORMED_WORK_PROGRAM": "Programme oeuvres interprétées",
+        "REVENUE_STATEMENT": "Bordereau de recette"
       }
     },
     "declarationType": {

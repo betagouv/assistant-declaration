@@ -31,6 +31,7 @@ export const SacemDeclarationSchema = DeclarationSchema.extend({
     expensesExcludingTaxes: true,
     introductionFeesExpensesIncludingTaxes: true,
     introductionFeesExpensesExcludingTaxes: true,
+    attachments: true,
   })
     .extend({
       place: PlaceSchema,

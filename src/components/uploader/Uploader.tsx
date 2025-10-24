@@ -1,20 +1,21 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Uppy from '@uppy/core';
-import '@uppy/core/dist/style.min.css';
+import Uppy, { RestrictionError } from '@uppy/core';
+import '@uppy/core/css/style.min.css';
 import DragDrop from '@uppy/drag-drop';
 import fr_FR from '@uppy/locales/lib/fr_FR';
 import Tus from '@uppy/tus';
-import { FileKind } from 'human-filetypes';
-import { RefObject, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { RefObject, createContext, useCallback, useContext, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useEffectOnce } from 'react-use';
 
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
-import { UploaderFileList } from '@ad/src/components/uploader/UploaderFileList';
+import { UploaderFileList, UploaderFileListProps } from '@ad/src/components/uploader/UploaderFileList';
 import '@ad/src/components/uploader/drag-drop.scss';
 import { AttachmentKindRequirementsSchemaType, UiAttachmentSchemaType } from '@ad/src/models/entities/attachment';
+import { BusinessError, fileRetriableUploadError } from '@ad/src/models/entities/errors';
 import { mockBaseUrl, shouldTargetMock } from '@ad/src/server/mock/environment';
-import { getExtensionsFromFileKinds, getFileIdFromUrl, getFileKindFromMime, getMimesFromFileKinds } from '@ad/src/utils/attachment';
+import { getExtensionsFromFileKinds, getFileIdFromUrl, getMimesFromFileKinds } from '@ad/src/utils/attachment';
 import { bitsFor } from '@ad/src/utils/bits';
 import {
   AdditionalMetaFields,
@@ -40,6 +41,7 @@ export interface UploaderProps {
   postUploadHook?: (internalId: string) => Promise<void>;
   // TODO: onError (useful if the list is not displayed... the parent can use a custom error) ... throw error if one of the two not enabled
   isUploadingChanged?: (value: boolean) => void;
+  listStyle?: UploaderFileListProps['style'];
 }
 
 export function Uploader({
@@ -51,6 +53,7 @@ export function Uploader({
   onStateChanged,
   postUploadHook,
   isUploadingChanged,
+  listStyle,
 }: UploaderProps) {
   const { t } = useTranslation('common');
   const { ContextualUploaderFileList } = useContext(UploaderContext);
@@ -60,9 +63,8 @@ export function Uploader({
 
   const [uppy, setUppy] = useState<EnhancedUppyEntity>(() => setupUppy({ attachmentKindRequirements, initialState, minFiles, maxFiles }));
   const [files, setFiles] = useState<EnhancedUppyFile[]>(() => uppy.getFiles());
-  const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  useEffect(() => {
+  useEffectOnce(() => {
     const updateFiles = () => {
       setFiles(uppy.getFiles());
     };
@@ -101,10 +103,27 @@ export function Uploader({
         updateFiles();
       },
       'upload-error': (file, error, response) => {
+        // This is the only callback where we can access the error object details
+        // TODO: here we simulate a basic case, but this could be improved to better handle our custom errors from the server
+        // Note: it's possible to detail more the context with `error instanceof DetailedError`
+        if (file && response && response.status >= 500) {
+          uppy.setFileState(file.id, {
+            error: fileRetriableUploadError.code, // It expects string so we respect the Uppy logic to avoid side issue despite passing custom error received elsewhere in the "file" object
+          });
+        }
+
         updateFiles();
       },
       'restriction-failed': (file, error) => {
-        setGlobalError(error);
+        let readableError: BusinessError | null = null;
+
+        if (error instanceof RestrictionError) {
+          // The error message is already translated by Uppy
+          // And so the error code does not matter since no translation needed from within the `ErrorAlert` component
+          readableError = new BusinessError('uppy_error', error.message);
+        }
+
+        setGlobalError(readableError ?? error);
 
         dragAndDropRef.current?.scrollIntoView({ behavior: 'smooth' });
       },
@@ -120,10 +139,10 @@ export function Uploader({
       },
       upload: (data) => {
         // Triggered when upload starts
-        setIsUploading(true);
+        isUploadingChanged && isUploadingChanged(true);
       },
       complete: (result) => {
-        setIsUploading(false);
+        isUploadingChanged && isUploadingChanged(false);
       },
     };
 
@@ -165,13 +184,7 @@ export function Uploader({
       unregisterListeners();
       uppy.destroy();
     };
-  }, [uppy, onCommittedFilesChanged, onStateChanged, postUploadHook]);
-
-  useEffect(() => {
-    if (isUploadingChanged) {
-      isUploadingChanged(isUploading);
-    }
-  }, [isUploading, isUploadingChanged]);
+  });
 
   const cancelUpload = useCallback(
     (file: EnhancedUppyFile) => {
@@ -223,11 +236,7 @@ export function Uploader({
               <ErrorAlert errors={[globalError]} style={{ marginTop: '0.5rem' }} />
             </>
           )}
-          {files.length > 0 && (
-            <>
-              <ContextualUploaderFileList files={files} onCancel={cancelUpload} onRemove={removeFile} onRetry={retryUpload} />
-            </>
-          )}
+          <ContextualUploaderFileList files={files} onCancel={cancelUpload} onRemove={removeFile} onRetry={retryUpload} style={listStyle} />
         </>
       )}
     </div>
@@ -301,7 +310,7 @@ function setupDragDrop(uppy: EnhancedUppyEntity, dragAndDropRef: RefObject<HTMLE
 }
 
 function getLocale(): any {
-  // TODO: if multiple locales allowed, manage switching to another like en_FB...
+  // TODO: if multiple locales allowed, manage switching to another like en_GB...
   return fr_FR;
 }
 
@@ -316,6 +325,7 @@ async function reusableUploadSuccessCallback(
 ) {
   if (postUploadHook) {
     try {
+      // Useful in case of directly pushing information to a server
       await postUploadHook(internalId);
     } catch (err) {
       // Force an error as if it was part of content upload to reuse the display
@@ -336,6 +346,14 @@ async function reusableUploadSuccessCallback(
     }
   }
 
+  // The parent component is likely to allow user to see files uploaded and served by the backend
+  // so we also make sure to provide a preview URL so it respects the same logic even if it's through `blob://...`
+  // (indeed uploaded files are removed from the "temporary upload zone" and cannot be accessed with a backend logic)
+  // Note: we are not using `URL.revokeObjectURL()` to release the resource because we don't know exactly from here
+  // when the user will have the final JWT-encoded URL from the backend, or when the user will remove it from the list before committing it to the backend
+  // ... normally it should auto clean up after the DOM unloads, if any issue we could manage a custom logic from the parent component
+  const previewUrl = file.data instanceof Blob ? URL.createObjectURL(file.data) : `blob://local_error_that_should_not_happen`;
+
   // If everything is good, keep the information for later process
   uppy.setFileState(file.id, {
     meta: {
@@ -345,48 +363,29 @@ async function reusableUploadSuccessCallback(
         id: internalId,
       },
     },
+    preview: previewUrl,
   });
 
-  const attachments: UiAttachmentSchemaType[] = await Promise.all(
-    uppy
-      .getFiles()
-      .filter((f) => {
-        return f.meta.internalMeta?.uploadSuccess === true;
-      })
-      .map(async (f) => {
-        let localUrl: string | null = null;
-
-        if (file.meta.type && getFileKindFromMime(file.meta.type) === FileKind.Image) {
-          // The `file.data` type says it can be just the size property, which would be unexpected
-          if (file.data instanceof Blob) {
-            const base64 = await convertBlobToBase64(file.data);
-
-            localUrl = base64 as string;
-          }
-        }
-
-        return {
-          id: f.meta.internalMeta?.id,
-          url: localUrl ?? `NOT_AVAILABLE_DUE_TO_UPPY_RESTRICTION_ON_RESPONSE_HEADERS`,
-        } as UiAttachmentSchemaType;
-      })
-  );
+  const attachments: UiAttachmentSchemaType[] = uppy
+    .getFiles()
+    .filter((f) => {
+      return f.meta.internalMeta?.uploadSuccess === true;
+    })
+    .map((f) => {
+      return {
+        id: f.meta.internalMeta?.id ?? 'unexpected_error',
+        url: f.preview ?? 'blob://unexpected_error',
+        contentType: file.meta.type,
+        size: file.size,
+        name: file.meta.name,
+      } satisfies UiAttachmentSchemaType;
+    });
 
   onCommittedFilesChanged && onCommittedFilesChanged(attachments);
   onStateChanged && onStateChanged(uppy.getState());
 
-  if (postUploadHook) {
-    // If we succeed the hook, we can safely remove the file since the parent is supposed to manage the UI
-    uppy.removeFile(file.id);
-  }
-}
-
-async function convertBlobToBase64(blob: Blob): Promise<string | ArrayBuffer | null> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(blob);
-    reader.onloadend = () => {
-      resolve(reader.result);
-    };
-  });
+  // If a success, we can safely remove the file since the parent is supposed to manage the UI to list uploaded files
+  // Note: it will throw a network error because also trying to remove the file from the server, but when fully uploaded
+  // the backend Tus server is already handling the clean up for privacy purpose. It cannot be caught from here, just leaving this liek that
+  uppy.removeFile(file.id);
 }
