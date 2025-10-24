@@ -6,7 +6,7 @@ import { useInterval } from 'usehooks-ts';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindAlert, playFindProgressBar } from '@ad/.storybook/testing';
-import { UploaderFileListItem } from '@ad/src/components/uploader/UploaderFileListItem';
+import { UploaderFileListItem, UploaderFileListItemProps } from '@ad/src/components/uploader/UploaderFileListItem';
 import { uppyFiles } from '@ad/src/fixtures/attachment';
 
 type ComponentType = typeof UploaderFileListItem;
@@ -26,12 +26,14 @@ async function playFindRemoveButton(canvasElement: HTMLElement): Promise<HTMLEle
   });
 }
 
+const ListItemWrapper = (props: UploaderFileListItemProps) => (
+  <List>
+    <UploaderFileListItem {...props} />
+  </List>
+);
+
 const Template: StoryFn<ComponentType> = (args) => {
-  return (
-    <List>
-      <UploaderFileListItem {...args} />
-    </List>
-  );
+  return <ListItemWrapper {...args} />;
 };
 
 const CompleteStory = Template.bind({});
@@ -87,7 +89,7 @@ const UploadingTemplate: StoryFn<ComponentType> = (args) => {
     percentage < 100 ? 50 : null
   );
 
-  return <Template {...args} file={file} />;
+  return <ListItemWrapper {...args} file={file} />;
 };
 
 const UploadingStory = UploadingTemplate.bind({});
