@@ -40,7 +40,11 @@
       "eventSeriePartialExpensesGreatherThanTotal": "le total des dépenses doit être supérieur aux frais renseignés",
       "expiredVerificationToken": "vous avez dépassé le temps imparti, merci de renouveler votre demande",
       "expiredConfirmationToken": "le lien de confirmation a expiré, veuillez contacter notre support",
+      "fileAccessLinkHasExpired": "le lien pour accéder au fichier a expiré, veuillez retourner sur la plateforme pour y accéder",
+      "fileAccessNotAuthorized": "vous n'êtes pas autorisé à lire ce fichier",
+      "fileIdMalformated": "l'identifiant du fichier est malformé",
       "fileNotFound": "aucun fichier n'a été trouvé",
+      "fileUpload": "une erreur a été détecté concernant la transmission de documents",
       "foreignTaxRateOnPrice": "nous ne gérons actuellement pas les spectacles joués en France qui ont le taux de TVA d'un pays étranger. Veuillez contacter notre support afin de nous décrire votre spécificité, pour que nous puissions améliorer notre plateforme",
       "helloassoMissingTier": "malheureusement nous n'arrivons pas à récupérer l'un des tarifs de vos événements auprès de HelloAsso. Veuillez contacter notre support pour que l'on puisse investiguer cette anomalie",
       "includingTaxesAmountCannotBeLowerThanExcludingTaxesAmount": "le montant TTC ne peut être inférieur au montant HT",
@@ -71,6 +75,7 @@
       "ticketingSystemNotFound": "ce système de billetterie n'existe pas",
       "transmittedDeclarationCannotBeUpdated": "une déclaration déjà transmise auprès d'un organisme ne peut pas être modifiée. Si une correction est nécessaire, veuillez contacter l'organisme directement",
       "tooManyOrganizationTicketingSystems": "vous avez atteint la limite du nombre de systèmes de billetterie par organisation",
+      "tooManyUploadedFiles": "vous ne pouvez pas transmettre plus de fichiers que le nombre autorisé",
       "userAlreadyConfirmed": "votre compte est déjà confirmé",
       "userNotConfirmed": "votre inscription doit être confirmée en cliquant sur le lien de l'email avant de pouvoir vous authentifier",
       "userNotFound": "cet utilisateur n'existe pas",
@@ -351,6 +356,20 @@
         "attachmentsInThisEmail_other": "Vous trouverez ci-joint à cet email {{count}} documents."
       }
     }
+  },
+  "file": {
+    "allowedExtensions_one": "Format supporté : {{extensions}}.",
+    "allowedExtensions_other": "Formats supportés : {{extensions}}.",
+    "attachment_one": "Pièce jointe",
+    "attachment_other": "Pièces jointes",
+    "error": {
+      "enum": {
+        "REJECTED_ATTACHMENTS": "Une ou plusieurs pièces jointes n'ont pas pu être réceptionnées"
+      }
+    },
+    "size": "{{ size, humanFileSize }}",
+    "upToMaxfiles_one": "Un seul fichier autorisé.",
+    "upToMaxfiles_other": "Jusqu'à {{count}} fichiers autorisés."
   },
   "model": {
     "audience": {

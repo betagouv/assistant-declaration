@@ -208,6 +208,7 @@ For each build and runtime (since they are shared), you should have set some env
 - `SCALINGO_POSTGRESQL_URL`: [GENERATED] _(you must add as query parameter `sslmode=prefer`. Also, in the development environment since using limited database resources (maximum 10 connections) we want the current runtime, potentially the one being deployed, plus maybe a local database connection to debug, to all be supported (1 runtime has 2 clients due to Prisma and PgBoss), so we chose to set in development the query parameter `connection_limit=1`)_
 - `DATABASE_URL`: `$SCALINGO_POSTGRESQL_URL` _(filled by Scalingo automatically when adding a database)_
 - `MAINTENANCE_API_KEY`: [SECRET] _(random string that can be generated with `openssl rand -base64 64`. Note this is needed to perform maintenance through dedicated API endpoints)_
+- `FILE_AUTH_SECRET`: [SECRET] _(random string that can be generated with `openssl rand -base64 64`. Note this token is just for the short-lived read permission of private attachments)_
 - `NEXT_AUTH_SECRET`: [SECRET] _(random string that can be generated with `openssl rand -base64 64`. Note that if this secret is lost, all users will have to log in again)_
 - `NEXT_PUBLIC_APP_BASE_URL`: [TO_DEFINE] _(must be the root URL to access the application, format `https://xxx.yyy.zzz`)_
 - `CRISP_SIGNING_SECRET_KEY`: [SECRET] _(this secret is generated from your Crisp account and depends on the development or production environment)_
