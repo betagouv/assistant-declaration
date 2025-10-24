@@ -3,6 +3,7 @@ import { toZonedTime } from 'date-fns-tz';
 import { fr as frDateLocale } from 'date-fns/locale/fr';
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import prettyBytes from 'pretty-bytes';
 import { z } from 'zod';
 
 import frCommonTranslations from '@ad/src/i18n/fr/common.json';
@@ -121,6 +122,10 @@ i18next.use(LanguageDetector).init(
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
               }).format(value);
+            } else if (format === 'humanFileSize') {
+              return prettyBytes(value, {
+                locale: lng,
+              });
             }
           }
         }

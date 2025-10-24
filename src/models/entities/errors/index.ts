@@ -101,7 +101,12 @@ export const passwordRequiresASpecialCharactersError = new BusinessError(
 export const countryInvalidError = new BusinessError('countryInvalid', t('errors.validation.address.countryCode.countryInvalid'));
 
 // File management
+export const fileAccessLinkHasExpiredError = new BusinessError('fileAccessLinkHasExpired', t('errors.custom.fileAccessLinkHasExpired'));
+export const fileAccessNotAuthorizedError = new BusinessError('fileAccessNotAuthorized', t('errors.custom.fileAccessNotAuthorized'));
+export const fileIdMalformatedError = new BusinessError('fileIdMalformated', t('errors.custom.fileIdMalformated'));
 export const fileNotFoundError = new BusinessError('fileNotFound', t('errors.custom.fileNotFound'));
+export const fileUploadError = new BusinessError('fileUpload', t('errors.custom.fileUpload'));
+export const tooManyUploadedFilesError = new BusinessError('tooManyUploadedFiles', t('errors.custom.tooManyUploadedFiles'));
 
 // Authentication
 export const authCredentialsRequiredError = new BusinessError('authCredentialsRequired', t('errors.custom.authCredentialsRequired'));
