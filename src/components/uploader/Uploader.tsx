@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Uppy, { State } from '@uppy/core';
+import Uppy from '@uppy/core';
 import '@uppy/core/dist/style.min.css';
 import DragDrop from '@uppy/drag-drop';
 import fr_FR from '@uppy/locales/lib/fr_FR';
@@ -16,7 +16,14 @@ import { AttachmentKindRequirementsSchemaType, UiAttachmentSchemaType } from '@a
 import { mockBaseUrl, shouldTargetMock } from '@ad/src/server/mock/environment';
 import { getExtensionsFromFileKinds, getFileIdFromUrl, getFileKindFromMime, getMimesFromFileKinds } from '@ad/src/utils/attachment';
 import { bitsFor } from '@ad/src/utils/bits';
-import { AdditionalMetaFields, EnhancedUppyEntity, EnhancedUppyEventMap, EnhancedUppyFile, ResponseBody } from '@ad/src/utils/uppy';
+import {
+  AdditionalMetaFields,
+  EnhancedUppyEntity,
+  EnhancedUppyEventMap,
+  EnhancedUppyFile,
+  EnhancedUppyState,
+  ResponseBody,
+} from '@ad/src/utils/uppy';
 import { getBaseUrl } from '@ad/src/utils/url';
 
 export const UploaderContext = createContext({
@@ -25,11 +32,11 @@ export const UploaderContext = createContext({
 
 export interface UploaderProps {
   attachmentKindRequirements: AttachmentKindRequirementsSchemaType;
-  initialState?: State;
+  initialState?: EnhancedUppyState;
   minFiles?: number;
   maxFiles: number;
   onCommittedFilesChanged?: (attachments: UiAttachmentSchemaType[]) => Promise<void>;
-  onStateChanged?: (state: State) => Promise<void>;
+  onStateChanged?: (state: EnhancedUppyState) => Promise<void>;
   postUploadHook?: (internalId: string) => Promise<void>;
   // TODO: onError (useful if the list is not displayed... the parent can use a custom error) ... throw error if one of the two not enabled
   isUploadingChanged?: (value: boolean) => void;
@@ -156,7 +163,7 @@ export function Uploader({
 
     return () => {
       unregisterListeners();
-      uppy.close({ reason: 'unmount' });
+      uppy.destroy();
     };
   }, [uppy, onCommittedFilesChanged, onStateChanged, postUploadHook]);
 
@@ -182,18 +189,11 @@ export function Uploader({
 
   const retryUpload = useCallback(
     async (file: EnhancedUppyFile) => {
-      if ((file as any).response.postUploadHookFailure === true) {
+      if (file.meta.internalMeta?.postUploadHookFailure === true) {
         // Reuse the logic after the Uppy logic succeeds
-        const internalId = (file as any).meta.internalMeta.id as string;
-        await reusableUploadSuccessCallback(
-          uppy,
-          file,
-          file.response as unknown as SuccessResponse,
-          internalId,
-          onCommittedFilesChanged,
-          onStateChanged,
-          postUploadHook
-        );
+        const internalId = file.meta.internalMeta.id;
+
+        await reusableUploadSuccessCallback(uppy, file, file.response, internalId, onCommittedFilesChanged, onStateChanged, postUploadHook);
 
         setFiles(uppy.getFiles());
       } else {
@@ -308,7 +308,7 @@ function getLocale(): any {
 async function reusableUploadSuccessCallback(
   uppy: EnhancedUppyEntity,
   file: EnhancedUppyFile,
-  response: SuccessResponse,
+  response: EnhancedUppyFile['response'],
   internalId: string,
   onCommittedFilesChanged: UploaderProps['onCommittedFilesChanged'],
   onStateChanged: UploaderProps['onStateChanged'],
@@ -324,18 +324,19 @@ async function reusableUploadSuccessCallback(
           ...file.meta,
           internalMeta: {
             id: internalId,
+            postUploadHookFailure: true,
           },
         },
         response: {
           status: 500,
-          postUploadHookFailure: true,
         },
       });
+
       return;
     }
   }
 
-  // If everything is good, mark keep the information for later process
+  // If everything is good, keep the information for later process
   uppy.setFileState(file.id, {
     meta: {
       ...file.meta,
@@ -350,19 +351,23 @@ async function reusableUploadSuccessCallback(
     uppy
       .getFiles()
       .filter((f) => {
-        return (f.meta as any).internalMeta?.uploadSuccess === true;
+        return f.meta.internalMeta?.uploadSuccess === true;
       })
       .map(async (f) => {
         let localUrl: string | null = null;
 
         if (file.meta.type && getFileKindFromMime(file.meta.type) === FileKind.Image) {
-          const base64 = await convertBlobToBase64(file.data);
-          localUrl = base64 as string;
+          // The `file.data` type says it can be just the size property, which would be unexpected
+          if (file.data instanceof Blob) {
+            const base64 = await convertBlobToBase64(file.data);
+
+            localUrl = base64 as string;
+          }
         }
 
         return {
-          id: (f.meta as any).internalMeta?.id,
-          url: localUrl || `NOT_AVAILABLE_DUE_TO_UPPY_RESTRICTION_ON_RESPONSE_HEADERS`,
+          id: f.meta.internalMeta?.id,
+          url: localUrl ?? `NOT_AVAILABLE_DUE_TO_UPPY_RESTRICTION_ON_RESPONSE_HEADERS`,
         } as UiAttachmentSchemaType;
       })
   );
