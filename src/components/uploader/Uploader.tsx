@@ -1,11 +1,11 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Uppy, { ErrorResponse, FileRemoveReason, State, UploadResult } from '@uppy/core';
+import Uppy, { State } from '@uppy/core';
 import '@uppy/core/dist/style.min.css';
 import DragDrop from '@uppy/drag-drop';
 import fr_FR from '@uppy/locales/lib/fr_FR';
 import Tus from '@uppy/tus';
-import { FileProgress } from '@uppy/utils';
+import { FileProgress, FileProgressStarted } from '@uppy/utils';
 import { FileKind } from 'human-filetypes';
 import { RefObject, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +17,7 @@ import { AttachmentKindRequirementsSchemaType, UiAttachmentSchemaType } from '@a
 import { mockBaseUrl, shouldTargetMock } from '@ad/src/server/mock/environment';
 import { getExtensionsFromFileKinds, getFileIdFromUrl, getFileKindFromMime, getMimesFromFileKinds } from '@ad/src/utils/attachment';
 import { bitsFor } from '@ad/src/utils/bits';
-import { EnhancedUppyEntity, EnhancedUppyFile } from '@ad/src/utils/uppy';
+import { EnhancedUppyEntity, EnhancedUppyEventMap, EnhancedUppyFile } from '@ad/src/utils/uppy';
 import { getBaseUrl } from '@ad/src/utils/url';
 
 export const UploaderContext = createContext({
@@ -61,58 +61,64 @@ export function Uploader({
       setFiles(uppy.getFiles());
     };
 
-    const handleFileAdded = (file: EnhancedUppyFile) => {
-      updateFiles();
-    };
+    const handlers: Pick<
+      EnhancedUppyEventMap,
+      | 'file-added'
+      | 'file-removed'
+      | 'upload-progress'
+      | 'upload-success'
+      | 'upload-error'
+      | 'restriction-failed'
+      | 'info-visible'
+      | 'info-hidden'
+      | 'upload'
+      | 'complete'
+    > = {
+      'file-added': (file) => {
+        updateFiles();
+      },
+      'file-removed': (file) => {
+        updateFiles();
+      },
+      'upload-progress': (file, progress) => {
+        updateFiles();
+      },
+      'upload-success': async (file, response) => {
+        if (!file || !response.uploadURL) {
+          return;
+        }
 
-    const handleFileRemoved = (file: EnhancedUppyFile, reason: FileRemoveReason) => {
-      updateFiles();
-    };
+        const internalId = getFileIdFromUrl(response.uploadURL);
 
-    const handleUploadProgress = (file: EnhancedUppyFile | undefined, progress: FileProgress) => {
-      updateFiles();
-    };
+        await reusableUploadSuccessCallback(uppy, file, response, internalId, onCommittedFilesChanged, onStateChanged, postUploadHook);
 
-    const handleUploadSuccess = async (file: EnhancedUppyFile | undefined, response: SuccessResponse) => {
-      if (!file || !response.uploadURL) {
-        return;
-      }
+        updateFiles();
+      },
+      'upload-error': (file, error, response) => {
+        updateFiles();
+      },
+      'restriction-failed': (file, error) => {
+        setGlobalError(error);
 
-      const internalId = getFileIdFromUrl(response.uploadURL);
+        dragAndDropRef.current?.scrollIntoView({ behavior: 'smooth' });
+      },
+      'info-visible': () => {
+        const { info } = uppy.getState();
 
-      await reusableUploadSuccessCallback(uppy, file, response, internalId, onCommittedFilesChanged, onStateChanged, postUploadHook);
-
-      updateFiles();
-    };
-
-    const handleUploadError = (file: EnhancedUppyFile | undefined, error: Error, response: ErrorResponse | undefined) => {
-      updateFiles();
-    };
-
-    const handleRestrictionFailed = (file: EnhancedUppyFile | undefined, error: Error) => {
-      setGlobalError(error);
-
-      dragAndDropRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    const handleInfoVisible = () => {
-      const { info } = uppy.getState();
-
-      if (info) {
-        console.log(`${info.message} ${info.details}`);
-      }
-    };
-
-    const handleInfoHidden = () => {
-      setGlobalError(null);
-    };
-
-    const handleUploadStarts = (data: { id: string; fileIDs: string[] }) => {
-      setIsUploading(true);
-    };
-
-    const handleAllUploadsComplete = (result: UploadResult) => {
-      setIsUploading(false);
+        if (info) {
+          console.log(`${info.message} ${info.details}`);
+        }
+      },
+      'info-hidden': () => {
+        setGlobalError(null);
+      },
+      upload: (data) => {
+        // Triggered when upload starts
+        setIsUploading(true);
+      },
+      complete: (result) => {
+        setIsUploading(false);
+      },
     };
 
     // TODO: notify parent... how to know if it's "is loading" for any file? Watch the progress and parse all files to see if finish or not?
@@ -120,33 +126,29 @@ export function Uploader({
 
     const registerListeners = () => {
       // All possibility listed on https://uppy.io/docs/uppy/#events
-      uppy.on('file-added', (aaa: EnhancedUppyFile) => {
-        //
-        aaa;
-      });
-
-      uppy.on('file-added', handleFileAdded);
-      uppy.on('file-removed', handleFileRemoved);
-      uppy.on('upload-progress', handleUploadProgress);
-      uppy.on('upload-success', handleUploadSuccess);
-      uppy.on('upload-error', handleUploadError);
-      uppy.on('restriction-failed', handleRestrictionFailed);
-      uppy.on('info-visible', handleInfoVisible);
-      uppy.on('info-hidden', handleInfoHidden);
-      uppy.on('upload', handleUploadStarts);
-      uppy.on('complete', handleAllUploadsComplete);
+      uppy.on('file-added', handlers['file-added']);
+      uppy.on('file-removed', handlers['file-removed']);
+      uppy.on('upload-progress', handlers['upload-progress']);
+      uppy.on('upload-success', handlers['upload-success']);
+      uppy.on('upload-error', handlers['upload-error']);
+      uppy.on('restriction-failed', handlers['restriction-failed']);
+      uppy.on('info-visible', handlers['info-visible']);
+      uppy.on('info-hidden', handlers['info-hidden']);
+      uppy.on('upload', handlers['upload']);
+      uppy.on('complete', handlers['complete']);
     };
 
     const unregisterListeners = () => {
-      uppy.off('file-added', handleFileAdded);
-      uppy.off('file-removed', handleFileRemoved);
-      uppy.off('upload-progress', handleUploadProgress);
-      uppy.off('upload-success', handleUploadSuccess);
-      uppy.off('upload-error', handleUploadError);
-      uppy.off('restriction-failed', handleRestrictionFailed);
-      uppy.off('info-hidden', handleInfoHidden);
-      uppy.off('upload', handleUploadStarts);
-      uppy.off('complete', handleAllUploadsComplete);
+      uppy.off('file-added', handlers['file-added']);
+      uppy.off('file-removed', handlers['file-removed']);
+      uppy.off('upload-progress', handlers['upload-progress']);
+      uppy.off('upload-success', handlers['upload-success']);
+      uppy.off('upload-error', handlers['upload-error']);
+      uppy.off('restriction-failed', handlers['restriction-failed']);
+      uppy.off('info-visible', handlers['info-visible']);
+      uppy.off('info-hidden', handlers['info-hidden']);
+      uppy.off('upload', handlers['upload']);
+      uppy.off('complete', handlers['complete']);
     };
 
     setupTus(uppy);
