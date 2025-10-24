@@ -364,14 +364,14 @@ enum EventSerieAttachmentType {
 }
 
 model AttachmentsOnEventSeries {
-  caseId       String                   @db.Uuid
+  eventSerieId String                   @db.Uuid
   attachmentId String                   @unique @db.Uuid
-  transmitter  EventSerieAttachmentType @default(OTHER)
+  type         EventSerieAttachmentType @default(OTHER)
 
-  eventSerie EventSerie @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  eventSerie EventSerie @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
   attachment Attachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
 
-  @@id([caseId, attachmentId])
+  @@id([eventSerieId, attachmentId])
 }
 
 model SacdAgency {
