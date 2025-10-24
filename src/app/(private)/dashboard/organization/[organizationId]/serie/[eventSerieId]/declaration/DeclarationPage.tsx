@@ -22,6 +22,7 @@ import { usePrevious } from 'react-use';
 import { z } from 'zod';
 
 import styles from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPage.module.scss';
+import { DeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPageContext';
 import sending from '@ad/src/assets/images/declaration/sending.svg';
 import { trpc } from '@ad/src/client/trpcClient';
 import { AddressField } from '@ad/src/components/AddressField';
@@ -38,12 +39,14 @@ import { SacemIdInput } from '@ad/src/components/SacemIdField';
 import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
 import { currentTaxRates } from '@ad/src/core/declaration';
 import { getEventsKeyFigures } from '@ad/src/core/declaration/format';
-import { FillDeclarationSchema, FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { FillDeclarationSchema, FillDeclarationSchemaType, fillDeclarationAttachmentsMax } from '@ad/src/models/actions/declaration';
 import { AddressInputSchemaType } from '@ad/src/models/entities/address';
-import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
+import { AttachmentKindSchema } from '@ad/src/models/entities/attachment';
+import { DeclarationAttachmentTypeSchema, DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { BusinessZodError, atLeastOneTransmissionHasFailedError, invalidDeclarationFieldsToTransmitError } from '@ad/src/models/entities/errors';
 import { AudienceSchema, PerformanceTypeSchema } from '@ad/src/models/entities/event';
 import { AppRouter } from '@ad/src/server/app-router';
+import { attachmentKindList } from '@ad/src/utils/attachment';
 import { parseError } from '@ad/src/utils/error';
 import { formatMaskedValue } from '@ad/src/utils/imask';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
@@ -66,6 +69,7 @@ export interface DeclarationPageProps {
 
 export function DeclarationPage({ params: { organizationId, eventSerieId } }: DeclarationPageProps) {
   const { t } = useTranslation('common');
+  const { ContextualUploader } = useContext(DeclarationPageContext);
   const { isDark } = useIsDark();
 
   const theme = useTheme();
@@ -1036,6 +1040,82 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               </>
                             )}
                           </div>
+                          {(expectedDeclarationTypes.includes('SACEM') || expectedDeclarationTypes.includes('SACD')) && (
+                            <div className={fr.cx('fr-grid-row')}>
+                              <div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
+                                <div className={fr.cx('fr-fieldset__element')}>
+                                  <span className={fr.cx('fr-text--bold')}>Pièces justificatives :</span>
+                                  <br />
+                                  {expectedDeclarationTypes.includes('SACEM') ? (
+                                    <>
+                                      <ol>
+                                        <li>contrats artistiques (cession & co-réalisation)</li>
+                                        <li>programme œuvres interprétées</li>
+                                        <li>bordereau de recette</li>
+                                      </ol>
+                                    </>
+                                  ) : (
+                                    <>contrats artistiques (cession, co-réalisation, co-production)</>
+                                  )}
+                                </div>
+                              </div>
+                              <div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
+                                <div className={fr.cx('fr-fieldset__element')}>
+                                  <Controller
+                                    control={control}
+                                    name="eventSerie.attachments"
+                                    disabled={alreadyDeclared}
+                                    render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error }, formState }) => {
+                                      return (
+                                        <>
+                                          {error?.message && <Alert severity="error">{error.message}</Alert>}
+                                          <ContextualUploader
+                                            attachmentKindRequirements={attachmentKindList[AttachmentKindSchema.enum.EVENT_SERIE_DOCUMENT]}
+                                            maxFiles={fillDeclarationAttachmentsMax}
+                                            postUploadHook={async (internalId: string) => {
+                                              const newValue = [...value];
+
+                                              if (newValue.findIndex((item) => item.id === internalId) === -1) {
+                                                newValue.push({
+                                                  id: internalId,
+                                                  // TODO: manage type of document (contract...)
+                                                  type: DeclarationAttachmentTypeSchema.enum.OTHER,
+                                                });
+                                              }
+
+                                              onChange(newValue);
+                                            }}
+                                          />
+                                          {value && value.length > 0 && (
+                                            <>
+                                              {/* TODO: */}
+                                              {/* TODO: maybe not using Uppy in a Controller... to avoid rerendering it at all value modification? this would break ongoing uploads */}
+                                              {/* TODO: */}
+                                              {/* TODO: */}
+                                              {/* <FileList
+                                                // files={attachments}
+                                                files={[]} // TODO: ...
+                                                onRemove={async (file) => {
+                                                  const newValue = [...value];
+                                                  const existingIndex = newValue.findIndex((item) => item.id === internalId);
+
+                                                  if (existingIndex !== -1) {
+                                                    newValue.splice(existingIndex, 1);
+                                                  }
+
+                                                  onChange(newValue);
+                                                }}
+                                              /> */}
+                                            </>
+                                          )}
+                                        </>
+                                      );
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
                           <div className={fr.cx('fr-fieldset__element')}>
                             <hr className={cx(fr.cx('fr-my-3v'), styles.hr)} />
                           </div>
