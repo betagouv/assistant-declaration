@@ -156,20 +156,18 @@ const tusServer = new Server({
       },
     });
 
+    // // `tus` is not designed so we can modify the payload... otherwise we end with: "Cannot set headers after they are sent to the client"
+    // // so we inform the frontend of internal meta through headers
+    // res.setHeader(uploadSuccessHeaders.internalMetaId, attachment.id);
+    // res.setHeader(uploadSuccessHeaders.internalMetaUrl, `https://TODO.com/${attachment.id}?mysecret=1111`);
+
     // If uploaded to the database we remove the file locally for security purpose
     // Notes:
     // - files not finished will be erased/lost at the next deployment (the risk is mitigated to be read on disk since incomplete files)
     // - files in the database not submitted through a business form will be removed thanks to a cron job
     fs.unlink(attachmentPath, () => {});
 
-    return {
-      // headers: {
-      //   // It would be a way to pass to the frontend meaningful information, but it was not used in our previous
-      //   // implementation due to missing ability to modify headers. Not using the following since working as it was
-      //   [uploadSuccessHeaders.internalMetaId]: attachment.id,
-      //   [uploadSuccessHeaders.internalMetaUrl]: `https://TODO.com/${attachment.id}?mysecret=1111`
-      // }
-    };
+    return {};
   },
 });
 
