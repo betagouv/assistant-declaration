@@ -10,7 +10,7 @@ export type ButtonProps = DsfrButtonProps & {
 };
 
 export function Button({ children, loading, disabled, ...props }: ButtonProps) {
-  const virtualDisabled = useMemo(() => loading ?? disabled, [loading, disabled]);
+  const virtualDisabled = useMemo(() => loading || disabled, [loading, disabled]);
 
   return (
     <DsfrButton
