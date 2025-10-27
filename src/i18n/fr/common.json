@@ -37,7 +37,7 @@
       "collaboratorCanOnlySeeOrganizationEventsSeries": "en tant que collaborateur vous ne pouvez que lister les spectacles concernant votre organisation",
       "collaboratorCanOnlySeeOrganizationTicketingSystems": "en tant que collaborateur vous ne pouvez que lister les systèmes de billetterie de votre organisation",
       "eventSerieNotFound": "ce spectacle n'existe pas",
-      "eventSeriePartialExpensesGreatherThanTotal": "le détail des dépenses doit être inférieur au total des dépenses",
+      "eventSeriePartialExpensesGreatherThanTotal": "le total des dépenses doit être supérieur aux frais renseignés",
       "expiredVerificationToken": "vous avez dépassé le temps imparti, merci de renouveler votre demande",
       "expiredConfirmationToken": "le lien de confirmation a expiré, veuillez contacter notre support",
       "fileNotFound": "aucun fichier n'a été trouvé",
