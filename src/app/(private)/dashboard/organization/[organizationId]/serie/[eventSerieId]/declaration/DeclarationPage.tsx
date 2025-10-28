@@ -63,18 +63,6 @@ type EnhancedUiAttachment = UiAttachmentSchemaType & {
   type: DeclarationAttachmentTypeSchemaType;
 };
 
-function sortUiAttachments(uiAttachments: EnhancedUiAttachment[]): EnhancedUiAttachment[] {
-  // This helper is to make sure they are always ordered the same way, both for the user
-  // but also in case `react-hook-form` does a deep check for `isDirty`
-  // Note: sorting by name if provided, or by id as fallback
-  return uiAttachments.sort((a, b) => {
-    if (a.name && b.name) return a.name.localeCompare(b.name);
-    if (a.name) return -1;
-    if (b.name) return 1;
-    return a.id.localeCompare(b.id);
-  });
-}
-
 const declarationTypesModal = createModal({
   id: 'declaration-types-modal',
   isOpenedByDefault: false,
@@ -175,8 +163,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         addressInput = liteAddress;
       }
 
-      const sortedUiAttachments = sortUiAttachments(result.declaration.eventSerie.attachments);
-
       reset({
         eventSerieId: eventSerieId,
         organization: {
@@ -209,7 +195,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           circusSpecificExpensesIncludingTaxes: result.declaration.eventSerie.circusSpecificExpensesIncludingTaxes,
           circusSpecificExpensesExcludingTaxes: result.declaration.eventSerie.circusSpecificExpensesExcludingTaxes,
           circusSpecificExpensesTaxRate: result.declaration.eventSerie.circusSpecificExpensesTaxRate,
-          attachments: sortedUiAttachments.map((uiAttachment) => {
+          attachments: result.declaration.eventSerie.attachments.map((uiAttachment) => {
             return {
               id: uiAttachment.id,
               type: uiAttachment.type,
@@ -258,7 +244,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
       // From now use the informatinon from the backend instead of local ones (like for the preview URL being hosted instead of `blob://...`)
       // It allows making sure it's in sync with the backend, that's why below we replace the current array since everything should have been pushed to the backend
-      _setUiAttachments(sortedUiAttachments); // Using direct setter, no need to sort again
+      setUiAttachments(result.declaration.eventSerie.attachments);
 
       push(['trackEvent', 'declaration', 'fill']);
     },
@@ -277,8 +263,6 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           const { id, ...liteAddress } = tmpAddress;
           addressInput = liteAddress;
         }
-
-        const sortedUiAttachments = sortUiAttachments(getDeclaration.data.declarationWrapper.declaration.eventSerie.attachments);
 
         // Update the form with fetched data
         reset({
@@ -319,7 +303,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             circusSpecificExpensesExcludingTaxes:
               getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesExcludingTaxes ?? 0,
             circusSpecificExpensesTaxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesTaxRate,
-            attachments: sortedUiAttachments.map((uiAttachment) => {
+            attachments: getDeclaration.data.declarationWrapper.declaration.eventSerie.attachments.map((uiAttachment) => {
               return {
                 id: uiAttachment.id,
                 type: uiAttachment.type,
@@ -369,7 +353,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         });
 
         // Attachments in the UI have much more information than the ones needed by the mutation endpoint, so filling the intermediate variable
-        _setUiAttachments(sortedUiAttachments); // Using direct setter, no need to sort again
+        setUiAttachments(getDeclaration.data.declarationWrapper.declaration.eventSerie.attachments);
 
         // If no declaration types we invite the user to select one through the window
         if (getDeclaration.data.declarationWrapper.declaration.eventSerie.expectedDeclarationTypes.length === 0) {
@@ -395,11 +379,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const expectedDeclarationTypes = watch('eventSerie.expectedDeclarationTypes');
 
   const [isUploadingAttachments, setIsUploadingAttachments] = useState<boolean>(false);
-  const [uiAttachments, _setUiAttachments] = useState<EnhancedUiAttachment[]>(() => []);
-
-  const setUiAttachments = useCallback((value: EnhancedUiAttachment[]) => {
-    _setUiAttachments(sortUiAttachments(value));
-  }, []);
+  const [uiAttachments, setUiAttachments] = useState<EnhancedUiAttachment[]>(() => []);
 
   useEffect(() => {
     // Make sure the data to be pushed reflects the list of uploaded items
@@ -417,7 +397,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
   const onCommittedFilesChanged = useCallback<(attachments: UiAttachmentSchemaType[]) => Promise<void>>(
     async (committedUiAttachments) => {
-      _setUiAttachments((previousValue) => {
+      setUiAttachments((previousValue) => {
         const newValue = [...previousValue];
 
         committedUiAttachments.forEach((committedUiAttachment) => {
@@ -429,10 +409,10 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           }
         });
 
-        return sortUiAttachments(newValue);
+        return newValue;
       });
     },
-    [_setUiAttachments]
+    [setUiAttachments]
   );
 
   const [tmpExpectedDeclarationTypes, setTmpExpectedDeclarationTypes] = useState<DeclarationTypeSchemaType[]>([]);
