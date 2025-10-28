@@ -1,7 +1,6 @@
 import { AttachmentStatus, Prisma } from '@prisma/client';
-import { getUnixTime, minutesToSeconds } from 'date-fns';
-import { SignJWT, jwtVerify } from 'jose';
-import isJwtTokenExpired from 'jwt-check-expiry';
+import { fromUnixTime, getUnixTime, isBefore, minutesToSeconds } from 'date-fns';
+import { SignJWT, errors, jwtVerify } from 'jose';
 import * as tus from 'tus-js-client';
 
 import { AttachmentKindRequirementsSchemaType, AttachmentKindSchemaType } from '@ad/src/models/entities/attachment';
@@ -61,16 +60,15 @@ export async function verifySignedAttachmentLink(
   token: string
 ): Promise<SignedAttachmentLinkVerification> {
   try {
-    if (isJwtTokenExpired(token)) {
+    const { payload } = await jwtVerify(token, secret);
+
+    // `jwtVerify()` will throw if expired, but just in case the property is missing or for whatever reason they change their way we check this here too
+    if (payload.exp === undefined || isBefore(fromUnixTime(payload.exp), new Date())) {
       return {
         isVerified: false,
         isExpired: true,
       };
-    }
-
-    const { payload } = await jwtVerify(token, secret);
-
-    if (payload[tokenFileIdClaim] !== expectedAttachmentId) {
+    } else if (payload[tokenFileIdClaim] !== expectedAttachmentId) {
       return {
         isVerified: false,
         isExpired: false,
@@ -81,7 +79,16 @@ export async function verifySignedAttachmentLink(
       isVerified: true,
       isExpired: false,
     };
-  } catch (err) {
+  } catch (error) {
+    if (error instanceof errors.JOSEError) {
+      if (error instanceof errors.JWTExpired) {
+        return {
+          isVerified: false,
+          isExpired: true,
+        };
+      }
+    }
+
     return {
       isVerified: false,
       isExpired: false,
