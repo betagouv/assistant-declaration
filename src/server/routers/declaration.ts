@@ -1,4 +1,4 @@
-import { EventSerieDeclarationStatus, Prisma, SacdAgency } from '@prisma/client';
+import { EventSerieAttachmentType, EventSerieDeclarationStatus, Prisma, SacdAgency } from '@prisma/client';
 import { renderToBuffer } from '@react-pdf/renderer';
 import slugify from '@sindresorhus/slugify';
 import { secondsToMilliseconds } from 'date-fns';
@@ -233,6 +233,25 @@ export const declarationRouter = router({
       throw atLeastOneEventToTransmitError;
     }
 
+    // Retrieve attachments if everything is alright (no need of loading them in memory in case of a input error)
+    const eventSerieEnhancedAttachments = await prisma.attachmentsOnEventSeries.findMany({
+      where: {
+        attachmentId: { in: eventSerie.AttachmentsOnEventSeries.map((aOES) => aOES.attachmentId) },
+      },
+      select: {
+        type: true,
+        attachment: {
+          select: {
+            contentType: true,
+            name: true,
+            value: true,
+          },
+        },
+      },
+    });
+
+    assert(eventSerieEnhancedAttachments.length === eventSerie.AttachmentsOnEventSeries.length, 'all attachments should be retrieved');
+
     for (const [declarationType, declarationToDeclare] of declarationsToDeclare) {
       try {
         if (declarationToDeclare === sacemDeclaration) {
@@ -268,6 +287,26 @@ export const declarationRouter = router({
             inline: false, // It will be attached, not specifically set somewhere in the content
           };
 
+          const attachments: EmailAttachment[] = [
+            declarationAttachment,
+            ...eventSerieEnhancedAttachments
+              .filter((eSEA) => {
+                // No need to attach files that were needed for other organisms
+                // Note: the "OTHER" type is the default one and it's always included (in case the declarant forgot to classify it, or to give more contexts to organisms)
+                return (['ARTISTIC_CONTRACT', 'PERFORMED_WORK_PROGRAM', 'REVENUE_STATEMENT', 'OTHER'] as EventSerieAttachmentType[]).includes(
+                  eSEA.type
+                );
+              })
+              .map((eSEA) => {
+                return {
+                  contentType: eSEA.attachment.contentType,
+                  filename: eSEA.attachment.name || undefined,
+                  content: Buffer.from(eSEA.attachment.value),
+                  inline: false, // That's not attachments in the middle of the content
+                };
+              }),
+          ];
+
           try {
             await mailer.sendDeclarationToSacemAgency({
               recipient: sacemAgency.email,
@@ -278,7 +317,7 @@ export const declarationRouter = router({
               originatorEmail: originatorUser.email,
               organizationName: sacemDeclaration.organization.name,
               aboutUrl: linkRegistry.get('about', undefined, { absolute: true }),
-              attachments: [declarationAttachment],
+              attachments: attachments,
             });
           } catch (error) {
             console.error(error);
@@ -288,9 +327,12 @@ export const declarationRouter = router({
         } else if (declarationToDeclare === sacdDeclaration) {
           const sacdClient = getSacdClient(ctx.user.id);
 
-          // TODO:
-          // const sendAttachments  = sacdDeclaration.attachments.length > 0);
-          const sendAttachments = false;
+          const sacdAttachments = eventSerieEnhancedAttachments.filter((eSEA) => {
+            // No need to attach files that were needed for other organisms
+            // Note: the "OTHER" type is the default one and it's always included (in case the declarant forgot to classify it, or to give more contexts to organisms)
+            return (['ARTISTIC_CONTRACT', 'OTHER'] as EventSerieAttachmentType[]).includes(eSEA.type);
+          });
+          const sendAttachments = sacdAttachments.length > 0;
 
           // Before sending any information outside we make sure of all validation
           let sacdAgency: Pick<SacdAgency, 'email'> | null = null;
@@ -326,9 +368,14 @@ export const declarationRouter = router({
           if (sendAttachments) {
             assert(sacdAgency);
 
-            const declarationAttachments: EmailAttachment[] = [
-              // TODO: ...
-            ];
+            const attachments: EmailAttachment[] = sacdAttachments.map((sA) => {
+              return {
+                contentType: sA.attachment.contentType,
+                filename: sA.attachment.name || undefined,
+                content: Buffer.from(sA.attachment.value),
+                inline: false, // That's not attachments in the middle of the content
+              };
+            });
 
             try {
               await mailer.sendDeclarationAttachmentsToSacdAgency({
@@ -340,7 +387,7 @@ export const declarationRouter = router({
                 originatorEmail: originatorUser.email,
                 organizationName: sacdDeclaration.organization.name,
                 aboutUrl: linkRegistry.get('about', undefined, { absolute: true }),
-                attachments: declarationAttachments,
+                attachments: attachments,
               });
             } catch (error) {
               console.error(error);
@@ -807,7 +854,7 @@ export const declarationRouter = router({
           await tx.attachmentsOnEventSeries.createMany({
             skipDuplicates: true,
             data: attachmentsToAdd.map((attachmentId) => {
-              const attachmentWithType = agnosticDeclaration.eventSerie.attachments.find((eSA) => eSA.id === attachmentId);
+              const attachmentWithType = agnosticDeclaration.eventSerie.attachments.find((eSEA) => eSEA.id === attachmentId);
 
               assert(attachmentWithType);
 
@@ -835,7 +882,7 @@ export const declarationRouter = router({
 
         // An attachment unchanged could still receive an update about its own type
         for (const unchangedAttachmentId of attachmentsUnchanged) {
-          const attachmentWithType = agnosticDeclaration.eventSerie.attachments.find((eSA) => eSA.id === unchangedAttachmentId);
+          const attachmentWithType = agnosticDeclaration.eventSerie.attachments.find((eSEA) => eSEA.id === unchangedAttachmentId);
 
           assert(attachmentWithType);
 
