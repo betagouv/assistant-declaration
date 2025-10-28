@@ -395,7 +395,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   const expectedDeclarationTypes = watch('eventSerie.expectedDeclarationTypes');
 
   const [isUploadingAttachments, setIsUploadingAttachments] = useState<boolean>(false);
-  const [uiAttachments, _setUiAttachments] = useState<EnhancedUiAttachment[]>([]);
+  const [uiAttachments, _setUiAttachments] = useState<EnhancedUiAttachment[]>(() => []);
 
   const setUiAttachments = useCallback((value: EnhancedUiAttachment[]) => {
     _setUiAttachments(sortUiAttachments(value));
@@ -414,6 +414,24 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       { shouldDirty: true }
     );
   }, [setValue, uiAttachments]);
+
+  const onCommittedFilesChanged = useCallback<(attachments: UiAttachmentSchemaType[]) => Promise<void>>(
+    async (committedUiAttachments) => {
+      const newValue = [...uiAttachments];
+
+      committedUiAttachments.forEach((committedUiAttachment) => {
+        if (newValue.findIndex((item) => item.id === committedUiAttachment.id) === -1) {
+          newValue.push({
+            ...committedUiAttachment,
+            type: DeclarationAttachmentTypeSchema.enum.OTHER, // Default one that will is always forwarded to organisms, but can be more specific
+          });
+        }
+      });
+
+      setUiAttachments(newValue);
+    },
+    [uiAttachments, setUiAttachments]
+  );
 
   const [tmpExpectedDeclarationTypes, setTmpExpectedDeclarationTypes] = useState<DeclarationTypeSchemaType[]>([]);
   useEffect(() => {
@@ -1176,21 +1194,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                     <ContextualUploader
                                       attachmentKindRequirements={attachmentKindList[AttachmentKindSchema.enum.EVENT_SERIE_DOCUMENT]}
                                       maxFiles={fillDeclarationAttachmentsMax}
-                                      onCommittedFilesChanged={async (committedUiAttachments) => {
-                                        const newValue = [...uiAttachments];
-
-                                        committedUiAttachments.forEach((committedUiAttachment) => {
-                                          if (newValue.findIndex((item) => item.id === committedUiAttachment.id) === -1) {
-                                            newValue.push({
-                                              ...committedUiAttachment,
-                                              // TODO: manage type of document (contract...)
-                                              type: DeclarationAttachmentTypeSchema.enum.OTHER,
-                                            });
-                                          }
-                                        });
-
-                                        setUiAttachments(newValue);
-                                      }}
+                                      onCommittedFilesChanged={onCommittedFilesChanged}
                                       isUploadingChanged={(newValue) => {
                                         setIsUploadingAttachments(newValue);
                                       }}

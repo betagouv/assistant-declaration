@@ -5,7 +5,7 @@ import '@uppy/core/css/style.min.css';
 import DragDrop from '@uppy/drag-drop';
 import fr_FR from '@uppy/locales/lib/fr_FR';
 import Tus from '@uppy/tus';
-import { RefObject, createContext, useCallback, useContext, useRef, useState } from 'react';
+import { RefObject, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEffectOnce } from 'react-use';
 
@@ -65,10 +65,19 @@ export function Uploader({
   const [files, setFiles] = useState<EnhancedUppyFile[]>(() => uppy.getFiles());
 
   useEffectOnce(() => {
-    const updateFiles = () => {
-      setFiles(uppy.getFiles());
-    };
+    setupTus(uppy);
+    setupDragDrop(uppy, dragAndDropRef);
 
+    return () => {
+      uppy.destroy();
+    };
+  });
+
+  const updateFiles = useCallback(() => {
+    setFiles(uppy.getFiles());
+  }, [setFiles, uppy]);
+
+  useEffect(() => {
     const handlers: Pick<
       EnhancedUppyEventMap,
       | 'file-added'
@@ -176,15 +185,12 @@ export function Uploader({
       uppy.off('complete', handlers['complete']);
     };
 
-    setupTus(uppy);
-    setupDragDrop(uppy, dragAndDropRef);
     registerListeners();
 
     return () => {
       unregisterListeners();
-      uppy.destroy();
     };
-  });
+  }, [updateFiles, uppy, onCommittedFilesChanged, onStateChanged, postUploadHook, isUploadingChanged]);
 
   const cancelUpload = useCallback(
     (file: EnhancedUppyFile) => {
