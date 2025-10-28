@@ -417,20 +417,22 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
 
   const onCommittedFilesChanged = useCallback<(attachments: UiAttachmentSchemaType[]) => Promise<void>>(
     async (committedUiAttachments) => {
-      const newValue = [...uiAttachments];
+      _setUiAttachments((previousValue) => {
+        const newValue = [...previousValue];
 
-      committedUiAttachments.forEach((committedUiAttachment) => {
-        if (newValue.findIndex((item) => item.id === committedUiAttachment.id) === -1) {
-          newValue.push({
-            ...committedUiAttachment,
-            type: DeclarationAttachmentTypeSchema.enum.OTHER, // Default one that will is always forwarded to organisms, but can be more specific
-          });
-        }
+        committedUiAttachments.forEach((committedUiAttachment) => {
+          if (newValue.findIndex((item) => item.id === committedUiAttachment.id) === -1) {
+            newValue.push({
+              ...committedUiAttachment,
+              type: DeclarationAttachmentTypeSchema.enum.OTHER, // Default one that will is always forwarded to organisms, but can be more specific
+            });
+          }
+        });
+
+        return sortUiAttachments(newValue);
       });
-
-      setUiAttachments(newValue);
     },
-    [uiAttachments, setUiAttachments]
+    [_setUiAttachments]
   );
 
   const [tmpExpectedDeclarationTypes, setTmpExpectedDeclarationTypes] = useState<DeclarationTypeSchemaType[]>([]);
