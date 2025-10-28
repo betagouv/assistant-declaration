@@ -622,8 +622,22 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             state={!!errors.eventSerie?.attachments?.[fileIndex]?.type ? 'error' : undefined}
             stateRelatedMessage={errors?.eventSerie?.attachments?.[fileIndex]?.type?.message}
             nativeSelectProps={{
-              ...register(`eventSerie.attachments.${fileIndex}.type`),
               'aria-label': 'type de document',
+              value: file.type,
+              onChange: (event) => {
+                // Updating this array will also affect the form values
+                // Note: it will rerender this select at each modification but we have no other choice due to order of the source of truth
+                setUiAttachments((previousValue) => {
+                  const newUiAttachments = [...previousValue];
+                  const currentFile = newUiAttachments.find((item) => item.id === file.id);
+
+                  if (currentFile) {
+                    currentFile.type = event.target.value;
+                  }
+
+                  return newUiAttachments;
+                });
+              },
               style: {
                 fontSize: '0.8rem',
                 lineHeight: '1rem',
@@ -650,7 +664,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         </>
       );
     },
-    [formAttachments, alreadyDeclared, register, errors.eventSerie?.attachments, t]
+    [formAttachments, alreadyDeclared, setUiAttachments, errors.eventSerie?.attachments, t]
   );
 
   if (aggregatedQueries.isPending) {
