@@ -229,7 +229,7 @@ export function Uploader({
     <div>
       {!!uppy && (
         <>
-          <Typography component="div" variant="caption">
+          <Typography component="div" variant="caption" sx={{ mb: 1 }}>
             Taille maximale : {t('file.size', { size: attachmentKindRequirements.maxSize })}.{' '}
             {t('file.allowedExtensions', { extensions: allowedExtensions.join(', '), count: allowedExtensions.length })}
             {maxFiles > 1 && <> {t('file.upToMaxfiles', { count: maxFiles })}</>}
@@ -312,6 +312,12 @@ function setupDragDrop(uppy: EnhancedUppyEntity, dragAndDropRef: RefObject<HTMLE
     target: dragAndDropRef.current || undefined,
     height: '100%',
     width: '100%',
+    locale: {
+      strings: {
+        dropHereOr: 'Déposez les fichiers ici ou %{browse}',
+        browse: 'parcourir',
+      },
+    },
   });
 }
 

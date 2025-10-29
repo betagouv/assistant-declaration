@@ -32,7 +32,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 100%;
+  width: 100%;
+  max-width: 500px;
   cursor: pointer;
 
   // firefox fix: removes thin dotted outline
@@ -79,7 +80,7 @@
   background-image: var(--underline-img), var(--underline-img);
   background-position:
     var(--underline-x) 100%,
-    var(--underline-x) calc(100% - 0.0625em);
+    var(--underline-x) 100%;
   background-repeat: no-repeat, no-repeat;
   background-size:
     var(--underline-hover-width) 0.125em,

@@ -993,7 +993,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                           label: 'Raison sociale du producteur',
                                           disabled: disabled,
                                           nativeInputProps: {
-                                            placeholder: 'Recherche',
+                                            placeholder: 'Recherche par nom ou SIREN',
                                           },
                                         }}
                                         onChange={(newValue) => {
