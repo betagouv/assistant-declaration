@@ -63,6 +63,17 @@ type EnhancedUiAttachment = UiAttachmentSchemaType & {
   type: DeclarationAttachmentTypeSchemaType;
 };
 
+function sortAttachments(
+  attachments: FillDeclarationSchemaInputType['eventSerie']['attachments']
+): FillDeclarationSchemaInputType['eventSerie']['attachments'] {
+  // For whatever reason with no interaction the array order between what is set inside `reset()`
+  // and the form array is not the same whereas not doing any interaction that would modify it
+  // ... so ending with sorting by ID for technical reasons
+  return attachments.sort((a, b) => {
+    return a.id.localeCompare(b.id);
+  });
+}
+
 const declarationTypesModal = createModal({
   id: 'declaration-types-modal',
   isOpenedByDefault: false,
@@ -195,12 +206,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           circusSpecificExpensesIncludingTaxes: result.declaration.eventSerie.circusSpecificExpensesIncludingTaxes,
           circusSpecificExpensesExcludingTaxes: result.declaration.eventSerie.circusSpecificExpensesExcludingTaxes,
           circusSpecificExpensesTaxRate: result.declaration.eventSerie.circusSpecificExpensesTaxRate,
-          attachments: result.declaration.eventSerie.attachments.map((uiAttachment) => {
-            return {
-              id: uiAttachment.id,
-              type: uiAttachment.type,
-            };
-          }),
+          attachments: sortAttachments(
+            result.declaration.eventSerie.attachments.map((uiAttachment) => {
+              return {
+                id: uiAttachment.id,
+                type: uiAttachment.type,
+              };
+            })
+          ),
         },
         events: result.declaration.events.map((event) => {
           const tmpEventAddress = event.placeOverride?.address ?? result.declaration.eventSerie.place?.address ?? null;
@@ -303,12 +316,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             circusSpecificExpensesExcludingTaxes:
               getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesExcludingTaxes ?? 0,
             circusSpecificExpensesTaxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesTaxRate,
-            attachments: getDeclaration.data.declarationWrapper.declaration.eventSerie.attachments.map((uiAttachment) => {
-              return {
-                id: uiAttachment.id,
-                type: uiAttachment.type,
-              };
-            }),
+            attachments: sortAttachments(
+              getDeclaration.data.declarationWrapper.declaration.eventSerie.attachments.map((uiAttachment) => {
+                return {
+                  id: uiAttachment.id,
+                  type: uiAttachment.type,
+                };
+              })
+            ),
           },
           events: getDeclaration.data.declarationWrapper.declaration.events.map((event) => {
             const tmpEventAddress =
@@ -385,12 +400,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
     // Make sure the data to be pushed reflects the list of uploaded items
     setValue(
       'eventSerie.attachments',
-      uiAttachments.map((uiAttachment) => {
-        return {
-          id: uiAttachment.id,
-          type: uiAttachment.type,
-        };
-      }),
+      sortAttachments(
+        uiAttachments.map((uiAttachment) => {
+          return {
+            id: uiAttachment.id,
+            type: uiAttachment.type,
+          };
+        })
+      ),
       { shouldDirty: true }
     );
   }, [setValue, uiAttachments]);
