@@ -120,7 +120,7 @@ FailedStory.args = {
 };
 FailedStory.parameters = {};
 FailedStory.play = async ({ canvasElement }) => {
-  await playFindAlert(canvasElement);
+  await within(canvasElement).findByText(/interne/i);
 };
 
 export const Failed = prepareStory(FailedStory);

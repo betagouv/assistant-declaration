@@ -1,3 +1,4 @@
+import { fr } from '@codegouvfr/react-dsfr';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import ReplayIcon from '@mui/icons-material/Replay';
@@ -9,9 +10,9 @@ import ListItemText from '@mui/material/ListItemText';
 import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { FileIcon } from '@ad/src/components/FileIcon';
-import { BusinessError, fileRetriableUploadError } from '@ad/src/models/entities/errors';
+import { BusinessError, CustomError, fileRetriableUploadError, internalServerErrorError } from '@ad/src/models/entities/errors';
+import { capitalizeFirstLetter, formatMessageFromCustomError } from '@ad/src/models/entities/errors/helpers';
 import { EnhancedUppyFile } from '@ad/src/utils/uppy';
 
 export interface UploaderFileListItemProps {
@@ -26,7 +27,7 @@ export function UploaderFileListItem({ file, onCancel, onRemove, onRetry }: Uplo
 
   const itemRef = useRef<HTMLLIElement | null>(null); // This is used to scroll to the error messages
 
-  const { error } = useMemo(() => {
+  const { error, errorMessage } = useMemo(() => {
     // The error must be a string according to how Uppy made the typing, so from the `upload-error` callback
     // we may pass a the custom error code to reuse the right error from here
     let parsedError: BusinessError | Error | null = null;
@@ -39,6 +40,12 @@ export function UploaderFileListItem({ file, onCancel, onRemove, onRetry }: Uplo
 
     return {
       error: parsedError,
+      errorMessage: parsedError
+        ? capitalizeFirstLetter(
+            formatMessageFromCustomError(parsedError instanceof CustomError ? parsedError : internalServerErrorError) ??
+              t(`errors.custom.${internalServerErrorError.code as 'internalServerError'}`)
+          )
+        : null,
     };
   }, [file.error]);
 
@@ -48,23 +55,8 @@ export function UploaderFileListItem({ file, onCancel, onRemove, onRetry }: Uplo
         <ListItemIcon className="disabledA11y" sx={{ minWidth: 0, width: 30, mr: 2 }}>
           <FileIcon contentType={file.type} />
         </ListItemIcon>
-        <ListItemText
-          primary={file.name}
-          secondary={t('file.size', { size: file.size })}
-          sx={{
-            flexShrink: 0, // Like that if there is an error the block won't compress the filename
-          }}
-          data-sentry-mask
-        />
-        {error && (
-          <ErrorAlert
-            errors={[error]}
-            style={{
-              marginLeft: '1.5rem',
-              marginRight: '3.5rem', // Since with an error there is 2 icons in the "absolute area" we adjust manually
-            }}
-          />
-        )}
+        <ListItemText primary={file.name} secondary={t('file.size', { size: file.size })} data-sentry-mask />
+        {errorMessage && <p className={fr.cx('fr-error-text', 'fr-m-0', 'fr-ml-4v')}>{errorMessage}</p>}
         {file.progress?.percentage !== undefined && file.progress.percentage < 100 ? (
           <>
             <IconButton edge="end" aria-label={`fichier en cours de transmission`} sx={{ ml: 2 }}>
