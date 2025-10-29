@@ -49,10 +49,26 @@ docker-compose down
 Now the database schema and client need to be initialized:
 `npm run db:migration:deploy && npm run db:schema:compile`
 
-She application has extra logic not accessible through the UI, we may have to use the CLI to perform some actions:
+The application has extra logic not accessible through the UI, we may have to use the CLI to perform some actions:
 `npm run cli`
 
 That's it! But still, we advise you to read the documentation below to better understand how the project is structured.
+
+### Requirements for SACD declaration
+
+For the SACD we have to target the right agency to transmit the declaration attachments. There is a matching between postal codes prefixes and their bound agency.
+
+This document is considered private for now so we cannot script the whole process. Here the manual steps:
+
+1. Get from the SACD the mapping file (should contain columns `Département`, `mail`)
+2. Since they usually give a XLSX, just save it as CSV with comma as delimiter (can be done with LibreOffice)
+3. Move the file under `./data/sacd-agencies.csv`
+4. Synchronize data into the database depending on the environment:
+   - If `local` you can simply run: `npm run cli sacd agency sync`
+   - If `development` or `production`, first export the database environment variable `DATABASE_URL` and then run: `npm run cli:unsecure sacd agency sync`
+5. Check within the database the table has been filled correctly
+
+The synchronization is working making a difference of both states, so if SACD is updating its file, juste update the CSV and rerun the synchronization. It will work properly.
 
 ### Requirements for SACEM declaration
 
@@ -64,8 +80,8 @@ This document is considered private for now so we cannot script the whole proces
 2. Since they usually give a XLSX, just save it as CSV with comma as delimiter (can be done with LibreOffice)
 3. Move the file under `./data/sacem-agencies.csv`
 4. Synchronize data into the database depending on the environment:
-   - If `local` you can simply run: `npm run cli sacem agency async`
-   - If `development` or `production`, first export the database environment variable `DATABASE_URL` and then run: `npm run cli:unsecure sacem agency async`
+   - If `local` you can simply run: `npm run cli sacem agency sync`
+   - If `development` or `production`, first export the database environment variable `DATABASE_URL` and then run: `npm run cli:unsecure sacem agency sync`
 5. Check within the database the table has been filled correctly
 
 The synchronization is working making a difference of both states, so if SACEM is updating its file, juste update the CSV and rerun the synchronization. It will work properly.
@@ -192,6 +208,7 @@ For each build and runtime (since they are shared), you should have set some env
 - `SCALINGO_POSTGRESQL_URL`: [GENERATED] _(you must add as query parameter `sslmode=prefer`. Also, in the development environment since using limited database resources (maximum 10 connections) we want the current runtime, potentially the one being deployed, plus maybe a local database connection to debug, to all be supported (1 runtime has 2 clients due to Prisma and PgBoss), so we chose to set in development the query parameter `connection_limit=1`)_
 - `DATABASE_URL`: `$SCALINGO_POSTGRESQL_URL` _(filled by Scalingo automatically when adding a database)_
 - `MAINTENANCE_API_KEY`: [SECRET] _(random string that can be generated with `openssl rand -base64 64`. Note this is needed to perform maintenance through dedicated API endpoints)_
+- `FILE_AUTH_SECRET`: [SECRET] _(random string that can be generated with `openssl rand -base64 64`. Note this token is just for the short-lived read permission of private attachments)_
 - `NEXT_AUTH_SECRET`: [SECRET] _(random string that can be generated with `openssl rand -base64 64`. Note that if this secret is lost, all users will have to log in again)_
 - `NEXT_PUBLIC_APP_BASE_URL`: [TO_DEFINE] _(must be the root URL to access the application, format `https://xxx.yyy.zzz`)_
 - `CRISP_SIGNING_SECRET_KEY`: [SECRET] _(this secret is generated from your Crisp account and depends on the development or production environment)_
@@ -200,7 +217,7 @@ For each build and runtime (since they are shared), you should have set some env
 - `NEXT_PUBLIC_CRISP_WEBSITE_ID`: [TO_DEFINE] _(this ID is defined in your Crisp account and depends on the development or production environment)_
 - `NEXT_PUBLIC_SENTRY_DSN`: [SECRET] _(format `https://xxx.yyy.zzz/nn`)_
 - `MAILER_DEFAULT_DOMAIN`: [TO_DEFINE] _(format `xxx.yyy.zzz` depending on the environment application URL)_
-- `MAILER_DOMAINS_TO_CATCH`: `domain.demo,sacem.fr` _(this should only be set in the development environment, comma separated domains)_
+- `MAILER_DOMAINS_TO_CATCH`: `domain.demo,sacem.fr,sacd.fr` _(this should only be set in the development environment, comma separated domains)_
 - `MAILER_SMTP_HOST`: [SECRET]
 - `MAILER_SMTP_PORT`: [SECRET]
 - `MAILER_SMTP_USER`: [SECRET]

@@ -22,7 +22,7 @@ async function playFindElement(canvasElement: HTMLElement): Promise<HTMLElement>
   return await within(canvasElement).findByText(/^billetweb$/i);
 }
 
-const Template: StoryFn<typeof TicketingSystemCard> = (args) => {
+const Template: StoryFn<ComponentType> = (args) => {
   return <TicketingSystemCard {...args} />;
 };
 

@@ -3,6 +3,8 @@ import { MjmlText } from '@faire/mjml-react';
 import { StandardLayout } from '@ad/src/components/emails/layouts/Standard';
 import { titles } from '@ad/src/components/emails/templates/common';
 import { Attachment as EmailAttachment } from '@ad/src/emails/mailer';
+import { useServerTranslation } from '@ad/src/i18n';
+import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
 export interface DeclarationToSacemAgencyEmailProps {
   eventSerieName: string;
@@ -15,7 +17,10 @@ export interface DeclarationToSacemAgencyEmailProps {
 }
 
 export function DeclarationToSacemAgencyEmail(props: DeclarationToSacemAgencyEmailProps) {
+  const { t } = useServerTranslation('common');
   const title = titles.DeclarationToSacemAgencyEmail;
+
+  assert(props.attachments.length > 0);
 
   return (
     <StandardLayout title={title}>
@@ -23,13 +28,18 @@ export function DeclarationToSacemAgencyEmail(props: DeclarationToSacemAgencyEma
         <h1>{title}</h1>
         <p>Bonjour,</p>
         <p>
-          Dans le cadre de notre mission de service public, vous trouverez ci-joint la déclaration du spectacle{' '}
+          Dans le cadre de notre mission de service public, nous vous transmettons la déclaration du spectacle{' '}
           <span style={{ fontWeight: 'bold' }}>{props.eventSerieName}</span>. Cette télédéclaration a été effectuée par{' '}
           <span style={{ fontWeight: 'bold' }}>
             {props.originatorFirstname} {props.originatorLastname}
           </span>{' '}
           pour la structure <span style={{ fontWeight: 'bold' }}>{props.organizationName}</span>.
         </p>
+        <p
+          dangerouslySetInnerHTML={{
+            __html: t('email.template.DeclarationToSacemAgencyEmail.attachmentsInThisEmail', { count: props.attachments.length }),
+          }}
+        />
         <p>
           Si besoin vous pouvez :
           <ul>

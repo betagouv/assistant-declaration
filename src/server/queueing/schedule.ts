@@ -1,10 +1,9 @@
 import { getBossClientInstance } from '@ad/src/server/queueing/client';
-
-// import { todoActionTopic } from '@ad/src/server/queueing/workers/todo';
+import { cleanPendingUploadsTopic } from '@ad/src/server/queueing/workers/clean-pending-uploads';
 
 export async function scheduleCronTasks() {
   const bossClient = await getBossClientInstance();
 
   // Schedule tasks
-  // await bossClient.schedule(todoActionTopic, `0 19 * * 0,3`, undefined, { tz: 'Europe/Paris' }); // Each sunday and wednesday at 7pm since the entire flow can be a bit long, it will run over night
+  await bossClient.schedule(cleanPendingUploadsTopic, `0 3 * * *`, undefined, { tz: 'Europe/Paris' }); // At night to save performance
 }

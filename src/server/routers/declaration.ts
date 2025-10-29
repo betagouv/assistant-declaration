@@ -1,4 +1,4 @@
-import { EventSerieDeclarationStatus, Prisma } from '@prisma/client';
+import { EventSerieAttachmentType, EventSerieDeclarationStatus, Prisma, SacdAgency } from '@prisma/client';
 import { renderToBuffer } from '@react-pdf/renderer';
 import slugify from '@sindresorhus/slugify';
 import { secondsToMilliseconds } from 'date-fns';
@@ -8,7 +8,13 @@ import { z } from 'zod';
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
 import { getSacdClient } from '@ad/src/core/declaration/sacd';
 import { Attachment as EmailAttachment, mailer } from '@ad/src/emails/mailer';
-import { FillDeclarationSchema, GetDeclarationSchema, TransmitDeclarationSchema } from '@ad/src/models/actions/declaration';
+import {
+  FillDeclarationSchema,
+  GetDeclarationSchema,
+  TransmitDeclarationSchema,
+  fillDeclarationAttachmentsMax,
+} from '@ad/src/models/actions/declaration';
+import { AttachmentKindSchema } from '@ad/src/models/entities/attachment';
 import { DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { DeclarationInputSchema, DeclarationSchema, DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
 import { SacdDeclarationSchema, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
@@ -21,6 +27,8 @@ import {
   eventSerieNotFoundError,
   invalidDeclarationFieldsToTransmitError,
   organizationCollaboratorRoleRequiredError,
+  sacdAgencyNotFoundError,
+  sacdAttachmentsDeclarationUnsuccessfulError,
   sacemAgencyNotFoundError,
   sacemDeclarationUnsuccessfulError,
   transmittedDeclarationCannotBeUpdatedError,
@@ -28,7 +36,8 @@ import {
 import { EventSchemaType, EventSerieSchemaType } from '@ad/src/models/entities/event';
 import { PlaceSchemaType } from '@ad/src/models/entities/place';
 import { prisma } from '@ad/src/prisma/client';
-import { declarationPrismaToModel } from '@ad/src/server/routers/mappers';
+import { formatSafeAttachmentsToProcess } from '@ad/src/server/routers/common/attachment';
+import { attachmentOnEventSeriePrismaToModel, attachmentPrismaToModel, declarationPrismaToModel } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
 import { privateProcedure, router } from '@ad/src/server/trpc';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -129,6 +138,12 @@ export const declarationRouter = router({
             },
           },
         },
+        AttachmentsOnEventSeries: {
+          select: {
+            attachmentId: true,
+            type: true,
+          },
+        },
         EventSerieDeclaration: {
           select: {
             id: true,
@@ -218,6 +233,25 @@ export const declarationRouter = router({
       throw atLeastOneEventToTransmitError;
     }
 
+    // Retrieve attachments if everything is alright (no need of loading them in memory in case of a input error)
+    const eventSerieEnhancedAttachments = await prisma.attachmentsOnEventSeries.findMany({
+      where: {
+        attachmentId: { in: eventSerie.AttachmentsOnEventSeries.map((aOES) => aOES.attachmentId) },
+      },
+      select: {
+        type: true,
+        attachment: {
+          select: {
+            contentType: true,
+            name: true,
+            value: true,
+          },
+        },
+      },
+    });
+
+    assert(eventSerieEnhancedAttachments.length === eventSerie.AttachmentsOnEventSeries.length, 'all attachments should be retrieved');
+
     for (const [declarationType, declarationToDeclare] of declarationsToDeclare) {
       try {
         if (declarationToDeclare === sacemDeclaration) {
@@ -253,6 +287,26 @@ export const declarationRouter = router({
             inline: false, // It will be attached, not specifically set somewhere in the content
           };
 
+          const attachments: EmailAttachment[] = [
+            declarationAttachment,
+            ...eventSerieEnhancedAttachments
+              .filter((eSEA) => {
+                // No need to attach files that were needed for other organisms
+                // Note: the "OTHER" type is the default one and it's always included (in case the declarant forgot to classify it, or to give more contexts to organisms)
+                return (['ARTISTIC_CONTRACT', 'PERFORMED_WORK_PROGRAM', 'REVENUE_STATEMENT', 'OTHER'] as EventSerieAttachmentType[]).includes(
+                  eSEA.type
+                );
+              })
+              .map((eSEA) => {
+                return {
+                  contentType: eSEA.attachment.contentType,
+                  filename: eSEA.attachment.name || undefined,
+                  content: Buffer.from(eSEA.attachment.value),
+                  inline: false, // That's not attachments in the middle of the content
+                };
+              }),
+          ];
+
           try {
             await mailer.sendDeclarationToSacemAgency({
               recipient: sacemAgency.email,
@@ -263,7 +317,7 @@ export const declarationRouter = router({
               originatorEmail: originatorUser.email,
               organizationName: sacemDeclaration.organization.name,
               aboutUrl: linkRegistry.get('about', undefined, { absolute: true }),
-              attachments: [declarationAttachment],
+              attachments: attachments,
             });
           } catch (error) {
             console.error(error);
@@ -273,10 +327,77 @@ export const declarationRouter = router({
         } else if (declarationToDeclare === sacdDeclaration) {
           const sacdClient = getSacdClient(ctx.user.id);
 
+          const sacdAttachments = eventSerieEnhancedAttachments.filter((eSEA) => {
+            // No need to attach files that were needed for other organisms
+            // Note: the "OTHER" type is the default one and it's always included (in case the declarant forgot to classify it, or to give more contexts to organisms)
+            return (['ARTISTIC_CONTRACT', 'OTHER'] as EventSerieAttachmentType[]).includes(eSEA.type);
+          });
+          const sendAttachments = sacdAttachments.length > 0;
+
+          // Before sending any information outside we make sure of all validation
+          let sacdAgency: Pick<SacdAgency, 'email'> | null = null;
+          if (sendAttachments) {
+            const eventPlacePostalCode: string = sacdDeclaration.eventSerie.place.address.postalCode;
+
+            sacdAgency = await prisma.sacdAgency.findFirst({
+              where: {
+                matchingFrenchPostalCodesPrefixes: {
+                  hasSome: [
+                    // SACD is providing only prefixes with 2, 3 or 5 digits, no need to look at others
+                    eventPlacePostalCode.substring(0, 2),
+                    eventPlacePostalCode.substring(0, 3),
+                    eventPlacePostalCode.substring(0, 5),
+                  ],
+                },
+              },
+              select: {
+                email: true,
+              },
+            });
+
+            if (!sacdAgency) {
+              throw sacdAgencyNotFoundError;
+            }
+          }
+
           // Since not tracking token expiration we log in again (but we could improve that)
           await sacdClient.login();
 
           await sacdClient.declare(sacdDeclaration);
+
+          if (sendAttachments) {
+            assert(sacdAgency);
+
+            const attachments: EmailAttachment[] = sacdAttachments.map((sA) => {
+              return {
+                contentType: sA.attachment.contentType,
+                filename: sA.attachment.name || undefined,
+                content: Buffer.from(sA.attachment.value),
+                inline: false, // That's not attachments in the middle of the content
+              };
+            });
+
+            try {
+              await mailer.sendDeclarationAttachmentsToSacdAgency({
+                recipient: sacdAgency.email,
+                replyTo: originatorUser.email, // We give the SACD the possibility to directly converse with the declarer
+                eventSerieName: sacdDeclaration.eventSerie.name,
+                originatorFirstname: originatorUser.firstname,
+                originatorLastname: originatorUser.lastname,
+                originatorEmail: originatorUser.email,
+                organizationName: sacdDeclaration.organization.name,
+                aboutUrl: linkRegistry.get('about', undefined, { absolute: true }),
+                attachments: attachments,
+              });
+            } catch (error) {
+              console.error(error);
+
+              // TODO: we have no way to retry email without resending data to the SACD API
+              // the ideal would be either to be able to check from their API first it exists, or that
+              // the attachments are soon transmit through API instead of separately through email
+              throw sacdAttachmentsDeclarationUnsuccessfulError;
+            }
+          }
         }
 
         // If successful mark the declaration as transmitted
@@ -426,6 +547,20 @@ export const declarationRouter = router({
             },
           },
         },
+        AttachmentsOnEventSeries: {
+          select: {
+            attachmentId: true,
+            type: true,
+            attachment: {
+              select: {
+                id: true,
+                contentType: true,
+                name: true,
+                size: true,
+              },
+            },
+          },
+        },
         EventSerieDeclaration: {
           select: {
             id: true,
@@ -515,9 +650,29 @@ export const declarationRouter = router({
         placeholder.placeCapacity.push(previousDeclaration.placeCapacity);
     }
 
+    // Attachments links must be generated on the fly asynchronously, that's why they are mapped separately than the rest (outside `declarationPrismaToModel()`)
+    const attachmentsWithTypes = await Promise.all(
+      eventSerie.AttachmentsOnEventSeries.map(async (aOES) => {
+        const { id, type } = attachmentOnEventSeriePrismaToModel(aOES);
+
+        return {
+          ...(await attachmentPrismaToModel(aOES.attachment)),
+          type: type,
+        };
+      })
+    );
+
+    const declarationModel = declarationPrismaToModel(eventSerie);
+
     return {
       declarationWrapper: {
-        declaration: declarationPrismaToModel(eventSerie),
+        declaration: {
+          ...declarationModel,
+          eventSerie: {
+            ...declarationModel.eventSerie,
+            attachments: attachmentsWithTypes,
+          },
+        },
         placeholder: placeholder,
         transmissions: eventSerie.EventSerieDeclaration.map((eSD) => {
           return {
@@ -575,6 +730,16 @@ export const declarationRouter = router({
                 ticketingRevenueTaxRateOverride: true,
                 freeTickets: true,
                 paidTickets: true,
+              },
+            },
+            AttachmentsOnEventSeries: {
+              select: {
+                type: true,
+                attachment: {
+                  select: {
+                    id: true,
+                  },
+                },
               },
             },
             EventSerieDeclaration: {
@@ -636,6 +801,7 @@ export const declarationRouter = router({
             circusSpecificExpensesIncludingTaxes: input.eventSerie.circusSpecificExpensesIncludingTaxes,
             circusSpecificExpensesExcludingTaxes: input.eventSerie.circusSpecificExpensesExcludingTaxes,
             circusSpecificExpensesTaxRate: input.eventSerie.circusSpecificExpensesTaxRate,
+            attachments: input.eventSerie.attachments,
           },
           events: input.events.map((event) => {
             return {
@@ -672,6 +838,66 @@ export const declarationRouter = router({
             };
           }),
         });
+
+        // The security about attaching documents is managed in the following helper
+        const { attachmentsToAdd, attachmentsToRemove, attachmentsUnchanged, markNewAttachmentsAsUsed } = await formatSafeAttachmentsToProcess(
+          AttachmentKindSchema.enum.EVENT_SERIE_DOCUMENT,
+          agnosticDeclaration.eventSerie.attachments.map((attachment) => attachment.id),
+          eventSerie.AttachmentsOnEventSeries.map((aOES) => aOES.attachment.id),
+          {
+            maxAttachmentsTotal: fillDeclarationAttachmentsMax,
+            prismaInstance: tx,
+          }
+        );
+
+        if (attachmentsToAdd.length > 0) {
+          await tx.attachmentsOnEventSeries.createMany({
+            skipDuplicates: true,
+            data: attachmentsToAdd.map((attachmentId) => {
+              const attachmentWithType = agnosticDeclaration.eventSerie.attachments.find((eSEA) => eSEA.id === attachmentId);
+
+              assert(attachmentWithType);
+
+              return {
+                eventSerieId: eventSerie.id,
+                attachmentId: attachmentId,
+                type: attachmentWithType.type,
+              };
+            }),
+          });
+        }
+
+        if (attachmentsToRemove.length > 0) {
+          await tx.attachmentsOnEventSeries.deleteMany({
+            where: {
+              eventSerieId: eventSerie.id,
+              attachmentId: {
+                in: attachmentsToRemove.map((attachmentId) => attachmentId),
+              },
+            },
+          });
+        }
+
+        await markNewAttachmentsAsUsed();
+
+        // An attachment unchanged could still receive an update about its own type
+        for (const unchangedAttachmentId of attachmentsUnchanged) {
+          const attachmentWithType = agnosticDeclaration.eventSerie.attachments.find((eSEA) => eSEA.id === unchangedAttachmentId);
+
+          assert(attachmentWithType);
+
+          await tx.attachmentsOnEventSeries.update({
+            where: {
+              eventSerieId_attachmentId: {
+                eventSerieId: eventSerie.id,
+                attachmentId: unchangedAttachmentId,
+              },
+            },
+            data: {
+              type: attachmentWithType.type,
+            },
+          });
+        }
 
         const oldPlacesIds = new Set<string>();
         const newPlacesIds = new Set<string>();
@@ -1052,6 +1278,20 @@ export const declarationRouter = router({
                 },
               },
             },
+            AttachmentsOnEventSeries: {
+              select: {
+                attachmentId: true,
+                type: true,
+                attachment: {
+                  select: {
+                    id: true,
+                    contentType: true,
+                    name: true,
+                    size: true,
+                  },
+                },
+              },
+            },
           },
         });
 
@@ -1113,8 +1353,28 @@ export const declarationRouter = router({
       }
     );
 
+    // Attachments links must be generated on the fly asynchronously, that's why they are mapped separately than the rest (outside `declarationPrismaToModel()`)
+    const attachmentsWithTypes = await Promise.all(
+      returnedEventSerie.AttachmentsOnEventSeries.map(async (aOES) => {
+        const { id, type } = attachmentOnEventSeriePrismaToModel(aOES);
+
+        return {
+          ...(await attachmentPrismaToModel(aOES.attachment)),
+          type: type,
+        };
+      })
+    );
+
+    const declarationModel = declarationPrismaToModel(returnedEventSerie);
+
     return {
-      declaration: declarationPrismaToModel(returnedEventSerie),
+      declaration: {
+        ...declarationModel,
+        eventSerie: {
+          ...declarationModel.eventSerie,
+          attachments: attachmentsWithTypes,
+        },
+      } satisfies DeclarationWrapperSchemaType['declaration'],
     };
   }),
 });

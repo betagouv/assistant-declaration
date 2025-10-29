@@ -257,10 +257,11 @@ model EventSerie {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  place                 Place?                  @relation(fields: [placeId], references: [id])
-  ticketingSystem       TicketingSystem         @relation(fields: [ticketingSystemId], references: [id], onDelete: Cascade)
-  Event                 Event[]
-  EventSerieDeclaration EventSerieDeclaration[]
+  place                    Place?                     @relation(fields: [placeId], references: [id])
+  ticketingSystem          TicketingSystem            @relation(fields: [ticketingSystemId], references: [id], onDelete: Cascade)
+  Event                    Event[]
+  EventSerieDeclaration    EventSerieDeclaration[]
+  AttachmentsOnEventSeries AttachmentsOnEventSeries[]
 
   @@unique([ticketingSystemId, internalTicketingSystemId])
 }
@@ -327,6 +328,59 @@ model EventSerieDeclaration {
   eventSerie EventSerie @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
 
   @@unique([eventSerieId, type])
+}
+
+enum AttachmentStatus {
+  PENDING_UPLOAD
+  VALID
+  EXPIRED
+}
+
+enum AttachmentKind {
+  EVENT_SERIE_DOCUMENT
+}
+
+model Attachment {
+  id          String           @id @default(uuid()) @db.Uuid
+  kind        AttachmentKind
+  contentType String
+  value       Bytes            @db.ByteA
+  size        Int
+  name        String?
+  status      AttachmentStatus @default(PENDING_UPLOAD)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  deletedAt DateTime?
+
+  AttachmentsOnEventSeries AttachmentsOnEventSeries?
+}
+
+enum EventSerieAttachmentType {
+  ARTISTIC_CONTRACT
+  PERFORMED_WORK_PROGRAM
+  REVENUE_STATEMENT
+  OTHER
+}
+
+model AttachmentsOnEventSeries {
+  eventSerieId String                   @db.Uuid
+  attachmentId String                   @unique @db.Uuid
+  type         EventSerieAttachmentType @default(OTHER)
+
+  eventSerie EventSerie @relation(fields: [eventSerieId], references: [id], onDelete: Cascade)
+  attachment Attachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
+
+  @@id([eventSerieId, attachmentId])
+}
+
+model SacdAgency {
+  id                                String   @id @default(uuid()) @db.Uuid
+  email                             String   @unique
+  matchingFrenchPostalCodesPrefixes String[] // Using prefix due to 2 digits for the "department" (3 for overseas ones), and full postal codes for a specific "department"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model SacemAgency {

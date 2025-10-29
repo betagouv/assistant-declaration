@@ -38,6 +38,7 @@ export const eventRouter = router({
             startAt: 'asc',
           },
         },
+        AttachmentsOnEventSeries: true,
       },
     });
 

@@ -7,6 +7,7 @@ import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { playFindEmailStructure } from '@ad/.storybook/testing';
 import { DeclarationToSacemAgencyEmail } from '@ad/src/components/emails/templates/DeclarationToSacemAgency';
 import { titles } from '@ad/src/components/emails/templates/common';
+import { emailAttachments } from '@ad/src/fixtures/attachment';
 import { eventsSeries } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
 import { users } from '@ad/src/fixtures/user';
@@ -40,6 +41,7 @@ NormalStory.args = {
   originatorLastname: users[0].lastname,
   originatorEmail: users[0].email,
   organizationName: organizations[0].name,
+  attachments: [emailAttachments[0]],
   aboutUrl: '',
 };
 NormalStory.decorators = [WithEmailRenderer];

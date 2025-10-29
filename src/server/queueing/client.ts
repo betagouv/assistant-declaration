@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/nextjs';
 import PgBoss from 'pg-boss';
 
 import { BusinessError } from '@ad/src/models/entities/errors';
+import { cleanPendingUploads, cleanPendingUploadsTopic } from '@ad/src/server/queueing/workers/clean-pending-uploads';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { gracefulExit } from '@ad/src/utils/system';
 
@@ -55,7 +56,7 @@ export async function getBossClientInstance(): Promise<PgBoss> {
       await bossClient.start();
 
       // Bind listeners
-      // await bossClient.work(todoActionTopic, handlerWrapper(todoAction));
+      await bossClient.work(cleanPendingUploadsTopic, handlerWrapper(cleanPendingUploads));
     })();
   }
 

@@ -22,6 +22,7 @@ import { usePrevious } from 'react-use';
 import { z } from 'zod';
 
 import styles from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPage.module.scss';
+import { DeclarationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/serie/[eventSerieId]/declaration/DeclarationPageContext';
 import sending from '@ad/src/assets/images/declaration/sending.svg';
 import { trpc } from '@ad/src/client/trpcClient';
 import { AddressField } from '@ad/src/components/AddressField';
@@ -31,6 +32,7 @@ import { Button } from '@ad/src/components/Button';
 import { CompanyField } from '@ad/src/components/CompanyField';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventsFieldsets } from '@ad/src/components/EventsFieldsets';
+import { FileList } from '@ad/src/components/FileList';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { officialHeadquartersIdMask } from '@ad/src/components/OfficialHeadquartersIdField';
 import { SacdIdInput } from '@ad/src/components/SacdIdField';
@@ -38,17 +40,39 @@ import { SacemIdInput } from '@ad/src/components/SacemIdField';
 import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
 import { currentTaxRates } from '@ad/src/core/declaration';
 import { getEventsKeyFigures } from '@ad/src/core/declaration/format';
-import { FillDeclarationSchema, FillDeclarationSchemaType } from '@ad/src/models/actions/declaration';
+import { FillDeclarationSchema, FillDeclarationSchemaType, fillDeclarationAttachmentsMax } from '@ad/src/models/actions/declaration';
 import { AddressInputSchemaType } from '@ad/src/models/entities/address';
-import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
+import { AttachmentKindSchema, UiAttachmentSchemaType } from '@ad/src/models/entities/attachment';
+import {
+  DeclarationAttachmentTypeSchema,
+  DeclarationAttachmentTypeSchemaType,
+  DeclarationTypeSchema,
+  DeclarationTypeSchemaType,
+} from '@ad/src/models/entities/common';
 import { BusinessZodError, atLeastOneTransmissionHasFailedError, invalidDeclarationFieldsToTransmitError } from '@ad/src/models/entities/errors';
 import { AudienceSchema, PerformanceTypeSchema } from '@ad/src/models/entities/event';
 import { AppRouter } from '@ad/src/server/app-router';
+import { attachmentKindList } from '@ad/src/utils/attachment';
 import { parseError } from '@ad/src/utils/error';
 import { formatMaskedValue } from '@ad/src/utils/imask';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 
 type FillDeclarationSchemaInputType = z.input<typeof FillDeclarationSchema>;
+
+type EnhancedUiAttachment = UiAttachmentSchemaType & {
+  type: DeclarationAttachmentTypeSchemaType;
+};
+
+function sortAttachments(
+  attachments: FillDeclarationSchemaInputType['eventSerie']['attachments']
+): FillDeclarationSchemaInputType['eventSerie']['attachments'] {
+  // For whatever reason with no interaction the array order between what is set inside `reset()`
+  // and the form array is not the same whereas not doing any interaction that would modify it
+  // ... so ending with sorting by ID for technical reasons
+  return attachments.sort((a, b) => {
+    return a.id.localeCompare(b.id);
+  });
+}
 
 const declarationTypesModal = createModal({
   id: 'declaration-types-modal',
@@ -66,6 +90,7 @@ export interface DeclarationPageProps {
 
 export function DeclarationPage({ params: { organizationId, eventSerieId } }: DeclarationPageProps) {
   const { t } = useTranslation('common');
+  const { ContextualUploader } = useContext(DeclarationPageContext);
   const { isDark } = useIsDark();
 
   const theme = useTheme();
@@ -123,6 +148,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         circusSpecificExpensesIncludingTaxes: 0,
         circusSpecificExpensesExcludingTaxes: 0,
         circusSpecificExpensesTaxRate: currentTaxRates[0],
+        attachments: [],
       },
       events: [], // To avoid being "undefined"
       // ...prefill,
@@ -180,6 +206,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           circusSpecificExpensesIncludingTaxes: result.declaration.eventSerie.circusSpecificExpensesIncludingTaxes,
           circusSpecificExpensesExcludingTaxes: result.declaration.eventSerie.circusSpecificExpensesExcludingTaxes,
           circusSpecificExpensesTaxRate: result.declaration.eventSerie.circusSpecificExpensesTaxRate,
+          attachments: sortAttachments(
+            result.declaration.eventSerie.attachments.map((uiAttachment) => {
+              return {
+                id: uiAttachment.id,
+                type: uiAttachment.type,
+              };
+            })
+          ),
         },
         events: result.declaration.events.map((event) => {
           const tmpEventAddress = event.placeOverride?.address ?? result.declaration.eventSerie.place?.address ?? null;
@@ -220,6 +254,10 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           };
         }),
       });
+
+      // From now use the informatinon from the backend instead of local ones (like for the preview URL being hosted instead of `blob://...`)
+      // It allows making sure it's in sync with the backend, that's why below we replace the current array since everything should have been pushed to the backend
+      setUiAttachments(result.declaration.eventSerie.attachments);
 
       push(['trackEvent', 'declaration', 'fill']);
     },
@@ -278,6 +316,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
             circusSpecificExpensesExcludingTaxes:
               getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesExcludingTaxes ?? 0,
             circusSpecificExpensesTaxRate: getDeclaration.data.declarationWrapper.declaration.eventSerie.circusSpecificExpensesTaxRate,
+            attachments: sortAttachments(
+              getDeclaration.data.declarationWrapper.declaration.eventSerie.attachments.map((uiAttachment) => {
+                return {
+                  id: uiAttachment.id,
+                  type: uiAttachment.type,
+                };
+              })
+            ),
           },
           events: getDeclaration.data.declarationWrapper.declaration.events.map((event) => {
             const tmpEventAddress =
@@ -321,6 +367,9 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           }),
         });
 
+        // Attachments in the UI have much more information than the ones needed by the mutation endpoint, so filling the intermediate variable
+        setUiAttachments(getDeclaration.data.declarationWrapper.declaration.eventSerie.attachments);
+
         // If no declaration types we invite the user to select one through the window
         if (getDeclaration.data.declarationWrapper.declaration.eventSerie.expectedDeclarationTypes.length === 0) {
           // [WORKAROUND] The DSFR may not be initialized yet so opening the modal will throw an error reading on a null object
@@ -343,6 +392,45 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
   }, [getDeclaration.data, formInitialized, setFormInitialized, reset, eventSerieId]);
 
   const expectedDeclarationTypes = watch('eventSerie.expectedDeclarationTypes');
+
+  const [isUploadingAttachments, setIsUploadingAttachments] = useState<boolean>(false);
+  const [uiAttachments, setUiAttachments] = useState<EnhancedUiAttachment[]>(() => []);
+
+  useEffect(() => {
+    // Make sure the data to be pushed reflects the list of uploaded items
+    setValue(
+      'eventSerie.attachments',
+      sortAttachments(
+        uiAttachments.map((uiAttachment) => {
+          return {
+            id: uiAttachment.id,
+            type: uiAttachment.type,
+          };
+        })
+      ),
+      { shouldDirty: true }
+    );
+  }, [setValue, uiAttachments]);
+
+  const onCommittedFilesChanged = useCallback<(attachments: UiAttachmentSchemaType[]) => Promise<void>>(
+    async (committedUiAttachments) => {
+      setUiAttachments((previousValue) => {
+        const newValue = [...previousValue];
+
+        committedUiAttachments.forEach((committedUiAttachment) => {
+          if (newValue.findIndex((item) => item.id === committedUiAttachment.id) === -1) {
+            newValue.push({
+              ...committedUiAttachment,
+              type: DeclarationAttachmentTypeSchema.enum.OTHER, // Default one that will is always forwarded to organisms, but can be more specific
+            });
+          }
+        });
+
+        return newValue;
+      });
+    },
+    [setUiAttachments]
+  );
 
   const [tmpExpectedDeclarationTypes, setTmpExpectedDeclarationTypes] = useState<DeclarationTypeSchemaType[]>([]);
   useEffect(() => {
@@ -538,6 +626,64 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         };
   }, [getDeclaration]);
 
+  const formAttachments = watch('eventSerie.attachments');
+  const fileItemAdditionalSectionRenderer = useCallback(
+    (file: EnhancedUiAttachment) => {
+      const fileIndex = formAttachments.findIndex((eA) => eA.id === file.id);
+
+      return (
+        <>
+          <Select
+            label=""
+            disabled={alreadyDeclared}
+            state={!!errors.eventSerie?.attachments?.[fileIndex]?.type ? 'error' : undefined}
+            stateRelatedMessage={errors?.eventSerie?.attachments?.[fileIndex]?.type?.message}
+            nativeSelectProps={{
+              'aria-label': 'type de document',
+              value: file.type,
+              onChange: (event) => {
+                // Updating this array will also affect the form values
+                // Note: it will rerender this select at each modification but we have no other choice due to order of the source of truth
+                setUiAttachments((previousValue) => {
+                  const newUiAttachments = [...previousValue];
+                  const currentFile = newUiAttachments.find((item) => item.id === file.id);
+
+                  if (currentFile) {
+                    currentFile.type = event.target.value;
+                  }
+
+                  return newUiAttachments;
+                });
+              },
+              style: {
+                fontSize: '0.8rem',
+                lineHeight: '1rem',
+                padding: '0.5rem 1.5rem 0.5rem 0.5rem',
+                backgroundPosition: 'calc(100% - 0.25rem) 50%',
+                marginLeft: '1.5rem',
+              },
+            }}
+            options={[
+              ...DeclarationAttachmentTypeSchema.options.map((attachmentType) => {
+                return {
+                  label: t(`model.declarationAttachmentType.enum.${attachmentType}`),
+                  value: attachmentType,
+                };
+              }),
+            ].sort((a, b) => a.label.localeCompare(b.label))}
+            style={{
+              maxWidth: '40%',
+              marginRight: '1rem',
+              marginLeft: 'auto',
+              marginBottom: 0,
+            }}
+          />
+        </>
+      );
+    },
+    [formAttachments, alreadyDeclared, setUiAttachments, errors.eventSerie?.attachments, t]
+  );
+
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
@@ -632,7 +778,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                       formContainerRef.current?.requestSubmit();
                     }}
                     priority="secondary"
-                    disabled={transmitDeclaration.isPending}
+                    disabled={transmitDeclaration.isPending || isUploadingAttachments}
                     loading={fillDeclaration.isPending}
                     nativeButtonProps={{
                       className: fr.cx('fr-m-2v'),
@@ -646,7 +792,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                 <Tooltip title={isDirty ? `Pour télédéclarer vous devez d'abord enregistrer vos dernières modifications` : ''}>
                   <span>
                     <Button
-                      disabled={isDirty || fillDeclaration.isPending}
+                      disabled={isDirty || fillDeclaration.isPending || isUploadingAttachments}
                       loading={transmitDeclaration.isPending}
                       onClick={async () => {
                         try {
@@ -1036,6 +1182,62 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                               </>
                             )}
                           </div>
+                          {(expectedDeclarationTypes.includes('SACEM') || expectedDeclarationTypes.includes('SACD')) && (
+                            <div className={fr.cx('fr-grid-row')}>
+                              <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+                                <div className={fr.cx('fr-fieldset__element')}>
+                                  <span className={fr.cx('fr-text--bold')}>Pièces justificatives :</span>
+                                  <br />
+                                  {expectedDeclarationTypes.includes('SACEM') ? (
+                                    <>
+                                      <ol>
+                                        <li>contrats artistiques (cession & co-réalisation)</li>
+                                        <li>programme œuvres interprétées</li>
+                                        <li>bordereau de recette</li>
+                                      </ol>
+                                    </>
+                                  ) : (
+                                    <>contrats artistiques (cession, co-réalisation, co-production)</>
+                                  )}
+                                </div>
+                              </div>
+                              <div className={fr.cx('fr-col-12', 'fr-col-md-7')}>
+                                <div className={fr.cx('fr-fieldset__element')}>
+                                  {!alreadyDeclared && (
+                                    <ContextualUploader
+                                      attachmentKindRequirements={attachmentKindList[AttachmentKindSchema.enum.EVENT_SERIE_DOCUMENT]}
+                                      maxFiles={fillDeclarationAttachmentsMax}
+                                      onCommittedFilesChanged={onCommittedFilesChanged}
+                                      isUploadingChanged={(newValue) => {
+                                        setIsUploadingAttachments(newValue);
+                                      }}
+                                      listStyle={{ paddingBottom: 0 }} // Since they are stack with the "uploaded files list" we prevent double spacing
+                                    />
+                                  )}
+                                  {uiAttachments && uiAttachments.length > 0 && (
+                                    <>
+                                      <FileList
+                                        files={uiAttachments}
+                                        onRemove={async (file) => {
+                                          const newValue = [...uiAttachments];
+                                          const existingIndex = newValue.findIndex((item) => item.id === file.id);
+
+                                          if (existingIndex !== -1) {
+                                            newValue.splice(existingIndex, 1);
+                                          }
+
+                                          setUiAttachments(newValue);
+                                        }}
+                                        additionalSection={fileItemAdditionalSectionRenderer}
+                                        readonly={alreadyDeclared}
+                                        style={{ paddingTop: 0 }} // Since they are stack with the "uploader files list" we prevent double spacing
+                                      />
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
                           <div className={fr.cx('fr-fieldset__element')}>
                             <hr className={cx(fr.cx('fr-my-3v'), styles.hr)} />
                           </div>

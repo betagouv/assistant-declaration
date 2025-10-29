@@ -1,6 +1,18 @@
-import { Address, DeclarationType, Event, EventSerie, Organization, Place, TicketingSystem, User } from '@prisma/client';
+import {
+  Address,
+  Attachment,
+  AttachmentsOnEventSeries,
+  DeclarationType,
+  Event,
+  EventSerie,
+  Organization,
+  Place,
+  TicketingSystem,
+  User,
+} from '@prisma/client';
 
 import { AddressSchemaType } from '@ad/src/models/entities/address';
+import { UiAttachmentSchemaType } from '@ad/src/models/entities/attachment';
 import { DeclarationTypeSchema, DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { DeclarationSchemaType } from '@ad/src/models/entities/declaration/common';
 import { EventSchemaType, EventSerieSchemaType } from '@ad/src/models/entities/event';
@@ -8,6 +20,8 @@ import { OrganizationSchemaType } from '@ad/src/models/entities/organization';
 import { PlaceSchemaType } from '@ad/src/models/entities/place';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
 import { UserSchemaType } from '@ad/src/models/entities/user';
+import { generateSignedAttachmentLink } from '@ad/src/server/routers/common/attachment';
+import { fileAuthSecret } from '@ad/src/server/routers/common/attachment.server';
 
 export function userPrismaToModel(user: User): UserSchemaType {
   return {
@@ -78,7 +92,11 @@ export function ticketingSystemPrismaToModel(
   };
 }
 
-export function eventSeriePrismaToModel(eventSerie: Omit<EventSerie, 'lastManualUpdateAt'>): EventSerieSchemaType {
+export function eventSeriePrismaToModel(
+  eventSerie: Omit<EventSerie, 'lastManualUpdateAt'> & {
+    AttachmentsOnEventSeries: Pick<AttachmentsOnEventSeries, 'attachmentId' | 'type'>[];
+  }
+): EventSerieSchemaType {
   return {
     id: eventSerie.id,
     internalTicketingSystemId: eventSerie.internalTicketingSystemId,
@@ -104,6 +122,7 @@ export function eventSeriePrismaToModel(eventSerie: Omit<EventSerie, 'lastManual
     circusSpecificExpensesExcludingTaxes:
       eventSerie.circusSpecificExpensesExcludingTaxes !== null ? eventSerie.circusSpecificExpensesExcludingTaxes.toNumber() : null,
     circusSpecificExpensesTaxRate: eventSerie.circusSpecificExpensesTaxRate !== null ? eventSerie.circusSpecificExpensesTaxRate.toNumber() : null,
+    attachments: eventSerie.AttachmentsOnEventSeries.map((aOES) => attachmentOnEventSeriePrismaToModel(aOES)),
     createdAt: eventSerie.createdAt,
     updatedAt: eventSerie.updatedAt,
   };
@@ -171,6 +190,7 @@ export function declarationPrismaToModel(
           })
         | null;
     })[];
+    AttachmentsOnEventSeries: Pick<AttachmentsOnEventSeries, 'attachmentId' | 'type'>[];
   }
 ): DeclarationSchemaType {
   const {
@@ -205,5 +225,38 @@ export function declarationPrismaToModel(
         placeOverride: event.placeOverride ? placePrismaToModel(event.placeOverride) : null,
       };
     }),
+  };
+}
+
+export async function attachmentPrismaToModel(
+  attachment: Pick<Attachment, 'id'> & Partial<Pick<Attachment, 'contentType' | 'size' | 'name'>>
+): Promise<UiAttachmentSchemaType> {
+  return {
+    id: attachment.id,
+    url: await generateSignedAttachmentLink(attachment.id, fileAuthSecret),
+    contentType: attachment.contentType,
+    size: attachment.size,
+    name: attachment.name,
+  };
+}
+
+export async function attachmentIdPrismaToModel(attachmentId: null): Promise<null>;
+export async function attachmentIdPrismaToModel(attachmentId: string): Promise<UiAttachmentSchemaType>;
+export async function attachmentIdPrismaToModel(attachmentId: string | null): Promise<UiAttachmentSchemaType | null> {
+  if (!attachmentId) {
+    return null;
+  }
+
+  return await attachmentPrismaToModel({
+    id: attachmentId,
+  });
+}
+
+export function attachmentOnEventSeriePrismaToModel(
+  attachmentOnEventSerie: Pick<AttachmentsOnEventSeries, 'attachmentId' | 'type'>
+): EventSerieSchemaType['attachments'][0] {
+  return {
+    id: attachmentOnEventSerie.attachmentId,
+    type: attachmentOnEventSerie.type,
   };
 }

@@ -40,7 +40,12 @@
       "eventSeriePartialExpensesGreatherThanTotal": "le total des dépenses doit être supérieur aux frais renseignés",
       "expiredVerificationToken": "vous avez dépassé le temps imparti, merci de renouveler votre demande",
       "expiredConfirmationToken": "le lien de confirmation a expiré, veuillez contacter notre support",
+      "fileAccessLinkHasExpired": "le lien pour accéder au fichier a expiré, veuillez retourner sur la plateforme pour y accéder",
+      "fileAccessNotAuthorized": "vous n'êtes pas autorisé à lire ce fichier",
+      "fileIdMalformated": "l'identifiant du fichier est malformé",
       "fileNotFound": "aucun fichier n'a été trouvé",
+      "fileRetriableUpload": "une erreur s'est produite au moment de transférer ce fichier, vous pouvez retenter le transfert",
+      "fileUpload": "une erreur a été détecté concernant la transmission de documents",
       "foreignTaxRateOnPrice": "nous ne gérons actuellement pas les spectacles joués en France qui ont le taux de TVA d'un pays étranger. Veuillez contacter notre support afin de nous décrire votre spécificité, pour que nous puissions améliorer notre plateforme",
       "helloassoMissingTier": "malheureusement nous n'arrivons pas à récupérer l'un des tarifs de vos événements auprès de HelloAsso. Veuillez contacter notre support pour que l'on puisse investiguer cette anomalie",
       "includingTaxesAmountCannotBeLowerThanExcludingTaxesAmount": "le montant TTC ne peut être inférieur au montant HT",
@@ -61,6 +66,8 @@
       "placeNameRequiredIfAnyAddressSpecified": "l'intitulé du lieu est requis quand son adresse est spécifiée",
       "sacemAgencyNotFound": "le code postal spécifié pour le lieu ne nous permet pas de savoir à quelle agence SACEM envoyer la déclaration. Veuillez le vérifier ou contacter notre support",
       "sacemDeclarationUnsuccessful": "nous n'avons pas réussi à transférer la déclaration à la SACEM. Merci de réessayer dans quelques secondes ou de nous contacter si le problème persiste",
+      "sacdAgencyNotFound": "le code postal spécifié pour le lieu ne nous permet pas de savoir à quelle agence SACD envoyer les pièces jointes. Veuillez le vérifier ou contacter notre support",
+      "sacdAttachmentsDeclarationUnsuccessful": "nous n'avons pas réussi à transférer les pièces jointes à la SACD. Merci de réessayer dans quelques secondes ou de nous contacter si le problème persiste",
       "sacdDeclarationIncorrectDeclarant": "l'identifiant de déclarant SACD que vous avez configuré est incorrect, nous vous conseillons de le vérifier et de nous contacter si besoin",
       "sacdDeclarationUnsuccessful": "la SACD nous a indiqué ne pas avoir complètement accepté votre déclaration. Nous vous conseillons de contacter votre interlocuteur SACD pour plus d'informations",
       "shotgunTooMuchToRetrieve": "vous avez trop de données à analyser et les récupérer pourrait affecter Shotgun. Bien que nous soyons déjà en discussions avec Shotgun pour autoriser la synchronization de structures à forte volumétrie, n'hésitez pas à contacter notre support pour appuyer la démarche",
@@ -69,6 +76,7 @@
       "ticketingSystemNotFound": "ce système de billetterie n'existe pas",
       "transmittedDeclarationCannotBeUpdated": "une déclaration déjà transmise auprès d'un organisme ne peut pas être modifiée. Si une correction est nécessaire, veuillez contacter l'organisme directement",
       "tooManyOrganizationTicketingSystems": "vous avez atteint la limite du nombre de systèmes de billetterie par organisation",
+      "tooManyUploadedFiles": "vous ne pouvez pas transmettre plus de fichiers que le nombre autorisé",
       "userAlreadyConfirmed": "votre compte est déjà confirmé",
       "userNotConfirmed": "votre inscription doit être confirmée en cliquant sur le lien de l'email avant de pouvoir vous authentifier",
       "userNotFound": "cet utilisateur n'existe pas",
@@ -338,12 +346,46 @@
   "duration": {
     "fromSeconds": "{{ duration, durationFromSeconds }}"
   },
+  "email": {
+    "template": {
+      "DeclarationAttachmentsToSacdAgencyEmail": {
+        "attachmentsInThisEmail_one": "Vous trouverez ci-joint à cet email {{count}} document.",
+        "attachmentsInThisEmail_other": "Vous trouverez ci-joint à cet email {{count}} documents."
+      },
+      "DeclarationToSacemAgencyEmail": {
+        "attachmentsInThisEmail_one": "Vous trouverez ci-joint à cet email {{count}} document.",
+        "attachmentsInThisEmail_other": "Vous trouverez ci-joint à cet email {{count}} documents."
+      }
+    }
+  },
+  "file": {
+    "allowedExtensions_one": "Format supporté : {{extensions}}.",
+    "allowedExtensions_other": "Formats supportés : {{extensions}}.",
+    "attachment_one": "Pièce jointe",
+    "attachment_other": "Pièces jointes",
+    "error": {
+      "enum": {
+        "REJECTED_ATTACHMENTS": "Une ou plusieurs pièces jointes n'ont pas pu être réceptionnées"
+      }
+    },
+    "size": "{{ size, humanFileSize }}",
+    "upToMaxfiles_one": "Un seul fichier autorisé.",
+    "upToMaxfiles_other": "Jusqu'à {{count}} fichiers autorisés."
+  },
   "model": {
     "audience": {
       "enum": {
         "ALL": "Tout public",
         "YOUNG": "Jeune public",
         "SCHOOL": "Scolaire"
+      }
+    },
+    "declarationAttachmentType": {
+      "enum": {
+        "ARTISTIC_CONTRACT": "Contrat artistique",
+        "OTHER": "Autre document",
+        "PERFORMED_WORK_PROGRAM": "Programme oeuvres interprétées",
+        "REVENUE_STATEMENT": "Bordereau de recette"
       }
     },
     "declarationType": {
