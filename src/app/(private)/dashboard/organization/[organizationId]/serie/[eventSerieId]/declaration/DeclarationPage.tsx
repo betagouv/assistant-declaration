@@ -1091,57 +1091,49 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                         </div>
                         */}
                           <div className={fr.cx('fr-grid-row')}>
-                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                              <div className={fr.cx('fr-fieldset__element')}>
-                                <Controller
-                                  control={control}
-                                  name="eventSerie.expensesExcludingTaxes"
-                                  disabled={alreadyDeclared}
-                                  render={({ field, fieldState: { error } }) => {
-                                    return <AmountInput {...field} label="Dépenses totales HT" signed={false} errorMessage={error?.message} />;
-                                  }}
-                                />
-                              </div>
-                            </div>
-                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
-                              <div className={fr.cx('fr-fieldset__element')}>
-                                <Controller
-                                  control={control}
-                                  name="eventSerie.expensesIncludingTaxes"
-                                  disabled={alreadyDeclared}
-                                  render={({ field, fieldState: { error } }) => {
-                                    return <AmountInput {...field} label="Dépenses totales TTC" signed={false} errorMessage={error?.message} />;
-                                  }}
-                                />
-                              </div>
-                            </div>
-                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-5')}>
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Controller
                                   control={control}
                                   name="eventSerie.introductionFeesExpensesExcludingTaxes"
                                   disabled={alreadyDeclared}
                                   render={({ field, fieldState: { error } }) => {
-                                    return <AmountInput {...field} label="Frais d'approche HT" signed={false} errorMessage={error?.message} />;
+                                    return (
+                                      <AmountInput
+                                        {...field}
+                                        label="Frais d'approche HT"
+                                        hintText="Hébergement et transport (artistes, techniciens, matériel, décor...)"
+                                        signed={false}
+                                        errorMessage={error?.message}
+                                      />
+                                    );
                                   }}
                                 />
                               </div>
                             </div>
-                            <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-5')}>
                               <div className={fr.cx('fr-fieldset__element')}>
                                 <Controller
                                   control={control}
                                   name="eventSerie.introductionFeesExpensesIncludingTaxes"
                                   disabled={alreadyDeclared}
                                   render={({ field, fieldState: { error } }) => {
-                                    return <AmountInput {...field} label="Frais d'approche TTC" signed={false} errorMessage={error?.message} />;
+                                    return (
+                                      <AmountInput
+                                        {...field}
+                                        label="Frais d'approche TTC"
+                                        hintText="Hébergement et transport (artistes, techniciens, matériel, décor...)"
+                                        signed={false}
+                                        errorMessage={error?.message}
+                                      />
+                                    );
                                   }}
                                 />
                               </div>
                             </div>
                             {expectedDeclarationTypes.includes('SACD') && (
                               <>
-                                <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                                <div className={fr.cx('fr-col-6', 'fr-col-md-5')}>
                                   <div className={fr.cx('fr-fieldset__element')}>
                                     <Controller
                                       control={control}
@@ -1152,6 +1144,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                           <AmountInput
                                             {...field}
                                             label="Frais spécifiques au cirque HT"
+                                            hintText="Transport, montage, démontage"
                                             signed={false}
                                             errorMessage={error?.message}
                                           />
@@ -1160,7 +1153,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                     />
                                   </div>
                                 </div>
-                                <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                                <div className={fr.cx('fr-col-6', 'fr-col-md-5')}>
                                   <div className={fr.cx('fr-fieldset__element')}>
                                     <Controller
                                       control={control}
@@ -1171,6 +1164,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                           <AmountInput
                                             {...field}
                                             label="Frais spécifiques au cirque TTC"
+                                            hintText="Transport, montage, démontage"
                                             signed={false}
                                             errorMessage={error?.message}
                                           />
@@ -1181,6 +1175,46 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 </div>
                               </>
                             )}
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-5')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="eventSerie.expensesExcludingTaxes"
+                                  disabled={alreadyDeclared}
+                                  render={({ field, fieldState: { error } }) => {
+                                    return (
+                                      <AmountInput
+                                        {...field}
+                                        label="Dépenses totales HT"
+                                        hintText="Somme de tous les contrats artistiques et frais d'approche"
+                                        signed={false}
+                                        errorMessage={error?.message}
+                                      />
+                                    );
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <div className={fr.cx('fr-col-6', 'fr-col-md-5')}>
+                              <div className={fr.cx('fr-fieldset__element')}>
+                                <Controller
+                                  control={control}
+                                  name="eventSerie.expensesIncludingTaxes"
+                                  disabled={alreadyDeclared}
+                                  render={({ field, fieldState: { error } }) => {
+                                    return (
+                                      <AmountInput
+                                        {...field}
+                                        label="Dépenses totales TTC"
+                                        hintText="Somme de tous les contrats artistiques et frais d'approche"
+                                        signed={false}
+                                        errorMessage={error?.message}
+                                      />
+                                    );
+                                  }}
+                                />
+                              </div>
+                            </div>
                           </div>
                           {(expectedDeclarationTypes.includes('SACEM') || expectedDeclarationTypes.includes('SACD')) && (
                             <div className={fr.cx('fr-grid-row')}>
