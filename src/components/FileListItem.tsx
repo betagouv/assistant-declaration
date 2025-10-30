@@ -60,9 +60,6 @@ export function FileListItem<T extends UiAttachmentSchemaType>({ file, onRemove,
         <ListItemText
           primary={file.name || 'Nom du fichier inconnu'}
           secondary={!!file.size ? t('file.size', { size: file.size }) : undefined}
-          sx={{
-            flexShrink: 0, // Like that if there is an error the block won't compress the filename
-          }}
           data-sentry-mask
         />
         {AdditionalSectionComponent && <>{AdditionalSectionComponent}</>}

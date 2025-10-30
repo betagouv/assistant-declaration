@@ -28,7 +28,7 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
       // Register the event listener for termination signals
       registerGracefulExit();
 
-      // await scheduleCronTasks();
+      await scheduleCronTasks();
 
       console.log('All services have been initialized');
     } catch (error) {

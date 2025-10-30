@@ -85,11 +85,12 @@ export function useAmountInput({ value, onAccept, signed }: UseAmountInputProps)
 
 interface AmountInputProps extends SubformType {
   label: string;
+  hintText?: string;
   signed?: boolean;
   errorMessage?: string;
 }
 
-export function AmountInput({ value, signed, label, disabled, errorMessage, onChange, onBlur }: AmountInputProps) {
+export function AmountInput({ value, signed, label, hintText, disabled, errorMessage, onChange, onBlur }: AmountInputProps) {
   const onAccept = useCallback<UseAmountInputProps['onAccept']>(
     (newValue) => {
       if (newValue !== value) {
@@ -108,6 +109,7 @@ export function AmountInput({ value, signed, label, disabled, errorMessage, onCh
   return (
     <Input
       label={label}
+      hintText={hintText}
       disabled={disabled}
       state={!!errorMessage ? 'error' : undefined}
       stateRelatedMessage={errorMessage}

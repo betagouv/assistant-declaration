@@ -6,4 +6,6 @@ export async function scheduleCronTasks() {
 
   // Schedule tasks
   await bossClient.schedule(cleanPendingUploadsTopic, `0 3 * * *`, undefined, { tz: 'Europe/Paris' }); // At night to save performance
+
+  console.log('cron tasks have been scheduled');
 }
