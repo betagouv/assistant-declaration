@@ -55,6 +55,9 @@ export async function getBossClientInstance(): Promise<PgBoss> {
     initPromise = (async () => {
       await bossClient.start();
 
+      // Create queues (should be run just once but for simplicity as for database automigration it's checked at each start)
+      await bossClient.createQueue(cleanPendingUploadsTopic);
+
       // Bind listeners
       await bossClient.work(cleanPendingUploadsTopic, handlerWrapper(cleanPendingUploads));
     })();
