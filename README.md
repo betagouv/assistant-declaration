@@ -410,7 +410,14 @@ For the setup, follow:
    4. Make it targets the forked GitHub repository to auto-deploy on updates (when synchronizing the fork...)
    5. Reuse the main application notifier settings for production to be notified by Slack and email
    6. Set the environments variables:
-      - `BUILDPACK_URL`: `https://github.com/Scalingo/multi-buildpack.git`
+      - `MB_SITE_URL`: [PROVIDED] _(format `https://xxx.yyy.zzz/`)_
+      - `MB_SITE_LOCALE`: `fr`
+      - `MB_DB_TYPE`: `postgres`
+      - `MB_DB_CONNECTION_URI`: `jdbc:postgresql://db.example.com:5432/mydb?user=dbuser&password=dbpassword`
+      - `MB_ENCRYPTION_SECRET_KEY`: [SECRET] _(random string that can be generated with `openssl rand -base64 64`. Note this is needed otherwise sensitive values in database won't be encrypted)_
+      - `MB_PASSWORD_COMPLEXITY`: `strong`
+      - `MB_PASSWORD_LENGTH`: `16`
+      - `MB_SESSION_TIMEOUT`: `{"amount":120,"unit":"minutes"}` _(without this the session would last forever)_
       - NONE FOR NOW...
    7. Start a manual deploy from the `master` branch
    8. Now containers are listed, you may ask for the type `M - 512MB of RAM`, no need of more
@@ -435,7 +442,7 @@ For the setup, follow:
 13. TODO: custom subdomain?
 14. TODO:
 15. TODO:
-16. TODO: enable alerts by Slack? Or email (but needs SMTP)?
+16. TODO: enable alerts by Slack? Or email (but needs SMTP)? `MB_EMAIL_SMTP_PASSWORD`
 17. TODO:
 18. TODO:
 
