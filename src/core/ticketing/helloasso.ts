@@ -13,6 +13,7 @@ import {
 } from '@ad/src/client/helloasso/sdk.gen';
 import { getExcludingTaxesAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
+import { helloassoMissingTierError } from '@ad/src/models/entities/errors';
 import { LiteEventSchema, LiteEventSerieSchema, LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
 import { JsonTokenSchema } from '@ad/src/models/entities/helloasso';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -261,8 +262,15 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       assert(formResult.data);
       assert(formResult.data.formSlug);
       assert(formResult.data.title);
-      assert(formResult.data.currency === 'EUR');
-      assert(formResult.data.startDate);
+
+      // Some users use `Event` type to sell things not dated, potentially things that are not events
+      // So instead of throwing an error we just ignore them
+      if (!formResult.data.startDate) {
+        return;
+      } else if (formResult.data.currency !== 'EUR') {
+        // Also ignore events not targeting the right currency
+        return;
+      }
 
       const startDate = new Date(formResult.data.startDate);
       const endDate = formResult.data.endDate ? new Date(formResult.data.endDate) : null;
@@ -391,13 +399,18 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
         assert(ticketItem.tierId, 'the tier ID should be set on tickets');
 
         const tierProperties = tierdIdToTaxRateAndAmount.get(ticketItem.tierId);
-
-        assert(tierProperties !== undefined, 'the tier tax rate should be retrieved');
-
         const ticketPriceIncludingTaxes = ticketItem.amount / 100; // 2000 is 20€
 
         if (ticketPriceIncludingTaxes === 0) {
           schemaEvent.freeTickets++;
+        } else if (tierProperties === undefined) {
+          // The public form entity sometimes does not include all tiers (maybe they are deleted or disabled?)
+          // and we have no other way to find them. Without this, there is no way to get the used tax rate to properly
+          // calculate the including taxes amount. So we throw a user facing error in the meantime...
+          // Notes:
+          // - Order entity contains a `vat` field but this one is not the percentage, it's a vat amount for the whole order so we cannot infer the vat for this specific ticket (= this specific order item)
+          // - HelloAsso has been contacted about this issue
+          throw helloassoMissingTierError;
         } else {
           schemaEvent.paidTickets++;
           schemaEvent.ticketingRevenueIncludingTaxes += ticketPriceIncludingTaxes;
