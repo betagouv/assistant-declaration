@@ -391,6 +391,54 @@ We use the minimal tracking configuration allowing the frontend to not request t
 
 On the Matomo instance you have access to, just create a new website to get a new site ID.
 
+### Metabase
+
+We use it as our business intelligence software for dashboards to measure impact. As for now it's not 100% anonymized as for Matomo because it also helps the team as an internal backoffice to understand what is happening, when and by who.
+
+Due to this, we do not use a shared Metabase instance, so it requires a distinct runtime instance on Scalingo (but we reuse the main database, with a different PostgreSQL schema).
+
+_Also note there is only an instance for production, no need of testing it on development environment._
+
+For the setup, follow:
+
+1. Fork https://github.com/Scalingo/metabase-scalingo to be in the same GitHub organization than your repositories
+2. Within Scalingo:
+
+   1. Create a new application suffixed with `-metabase`
+   2. Make it accessible on `data.assistant-declaration.beta.gouv.fr` by configuring both Scalingo as a canonical domain, and the DNS zone with the `CNAME` Scalingo value
+   3. Force HTTPS in the routing settings
+   4. Make it targets the forked GitHub repository to auto-deploy on updates (when synchronizing the fork...)
+   5. Reuse the main application notifier settings for production to be notified by Slack and email
+   6. Set the environments variables:
+      - `BUILDPACK_URL`: `https://github.com/Scalingo/multi-buildpack.git`
+      - NONE FOR NOW...
+   7. Start a manual deploy from the `master` branch
+   8. Now containers are listed, you may ask for the type `M - 512MB of RAM`, no need of more
+
+3. Go to https://data.assistant-declaration.beta.gouv.fr/ for the first initialization of the service:
+   1. Use hard secret
+   2. Skip database source configuration
+   3. Disable metrics going to the Metabase company
+   4. Validate the onboarding
+   5. Then within the dashboard go to admin settings and make sure the domain is correctly set to:
+      - `https://`
+      - `data.assistant-declaration.beta.gouv.fr`
+4. TODO: configure notifier?
+5. TODO:
+6. TODO: create db user specific schema for metabase
+7. TODO: provide database url... if possible (cross-instances)
+8. TODO:
+9. TODO: create connector db user (only select on a few tables)
+10. TODO: create a few dashboards for test
+11. TODO: require 2FA for all users!
+12. TODO:
+13. TODO: custom subdomain?
+14. TODO:
+15. TODO:
+16. TODO: enable alerts by Slack? Or email (but needs SMTP)?
+17. TODO:
+18. TODO:
+
 ### Crisp
 
 Crisp is used as a livechat for user support.
