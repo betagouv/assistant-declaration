@@ -262,8 +262,15 @@ export class HelloassoTicketingSystemClient implements TicketingSystemClient {
       assert(formResult.data);
       assert(formResult.data.formSlug);
       assert(formResult.data.title);
-      assert(formResult.data.currency === 'EUR');
-      assert(formResult.data.startDate);
+
+      // Some users use `Event` type to sell things not dated, potentially things that are not events
+      // So instead of throwing an error we just ignore them
+      if (!formResult.data.startDate) {
+        return;
+      } else if (formResult.data.currency !== 'EUR') {
+        // Also ignore events not targeting the right currency
+        return;
+      }
 
       const startDate = new Date(formResult.data.startDate);
       const endDate = formResult.data.endDate ? new Date(formResult.data.endDate) : null;
