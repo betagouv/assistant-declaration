@@ -47,7 +47,7 @@
       "fileRetriableUpload": "une erreur s'est produite au moment de transférer ce fichier, vous pouvez retenter le transfert",
       "fileUpload": "une erreur a été détecté concernant la transmission de documents",
       "foreignTaxRateOnPrice": "nous ne gérons actuellement pas les spectacles joués en France qui ont le taux de TVA d'un pays étranger. Veuillez contacter notre support afin de nous décrire votre spécificité, pour que nous puissions améliorer notre plateforme",
-      "helloassoMissingTier": "malheureusement nous n'arrivons pas à récupérer l'un des tarifs de vos événements auprès de HelloAsso. Veuillez contacter notre support pour que l'on puisse investiguer cette anomalie",
+      "helloassoMissingTier": "malheureusement l'un des tarifs de vos événements ne peut être récupéré. C'est un problème connu et déjà remonté à l'équipe de HelloAsso, il sera corrigé dès qu'une solution aura été proposée",
       "includingTaxesAmountCannotBeLowerThanExcludingTaxesAmount": "le montant TTC ne peut être inférieur au montant HT",
       "internalServerError": "une erreur interne est survenue, veuillez retenter",
       "invalidCurrentPassword": "le mot de passe actuel que vous venez de rentrer est invalide",
