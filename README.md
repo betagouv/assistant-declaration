@@ -401,8 +401,11 @@ _Also note there is only an instance for production, no need of testing it on de
 
 For the setup, follow:
 
-1. Fork https://github.com/Scalingo/metabase-scalingo to be in the same GitHub organization than your repositories
-2. Within Scalingo:
+1. First of all prepare the current production database to colocate Metabase data in its own isolated schema
+   1. Follow instructions within `./src/scripts/db/init_metabase.sql`
+   2. Some of the values you used will be needed to fill the following `MB_DB_CONNECTION_URI` environment variable
+2. Fork https://github.com/Scalingo/metabase-scalingo to be in the same GitHub organization than your repositories
+3. Within Scalingo:
 
    1. Create a new application suffixed with `-metabase`
    2. Make it accessible on `data.assistant-declaration.beta.gouv.fr` by configuring both Scalingo as a canonical domain, and the DNS zone with the `CNAME` Scalingo value
@@ -413,7 +416,7 @@ For the setup, follow:
       - `MB_SITE_URL`: [PROVIDED] _(format `https://xxx.yyy.zzz/`)_
       - `MB_SITE_LOCALE`: `fr`
       - `MB_DB_TYPE`: `postgres`
-      - `MB_DB_CONNECTION_URI`: `jdbc:postgresql://db.example.com:5432/mydb?user=dbuser&password=dbpassword`
+      - `MB_DB_CONNECTION_URI`: [SECRET] _(format `jdbc:postgresql://$host:$port/$database?currentSchema=metabase=user=$user&password=$password`, note the `metabase` schema used here)_
       - `MB_ENCRYPTION_SECRET_KEY`: [SECRET] _(random string that can be generated with `openssl rand -base64 64`. Note this is needed otherwise sensitive values in database won't be encrypted)_
       - `MB_PASSWORD_COMPLEXITY`: `strong`
       - `MB_PASSWORD_LENGTH`: `16`
@@ -422,7 +425,8 @@ For the setup, follow:
    7. Start a manual deploy from the `master` branch
    8. Now containers are listed, you may ask for the type `M - 512MB of RAM`, no need of more
 
-3. Go to https://data.assistant-declaration.beta.gouv.fr/ for the first initialization of the service:
+4. If the start is failing on migrating things into the `public` schema, it may be due to Metabase for the initial setup unable to use the custom `?currentSchema` (have a look at https://github.com/metabase/metabase/issues/37836#issuecomment-3474538472 for explanations and solution)
+5. Go to https://data.assistant-declaration.beta.gouv.fr/ for the first initialization of the service:
    1. Use hard secret
    2. Skip database source configuration
    3. Disable metrics going to the Metabase company
