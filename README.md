@@ -421,7 +421,8 @@ For the setup, follow:
       - `MB_PASSWORD_COMPLEXITY`: `strong`
       - `MB_PASSWORD_LENGTH`: `16`
       - `MB_SESSION_TIMEOUT`: `{"amount":120,"unit":"minutes"}` _(without this the session would last forever)_
-      - NONE FOR NOW...
+      - `MB_APPLICATION_DB_MAX_CONNECTION_POOL_SIZE`: `5`
+      - `MB_JDBC_DATA_WAREHOUSE_MAX_CONNECTION_POOL_SIZE`: `5`
    7. Start a manual deploy from the `master` branch
    8. Now containers are listed, you may ask for the type `M - 512MB of RAM`, no need of more
 
