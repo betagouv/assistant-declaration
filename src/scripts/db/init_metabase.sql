@@ -17,7 +17,7 @@ REVOKE ALL ON SCHEMA public FROM PUBLIC; -- Adding this one just in case since h
 
 -- -- Replace the password
 -- -- python2 -c 'import random,string; print("".join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for i in range(64)))'
--- CREATE USER metabase_XXX WITH PASSWORD <password_XXX>;
+-- CREATE USER <metabase_XXX> WITH PASSWORD <password_XXX>;
 
 CREATE SCHEMA metabase;
 

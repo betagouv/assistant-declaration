@@ -427,28 +427,39 @@ For the setup, follow:
 
 4. If the start is failing on migrating things into the `public` schema, it may be due to Metabase for the initial setup unable to use the custom `?currentSchema` (have a look at https://github.com/metabase/metabase/issues/37836#issuecomment-3474538472 for explanations and solution)
 5. Go to https://data.assistant-declaration.beta.gouv.fr/ for the first initialization of the service:
+
    1. Use hard secret
    2. Skip database source configuration
    3. Disable metrics going to the Metabase company
    4. Validate the onboarding
-   5. Then within the dashboard go to admin settings and make sure the domain is correctly set to:
-      - `https://`
-      - `data.assistant-declaration.beta.gouv.fr`
-4. TODO: configure notifier?
-5. TODO:
-6. TODO: create db user specific schema for metabase
-7. TODO: provide database url... if possible (cross-instances)
-8. TODO:
-9. TODO: create connector db user (only select on a few tables)
-10. TODO: create a few dashboards for test
-11. TODO: require 2FA for all users!
-12. TODO:
-13. TODO: custom subdomain?
+   5. Then within the dashboard go to admin settings:
+      - Make sure the domain is correctly set to:
+        - `https://`
+        - `data.assistant-declaration.beta.gouv.fr`
+      - Enable HTTPS redirection
+
+6. TODO: configure notifier?
+7. TODO:
+8. TODO: create db user specific schema for metabase
+9. TODO: provide database url... if possible (cross-instances)
+10. TODO:
+11. TODO: create connector db user (only select on a few tables)
+12. TODO: create a few dashboards for test
+13. TODO: require 2FA for all users!
 14. TODO:
-15. TODO:
-16. TODO: enable alerts by Slack? Or email (but needs SMTP)? `MB_EMAIL_SMTP_PASSWORD`
+15. TODO: custom subdomain?
+16. TODO:
 17. TODO:
-18. TODO:
+18. TODO: enable alerts by Slack? Or email (but needs SMTP)? `MB_EMAIL_SMTP_PASSWORD`
+19. TODO:
+20. TODO:
+21. TODO:
+22. TODO: comment mieux sécuriser vu que y'a pas de 2FA ? Voir ça pour après novembre ? Mettre le SSO ProConnect si possible ?
+23. TODO: https://www.metabase.com/docs/latest/people-and-groups/authenticating-with-jwt
+24. TODO: p-e qu'avec une envVar on peut débloquer la page JWT et tenter ProConnect... pas urgent là
+25. TODO:
+26. TODO:
+27. TODO:
 
 ### Crisp
 
