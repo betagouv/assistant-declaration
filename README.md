@@ -439,28 +439,11 @@ For the setup, follow:
         - `data.assistant-declaration.beta.gouv.fr`
       - Enable HTTPS redirection
 
-6. TODO: configure notifier?
-7. TODO:
-8. TODO: create db user specific schema for metabase
-9. TODO: provide database url... if possible (cross-instances)
-10. TODO:
-11. TODO: create connector db user (only select on a few tables)
-12. TODO: create a few dashboards for test
-13. TODO: require 2FA for all users!
-14. TODO:
-15. TODO: custom subdomain?
-16. TODO:
-17. TODO:
-18. TODO: enable alerts by Slack? Or email (but needs SMTP)? `MB_EMAIL_SMTP_PASSWORD`
-19. TODO:
-20. TODO:
-21. TODO:
-22. TODO: comment mieux sécuriser vu que y'a pas de 2FA ? Voir ça pour après novembre ? Mettre le SSO ProConnect si possible ?
-23. TODO: https://www.metabase.com/docs/latest/people-and-groups/authenticating-with-jwt
-24. TODO: p-e qu'avec une envVar on peut débloquer la page JWT et tenter ProConnect... pas urgent là
-25. TODO:
-26. TODO:
-27. TODO:
+6. Then configure the connector to our application tables
+
+   1. Go to database menu in the data section
+   2. Add a database a database as connector
+   3. Fill all information. _You can use the `Connection string` to prefill all others, but we learnt the hard way it sets wrongly the field `Additional options for JBDC` within `Advanced configuration`. **So make sure to empty this field!** In our case it was setting all URL parameters as `currentSchema=xxx;user=yyy;password=zzz` resulting in `=xxx;user=yyy;password=zzz` being the current schema within the additional option. So it was messing to cast variables to Postgres ENUMs despite existing... Saw that by using `SELECT search_path;`_
 
 ### Crisp
 
