@@ -393,7 +393,7 @@ On the Matomo instance you have access to, just create a new website to get a ne
 
 ### Metabase
 
-We use it as our business intelligence software for dashboards to measure impact. As for now it's not 100% anonymized as for Matomo because it also helps the team as an internal backoffice to understand what is happening, when and by who.
+We use it as our business intelligence software for dashboards to measure impact. As of now it's not 100% anonymized as for Matomo because it also helps the team as an internal backoffice to understand what is happening, when and by who.
 
 Due to this, we do not use a shared Metabase instance, so it requires a distinct runtime instance on Scalingo (but we reuse the main database, with a different PostgreSQL schema).
 
@@ -401,9 +401,9 @@ _Also note there is only an instance for production, no need of testing it on de
 
 For the setup, follow:
 
-1. First of all prepare the current production database to colocate Metabase data in its own isolated schema
+1. First of all prepare the current production database to colocate Metabase data in its own isolated schema:
    1. Follow instructions within `./src/scripts/db/init_metabase.sql`
-   2. Some of the values you used will be needed to fill the following `MB_DB_CONNECTION_URI` environment variable
+   2. Some of the values you used will be needed to fill the `MB_DB_CONNECTION_URI` environment variable (another step below)
 2. Fork https://github.com/Scalingo/metabase-scalingo to be in the same GitHub organization than your repositories
 3. Within Scalingo:
 
@@ -421,8 +421,8 @@ For the setup, follow:
       - `MB_PASSWORD_COMPLEXITY`: `strong`
       - `MB_PASSWORD_LENGTH`: `16`
       - `MB_SESSION_TIMEOUT`: `{"amount":120,"unit":"minutes"}` _(without this the session would last forever)_
-      - `MB_APPLICATION_DB_MAX_CONNECTION_POOL_SIZE`: `5`
-      - `MB_JDBC_DATA_WAREHOUSE_MAX_CONNECTION_POOL_SIZE`: `5`
+      - `MB_APPLICATION_DB_MAX_CONNECTION_POOL_SIZE`: `5` _(Metabase can be really consumming in term of database connections for the instance, since available ones are limited on Scalingo we cap this)_
+      - `MB_JDBC_DATA_WAREHOUSE_MAX_CONNECTION_POOL_SIZE`: `5` _(Metabase can be really consumming in term of database connections for connectors, since available ones are limited on Scalingo we cap this)_
    7. Start a manual deploy from the `master` branch
    8. Now containers are listed, you may ask for the type `M - 512MB of RAM`, no need of more
 
@@ -438,12 +438,20 @@ For the setup, follow:
         - `https://`
         - `data.assistant-declaration.beta.gouv.fr`
       - Enable HTTPS redirection
+   6. Ideally Metabase should manage 2FA for users but it's not, in the meantime be aware of that like for emails used (ref: https://github.com/metabase/metabase/issues/3729). _Maybe ProConnect as SSO could be used to fill this purpose partially._
 
-6. Then configure the connector to our application tables
+6. We need to also create a database user accessing our application tables but excluding sensitive tables or columns, for this follow instructions within `./src/scripts/db/init_metabase_connector.sql`
+7. Then configure the connector to our application tables
 
    1. Go to database menu in the data section
    2. Add a database a database as connector
-   3. Fill all information. _You can use the `Connection string` to prefill all others, but we learnt the hard way it sets wrongly the field `Additional options for JBDC` within `Advanced configuration`. **So make sure to empty this field!** In our case it was setting all URL parameters as `currentSchema=xxx;user=yyy;password=zzz` resulting in `=xxx;user=yyy;password=zzz` being the current schema within the additional option. So it was messing to cast variables to Postgres ENUMs despite existing... Saw that by using `SELECT search_path;`_
+   3. Fill all information with the "connector user", specify the schema, and enable SSL connection in the `prefer` mode. Note you can use the `Connection string` to prefill all others, but we learnt the hard way it sets wrongly the field `Additional options for JBDC` within `Advanced configuration`. **So make sure to empty this field!** In our case it was setting all URL parameters as `currentSchema=xxx;user=yyy;password=zzz` resulting in `=xxx;user=yyy;password=zzz` being the current schema within the additional option. So it was messing to cast variables to Postgres ENUMs despite existing... Saw that by using `SELECT search_path;`\_
+   4. Create a few Metabase questions and a sample dashboard to make sure everything is working
+
+Some notes aside:
+
+- Any new user has access to connected databases (make sure to use groups for permissions if needed)
+- Metabase allows notifying by emails or Slack of any interesting change in a metric
 
 ### Crisp
 
