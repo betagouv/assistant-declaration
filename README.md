@@ -391,6 +391,68 @@ We use the minimal tracking configuration allowing the frontend to not request t
 
 On the Matomo instance you have access to, just create a new website to get a new site ID.
 
+### Metabase
+
+We use it as our business intelligence software for dashboards to measure impact. As of now it's not 100% anonymized as for Matomo because it also helps the team as an internal backoffice to understand what is happening, when and by who.
+
+Due to this, we do not use a shared Metabase instance, so it requires a distinct runtime instance on Scalingo (but we reuse the main database, with a different PostgreSQL schema).
+
+_Also note there is only an instance for production, no need of testing it on development environment._
+
+For the setup, follow:
+
+1. First of all prepare the current production database to colocate Metabase data in its own isolated schema:
+   1. Follow instructions within `./src/scripts/db/init_metabase.sql`
+   2. Some of the values you used will be needed to fill the `MB_DB_CONNECTION_URI` environment variable (another step below)
+2. Fork https://github.com/Scalingo/metabase-scalingo to be in the same GitHub organization than your repositories
+3. Within Scalingo:
+
+   1. Create a new application suffixed with `-metabase`
+   2. Make it accessible on `data.assistant-declaration.beta.gouv.fr` by configuring both Scalingo as a canonical domain, and the DNS zone with the `CNAME` Scalingo value
+   3. Force HTTPS in the routing settings
+   4. Make it targets the forked GitHub repository to auto-deploy on updates (when synchronizing the fork...)
+   5. Reuse the main application notifier settings for production to be notified by Slack and email
+   6. Set the environments variables:
+      - `MB_SITE_URL`: [PROVIDED] _(format `https://xxx.yyy.zzz/`)_
+      - `MB_SITE_LOCALE`: `fr`
+      - `MB_DB_TYPE`: `postgres`
+      - `MB_DB_CONNECTION_URI`: [SECRET] _(format `jdbc:postgresql://$host:$port/$database?currentSchema=metabase=user=$user&password=$password`, note the `metabase` schema used here)_
+      - `MB_ENCRYPTION_SECRET_KEY`: [SECRET] _(random string that can be generated with `openssl rand -base64 64`. Note this is needed otherwise sensitive values in database won't be encrypted)_
+      - `MB_PASSWORD_COMPLEXITY`: `strong`
+      - `MB_PASSWORD_LENGTH`: `16`
+      - `MB_SESSION_TIMEOUT`: `{"amount":120,"unit":"minutes"}` _(without this the session would last forever)_
+      - `MB_APPLICATION_DB_MAX_CONNECTION_POOL_SIZE`: `5` _(Metabase can be really consumming in term of database connections for the instance, since available ones are limited on Scalingo we cap this)_
+      - `MB_JDBC_DATA_WAREHOUSE_MAX_CONNECTION_POOL_SIZE`: `5` _(Metabase can be really consumming in term of database connections for connectors, since available ones are limited on Scalingo we cap this)_
+   7. Start a manual deploy from the `master` branch
+   8. Now containers are listed, you may ask for the type `M - 512MB of RAM`, no need of more
+
+4. If the start is failing on migrating things into the `public` schema, it may be due to Metabase for the initial setup unable to use the custom `?currentSchema` (have a look at https://github.com/metabase/metabase/issues/37836#issuecomment-3474538472 for explanations and solution)
+5. Go to https://data.assistant-declaration.beta.gouv.fr/ for the first initialization of the service:
+
+   1. Use hard secret
+   2. Skip database source configuration
+   3. Disable metrics going to the Metabase company
+   4. Validate the onboarding
+   5. Then within the dashboard go to admin settings:
+      - Make sure the domain is correctly set to:
+        - `https://`
+        - `data.assistant-declaration.beta.gouv.fr`
+      - Enable HTTPS redirection
+   6. Ideally Metabase should manage 2FA for users but it's not, in the meantime be aware of that like for emails used (ref: https://github.com/metabase/metabase/issues/3729). _Maybe ProConnect as SSO could be used to fill this purpose partially._
+
+6. We need to also create a database user accessing our application tables but excluding sensitive tables or columns, for this follow instructions within `./src/scripts/db/init_metabase_connector.sql`
+7. Then configure the connector to our application tables
+
+   1. Go to database menu in the data section
+   2. Add a database a database as connector
+   3. Fill all information with the "connector user", specify the schema, and enable SSL connection in the `prefer` mode. Note you can use the `Connection string` to prefill all others, but we learnt the hard way it sets wrongly the field `Additional options for JBDC` within `Advanced configuration`. **So make sure to empty this field!** In our case it was setting all URL parameters as `currentSchema=xxx;user=yyy;password=zzz` resulting in `=xxx;user=yyy;password=zzz` being the current schema within the additional option. So it was messing to cast variables to Postgres ENUMs despite existing... Saw that by using `SELECT search_path;`\_
+   4. Create a few Metabase questions and a sample dashboard to make sure everything is working
+
+Some notes aside:
+
+- Any new user has access to connected databases (make sure to use groups for permissions if needed)
+- Metabase allows notifying by emails or Slack of any interesting change in a metric
+
 ### Crisp
 
 Crisp is used as a livechat for user support.
