@@ -47,7 +47,7 @@ export function UploaderFileListItem({ file, onCancel, onRemove, onRetry }: Uplo
           )
         : null,
     };
-  }, [file.error]);
+  }, [file.error, t]);
 
   return (
     <>

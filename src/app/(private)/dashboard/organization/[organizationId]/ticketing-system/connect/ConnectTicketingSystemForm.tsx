@@ -2,14 +2,14 @@
 
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { Select } from '@codegouvfr/react-dsfr/SelectNext';
-import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { ChangeEventHandler, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -77,6 +77,16 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
       push(['trackEvent', 'ticketing', 'connect', 'system', input.ticketingSystemName]);
     },
     [connectTicketingSystem, onboardingFlow, router, showOtherIndication, props.prefill]
+  );
+
+  const [showApiSecretKey, setShowApiSecretKey] = useState(false);
+  const handleApiSecretKeyDisplayToggle = useCallback<ChangeEventHandler<HTMLInputElement>>(
+    (event) => {
+      const checked = event.target.checked;
+
+      setShowApiSecretKey(checked);
+    },
+    [setShowApiSecretKey]
   );
 
   const [displayApiAccessKey, setDisplayApiAccessKey] = useState(true);
@@ -153,12 +163,38 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
                 </div>
               )}
               <div className={fr.cx('fr-fieldset__element')}>
-                <PasswordInput
-                  label="Clé d'accès"
-                  messages={errors?.apiSecretKey ? [{ severity: 'error', message: errors?.apiSecretKey?.message }] : []}
+                <Input
+                  label={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                      <div>Clé d&apos;accès</div>
+                      <div style={{ marginLeft: 'auto' }}>
+                        <Checkbox
+                          options={[
+                            {
+                              label: 'Afficher',
+                              nativeInputProps: {
+                                checked: showApiSecretKey,
+                                onChange: handleApiSecretKeyDisplayToggle,
+                              },
+                            },
+                          ]}
+                          small
+                        />
+                      </div>
+                    </div>
+                  }
+                  state={!!errors.apiSecretKey ? 'error' : undefined}
+                  stateRelatedMessage={errors?.apiSecretKey?.message}
                   nativeInputProps={{
                     ...register('apiSecretKey'),
                     autoComplete: 'off',
+                    style: {
+                      // When using `type="password"` Chrome was forcing autofilling password despite the `autocomplete="off"`, so using a text input with password style
+                      // Note: this webkit property is broadly adopted so it's fine, and in case it's not, we are fine it's not like a standard password (should be longer than input display...)
+                      ...({
+                        WebkitTextSecurity: showApiSecretKey ? 'none' : 'disc',
+                      } as React.CSSProperties), // Have to cast since `WebkitTextSecurity` not recognized
+                    },
                   }}
                 />
               </div>
