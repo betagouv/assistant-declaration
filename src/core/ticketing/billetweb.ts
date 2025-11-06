@@ -1,6 +1,6 @@
 import { eachOfLimit } from 'async';
 import Bottleneck from 'bottleneck';
-import { getUnixTime, minutesToMilliseconds } from 'date-fns';
+import { getUnixTime, secondsToMilliseconds } from 'date-fns';
 
 import { getExcludingTaxesAmountFromIncludingTaxesAmount } from '@ad/src/core/declaration';
 import { TicketingSystemClient } from '@ad/src/core/ticketing/common';
@@ -19,11 +19,15 @@ import { sleep } from '@ad/src/utils/sleep';
 
 export class BilletwebTicketingSystemClient implements TicketingSystemClient {
   public readonly baseUrl = 'https://www.billetweb.fr/api';
-  protected requestsPerMinuteLimit = 90; // It's 100 according to our tests but using a margin just in case, still it's failing sometimes, maybe they reset the count not 60 seconds after the first request, but at each clock tick (each minute)
+
+  // It's 100 requests per minute according to their documentation sometimes it's failing
+  // Maybe that's due to sliding window interval versus their own backend doing maybe a reset at each minute on a clock (every 00 second)
+  // Since not understanding the logic even by using 90 requests maximum, we decided also to expand the window by 20 seconds to try bypassing the firewall
+  protected requestsPerMinuteLimit = 90;
   protected requestsLimiter: Bottleneck = new Bottleneck({
     reservoir: this.requestsPerMinuteLimit,
     reservoirRefreshAmount: this.requestsPerMinuteLimit,
-    reservoirRefreshInterval: minutesToMilliseconds(1),
+    reservoirRefreshInterval: secondsToMilliseconds(60 + 20),
   });
 
   constructor(
