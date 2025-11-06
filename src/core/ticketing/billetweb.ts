@@ -19,7 +19,7 @@ import { sleep } from '@ad/src/utils/sleep';
 
 export class BilletwebTicketingSystemClient implements TicketingSystemClient {
   public readonly baseUrl = 'https://www.billetweb.fr/api';
-  protected requestsPerMinuteLimit = 90; // It's 100 according to our tests but using a margin just in case
+  protected requestsPerMinuteLimit = 90; // It's 100 according to our tests but using a margin just in case, still it's failing sometimes, maybe they reset the count not 60 seconds after the first request, but at each clock tick (each minute)
   protected requestsLimiter: Bottleneck = new Bottleneck({
     reservoir: this.requestsPerMinuteLimit,
     reservoirRefreshAmount: this.requestsPerMinuteLimit,
@@ -52,6 +52,13 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
     // It returns a page needing JavaScript that uses a relative script from Cloudflare
     // (pointing to https://www.billetweb.fr/cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/v1)
     if (content.includes('cdn-cgi/challenge-platform')) {
+      throw billetwebFirewallError;
+    } else if (content.includes(`"error": "rate_limiting",`)) {
+      // We avoid the JSON parsing logic here, but the response would be:
+      // {
+      //     "error": "rate_limiting",
+      //     "description": "You exceed the global rate limiter : 100 hits per minute"
+      // }
       throw billetwebFirewallError;
     }
   }
