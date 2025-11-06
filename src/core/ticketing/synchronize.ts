@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 import { truncateFloatAmountNumber } from '@ad/src/core/declaration';
 import { getTicketingSystemClient } from '@ad/src/core/ticketing/instance';
-import { anotherTicketingSystemSynchronizationOngoingError, noValidTicketingSystemError } from '@ad/src/models/entities/errors';
+import { BusinessError, anotherTicketingSystemSynchronizationOngoingError, noValidTicketingSystemError } from '@ad/src/models/entities/errors';
 import {
   EventSerieSchema,
   LiteEventSchema,
@@ -408,7 +408,7 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
                   id: ticketingSystem.id,
                 },
                 data: {
-                  lastProcessingError: error.message,
+                  lastProcessingError: error instanceof BusinessError ? error.code : error.message,
                   lastProcessingErrorAt: new Date(),
                 },
               });

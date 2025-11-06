@@ -110,7 +110,7 @@ export const JsonEventDateSchema = applyTypedParsers(
           valueIncvat: z.number().nonnegative(), // Not cents
           tax: z.object({
             rate: z.number().nonnegative(),
-            countryCode: z.literal('FR').or(z.literal('CORSE')).or(z.string().min(1)).nullable(),
+            countryCode: z.string().transform(transformStringOrNull).nullable(), // Usually null, "FR" or "CORSE", but could be another code
           }),
         })
       ),
