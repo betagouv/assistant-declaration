@@ -252,8 +252,8 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                   </TableCell>
                   <TableCell>
                     <View>
-                      <Text>{flattenEvent.paidTickets} gratuites</Text>
-                      <Text>{flattenEvent.freeTickets} payantes</Text>
+                      <Text>{flattenEvent.freeTickets} gratuites</Text>
+                      <Text>{flattenEvent.paidTickets} payantes</Text>
                     </View>
                   </TableCell>
                   <TableCell style={{ justifyContent: 'flex-end' }}>
@@ -321,8 +321,8 @@ export function SacemDeclarationDocument(props: SacemDeclarationDocumentProps) {
                 <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
                 <TableCell style={sacemTableLayoutStyles.totalCell}>
                   <View>
-                    <Text>{flattenEventsKeyFigures.paidTickets} gratuites</Text>
-                    <Text>{flattenEventsKeyFigures.freeTickets} payantes</Text>
+                    <Text>{flattenEventsKeyFigures.freeTickets} gratuites</Text>
+                    <Text>{flattenEventsKeyFigures.paidTickets} payantes</Text>
                   </View>
                 </TableCell>
                 <TableCell style={sacemTableLayoutStyles.invisibleLastRowCell}></TableCell>
