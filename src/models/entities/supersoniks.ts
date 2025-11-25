@@ -17,7 +17,7 @@ export const JsonPriceSchema = applyTypedParsers(
     amount: z.number(), // Ticket category price
     quantity: z.number().int().nonnegative(), // Number of sold tickets
     revenue: z.number(), // Total revenue for this ticket category
-    title: z.string().min(1),
+    title: z.string().transform(transformStringOrNull),
   })
 );
 export type JsonPriceSchemaType = z.infer<typeof JsonPriceSchema>;
