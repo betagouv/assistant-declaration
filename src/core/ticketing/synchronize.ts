@@ -398,6 +398,8 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
               data: {
                 lastSynchronizationAt: currentSynchronizationStartingDate,
                 forceNextSynchronizationFrom: null,
+                lastProcessingError: null,
+                lastProcessingErrorAt: null,
               },
             });
           } catch (error) {
