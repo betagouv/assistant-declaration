@@ -9,6 +9,7 @@ import { foreignTaxRateOnPriceError } from '@ad/src/models/entities/errors';
 import { LiteEventSchema, LiteEventSchemaType, LiteEventSerieSchema, LiteEventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
 import {
   JsonCollectionSchemaType,
+  JsonEventDateSchemaType,
   JsonGetEventDatesResponseSchema,
   JsonGetRecentPurchasedEventDatesResponseSchema,
   JsonGetRecentTicketsResponseSchema,
@@ -210,29 +211,45 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
       const schemaEvents: Map<LiteEventSchemaType['internalTicketingSystemId'], LiteEventSchemaType> = new Map();
 
       if (ticketing.eventDateList.length > 0) {
-        // As for the `event_dates` endpoint and just in case we use the short IDs to avoid `414 Request-URI Too Large`
+        // As for the first `event_dates` endpoint reqyest and just in case we use the short IDs to avoid `414 Request-URI Too Large`
         const shortEventDatesIds = ticketing.eventDateList.map((id) => id.replace(/^\/v1\/event_dates\//, ''));
 
-        // Thanks to associations we can retrieve "price category"
-        // Note: it won't have duplicate entries since `TicketPrice` entity is unique per event (it causes us complications below to aggregate them due to our internal structure)
-        const eventDatesResult = await getEventDateCollection({
-          client: this.client,
-          query: {
-            '@id': shortEventDatesIds.join(','),
-            itemsPerPage: this.itemsPerPageToAvoidPagination,
-            ...{
-              fields:
-                '@id,startDate,endDate,startOfEventDay,ticketPriceList{@id,id,type,name,description,currency,facialValue,tax{rate,countryCode},valueIncvat}',
-            },
-          },
-        });
+        // Despite reducing the ID length, a few organizations have reached `414 Request-URI Too Large` so we chunk them by groups
+        const chunkSize = 500;
+        const chunks: (typeof shortEventDatesIds)[] = [];
 
-        if (eventDatesResult.error) {
-          throw eventDatesResult.error;
+        for (let i = 0; i < shortEventDatesIds.length; i += chunkSize) {
+          chunks.push(shortEventDatesIds.slice(i, i + chunkSize));
         }
 
-        const eventDatesData = JsonGetEventDatesResponseSchema.parse(eventDatesResult.data);
-        this.assertCollectionResponseValid(eventDatesData);
+        const allEventDatesData: JsonEventDateSchemaType[] = [];
+
+        for (const chunkOfShortEventDatesIds of chunks) {
+          // Thanks to associations we can retrieve "price category"
+          // Note: it won't have duplicate entries since `TicketPrice` entity is unique per event (it causes us complications below to aggregate them due to our internal structure)
+          const eventDatesResult = await getEventDateCollection({
+            client: this.client,
+            query: {
+              '@id': chunkOfShortEventDatesIds.join(','),
+              itemsPerPage: this.itemsPerPageToAvoidPagination,
+              ...{
+                fields:
+                  '@id,startDate,endDate,startOfEventDay,ticketPriceList{@id,id,type,name,description,currency,facialValue,tax{rate,countryCode},valueIncvat}',
+              },
+            },
+          });
+
+          if (eventDatesResult.error) {
+            throw eventDatesResult.error;
+          }
+
+          const eventDatesData = JsonGetEventDatesResponseSchema.parse(eventDatesResult.data);
+          this.assertCollectionResponseValid(eventDatesData);
+
+          eventDatesData['hydra:member'].forEach((eventDate) => {
+            allEventDatesData.push(eventDate);
+          });
+        }
 
         const ticketPriceIdToTaxRateAndAmount = new Map<
           string,
@@ -242,7 +259,7 @@ export class MapadoTicketingSystemClient implements TicketingSystemClient {
           }
         >();
 
-        for (const eventDate of eventDatesData['hydra:member']) {
+        for (const eventDate of allEventDatesData) {
           // `startDate` is mandatory so falling back to `startOfEventDay` if needed (`endDate` is optional on our side so not using something not meaningful)
           const safeStartDate = eventDate.startDate || eventDate.startOfEventDay;
           const safeEndDate = eventDate.endDate;
