@@ -5,12 +5,13 @@ import '@uppy/core/css/style.min.css';
 import DragDrop from '@uppy/drag-drop';
 import fr_FR from '@uppy/locales/lib/fr_FR';
 import Tus from '@uppy/tus';
-import { RefObject, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { RefObject, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEffectOnce } from 'react-use';
 
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
-import { UploaderFileList, UploaderFileListProps } from '@ad/src/components/uploader/UploaderFileList';
+import { UploaderContext } from '@ad/src/components/uploader/UploaderContext';
+import { UploaderFileListProps } from '@ad/src/components/uploader/UploaderFileList';
 import '@ad/src/components/uploader/drag-drop.scss';
 import { AttachmentKindRequirementsSchemaType, UiAttachmentSchemaType } from '@ad/src/models/entities/attachment';
 import { BusinessError, fileRetriableUploadError } from '@ad/src/models/entities/errors';
@@ -26,10 +27,6 @@ import {
   ResponseBody,
 } from '@ad/src/utils/uppy';
 import { getBaseUrl } from '@ad/src/utils/url';
-
-export const UploaderContext = createContext({
-  ContextualUploaderFileList: UploaderFileList,
-});
 
 export interface UploaderProps {
   attachmentKindRequirements: AttachmentKindRequirementsSchemaType;

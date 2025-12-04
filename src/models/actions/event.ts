@@ -1,8 +1,12 @@
+import { isBefore } from 'date-fns';
 import z from 'zod';
 
 import { GetterInputSchema } from '@ad/src/models/actions/common';
+import { eventEndDateMustBeAfterStartDateError } from '@ad/src/models/entities/errors';
+import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 import { EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
+import { TicketingSystemSchema } from '@ad/src/models/entities/ticketing';
 
 export const SynchronizeDataFromTicketingSystemsSchema = z
   .object({
@@ -40,3 +44,64 @@ export const ListEventsSchema = GetterInputSchema.extend({
   }),
 }).strict();
 export type ListEventsSchemaType = z.infer<typeof ListEventsSchema>;
+
+export const rawEventInputSchema = z
+  .object({
+    startAt: EventSchema.shape.startAt,
+    endAt: EventSchema.shape.endAt,
+  })
+  .superRefine((data, ctx) => {
+    if (data.endAt !== null && isBefore(data.endAt, data.startAt)) {
+      ctx.issues.push({
+        ...customErrorToZodIssue(eventEndDateMustBeAfterStartDateError, {
+          overridePath: ['endAt' satisfies keyof typeof data], // Concatenated to where the `superRefine` is applied
+        }),
+        input: {
+          startAt: data.startAt,
+          endAt: data.endAt,
+        },
+      });
+    }
+  })
+  .strict();
+
+export const AddEventSerieSchema = z
+  .object({
+    ticketingSystemId: TicketingSystemSchema.shape.id.nullable(),
+    organizationId: OrganizationSchema.shape.id, // This is needed to scope the manual ticketing system creation since it may not exist in database when the user tries using it
+    name: EventSerieSchema.shape.name,
+    events: z.array(rawEventInputSchema).min(1),
+  })
+  .strict();
+export type AddEventSerieSchemaType = z.infer<typeof AddEventSerieSchema>;
+
+export const AddEventSeriePrefillSchema = AddEventSerieSchema.partial();
+export type AddEventSeriePrefillSchemaType = z.infer<typeof AddEventSeriePrefillSchema>;
+
+export const UpdateEventSerieSchema = z
+  .object({
+    eventSerieId: EventSerieSchema.shape.id,
+    name: EventSerieSchema.shape.name,
+    events: z
+      .array(
+        rawEventInputSchema.safeExtend({
+          id: EventSchema.shape.id.nullable(),
+        })
+      )
+      .min(1),
+  })
+  .strict();
+export type UpdateEventSerieSchemaType = z.infer<typeof UpdateEventSerieSchema>;
+
+export const UpdateEventSeriePrefillSchema = UpdateEventSerieSchema.partial();
+export type UpdateEventSeriePrefillSchemaType = z.infer<typeof UpdateEventSeriePrefillSchema>;
+
+export const RemoveEventSerieSchema = z
+  .object({
+    eventSerieId: EventSerieSchema.shape.id,
+  })
+  .strict();
+export type RemoveEventSerieSchemaType = z.infer<typeof RemoveEventSerieSchema>;
+
+export const RemoveEventSeriePrefillSchema = RemoveEventSerieSchema.partial();
+export type RemoveEventSeriePrefillSchemaType = z.infer<typeof RemoveEventSeriePrefillSchema>;

@@ -2,8 +2,11 @@ import z from 'zod';
 
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
-export const TicketingSystemNameSchema = z.enum(['BILLETWEB', 'HELLOASSO', 'MAPADO', 'SHOTGUN', 'SOTICKET', 'SUPERSONIKS']);
+export const TicketingSystemNameSchema = z.enum(['MANUAL', 'BILLETWEB', 'HELLOASSO', 'MAPADO', 'SHOTGUN', 'SOTICKET', 'SUPERSONIKS']);
 export type TicketingSystemNameSchemaType = z.infer<typeof TicketingSystemNameSchema>;
+
+export const RemoteTicketingSystemNameSchema = TicketingSystemNameSchema.exclude(['MANUAL']);
+export type RemoteTicketingSystemNameSchemaType = z.infer<typeof RemoteTicketingSystemNameSchema>;
 
 export const TicketingSystemSchema = applyTypedParsers(
   z

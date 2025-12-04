@@ -3,14 +3,16 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { SegmentedControl, SegmentedControlProps } from '@codegouvfr/react-dsfr/SegmentedControl';
-import { RiLoopLeftFill } from '@remixicon/react';
+import { Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { RiAddCircleLine, RiLoopLeftFill } from '@remixicon/react';
 import { push } from '@socialgouv/matomo-next';
 import { isBefore, subHours, subMonths } from 'date-fns';
 import NextLink from 'next/link';
-import { useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAsyncFn } from 'react-use';
 
+import { OrganizationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/OrganizationPageContext';
 import { trpc } from '@ad/src/client/trpcClient';
 import { Button } from '@ad/src/components/Button';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
@@ -18,6 +20,7 @@ import { EventSerieCard } from '@ad/src/components/EventSerieCard';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
 import { SynchronizeDataFromTicketingSystemsSchemaType } from '@ad/src/models/actions/event';
 import { CustomError, internalServerErrorError } from '@ad/src/models/entities/errors';
+import { TicketingSystemNameSchema } from '@ad/src/models/entities/ticketing';
 import { mockBaseUrl, shouldTargetMock } from '@ad/src/server/mock/environment';
 import { CHUNK_DATA_PREFIX, CHUNK_ERROR_PREFIX, CHUNK_PING_PREFIX } from '@ad/src/utils/api';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
@@ -41,6 +44,7 @@ export interface OrganizationPageProps {
 
 export function OrganizationPage({ params: { organizationId } }: OrganizationPageProps) {
   const { t } = useTranslation('common');
+  const { ContextualAddEventSerieForm } = useContext(OrganizationPageContext);
 
   const trpcUtils = trpc.useUtils();
 
@@ -144,18 +148,24 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
     });
   }, [listFilter, listEventsSeries.data]);
 
-  const lastSynchronizationAt: Date | null = useMemo(() => {
+  const { remoteTicketingSystems, lastSynchronizationAt } = useMemo(() => {
+    // The manual ticketing system must be separate to adjust properly the UI since it can be considered linked at account creation
+    const tmpRemoteTicketingSystems = (listTicketingSystems.data?.ticketingSystems ?? []).filter(
+      (ticketingSystem) => ticketingSystem.name !== 'MANUAL'
+    );
+
     let oldestDate: Date | null = null;
 
-    if (listTicketingSystems.data) {
-      for (const ticketingSystem of listTicketingSystems.data.ticketingSystems) {
-        if (oldestDate === null || (ticketingSystem.lastSynchronizationAt && ticketingSystem.lastSynchronizationAt < oldestDate)) {
-          oldestDate = ticketingSystem.lastSynchronizationAt;
-        }
+    for (const remoteTicketingSystem of tmpRemoteTicketingSystems) {
+      if (oldestDate === null || (remoteTicketingSystem.lastSynchronizationAt && remoteTicketingSystem.lastSynchronizationAt < oldestDate)) {
+        oldestDate = remoteTicketingSystem.lastSynchronizationAt;
       }
     }
 
-    return oldestDate;
+    return {
+      remoteTicketingSystems: tmpRemoteTicketingSystems,
+      lastSynchronizationAt: oldestDate,
+    };
   }, [listTicketingSystems.data]);
 
   const lastSynchronizationTooOld: boolean = useMemo(() => {
@@ -163,6 +173,14 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
 
     return lastSynchronizationAt ? isBefore(lastSynchronizationAt, thresholdDate) : true;
   }, [lastSynchronizationAt]);
+
+  const [eventSerieCreationModalOpen, setEventSerieCreationModalOpen] = useState<boolean>(false);
+  const openEventSerieCreationModal = useCallback(() => {
+    setEventSerieCreationModalOpen(true);
+  }, [setEventSerieCreationModalOpen]);
+  const closeEventSerieCreationModal = useCallback(() => {
+    setEventSerieCreationModalOpen(false);
+  }, [setEventSerieCreationModalOpen]);
 
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
@@ -179,32 +197,35 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
   }
 
   const organization = getOrganization.data!.organization;
-  const ticketingSystems = listTicketingSystems.data!.ticketingSystems;
   const eventsSeriesWrappers = listEventsSeries.data!.eventsSeriesWrappers;
 
   return (
     <div className={fr.cx('fr-container', 'fr-py-12v')} style={{ height: '100%' }}>
       <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')} style={{ height: '100%' }}>
-        {ticketingSystems.length > 0 ? (
-          <>
-            <div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-              <h1 className={fr.cx('fr-h4')}>Spectacles</h1>
-              <p>Synchronisez vos données, puis sélectionnez le spectacle à déclarer.</p>
-              <Button
-                onClick={async () => {
-                  await synchronizeDataFromTicketingSystemsTrigger({
-                    organizationId: organization.id,
-                  });
-
-                  push(['trackEvent', 'ticketing', 'synchronize']);
+        <div
+          className={fr.cx('fr-col-12')}
+          style={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'start',
+            alignItems: 'center',
+            margin: '0 auto',
+          }}
+        >
+          <h1 className={fr.cx('fr-h4')}>Déclarer un spectacle</h1>
+          {remoteTicketingSystems.length > 0 ? (
+            <>
+              <p
+                className={fr.cx('fr-text--lg')}
+                style={{
+                  textAlign: 'center',
+                  maxWidth: 600,
+                  margin: '0 auto',
                 }}
-                loading={synchronizeDataFromTicketingSystems.loading}
               >
-                <RiLoopLeftFill size={20} aria-hidden={true} style={{ marginRight: 8 }} />
-                Synchroniser
-              </Button>
-            </div>
-            <div className={fr.cx('fr-col-12', 'fr-col-md-9')}>
+                Synchronisez vos données, puis sélectionnez le spectacle à déclarer. Il manque un spectacle ? Ajoutez-le manuellement.
+              </p>
               {lastSynchronizationAt !== null ? (
                 <>
                   {lastSynchronizationTooOld ? (
@@ -214,83 +235,20 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                       description={`La dernière synchronisation date d'${t('date.ago', {
                         date: lastSynchronizationAt,
                       })}. Il est fortement recommandé de resynchroniser vos données avant de faire une déclaration.`}
-                      className={fr.cx('fr-mb-2v')}
+                      className={fr.cx('fr-mt-4v')}
                     />
                   ) : (
                     <Alert
                       severity="info"
                       small={true}
                       description={`Vous avez synchronisé vos données de billetterie ${t('date.relative', { date: lastSynchronizationAt })}.`}
-                      className={fr.cx('fr-mb-2v')}
+                      className={fr.cx('fr-mt-4v')}
                     />
                   )}
                   {synchronizeDataFromTicketingSystems.error && (
-                    <div className={fr.cx('fr-pb-2v')}>
+                    <div className={fr.cx('fr-mt-4v')}>
                       <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />
                     </div>
-                  )}
-                  <div className={fr.cx('fr-py-2v')} aria-label="filtre">
-                    <SegmentedControl
-                      segments={
-                        [
-                          {
-                            label: 'Tous',
-                            value: ListFilter.ALL,
-                          },
-                          {
-                            label: 'Archivés',
-                            value: ListFilter.ARCHIVED_ONLY,
-                          },
-                          {
-                            label: 'Terminés',
-                            value: ListFilter.ENDED_ONLY,
-                          },
-                          {
-                            label: 'En cours',
-                            value: ListFilter.CURRENT_ONLY,
-                          },
-                          {
-                            label: 'À venir',
-                            value: ListFilter.FUTURE_ONLY,
-                          },
-                        ].map((segment) => {
-                          return {
-                            label: segment.label,
-                            nativeInputProps: {
-                              value: segment.value as unknown as string,
-                              defaultChecked: segment.value === listFilter,
-                              onChange: (event) => {
-                                setListFilter(event.currentTarget.value as ListFilter);
-                              },
-                            },
-                          } satisfies SegmentedControlProps.Segments[0];
-                        }) as SegmentedControlProps.Segments // Cast needed because the type expects a tuple, not an array
-                      }
-                      hideLegend={true}
-                    ></SegmentedControl>
-                  </div>
-                  {filteredEventsSeriesWrappers.length > 0 ? (
-                    <div>
-                      {filteredEventsSeriesWrappers.map((eventsSeriesWrapper) => {
-                        return (
-                          <div key={eventsSeriesWrapper.serie.id} className={fr.cx('fr-py-2v')}>
-                            <EventSerieCard
-                              wrapper={eventsSeriesWrapper}
-                              declarationLink={linkRegistry.get('declaration', {
-                                organizationId: organizationId,
-                                eventSerieId: eventsSeriesWrapper.serie.id,
-                              })}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className={fr.cx('fr-py-4v')}>
-                      {eventsSeriesWrappers.length === 0
-                        ? `Aucun spectacle n'a été trouvé dans votre billetterie.`
-                        : `Aucun spectacle n'a été trouvé dans votre billetterie avec le filtre choisi.`}
-                    </p>
                   )}
                 </>
               ) : (
@@ -307,33 +265,131 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                         </span>
                       </>
                     }
-                    className={fr.cx('fr-py-2v')}
+                    className={fr.cx('fr-mt-4v')}
                   />
-                  {synchronizeDataFromTicketingSystems.error && <ErrorAlert errors={[synchronizeDataFromTicketingSystems.error]} />}
                 </>
               )}
-            </div>
-          </>
-        ) : (
-          <div
-            className={fr.cx('fr-col-12')}
-            style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}
-          >
-            <h1 className={fr.cx('fr-h4')}>Synchronisation de vos données</h1>
-            <p>
-              La dernière étape pour commencer les déclarations est de connecter votre système de billetterie.
-              <br />
-              Des indications vous seront affichées en fonction du système choisi.
-            </p>
-            <NextLink
-              href={linkRegistry.get('ticketingSystemConnection', { organizationId: organizationId, onboarding: true })}
-              className={fr.cx('fr-btn', 'fr-mt-8v')}
-            >
-              Connecter un système de billetterie
-            </NextLink>
-          </div>
-        )}
+              <div className={fr.cx('fr-my-6v')} style={{ display: 'flex', gap: '1rem' }}>
+                <Button
+                  onClick={async () => {
+                    await synchronizeDataFromTicketingSystemsTrigger({
+                      organizationId: organization.id,
+                    });
+
+                    push(['trackEvent', 'ticketing', 'synchronize']);
+                  }}
+                  loading={synchronizeDataFromTicketingSystems.loading}
+                >
+                  <RiLoopLeftFill size={20} aria-hidden={true} style={{ marginRight: 8 }} />
+                  Synchroniser
+                </Button>
+                <Button onClick={openEventSerieCreationModal} priority="secondary">
+                  <RiAddCircleLine size={20} aria-hidden={true} style={{ marginRight: 8 }} />
+                  Ajouter un spectacle
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p
+                className={fr.cx('fr-text--lg')}
+                style={{
+                  maxWidth: 700,
+                  margin: '0 auto',
+                  textAlign: 'center',
+                }}
+              >
+                <NextLink
+                  href={linkRegistry.get('ticketingSystemConnection', { organizationId: organizationId, onboarding: true })}
+                  className={fr.cx('fr-link', 'fr-text--lg')}
+                >
+                  Branchez votre logiciel de billetterie
+                </NextLink>{' '}
+                pour visualiser vos spectacles et déclarer plus rapidement, ou ajouter manuellement un spectacle.
+              </p>
+              <Button onClick={openEventSerieCreationModal} className={fr.cx('fr-my-6v')}>
+                <RiAddCircleLine size={20} aria-hidden={true} style={{ marginRight: 8 }} />
+                Ajouter un spectacle
+              </Button>
+            </>
+          )}
+          {listEventsSeries.data && listEventsSeries.data.eventsSeriesWrappers.length > 0 && (
+            <>
+              <div className={fr.cx('fr-py-2v')} aria-label="filtre">
+                <SegmentedControl
+                  segments={
+                    [
+                      {
+                        label: 'Tous',
+                        value: ListFilter.ALL,
+                      },
+                      {
+                        label: 'Archivés',
+                        value: ListFilter.ARCHIVED_ONLY,
+                      },
+                      {
+                        label: 'Terminés',
+                        value: ListFilter.ENDED_ONLY,
+                      },
+                      {
+                        label: 'En cours',
+                        value: ListFilter.CURRENT_ONLY,
+                      },
+                      {
+                        label: 'À venir',
+                        value: ListFilter.FUTURE_ONLY,
+                      },
+                    ].map((segment) => {
+                      return {
+                        label: segment.label,
+                        nativeInputProps: {
+                          value: segment.value as unknown as string,
+                          defaultChecked: segment.value === listFilter,
+                          onChange: (event) => {
+                            setListFilter(event.currentTarget.value as ListFilter);
+                          },
+                        },
+                      } satisfies SegmentedControlProps.Segments[0];
+                    }) as SegmentedControlProps.Segments // Cast needed because the type expects a tuple, not an array
+                  }
+                  hideLegend={true}
+                ></SegmentedControl>
+              </div>
+              {filteredEventsSeriesWrappers.length > 0 && (
+                <div className={fr.cx('fr-pt-4v')} style={{ width: '100%', maxWidth: 850 }}>
+                  {filteredEventsSeriesWrappers.map((eventsSeriesWrapper) => {
+                    return (
+                      <div key={eventsSeriesWrapper.serie.id} className={fr.cx('fr-py-2v')}>
+                        <EventSerieCard
+                          wrapper={eventsSeriesWrapper}
+                          declarationLink={linkRegistry.get('declaration', {
+                            organizationId: organizationId,
+                            eventSerieId: eventsSeriesWrapper.serie.id,
+                          })}
+                          onUpdate={eventsSeriesWrapper.ticketingSystemName === TicketingSystemNameSchema.enum.MANUAL ? async () => {} : undefined}
+                          onRemove={eventsSeriesWrapper.ticketingSystemName === TicketingSystemNameSchema.enum.MANUAL ? async () => {} : undefined}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {eventsSeriesWrappers.length > 0 && filteredEventsSeriesWrappers.length === 0 && (
+                <p className={fr.cx('fr-py-4v')}>Aucun spectacle n&apos;a été trouvé avec le filtre choisi.</p>
+              )}
+            </>
+          )}
+        </div>
       </div>
+      <Dialog open={eventSerieCreationModalOpen} onClose={closeEventSerieCreationModal}>
+        <DialogTitle>Ajout manuel d&apos;un spectacle</DialogTitle>
+        <DialogContent>
+          <ContextualAddEventSerieForm
+            prefill={{ ticketingSystemId: null, organizationId: organizationId }}
+            onSuccess={closeEventSerieCreationModal}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
