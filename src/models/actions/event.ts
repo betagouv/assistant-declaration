@@ -1,6 +1,9 @@
+import { isBefore } from 'date-fns';
 import z from 'zod';
 
 import { GetterInputSchema } from '@ad/src/models/actions/common';
+import { supersoniksAccessKeyInvalidDomainNameError } from '@ad/src/models/entities/errors';
+import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 import { EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 
@@ -40,3 +43,52 @@ export const ListEventsSchema = GetterInputSchema.extend({
   }),
 }).strict();
 export type ListEventsSchemaType = z.infer<typeof ListEventsSchema>;
+
+export const rawEventInputSchema = z
+  .object({
+    startAt: EventSchema.shape.startAt,
+    endAt: EventSchema.shape.endAt,
+  })
+  .superRefine((data, ctx) => {
+    if (data.endAt !== null && isBefore(data.endAt, data.startAt)) {
+      ctx.issues.push({
+        ...customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError),
+        input: {
+          startAt: data.startAt,
+          endAt: data.endAt,
+        },
+      });
+    }
+  })
+  .strict();
+
+export const AddEventSerieSchema = z
+  .object({
+    organizationId: OrganizationSchema.shape.id,
+    name: EventSerieSchema.shape.name,
+    events: z.array(rawEventInputSchema).min(1),
+  })
+  .strict();
+export type AddEventSerieSchemaType = z.infer<typeof AddEventSerieSchema>;
+
+export const UpdateEventSerieSchema = z
+  .object({
+    eventSerieId: EventSerieSchema.shape.id,
+    name: EventSerieSchema.shape.name,
+    events: z
+      .array(
+        rawEventInputSchema.safeExtend({
+          id: EventSchema.shape.id.nullable(),
+        })
+      )
+      .min(1),
+  })
+  .strict();
+export type UpdateEventSerieSchemaType = z.infer<typeof UpdateEventSerieSchema>;
+
+export const RemoveEventSerieSchema = z
+  .object({
+    eventSerieId: EventSerieSchema.shape.id,
+  })
+  .strict();
+export type RemoveEventSerieSchemaType = z.infer<typeof RemoveEventSerieSchema>;

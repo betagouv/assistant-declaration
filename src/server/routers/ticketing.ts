@@ -27,6 +27,10 @@ export const ticketingRouter = router({
       throw organizationCollaboratorRoleRequiredError;
     }
 
+    if (input.ticketingSystemName === 'MANUAL') {
+      throw new Error('the manual ticketing system cannot be created from here');
+    }
+
     const organizationTicketingSystemsCount = await prisma.ticketingSystem.count({
       where: {
         organizationId: input.organizationId,
@@ -136,6 +140,8 @@ export const ticketingRouter = router({
       return ticketingSystemNotFoundError;
     } else if (!(await isUserACollaboratorPartOfOrganization(ticketingSystem.organizationId, ctx.user.id))) {
       throw organizationCollaboratorRoleRequiredError;
+    } else if (ticketingSystem.name === 'MANUAL') {
+      throw new Error('the manual ticketing system cannot be updated');
     }
 
     // We have the `name` in the input only to properly ajust the validation on passed credentials

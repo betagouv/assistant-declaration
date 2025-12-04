@@ -57,6 +57,8 @@ export function getTicketingSystemClient(
 
         ticketingSystemClient = new SupersoniksTicketingSystemClient(ticketingSystem.apiAccessKey, ticketingSystem.apiSecretKey);
         break;
+      case 'MANUAL':
+        throw new Error('manual ticketing system should not be used as other ones');
       default:
         throw new Error('unknown ticketing system');
     }

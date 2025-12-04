@@ -143,6 +143,7 @@ model Organization {
 }
 
 enum TicketingSystemName {
+  MANUAL // To allow managing its own ticketing data within the platform
   BILLETWEB
   HELLOASSO
   MAPADO
