@@ -1,6 +1,7 @@
 import { getTaxAmountFromIncludingAndExcludingTaxesAmounts } from '@ad/src/core/declaration';
 import { FlattenSacdEventSchemaType, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { FlattenSacemEventSchemaType, SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
+import { FlattenSibilEventSchemaType, SibilDeclarationSchemaType } from '@ad/src/models/entities/declaration/sibil';
 import { EventSchemaType } from '@ad/src/models/entities/event';
 
 export function getFlattenEventsForSacemDeclaration(declaration: SacemDeclarationSchemaType): FlattenSacemEventSchemaType[] {
@@ -46,6 +47,42 @@ export function getFlattenEventsForSacdDeclaration(declaration: SacdDeclarationS
       endAt: originalEvent.endAt,
       ticketingRevenueIncludingTaxes: originalEvent.ticketingRevenueIncludingTaxes,
       ticketingRevenueExcludingTaxes: originalEvent.ticketingRevenueExcludingTaxes,
+      freeTickets: originalEvent.freeTickets,
+      paidTickets: originalEvent.paidTickets,
+      place: originalEvent.placeOverride ?? declaration.eventSerie.place,
+      placeCapacity: originalEvent.placeCapacityOverride ?? declaration.eventSerie.placeCapacity,
+      audience: originalEvent.audienceOverride ?? declaration.eventSerie.audience,
+    });
+  }
+
+  return flattenEvents;
+}
+
+export function getFlattenEventsForSibilDeclaration(declaration: SibilDeclarationSchemaType): FlattenSibilEventSchemaType[] {
+  const flattenEvents: FlattenSibilEventSchemaType[] = [];
+
+  for (const originalEvent of declaration.events) {
+    originalEvent.audienceOverride;
+
+    flattenEvents.push({
+      id: originalEvent.id,
+      startAt: originalEvent.startAt,
+      endAt: originalEvent.endAt,
+      ticketingRevenueIncludingTaxes: originalEvent.ticketingRevenueIncludingTaxes,
+      ticketingRevenueExcludingTaxes: originalEvent.ticketingRevenueExcludingTaxes,
+      ticketingRevenueTaxRate: originalEvent.ticketingRevenueTaxRateOverride ?? declaration.eventSerie.ticketingRevenueTaxRate,
+      consumptionsRevenueIncludingTaxes: originalEvent.consumptionsRevenueIncludingTaxes,
+      consumptionsRevenueExcludingTaxes: originalEvent.consumptionsRevenueExcludingTaxes,
+      consumptionsRevenueTaxRate: originalEvent.consumptionsRevenueTaxRate,
+      cateringRevenueIncludingTaxes: originalEvent.cateringRevenueIncludingTaxes,
+      cateringRevenueExcludingTaxes: originalEvent.cateringRevenueExcludingTaxes,
+      cateringRevenueTaxRate: originalEvent.cateringRevenueTaxRate,
+      programSalesRevenueIncludingTaxes: originalEvent.programSalesRevenueIncludingTaxes,
+      programSalesRevenueExcludingTaxes: originalEvent.programSalesRevenueExcludingTaxes,
+      programSalesRevenueTaxRate: originalEvent.programSalesRevenueTaxRate,
+      otherRevenueIncludingTaxes: originalEvent.otherRevenueIncludingTaxes,
+      otherRevenueExcludingTaxes: originalEvent.otherRevenueExcludingTaxes,
+      otherRevenueTaxRate: originalEvent.otherRevenueTaxRate,
       freeTickets: originalEvent.freeTickets,
       paidTickets: originalEvent.paidTickets,
       place: originalEvent.placeOverride ?? declaration.eventSerie.place,
