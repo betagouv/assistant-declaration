@@ -334,10 +334,16 @@ export class BilletwebTicketingSystemClient implements TicketingSystemClient {
           throw new Error('a sold ticket should always match a ticket category');
         }
 
-        // Commission must be deduced when declaring from our platform
-        // Note: if for whatever reason the buyer bad a 100% voucher code, we assume commission would not be applied entierly
-        // TODO: this should be check... if ticket sold "40 cents" with voucher, and the category commission is "50 cents", do they reduce commission or not?
-        const ticketPriceIncludingTaxes = Math.max(attendee.price - relatedTicketCategory.commission, 0);
+        // Commission must be deduced when declaring from our platform, the Billetweb commission only exist when the purchase (non-zero) has been done from their services
+        // Since there are a predefined list of payment types but also random ones (numeric names), we checked with endpoint `/api/accounting` no fee was accounted with types other than "web"
+        //
+        // Also if for whatever reason the buyer had a 100% voucher code, we assume commission would not be applied entirely to not go with negative amount (but still maybe the commission is decreased?)
+        // TODO: this should be checked... if ticket sold "40 cents" with voucher, and the category commission is "50 cents", do they reduce commission or not?
+        // ... maybe in the future we should rely on `/api/accounting` endpoint only, but this would be really ressource intensive
+        const ticketPriceIncludingTaxes = Math.max(
+          attendee.order_payment_type === 'web' ? attendee.price - relatedTicketCategory.commission : attendee.price,
+          0
+        );
 
         if (ticketPriceIncludingTaxes === 0) {
           relatedEvent.freeTickets++;
