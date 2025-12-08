@@ -99,9 +99,17 @@ export const FillDeclarationSchema = z
         placeCapacityOverride: true,
         audienceOverride: true,
         ticketingRevenueTaxRateOverride: true, // TODO: waiting to know if using them or not
-      }).extend({
-        placeOverride: PlaceInputSchema,
       })
+        .extend({
+          placeOverride: PlaceInputSchema,
+        })
+        .superRefine((data, ctx) => {
+          assertAmountsRespectTaxLogic(data, 'ticketingRevenueExcludingTaxes', 'ticketingRevenueIncludingTaxes', ctx);
+          assertAmountsRespectTaxLogic(data, 'consumptionsRevenueExcludingTaxes', 'consumptionsRevenueIncludingTaxes', ctx);
+          assertAmountsRespectTaxLogic(data, 'cateringRevenueExcludingTaxes', 'cateringRevenueIncludingTaxes', ctx);
+          assertAmountsRespectTaxLogic(data, 'programSalesRevenueExcludingTaxes', 'programSalesRevenueIncludingTaxes', ctx);
+          assertAmountsRespectTaxLogic(data, 'otherRevenueExcludingTaxes', 'otherRevenueIncludingTaxes', ctx);
+        })
     ),
   })
   .strict();
