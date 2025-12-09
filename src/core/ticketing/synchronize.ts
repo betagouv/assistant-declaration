@@ -25,7 +25,7 @@ const LiteEventSerieManagingDefaultsSchema = applyTypedParsers(
 );
 export type LiteEventSerieManagingDefaultsSchemaType = z.infer<typeof LiteEventSerieManagingDefaultsSchema>;
 
-const defaultConnectorEventSerieTaxRate = 0.055;
+export const defaultConnectorEventSerieTaxRate = 0.055;
 
 export async function synchronizeDataFromTicketingSystems(organizationId: string, userId: string): Promise<void> {
   await assertUserACollaboratorPartOfOrganization(organizationId, userId);

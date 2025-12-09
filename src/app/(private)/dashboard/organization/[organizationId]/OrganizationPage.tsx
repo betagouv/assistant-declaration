@@ -3,11 +3,12 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { SegmentedControl, SegmentedControlProps } from '@codegouvfr/react-dsfr/SegmentedControl';
+import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { RiLoopLeftFill } from '@remixicon/react';
 import { push } from '@socialgouv/matomo-next';
 import { isBefore, subHours, subMonths } from 'date-fns';
 import NextLink from 'next/link';
-import { useMemo, useState } from 'react';
+import { createContext, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAsyncFn } from 'react-use';
 
@@ -35,12 +36,17 @@ enum ListFilter {
   FUTURE_ONLY = 'FUTURE_ONLY',
 }
 
+export const OrganizationPageContext = createContext({
+  ContextualAddEventSerieForm: AddEventSerieForm,
+});
+
 export interface OrganizationPageProps {
   params: { organizationId: string };
 }
 
 export function OrganizationPage({ params: { organizationId } }: OrganizationPageProps) {
   const { t } = useTranslation('common');
+  const { ContextualAddEventSerieForm } = useContext(OrganizationPageContext);
 
   const trpcUtils = trpc.useUtils();
 
@@ -164,6 +170,14 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
     return lastSynchronizationAt ? isBefore(lastSynchronizationAt, thresholdDate) : true;
   }, [lastSynchronizationAt]);
 
+  const [eventSerieCreationModalOpen, setEventSerieCreationModalOpen] = useState<boolean>(false);
+  const openEventSerieCreationModal = useCallback(() => {
+    setEventSerieCreationModalOpen(true);
+  }, [setEventSerieCreationModalOpen]);
+  const closeEventSerieCreationModal = useCallback(() => {
+    setEventSerieCreationModalOpen(false);
+  }, [setEventSerieCreationModalOpen]);
+
   if (aggregatedQueries.isPending) {
     return <LoadingArea ariaLabelTarget="contenu" />;
   } else if (aggregatedQueries.hasError) {
@@ -203,6 +217,8 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                 <RiLoopLeftFill size={20} aria-hidden={true} style={{ marginRight: 8 }} />
                 Synchroniser
               </Button>
+              QUID si pas de ticketing... enlever synchroniser
+              <Button onClick={openEventSerieCreationModal}>Ajouter un spectacle manuellement</Button>
             </div>
             <div className={fr.cx('fr-col-12', 'fr-col-md-9')}>
               {lastSynchronizationAt !== null ? (
@@ -280,6 +296,10 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                                 organizationId: organizationId,
                                 eventSerieId: eventsSeriesWrapper.serie.id,
                               })}
+                              // TODO:
+                              // TODO:
+                              // TODO: onRemove/onUpdate should be conditionned if alreayd declared and if ticketing MANUAL
+                              // TODO:
                             />
                           </div>
                         );
@@ -292,6 +312,12 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                         : `Aucun spectacle n'a été trouvé dans votre billetterie avec le filtre choisi.`}
                     </p>
                   )}
+                  <Dialog open={eventSerieCreationModalOpen} onClose={closeEventSerieCreationModal}>
+                    <DialogTitle>Ajout manuel d'un spectacle</DialogTitle>
+                    <DialogContent>
+                      <ContextualAddEventSerieForm prefill={{ ticketingSystemId: props.xxx }} onSuccess={closeEventSerieCreationModal} />
+                    </DialogContent>
+                  </Dialog>
                 </>
               ) : (
                 <>
