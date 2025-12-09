@@ -221,6 +221,12 @@ export const eventSeriePartialExpensesGreatherThanTotalError = new BusinessError
   t('errors.custom.eventSeriePartialExpensesGreatherThanTotal')
 );
 
+// Event
+export const eventEndDateMustBeAfterStartDateError = new BusinessError(
+  'eventEndDateMustBeAfterStartDate',
+  t('errors.custom.eventEndDateMustBeAfterStartDate')
+);
+
 // Place
 export const placeAddressRequiredIfAnyNameSpecifiedError = new BusinessError(
   'placeAddressRequiredIfAnyNameSpecified',

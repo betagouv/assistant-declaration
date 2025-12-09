@@ -2,10 +2,11 @@ import { isBefore } from 'date-fns';
 import z from 'zod';
 
 import { GetterInputSchema } from '@ad/src/models/actions/common';
-import { supersoniksAccessKeyInvalidDomainNameError } from '@ad/src/models/entities/errors';
+import { eventEndDateMustBeAfterStartDateError } from '@ad/src/models/entities/errors';
 import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 import { EventSchema, EventSerieSchema } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
+import { TicketingSystemSchema } from '@ad/src/models/entities/ticketing';
 
 export const SynchronizeDataFromTicketingSystemsSchema = z
   .object({
@@ -52,7 +53,9 @@ export const rawEventInputSchema = z
   .superRefine((data, ctx) => {
     if (data.endAt !== null && isBefore(data.endAt, data.startAt)) {
       ctx.issues.push({
-        ...customErrorToZodIssue(supersoniksAccessKeyInvalidDomainNameError),
+        ...customErrorToZodIssue(eventEndDateMustBeAfterStartDateError, {
+          overridePath: ['endAt' satisfies keyof typeof data], // Concatenated to where the `superRefine` is applied
+        }),
         input: {
           startAt: data.startAt,
           endAt: data.endAt,
@@ -64,7 +67,7 @@ export const rawEventInputSchema = z
 
 export const AddEventSerieSchema = z
   .object({
-    organizationId: OrganizationSchema.shape.id,
+    ticketingSystemId: TicketingSystemSchema.shape.id,
     name: EventSerieSchema.shape.name,
     events: z.array(rawEventInputSchema).min(1),
   })
