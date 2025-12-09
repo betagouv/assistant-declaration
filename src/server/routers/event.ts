@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { secondsToMilliseconds } from 'date-fns';
 
+import { defaultConnectorEventSerieTaxRate } from '@ad/src/core/ticketing/synchronize';
 import { AddEventSerieSchema, ListEventsSeriesSchema, RemoveEventSerieSchema, UpdateEventSerieSchema } from '@ad/src/models/actions/event';
 import { DeclarationStatusSchema } from '@ad/src/models/entities/common';
 import {
@@ -101,103 +102,64 @@ export const eventRouter = router({
           throw ticketingSystemNotFoundError;
         } else if (!(await isUserACollaboratorPartOfOrganization(ticketingSystem.organization.id, ctx.user.id))) {
           throw organizationCollaboratorRoleRequiredError;
-        } else if (eventSerie.ticketingSystem.name !== 'MANUAL') {
+        } else if (ticketingSystem.name !== 'MANUAL') {
           throw new Error('only event serie manually added can be updated');
-        } else if (eventSerie.EventSerieDeclaration.length > 0) {
-          throw new Error('event serie not updatable since it has already been in the process of declaration');
         }
 
-        // const existingLiteEvents = new Map<string, { startAt: Date; endAt: Date | null }>();
-        // const nextLiteEvents: typeof existingLiteEvents = new Map();
-
-        // eventSerie.Event.forEach((event) =>
-        //   existingLiteEvents.set(event.id, {
-        //     startAt: event.startAt,
-        //     endAt: event.endAt,
-        //   })
-        // );
-
-        // let newIdIncrement = 0;
-        // input.events.forEach((event) =>
-        //   nextLiteEvents.set(
-        //     event.id ?? `new_${++newIdIncrement}`, // ID does not matter, it just needs to be non existing for the comparaison
-        //     {
-        //       startAt: event.startAt,
-        //       endAt: event.endAt,
-        //     }
-        //   )
-        // );
-
-        // const eventsDiffResult = getDiff(existingLiteEvents, nextLiteEvents);
-        // const sortedEventsDiffResult = sortDiffWithKeys(eventsDiffResult);
-
-        // if (sortedEventsDiffResult.added.length > 0) {
-        //   await tx.event.createMany({
-        //     data: sortedEventsDiffResult.added.map((addedEvent) => ({
-        //       internalTicketingSystemId: Date.now().toString(), // Since needing a unique ID we chose to use the milliseconds timestamp (since not parallelization it won't be an issue across users)
-        //       eventSerieId: eventSerie.id,
-        //       startAt: addedEvent.model.startAt,
-        //       endAt: addedEvent.model.endAt,
-        //       ticketingRevenueIncludingTaxes: 0,
-        //       ticketingRevenueExcludingTaxes: 0,
-        //       ticketingRevenueDefinedTaxRate: false, // For now we disable the usage of tax rate as a coefficient (both amounts must be provided)
-        //       consumptionsRevenueIncludingTaxes: 0,
-        //       consumptionsRevenueExcludingTaxes: 0,
-        //       consumptionsRevenueTaxRate: null,
-        //       cateringRevenueIncludingTaxes: 0,
-        //       cateringRevenueExcludingTaxes: 0,
-        //       cateringRevenueTaxRate: null,
-        //       programSalesRevenueIncludingTaxes: 0,
-        //       programSalesRevenueExcludingTaxes: 0,
-        //       programSalesRevenueTaxRate: null,
-        //       otherRevenueIncludingTaxes: 0,
-        //       otherRevenueExcludingTaxes: 0,
-        //       otherRevenueTaxRate: null,
-        //       freeTickets: 0,
-        //       paidTickets: 0,
-        //       placeOverrideId: undefined,
-        //       placeCapacityOverride: null,
-        //       audienceOverride: null,
-        //       ticketingRevenueTaxRateOverride: null,
-        //     })),
-        //     skipDuplicates: true,
-        //   });
-        // }
-
-        // if (sortedEventsDiffResult.updated.length > 0) {
-        //   for (const updatedEvent of sortedEventsDiffResult.updated) {
-        //     await tx.event.update({
-        //       where: {
-        //         id: updatedEvent.key,
-        //         eventSerieId: eventSerie.id, // Ensure not messing with places from other companies
-        //       },
-        //       data: {
-        //         startAt: updatedEvent.model.startAt,
-        //         endAt: updatedEvent.model.endAt,
-        //       },
-        //     });
-        //   }
-        // }
-
-        // if (sortedEventsDiffResult.removed.length > 0) {
-        //   await tx.event.deleteMany({
-        //     where: {
-        //       id: {
-        //         in: sortedEventsDiffResult.removed.map((removedEvent) => removedEvent.key),
-        //       },
-        //       eventSerieId: eventSerie.id, // Ensure not messing with places from other companies
-        //     },
-        //   });
-        // }
-
-        // await tx.eventSerie.update({
-        //   where: {
-        //     id: eventSerie.id,
-        //   },
-        //   data: {
-        //     name: input.name,
-        //   },
-        // });
+        await tx.eventSerie.create({
+          data: {
+            // We reuse default values we could have from a creation during a synchronization
+            internalTicketingSystemId: Date.now().toString(), // Since needing a unique ID we chose to use the milliseconds timestamp (since not parallelization it won't be an issue across users)
+            ticketingSystemId: ticketingSystem.id,
+            name: input.name,
+            producerOfficialId: null,
+            producerName: null,
+            performanceType: null,
+            expectedDeclarationTypes: [],
+            lastManualUpdateAt: null,
+            placeId: null,
+            placeCapacity: null,
+            audience: 'ALL',
+            ticketingRevenueTaxRate: defaultConnectorEventSerieTaxRate,
+            expensesIncludingTaxes: 0,
+            expensesExcludingTaxes: 0,
+            introductionFeesExpensesIncludingTaxes: 0,
+            introductionFeesExpensesExcludingTaxes: 0,
+            circusSpecificExpensesIncludingTaxes: null,
+            circusSpecificExpensesExcludingTaxes: null,
+            Event: {
+              createMany: {
+                data: input.events.map((addedEvent) => ({
+                  internalTicketingSystemId: Date.now().toString(), // Since needing a unique ID we chose to use the milliseconds timestamp (since not parallelization it won't be an issue across users)
+                  startAt: addedEvent.startAt,
+                  endAt: addedEvent.endAt,
+                  ticketingRevenueIncludingTaxes: 0,
+                  ticketingRevenueExcludingTaxes: 0,
+                  ticketingRevenueDefinedTaxRate: false, // For now we disable the usage of tax rate as a coefficient (both amounts must be provided)
+                  consumptionsRevenueIncludingTaxes: 0,
+                  consumptionsRevenueExcludingTaxes: 0,
+                  consumptionsRevenueTaxRate: null,
+                  cateringRevenueIncludingTaxes: 0,
+                  cateringRevenueExcludingTaxes: 0,
+                  cateringRevenueTaxRate: null,
+                  programSalesRevenueIncludingTaxes: 0,
+                  programSalesRevenueExcludingTaxes: 0,
+                  programSalesRevenueTaxRate: null,
+                  otherRevenueIncludingTaxes: 0,
+                  otherRevenueExcludingTaxes: 0,
+                  otherRevenueTaxRate: null,
+                  freeTickets: 0,
+                  paidTickets: 0,
+                  placeOverrideId: undefined,
+                  placeCapacityOverride: null,
+                  audienceOverride: null,
+                  ticketingRevenueTaxRateOverride: null,
+                })),
+                skipDuplicates: true,
+              },
+            },
+          },
+        });
       },
       {
         timeout: secondsToMilliseconds(15),
