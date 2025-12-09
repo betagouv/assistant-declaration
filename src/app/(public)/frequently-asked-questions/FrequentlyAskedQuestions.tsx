@@ -13,14 +13,8 @@ export function FrequentlyAskedQuestions() {
               <Accordion label="À quoi sert l'Assistant Déclaration ?">
                 L&apos;Assistant aide les organisateurs à réaliser les déclarations post-spectacles pour la SACEM et la SACD.
                 <br />
-                <br />À terme, l&apos;Assistant permettra aussi de déclarer la taxe sur le spectacle au CNM et à l&apos;ASTP et alimentera{' '}
-                <NextLink
-                  href="https://www.culture.gouv.fr/thematiques/theatre-spectacles/pour-les-professionnels/sibil-systeme-d-information-billetterie"
-                  target="_blank"
-                >
-                  SIBIL
-                </NextLink>
-                , le système d&apos;information de billetterie du Ministère de la Culture.
+                <br />À terme, l&apos;Assistant pourrait permettre de simplifier d&apos;autres formalités administratives pour les entrepreneurs du
+                spectacle.
               </Accordion>
             </li>
             <li>
@@ -103,8 +97,8 @@ export function FrequentlyAskedQuestions() {
                 L&apos;Assistant permet de remplir une seule fois les champs des formulaires SACEM et SACD et d&apos;envoyer automatiquement les
                 formulaires à ces 2 organismes.
                 <br />
-                <br />À terme, l&apos;Assistant permettra aussi de remplir et envoyer les formalités demandées par le CNM et l&apos;ASTP ainsi
-                qu&apos;au ministère de la Culture pour ce qui concerne SIBIL.
+                <br />
+                Pour l&apos;instant l&apos;Assistant ne permet pas de réaliser vos déclarations CNM, ASTP et SIBIL.
               </Accordion>
             </li>
             <li>
@@ -112,8 +106,7 @@ export function FrequentlyAskedQuestions() {
                 Non, l&apos;Assistant ne permet pas de filtrer les déclarations à réaliser pour un spectacle. Même s&apos;il est possible
                 d&apos;établir des règles générales selon le genre du spectacle (musique, danse, théâtre, etc.) il y a de nombreux cas particuliers
                 (ex. : spectacles d&apos;humour) qui ne permettent pas de mettre en place une règle pour déterminer automatiquement si un spectacle
-                relève de la SACEM et/ou de la SACD, du CNM et/ou de l&apos;ASTP. En cas de doute nous vous recommandons de contacter vos
-                gestionnaires de proximité.
+                relève de la SACEM et/ou de la SACD. En cas de doute nous vous recommandons de contacter vos gestionnaires de proximité.
               </Accordion>
             </li>
             <li>
