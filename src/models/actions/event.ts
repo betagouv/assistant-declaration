@@ -74,6 +74,9 @@ export const AddEventSerieSchema = z
   .strict();
 export type AddEventSerieSchemaType = z.infer<typeof AddEventSerieSchema>;
 
+export const AddEventSeriePrefillSchema = AddEventSerieSchema.partial();
+export type AddEventSeriePrefillSchemaType = z.infer<typeof AddEventSeriePrefillSchema>;
+
 export const UpdateEventSerieSchema = z
   .object({
     eventSerieId: EventSerieSchema.shape.id,
@@ -89,9 +92,15 @@ export const UpdateEventSerieSchema = z
   .strict();
 export type UpdateEventSerieSchemaType = z.infer<typeof UpdateEventSerieSchema>;
 
+export const UpdateEventSeriePrefillSchema = UpdateEventSerieSchema.partial();
+export type UpdateEventSeriePrefillSchemaType = z.infer<typeof UpdateEventSeriePrefillSchema>;
+
 export const RemoveEventSerieSchema = z
   .object({
     eventSerieId: EventSerieSchema.shape.id,
   })
   .strict();
 export type RemoveEventSerieSchemaType = z.infer<typeof RemoveEventSerieSchema>;
+
+export const RemoveEventSeriePrefillSchema = RemoveEventSerieSchema.partial();
+export type RemoveEventSeriePrefillSchemaType = z.infer<typeof RemoveEventSeriePrefillSchema>;
