@@ -8,10 +8,11 @@ import { RiLoopLeftFill } from '@remixicon/react';
 import { push } from '@socialgouv/matomo-next';
 import { isBefore, subHours, subMonths } from 'date-fns';
 import NextLink from 'next/link';
-import { createContext, useCallback, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAsyncFn } from 'react-use';
 
+import { AddEventSerieForm } from '@ad/src/app/(private)/dashboard/organization/AddEventSerieForm';
 import { trpc } from '@ad/src/client/trpcClient';
 import { Button } from '@ad/src/components/Button';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
