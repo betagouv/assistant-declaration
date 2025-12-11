@@ -25,7 +25,6 @@ export function AddEventSerieForm({ onSuccess, prefill }: AddEventSerieFormProps
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
     control,
   } = useForm({
     resolver: zodResolver(AddEventSerieSchema),
@@ -106,7 +105,7 @@ export function AddEventSerieForm({ onSuccess, prefill }: AddEventSerieFormProps
                         remove(eventWithErrorLogic.index);
                       }}
                     >
-                      Ajouter une représentation
+                      Supprimer
                     </Button>
                   </div>
                 </div>
