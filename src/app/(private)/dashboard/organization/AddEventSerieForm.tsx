@@ -31,7 +31,9 @@ export function AddEventSerieForm({ onSuccess, prefill }: AddEventSerieFormProps
     defaultValues: {
       ticketingSystemId: '',
       name: '',
-      events: [],
+      events: [
+        { startAt: new Date(), endAt: null }, // Always provide one so the user understand what's expected
+      ],
       ...prefill,
     },
   });
