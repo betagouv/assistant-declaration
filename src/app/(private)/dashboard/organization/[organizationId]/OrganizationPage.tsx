@@ -3,10 +3,10 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { SegmentedControl, SegmentedControlProps } from '@codegouvfr/react-dsfr/SegmentedControl';
-import { Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { Badge, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { RiAddCircleLine, RiLoopLeftFill } from '@remixicon/react';
 import { push } from '@socialgouv/matomo-next';
-import { isBefore, subHours, subMonths } from 'date-fns';
+import { isBefore, subHours } from 'date-fns';
 import NextLink from 'next/link';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,10 +32,9 @@ const textDecoder = new TextDecoder();
 
 enum ListFilter {
   ALL = 'ALL',
-  ARCHIVED_ONLY = 'ARCHIVED_ONLY',
-  ENDED_ONLY = 'ENDED_ONLY',
-  CURRENT_ONLY = 'CURRENT_ONLY',
-  FUTURE_ONLY = 'FUTURE_ONLY',
+  PENDING = 'PENDING',
+  ERRORED = 'ERRORED',
+  DECLARED = 'DECLARED',
 }
 
 export interface OrganizationPageProps {
@@ -126,27 +125,38 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
     }
   );
 
-  const [listFilter, setListFilter] = useState<ListFilter>(ListFilter.ENDED_ONLY);
+  const [listFilter, setListFilter] = useState<ListFilter>(ListFilter.PENDING);
 
   const filteredEventsSeriesWrappers = useMemo(() => {
     const currentDate = new Date();
-    const archivedThreshold = subMonths(currentDate, 3);
 
     return (listEventsSeries.data?.eventsSeriesWrappers || []).filter((eventSerieWrapper) => {
+      const eventSerieHasAtLeastOneError =
+        eventSerieWrapper.partialDeclarations.findIndex(
+          (partialDeclaration) => partialDeclaration.status === 'PENDING' && partialDeclaration.transmittedAt === null
+        ) !== -1;
+
       switch (listFilter) {
-        case ListFilter.ARCHIVED_ONLY:
-          return isBefore(eventSerieWrapper.computedEndAt, archivedThreshold);
-        case ListFilter.ENDED_ONLY:
-          return isBefore(eventSerieWrapper.computedEndAt, currentDate) && !isBefore(eventSerieWrapper.computedEndAt, archivedThreshold);
-        case ListFilter.CURRENT_ONLY:
-          return isBefore(eventSerieWrapper.computedStartAt, currentDate) && !isBefore(eventSerieWrapper.computedEndAt, currentDate);
-        case ListFilter.FUTURE_ONLY:
-          return !isBefore(eventSerieWrapper.computedStartAt, currentDate);
+        case ListFilter.PENDING:
+          return eventSerieWrapper.partialDeclarations.length === 0 && isBefore(eventSerieWrapper.computedEndAt, currentDate);
+        case ListFilter.ERRORED:
+          return eventSerieHasAtLeastOneError;
+        case ListFilter.DECLARED:
+          return eventSerieWrapper.partialDeclarations.length > 0 && !eventSerieHasAtLeastOneError; // It should handle all other cases
         default:
           return true;
       }
     });
   }, [listFilter, listEventsSeries.data]);
+
+  const erroredEventsSeriesCount = useMemo(() => {
+    return (listEventsSeries.data?.eventsSeriesWrappers || []).filter(
+      (eventSerieWrapper) =>
+        eventSerieWrapper.partialDeclarations.findIndex(
+          (partialDeclaration) => partialDeclaration.status === 'PENDING' && partialDeclaration.transmittedAt === null
+        ) !== -1
+    ).length;
+  }, [listEventsSeries.data]);
 
   const { remoteTicketingSystems, lastSynchronizationAt } = useMemo(() => {
     // The manual ticketing system must be separate to adjust properly the UI since it can be considered linked at account creation
@@ -324,20 +334,37 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                         value: ListFilter.ALL,
                       },
                       {
-                        label: 'Archivés',
-                        value: ListFilter.ARCHIVED_ONLY,
+                        label: 'À déclarer',
+                        value: ListFilter.PENDING,
                       },
                       {
-                        label: 'Terminés',
-                        value: ListFilter.ENDED_ONLY,
+                        label: (
+                          <>
+                            En alerte
+                            {erroredEventsSeriesCount > 0 && (
+                              <Badge
+                                badgeContent={erroredEventsSeriesCount}
+                                max={99}
+                                title="nombre de spectacles dont la déclaration est en erreur"
+                                color="error"
+                                sx={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  '& .MuiBadge-badge': {
+                                    position: 'relative',
+                                    transform: 'none',
+                                    marginLeft: '0.5rem',
+                                  },
+                                }}
+                              />
+                            )}
+                          </>
+                        ),
+                        value: ListFilter.ERRORED,
                       },
                       {
-                        label: 'En cours',
-                        value: ListFilter.CURRENT_ONLY,
-                      },
-                      {
-                        label: 'À venir',
-                        value: ListFilter.FUTURE_ONLY,
+                        label: 'Déclarés',
+                        value: ListFilter.DECLARED,
                       },
                     ].map((segment) => {
                       return {
