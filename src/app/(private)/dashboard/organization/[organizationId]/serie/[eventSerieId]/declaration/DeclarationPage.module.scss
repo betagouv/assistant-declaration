@@ -56,3 +56,7 @@
 .hr {
   background-image: linear-gradient(0deg, var(--border-default-blue-france), var(--border-default-blue-france)) !important;
 }
+
+.fixedFieldset {
+  align-items: flex-start !important; // Quick fix since everything working on Chrome but not on Safari and some others (the logic of using DSFR fieldset should be reviewed here)
+}
