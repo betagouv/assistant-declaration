@@ -21,6 +21,161 @@ import { AudienceSchema } from '@ad/src/models/entities/event';
 
 type FillDeclarationSchemaInputType = z.input<typeof FillDeclarationSchema>;
 
+export interface TicketingSectionProps {
+  control: Control<FillDeclarationSchemaInputType, any>;
+  register: UseFormRegister<FillDeclarationSchemaInputType>;
+  name: `events.${number}`;
+  errors: FieldErrors<NonNullable<FillDeclarationSchemaInputType>['events']>[0];
+  readonly?: boolean;
+}
+
+export function TicketingSection({ control, register, name, errors, readonly }: TicketingSectionProps) {
+  const { t } = useTranslation('common');
+
+  return (
+    <>
+      <div className={fr.cx('fr-grid-row')}>
+        <div className={fr.cx('fr-col-12')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <div className={fr.cx('fr-mb-2v', 'fr-mt-4v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
+              Billetterie
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className={fr.cx('fr-grid-row')}>
+        <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Controller
+              control={control}
+              name={`${name}.freeTickets`}
+              disabled={readonly}
+              render={({ field: { ref, onChange, disabled, ...fieldOthers }, fieldState: { error } }) => {
+                return (
+                  <Input
+                    ref={ref}
+                    label="Billets gratuits"
+                    disabled={disabled}
+                    state={!!error ? 'error' : undefined}
+                    stateRelatedMessage={error?.message}
+                    nativeInputProps={{
+                      ...fieldOthers,
+                      type: 'number',
+                      placeholder: '0',
+                      step: 1,
+                      min: 0,
+                      onChange: (event) => {
+                        onChange(event.target.value === '' ? null : Number(event.target.value));
+                      },
+                      onFocusCapture: (event) => {
+                        event.target.select(); // For the ease of modification select the whole on focus
+                      },
+                      onWheel: (event) => {
+                        // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
+
+                        // `event.currentTarget` is a callable type but is targetting the MUI element
+                        // whereas `event.target` targets the input element but does not have the callable type, so casting
+                        (event.target as HTMLInputElement).blur();
+                      },
+                    }}
+                  />
+                );
+              }}
+            />
+          </div>
+        </div>
+        <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Controller
+              control={control}
+              name={`${name}.paidTickets`}
+              disabled={readonly}
+              render={({ field: { ref, onChange, disabled, ...fieldOthers }, fieldState: { error } }) => {
+                return (
+                  <Input
+                    ref={ref}
+                    label="Billets payants"
+                    disabled={disabled}
+                    state={!!error ? 'error' : undefined}
+                    stateRelatedMessage={error?.message}
+                    nativeInputProps={{
+                      ...fieldOthers,
+                      type: 'number',
+                      placeholder: '0',
+                      step: 1,
+                      min: 0,
+                      onChange: (event) => {
+                        onChange(event.target.value === '' ? null : Number(event.target.value));
+                      },
+                      onFocusCapture: (event) => {
+                        event.target.select(); // For the ease of modification select the whole on focus
+                      },
+                      onWheel: (event) => {
+                        // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
+
+                        // `event.currentTarget` is a callable type but is targetting the MUI element
+                        // whereas `event.target` targets the input element but does not have the callable type, so casting
+                        (event.target as HTMLInputElement).blur();
+                      },
+                    }}
+                  />
+                );
+              }}
+            />
+          </div>
+        </div>
+        <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Select
+              label="Taux de TVA"
+              disabled={readonly}
+              state={!!errors?.ticketingRevenueTaxRateOverride ? 'error' : undefined}
+              stateRelatedMessage={errors?.ticketingRevenueTaxRateOverride?.message}
+              nativeSelectProps={{
+                ...register(`${name}.ticketingRevenueTaxRateOverride`, {
+                  valueAsNumber: true,
+                }),
+              }}
+              options={currentTaxRates.map((taxRate) => {
+                return {
+                  label: t('number.percent', {
+                    percentage: taxRate,
+                  }),
+                  value: taxRate.toString(),
+                };
+              })}
+            />
+          </div>
+        </div>
+        <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Controller
+              control={control}
+              name={`${name}.ticketingRevenueExcludingTaxes`}
+              disabled={readonly}
+              render={({ field, fieldState: { error } }) => {
+                return <AmountInput {...field} label="Montant HT" signed={false} errorMessage={error?.message} />;
+              }}
+            />
+          </div>
+        </div>
+        <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Controller
+              control={control}
+              name={`${name}.ticketingRevenueIncludingTaxes`}
+              disabled={readonly}
+              render={({ field, fieldState: { error } }) => {
+                return <AmountInput {...field} label="Montant TTC" signed={false} errorMessage={error?.message} />;
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export interface EventFieldsetProps {
   control: Control<FillDeclarationSchemaInputType, any>;
   register: UseFormRegister<FillDeclarationSchemaInputType>;
@@ -30,11 +185,24 @@ export interface EventFieldsetProps {
   eventIndex: number;
   name: `events.${number}`;
   placeholder: DeclarationWrapperSchemaType['placeholder'];
+  eventSerieManuallyCreated: boolean;
   errors: FieldErrors<NonNullable<FillDeclarationSchemaInputType>['events']>[0];
   readonly?: boolean;
 }
 
-export function EventFieldset({ control, register, setValue, watch, trigger, eventIndex, name, placeholder, errors, readonly }: EventFieldsetProps) {
+export function EventFieldset({
+  control,
+  register,
+  setValue,
+  watch,
+  trigger,
+  eventIndex,
+  name,
+  placeholder,
+  eventSerieManuallyCreated,
+  errors,
+  readonly,
+}: EventFieldsetProps) {
   const { t } = useTranslation('common');
 
   const errorMessage = useMemo(() => errors?.root?.message ?? errors?.message, [errors]);
@@ -53,6 +221,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
           </div>
         </div>
       )}
+      {eventSerieManuallyCreated && <TicketingSection control={control} register={register} name={name} errors={errors} readonly={readonly} />}
       {watch('eventSerie.expectedDeclarationTypes').includes('SACEM') && (
         <>
           <div className={fr.cx('fr-grid-row')}>
@@ -392,144 +561,7 @@ export function EventFieldset({ control, register, setValue, watch, trigger, eve
               </div>
             </div>
           </div>
-          <div className={fr.cx('fr-grid-row')}>
-            <div className={fr.cx('fr-col-12')}>
-              <div className={fr.cx('fr-fieldset__element')}>
-                <div className={fr.cx('fr-mb-2v', 'fr-mt-4v')} style={{ color: fr.colors.decisions.border.default.blueFrance.default }}>
-                  Billetterie
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className={fr.cx('fr-grid-row')}>
-            <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-              <div className={fr.cx('fr-fieldset__element')}>
-                <Controller
-                  control={control}
-                  name={`${name}.freeTickets`}
-                  disabled={readonly}
-                  render={({ field: { ref, onChange, disabled, ...fieldOthers }, fieldState: { error } }) => {
-                    return (
-                      <Input
-                        ref={ref}
-                        label="Billets gratuits"
-                        disabled={disabled}
-                        state={!!error ? 'error' : undefined}
-                        stateRelatedMessage={error?.message}
-                        nativeInputProps={{
-                          ...fieldOthers,
-                          type: 'number',
-                          placeholder: '0',
-                          step: 1,
-                          min: 0,
-                          onChange: (event) => {
-                            onChange(event.target.value === '' ? null : Number(event.target.value));
-                          },
-                          onFocusCapture: (event) => {
-                            event.target.select(); // For the ease of modification select the whole on focus
-                          },
-                          onWheel: (event) => {
-                            // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
-
-                            // `event.currentTarget` is a callable type but is targetting the MUI element
-                            // whereas `event.target` targets the input element but does not have the callable type, so casting
-                            (event.target as HTMLInputElement).blur();
-                          },
-                        }}
-                      />
-                    );
-                  }}
-                />
-              </div>
-            </div>
-            <div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-              <div className={fr.cx('fr-fieldset__element')}>
-                <Controller
-                  control={control}
-                  name={`${name}.paidTickets`}
-                  disabled={readonly}
-                  render={({ field: { ref, onChange, disabled, ...fieldOthers }, fieldState: { error } }) => {
-                    return (
-                      <Input
-                        ref={ref}
-                        label="Billets payants"
-                        disabled={disabled}
-                        state={!!error ? 'error' : undefined}
-                        stateRelatedMessage={error?.message}
-                        nativeInputProps={{
-                          ...fieldOthers,
-                          type: 'number',
-                          placeholder: '0',
-                          step: 1,
-                          min: 0,
-                          onChange: (event) => {
-                            onChange(event.target.value === '' ? null : Number(event.target.value));
-                          },
-                          onFocusCapture: (event) => {
-                            event.target.select(); // For the ease of modification select the whole on focus
-                          },
-                          onWheel: (event) => {
-                            // [WORKAROUND] Ref: https://github.com/mui/material-ui/issues/19154#issuecomment-2566529204
-
-                            // `event.currentTarget` is a callable type but is targetting the MUI element
-                            // whereas `event.target` targets the input element but does not have the callable type, so casting
-                            (event.target as HTMLInputElement).blur();
-                          },
-                        }}
-                      />
-                    );
-                  }}
-                />
-              </div>
-            </div>
-            <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
-              <div className={fr.cx('fr-fieldset__element')}>
-                <Select
-                  label="Taux de TVA"
-                  disabled={readonly}
-                  state={!!errors?.ticketingRevenueTaxRateOverride ? 'error' : undefined}
-                  stateRelatedMessage={errors?.ticketingRevenueTaxRateOverride?.message}
-                  nativeSelectProps={{
-                    ...register(`${name}.ticketingRevenueTaxRateOverride`, {
-                      valueAsNumber: true,
-                    }),
-                  }}
-                  options={currentTaxRates.map((taxRate) => {
-                    return {
-                      label: t('number.percent', {
-                        percentage: taxRate,
-                      }),
-                      value: taxRate.toString(),
-                    };
-                  })}
-                />
-              </div>
-            </div>
-            <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
-              <div className={fr.cx('fr-fieldset__element')}>
-                <Controller
-                  control={control}
-                  name={`${name}.ticketingRevenueExcludingTaxes`}
-                  disabled={readonly}
-                  render={({ field, fieldState: { error } }) => {
-                    return <AmountInput {...field} label="Montant HT" signed={false} errorMessage={error?.message} />;
-                  }}
-                />
-              </div>
-            </div>
-            <div className={fr.cx('fr-col-4', 'fr-col-md-2')}>
-              <div className={fr.cx('fr-fieldset__element')}>
-                <Controller
-                  control={control}
-                  name={`${name}.ticketingRevenueIncludingTaxes`}
-                  disabled={readonly}
-                  render={({ field, fieldState: { error } }) => {
-                    return <AmountInput {...field} label="Montant TTC" signed={false} errorMessage={error?.message} />;
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+          {!eventSerieManuallyCreated && <TicketingSection control={control} register={register} name={name} errors={errors} readonly={readonly} />}
         </Accordion>
       </div>
     </>

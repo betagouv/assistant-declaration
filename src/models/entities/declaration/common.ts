@@ -12,6 +12,7 @@ import {
 } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceInputSchema, PlaceSchema } from '@ad/src/models/entities/place';
+import { TicketingSystemSchema } from '@ad/src/models/entities/ticketing';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
 const declarationEventSerie = EventSerieSchema.pick({
@@ -196,6 +197,7 @@ export const DeclarationWrapperSchema = applyTypedParsers(
         }),
         events: DeclarationSchema.shape.events,
       }),
+      ticketingSystemName: TicketingSystemSchema.shape.name,
       // We provide some suggestions from past declarations to fill the current one
       placeholder: z.object({
         producer: z.array(

@@ -485,6 +485,7 @@ export const declarationRouter = router({
         updatedAt: true,
         ticketingSystem: {
           select: {
+            name: true,
             organization: {
               select: {
                 id: true,
@@ -673,6 +674,7 @@ export const declarationRouter = router({
             attachments: attachmentsWithTypes,
           },
         },
+        ticketingSystemName: eventSerie.ticketingSystem.name,
         placeholder: placeholder,
         transmissions: eventSerie.EventSerieDeclaration.map((eSD) => {
           return {

@@ -1536,6 +1536,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             watch={watch}
                             trigger={trigger}
                             placeholder={declarationWrapper.placeholder}
+                            eventSerieManuallyCreated={declarationWrapper.ticketingSystemName === 'MANUAL'}
                             errors={errors.events}
                             readonly={alreadyDeclared}
                           />

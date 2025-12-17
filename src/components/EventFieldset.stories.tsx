@@ -53,6 +53,7 @@ const Template: StoryFn<ComponentType> = (args) => {
         eventIndex={0}
         name={`events.0`}
         placeholder={declarationsWrappers[0].placeholder}
+        eventSerieManuallyCreated={args.eventSerieManuallyCreated ?? false}
         errors={undefined}
         readonly={false}
       />
@@ -71,3 +72,17 @@ NormalStory.play = async ({ canvasElement }) => {
 };
 
 export const Normal = prepareStory(NormalStory);
+
+const ManuallyCreatedStory = Template.bind({});
+ManuallyCreatedStory.args = {
+  eventSerieManuallyCreated: true,
+};
+ManuallyCreatedStory.parameters = {};
+ManuallyCreatedStory.play = async ({ canvasElement }) => {
+  await within(canvasElement).findByRole('heading', {
+    level: 2,
+    name: /séance/i,
+  });
+};
+
+export const ManuallyCreated = prepareStory(ManuallyCreatedStory);
