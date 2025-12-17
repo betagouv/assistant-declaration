@@ -73,10 +73,34 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
     <BaseForm handleSubmit={handleSubmit} onSubmit={onSubmit} control={control} ariaLabel="éditer un système de billetterie">
       <div className={fr.cx('fr-col-12')}>
         <fieldset className={fr.cx('fr-fieldset', 'fr-mb-0')}>
+          <div className={fr.cx('fr-fieldset__element')}>
+            <Alert
+              as="h2"
+              severity="info"
+              small={false}
+              title="Tutoriel de branchement"
+              description={
+                <>
+                  Pour retrouver ou récréer vos identifiants, nous vous recommandons de suivre{' '}
+                  <NextLink
+                    href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
+                    target="_blank"
+                    onClick={() => {
+                      push(['trackEvent', 'ticketing', 'openHowTo', 'system', getValues('ticketingSystemName')]);
+                    }}
+                    className={fr.cx('fr-link')}
+                  >
+                    notre tutoriel
+                  </NextLink>
+                  .
+                </>
+              }
+            />
+          </div>
           {displayApiAccessKey && (
             <div className={fr.cx('fr-fieldset__element')}>
               <Input
-                label="Identifiant utilisateur"
+                label="Identifiant de la clé d'accès"
                 state={!!errors.apiAccessKey ? 'error' : undefined}
                 stateRelatedMessage={errors?.apiAccessKey?.message}
                 nativeInputProps={{
@@ -120,30 +144,6 @@ export function UpdateTicketingSystemForm(props: UpdateTicketingSystemFormProps)
                   } as React.CSSProperties), // Have to cast since `WebkitTextSecurity` not recognized
                 },
               }}
-            />
-          </div>
-          <div className={fr.cx('fr-fieldset__element')}>
-            <Alert
-              as="h2"
-              severity="info"
-              small={false}
-              title="Tutoriel de branchement"
-              description={
-                <>
-                  Pour retrouver ou récréer vos identifiants, nous vous recommandons de suivre{' '}
-                  <NextLink
-                    href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
-                    target="_blank"
-                    onClick={() => {
-                      push(['trackEvent', 'ticketing', 'openHowTo', 'system', getValues('ticketingSystemName')]);
-                    }}
-                    className={fr.cx('fr-link')}
-                  >
-                    notre tutoriel
-                  </NextLink>
-                  .
-                </>
-              }
             />
           </div>
           <div className={fr.cx('fr-fieldset__element')}>

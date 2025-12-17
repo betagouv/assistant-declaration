@@ -22,7 +22,7 @@ import {
   ConnectTicketingSystemSchema,
   ConnectTicketingSystemSchemaType,
 } from '@ad/src/models/actions/ticketing';
-import { TicketingSystemNameSchema } from '@ad/src/models/entities/ticketing';
+import { RemoteTicketingSystemNameSchema } from '@ad/src/models/entities/ticketing';
 import { linkRegistry } from '@ad/src/utils/routes/registry';
 
 export interface ConnectTicketingSystemFormProps {
@@ -53,7 +53,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
     resolver: zodResolver(ConnectTicketingSystemSchema),
     defaultValues: {
       organizationId: '',
-      ticketingSystemName: TicketingSystemNameSchema.enum.BILLETWEB,
+      ticketingSystemName: undefined, // Like that the select won't have value that displays how-to information and the rest of the form
       apiAccessKey: '',
       apiSecretKey: '',
       ...props.prefill,
@@ -119,14 +119,14 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
         <fieldset className={fr.cx('fr-fieldset')}>
           <div className={fr.cx('fr-fieldset__element')}>
             <Select
-              label="Système de billetterie"
+              label="Logiciel de billetterie"
               state={!!errors.ticketingSystemName ? 'error' : undefined}
               stateRelatedMessage={errors?.ticketingSystemName?.message}
               nativeSelectProps={{
                 ...register('ticketingSystemName'),
               }}
               options={[
-                ...TicketingSystemNameSchema.options.map((ticketingSystemName) => {
+                ...RemoteTicketingSystemNameSchema.options.map((ticketingSystemName) => {
                   return {
                     label: t(`model.ticketingSystemName.enum.${ticketingSystemName}`),
                     value: ticketingSystemName,
@@ -139,99 +139,128 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
               ]}
             />
           </div>
-          {showOtherIndication ? (
-            <div className={fr.cx('fr-fieldset__element')}>
-              <Alert
-                severity="warning"
-                small={true}
-                description="Nous sommes désolés mais pour l'instant nous ne supportons pas d'autres sytèmes de billetterie. N'hésitez pas à contacter notre support pour que nous planifions l'implémentation du vôtre."
-              />
-            </div>
-          ) : (
+          {(watch('ticketingSystemName') as any) !== '' ? ( // Empty string will be set by the select (we used "undefined" to match the type)
             <>
-              {displayApiAccessKey && (
+              {showOtherIndication ? (
                 <div className={fr.cx('fr-fieldset__element')}>
-                  <Input
-                    label="Identifiant utilisateur"
-                    state={!!errors.apiAccessKey ? 'error' : undefined}
-                    stateRelatedMessage={errors?.apiAccessKey?.message}
-                    nativeInputProps={{
-                      ...register('apiAccessKey'),
-                      autoComplete: 'off',
-                    }}
+                  <Alert
+                    severity="warning"
+                    small={true}
+                    description="Nous sommes désolés mais pour l'instant nous ne supportons pas d'autres sytèmes de billetterie. N'hésitez pas à contacter notre support pour que nous planifions l'implémentation du vôtre."
                   />
+                  <NextLink
+                    href={linkRegistry.get('organization', { organizationId: props.prefill!.organizationId! })}
+                    className={fr.cx('fr-btn', 'fr-btn--secondary', 'fr-mt-8v')}
+                    style={{ float: 'right' }}
+                  >
+                    Continuer sans brancher votre logiciel
+                  </NextLink>
                 </div>
-              )}
-              <div className={fr.cx('fr-fieldset__element')}>
-                <Input
-                  label={
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                      <div>Clé d&apos;accès</div>
-                      <div style={{ marginLeft: 'auto' }}>
-                        <Checkbox
-                          options={[
-                            {
-                              label: 'Afficher',
-                              nativeInputProps: {
-                                checked: showApiSecretKey,
-                                onChange: handleApiSecretKeyDisplayToggle,
-                              },
-                            },
-                          ]}
-                          small
-                        />
-                      </div>
-                    </div>
-                  }
-                  state={!!errors.apiSecretKey ? 'error' : undefined}
-                  stateRelatedMessage={errors?.apiSecretKey?.message}
-                  nativeInputProps={{
-                    ...register('apiSecretKey'),
-                    autoComplete: 'off',
-                    style: {
-                      // When using `type="password"` Chrome was forcing autofilling password despite the `autocomplete="off"`, so using a text input with password style
-                      // Note: this webkit property is broadly adopted so it's fine, and in case it's not, we are fine it's not like a standard password (should be longer than input display...)
-                      ...({
-                        WebkitTextSecurity: showApiSecretKey ? 'none' : 'disc',
-                      } as React.CSSProperties), // Have to cast since `WebkitTextSecurity` not recognized
-                    },
-                  }}
-                />
-              </div>
-              <div className={fr.cx('fr-fieldset__element')}>
-                <Alert
-                  as="h2"
-                  severity="info"
-                  small={false}
-                  title="Tutoriel de branchement"
-                  description={
-                    <>
-                      Nous vous recommandons de suivre{' '}
-                      <NextLink
-                        href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
-                        target="_blank"
-                        onClick={() => {
-                          push(['trackEvent', 'ticketing', 'openHowTo', 'system', getValues('ticketingSystemName')]);
+              ) : (
+                <>
+                  <div className={fr.cx('fr-fieldset__element')}>
+                    <Alert
+                      as="h2"
+                      severity="info"
+                      small={false}
+                      title="Tutoriel de branchement"
+                      description={
+                        <>
+                          Nous vous recommandons de suivre{' '}
+                          <NextLink
+                            href={`https://atelier-numerique.notion.site/creer-une-cle-${watch('ticketingSystemName').toLowerCase()}`}
+                            target="_blank"
+                            onClick={() => {
+                              push(['trackEvent', 'ticketing', 'openHowTo', 'system', getValues('ticketingSystemName')]);
+                            }}
+                            className={fr.cx('fr-link')}
+                          >
+                            notre tutoriel pour bien configurer et récupérer les options de connexion
+                          </NextLink>{' '}
+                          à nous fournir.
+                        </>
+                      }
+                    />
+                  </div>
+                  {displayApiAccessKey && (
+                    <div className={fr.cx('fr-fieldset__element')}>
+                      <Input
+                        label="Identifiant de la clé d'accès"
+                        state={!!errors.apiAccessKey ? 'error' : undefined}
+                        stateRelatedMessage={errors?.apiAccessKey?.message}
+                        nativeInputProps={{
+                          ...register('apiAccessKey'),
+                          autoComplete: 'off',
                         }}
-                        className={fr.cx('fr-link')}
-                      >
-                        notre tutoriel pour bien configurer et récupérer les options de connexion
-                      </NextLink>{' '}
-                      à nous fournir.
-                    </>
-                  }
-                />
-              </div>
-              <div className={fr.cx('fr-fieldset__element')}>
-                <ul className={fr.cx('fr-btns-group')}>
-                  <li>
-                    <Button type="submit" loading={connectTicketingSystem.isPending}>
-                      Tester et connecter
-                    </Button>
-                  </li>
-                </ul>
-              </div>
+                      />
+                    </div>
+                  )}
+                  <div className={fr.cx('fr-fieldset__element')}>
+                    <Input
+                      label={
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                          <div>Clé d&apos;accès</div>
+                          <div style={{ marginLeft: 'auto' }}>
+                            <Checkbox
+                              options={[
+                                {
+                                  label: 'Afficher',
+                                  nativeInputProps: {
+                                    checked: showApiSecretKey,
+                                    onChange: handleApiSecretKeyDisplayToggle,
+                                  },
+                                },
+                              ]}
+                              small
+                            />
+                          </div>
+                        </div>
+                      }
+                      state={!!errors.apiSecretKey ? 'error' : undefined}
+                      stateRelatedMessage={errors?.apiSecretKey?.message}
+                      nativeInputProps={{
+                        ...register('apiSecretKey'),
+                        autoComplete: 'off',
+                        style: {
+                          // When using `type="password"` Chrome was forcing autofilling password despite the `autocomplete="off"`, so using a text input with password style
+                          // Note: this webkit property is broadly adopted so it's fine, and in case it's not, we are fine it's not like a standard password (should be longer than input display...)
+                          ...({
+                            WebkitTextSecurity: showApiSecretKey ? 'none' : 'disc',
+                          } as React.CSSProperties), // Have to cast since `WebkitTextSecurity` not recognized
+                        },
+                      }}
+                    />
+                  </div>
+                  <div className={fr.cx('fr-fieldset__element')}>
+                    <ul className={fr.cx('fr-btns-group')}>
+                      <li>
+                        <Button type="submit" loading={connectTicketingSystem.isPending}>
+                          Tester et connecter
+                        </Button>
+                      </li>
+                      <li>
+                        <NextLink
+                          href={linkRegistry.get('organization', { organizationId: props.prefill!.organizationId! })}
+                          className={fr.cx('fr-btn', 'fr-btn--secondary')}
+                        >
+                          Continuer sans brancher votre logiciel
+                        </NextLink>
+                      </li>
+                    </ul>
+                  </div>
+                </>
+              )}
             </>
+          ) : (
+            <div className={fr.cx('fr-fieldset__element')}>
+              <NextLink
+                href={linkRegistry.get('organization', { organizationId: props.prefill!.organizationId! })}
+                className={fr.cx('fr-btn', 'fr-btn--secondary', 'fr-mt-8v')}
+                style={{ float: 'right' }}
+              >
+                Continuer sans brancher votre logiciel
+              </NextLink>
+            </div>
           )}
         </fieldset>
       </div>

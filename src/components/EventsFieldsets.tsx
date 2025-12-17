@@ -18,11 +18,22 @@ export interface EventsFieldsetsProps {
   watch: UseFormWatch<FillDeclarationSchemaInputType>;
   trigger: UseFormTrigger<FillDeclarationSchemaInputType>;
   placeholder: DeclarationWrapperSchemaType['placeholder'];
+  eventSerieManuallyCreated: boolean;
   errors: FieldErrors<FillDeclarationSchemaInputType>['events'];
   readonly?: boolean;
 }
 
-export function EventsFieldsets({ control, register, setValue, watch, trigger, placeholder, errors, readonly }: EventsFieldsetsProps) {
+export function EventsFieldsets({
+  control,
+  register,
+  setValue,
+  watch,
+  trigger,
+  placeholder,
+  eventSerieManuallyCreated,
+  errors,
+  readonly,
+}: EventsFieldsetsProps) {
   const { fields, append, update, remove } = useFieldArray({
     control,
     name: 'events',
@@ -62,6 +73,7 @@ export function EventsFieldsets({ control, register, setValue, watch, trigger, p
                     eventIndex={eventWithErrorLogic.index}
                     name={`events.${eventWithErrorLogic.index}`}
                     placeholder={placeholder}
+                    eventSerieManuallyCreated={eventSerieManuallyCreated}
                     errors={eventWithErrorLogic.errors}
                     readonly={readonly}
                   />

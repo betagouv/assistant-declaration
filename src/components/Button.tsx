@@ -15,7 +15,7 @@ export function Button({ children, loading, disabled, ...props }: ButtonProps) {
   return (
     <DsfrButton
       {...props}
-      className={styles.button}
+      className={`${props.className ?? ''} ${styles.button}`}
       disabled={virtualDisabled as any} // Due to complex union types disabled may not be usable some times so just casting for the ease
     >
       <RiLoader4Fill size={24} className={`${styles.spinner} ${loading ? styles.loading : ''}`} />

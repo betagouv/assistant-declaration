@@ -1524,7 +1524,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                           </div>
                         </div>
                       </fieldset>
-                      <fieldset className={fr.cx('fr-fieldset')}>
+                      <fieldset className={cx(fr.cx('fr-fieldset'), styles.fixedFieldset)}>
                         <div className={fr.cx('fr-col-12')}>
                           <div className={fr.cx('fr-fieldset__element')}>
                             <hr className={cx(fr.cx('fr-my-3v'), styles.hr)} />
@@ -1536,6 +1536,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             watch={watch}
                             trigger={trigger}
                             placeholder={declarationWrapper.placeholder}
+                            eventSerieManuallyCreated={declarationWrapper.ticketingSystemName === 'MANUAL'}
                             errors={errors.events}
                             readonly={alreadyDeclared}
                           />

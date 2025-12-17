@@ -36,6 +36,7 @@
       "cannotMutateTicketingDataOnceDeclared": "les données de billetterie ne sont plus modifiables une fois qu'une télédéclaration a été effectuée pour ce spectacle",
       "collaboratorCanOnlySeeOrganizationEventsSeries": "en tant que collaborateur vous ne pouvez que lister les spectacles concernant votre organisation",
       "collaboratorCanOnlySeeOrganizationTicketingSystems": "en tant que collaborateur vous ne pouvez que lister les systèmes de billetterie de votre organisation",
+      "eventEndDateMustBeAfterStartDate": "la date de fin doit être postérieure à la date de début de représentation",
       "eventSerieNotFound": "ce spectacle n'existe pas",
       "eventSeriePartialExpensesGreatherThanTotal": "le total des dépenses doit être supérieur aux frais renseignés",
       "expiredVerificationToken": "vous avez dépassé le temps imparti, merci de renouveler votre demande",
@@ -104,7 +105,7 @@
         }
       },
       "apiAccessKey": {
-        "too_small_one": "l'identifiant utilisateur est requis"
+        "too_small_one": "l'identifiant de la clé d'accès est requis"
       },
       "apiSecretKey": {
         "too_small_one": "la clé d'accès est requise"
@@ -176,6 +177,7 @@
         "ticketingRevenueTaxRateOverride": {
           "too_small": "le taux de TVA doit être supérieur à {{minimum}}%"
         },
+        "too_small": "il doit y avoir {{minimum}} représentation(s) au minimum",
         "too_big": "il ne peut y avoir que {{maximum}} représentations au maximum"
       },
       "eventSerie": {
@@ -416,6 +418,7 @@
       "enum": {
         "BILLETWEB": "Billetweb",
         "HELLOASSO": "HelloAsso",
+        "MANUAL": "Billetterie dans notre plateforme",
         "MAPADO": "Mapado",
         "SHOTGUN": "Shotgun",
         "SOTICKET": "SoTicket",

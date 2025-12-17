@@ -3,9 +3,11 @@ import { HttpResponse, http } from 'msw';
 import { mockDateDecorator } from 'storybook-mock-date-decorator';
 
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
-import { playFindAlert, playFindButton, playFindLink } from '@ad/.storybook/testing';
+import { playFindButton, playFindLink } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
+import { Empty as AddEventSerieFormEmptyStory } from '@ad/src/app/(private)/dashboard/organization/AddEventSerieForm.stories';
 import { OrganizationPage } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/OrganizationPage';
+import { OrganizationPageContext } from '@ad/src/app/(private)/dashboard/organization/[organizationId]/OrganizationPageContext';
 import { eventsSeriesWrappers } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
 import { ticketingSystems } from '@ad/src/fixtures/ticketing';
@@ -82,7 +84,14 @@ NormalStory.play = async ({ canvasElement }) => {
   await playFindButton(canvasElement, /synchroniser/i);
 };
 
-export const Normal = prepareStory(NormalStory);
+export const Normal = prepareStory(NormalStory, {
+  childrenContext: {
+    context: OrganizationPageContext,
+    value: {
+      ContextualAddEventSerieForm: AddEventSerieFormEmptyStory,
+    },
+  },
+});
 
 const DesynchronizedStory = Template.bind({});
 DesynchronizedStory.args = {
@@ -115,7 +124,14 @@ DesynchronizedStory.play = async ({ canvasElement }) => {
   await playFindButton(canvasElement, /synchroniser/i);
 };
 
-export const Desynchronized = prepareStory(DesynchronizedStory);
+export const Desynchronized = prepareStory(DesynchronizedStory, {
+  childrenContext: {
+    context: OrganizationPageContext,
+    value: {
+      ContextualAddEventSerieForm: AddEventSerieFormEmptyStory,
+    },
+  },
+});
 
 const NeverSynchronizedStory = Template.bind({});
 NeverSynchronizedStory.args = {
@@ -153,7 +169,14 @@ NeverSynchronizedStory.play = async ({ canvasElement }) => {
   await playFindButton(canvasElement, /synchroniser/i);
 };
 
-export const NeverSynchronized = prepareStory(NeverSynchronizedStory);
+export const NeverSynchronized = prepareStory(NeverSynchronizedStory, {
+  childrenContext: {
+    context: OrganizationPageContext,
+    value: {
+      ContextualAddEventSerieForm: AddEventSerieFormEmptyStory,
+    },
+  },
+});
 
 const NoTicketingSystemStory = Template.bind({});
 NoTicketingSystemStory.args = {
@@ -186,7 +209,14 @@ NoTicketingSystemStory.play = async ({ canvasElement }) => {
   await playFindLink(canvasElement, /connecter/i);
 };
 
-export const NoTicketingSystem = prepareStory(NoTicketingSystemStory);
+export const NoTicketingSystem = prepareStory(NoTicketingSystemStory, {
+  childrenContext: {
+    context: OrganizationPageContext,
+    value: {
+      ContextualAddEventSerieForm: AddEventSerieFormEmptyStory,
+    },
+  },
+});
 
 const NoEventSerieStory = Template.bind({});
 NoEventSerieStory.args = {
@@ -219,7 +249,14 @@ NoEventSerieStory.play = async ({ canvasElement }) => {
   await playFindButton(canvasElement, /synchroniser/i);
 };
 
-export const NoEventSerie = prepareStory(NoEventSerieStory);
+export const NoEventSerie = prepareStory(NoEventSerieStory, {
+  childrenContext: {
+    context: OrganizationPageContext,
+    value: {
+      ContextualAddEventSerieForm: AddEventSerieFormEmptyStory,
+    },
+  },
+});
 
 const WithLayoutStory = Template.bind({});
 WithLayoutStory.args = {
@@ -236,4 +273,10 @@ WithLayoutStory.play = async ({ canvasElement }) => {
 
 export const WithLayout = prepareStory(WithLayoutStory, {
   layoutStory: PrivateLayoutAsCollaboratorStory,
+  childrenContext: {
+    context: OrganizationPageContext,
+    value: {
+      ContextualAddEventSerieForm: AddEventSerieFormEmptyStory,
+    },
+  },
 });

@@ -3,6 +3,7 @@ import { uiAttachments } from '@ad/src/fixtures/attachment';
 import { events, eventsSeries } from '@ad/src/fixtures/event';
 import { organizations } from '@ad/src/fixtures/organization';
 import { places } from '@ad/src/fixtures/place';
+import { ticketingSystems } from '@ad/src/fixtures/ticketing';
 import { DeclarationAttachmentTypeSchema, DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import {
   DeclarationSchema,
@@ -146,6 +147,7 @@ export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
         ],
       },
     },
+    ticketingSystemName: ticketingSystems[0].name,
     placeholder: {
       producer: [
         {
@@ -181,6 +183,7 @@ export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
         ],
       },
     },
+    ticketingSystemName: ticketingSystems[1].name,
     placeholder: {
       producer: [
         {
@@ -201,6 +204,7 @@ export const declarationsWrappers: DeclarationWrapperSchemaType[] = [
         attachments: [],
       },
     },
+    ticketingSystemName: ticketingSystems[2].name,
     placeholder: {
       producer: [
         {

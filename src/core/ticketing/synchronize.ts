@@ -25,7 +25,7 @@ const LiteEventSerieManagingDefaultsSchema = applyTypedParsers(
 );
 export type LiteEventSerieManagingDefaultsSchemaType = z.infer<typeof LiteEventSerieManagingDefaultsSchema>;
 
-const defaultConnectorEventSerieTaxRate = 0.055;
+export const defaultConnectorEventSerieTaxRate = 0.055;
 
 export async function synchronizeDataFromTicketingSystems(organizationId: string, userId: string): Promise<void> {
   await assertUserACollaboratorPartOfOrganization(organizationId, userId);
@@ -35,6 +35,9 @@ export async function synchronizeDataFromTicketingSystems(organizationId: string
   const ticketingSystems = await prisma.ticketingSystem.findMany({
     where: {
       organizationId: organizationId,
+      name: {
+        not: 'MANUAL', // Synchronization does not apply to the manual ticketing system
+      },
       deletedAt: null,
     },
     select: {

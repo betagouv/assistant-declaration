@@ -2,7 +2,7 @@
 
 A french national platform helping live performance entrepreneurs leverage their ticketing software to pre-fill administrative declarations.
 
-- The project is available onto: https://assistant-declaration.incubateur.net _(#production)_
+- The project is available at: https://assistant-declaration.beta.gouv.fr _(#production)_
 - The "test environment" with meaningless data is on: https://assistant-declaration.incubateur.net _(#development)_
 
 All the states of the application are described visually on a Storybook. It renders fake data but allows you to discover the project without dealing with real flows: https://main--674df2a3f4d9c5810580efa2.chromatic.com/
@@ -192,7 +192,7 @@ Just enable with the SQL query `CREATE extension ${EXTENSION};` the following ex
 
 ##### Tooling
 
-We advie you to use DBeaver (RDBMS-agnostic) as a software to supervize and monitor you application.
+We advise you to use DBeaver (RDBMS-agnostic) as a software to supervize and monitor you application.
 
 #### Environment variables
 
@@ -375,7 +375,7 @@ On the other side if you are looking for investigating a built image, Scalingo p
 We use 2 providers to send emails:
 
 - the main one (Scaleway)
-- the fallback one (Brevo) in case the main one is not reachable it keeps our delivary reactive
+- the fallback one (Brevo) in case the main one is not reachable it keeps our delivery reactive
 
 Sending verified emails must be taken seriously so they don't end into the spam inbox. Keeping a good reputation by sending necessary content so users don't flag you as spam.
 
@@ -522,7 +522,7 @@ Except the case of replaying queueing jobs once they fail because they may be ar
 
 ### IDE
 
-Since the most used IDE as of today is Visual Studio Code we decided to go we it. Using it as well will make you benefit from all the settings we set for this project.
+Since the most used IDE as of today is Visual Studio Code we decided to go with it. Using it as well will make you benefit from all the settings we set for this project.
 
 #### Manual steps
 

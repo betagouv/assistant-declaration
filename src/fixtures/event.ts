@@ -13,6 +13,7 @@ import {
   EventWrapperSchemaType,
   PerformanceTypeSchema,
 } from '@ad/src/models/entities/event';
+import { TicketingSystemNameSchema } from '@ad/src/models/entities/ticketing';
 
 export const eventsSeries: EventSerieSchemaType[] = [
   EventSerieSchema.parse({
@@ -227,6 +228,11 @@ export const eventsSeriesWrappers: EventSerieWrapperSchemaType[] = [
         transmittedAt: null,
       },
     ],
+    partialEvents: [
+      { id: events[0].id, startAt: events[0].startAt, endAt: events[0].endAt },
+      { id: events[1].id, startAt: events[1].startAt, endAt: events[1].endAt },
+    ],
+    ticketingSystemName: TicketingSystemNameSchema.enum.BILLETWEB,
   }),
   EventSerieWrapperSchema.parse({
     serie: eventsSeries[1],
@@ -234,6 +240,11 @@ export const eventsSeriesWrappers: EventSerieWrapperSchemaType[] = [
     computedEndAt: new Date('December 1, 2024 12:00:00 UTC'),
     place: places[1],
     partialDeclarations: [],
+    partialEvents: [
+      { id: events[1].id, startAt: events[1].startAt, endAt: events[1].endAt },
+      { id: events[2].id, startAt: events[2].startAt, endAt: events[2].endAt },
+    ],
+    ticketingSystemName: TicketingSystemNameSchema.enum.MAPADO,
   }),
   EventSerieWrapperSchema.parse({
     serie: eventsSeries[2],
@@ -247,5 +258,7 @@ export const eventsSeriesWrappers: EventSerieWrapperSchemaType[] = [
         transmittedAt: new Date('December 31, 2024 10:00:00 UTC'),
       },
     ],
+    partialEvents: [{ id: events[1].id, startAt: events[1].startAt, endAt: events[1].endAt }],
+    ticketingSystemName: TicketingSystemNameSchema.enum.MANUAL,
   }),
 ];

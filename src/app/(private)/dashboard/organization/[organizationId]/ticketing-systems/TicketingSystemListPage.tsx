@@ -4,7 +4,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { cx } from '@codegouvfr/react-dsfr/tools/cx';
 import { push } from '@socialgouv/matomo-next';
 import NextLink from 'next/link';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { trpc } from '@ad/src/client/trpcClient';
 import { ErrorAlert } from '@ad/src/components/ErrorAlert';
@@ -40,7 +40,10 @@ export function TicketingSystemListPage({ params: { organizationId } }: Ticketin
 
   const aggregatedQueries = new AggregatedQueries(listTicketingSystems);
 
-  const ticketingSystems = listTicketingSystems.data?.ticketingSystems || [];
+  const ticketingSystems = useMemo(() => {
+    // We do not list the manual ticketing system since it's implicit in the UI
+    return (listTicketingSystems.data?.ticketingSystems || []).filter((ticketingSystem) => ticketingSystem.name !== 'MANUAL');
+  }, [listTicketingSystems.data]);
 
   if (aggregatedQueries.hasError) {
     return (

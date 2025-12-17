@@ -10,6 +10,7 @@ import {
 } from '@ad/src/models/entities/errors';
 import { customErrorToZodIssue } from '@ad/src/models/entities/errors/helpers';
 import { PlaceSchema } from '@ad/src/models/entities/place';
+import { TicketingSystemSchema } from '@ad/src/models/entities/ticketing';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
 export const AudienceSchema = z.enum(['ALL', 'YOUNG', 'SCHOOL']);
@@ -196,27 +197,6 @@ export const EventSerieSchema = applyTypedParsers(
 );
 export type EventSerieSchemaType = z.infer<typeof EventSerieSchema>;
 
-export const EventSerieWrapperSchema = applyTypedParsers(
-  z
-    .object({
-      serie: EventSerieSchema,
-      computedStartAt: z.date(),
-      computedEndAt: z.date(),
-      place: PlaceSchema.nullable(),
-      partialDeclarations: z.array(
-        // This is partial declarations just to adjust the UI
-        z.object({
-          type: DeclarationTypeSchema,
-          status: DeclarationStatusSchema,
-          // transmittedAt: DeclarationSchema.shape.transmittedAt,
-          transmittedAt: z.unknown(),
-        })
-      ),
-    })
-    .strict()
-);
-export type EventSerieWrapperSchemaType = z.infer<typeof EventSerieWrapperSchema>;
-
 export const StricterEventSchema = z.object({
   id: z.uuid(),
   internalTicketingSystemId: z.string().min(1),
@@ -279,6 +259,36 @@ export const EventWrapperSchema = applyTypedParsers(
     .strict()
 );
 export type EventWrapperSchemaType = z.infer<typeof EventWrapperSchema>;
+
+export const EventSerieWrapperSchema = applyTypedParsers(
+  z
+    .object({
+      serie: EventSerieSchema,
+      computedStartAt: z.date(),
+      computedEndAt: z.date(),
+      place: PlaceSchema.nullable(),
+      partialDeclarations: z.array(
+        // This is partial declarations just to adjust the UI
+        z.object({
+          type: DeclarationTypeSchema,
+          status: DeclarationStatusSchema,
+          // transmittedAt: DeclarationSchema.shape.transmittedAt,
+          transmittedAt: z.unknown(),
+        })
+      ),
+      partialEvents: z.array(
+        // This is partial events to allow editing main info from them
+        z.object({
+          id: EventSchema.shape.id,
+          startAt: EventSchema.shape.startAt,
+          endAt: EventSchema.shape.endAt,
+        })
+      ),
+      ticketingSystemName: TicketingSystemSchema.shape.name,
+    })
+    .strict()
+);
+export type EventSerieWrapperSchemaType = z.infer<typeof EventSerieWrapperSchema>;
 
 export const LiteEventSerieSchema = applyTypedParsers(
   z

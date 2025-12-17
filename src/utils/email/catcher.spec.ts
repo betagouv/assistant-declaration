@@ -35,12 +35,11 @@ describe('email', () => {
   describe('send', () => {
     it('SignUpConfirmation', async () => {
       await expect(
-        Promise.resolve()
-        // mailer.sendSignUpConfirmation({
-        //   recipient: 'albert@mail.com',
-        //   firstname: 'Albert',
-        //   signInUrl: 'http://localhost:8080/#',
-        // })
+        mailer.sendSignUpConfirmation({
+          recipient: 'albert@mail.com',
+          firstname: 'Albert',
+          confirmationUrl: 'http://localhost:8080/#',
+        })
       ).resolves.not.toThrow();
     });
   });
@@ -60,12 +59,11 @@ describe('email', () => {
       });
 
       await expect(
-        Promise.resolve()
-        // mailer.sendSignUpConfirmation({
-        //   recipient: 'alice@domain.demo',
-        //   firstname: 'Albert',
-        //   signInUrl: 'http://localhost:8080/#',
-        // })
+        mailer.sendSignUpConfirmation({
+          recipient: 'alice@domain.demo',
+          firstname: 'Albert',
+          confirmationUrl: 'http://localhost:8080/#',
+        })
       ).resolves.not.toThrow();
     });
   });
