@@ -49,6 +49,8 @@ export const DeclarationSchema = applyTypedParsers(
         officialHeadquartersId: true,
         sacemId: true,
         sacdId: true,
+        sibilUsername: true,
+        sibilPassword: true,
       }).extend({
         headquartersAddress: AddressSchema,
       }),

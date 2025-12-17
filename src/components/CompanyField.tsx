@@ -7,9 +7,8 @@ import debounce from 'lodash.debounce';
 import { FocusEventHandler, PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { CompanySuggestion } from '@ad/src/client/api-gouv-fr';
-import { officialIdMask } from '@ad/src/components/OfficialIdField';
 import { searchCompanySuggestions } from '@ad/src/proxies/api-gouv-fr';
-import { formatMaskedValue } from '@ad/src/utils/imask';
+import { formatMaskedValue, officialIdMask } from '@ad/src/utils/imask';
 
 export interface Company {
   officialId: string;

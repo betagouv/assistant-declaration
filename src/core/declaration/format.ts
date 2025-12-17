@@ -1,6 +1,7 @@
 import { getTaxAmountFromIncludingAndExcludingTaxesAmounts } from '@ad/src/core/declaration';
 import { FlattenSacdEventSchemaType, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { FlattenSacemEventSchemaType, SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
+import { FlattenSibilEventSchemaType, SibilDeclarationSchemaType } from '@ad/src/models/entities/declaration/sibil';
 import { EventSchemaType } from '@ad/src/models/entities/event';
 
 export function getFlattenEventsForSacemDeclaration(declaration: SacemDeclarationSchemaType): FlattenSacemEventSchemaType[] {
@@ -38,6 +39,27 @@ export function getFlattenEventsForSacemDeclaration(declaration: SacemDeclaratio
 
 export function getFlattenEventsForSacdDeclaration(declaration: SacdDeclarationSchemaType): FlattenSacdEventSchemaType[] {
   const flattenEvents: FlattenSacdEventSchemaType[] = [];
+
+  for (const originalEvent of declaration.events) {
+    flattenEvents.push({
+      id: originalEvent.id,
+      startAt: originalEvent.startAt,
+      endAt: originalEvent.endAt,
+      ticketingRevenueIncludingTaxes: originalEvent.ticketingRevenueIncludingTaxes,
+      ticketingRevenueExcludingTaxes: originalEvent.ticketingRevenueExcludingTaxes,
+      freeTickets: originalEvent.freeTickets,
+      paidTickets: originalEvent.paidTickets,
+      place: originalEvent.placeOverride ?? declaration.eventSerie.place,
+      placeCapacity: originalEvent.placeCapacityOverride ?? declaration.eventSerie.placeCapacity,
+      audience: originalEvent.audienceOverride ?? declaration.eventSerie.audience,
+    });
+  }
+
+  return flattenEvents;
+}
+
+export function getFlattenEventsForSibilDeclaration(declaration: SibilDeclarationSchemaType): FlattenSibilEventSchemaType[] {
+  const flattenEvents: FlattenSibilEventSchemaType[] = [];
 
   for (const originalEvent of declaration.events) {
     flattenEvents.push({

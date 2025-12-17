@@ -7,6 +7,7 @@ import { z } from 'zod';
 
 import { SacemDeclarationDocument } from '@ad/src/components/documents/templates/SacemDeclaration';
 import { getSacdClient } from '@ad/src/core/declaration/sacd';
+import { getSibilClient } from '@ad/src/core/declaration/sibil';
 import { Attachment as EmailAttachment, mailer } from '@ad/src/emails/mailer';
 import {
   FillDeclarationSchema,
@@ -19,6 +20,7 @@ import { DeclarationTypeSchemaType } from '@ad/src/models/entities/common';
 import { DeclarationInputSchema, DeclarationSchema, DeclarationWrapperSchemaType } from '@ad/src/models/entities/declaration/common';
 import { SacdDeclarationSchema, SacdDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacd';
 import { SacemDeclarationSchema, SacemDeclarationSchemaType } from '@ad/src/models/entities/declaration/sacem';
+import { SibilDeclarationSchema, SibilDeclarationSchemaType } from '@ad/src/models/entities/declaration/sibil';
 import {
   BusinessError,
   BusinessZodError,
@@ -85,6 +87,8 @@ export const declarationRouter = router({
                 headquartersAddressId: true,
                 sacemId: true,
                 sacdId: true,
+                sibilUsername: true,
+                sibilPassword: true,
                 createdAt: true,
                 updatedAt: true,
                 headquartersAddress: true,
@@ -177,8 +181,10 @@ export const declarationRouter = router({
     // Then ensure it's correctly fulfilled for each declaration type not sent yet, and associated with
     let sacemDeclaration: SacemDeclarationSchemaType | null = null;
     let sacdDeclaration: SacdDeclarationSchemaType | null = null;
+    let sibilDeclaration: SibilDeclarationSchemaType | null = null;
 
-    const declarationsToDeclare: [DeclarationTypeSchemaType, SacemDeclarationSchemaType | SacdDeclarationSchemaType][] = [];
+    const declarationsToDeclare: [DeclarationTypeSchemaType, SacemDeclarationSchemaType | SacdDeclarationSchemaType | SibilDeclarationSchemaType][] =
+      [];
 
     if (agnosticDeclaration.eventSerie.expectedDeclarationTypes.length === 0) {
       throw atLeastOneDeclarationTypeToTransmitError;
@@ -213,8 +219,21 @@ export const declarationRouter = router({
           } else {
             sacdDeclaration = sacdDeclarationParsing.data;
 
-            // Doing SACD declaration first because it's more likely to fail than sending the email as for Sacem
+            // Doing SACD declaration in the first ones because it's more likely to fail than sending the email as for Sacem
             declarationsToDeclare.unshift([declarationType, sacdDeclaration]);
+          }
+
+          break;
+        case 'SIBIL':
+          const sibilDeclarationParsing = SibilDeclarationSchema.safeParse(agnosticDeclaration);
+
+          if (!sibilDeclarationParsing.success) {
+            validationIssues.push(...sibilDeclarationParsing.error.issues);
+          } else {
+            sibilDeclaration = sibilDeclarationParsing.data;
+
+            // Doing SIBIL declaration in the first ones because it's more likely to fail than sending the email as for Sacem
+            declarationsToDeclare.unshift([declarationType, sibilDeclaration]);
           }
 
           break;
@@ -398,6 +417,12 @@ export const declarationRouter = router({
               throw sacdAttachmentsDeclarationUnsuccessfulError;
             }
           }
+        } else if (declarationToDeclare === sibilDeclaration) {
+          const sibilClient = getSibilClient(ctx.user.id, sibilDeclaration.organization.sibilUsername, sibilDeclaration.organization.sibilPassword);
+
+          await sibilClient.login();
+
+          await sibilClient.declare(sibilDeclaration);
         }
 
         // If successful mark the declaration as transmitted
@@ -495,6 +520,8 @@ export const declarationRouter = router({
                 headquartersAddressId: true,
                 sacemId: true,
                 sacdId: true,
+                sibilUsername: true,
+                sibilPassword: true,
                 createdAt: true,
                 updatedAt: true,
                 headquartersAddress: true,
@@ -708,6 +735,8 @@ export const declarationRouter = router({
                     officialHeadquartersId: true,
                     sacemId: true,
                     sacdId: true,
+                    sibilUsername: true,
+                    sibilPassword: true,
                     headquartersAddress: {
                       select: {
                         id: true,
@@ -779,6 +808,8 @@ export const declarationRouter = router({
             headquartersAddress: eventSerie.ticketingSystem.organization.headquartersAddress,
             sacemId: input.organization.sacemId ?? eventSerie.ticketingSystem.organization.sacemId,
             sacdId: input.organization.sacdId ?? eventSerie.ticketingSystem.organization.sacdId,
+            sibilUsername: input.organization.sibil?.username ?? eventSerie.ticketingSystem.organization.sibilUsername,
+            sibilPassword: input.organization.sibil?.password ?? eventSerie.ticketingSystem.organization.sibilPassword,
           },
           eventSerie: {
             id: eventSerie.id,
@@ -1156,7 +1187,12 @@ export const declarationRouter = router({
         }
 
         // Only update organization if properties have been set
-        if (agnosticDeclaration.organization.sacemId || agnosticDeclaration.organization.sacdId) {
+        if (
+          agnosticDeclaration.organization.sacemId ||
+          agnosticDeclaration.organization.sacdId ||
+          agnosticDeclaration.organization.sibilUsername ||
+          agnosticDeclaration.organization.sibilPassword
+        ) {
           await tx.organization.update({
             where: {
               id: eventSerie.ticketingSystem.organization.id,
@@ -1164,6 +1200,9 @@ export const declarationRouter = router({
             data: {
               sacemId: agnosticDeclaration.organization.sacemId ?? undefined,
               sacdId: agnosticDeclaration.organization.sacdId ?? undefined,
+              // SIBIL values go by pair due to how is formatted the input object
+              sibilUsername: agnosticDeclaration.organization.sibilUsername ?? undefined,
+              sibilPassword: agnosticDeclaration.organization.sibilPassword ?? undefined,
             },
           });
         }
@@ -1227,6 +1266,8 @@ export const declarationRouter = router({
                     headquartersAddressId: true,
                     sacemId: true,
                     sacdId: true,
+                    sibilUsername: true,
+                    sibilPassword: true,
                     createdAt: true,
                     updatedAt: true,
                     headquartersAddress: true,

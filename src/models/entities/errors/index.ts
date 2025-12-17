@@ -267,3 +267,4 @@ export const sacdDeclarationIncorrectDeclarantError = new BusinessError(
   t('errors.custom.sacdDeclarationIncorrectDeclarant')
 );
 export const sacdDeclarationUnsuccessfulError = new BusinessError('sacdDeclarationUnsuccessful', t('errors.custom.sacdDeclarationUnsuccessful'));
+export const sibilWrongCredentialsError = new BusinessError('sibilWrongCredentials', t('errors.custom.sibilWrongCredentials'));

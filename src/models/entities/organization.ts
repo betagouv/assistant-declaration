@@ -25,6 +25,8 @@ export const StricterOrganizationSchema = z.object({
   headquartersAddressId: z.uuid(),
   sacemId: SacemIdSchema,
   sacdId: SacdIdSchema,
+  sibilUsername: z.string().min(1),
+  sibilPassword: z.string().min(1),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -33,6 +35,8 @@ export const OrganizationSchema = applyTypedParsers(
   StricterOrganizationSchema.extend({
     sacemId: StricterOrganizationSchema.shape.sacemId.nullable(),
     sacdId: StricterOrganizationSchema.shape.sacdId.nullable(),
+    sibilUsername: StricterOrganizationSchema.shape.sibilUsername.nullable(),
+    sibilPassword: StricterOrganizationSchema.shape.sibilPassword.nullable(),
   }).strict()
 );
 export type OrganizationSchemaType = z.infer<typeof OrganizationSchema>;

@@ -45,6 +45,8 @@ export function organizationPrismaToModel(organization: Organization): Organizat
     name: organization.name,
     sacemId: organization.sacemId,
     sacdId: organization.sacdId,
+    sibilUsername: organization.sibilUsername,
+    sibilPassword: organization.sibilPassword,
     createdAt: organization.createdAt,
     updatedAt: organization.updatedAt,
   };

@@ -133,6 +133,8 @@ model Organization {
   headquartersAddressId  String  @unique @db.Uuid
   sacemId                String? @unique
   sacdId                 String? @unique
+  sibilUsername          String? @unique
+  sibilPassword          String? @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -226,6 +228,7 @@ enum PerformanceType {
 enum DeclarationType {
   SACEM
   SACD
+  SIBIL
 }
 
 model EventSerie {

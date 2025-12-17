@@ -34,6 +34,8 @@ export const declarations: DeclarationSchemaType[] = [
       headquartersAddress: addresses[0],
       sacemId: organizations[0].sacemId,
       sacdId: organizations[0].sacdId,
+      sibilUsername: organizations[0].sacemId,
+      sibilPassword: organizations[0].sacdId,
     },
     eventSerie: {
       id: eventsSeries[0].id,
@@ -68,6 +70,8 @@ export const declarations: DeclarationSchemaType[] = [
       headquartersAddress: addresses[1],
       sacemId: organizations[1].sacemId,
       sacdId: organizations[1].sacdId,
+      sibilUsername: organizations[1].sacemId,
+      sibilPassword: organizations[1].sacdId,
     },
     eventSerie: {
       id: eventsSeries[1].id,
@@ -102,6 +106,8 @@ export const declarations: DeclarationSchemaType[] = [
       headquartersAddress: addresses[2],
       sacemId: organizations[2].sacemId,
       sacdId: organizations[2].sacdId,
+      sibilUsername: organizations[2].sacemId,
+      sibilPassword: organizations[2].sacdId,
     },
     eventSerie: {
       id: eventsSeries[2].id,

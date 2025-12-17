@@ -9,7 +9,7 @@ import {
   assertAmountsRespectTaxLogic,
   assertValidExpenses,
 } from '@ad/src/models/entities/event';
-import { OrganizationSchema } from '@ad/src/models/entities/organization';
+import { OrganizationSchema, StricterOrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceInputSchema } from '@ad/src/models/entities/place';
 
 export const TransmitDeclarationSchema = z
@@ -36,6 +36,13 @@ export const FillDeclarationSchema = z
     organization: OrganizationSchema.pick({
       sacemId: true,
       sacdId: true,
+    }).extend({
+      sibil: z
+        .object({
+          username: StricterOrganizationSchema.shape.sibilUsername,
+          password: StricterOrganizationSchema.shape.sibilPassword,
+        })
+        .nullable(),
     }),
     eventSerie: EventSerieSchema.pick({
       performanceType: true,

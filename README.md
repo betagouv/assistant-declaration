@@ -232,6 +232,7 @@ For each build and runtime (since they are shared), you should have set some env
 - `SACD_API_PROVIDER_NAME`: [SECRET]
 - `SACD_API_PROVIDER_REFFILE`: [SECRET]
 - `SACD_API_PROVIDER_PASSWORD`: [SECRET]
+- `SIBIL_API_BASE_URL`: [SECRET]
 - `DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS`: [TO_DEFINE] _(environments that are not production will by default mock remote ticketing system calls. For testing purpose you can provide a comma separated UUID list of users who need to perform real tests)_
 
 #### Review apps

@@ -1,17 +1,9 @@
 import { Input } from '@codegouvfr/react-dsfr/Input';
-import { FactoryOpts } from 'imask';
 import { Ref, useEffect } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 import { useIMask } from 'react-imask';
 
-// Can be used directly with `xxx.format(value)`
-export const sacemIdMask: FactoryOpts = {
-  mask: '0000000000',
-  definitions: {
-    '0': /[0-9]/,
-  },
-  overwrite: 'shift',
-};
+import { sacemIdMask } from '@ad/src/utils/imask';
 
 // No way with generics on `ControllerRenderProps<A, B>` to allow any property name, so overriding their type with missing differences
 interface SubformType extends ControllerRenderProps<any, any> {

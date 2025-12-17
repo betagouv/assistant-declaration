@@ -15,6 +15,7 @@ import { push } from '@socialgouv/matomo-next';
 import { TRPCClientErrorLike } from '@trpc/client';
 import debounce from 'lodash.debounce';
 import Image from 'next/image';
+import NextLink from 'next/link';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, FieldPath, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -34,7 +35,6 @@ import { ErrorAlert } from '@ad/src/components/ErrorAlert';
 import { EventsFieldsets } from '@ad/src/components/EventsFieldsets';
 import { FileList } from '@ad/src/components/FileList';
 import { LoadingArea } from '@ad/src/components/LoadingArea';
-import { officialHeadquartersIdMask } from '@ad/src/components/OfficialHeadquartersIdField';
 import { SacdIdInput } from '@ad/src/components/SacdIdField';
 import { SacemIdInput } from '@ad/src/components/SacemIdField';
 import { useConfirmationIfUnsavedChange } from '@ad/src/components/navigation/useConfirmationIfUnsavedChange';
@@ -54,7 +54,7 @@ import { AudienceSchema, PerformanceTypeSchema } from '@ad/src/models/entities/e
 import { AppRouter } from '@ad/src/server/app-router';
 import { attachmentKindList } from '@ad/src/utils/attachment';
 import { parseError } from '@ad/src/utils/error';
-import { formatMaskedValue } from '@ad/src/utils/imask';
+import { formatMaskedValue, officialHeadquartersIdMask } from '@ad/src/utils/imask';
 import { AggregatedQueries } from '@ad/src/utils/trpc';
 
 type FillDeclarationSchemaInputType = z.input<typeof FillDeclarationSchema>;
@@ -127,6 +127,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
       organization: {
         sacemId: null,
         sacdId: null,
+        sibil: null,
       },
       eventSerie: {
         producer: null,
@@ -179,6 +180,13 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
         organization: {
           sacemId: result.declaration.organization.sacemId,
           sacdId: result.declaration.organization.sacdId,
+          sibil:
+            result.declaration.organization.sibilUsername && result.declaration.organization.sibilPassword
+              ? {
+                  username: result.declaration.organization.sibilUsername,
+                  password: result.declaration.organization.sibilPassword,
+                }
+              : null,
         },
         eventSerie: {
           producer:
@@ -283,6 +291,14 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
           organization: {
             sacemId: getDeclaration.data.declarationWrapper.declaration.organization.sacemId,
             sacdId: getDeclaration.data.declarationWrapper.declaration.organization.sacdId,
+            sibil:
+              getDeclaration.data.declarationWrapper.declaration.organization.sibilUsername &&
+              getDeclaration.data.declarationWrapper.declaration.organization.sibilPassword
+                ? {
+                    username: getDeclaration.data.declarationWrapper.declaration.organization.sibilUsername,
+                    password: getDeclaration.data.declarationWrapper.declaration.organization.sibilPassword,
+                  }
+                : null,
           },
           eventSerie: {
             producer:
@@ -955,6 +971,62 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                 </div>
                               </div>
                             )}
+                            {expectedDeclarationTypes.includes('SIBIL') && (
+                              <>
+                                <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                                  Pour connaître vos identifiants techniques SIBIL vous pouvez{' '}
+                                  <NextLink
+                                    href="https://atelier-numerique.notion.site/creer-identifiants-sibil"
+                                    target="_blank"
+                                    onClick={() => {
+                                      push(['trackEvent', 'declaration', 'openHowTo', 'sibil']);
+                                    }}
+                                    className={fr.cx('fr-link')}
+                                  >
+                                    consulter notre tutoriel
+                                  </NextLink>
+                                  .
+                                </div>
+                                <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                                  <div className={fr.cx('fr-fieldset__element')}>
+                                    <Controller
+                                      control={control}
+                                      name="organization.sibil.username"
+                                      disabled={alreadyDeclared}
+                                      render={({ field, fieldState: { error } }) => {
+                                        return (
+                                          <Input
+                                            {...field}
+                                            label="Identifiant technique SIBIL"
+                                            state={!!error ? 'error' : undefined}
+                                            stateRelatedMessage={error?.message}
+                                          />
+                                        );
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                                <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+                                  <div className={fr.cx('fr-fieldset__element')}>
+                                    <Controller
+                                      control={control}
+                                      name="organization.sibil.password"
+                                      disabled={alreadyDeclared}
+                                      render={({ field, fieldState: { error } }) => {
+                                        return (
+                                          <Input
+                                            {...field}
+                                            label="Mot de passe technique SIBIL"
+                                            state={!!error ? 'error' : undefined}
+                                            stateRelatedMessage={error?.message}
+                                          />
+                                        );
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              </>
+                            )}
                           </div>
                           <div className={fr.cx('fr-grid-row')}>
                             <div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
@@ -1582,6 +1654,7 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                     <div style={{ color: fr.colors.decisions.text.mention.grey.default }}>
                                       {declarationType === 'SACEM' && 'spectacles avec musique protégée'}
                                       {declarationType === 'SACD' && 'spectacles avec texte, scénario ou chorégraphie protégés'}
+                                      {declarationType === 'SIBIL' && 'tout type de spectacle'}
                                     </div>
                                   </div>
                                 ),
