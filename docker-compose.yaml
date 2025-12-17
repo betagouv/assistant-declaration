@@ -37,8 +37,8 @@ services:
     networks:
       - ad
     ports:
-      - '127.0.0.1:${DOCKER_COMPOSE_HOST_PORTS:-1080:}1080'
-      - '127.0.0.1:${DOCKER_COMPOSE_HOST_PORTS:-11025:}1025' # We set `11025` on the host because we had the case where a local email software had taken this port already and Docker didn't warn us (it was really tricky to find the cause...)
+      - '${DOCKER_COMPOSE_MAILCATCHER_UI_PORT_BINDING:-1080:1080}'
+      - '${DOCKER_COMPOSE_MAILCATCHER_EMAIL_PORT_BINDING:-11025:1025}' # We set `11025` on the host because we had the case where a local email software had taken this port already and Docker didn't warn us (it was really tricky to find the cause...)
     restart: unless-stopped
     healthcheck:
       test: ['CMD', '/scripts/docker-healthcheck.sh']
