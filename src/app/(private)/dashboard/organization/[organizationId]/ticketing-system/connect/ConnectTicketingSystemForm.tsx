@@ -139,7 +139,7 @@ export function ConnectTicketingSystemForm(props: ConnectTicketingSystemFormProp
               ]}
             />
           </div>
-          {(watch('ticketingSystemName') as any) !== '' ? ( // Empty string will be set by the select (we used "undefined" to match the type)
+          {(watch('ticketingSystemName') as any) !== undefined && (watch('ticketingSystemName') as any) !== '' ? ( // Empty string will be set by the select (we used "undefined" to match the type, but "" is set just after)
             <>
               {showOtherIndication ? (
                 <div className={fr.cx('fr-fieldset__element')}>
