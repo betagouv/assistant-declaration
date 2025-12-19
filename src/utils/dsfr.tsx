@@ -100,6 +100,14 @@ export const commonFooterAttributes = {
     {
       iconId: undefined as any,
       linkProps: {
+        // href: linkRegistry.get('impact', undefined),
+        href: '/impact',
+      },
+      text: "Mesures d'impact",
+    },
+    {
+      iconId: undefined as any,
+      linkProps: {
         href: 'https://github.com/betagouv/assistant-declaration',
         target: '_blank',
       },

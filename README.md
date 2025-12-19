@@ -232,6 +232,9 @@ For each build and runtime (since they are shared), you should have set some env
 - `SACD_API_PROVIDER_NAME`: [SECRET]
 - `SACD_API_PROVIDER_REFFILE`: [SECRET]
 - `SACD_API_PROVIDER_PASSWORD`: [SECRET]
+- `METABASE_SITE_URL`: [PROVIDED] _(only in production, format `https://xxx.yyy.zzz`)_
+- `METABASE_SECRET_KEY`: [SECRET] _(only in production, comes from the Metabase interface when allowing static embeds)_
+- `METABASE_IMPACT_DASHBOARD_ID`: [SECRET] _(only in production, comes from the main dashboard inside Metabase)_
 - `DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS`: [TO_DEFINE] _(environments that are not production will by default mock remote ticketing system calls. For testing purpose you can provide a comma separated UUID list of users who need to perform real tests)_
 
 #### Review apps
@@ -624,6 +627,14 @@ As for any `hydratation issue` it worths taking a look at your browser extension
 For example:
 
 - Ad blockers _(whitelist the blocked URL in your extension)_
+
+#### Backend developement
+
+##### Adding a new ticketing system
+
+Each remote ticketing system is implemented inside its own connector, respecting the interface of `TicketingSystemClient` to be sure we can have a generic logic in our controller to synchronize ticketing data. _Examples of current connectors can be found within `./src/core/ticketing/`._
+
+All ticketing systems indeed manage entities like event, but the logic of event serie is not always present and their structure are really different across actors. The idea is to do your best to try matching the data we want, sometimes it will be in 1 request, sometimes you will have to iterate over all tickets to know the event total revenue for example.
 
 #### Jest not working in VSCode
 

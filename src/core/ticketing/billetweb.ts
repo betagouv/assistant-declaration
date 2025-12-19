@@ -17,6 +17,7 @@ import { LiteEventSchema, LiteEventSchemaType, LiteEventSerieSchema, LiteEventSe
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { sleep } from '@ad/src/utils/sleep';
 
+// Billetweb documentation at https://www.billetweb.fr/bo/api.php
 export class BilletwebTicketingSystemClient implements TicketingSystemClient {
   public readonly baseUrl = 'https://www.billetweb.fr/api';
 
