@@ -9,6 +9,7 @@ import { LiteEventSchema, LiteEventSchemaType, LiteEventSerieSchema, LiteEventSe
 import { JsonCollectionSchemaType, JsonGetClosingStatementsResponseSchema, JsonStatementSchemaType } from '@ad/src/models/entities/supersoniks';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
+// Supersoniks documentation is private except the technical OpenAPI schema we generated
 export class SupersoniksTicketingSystemClient implements TicketingSystemClient {
   protected readonly client: Client;
   protected readonly publicIdentifier: string;

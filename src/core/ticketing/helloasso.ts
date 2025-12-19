@@ -18,6 +18,7 @@ import { LiteEventSchema, LiteEventSerieSchema, LiteEventSerieWrapperSchemaType 
 import { JsonTokenSchema } from '@ad/src/models/entities/helloasso';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
+// HelloAsso documentation at https://dev.helloasso.com/reference/
 export class HelloassoTicketingSystemClient implements TicketingSystemClient {
   public baseUrl: string;
   protected usingTestEnvironnement = false;

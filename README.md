@@ -628,6 +628,14 @@ For example:
 
 - Ad blockers _(whitelist the blocked URL in your extension)_
 
+#### Backend developement
+
+##### Adding a new ticketing system
+
+Each remote ticketing system is implemented inside its own connector, respecting the interface of `TicketingSystemClient` to be sure we can have a generic logic in our controller to synchronize ticketing data. _Examples of current connectors can be found within `./src/core/ticketing/`._
+
+All ticketing systems indeed manage entities like event, but the logic of event serie is not always present and their structure are really different across actors. The idea is to do your best to try matching the data we want, sometimes it will be in 1 request, sometimes you will have to iterate over all tickets to know the event total revenue for example.
+
 #### Jest not working in VSCode
 
 Sometimes it appears Jest VSCode extension will be stuck and will keep throwing:

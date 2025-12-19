@@ -22,6 +22,7 @@ import {
 } from '@ad/src/models/entities/mapado';
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 
+// Mapado documentation at https://ticketing.mapado.net/doc.html
 export class MapadoTicketingSystemClient implements TicketingSystemClient {
   protected readonly client: Client;
   protected readonly itemsPerPageToAvoidPagination: number = 100_000_000;

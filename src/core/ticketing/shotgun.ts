@@ -16,6 +16,7 @@ import {
 import { workaroundAssert as assert } from '@ad/src/utils/assert';
 import { sleep } from '@ad/src/utils/sleep';
 
+// Shotgun documentation is private
 export class ShotgunTicketingSystemClient implements TicketingSystemClient {
   public baseUrl = 'https://smartboard-api.shotgun.live/api/shotgun';
   protected usingTestEnvironnement = false;
