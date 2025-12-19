@@ -973,6 +973,22 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                             )}
                             {expectedDeclarationTypes.includes('SIBIL') && (
                               <>
+                                {/*
+
+                                SUGGESTIONS / REQUIREMENTS:
+
+                                Since the feature of SIBIL has stopped with the end of my mission, I just coded the same logic as for SACEM and SACD organisms
+                                but that's not right since SIBIL requests require from us private credentials. There is no reason to have those fields directly in the declaration form.
+
+                                Ideally it would be in the organization page, at least. But I think it would make sense that in the "organisms choices list" as soon as the user
+                                checks one of them, if the ID or credentials is not yet filled, we open a new modal over it to request those. Having it separate is ideal to explain
+                                a bit what needs to be done without overcharging the UI of the daily declaration.
+
+                                Like that, the modal of "mutating those properties" could be reused on the organization page.
+
+                                Disclaimer: I had no chance to test the flow from scratch for SIBIL
+
+                                */}
                                 <div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
                                   Pour connaître vos identifiants techniques SIBIL vous pouvez{' '}
                                   <NextLink
