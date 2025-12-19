@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const scriptSrcValues = ["'self'"];
 const connectSrcValues = ["'self'"];
+const frameSrcValues = ["'self'"];
 const fontSrcValues = ["'self'", 'https:', 'data:'];
 const imgSrcValues = ["'self'", 'data:'];
 const styleSrcValues = ["'self'", 'https:'];
@@ -29,6 +30,11 @@ const upgradeInsecureRequests = process.env.NODE_ENV === 'production';
 if (process.env.NEXT_PUBLIC_MATOMO_URL) {
   scriptSrcValues.push(process.env.NEXT_PUBLIC_MATOMO_URL);
   connectSrcValues.push(process.env.NEXT_PUBLIC_MATOMO_URL);
+}
+
+// Metabase settings
+if (process.env.METABASE_SITE_URL) {
+  frameSrcValues.push(process.env.METABASE_SITE_URL);
 }
 
 // Sentry settings
@@ -84,9 +90,9 @@ function formatSecurityHeaders(nonce?: string) {
       ' '
     )};object-src 'none';script-src ${`'nonce-${nonce}'`} ${scriptSrcValues.join(' ')};script-src-attr 'none';connect-src ${connectSrcValues.join(
       ' '
-    )};worker-src ${workerSrcValues.join(' ')};style-src ${styleSrcValues.join(' ')};style-src-elem 'unsafe-inline' ${styleSrcValues.join(
+    )};frame-src ${frameSrcValues.join(' ')};worker-src ${workerSrcValues.join(' ')};style-src ${styleSrcValues.join(
       ' '
-    )};style-src-attr 'self' ${libraryCompatibilityWorkaround ? "'unsafe-inline'" : ''}${
+    )};style-src-elem 'unsafe-inline' ${styleSrcValues.join(' ')};style-src-attr 'self' ${libraryCompatibilityWorkaround ? "'unsafe-inline'" : ''}${
       upgradeInsecureRequests ? ';upgrade-insecure-requests' : ''
     }`,
     'Origin-Agent-Cluster': '?1',

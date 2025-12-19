@@ -111,6 +111,7 @@
     "@next-auth/prisma-adapter": "^1.0.7",
     "@next/bundle-analyzer": "15.3.4",
     "@next/mdx": "^15.4.4",
+    "@open-iframe-resizer/react": "^2.1.0",
     "@prisma/client": "6.10.1",
     "@react-pdf/renderer": "^4.1.6",
     "@remixicon/react": "^4.6.0",

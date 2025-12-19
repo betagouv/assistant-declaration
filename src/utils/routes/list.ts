@@ -111,6 +111,13 @@ export const localizedRoutes = {
       fr: (p) => `/`,
     }
   ),
+  impact: defineLocalizedRoute(
+    {},
+    {
+      en: (p) => `/impact`,
+      fr: (p) => `/impact`,
+    }
+  ),
   legalNotice: defineLocalizedRoute(
     {},
     {
@@ -245,6 +252,7 @@ export const routes = {
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.en),
     frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.en),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.en),
+    impact: defineRoute(localizedRoutes.impact.params, localizedRoutes.impact.paths.en),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.en),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.en),
     organizationCreation: defineRoute(localizedRoutes.organizationCreation.params, localizedRoutes.organizationCreation.paths.en),
@@ -273,6 +281,7 @@ export const routes = {
     forgottenPassword: defineRoute(localizedRoutes.forgottenPassword.params, localizedRoutes.forgottenPassword.paths.fr),
     frequentlyAskedQuestions: defineRoute(localizedRoutes.frequentlyAskedQuestions.params, localizedRoutes.frequentlyAskedQuestions.paths.fr),
     home: defineRoute(localizedRoutes.home.params, localizedRoutes.home.paths.fr),
+    impact: defineRoute(localizedRoutes.impact.params, localizedRoutes.impact.paths.fr),
     legalNotice: defineRoute(localizedRoutes.legalNotice.params, localizedRoutes.legalNotice.paths.fr),
     organization: defineRoute(localizedRoutes.organization.params, localizedRoutes.organization.paths.fr),
     organizationCreation: defineRoute(localizedRoutes.organizationCreation.params, localizedRoutes.organizationCreation.paths.fr),

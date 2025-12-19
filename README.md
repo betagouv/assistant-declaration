@@ -232,6 +232,9 @@ For each build and runtime (since they are shared), you should have set some env
 - `SACD_API_PROVIDER_NAME`: [SECRET]
 - `SACD_API_PROVIDER_REFFILE`: [SECRET]
 - `SACD_API_PROVIDER_PASSWORD`: [SECRET]
+- `METABASE_SITE_URL`: [PROVIDED] _(only in production, format `https://xxx.yyy.zzz`)_
+- `METABASE_SECRET_KEY`: [SECRET] _(only in production, comes from the Metabase interface when allowing static embeds)_
+- `METABASE_IMPACT_DASHBOARD_ID`: [SECRET] _(only in production, comes from the main dashboard inside Metabase)_
 - `DISABLE_TICKETING_SYSTEM_MOCK_FOR_USER_IDS`: [TO_DEFINE] _(environments that are not production will by default mock remote ticketing system calls. For testing purpose you can provide a comma separated UUID list of users who need to perform real tests)_
 
 #### Review apps
