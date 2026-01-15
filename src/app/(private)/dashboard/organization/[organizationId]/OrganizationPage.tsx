@@ -315,7 +315,7 @@ export function OrganizationPage({ params: { organizationId } }: OrganizationPag
                 >
                   Branchez votre logiciel de billetterie
                 </NextLink>{' '}
-                pour visualiser vos spectacles et déclarer plus rapidement, ou ajouter manuellement un spectacle.
+                pour visualiser vos spectacles et déclarer plus rapidement, ou ajoutez manuellement un spectacle.
               </p>
               <Button onClick={openEventSerieCreationModal} className={fr.cx('fr-my-6v')}>
                 <RiAddCircleLine size={20} aria-hidden={true} style={{ marginRight: 8 }} />
