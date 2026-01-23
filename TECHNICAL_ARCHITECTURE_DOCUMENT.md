@@ -57,23 +57,26 @@ _(When appropriate we describe the motivation of the choice)_
 - Scaleway (used to send emails)
 - Brevo (used as a fallback of Scaleway to send emails)
 - Crisp (for customer support but only loaded if the user explicitly triggers a button)
+- Metabase (for the needs of following the impact of the project)
 
 ### Communication matrix
 
-| Source   | Destination              | Protocol | Port | Location      | Type                                                     |
-| -------- | ------------------------ | -------- | ---- | ------------- | -------------------------------------------------------- |
-| Frontend | Backend                  | HTTPS    | 443  | Paris, France | Internal                                                 |
-| Frontend | Sentry                   | HTTPS    | 443  | Tours, France | External (sentry.incubateur.net)                         |
-| Frontend | Matomo                   | HTTPS    | 443  | Tours, France | External (stats.beta.gouv.fr)                            |
-| Frontend | Crisp                    | HTTPS    | 443  | France        | External (client.crisp.chat and client.relay.crisp.chat) |
-| Backend  | PostgreSQL               | TCP      | -    | Paris, France | Internal                                                 |
-| Backend  | Sentry                   | HTTPS    | 443  | Paris, France | External (sentry.incubateur.net)                         |
-| Backend  | Matomo                   | HTTPS    | 443  | Tours, France | External (stats.beta.gouv.fr)                            |
-| Backend  | Scaleway                 | SMTP     | 465  | Paris, France | External (smtp.tem.scw.cloud)                            |
-| Backend  | Brevo                    | SMTP     | 587  | Paris, France | External (smtp-relay.sendinblue.com)                     |
-| Backend  | \* _(ticketing systems)_ | HTTPS    | 443  | \*            | External (\*)                                            |
+| Source     | Destination                | Protocol | Port | Location      | Type                                                     |
+| ---------- | -------------------------- | -------- | ---- | ------------- | -------------------------------------------------------- |
+| Frontend   | Backend                    | HTTPS    | 443  | Paris, France | Internal                                                 |
+| Frontend   | Sentry                     | HTTPS    | 443  | Tours, France | External (sentry.incubateur.net)                         |
+| Frontend   | Matomo                     | HTTPS    | 443  | Tours, France | External (stats.beta.gouv.fr)                            |
+| Frontend   | Crisp                      | HTTPS    | 443  | France        | External (client.crisp.chat and client.relay.crisp.chat) |
+| Backend    | PostgreSQL                 | TCP      | -    | Paris, France | Internal                                                 |
+| Backend    | Sentry                     | HTTPS    | 443  | Paris, France | External (sentry.incubateur.net)                         |
+| Backend    | Matomo                     | HTTPS    | 443  | Tours, France | External (stats.beta.gouv.fr)                            |
+| Backend    | Scaleway                   | SMTP     | 465  | Paris, France | External (smtp.tem.scw.cloud)                            |
+| Backend    | Brevo                      | SMTP     | 587  | Paris, France | External (smtp-relay.sendinblue.com)                     |
+| Backend    | \* _(ticketing systems)_   | HTTPS    | 443  | \*            | External (\*)                                            |
+| Backend    | \* _(declaration systems)_ | HTTPS    | 443  | \*            | External (\*)                                            |
+| PostgreSQL | Metabase                   | TCP      | -    | Paris, France | Internal                                                 |
 
-**Note we list all flows known in advance except the last wildcard entry. This is because `Assistant déclaration` does gather ticketing data from dynamic inputs. We cannot list them all since there are dynamic, but those endpoints are just for read-only purposes and no user data is sent to their servers except to authenticate the call.**
+**Note we list all flows known in advance except the wildcard entries. This is because `Assistant déclaration` relies on multiple ticketing and declaration systems that evolve over time and where sometimes the domain is non-disclosure. Note ticketing endpoints are just for read-only purposes and no user data is sent to their servers except to authenticate the call, unlike declaration ones that are used to push information.**
 
 <!-- We used https://www.site24x7.com/tools/find-website-location.html to find locations -->
 
@@ -132,10 +135,10 @@ Some warnings about security are done during the onboarding and they have a supp
 
 ### Activity tracking
 
-- Errors are forwarded to Sentry so we can debug and manage alerts
-- Our logs give an overview of what is happening
-
-In both cases no sensitive information is provided.
+- Errors are forwarded to Sentry so we can debug and manage alerts _(anonymized input)_
+- Our logs give an overview of what is happening _(anonymized input)_
+- Matomo gathers analytics _(anonymized input)_
+- Metabase can be used by the team to overview the platform activity _(relies on nominative data)_
 
 ### Application update policy
 
