@@ -542,6 +542,27 @@ In addition, using the workspace TypeScript will load `compilerOptions.plugins` 
 
 ### Tips
 
+#### Quick onboarding overview
+
+There are 2 main goals of the current application:
+
+1. From a unique declaration form, allow transmitting it to one or multiple organisms
+2. Try to gather already digitized information from external services to prefill the declaration form (only from ticketing systems for now)
+
+The core feature is the (1) and after some testing we ended using a unique form that have some fields required (because common to all organisms like event serie name, dates...), and some others optional depending on which organism you need to declare to. This declaration information is directly set both on the `event serie` and `event` entities, [you can discover the details in the database schema](./src/prisma/schema.prisma). Once fully filled the declarant can transmit the information to organism, resulting in some `declaration` according to how many were selected.
+
+Declarants have the possibility in the platform to create manually their `event serie` and `event` to declare, but the idea was to rely on the (2) to help declarants saving time instead of copy-pasting event serie name, dates, ticketing data. For example among ticketing revenues to declare you may need to substract commission from each sold ticket, which may add over-calculation from a declarant point of view. But despite binding directly some ticketing systems has worked, we noticed they were all behaving differently:
+
+- some not having the notion of `event serie` but only `event`
+- some putting the VAT either on the ticket, on the category price, on the event or on the event serie
+- some not exposing the commission amount to substract
+- some not having an API to get this information
+- ...
+
+And since there is also no standard, our data models result in a compromise to be compatible with most those systems, ensuring this would also fit expected data from organisms.
+
+_If any doubt about a property name since all technical stuff is in english, you may look at its french version [in the application translations file](./src/i18n/fr/common.json)._
+
 #### Cron tasks
 
 Doing tasks on a regular basis is a real subject, ask yourself:
