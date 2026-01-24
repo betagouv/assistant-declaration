@@ -149,7 +149,7 @@ export const JsonEventAttendeeSchema = applyTypedParsers(
       // order_paid: safeCoerceToBoolean(z.boolean()),
       // ---
       // order_payment_type: z.enum(['web', 'free', 'invitation', 'reservation', 'cash', 'check', 'card', 'multiple', 'other', '4030', '123xxxx']), // "web" is if ordered from Billetweb services with amount non-zero (cash, check and card supposingly on-premise and other by admins), also "multiple" seems to always have no fee (maybe it cannot be "web+cash" but always combined outside Billetweb platform)
-      order_payment_type: z.string().min(1), // Cannot rely on an enum since there are custom payment types that are numerics like 430, 10549... so have to accept string
+      order_payment_type: z.string(), // Cannot rely on an enum since there are custom payment types that are numerics like 430, 10549... so have to accept string, and we cannot expect it to be non-empty, since we saw a case where it was instead of using "free" for a free ticket
       // ---
       // order_origin: z.string().min(1), // Either "web" or an arbitrary string written by the organization (the place, the season or the role of the originator if admin...)
       // order_price: z.coerce.number(), // The amount contains the total if multiple tickets bought
