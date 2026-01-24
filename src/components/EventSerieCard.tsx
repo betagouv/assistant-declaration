@@ -16,8 +16,8 @@ import { EventSerieWrapperSchemaType } from '@ad/src/models/entities/event';
 export interface EventSerieCardProps {
   wrapper: EventSerieWrapperSchemaType;
   declarationLink: string;
-  onUpdate?: (eventSerie: string) => Promise<void>;
-  onRemove?: (eventSerie: string) => Promise<void>;
+  onUpdate?: (eventSerieId: string) => Promise<void>;
+  onRemove?: (eventSerieId: string) => Promise<void>;
 }
 
 export function EventSerieCard(props: EventSerieCardProps) {
