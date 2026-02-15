@@ -98,7 +98,11 @@ export function PrivateLayout(props: PropsWithChildren) {
     <>
       <UserInterfaceSessionProvider session={userInterfaceSession!}>
         <Header {...commonHeaderAttributes} quickAccessItems={quickAccessItems} currentOrganization={currentOrganization || null} />
-        <FlashMessage appMode={process.env.NEXT_PUBLIC_APP_MODE} nodeEnv={process.env.NODE_ENV} />
+        <FlashMessage
+          appMode={process.env.NEXT_PUBLIC_APP_MODE}
+          nodeEnv={process.env.NODE_ENV}
+          temporaryAlertMessage={process.env.NEXT_PUBLIC_TEMPORARY_ALERT_MESSAGE}
+        />
         <ContentWrapper>{props.children}</ContentWrapper>
         <Footer {...commonFooterAttributes} />
       </UserInterfaceSessionProvider>

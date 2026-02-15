@@ -34,8 +34,10 @@ const ProductionEnvStory = Template.bind({});
 ProductionEnvStory.args = {
   appMode: 'prod',
   nodeEnv: 'production',
+  temporaryAlertMessage: 'La fonctionnalité de dépôt de pièce jointe est momentanément indisponible.',
 };
 ProductionEnvStory.play = async ({ canvasElement }) => {
+  await within(canvasElement).findByText(/momentanément indisponible/i);
   await within(canvasElement).findByText(/merci/i);
 };
 
