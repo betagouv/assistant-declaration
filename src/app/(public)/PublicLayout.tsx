@@ -50,7 +50,11 @@ export function PublicLayout(props: PropsWithChildren) {
         currentOrganization={null}
         style={stickyMenu ? { position: 'sticky', top: 0, zIndex: 1000 } : {}}
       />
-      <FlashMessage appMode={process.env.NEXT_PUBLIC_APP_MODE} nodeEnv={process.env.NODE_ENV} />
+      <FlashMessage
+        appMode={process.env.NEXT_PUBLIC_APP_MODE}
+        nodeEnv={process.env.NODE_ENV}
+        temporaryAlertMessage={process.env.NEXT_PUBLIC_TEMPORARY_ALERT_MESSAGE}
+      />
       <ContentWrapper>{props.children}</ContentWrapper>
       <Footer {...commonFooterAttributes} />
     </>
