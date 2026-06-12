@@ -1,8 +1,8 @@
 import { Meta, StoryFn } from '@storybook/react';
 import { HttpResponse, http } from 'msw';
-import { mockDateDecorator } from 'storybook-mock-date-decorator';
 
 import { ComponentProps, StoryHelperFactory } from '@ad/.storybook/helpers';
+import { mockDateDecorator } from '@ad/.storybook/MockDateDecorator';
 import { playFindButton, playFindLink } from '@ad/.storybook/testing';
 import { AsCollaborator as PrivateLayoutAsCollaboratorStory } from '@ad/src/app/(private)/PrivateLayout.stories';
 import { Empty as AddEventSerieFormEmptyStory } from '@ad/src/app/(private)/dashboard/organization/AddEventSerieForm.stories';

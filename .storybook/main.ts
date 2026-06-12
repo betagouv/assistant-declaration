@@ -1,13 +1,77 @@
 import type { StorybookConfig } from '@storybook/nextjs';
+import type { Options as MdxLoaderOptions } from '@mdx-js/loader';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import cssnano from 'cssnano';
 import FileManagerPlugin from 'filemanager-webpack-plugin';
+import highlightPhp from 'highlight.js/lib/languages/php';
+import highlightShell from 'highlight.js/lib/languages/shell';
+import { createRequire } from 'node:module';
 import path from 'path';
+import { fileURLToPath } from 'node:url';
+import rehypeHighlight from 'rehype-highlight';
+import remarkGfm from 'remark-gfm';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
-import { mdxLoaderOptions } from '@ad/src/utils/mdx-loader';
-import { applyRawQueryParserOnStorybookCssModule } from '@ad/src/utils/webpack';
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
 const staticBuildFolderPath = path.resolve(__dirname, '../storybook-static/');
+
+const mdxLoaderOptions: MdxLoaderOptions = {
+  remarkPlugins: [remarkGfm],
+  rehypePlugins: [[rehypeHighlight, { languages: { php: highlightPhp, shell: highlightShell } }]],
+};
+
+function generateOneOfRawCssRule() {
+  return {
+    resourceQuery: /raw/,
+    type: 'asset/source',
+    use: [
+      {
+        loader: 'postcss-loader',
+        options: {
+          postcssOptions: {
+            plugins: [cssnano({ preset: 'default' })],
+          },
+        },
+      },
+      'resolve-url-loader',
+      {
+        loader: 'sass-loader',
+        options: {
+          sassOptions: {
+            silenceDeprecations: ['legacy-js-api'],
+          },
+        },
+      },
+    ],
+  };
+}
+
+function applyRawQueryParserOnStorybookCssModule(moduleRules: any[]) {
+  let scssRuleFound = false;
+  for (const ruleIndex in moduleRules) {
+    const originalRule = moduleRules[ruleIndex];
+
+    if (originalRule && typeof originalRule === 'object' && originalRule.test instanceof RegExp && originalRule.test.test('.scss')) {
+      scssRuleFound = true;
+
+      moduleRules[ruleIndex] = {
+        test: originalRule.test,
+        oneOf: [
+          generateOneOfRawCssRule(),
+          {
+            use: originalRule.use,
+          },
+        ],
+      };
+    }
+  }
+
+  if (!scssRuleFound) {
+    throw new Error('our custom SCSS rule should have been added, make sure the project manage SCSS by default first');
+  }
+}
 
 const config: StorybookConfig = {
   stories: [path.resolve(__dirname, '../src/**/*.@(mdx|stories.@(js|ts|jsx|tsx))')],
@@ -100,7 +164,7 @@ const config: StorybookConfig = {
             to: path.resolve(__dirname, '../public/assets/fonts/'),
           },
           {
-            from: require.resolve('@ad/src/assets/fonts/index.css'),
+            from: path.resolve(__dirname, '../src/assets/fonts/index.css'),
             to: path.resolve(__dirname, '../public/assets/fonts/'),
           },
         ],

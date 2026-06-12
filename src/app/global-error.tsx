@@ -1,6 +1,6 @@
 'use client';
 
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
 import * as Sentry from '@sentry/nextjs';
 import { useEffect } from 'react';
 
