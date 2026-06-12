@@ -29,24 +29,5 @@ declare module '*.scss?raw' {
   export default content;
 }
 
-interface ServerRuntimeConfig {
-  //
-}
-
-interface PublicRuntimeConfig {
-  appMode: 'prod' | 'dev' | 'test';
-  appVersion: string;
-}
-
-interface RuntimeConfig {
-  serverRuntimeConfig: ServerRuntimeConfig;
-  publicRuntimeConfig: PublicRuntimeConfig;
-}
-
 declare module '@react-pdf/stylesheet';
 declare module '@tomfreudenberg/next-auth-mock/storybook';
-declare module 'next/config' {
-  const value: () => RuntimeConfig;
-  export default value;
-}
-declare module 'storybook-mock-date-decorator';

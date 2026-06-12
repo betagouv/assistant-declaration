@@ -1,6 +1,6 @@
 import MuiDsfrThemeProvider from '@codegouvfr/react-dsfr/mui';
 import { MDXProvider } from '@mdx-js/react';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
 import { DocsContainerProps } from '@storybook/addon-docs/blocks';
 import { withLinks } from '@storybook/addon-links';
 import type { Preview } from '@storybook/react';

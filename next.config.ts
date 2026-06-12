@@ -24,21 +24,13 @@ const baseUrl = new URL(getBaseUrl());
 const generateNextConfig = async (): Promise<NextConfig> => {
   const appHumanVersion = await getHumanVersion();
 
-  let standardModuleExports: NextConfig = {
+  let standardModuleExports: any = {
     reactStrictMode: true,
     pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'], // Allow using Markdown for content pages like documentation
     output: process.env.NEXTJS_BUILD_OUTPUT_MODE ? (process.env.NEXTJS_BUILD_OUTPUT_MODE as 'standalone' | 'export') : 'standalone', // To debug locally the `next start` comment this line (it will avoid trying to mess with the assembling folders logic of standalone mode)
     env: {
       // Those will replace `process.env.*` with hardcoded values (useful when the value is calculated during the build time)
       SENTRY_RELEASE_TAG: appHumanVersion,
-    },
-    serverRuntimeConfig: {},
-    publicRuntimeConfig: {
-      appMode: mode,
-      appVersion: appHumanVersion,
-    },
-    eslint: {
-      ignoreDuringBuilds: true, // Skip since already done in a specific step of our CI/CD
     },
     typescript: {
       ignoreBuildErrors: true, // Skip since already done in a specific step of our CI/CD
@@ -55,7 +47,7 @@ const generateNextConfig = async (): Promise<NextConfig> => {
     },
     experimental: {
       optimizePackageImports: ['@mui/material', '@mui/icons-material', 'date-fns', 'react-use'],
-      swcPlugins: [['superjson-next', { router: 'PAGE' }]],
+      swcPlugins: [['superjson-next', {}]],
     },
     async redirects() {
       return [
@@ -96,7 +88,7 @@ const generateNextConfig = async (): Promise<NextConfig> => {
         },
       ],
     },
-    webpack: (config, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }) => {
+    webpack: (config: any, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }: any) => {
       // Expose all DSFR fonts as static at the root
       config.plugins.push(
         new CopyWebpackPlugin({

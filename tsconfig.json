@@ -27,7 +27,7 @@
     "composite": false,
     "incremental": true,
     "noEmit": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "importHelpers": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
@@ -61,7 +61,8 @@
     ".storybook/**/*.ts",
     ".storybook/**/*.tsx",
     ".next/types/**/*.ts",
-    "next-env.d.ts"
+    "next-env.d.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
