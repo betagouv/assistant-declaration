@@ -8,7 +8,6 @@ on:
 env:
   APP_NAME: assistant-declaration
   NODE_OPTIONS: --max_old_space_size=4096
-  NODE_VERSION: 20.19.5
   JEST_CACHE_FOLDER_SUFFIX: .cache/jest
   PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX: .cache/ms-playwright
 concurrency:
@@ -18,10 +17,10 @@ concurrency:
 jobs:
   requirements:
     name: Continuous Integration
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -36,16 +35,17 @@ jobs:
           fi
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: .nvmrc
+          package-manager-cache: false
 
       - name: Export npm store directory as an environment variable
         shell: bash
         run: |
           echo "STORE_PATH=$(npm config get cache)" >> $GITHUB_ENV
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v6
         name: Setup npm cache
         with:
           path: ${{ env.STORE_PATH }}
@@ -53,7 +53,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-store-
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v6
         name: Setup Next.js build cache
         with:
           path: ${{ github.workspace }}/.next/cache
