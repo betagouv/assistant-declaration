@@ -1,13 +1,13 @@
-import type { StorybookConfig } from '@storybook/nextjs';
 import type { Options as MdxLoaderOptions } from '@mdx-js/loader';
+import type { StorybookConfig } from '@storybook/nextjs';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import cssnano from 'cssnano';
 import FileManagerPlugin from 'filemanager-webpack-plugin';
 import highlightPhp from 'highlight.js/lib/languages/php';
 import highlightShell from 'highlight.js/lib/languages/shell';
 import { createRequire } from 'node:module';
-import path from 'path';
 import { fileURLToPath } from 'node:url';
+import path from 'path';
 import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';

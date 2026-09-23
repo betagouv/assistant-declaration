@@ -1,5 +1,4 @@
 /** @jest-environment node */
-
 import { jest } from '@jest/globals';
 import type { Transporter } from 'nodemailer';
 
