@@ -114,7 +114,7 @@ export class Mailer {
     }
 
     const mjmlHtmlContent = renderToMjml(options.emailComponent);
-    const transformResult = mjml2html(mjmlHtmlContent);
+    const transformResult = await mjml2html(mjmlHtmlContent);
 
     if (transformResult.errors) {
       for (const err of transformResult.errors) {
