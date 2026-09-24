@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import type { Decorator } from '@storybook/react';
+import { useEffect } from 'react';
 
 const RealDate = Date;
 
