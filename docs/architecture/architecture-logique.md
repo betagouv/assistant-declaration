@@ -16,11 +16,11 @@ Le modèle courant couvre les déclarations SACEM et SACD. Une même série de r
 
 ### Profils d’utilisateurs
 
-| Profil                                       | Capacités constatées                                                                                                                                                                                                                   |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Visiteur                                     | Consulter les pages publiques, la documentation de raccordement, les mentions de conformité et créer ou confirmer un compte.                                                                                                           |
-| Utilisateur authentifié                      | Gérer son profil et son mot de passe, créer sa structure, accéder aux structures dont il est collaborateur et solliciter le support.                                                                                                   |
-| Collaborateur d’une structure / entrepreneur | Raccorder les billetteries de sa structure, lancer une synchronisation, gérer les séries et représentations, compléter les données déclaratives, joindre des documents et transmettre les déclarations.                                |
+| Profil                                       | Capacités constatées                                                                                                                                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Visiteur                                     | Consulter les pages publiques, la documentation de raccordement, les mentions de conformité et créer ou confirmer un compte.                                                                            |
+| Utilisateur authentifié                      | Gérer son profil et son mot de passe, créer sa structure, accéder aux structures dont il est collaborateur et solliciter le support.                                                                    |
+| Collaborateur d’une structure / entrepreneur | Raccorder les billetteries de sa structure, lancer une synchronisation, gérer les séries et représentations, compléter les données déclaratives, joindre des documents et transmettre les déclarations. |
 
 ### Fonctions couvertes
 

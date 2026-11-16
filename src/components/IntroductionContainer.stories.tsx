@@ -1,5 +1,5 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
 import Image from 'next/image';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';

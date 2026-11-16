@@ -56,18 +56,18 @@ export function AddressField(props: PropsWithChildren<AddressFieldProps>) {
       inputValue={inputValue}
       options={searchAddressQuerySuggestions}
       filterOptions={(options, state) => options} // We want to show results from the API without any additional filtering from MUI
-      renderInput={({ InputProps, id, inputProps }) => {
+      renderInput={({ slotProps, id }) => {
         // Unable to prevent the autocomplete for address from Chrome despite `autoComplete="false"` so giving up
         return (
           <Input
             {...props.inputProps}
-            ref={InputProps.ref}
+            ref={slotProps.input.ref}
             id={id}
             state={!!props.errorMessage ? 'error' : undefined}
             stateRelatedMessage={props.errorMessage}
             nativeInputProps={{
               ...props.inputProps.nativeInputProps,
-              ...inputProps,
+              ...slotProps.htmlInput,
             }}
           />
         );

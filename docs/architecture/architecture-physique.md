@@ -8,24 +8,23 @@ Les centres de données, hyperviseurs, grappes de calcul, équipements réseau, 
 
 Les composants logiciels sont détaillés dans [l’architecture technique](./architecture-technique.md) et les responsabilités fonctionnelles dans [l’architecture logique](./architecture-logique.md).
 
-## Environnements physiques / d’hébergement
+## Environnements physiques / d’hébergemen
 
-| Environnement                       | Prestataire                            | Région                                                      | Type de service                                                                 | Ressources connues                                                                                  | Données hébergées                                                                                                             |
-| ----------------------------------- | -------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Développement local                 | Poste du développeur et moteur Docker  | Locale                                                      | Processus Node.js, PostgreSQL et MailCatcher conteneurisés pour les dépendances | PostgreSQL `15.8`, volume Docker persistant, ports paramétrables ; ressources du poste non définies | Données locales ou fictives ; courriels interceptés                                                                           |
-| Tests locaux / intégration continue | Poste du développeur ou GitHub Actions | Non applicable / non documentée                             | Exécution éphémère, PostgreSQL lancé par Testcontainers                         | Exécuteur GitHub `ubuntu-24.04` ; processeur détecté dynamiquement pour Jest                        | Jeux de test éphémères                                                                                                        |
-| Applications de revue               | Scalingo                               | `osc-fr1`                                                 | Application PaaS et base associée selon la configuration Scalingo               | Type, nombre de conteneurs et plan de base non versionnés                                           | Données temporaires peuplées ; secrets factices fournis par `scalingo.json`                                                   |
-| Développement partagé               | Scalingo                               | `osc-fr1`        | Application PaaS et PostgreSQL managé                                           |                     | Données de test annoncées par le `README.md`                                                                                  |
-| Production                          | Scalingo                               | `osc-secnum-fr1` | Application PaaS et PostgreSQL managé                                           | 1 instance                                                                         | Comptes, structures, identifiants de raccordement, données de billetterie et de déclaration, pièces jointes, files de travaux |
-
+| Environnement                       | Prestataire                            | Région                          | Type de service                                                                 | Ressources connues                                                                                  | Données hébergées                                                                                                             |
+| ----------------------------------- | -------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Développement local                 | Poste du développeur et moteur Docker  | Locale                          | Processus Node.js, PostgreSQL et MailCatcher conteneurisés pour les dépendances | PostgreSQL `15.8`, volume Docker persistant, ports paramétrables ; ressources du poste non définies | Données locales ou fictives ; courriels interceptés                                                                           |
+| Tests locaux / intégration continue | Poste du développeur ou GitHub Actions | Non applicable / non documentée | Exécution éphémère, PostgreSQL lancé par Testcontainers                         | Exécuteur GitHub `ubuntu-24.04` ; processeur détecté dynamiquement pour Jest                        | Jeux de test éphémères                                                                                                        |
+| Applications de revue               | Scalingo                               | `osc-fr1`                       | Application PaaS et base associée selon la configuration Scalingo               | Type, nombre de conteneurs et plan de base non versionnés                                           | Données temporaires peuplées ; secrets factices fournis par `scalingo.json`                                                   |
+| Développement partagé               | Scalingo                               | `osc-fr1`                       | Application PaaS et PostgreSQL managé                                           |                                                                                                     | Données de test annoncées par le `README.md`                                                                                  |
+| Production                          | Scalingo                               | `osc-secnum-fr1`                | Application PaaS et PostgreSQL managé                                           | 1 instance                                                                                          | Comptes, structures, identifiants de raccordement, données de billetterie et de déclaration, pièces jointes, files de travaux |
 
 ## Socle système
 
-### Éléments gérés par le projet
+### Éléments gérés par le proje
 
 | Élément         | Configuration versionnée                               | Observation                                                                                                               |
 | --------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| Application     | Sortie autonome Next.js exécutée par Node.js `24.21.0` | Un type de processus `web` dans le `Procfile`                                                                             |
+| Application     | Sortie autonome Next.js exécutée par Node.js `26.13.0` | Un type de processus `web` dans le `Procfile`                                                                             |
 | Construction    | Buildpack Node.js Scalingo                             | Référence distante non épinglée à un commit dans `.buildpacks`                                                            |
 | Démarrage       | `start-and-wait-to-init.sh`                            | Lance le serveur, vérifie sa disponibilité puis initialise les traitements                                                |
 | Migrations      | Prisma `6.10.1` en tâche `postdeploy`                  | Schéma et 24 migrations versionnés                                                                                        |
@@ -55,23 +54,23 @@ Les composants logiciels sont détaillés dans [l’architecture technique](./ar
 - billetteries connectées ;
 - interface SACD et agences SACD/SACEM ;
 
-## Ressources et dimensionnement
+## Ressources et dimensionnemen
 
-| Ressource                               | Valeur établie dans le dépôt                                                                                                        | État                                                                                                                          |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Processus de l’application principale   | Type `web` ; Next.js, planificateur et consommateur de travaux dans le même processus logique                                       | Nombre de conteneurs à compléter                                                                                              |
-| Mémoire du processus principal          | -                                                                                                                       | 512Mo |
-| Unités de calcul du processus principal | -                                                                                                                       | 1 instance, élastique |
-| PostgreSQL de développement partagé     | Maximum de 10 connexions                                                                                | 512Mo                                                                                 |
-| PostgreSQL de production                | Aucune caractéristique versionnée                                                                                                   | 512Mo |
-| Stockage de fichiers                    | PostgreSQL `bytea`, 5 Mio maximum par pièce                                                                                         | Volumétrie faible                                                                               |
-| Tampon de téléversement                 | Système de fichiers local éphémère du conteneur                                                                                     | Capacité `tmp` ; ne constitue pas un stockage pérenne                                                        |
-| File de travaux                         | Même PostgreSQL, interrogation toutes les 30 secondes, un travail attendu par lot                                                   | Nombre de consommateurs lié au nombre de processus `web`                                                         |
-| Intégration continue                    | `NODE_OPTIONS=--max_old_space_size=4096`                                                                                            | Limite du tas Node.js pendant la CI, pas dimensionnement de production                                                        |
+| Ressource                               | Valeur établie dans le dépôt                                                                  | État                                                                   |
+| --------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Processus de l’application principale   | Type `web` ; Next.js, planificateur et consommateur de travaux dans le même processus logique | Nombre de conteneurs à compléter                                       |
+| Mémoire du processus principal          | -                                                                                             | 512Mo                                                                  |
+| Unités de calcul du processus principal | -                                                                                             | 1 instance, élastique                                                  |
+| PostgreSQL de développement partagé     | Maximum de 10 connexions                                                                      | 512Mo                                                                  |
+| PostgreSQL de production                | Aucune caractéristique versionnée                                                             | 512Mo                                                                  |
+| Stockage de fichiers                    | PostgreSQL `bytea`, 5 Mio maximum par pièce                                                   | Volumétrie faible                                                      |
+| Tampon de téléversement                 | Système de fichiers local éphémère du conteneur                                               | Capacité `tmp` ; ne constitue pas un stockage pérenne                  |
+| File de travaux                         | Même PostgreSQL, interrogation toutes les 30 secondes, un travail attendu par lot             | Nombre de consommateurs lié au nombre de processus `web`               |
+| Intégration continue                    | `NODE_OPTIONS=--max_old_space_size=4096`                                                      | Limite du tas Node.js pendant la CI, pas dimensionnement de production |
 
 ## Architecture réseau
 
-L’application est exposée à Internet par le routage Scalingo. 
+L’application est exposée à Internet par le routage Scalingo.
 
 Le processus applicatif communique avec PostgreSQL au moyen de l’URL fournie par Scalingo, sur un réseau privé. Prisma et `pg-boss` disposent de clients distincts. Le flux Prisma est documenté avec `sslmode=prefer`. Le flux `pg-boss` substitue `sslmode=no-verify` pour contourner un certificat autosigné dans la chaîne.
 
@@ -116,22 +115,21 @@ flowchart TB
 - Les pièces jointes privées exigent un jeton signé à courte durée ; leur contenu pérenne reste dans PostgreSQL.
 - La politique de sécurité du contenu limite les origines côté navigateur aux services configurés ou explicitement autorisés.
 
-
 ## Hébergement et localisation
 
-| Service                                       | Localisation documentée dans le dépôt                        |
-| --------------------------------------------- | ------------------------------------------------------------ |
-| Application et base de développement Scalingo | Région `osc-fr1`                               |
-| Application et base de production Scalingo    | Région `osc-secnum-fr1`                     |                
-| Sentry `sentry.incubateur.net`                | Tours, Paris  |                   
-| Matomo `stats.beta.gouv.fr`                   | Tours, France selon l’ancien DAT  
-| Crisp                                         | France                                         |
-| SMTP Scaleway                                 | Paris                                           |
-| SMTP Brevo                                    | Paris                             | 
-| Billetweb, HelloAsso, Mapado, Shotgun         | Non documentée                                               |
-| Supersoniks / SoTicket                        | Variable selon le domaine du client                         |
-| SACD et agences                               | Destination partiellement confidentielle ou variable        |
-| GitHub Actions et Chromatic                   | Non documentée                                               |
+| Service                                       | Localisation documentée dans le dépôt                |
+| --------------------------------------------- | ---------------------------------------------------- |
+| Application et base de développement Scalingo | Région `osc-fr1`                                     |
+| Application et base de production Scalingo    | Région `osc-secnum-fr1`                              |
+| Sentry `sentry.incubateur.net`                | Tours, Paris                                         |
+| Matomo `stats.beta.gouv.fr`                   | Tours, France selon l’ancien DAT                     |
+| Crisp                                         | France                                               |
+| SMTP Scaleway                                 | Paris                                                |
+| SMTP Brevo                                    | Paris                                                |
+| Billetweb, HelloAsso, Mapado, Shotgun         | Non documentée                                       |
+| Supersoniks / SoTicket                        | Variable selon le domaine du client                  |
+| SACD et agences                               | Destination partiellement confidentielle ou variable |
+| GitHub Actions et Chromatic                   | Non documentée                                       |
 
 ## Sauvegarde, redondance et reprise
 
@@ -139,7 +137,7 @@ flowchart TB
 
 Scalingo assure une sauvegarde quotidienne de la base de donnée. La restauration est un processus manuel.
 
-### Mécanismes du projet
+### Mécanismes du proje
 
 - les migrations Prisma versionnent les changements de structure et s’exécutent après déploiement ;
 - les données métier, pièces jointes et travaux sont regroupés dans PostgreSQL, ce qui permet une sauvegarde cohérente de l’état applicatif si toutes les tables et tous les schémas sont inclus ;

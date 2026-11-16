@@ -1,4 +1,4 @@
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { ResetPasswordForm } from '@ad/src/app/(visitor-only)/auth/password/reset/ResetPasswordForm';

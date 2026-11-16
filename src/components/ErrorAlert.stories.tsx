@@ -1,4 +1,4 @@
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
 import { TRPCClientError } from '@trpc/client';
 import { within } from 'storybook/test';
 

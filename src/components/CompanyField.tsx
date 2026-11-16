@@ -75,17 +75,17 @@ export function CompanyField(props: PropsWithChildren<CompanyFieldProps>) {
       inputValue={inputValue}
       options={searchCompanyQuerySuggestions}
       filterOptions={(options, state) => options} // We want to show results from the API without any additional filtering from MUI
-      renderInput={({ InputProps, id, inputProps }) => {
+      renderInput={({ slotProps, id }) => {
         return (
           <Input
             {...props.inputProps}
-            ref={InputProps.ref}
+            ref={slotProps.input.ref}
             id={id}
             state={!!props.errorMessage ? 'error' : undefined}
             stateRelatedMessage={props.errorMessage}
             nativeInputProps={{
               ...props.inputProps.nativeInputProps,
-              ...inputProps,
+              ...slotProps.htmlInput,
             }}
           />
         );

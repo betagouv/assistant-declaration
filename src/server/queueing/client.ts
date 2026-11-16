@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
-import PgBoss from 'pg-boss';
+import { type Job, PgBoss, type WorkHandler } from 'pg-boss';
 
 import { BusinessError } from '@ad/src/models/entities/errors';
 import { cleanPendingUploads, cleanPendingUploadsTopic } from '@ad/src/server/queueing/workers/clean-pending-uploads';
@@ -33,12 +33,12 @@ export let bossClient =
   global.bossClient ||
   new PgBoss({
     connectionString: databaseUrl,
-    pollingIntervalSeconds: 30, // No need to check every 2 seconds as set by default to look at new jobs
-    deleteAfterDays: 45, // Give some time before cleaning archives so an issue can be investigated without dealing with database backups
+    // `pollingIntervalSeconds` and `deleteAfterDays` constructor options have been removed in pg-boss v12;
+    // polling is now configured per queue/job (`JobPollingOptions`) and retention via `deleteAfterSeconds` / `retentionSeconds`
   });
 if (process.env.NODE_ENV !== 'production') global.bossClient = bossClient;
 
-bossClient.on('error', (error) => {
+bossClient.on('error', (error: Error) => {
   // This error catcher is just for internal operations on pb-boss (fetching, maintenance...)
   // `onComplete` is the proper way to watch job errors
   console.error(error);
@@ -79,8 +79,8 @@ export async function stopBossClientInstance(): Promise<void> {
   }
 }
 
-export function handlerWrapper<ReqData>(handler: (job: PgBoss.Job<ReqData>) => Promise<any>): PgBoss.WorkHandler<ReqData> {
-  return async (jobs: PgBoss.Job<ReqData>[]) => {
+export function handlerWrapper<ReqData>(handler: (job: Job<ReqData>) => Promise<any>): WorkHandler<ReqData> {
+  return async (jobs: Job<ReqData>[]) => {
     // Since `pg-boss` v10 it may send multiple jobs at once depending on the `batchSize` parameter
     // we don't want that since it seems the result `completed/failed` will be set to all, waiting for insights
     // on https://github.com/timgit/pg-boss/issues/474#issuecomment-2518189960
