@@ -31,11 +31,11 @@ export const ErrorDialog = (props: ErrorDialogProps) => {
       <DialogTitle>{props.title || 'Erreur'}</DialogTitle>
       <DialogContent ref={dialogContentRef}>
         <DialogContentText component="div">
-          <Grid container direction="column" spacing={2}>
-            <Grid item component="p" xs={12}>
+          <Grid container spacing={2} sx={{ flexDirection: 'column' }}>
+            <Grid component="p" size={{ xs: 12 }}>
               {props.description || 'Une erreur est survenue lors de votre précédente action.'}
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <ErrorAlert errors={[props.error]} />
             </Grid>
           </Grid>

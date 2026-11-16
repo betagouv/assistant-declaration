@@ -12,17 +12,19 @@ import { BusinessError } from '@ad/src/models/entities/errors';
 import { capitalizeFirstLetter } from '@ad/src/utils/format';
 import { recursiveCountErrors } from '@ad/src/utils/validation';
 
-export interface BaseFormProps<FormSchemaType extends FieldValues> {
-  handleSubmit: UseFormHandleSubmit<FormSchemaType>;
-  onSubmit: (input: FormSchemaType) => Promise<void>;
-  control: Control<any>;
+export interface BaseFormProps<FormSchemaType extends FieldValues, FormTransformedType = FormSchemaType> {
+  handleSubmit: UseFormHandleSubmit<FormSchemaType, FormTransformedType>;
+  onSubmit: (input: FormTransformedType) => Promise<void>;
+  control: Control<FormSchemaType, any, FormTransformedType>;
   ariaLabel: string;
   style?: CSSProperties;
   innerRef?: MutableRefObject<HTMLFormElement | null>;
 }
 
 // When you want to debug a form, just uncomment the below line (I did not see the value to manage it through environment variable)
-export function BaseForm<FormSchemaType extends FieldValues>(props: PropsWithChildren<BaseFormProps<FormSchemaType>>) {
+export function BaseForm<FormSchemaType extends FieldValues, FormTransformedType = FormSchemaType>(
+  props: PropsWithChildren<BaseFormProps<FormSchemaType, FormTransformedType>>
+) {
   const { t } = useTranslation('common');
   const [validationErrors, setValidationErrors] = useState<FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined>(
     props.control._formState.errors
@@ -54,7 +56,7 @@ export function BaseForm<FormSchemaType extends FieldValues>(props: PropsWithChi
 
     try {
       const submitChain = props.handleSubmit(
-        async (input: FormSchemaType) => {
+        async (input: FormTransformedType) => {
           try {
             // Validation has passed, reset validation errors
             setValidationErrors({});

@@ -1,6 +1,6 @@
 /** @jest-environment node */
 import { jest } from '@jest/globals';
-import type { Transporter } from 'nodemailer';
+import type { SentMessageInfo, Transporter } from 'nodemailer';
 
 import { Mailer } from '@ad/src/emails/mailer';
 
@@ -29,7 +29,7 @@ class TestMailer extends Mailer {
 describe('Mailer', () => {
   beforeEach(() => {
     sendMailMock.mockReset();
-    sendMailMock.mockResolvedValue(undefined);
+    sendMailMock.mockResolvedValue(undefined as unknown as SentMessageInfo);
   });
 
   it('sends rendered HTML and plaintext for a password-reset request', async () => {

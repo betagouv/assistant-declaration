@@ -1,4 +1,4 @@
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
 import { HttpResponse, http } from 'msw';
 
 import { mockDateDecorator } from '@ad/.storybook/MockDateDecorator';

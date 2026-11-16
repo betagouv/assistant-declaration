@@ -33,7 +33,6 @@ export function GlobalError({ error, reset }: { error: Error; reset: () => void 
 
   return (
     <>
-      {/* eslint-disable-next-line jsx-a11y/html-has-lang */}
       <html {...getHtmlAttributes({ lang })}>
         <head>
           <DsfrHead

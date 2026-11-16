@@ -1,4 +1,4 @@
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
 
 import { WithDocumentRenderer } from '@ad/.storybook/WithDocumentRenderer';
 import { commonDocumentsParameters } from '@ad/.storybook/document';

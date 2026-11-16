@@ -1343,17 +1343,17 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                         value={value}
                                         inputValue={value ?? ''}
                                         disabled={disabled}
-                                        renderInput={({ InputProps, disabled, id, inputProps }) => {
+                                        renderInput={({ slotProps, disabled, id }) => {
                                           return (
                                             <Input
-                                              ref={InputProps.ref}
+                                              ref={slotProps.input.ref}
                                               label="Intitulé du lieu de la représentation"
                                               id={id}
                                               disabled={disabled}
                                               state={!!error ? 'error' : undefined}
                                               stateRelatedMessage={error?.message}
                                               nativeInputProps={{
-                                                ...inputProps,
+                                                ...slotProps.htmlInput,
                                                 placeholder: 'Saisie ou recherche',
                                               }}
                                             />
@@ -1470,17 +1470,17 @@ export function DeclarationPage({ params: { organizationId, eventSerieId } }: De
                                           // The check is needed because the input value can be an empty string
                                           onChange(!isNaN(parsedValue) ? parsedValue : null);
                                         }}
-                                        renderInput={({ InputProps, disabled, id, inputProps }) => {
+                                        renderInput={({ slotProps, disabled, id }) => {
                                           return (
                                             <Input
-                                              ref={InputProps.ref}
+                                              ref={slotProps.input.ref}
                                               label="Jauge"
                                               id={id}
                                               disabled={disabled}
                                               state={!!error ? 'error' : undefined}
                                               stateRelatedMessage={error?.message}
                                               nativeInputProps={{
-                                                ...inputProps,
+                                                ...slotProps.htmlInput,
                                                 type: 'number',
                                                 placeholder: '0',
                                                 step: 1,

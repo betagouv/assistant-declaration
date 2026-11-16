@@ -3,10 +3,9 @@ import { MDXProvider } from '@mdx-js/react';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
 import { DocsContainerProps } from '@storybook/addon-docs/blocks';
 import { withLinks } from '@storybook/addon-links';
-import type { Preview } from '@storybook/react';
+import type { Preview } from '@storybook/nextjs';
 import { withMockAuth } from '@tomfreudenberg/next-auth-mock/storybook';
-import { passthrough } from 'msw';
-import { initialize, mswLoader } from 'msw-storybook-addon';
+import { mswLoader } from 'msw-storybook-addon/csf3';
 import React, { PropsWithChildren, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { configure as testingConfigure } from 'storybook/test';
@@ -46,20 +45,7 @@ if (window.matchMedia) {
   });
 }
 
-// Initialize MSW
-const mswServerSingleton = initialize({
-  onUnhandledRequest: (request, print) => {
-    const url = new URL(request.url);
-
-    if (url.pathname.startsWith('/api/')) {
-      // If API calls are not handled it means they are missing handlers for the server mock
-      print.error();
-    } else {
-      // Otherwise let XHR library get local files, favicon...
-      passthrough();
-    }
-  },
-});
+// MSW is initialized by the `mswLoader` below (msw-storybook-addon v3 no longer exports `initialize`)
 
 // Increase the timeout because when testing (test runners or interactions panel) all async methods like `findBy`
 // have 1 second of timeout, this is sometimes too short when there are multiple loadings behind
@@ -139,7 +125,7 @@ const preview: Preview = {
       },
     },
   },
-  loaders: [mswLoader],
+  loaders: [mswLoader()],
   decorators: [
     withLinks,
     withMockAuth,

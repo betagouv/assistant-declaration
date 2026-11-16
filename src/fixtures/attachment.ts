@@ -39,7 +39,7 @@ export const uppyFiles: EnhancedUppyFile[] = [
     extension: 'jpg',
     meta: {
       kind: 'EVENT_SERIE_DOCUMENT',
-      relativePath: null,
+      relativePath: undefined,
       name: 'sample-1.jpg',
       type: 'image/jpeg',
     },

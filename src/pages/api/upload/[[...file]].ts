@@ -105,7 +105,7 @@ const tusServer = new Server({
       // Still, Tus does not parse cookies from headers to set them as separate property, so we simulate it so "next-auth" can analyze them
       const cookiesHeader = req.headers.get('cookie');
       if (cookiesHeader) {
-        nextjsReq.cookies = cookie.parse(cookiesHeader);
+        nextjsReq.cookies = cookie.parseCookie(cookiesHeader);
       }
 
       const token = await nextAuthGetToken({ req: nextjsReq, secret: nextAuthOptions.secret });

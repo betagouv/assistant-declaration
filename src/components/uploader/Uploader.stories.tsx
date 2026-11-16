@@ -1,4 +1,4 @@
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
 import { HttpResponse, delay, http } from 'msw';
 import { within } from 'storybook/test';
 

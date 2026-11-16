@@ -1,4 +1,4 @@
-import type { Decorator } from '@storybook/react';
+import type { Decorator } from '@storybook/nextjs';
 import { useEffect } from 'react';
 
 const RealDate = Date;
