@@ -23,6 +23,11 @@ const customJestConfig: Parameters<typeof createJestConfig>[0] = {
   setupFilesAfterEnv: [],
   moduleDirectories: ['node_modules', '<rootDir>/'],
   moduleNameMapper: {
+    'pretty-bytes': '<rootDir>/src/fixtures/pretty-bytes-mock.js',
+    '@octokit/rest': '<rootDir>/src/fixtures/octokit-mock.js',
+    '@sindresorhus/slugify': '<rootDir>/src/fixtures/slugify-mock.js',
+    '\\.email\\.scss\\?raw$': '<rootDir>/src/fixtures/rawImportMock.js',
+    '\\.storybook\\.scss\\?raw$': '<rootDir>/src/fixtures/rawImportMock.js',
     ...(fullTsconfig.config.compilerOptions && fullTsconfig.config.compilerOptions.paths
       ? pathsToModuleNameMapper(fullTsconfig.config.compilerOptions.paths, { prefix: '<rootDir>/' })
       : {}),
@@ -37,7 +42,14 @@ const customJestConfig: Parameters<typeof createJestConfig>[0] = {
       'ts-jest',
       {
         useESM: true,
-        isolatedModules: true, // It disables type checking to make it faster (note it's not taken by default from the `tsconfig.json`)
+        isolatedModules: true,
+      },
+    ],
+    '\\.tsx$': [
+      'ts-jest',
+      {
+        useESM: true,
+        isolatedModules: true,
       },
     ],
     '\\.(html|xml|txt)$': '@glen/jest-raw-loader',
@@ -48,23 +60,17 @@ const customJestConfig: Parameters<typeof createJestConfig>[0] = {
 };
 
 // Used to specify the default cache directory in our CI/CD environment
-// Note: it cannot be set to undefined directly into the config object because Jest would take it due to the object key existing, so using a separate condition
 if (typeof process.env.JEST_CACHE_PATH === 'string') {
   customJestConfig.cacheDirectory = process.env.JEST_CACHE_PATH;
 }
 
-// [WORKAROUND] To transpile additional dependencies we hack a bit as specified into https://github.com/vercel/next.js/discussions/31152#discussioncomment-1697047
-// (and we add our own logic to avoid hardcoding values)
 const asyncConfig = createJestConfig(customJestConfig);
 
 const defaultExport = async () => {
   const config = await asyncConfig();
 
-  // Since the order over other mappers matters, we cannnot use it directly inside `moduleNameMapper` because it's appended over Next.js default configuration and not preprended
-  // So we make sure it's added as keys before (since JavaScript object keys are not sorted)
   config.moduleNameMapper = {
-    // '^.+\\.(scss)\\?raw$': '<rootDir>/src/fixtures/rawStyleMock.ts', // `createJestConfig` mocks all styles with `{}` but not our specific `?raw` so we do (note order over other mappers matters)
-    '^.+\\.(email|storybook)\\.scss$': '<rootDir>/src/fixtures/rawStyleMock.ts', // [WORKAROUND] Since using ESM modules (`extensionsToTreatAsEsm`) the paths no longer have their query string, so in the meantime we just force it for our specific case
+    '^.+\\.(email|storybook)\\.scss$': '<rootDir>/src/fixtures/rawStyleMock.ts',
     ...config.moduleNameMapper,
   };
 

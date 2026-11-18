@@ -63,7 +63,7 @@ export const SacdDeclarationSchema = DeclarationSchema.extend({
       paidTickets: true,
     })
       .extend(
-        EventSchema.pick({
+        StricterEventSchema.pick({
           endAt: true,
           // Since that's overrides there are not required
           placeCapacityOverride: true,
@@ -97,7 +97,7 @@ export const FlattenSacdEventSchema = StricterEventSchema.pick({
     place: PlaceSchema,
   })
   .extend(
-    EventSchema.pick({
+    StricterEventSchema.pick({
       endAt: true,
     }).shape
   )

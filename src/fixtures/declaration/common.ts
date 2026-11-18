@@ -19,9 +19,9 @@ const partialEvents = events.map((event) => {
 });
 
 export const eventsWithPlace: DeclarationSchemaType['events'] = [
-  { ...partialEvents[0], placeOverride: places[1] },
-  { ...partialEvents[1], placeOverride: null },
-  { ...partialEvents[2], placeOverride: places[2] },
+  { ...partialEvents[0], placeOverride: places[1], consumptionsRevenueTaxRate: 0.2, cateringRevenueTaxRate: 0.2, programSalesRevenueTaxRate: 0.2, otherRevenueTaxRate: 0.2, audienceOverride: 'ALL', ticketingRevenueTaxRateOverride: 0.055 },
+  { ...partialEvents[1], placeOverride: null, ticketingRevenueTaxRateOverride: 0.055 },
+  { ...partialEvents[2], placeOverride: places[2], audienceOverride: 'ALL' },
 ];
 
 export const declarations: DeclarationSchemaType[] = [

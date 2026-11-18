@@ -4,9 +4,8 @@ import { AddressSchema } from '@ad/src/models/entities/address';
 import { AttachmentInputSchema, UiAttachmentSchema } from '@ad/src/models/entities/attachment';
 import { DeclarationAttachmentTypeSchema, DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
 import {
-  EventSchema,
-  EventSerieSchema,
   StricterEventSerieSchema,
+  StricterEventSchema,
   assertAmountsRespectTaxLogic,
   assertValidExpenses,
 } from '@ad/src/models/entities/event';
@@ -15,7 +14,7 @@ import { PlaceInputSchema, PlaceSchema } from '@ad/src/models/entities/place';
 import { TicketingSystemSchema } from '@ad/src/models/entities/ticketing';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
-const declarationEventSerie = EventSerieSchema.pick({
+const declarationEventSerie = StricterEventSerieSchema.pick({
   id: true,
   name: true,
   producerOfficialId: true,
@@ -60,7 +59,7 @@ export const DeclarationSchema = applyTypedParsers(
         assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
       }),
       events: z.array(
-        EventSchema.pick({
+        StricterEventSchema.pick({
           id: true,
           startAt: true,
           endAt: true,
@@ -105,7 +104,7 @@ export const DeclarationInputSchema = applyTypedParsers(
   z
     .object({
       organization: DeclarationSchema.shape.organization,
-      eventSerie: EventSerieSchema.pick({
+      eventSerie: StricterEventSerieSchema.pick({
         id: true,
         name: true,
         producerOfficialId: true,
@@ -142,7 +141,7 @@ export const DeclarationInputSchema = applyTypedParsers(
           assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
         }),
       events: z.array(
-        EventSchema.pick({
+        StricterEventSchema.pick({
           id: true,
           startAt: true,
           endAt: true,
