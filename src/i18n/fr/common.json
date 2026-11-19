@@ -307,7 +307,7 @@
         "too_small_one": "l'identifiant SACEM est requis"
       },
       "sacdId": {
-        "sacdIdMustBeDigits": "l'identifiant SACD doit être composé de 1 à 10 chiffres",
+        "sacdIdMustBeHex": "l'identifiant SACD doit être composé de 1 à 32 caractères hexadécimaux",
         "invalid_type": "l'identifiant SACD est requis",
         "too_big": "l'identifiant SACD doit faire {{maximum}} caractères maximum",
         "too_small_one": "l'identifiant SACD est requis"

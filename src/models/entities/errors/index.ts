@@ -165,7 +165,7 @@ export const officialIdHeadquartersMustBe14DigitsError = new BusinessError(
   t('errors.validation.officialHeadquartersId.officialHeadquartersIdMustBe14Digits')
 );
 export const sacemIdMustBeDigitsError = new BusinessError('sacemIdMustBeDigits', t('errors.validation.sacemId.sacemIdMustBeDigits'));
-export const sacdIdMustBeDigitsError = new BusinessError('sacdIdMustBeDigits', t('errors.validation.sacdId.sacdIdMustBeDigits'));
+export const sacdIdMustBeHexError = new BusinessError('sacdIdMustBeHex', t('errors.validation.sacdId.sacdIdMustBeHex'));
 export const anotherOrganizationAlreadyHasThisOfficialIdError = new BusinessError(
   'anotherOrganizationAlreadyHasThisOfficialId',
   t('errors.custom.anotherOrganizationAlreadyHasThisOfficialId')
