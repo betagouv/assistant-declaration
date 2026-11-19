@@ -6,9 +6,9 @@ import { useIMask } from 'react-imask';
 
 // Can be used directly with `xxx.format(value)`
 export const sacdIdMask: FactoryOpts = {
-  mask: '0000000000',
+  mask: '00000000000000000000000000000000',
   definitions: {
-    '0': /[0-9]/,
+    '0': /[0-9a-fA-F]/,
   },
   overwrite: 'shift',
 };
@@ -57,7 +57,7 @@ export function SacdIdInput(props: SacdIdInputProps) {
       stateRelatedMessage={props.errorMessage}
       nativeInputProps={{
         ref: maskInputRef as Ref<HTMLInputElement> | undefined,
-        placeholder: '000000',
+        placeholder: '00000000000000000000000000000000',
         onChange: props.onChange,
         onBlur: props.onBlur,
       }}
