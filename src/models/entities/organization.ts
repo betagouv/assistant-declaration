@@ -8,13 +8,13 @@ import { applyTypedParsers } from '@ad/src/utils/zod';
 export const SacemIdSchema = z
   .string()
   .min(1)
-  .regex(/^\d{1,10}$/, customErrorToZodIssue(officialIdMustBe9DigitsError));
+  .regex(/^[0-9a-fA-F]{1,32}$/, customErrorToZodIssue(officialIdMustBe9DigitsError));
 export type SacemIdSchemaType = z.infer<typeof SacemIdSchema>;
 
 export const SacdIdSchema = z
   .string()
   .min(1)
-  .regex(/^\d{1,10}$/, customErrorToZodIssue(officialIdMustBe9DigitsError));
+  .regex(/^[0-9a-fA-F]{1,32}$/, customErrorToZodIssue(officialIdMustBe9DigitsError));
 export type SacdIdSchemaType = z.infer<typeof SacdIdSchema>;
 
 export const StricterOrganizationSchema = z.object({
