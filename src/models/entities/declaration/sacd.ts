@@ -12,99 +12,77 @@ import {
 import { StricterOrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceSchema } from '@ad/src/models/entities/place';
 
-// Here we take the original stored structure but forcing fields as required when needed by SACD
+// Avoid .pick() on refined schemas (zod 4.x limitation)
+// Build new object schemas with only the fields we need
+
+const SacdOrganizationSchema = z.object({
+  id: StricterOrganizationSchema.shape.id,
+  name: StricterOrganizationSchema.shape.name,
+  officialId: StricterOrganizationSchema.shape.officialId,
+  sacdId: StricterOrganizationSchema.shape.sacdId,
+  headquartersAddress: AddressSchema,
+}).strip();
+
+const SacdEventSerieSchema = z.object({
+  id: StricterEventSerieSchema.shape.id,
+  name: StricterEventSerieSchema.shape.name,
+  producerOfficialId: StricterEventSerieSchema.shape.producerOfficialId,
+  producerName: StricterEventSerieSchema.shape.producerName,
+  performanceType: StricterEventSerieSchema.shape.performanceType,
+  expectedDeclarationTypes: StricterEventSerieSchema.shape.expectedDeclarationTypes,
+  placeCapacity: StricterEventSerieSchema.shape.placeCapacity,
+  audience: StricterEventSerieSchema.shape.audience,
+  ticketingRevenueTaxRate: StricterEventSerieSchema.shape.ticketingRevenueTaxRate,
+  expensesIncludingTaxes: StricterEventSerieSchema.shape.expensesIncludingTaxes,
+  expensesExcludingTaxes: StricterEventSerieSchema.shape.expensesExcludingTaxes,
+  introductionFeesExpensesIncludingTaxes: StricterEventSerieSchema.shape.introductionFeesExpensesIncludingTaxes,
+  introductionFeesExpensesExcludingTaxes: StricterEventSerieSchema.shape.introductionFeesExpensesExcludingTaxes,
+  circusSpecificExpensesIncludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesIncludingTaxes,
+  circusSpecificExpensesExcludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesExcludingTaxes,
+  attachments: StricterEventSerieSchema.shape.attachments,
+  place: PlaceSchema,
+}).superRefine((data, ctx) => {
+  assertValidExpenses(data, ctx);
+  assertAmountsRespectTaxLogic(data, 'expensesExcludingTaxes', 'expensesIncludingTaxes', ctx);
+  assertAmountsRespectTaxLogic(data, 'introductionFeesExpensesExcludingTaxes', 'introductionFeesExpensesIncludingTaxes', ctx);
+  assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
+}).strip();
+
+const SacdEventSchema = z.object({
+  id: StricterEventSchema.shape.id,
+  startAt: StricterEventSchema.shape.startAt,
+  endAt: StricterEventSchema.shape.endAt,
+  ticketingRevenueIncludingTaxes: StricterEventSchema.shape.ticketingRevenueIncludingTaxes,
+  ticketingRevenueExcludingTaxes: StricterEventSchema.shape.ticketingRevenueExcludingTaxes,
+  freeTickets: StricterEventSchema.shape.freeTickets,
+  paidTickets: StricterEventSchema.shape.paidTickets,
+  placeCapacityOverride: StricterEventSchema.shape.placeCapacityOverride,
+  audienceOverride: StricterEventSchema.shape.audienceOverride,
+  ticketingRevenueTaxRateOverride: StricterEventSchema.shape.ticketingRevenueTaxRateOverride,
+  placeOverride: PlaceSchema.nullable(),
+}).superRefine((data, ctx) => {
+  assertAmountsRespectTaxLogic(data, 'ticketingRevenueExcludingTaxes', 'ticketingRevenueIncludingTaxes', ctx);
+}).strip();
+
 export const SacdDeclarationSchema = DeclarationSchema.extend({
-  organization: StricterOrganizationSchema.pick({
-    id: true,
-    name: true,
-    officialId: true,
-    sacdId: true,
-  })
-    .extend({
-      headquartersAddress: AddressSchema,
-    })
-    .strip(),
-  eventSerie: StricterEventSerieSchema.pick({
-    id: true,
-    name: true,
-    producerOfficialId: true,
-    producerName: true,
-    performanceType: true,
-    expectedDeclarationTypes: true,
-    placeCapacity: true,
-    audience: true,
-    ticketingRevenueTaxRate: true,
-    expensesIncludingTaxes: true,
-    expensesExcludingTaxes: true,
-    introductionFeesExpensesIncludingTaxes: true,
-    introductionFeesExpensesExcludingTaxes: true,
-    circusSpecificExpensesIncludingTaxes: true,
-    circusSpecificExpensesExcludingTaxes: true,
-    attachments: true,
-  })
-    .extend({
-      place: PlaceSchema,
-    })
-    .superRefine((data, ctx) => {
-      // Had to be reapplied since we picked up a few properties
-      assertValidExpenses(data, ctx);
-      assertAmountsRespectTaxLogic(data, 'expensesExcludingTaxes', 'expensesIncludingTaxes', ctx);
-      assertAmountsRespectTaxLogic(data, 'introductionFeesExpensesExcludingTaxes', 'introductionFeesExpensesIncludingTaxes', ctx);
-      assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
-    })
-    .strip(),
-  events: z.array(
-    StricterEventSchema.pick({
-      id: true,
-      startAt: true,
-      ticketingRevenueIncludingTaxes: true,
-      ticketingRevenueExcludingTaxes: true,
-      freeTickets: true,
-      paidTickets: true,
-    })
-      .extend(
-        StricterEventSchema.pick({
-          endAt: true,
-          // Since that's overrides there are not required
-          placeCapacityOverride: true,
-          audienceOverride: true,
-          ticketingRevenueTaxRateOverride: true,
-        }).shape
-      )
-      .extend({
-        placeOverride: PlaceSchema.nullable(),
-      })
-      .superRefine((data, ctx) => {
-        // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
-        assertAmountsRespectTaxLogic(data, 'ticketingRevenueExcludingTaxes', 'ticketingRevenueIncludingTaxes', ctx);
-      })
-      .strip()
-  ),
+  organization: SacdOrganizationSchema,
+  eventSerie: SacdEventSerieSchema,
+  events: z.array(SacdEventSchema),
 });
 export type SacdDeclarationSchemaType = z.infer<typeof SacdDeclarationSchema>;
 
 // This is useful to avoid in multiple locations of the code trying to search for the default value to display it
 // It will ensure no isolate issue over time
-export const FlattenSacdEventSchema = StricterEventSchema.pick({
-  id: true,
-  startAt: true,
-  ticketingRevenueIncludingTaxes: true,
-  ticketingRevenueExcludingTaxes: true,
-  freeTickets: true,
-  paidTickets: true,
-})
-  .extend({
-    place: PlaceSchema,
-  })
-  .extend(
-    StricterEventSchema.pick({
-      endAt: true,
-    }).shape
-  )
-  .extend(
-    StricterEventSerieSchema.pick({
-      placeCapacity: true,
-      audience: true,
-    }).shape
-  );
+export const FlattenSacdEventSchema = z.object({
+  id: StricterEventSchema.shape.id,
+  startAt: StricterEventSchema.shape.startAt,
+  endAt: StricterEventSchema.shape.endAt,
+  ticketingRevenueIncludingTaxes: StricterEventSchema.shape.ticketingRevenueIncludingTaxes,
+  ticketingRevenueExcludingTaxes: StricterEventSchema.shape.ticketingRevenueExcludingTaxes,
+  freeTickets: StricterEventSchema.shape.freeTickets,
+  paidTickets: StricterEventSchema.shape.paidTickets,
+  place: PlaceSchema,
+  placeCapacity: StricterEventSerieSchema.shape.placeCapacity,
+  audience: StricterEventSerieSchema.shape.audience,
+});
 export type FlattenSacdEventSchemaType = z.infer<typeof FlattenSacdEventSchema>;
