@@ -1,1 +1,5 @@
-module.exports = { Octokit: class { constructor() {} } };
+module.exports = {
+  Octokit: class {
+    constructor() {}
+  },
+};

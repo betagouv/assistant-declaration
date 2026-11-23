@@ -1,10 +1,10 @@
 /**
  * @jest-environment node
  */
-import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
+import { PrismaClient } from '@prisma/client';
 import concurrently from 'concurrently';
+import { Pool } from 'pg';
 
 import { seedDatabase } from '@ad/src/prisma/seed';
 import { PostgresContainer, setupPostgres } from '@ad/src/utils/database';
@@ -44,16 +44,24 @@ describe('database', () => {
       await result;
     });
 
-    it('migrate', async () => {
-      const { result } = concurrently(['npm:db:push:unsecure']);
-      await result;
-    }, 15 * 1000);
+    it(
+      'migrate',
+      async () => {
+        const { result } = concurrently(['npm:db:push:unsecure']);
+        await result;
+      },
+      15 * 1000
+    );
   });
 
-  it('seed database', async () => {
-    if (!prisma) {
-      throw new Error('prisma is not defined');
-    }
-    await seedDatabase(prisma);
-  }, 30 * 1000);
+  it(
+    'seed database',
+    async () => {
+      if (!prisma) {
+        throw new Error('prisma is not defined');
+      }
+      await seedDatabase(prisma);
+    },
+    30 * 1000
+  );
 });

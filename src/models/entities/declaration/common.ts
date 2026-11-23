@@ -3,12 +3,7 @@ import { z } from 'zod';
 import { AddressSchema } from '@ad/src/models/entities/address';
 import { AttachmentInputSchema, UiAttachmentSchema } from '@ad/src/models/entities/attachment';
 import { DeclarationAttachmentTypeSchema, DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
-import {
-  StricterEventSerieSchema,
-  StricterEventSchema,
-  assertAmountsRespectTaxLogic,
-  assertValidExpenses,
-} from '@ad/src/models/entities/event';
+import { StricterEventSchema, StricterEventSerieSchema, assertAmountsRespectTaxLogic, assertValidExpenses } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceInputSchema, PlaceSchema } from '@ad/src/models/entities/place';
 import { TicketingSystemSchema } from '@ad/src/models/entities/ticketing';

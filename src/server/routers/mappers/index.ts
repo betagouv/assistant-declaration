@@ -20,6 +20,14 @@ import { OrganizationSchemaType } from '@ad/src/models/entities/organization';
 import { PlaceSchemaType } from '@ad/src/models/entities/place';
 import { TicketingSystemSchemaType } from '@ad/src/models/entities/ticketing';
 import { UserSchemaType } from '@ad/src/models/entities/user';
+import {
+  DEFAULT_PERFORMANCE_TYPE,
+  DEFAULT_PLACE_CAPACITY,
+  DEFAULT_PRODUCER_NAME,
+  DEFAULT_PRODUCER_OFFICIAL_ID,
+  DEFAULT_REDUCED_TAX_RATE,
+  DEFAULT_TAX_RATE,
+} from '@ad/src/server/declaration-defaults';
 import { generateSignedAttachmentLink } from '@ad/src/server/routers/common/attachment';
 import { fileAuthSecret } from '@ad/src/server/routers/common/attachment.server';
 
@@ -104,7 +112,7 @@ export function eventSeriePrismaToModel(
     name: eventSerie.name,
     producerOfficialId: eventSerie.producerOfficialId,
     producerName: eventSerie.producerName,
-    performanceType: eventSerie.performanceType ? eventSerie.performanceType : null,
+    performanceType: eventSerie.performanceType ?? DEFAULT_PERFORMANCE_TYPE,
     expectedDeclarationTypes: eventSerie.expectedDeclarationTypes,
     placeId: eventSerie.placeId,
     placeCapacity: eventSerie.placeCapacity,
@@ -215,7 +223,16 @@ export function declarationPrismaToModel(
     },
     eventSerie: {
       ...liteEventSerie,
+      performanceType: liteEventSerie.performanceType ?? DEFAULT_PERFORMANCE_TYPE,
+      producerOfficialId: liteEventSerie.producerOfficialId ?? DEFAULT_PRODUCER_OFFICIAL_ID,
+      producerName: liteEventSerie.producerName ?? DEFAULT_PRODUCER_NAME,
       place: eventSerie.place ? placePrismaToModel(eventSerie.place) : null,
+      placeCapacity: liteEventSerie.placeCapacity ?? DEFAULT_PLACE_CAPACITY,
+      expensesTaxRate: liteEventSerie.expensesTaxRate ?? DEFAULT_TAX_RATE,
+      introductionFeesExpensesTaxRate: liteEventSerie.introductionFeesExpensesTaxRate ?? DEFAULT_TAX_RATE,
+      circusSpecificExpensesIncludingTaxes: liteEventSerie.circusSpecificExpensesIncludingTaxes ?? 0,
+      circusSpecificExpensesExcludingTaxes: liteEventSerie.circusSpecificExpensesExcludingTaxes ?? 0,
+      circusSpecificExpensesTaxRate: liteEventSerie.circusSpecificExpensesTaxRate ?? DEFAULT_TAX_RATE,
     },
     events: eventSerie.Event.map((event) => {
       const { placeOverrideId, internalTicketingSystemId, eventSerieId, createdAt, updatedAt, ...liteEvent } = eventPrismaToModel(event);
@@ -223,6 +240,13 @@ export function declarationPrismaToModel(
       return {
         ...liteEvent,
         placeOverride: event.placeOverride ? placePrismaToModel(event.placeOverride) : null,
+        audienceOverride: liteEvent.audienceOverride ?? 'ALL',
+        endAt: liteEvent.endAt ?? liteEvent.startAt,
+        ticketingRevenueTaxRateOverride: liteEvent.ticketingRevenueTaxRateOverride ?? DEFAULT_REDUCED_TAX_RATE,
+        consumptionsRevenueTaxRate: liteEvent.consumptionsRevenueTaxRate ?? DEFAULT_TAX_RATE,
+        cateringRevenueTaxRate: liteEvent.cateringRevenueTaxRate ?? DEFAULT_TAX_RATE,
+        programSalesRevenueTaxRate: liteEvent.programSalesRevenueTaxRate ?? DEFAULT_TAX_RATE,
+        otherRevenueTaxRate: liteEvent.otherRevenueTaxRate ?? DEFAULT_TAX_RATE,
       };
     }),
   };
