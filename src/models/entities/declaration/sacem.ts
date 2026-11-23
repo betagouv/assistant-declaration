@@ -95,11 +95,11 @@ export const FlattenSacemEventSchema = z.object({
   freeTickets: StricterEventSchema.shape.freeTickets,
   paidTickets: StricterEventSchema.shape.paidTickets,
   place: PlaceSchema,
-  // Tax rates from EventSchema
-  consumptionsRevenueTaxRate: EventSchema.shape.consumptionsRevenueTaxRate,
-  cateringRevenueTaxRate: EventSchema.shape.cateringRevenueTaxRate,
-  programSalesRevenueTaxRate: EventSchema.shape.programSalesRevenueTaxRate,
-  otherRevenueTaxRate: EventSchema.shape.otherRevenueTaxRate,
+  // Tax rates from EventSchema (optional as in EventSchema)
+  consumptionsRevenueTaxRate: EventSchema.shape.consumptionsRevenueTaxRate.optional(),
+  cateringRevenueTaxRate: EventSchema.shape.cateringRevenueTaxRate.optional(),
+  programSalesRevenueTaxRate: EventSchema.shape.programSalesRevenueTaxRate.optional(),
+  otherRevenueTaxRate: EventSchema.shape.otherRevenueTaxRate.optional(),
   // From EventSerieSchema
   placeCapacity: StricterEventSerieSchema.shape.placeCapacity,
   audience: StricterEventSerieSchema.shape.audience,
