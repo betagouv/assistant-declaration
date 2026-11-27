@@ -248,7 +248,7 @@ export const customErrorMap: z.core.$ZodErrorMap = (issue) => {
   // Our errors are lowercase to combine them as we want
   // In this case, for field highligh we want the sentence to be uppercase on the first letter
   return {
-    message: retrievedTranslation ? capitalizeFirstLetter(retrievedTranslation) : issue.message ?? issue.code,
+    message: retrievedTranslation ? capitalizeFirstLetter(retrievedTranslation) : (issue.message ?? issue.code),
   };
 };
 

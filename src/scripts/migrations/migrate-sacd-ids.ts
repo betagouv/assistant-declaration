@@ -39,9 +39,8 @@
  *   - Gère les anciens IDs inexistants
  *   - Retourne un code de sortie 1 en cas d'erreurs
  */
-
-import fs from 'fs';
 import dotenv from 'dotenv';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -90,14 +89,17 @@ async function readCorrespondenceFile(filePath: string): Promise<Mapping[]> {
   }
 
   // Strip UTF-8 BOM (fichiers édités dans Excel) avant parsing
-  const content = fs.readFileSync(absolutePath, 'utf-8').replace(/^\uFEFF/, '').trim();
+  const content = fs
+    .readFileSync(absolutePath, 'utf-8')
+    .replace(/^\uFEFF/, '')
+    .trim();
   const lines = content.split('\n');
 
   if (lines.length < 2) {
     throw new Error('CSV must have header and at least one data row');
   }
 
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
 
   if (headers.length !== 2 || headers[0] !== 'oldid' || headers[1] !== 'newid') {
     throw new Error('CSV must have two columns: oldId,newId');
@@ -108,7 +110,7 @@ async function readCorrespondenceFile(filePath: string): Promise<Mapping[]> {
     const line = lines[i].trim();
     if (!line) continue;
 
-    const [oldId, newId] = line.split(',').map(x => x.trim());
+    const [oldId, newId] = line.split(',').map((x) => x.trim());
     if (!oldId || !newId) {
       throw new Error(`Invalid CSV row ${i}: ${line}`);
     }
@@ -150,7 +152,7 @@ async function exportCurrentSacdIds(): Promise<void> {
     throw new Error('DATABASE_URL is required to export (set it or provide .env.test)');
   }
 
-  const { prisma } = await import('../prisma/client.ts');
+  const { prisma } = await import('../../prisma/client.ts');
 
   const records = await prisma.organization.findMany({
     where: { sacdId: { not: null } },
@@ -158,10 +160,7 @@ async function exportCurrentSacdIds(): Promise<void> {
     orderBy: { sacdId: 'asc' },
   });
 
-  const lines = [
-    'oldId,name',
-    ...records.map((r) => `${r.sacdId ?? ''},${csvEscape(r.name)}`),
-  ];
+  const lines = ['oldId,name', ...records.map((r) => `${r.sacdId ?? ''},${csvEscape(r.name)}`)];
 
   const outputPath = path.resolve(EXPORT_FILENAME);
   fs.writeFileSync(outputPath, lines.join('\n') + '\n', 'utf-8');
@@ -173,7 +172,7 @@ async function exportCurrentSacdIds(): Promise<void> {
 async function fetchSampleRecords(): Promise<SampleRecord[]> {
   if (!hasDatabaseConfigured()) return [];
 
-  const { prisma } = await import('../prisma/client.ts');
+  const { prisma } = await import('../../prisma/client.ts');
 
   const records = await prisma.organization.findMany({
     where: { sacdId: { not: null } },
@@ -211,7 +210,7 @@ async function migrateSacdIds(mappings: Mapping[]): Promise<MigrationResult[]> {
 
   // Live mode: actually update the database
   try {
-    const { prisma } = await import('../prisma/client.ts');
+    const { prisma } = await import('../../prisma/client.ts');
 
     for (const mapping of mappings) {
       if (usedNewIds.has(mapping.newId)) {
@@ -262,7 +261,7 @@ async function migrateSacdIds(mappings: Mapping[]): Promise<MigrationResult[]> {
 async function printSampleDiff(before: SampleRecord[]): Promise<void> {
   if (before.length === 0) return;
 
-  const { prisma } = await import('../prisma/client.ts');
+  const { prisma } = await import('../../prisma/client.ts');
 
   const currentRecords = (await prisma.organization.findMany({
     where: { id: { in: before.map((r) => r.id) } },
@@ -271,10 +270,7 @@ async function printSampleDiff(before: SampleRecord[]): Promise<void> {
 
   const currentById = new Map(currentRecords.map((r) => [r.id, r] as const));
 
-  const lines: string[] = [
-    'name | old sacdId | current sacdId',
-    '-----|------------|---------------',
-  ];
+  const lines: string[] = ['name | old sacdId | current sacdId', '-----|------------|---------------'];
 
   for (const prev of before) {
     const current = currentById.get(prev.id);
@@ -298,9 +294,9 @@ async function main() {
     return;
   }
 
-  const mappings     = await readCorrespondenceFile(args[0]);
+  const mappings = await readCorrespondenceFile(args[0]);
   const sampleBefore = await fetchSampleRecords();
-  const results      = await migrateSacdIds(mappings);
+  const results = await migrateSacdIds(mappings);
 
   await printSampleDiff(sampleBefore);
 

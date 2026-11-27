@@ -75,6 +75,15 @@ export const nextAuthOptions: NextAuthOptions = {
           throw new Error(authFatalError.code);
         }
 
+        // Reset MFA verification timestamp on each login
+        // This ensures MFA is required again after logout/login
+        try {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { mfaLastVerifiedAt: null },
+          });
+        } catch (err) {}
+
         return tokenUserParse.data;
       },
       credentials: {
@@ -84,6 +93,24 @@ export const nextAuthOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
+      const userId = user?.id || token.sub;
+
+      // Always fetch fresh MFA state from database
+      let dbUser = null;
+      if (userId) {
+        dbUser = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { mfaEnabled: true, mfaLastVerifiedAt: true },
+        });
+      }
+
+      // Calculate if MFA is verified (within timeout)
+      let mfaVerified = false;
+      if (dbUser?.mfaLastVerifiedAt) {
+        const timeSinceVerification = Date.now() - dbUser.mfaLastVerifiedAt.getTime();
+        mfaVerified = timeSinceVerification < Number(process.env.MFA_VERIFICATION_TIMEOUT_MINUTES || 180) * 60 * 1000;
+      }
+
       if (user) {
         return {
           ...token,
@@ -91,10 +118,16 @@ export const nextAuthOptions: NextAuthOptions = {
           email: user.email,
           given_name: user.firstname,
           family_name: user.lastname,
+          mfaEnabled: dbUser?.mfaEnabled ?? false,
+          mfaVerified,
         };
       }
 
-      return token;
+      return {
+        ...token,
+        mfaEnabled: dbUser?.mfaEnabled ?? false,
+        mfaVerified,
+      };
     },
     async session({ session, token }) {
       // Each time a token is forged (login/refreshToken) we update the "lastActivityAt" property (async to not slow the main purpose)
@@ -119,6 +152,8 @@ export const nextAuthOptions: NextAuthOptions = {
             email: token.email,
             firstname: token.given_name,
             lastname: token.family_name,
+            mfaEnabled: token.mfaEnabled,
+            mfaVerified: token.mfaVerified,
           },
         };
       }
@@ -137,6 +172,19 @@ export const nextAuthOptions: NextAuthOptions = {
       } else {
         // For security reason the default case is to redirect to home
         return baseUrl;
+      }
+    },
+    // @ts-ignore - signout callback exists in NextAuth v4 but types may differ
+    async signout({ user }: { user: any }) {
+      // Revoke MFA verification on signout
+      if (user?.id) {
+        try {
+          const result = await prisma.user.update({
+            where: { id: user.id },
+            data: { mfaLastVerifiedAt: null },
+          });
+        } catch (err) {}
+      } else {
       }
     },
   },

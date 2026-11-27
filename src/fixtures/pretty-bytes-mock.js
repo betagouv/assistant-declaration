@@ -1,4 +1,4 @@
-module.exports = function prettyBytes(bytes) {
+export default function prettyBytes(bytes) {
   if (typeof bytes !== 'number') return '0 B';
   const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
   let i = 0;
@@ -8,4 +8,4 @@ module.exports = function prettyBytes(bytes) {
     i++;
   }
   return `${value.toFixed(1)} ${units[i]}`;
-};
+}

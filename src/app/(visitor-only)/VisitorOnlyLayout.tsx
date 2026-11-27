@@ -14,12 +14,17 @@ export function VisitorOnlyLayout(props: PropsWithChildren) {
 
   useEffect(() => {
     if (sessionWrapper.status === 'authenticated') {
-      // TODO: this shows the children during a few ms... maybe the condition should be inside the useEffect too?
-      // or find a better hook than triggers ASAP without making React throwing error because it's currently rendering
-      // ... for now I just fixed it by forcing skeleton also when "authenticated" is true in the re-render
-      router.push(linkRegistry.get('dashboard', undefined));
+      const { mfaEnabled, mfaVerified } = sessionWrapper.data?.user || {};
+
+      // If MFA is enabled and verified, go to dashboard
+      if (mfaEnabled && mfaVerified) {
+        router.push(linkRegistry.get('dashboard', undefined));
+      } else {
+        // Otherwise, redirect to MFA page (setup or verification)
+        router.push('/mfa');
+      }
     }
-  }, [router, sessionWrapper.status]);
+  }, [router, sessionWrapper.status, sessionWrapper.data]);
 
   if (sessionWrapper.status !== 'unauthenticated') {
     return <LoadingArea ariaLabelTarget="contenu" />;

@@ -80,6 +80,8 @@ export const TokenUserSchema = z
     firstname: UserSchema.shape.firstname,
     lastname: UserSchema.shape.lastname,
     email: UserSchema.shape.email,
+    mfaEnabled: z.boolean().optional(),
+    mfaVerified: z.boolean().optional(),
   })
   .strict();
 export type TokenUserSchemaType = z.infer<typeof TokenUserSchema>;

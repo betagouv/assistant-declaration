@@ -66,7 +66,7 @@ export const eventRouter = router({
           const computedStartAt = eventsSerie.Event.length > 0 ? eventsSerie.Event[0].startAt : new Date(0);
           const computedEndAt =
             eventsSerie.Event.length > 0
-              ? eventsSerie.Event[eventsSerie.Event.length - 1].endAt ?? eventsSerie.Event[eventsSerie.Event.length - 1].startAt
+              ? (eventsSerie.Event[eventsSerie.Event.length - 1].endAt ?? eventsSerie.Event[eventsSerie.Event.length - 1].startAt)
               : new Date(0);
 
           return {

@@ -1,5 +1,5 @@
-import { sacdIdMustBeHexError } from '@ad/src/models/entities/errors';
 import { getServerTranslation } from '@ad/src/i18n';
+import { sacdIdMustBeHexError } from '@ad/src/models/entities/errors';
 
 describe('SACD ID error messages', () => {
   it('should use sacdIdMustBeHexError instead of sacdIdMustBeDigitsError', () => {

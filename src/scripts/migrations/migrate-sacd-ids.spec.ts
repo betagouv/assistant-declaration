@@ -1,8 +1,8 @@
 /**
  * @jest-environment node
  */
-import fs from 'fs';
 import { exec } from 'child_process';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -177,13 +177,18 @@ describe('Script de migration des identifiants SACD', () => {
   });
 });
 
-function runScript(filePath) {
+interface ScriptResult {
+  output: string;
+  exitCode: number | null | undefined;
+}
+
+function runScript(filePath: string): Promise<ScriptResult> {
   return new Promise((resolve) => {
     const command = `cd ${__dirname} && DATABASE_URL="" npx tsx migrate-sacd-ids.ts ${filePath}`;
     exec(command, (error, stdout, stderr) => {
       resolve({
         output: stdout + stderr,
-        exitCode: error ? error.code : 0,
+        exitCode: error ? (typeof error.code === 'number' ? error.code : 1) : 0,
       });
     });
   });

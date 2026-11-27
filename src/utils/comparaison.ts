@@ -32,10 +32,7 @@ type SortedUpdatedModel<Model, ReferenceProperty> = { key: ReferenceProperty; be
 type SortedUnchangedModel<Model, ReferenceProperty> = { key: ReferenceProperty; model: Model };
 
 export type GetDiffResult<Model, DoNotReportDifferences extends boolean = false> =
-  | AddedResult<Model>
-  | RemovedResult<Model>
-  | UpdatedResult<Model, DoNotReportDifferences>
-  | UnchangedResult<Model>;
+  AddedResult<Model> | RemovedResult<Model> | UpdatedResult<Model, DoNotReportDifferences> | UnchangedResult<Model>;
 
 export type GetDiffResults<ReferenceProperty, Model, DoNotReportDifferences extends boolean = false> = Map<
   ReferenceProperty,

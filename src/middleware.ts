@@ -1,4 +1,10 @@
+import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
+
+import { prisma } from '@ad/src/prisma/client';
+
+// Force Node.js runtime (Edge runtime is incompatible with oidc-token-hash used by next-auth)
+export const runtime = 'nodejs';
 
 const scriptSrcValues = ["'self'"];
 const connectSrcValues = ["'self'"];
@@ -62,6 +68,7 @@ if (process.env.NODE_ENV === 'development') {
   // Due to Next.js hot reload in development we need to allow `eval()`
   // Ref: https://github.com/vercel/next.js/issues/14221
   scriptSrcValues.push("'unsafe-eval'");
+  styleSrcValues.push("'http://localhost:3000'");
 }
 
 // Those headers are directly inspired from the default of https://github.com/helmetjs/helmet
@@ -113,7 +120,7 @@ export function mergeHeadersForNextjs(headersToAdjust: Headers, headersToAdd: { 
   });
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
 
   const requestHeaders = new Headers(request.headers);
@@ -140,6 +147,72 @@ export function middleware(request: NextRequest) {
     });
   }
 
+  // MFA middleware: redirect to /mfa if mfaEnabled and not mfaVerified
+  // Skip for auth routes and API routes
+  const isAuthRoute = url.pathname.startsWith('/auth/');
+  const isApiRoute = url.pathname.startsWith('/api/');
+
+  if (!isAuthRoute && !isApiRoute) {
+    try {
+      const token = await getToken({
+        req: request,
+        secret: process.env.NEXT_AUTH_SECRET,
+      });
+
+      if (url.pathname === '/mfa') {
+        if (!token?.sub) {
+          // Not authenticated: go to sign-in
+          return NextResponse.redirect(new URL('/auth/sign-in', request.url));
+        }
+
+        // Check MFA status directly from database (token may be stale)
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { mfaEnabled: true, mfaLastVerifiedAt: true },
+        });
+
+        // Calculate if MFA is verified (within 3 hours)
+        let mfaVerified = false;
+        if (dbUser?.mfaLastVerifiedAt) {
+          const timeSinceVerification = Date.now() - dbUser.mfaLastVerifiedAt.getTime();
+          mfaVerified = timeSinceVerification < Number(process.env.MFA_VERIFICATION_TIMEOUT_MINUTES || 180) * 60 * 1000;
+        }
+
+        // MFA fully done: go to dashboard
+        if (dbUser?.mfaEnabled && mfaVerified) {
+          return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+
+        // Otherwise (setup or verification pending): let the page render
+        return NextResponse.next();
+      }
+
+      if (token?.sub) {
+        // Check MFA status directly from database (token may be stale)
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { mfaEnabled: true, mfaLastVerifiedAt: true },
+        });
+
+        // Calculate if MFA is verified (within 3 hours)
+        let mfaVerified = false;
+        if (dbUser?.mfaLastVerifiedAt) {
+          const timeSinceVerification = Date.now() - dbUser.mfaLastVerifiedAt.getTime();
+          mfaVerified = timeSinceVerification < Number(process.env.MFA_VERIFICATION_TIMEOUT_MINUTES || 180) * 60 * 1000;
+        }
+
+        // Force all users to use MFA: if not enabled OR not verified, redirect to /mfa
+        if (!dbUser?.mfaEnabled || !mfaVerified) {
+          // Redirect to MFA verification page (root route, not inside visitor-only layout)
+          return NextResponse.redirect(new URL('/mfa', request.url));
+        }
+      }
+    } catch (error) {
+      console.error('[middleware] Error checking MFA status:', error);
+      // Continue without redirect if there's an error
+    }
+  }
+
   return response;
 }
 
@@ -164,3 +237,18 @@ export function middleware(request: NextRequest) {
 //     },
 //   ],
 // };
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    {
+      source: '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    },
+  ],
+};

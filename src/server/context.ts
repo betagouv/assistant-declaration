@@ -5,11 +5,14 @@ import { NextApiRequest } from 'next';
 import { getServerSession } from 'next-auth';
 
 import { nextAuthOptions } from '@ad/src/pages/api/auth/[...nextauth]';
+import { prisma } from '@ad/src/prisma/client';
 
 export interface User {
   id: string;
   email: string;
   name: string;
+  mfaEnabled?: boolean;
+  mfaVerified?: boolean;
 }
 
 export async function createContext(opts: CreateNextContextOptions | CreateWSSContextFnOptions) {
@@ -25,8 +28,11 @@ export async function createContext(opts: CreateNextContextOptions | CreateWSSCo
     nextAuthOptions
   );
 
+  const user = session?.user;
+
   return {
-    user: session?.user,
+    user,
+    prisma,
   };
 }
 

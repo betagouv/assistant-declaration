@@ -178,6 +178,11 @@ const config: StorybookConfig = {
       use: 'raw-loader',
     });
 
+    config.module!.rules!.push({
+      test: /\.svg$/i,
+      type: 'asset',
+    });
+
     if (!config.resolve) {
       config.resolve = {};
     }

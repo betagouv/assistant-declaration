@@ -40,4 +40,4 @@ Mesures de sécurité retenues :
 - Réévaluer cette décision si : une seconde application apparaît (besoin de SSO), le nombre d'utilisateurs ou d'exigences d'audit augmente fortement, ou le RSSI exige WebAuthn / un niveau d'assurance supérieur.
 - Hors périmètre : protection contre le vol de session ou le phishing en temps réel (non couverts par TOTP).
 
-Voir aussi : [runbook MFA](../runbooks/mfa.md) *(à venir)*
+Voir aussi : [runbook MFA](../runbooks/mfa.md)

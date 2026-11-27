@@ -11,7 +11,7 @@
   "scripts": {
     "setup": "playwright install chromium",
     "postinstall": "patch-package",
-    "dev": "n",
+    "dev": "only-include-used-icons && concurrently --kill-others -c \"auto\" \"npm:dev:app:command\" \"npm:dev:storybook:command\"",
     "dev:app": "only-include-used-icons && npm run dev:app:command",
     "dev:app:command": "dotenv-run-script .env.test -- dev:app:command:unsecure",
     "dev:app:command:unsecure": "next dev --webpack",
@@ -88,7 +88,8 @@
     "prisma": "dotenv-run-script .env.test -- prisma:unsecure",
     "prisma:unsecure": "prisma",
     "tsx": "tsx",
-    "jest": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest"
+    "jest": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+    "install-deps": "npm install --legacy-peer-deps"
   },
   "dependencies": {
     "@ag-media/react-pdf-table": "^2.0.3",
@@ -124,6 +125,7 @@
     "@trpc/server": "^11.26.0",
     "@tus/file-store": "^2.1.2",
     "@tus/server": "2.4.7",
+    "@types/qrcode": "^1.5.6",
     "@types/simple-oauth2": "^5.0.8",
     "@uppy/core": "^6.3.1",
     "@uppy/drag-drop": "^6.0.2",
@@ -167,6 +169,9 @@
     "pg-boss": "^12.38.1",
     "playwright": "^1.65.0",
     "pretty-bytes": "^7.2.0",
+    "qrcode": "^1.5.4",
+    "qrcode-generator": "^2.0.4",
+    "qrcode-svg": "^1.1.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-file-icon": "^1.6.0",
@@ -196,6 +201,7 @@
     "@hookform/devtools": "^4.4.0",
     "@mdx-js/loader": "^3.1.1",
     "@octokit/rest": "^22.0.1",
+    "@otplib/preset-default": "^12.0.1",
     "@prettier/plugin-xml": "^3.4.2",
     "@sentry/cli": "^3.8.2",
     "@sentry/profiling-node": "^11.11.0",
@@ -204,6 +210,7 @@
     "@storybook/addon-docs": "^10.6.6",
     "@storybook/addon-links": "^10.6.6",
     "@storybook/nextjs": "^10.6.6",
+    "@storybook/test": "^8.6.15",
     "@storybook/test-runner": "^0.26.1",
     "@swc/core": "^1.16.22",
     "@testing-library/jest-dom": "^7.0.1",
@@ -230,6 +237,7 @@
     "@types/mjml-react": "^2.0.11",
     "@types/node": "^26.6.6",
     "@types/parse-github-url": "^1.0.3",
+    "@types/qrcode-svg": "^1.1.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@types/react-file-icon": "^1.0.5",
@@ -270,6 +278,7 @@
     "parse-github-url": "^1.0.4",
     "path-browserify": "^1.0.1",
     "postcss-loader": "^8.2.1",
+    "prettier": "^3.10.1",
     "prisma": "7.10.1",
     "raw-loader": "^4.0.2",
     "sass": "^1.108.1",
@@ -284,32 +293,6 @@
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "typescript-plugin-css-modules": "^5.3.0"
-  },
-  "overrides": {
-    "@tomfreudenberg/next-auth-mock": {
-      "react": "^19.0.0"
-    },
-    "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0",
-    "msw": {
-      "typescript": "$typescript"
-    },
-    "ts-import": {
-      "typescript": "$typescript"
-    },
-    "cssnano": "^9.9.0",
-    "compression": "^1.8.2",
-    "js-yaml": "^4.3.2",
-    "glob": "^14.0.4",
-    "minimatch": "^11.0.5",
-    "uuid": "^14.0.3",
-    "webpack-dev-middleware": "^7.4.6",
-    "node-polyfill-webpack-plugin": "^4.1.0",
-    "next-auth": {
-      "nodemailer": "$nodemailer"
-    },
-    "test-exclude": "^8.0.0",
-    "nyc": "^18.0.0"
   },
   "packageManager": "npm@12.2.2",
   "engines": {

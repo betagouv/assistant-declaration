@@ -73,9 +73,13 @@ enum UserStatus {
 }
 
 model UserSecrets {
-  id           String @id @default(uuid()) @db.Uuid
-  userId       String @unique @db.Uuid
-  passwordHash String
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @unique @db.Uuid
+  passwordHash      String
+  totpSecret        String?
+  mfaFailedAttempts Int       @default(0)
+  mfaLockedUntil    DateTime?
+  totpLastUsedStep  Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -90,7 +94,11 @@ model User {
   email          String     @unique
   status         UserStatus @default(REGISTERED)
   profilePicture String?
-  lastActivityAt DateTime?  @default(now())
+  mfaEnabled         Boolean  @default(false)
+  mfaLastVerifiedAt  DateTime?
+  mfaFailedAttempts  Int      @default(0)
+  mfaLockedUntil     DateTime?
+  lastActivityAt     DateTime?  @default(now())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

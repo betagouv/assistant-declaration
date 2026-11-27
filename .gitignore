@@ -46,3 +46,4 @@ yarn-error.log*
 
 # legal documents to transform to HTML (with `format-legal-documents.sh`)
 /src/**/*.docx
+logs/

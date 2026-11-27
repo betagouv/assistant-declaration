@@ -89,3 +89,32 @@ export const isAuthed = t.middleware(({ next, ctx }) => {
 });
 
 export const privateProcedure = t.procedure.use(isAuthed);
+
+// MFA protection middleware: rejects if mfaEnabled && !mfaVerified
+// Apply to all protected procedures except verifyMfaLogin
+export const isMfaVerified = t.middleware(({ next, ctx }) => {
+  // isAuthed is expected to run before this middleware (see protectedMfaProcedure)
+  if (!ctx.user) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: unauthorizedError.message,
+      cause: unauthorizedError,
+    });
+  }
+
+  if (ctx.user.mfaEnabled && !ctx.user.mfaVerified) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'MFA verification required',
+    });
+  }
+
+  return next({
+    ctx: {
+      user: ctx.user,
+    },
+  });
+});
+
+// Protected procedure that also requires MFA verification
+export const protectedMfaProcedure = t.procedure.use(isAuthed).use(isMfaVerified);

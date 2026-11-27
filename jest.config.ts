@@ -26,6 +26,11 @@ const customJestConfig: Parameters<typeof createJestConfig>[0] = {
     'pretty-bytes': '<rootDir>/src/fixtures/pretty-bytes-mock.js',
     '@octokit/rest': '<rootDir>/src/fixtures/octokit-mock.js',
     '@sindresorhus/slugify': '<rootDir>/src/fixtures/slugify-mock.js',
+    '@codegouvfr/react-dsfr$': '<rootDir>/src/fixtures/react-dsfr-mock.js',
+    '@codegouvfr/react-dsfr/Input': '<rootDir>/src/fixtures/react-dsfr-mock.js',
+    '@codegouvfr/react-dsfr/Button': '<rootDir>/src/fixtures/react-dsfr-mock.js',
+    '@codegouvfr/react-dsfr/Badge': '<rootDir>/src/fixtures/react-dsfr-mock.js',
+    '@codegouvfr/react-dsfr/Alert': '<rootDir>/src/fixtures/react-dsfr-mock.js',
     '\\.email\\.scss\\?raw$': '<rootDir>/src/fixtures/rawImportMock.js',
     '\\.storybook\\.scss\\?raw$': '<rootDir>/src/fixtures/rawImportMock.js',
     ...(fullTsconfig.config.compilerOptions && fullTsconfig.config.compilerOptions.paths

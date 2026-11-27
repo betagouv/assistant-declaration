@@ -1,1 +1,1 @@
-module.exports = (input) => input.toLowerCase().replace(/\s+/g, '-');
+export default (input) => input.toLowerCase().replace(/\s+/g, '-');
