@@ -1,5 +1,5 @@
 import { Attachment } from '@prisma/client';
-import contentDisposition from 'content-disposition';
+import { create as contentDisposition } from 'content-disposition';
 import { minutesToSeconds } from 'date-fns';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Readable } from 'stream';

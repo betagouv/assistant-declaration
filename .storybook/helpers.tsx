@@ -1,6 +1,16 @@
 import { ArgTypes, Controls, Description, PRIMARY_STORY, Primary, Stories, Subtitle, Title } from '@storybook/addon-docs/blocks';
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
+import type { AnyHandler } from 'msw';
+import type { MswParameter } from 'msw-storybook-addon/csf3';
 import { PartialStoryFn } from 'storybook/internal/types';
+
+// msw-storybook-addon v3: `parameters.msw` is either an array of handlers or `{ handlers }`
+function mswHandlersOf(parameters: { msw?: MswParameter } | undefined): AnyHandler[] {
+  const msw = parameters?.msw;
+  if (!msw) return [];
+  if (Array.isArray(msw)) return msw;
+  return Array.isArray(msw.handlers) ? msw.handlers : [];
+}
 
 // Helper to get props type of a component
 export type ComponentProps<F extends (props: any) => React.JSX.Element> = F extends (...args: infer A) => any ? Partial<A[0]> : never;
@@ -172,13 +182,9 @@ export function prepareStory<ComponentType, ContextValueType extends MatchingCon
 
     // It we detect some network mocking from the layout story, make sure to reuse it
     if (layoutStory.parameters?.msw) {
-      if (!story.parameters.msw) {
-        story.parameters.msw = {
-          handlers: [],
-        };
-      }
-
-      story.parameters.msw.handlers = [...layoutStory.parameters.msw.handlers, ...story.parameters.msw.handlers];
+      story.parameters.msw = {
+        handlers: [...mswHandlersOf(layoutStory.parameters), ...mswHandlersOf(story.parameters)],
+      };
     }
   }
 
@@ -198,13 +204,9 @@ export function prepareStory<ComponentType, ContextValueType extends MatchingCon
 
           // It we detect some network mocking from the child story, make sure to reuse it
           if (childStory.parameters?.msw) {
-            if (!story.parameters.msw) {
-              story.parameters.msw = {
-                handlers: [],
-              };
-            }
-
-            story.parameters.msw.handlers = [...childStory.parameters.msw.handlers, ...story.parameters.msw.handlers];
+            story.parameters.msw = {
+              handlers: [...mswHandlersOf(childStory.parameters), ...mswHandlersOf(story.parameters)],
+            };
           }
 
           (options.childrenContext.value[key] as any) = (props: any) => {

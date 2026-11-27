@@ -17,8 +17,9 @@ export const centeredContainerGridProps: GridProps = {
 };
 
 export const centeredFormContainerGridProps: GridProps = {
-  direction: 'column',
   sx: {
+    // MUI v9 Grid only supports `direction="row"`; column layouts go through `sx`
+    flexDirection: 'column',
     ...wideContainerGridProps.sx,
     maxWidth: '460px',
     mx: 'auto',
@@ -35,8 +36,9 @@ export const mdCenteredFormContainerGridProps = {
 };
 
 export const centeredAlertContainerGridProps: GridProps = {
-  direction: 'column',
   sx: {
+    // MUI v9 Grid only supports `direction="row"`; column layouts go through `sx`
+    flexDirection: 'column',
     ...wideContainerGridProps.sx,
     maxWidth: 'md',
     mx: 'auto',
@@ -45,8 +47,9 @@ export const centeredAlertContainerGridProps: GridProps = {
 };
 
 export const centeredErrorContainerGridProps: GridProps = {
-  direction: 'column',
   sx: {
+    // MUI v9 Grid only supports `direction="row"`; column layouts go through `sx`
+    flexDirection: 'column',
     ...wideContainerGridProps.sx,
     maxWidth: 'xl',
     mx: 'auto',
@@ -55,8 +58,9 @@ export const centeredErrorContainerGridProps: GridProps = {
 };
 
 export const centeredContentContainerGridProps: GridProps = {
-  direction: 'column',
   sx: {
+    // MUI v9 Grid only supports `direction="row"`; column layouts go through `sx`
+    flexDirection: 'column',
     ...wideContainerGridProps.sx,
     maxWidth: 'xl',
     mx: 'auto',

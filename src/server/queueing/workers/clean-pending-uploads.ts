@@ -1,12 +1,12 @@
 import { AttachmentStatus } from '@prisma/client';
 import { subDays } from 'date-fns';
-import PgBoss from 'pg-boss';
+import type { Job } from 'pg-boss';
 
 import { prisma } from '@ad/src/prisma';
 
 export const cleanPendingUploadsTopic = 'clean-pending-uploads';
 
-export async function cleanPendingUploads(job: PgBoss.Job<void>) {
+export async function cleanPendingUploads(job: Job<void>) {
   console.log('starting the job of cleaning pending uploads');
 
   const deletedAttachments = await prisma.attachment.deleteMany({

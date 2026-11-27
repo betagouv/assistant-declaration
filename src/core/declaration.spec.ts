@@ -4,9 +4,11 @@ import {
   getTaxAmountFromIncludingTaxesAmount,
 } from '@ad/src/core/declaration';
 
+import { DEFAULT_TAX_RATE } from '../server/declaration-defaults';
+
 describe('calculations related to tax rate', () => {
   const includingTaxesAmount = 9.6;
-  const taxRate = 0.2;
+  const taxRate = DEFAULT_TAX_RATE;
 
   describe('getExcludingTaxesAmountFromIncludingTaxesAmount()', () => {
     it('should return the excluding taxes amount', () => {

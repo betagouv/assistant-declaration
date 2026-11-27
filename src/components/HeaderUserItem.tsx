@@ -76,8 +76,8 @@ export function HeaderUserItem(props: PropsWithChildren<HeaderUserItemProps>) {
 
   return (
     <Box aria-label="options" aria-controls={open ? 'account-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined}>
-      <Grid container direction="row" alignItems="center" spacing={1}>
-        <Grid item>Mon compte</Grid>
+      <Grid container spacing={1} sx={{ alignItems: 'center' }}>
+        <Grid>Mon compte</Grid>
       </Grid>
       <FocusTrap open={open}>
         <Popover
@@ -88,7 +88,7 @@ export function HeaderUserItem(props: PropsWithChildren<HeaderUserItemProps>) {
           disableEnforceFocus={true} // Required otherwise on responsive navbar clicking when the menu is open throws an error ("Maximum call stack size exceeded" on the "FocusTrap"). I did not find a way to fix this :/ ... not sure about the accessibility impact so we added manually a `<FocusTrap>` (https://mui.com/material-ui/react-modal/#focus-trap)?
           onClose={handleClose}
           onClick={handleClose}
-          PaperProps={{ ...menuPaperProps }}
+          slotProps={{ paper: { ...menuPaperProps } }}
           transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           sx={{ zIndex: 2000 }} // Needed to be displayed over the navbar on mobile devices

@@ -1,4 +1,4 @@
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
 import { EventEmitter } from 'eventemitter3';
 import { screen, userEvent, within } from 'storybook/test';
 

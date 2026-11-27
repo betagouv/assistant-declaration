@@ -1,4 +1,4 @@
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
 
 import { WithEmailClientOverviewFactory } from '@ad/.storybook/WithEmailClientOverviewFactory';
 import { WithEmailRenderer } from '@ad/.storybook/WithEmailRenderer';

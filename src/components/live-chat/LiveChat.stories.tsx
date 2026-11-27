@@ -1,4 +1,4 @@
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { LiveChatProvider } from '@ad/src/components/live-chat/LiveChatProvider';

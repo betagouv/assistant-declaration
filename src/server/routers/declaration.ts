@@ -36,6 +36,13 @@ import {
 import { EventSchemaType, EventSerieSchemaType } from '@ad/src/models/entities/event';
 import { PlaceSchemaType } from '@ad/src/models/entities/place';
 import { prisma } from '@ad/src/prisma/client';
+import {
+  DEFAULT_PERFORMANCE_TYPE,
+  DEFAULT_PLACE_CAPACITY,
+  DEFAULT_PRODUCER_NAME,
+  DEFAULT_PRODUCER_OFFICIAL_ID,
+  DEFAULT_TAX_RATE,
+} from '@ad/src/server/declaration-defaults';
 import { formatSafeAttachmentsToProcess } from '@ad/src/server/routers/common/attachment';
 import { attachmentOnEventSeriePrismaToModel, attachmentPrismaToModel, declarationPrismaToModel } from '@ad/src/server/routers/mappers';
 import { isUserACollaboratorPartOfOrganization } from '@ad/src/server/routers/organization';
@@ -783,51 +790,47 @@ export const declarationRouter = router({
           eventSerie: {
             id: eventSerie.id,
             name: eventSerie.name,
-            producerOfficialId: input.eventSerie.producer?.officialId ?? null,
-            producerName: input.eventSerie.producer?.name ?? null,
-            performanceType: input.eventSerie.performanceType,
+            producerOfficialId: input.eventSerie.producer?.officialId ?? DEFAULT_PRODUCER_OFFICIAL_ID,
+            producerName: input.eventSerie.producer?.name ?? DEFAULT_PRODUCER_NAME,
+            performanceType: input.eventSerie.performanceType ?? DEFAULT_PERFORMANCE_TYPE,
             expectedDeclarationTypes: input.eventSerie.expectedDeclarationTypes,
             place: {
               name: input.eventSerie.place.name,
               address: input.eventSerie.place.address,
             },
-            placeCapacity: input.eventSerie.placeCapacity,
+            placeCapacity: input.eventSerie.placeCapacity ?? DEFAULT_PLACE_CAPACITY,
             audience: input.eventSerie.audience,
             ticketingRevenueTaxRate: input.eventSerie.ticketingRevenueTaxRate,
             expensesIncludingTaxes: input.eventSerie.expensesIncludingTaxes,
             expensesExcludingTaxes: input.eventSerie.expensesExcludingTaxes,
-            expensesTaxRate: input.eventSerie.expensesTaxRate,
+            expensesTaxRate: input.eventSerie.expensesTaxRate ?? DEFAULT_TAX_RATE,
             introductionFeesExpensesIncludingTaxes: input.eventSerie.introductionFeesExpensesIncludingTaxes,
             introductionFeesExpensesExcludingTaxes: input.eventSerie.introductionFeesExpensesExcludingTaxes,
-            introductionFeesExpensesTaxRate: input.eventSerie.introductionFeesExpensesTaxRate,
-            circusSpecificExpensesIncludingTaxes: input.eventSerie.circusSpecificExpensesIncludingTaxes,
-            circusSpecificExpensesExcludingTaxes: input.eventSerie.circusSpecificExpensesExcludingTaxes,
-            circusSpecificExpensesTaxRate: input.eventSerie.circusSpecificExpensesTaxRate,
+            introductionFeesExpensesTaxRate: input.eventSerie.introductionFeesExpensesTaxRate ?? DEFAULT_TAX_RATE,
+            circusSpecificExpensesIncludingTaxes: input.eventSerie.circusSpecificExpensesIncludingTaxes ?? 0,
+            circusSpecificExpensesExcludingTaxes: input.eventSerie.circusSpecificExpensesExcludingTaxes ?? 0,
+            circusSpecificExpensesTaxRate: input.eventSerie.circusSpecificExpensesTaxRate ?? DEFAULT_TAX_RATE,
             attachments: input.eventSerie.attachments,
           },
           events: input.events.map((event) => {
             return {
               id: event.id,
               startAt: event.startAt,
-              endAt: event.endAt,
+              endAt: event.endAt ?? event.startAt,
               ticketingRevenueIncludingTaxes: event.ticketingRevenueIncludingTaxes,
               ticketingRevenueExcludingTaxes: event.ticketingRevenueExcludingTaxes,
               consumptionsRevenueIncludingTaxes: event.consumptionsRevenueIncludingTaxes,
               consumptionsRevenueExcludingTaxes: event.consumptionsRevenueExcludingTaxes,
-              // consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate,
-              consumptionsRevenueTaxRate: null,
+              consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate ?? DEFAULT_TAX_RATE,
               cateringRevenueIncludingTaxes: event.cateringRevenueIncludingTaxes,
               cateringRevenueExcludingTaxes: event.cateringRevenueExcludingTaxes,
-              // cateringRevenueTaxRate: event.cateringRevenueTaxRate,
-              cateringRevenueTaxRate: null,
+              cateringRevenueTaxRate: event.cateringRevenueTaxRate ?? DEFAULT_TAX_RATE,
               programSalesRevenueIncludingTaxes: event.programSalesRevenueIncludingTaxes,
               programSalesRevenueExcludingTaxes: event.programSalesRevenueExcludingTaxes,
-              // programSalesRevenueTaxRate: event.programSalesRevenueTaxRate,
-              programSalesRevenueTaxRate: null,
+              programSalesRevenueTaxRate: event.programSalesRevenueTaxRate ?? DEFAULT_TAX_RATE,
               otherRevenueIncludingTaxes: event.otherRevenueIncludingTaxes,
               otherRevenueExcludingTaxes: event.otherRevenueExcludingTaxes,
-              // otherRevenueTaxRate: event.otherRevenueTaxRate,
-              otherRevenueTaxRate: null,
+              otherRevenueTaxRate: event.otherRevenueTaxRate ?? DEFAULT_TAX_RATE,
               freeTickets: event.freeTickets,
               paidTickets: event.paidTickets,
               placeOverride: {
@@ -835,8 +838,8 @@ export const declarationRouter = router({
                 address: event.placeOverride.address,
               },
               placeCapacityOverride: event.placeCapacityOverride,
-              audienceOverride: event.audienceOverride,
-              ticketingRevenueTaxRateOverride: event.ticketingRevenueTaxRateOverride,
+              audienceOverride: event.audienceOverride ?? 'ALL',
+              ticketingRevenueTaxRateOverride: event.ticketingRevenueTaxRateOverride ?? 0.055,
             };
           }),
         });
@@ -1127,7 +1130,7 @@ export const declarationRouter = router({
               // ticketingRevenueDefinedTaxRate: event.ticketingRevenueDefinedTaxRate, // Not used for now
               consumptionsRevenueIncludingTaxes: event.consumptionsRevenueIncludingTaxes,
               consumptionsRevenueExcludingTaxes: event.consumptionsRevenueExcludingTaxes,
-              consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate,
+              consumptionsRevenueTaxRate: event.consumptionsRevenueTaxRate ?? DEFAULT_TAX_RATE,
               cateringRevenueIncludingTaxes: event.cateringRevenueIncludingTaxes,
               cateringRevenueExcludingTaxes: event.cateringRevenueExcludingTaxes,
               cateringRevenueTaxRate: event.cateringRevenueTaxRate,
