@@ -1,7 +1,7 @@
 import { type Locale, formatDate, formatDistance, formatDuration, formatRelative, isDate } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { fr as frDateLocale } from 'date-fns/locale/fr';
-import i18next from 'i18next';
+import i18next, { type InterpolationOptions } from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import prettyBytes from 'pretty-bytes';
 import { z } from 'zod';
@@ -40,9 +40,10 @@ i18next.use(LanguageDetector).init(
     defaultNS: defaultNamespace,
     returnEmptyString: false,
     returnNull: false,
+    // i18next v27 no longer types `interpolation.format` but still calls it at runtime, so we keep it with a cast
     interpolation: {
       escapeValue: false, // React already safes from xss
-      format: (value, format, lng, options) => {
+      format: (value: any, format: string | undefined, lng: string | undefined, options: { timezone?: string } | undefined) => {
         if (!!format && !!lng) {
           if (isDate(value)) {
             if (options) {
@@ -132,7 +133,7 @@ i18next.use(LanguageDetector).init(
 
         return value;
       },
-    },
+    } as InterpolationOptions,
     resources: resources,
     debug: false,
   },

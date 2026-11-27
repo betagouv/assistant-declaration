@@ -38,13 +38,13 @@ export const ConfirmationDialog = (props: ConfirmationDialogProps) => {
       <DialogTitle>{props.title || 'Confirmation'}</DialogTitle>
       <DialogContent ref={dialogContentRef}>
         <DialogContentText component="div">
-          <Grid container direction="column" spacing={2}>
+          <Grid container spacing={2} sx={{ flexDirection: 'column' }}>
             {!!actionError && (
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <ErrorAlert errors={[actionError]} />
               </Grid>
             )}
-            <Grid item component="p" xs={12}>
+            <Grid component="p" size={{ xs: 12 }}>
               {props.description || 'Êtes-vous sûr de vouloir continuer ?'}
             </Grid>
           </Grid>

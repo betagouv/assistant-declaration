@@ -3,88 +3,82 @@ import { z } from 'zod';
 import { AddressSchema } from '@ad/src/models/entities/address';
 import { AttachmentInputSchema, UiAttachmentSchema } from '@ad/src/models/entities/attachment';
 import { DeclarationAttachmentTypeSchema, DeclarationStatusSchema, DeclarationTypeSchema } from '@ad/src/models/entities/common';
-import {
-  EventSchema,
-  EventSerieSchema,
-  StricterEventSerieSchema,
-  assertAmountsRespectTaxLogic,
-  assertValidExpenses,
-} from '@ad/src/models/entities/event';
+import { StricterEventSchema, StricterEventSerieSchema, assertAmountsRespectTaxLogic, assertValidExpenses } from '@ad/src/models/entities/event';
 import { OrganizationSchema } from '@ad/src/models/entities/organization';
 import { PlaceInputSchema, PlaceSchema } from '@ad/src/models/entities/place';
 import { TicketingSystemSchema } from '@ad/src/models/entities/ticketing';
 import { applyTypedParsers } from '@ad/src/utils/zod';
 
-const declarationEventSerie = EventSerieSchema.pick({
-  id: true,
-  name: true,
-  producerOfficialId: true,
-  producerName: true,
-  performanceType: true,
-  expectedDeclarationTypes: true,
-  placeCapacity: true,
-  audience: true,
-  ticketingRevenueTaxRate: true,
-  expensesIncludingTaxes: true,
-  expensesExcludingTaxes: true,
-  expensesTaxRate: true,
-  introductionFeesExpensesIncludingTaxes: true,
-  introductionFeesExpensesExcludingTaxes: true,
-  introductionFeesExpensesTaxRate: true,
-  circusSpecificExpensesIncludingTaxes: true,
-  circusSpecificExpensesExcludingTaxes: true,
-  circusSpecificExpensesTaxRate: true,
-  attachments: true,
-}).extend({
+// Avoid .pick() on refined schemas (zod 4.x limitation)
+// Build new object schemas with only the fields we need
+
+const declarationEventSerie = z.object({
+  id: StricterEventSerieSchema.shape.id,
+  name: StricterEventSerieSchema.shape.name,
+  producerOfficialId: StricterEventSerieSchema.shape.producerOfficialId,
+  producerName: StricterEventSerieSchema.shape.producerName,
+  performanceType: StricterEventSerieSchema.shape.performanceType,
+  expectedDeclarationTypes: StricterEventSerieSchema.shape.expectedDeclarationTypes,
+  placeCapacity: StricterEventSerieSchema.shape.placeCapacity,
+  audience: StricterEventSerieSchema.shape.audience,
+  ticketingRevenueTaxRate: StricterEventSerieSchema.shape.ticketingRevenueTaxRate,
+  expensesIncludingTaxes: StricterEventSerieSchema.shape.expensesIncludingTaxes,
+  expensesExcludingTaxes: StricterEventSerieSchema.shape.expensesExcludingTaxes,
+  expensesTaxRate: StricterEventSerieSchema.shape.expensesTaxRate,
+  introductionFeesExpensesIncludingTaxes: StricterEventSerieSchema.shape.introductionFeesExpensesIncludingTaxes,
+  introductionFeesExpensesExcludingTaxes: StricterEventSerieSchema.shape.introductionFeesExpensesExcludingTaxes,
+  introductionFeesExpensesTaxRate: StricterEventSerieSchema.shape.introductionFeesExpensesTaxRate,
+  circusSpecificExpensesIncludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesIncludingTaxes,
+  circusSpecificExpensesExcludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesExcludingTaxes,
+  circusSpecificExpensesTaxRate: StricterEventSerieSchema.shape.circusSpecificExpensesTaxRate,
+  attachments: StricterEventSerieSchema.shape.attachments,
   place: PlaceSchema.nullable(),
 });
 
 export const DeclarationSchema = applyTypedParsers(
   z
     .object({
-      organization: OrganizationSchema.pick({
-        id: true,
-        name: true,
-        officialId: true,
-        officialHeadquartersId: true,
-        sacemId: true,
-        sacdId: true,
-      }).extend({
+      organization: z.object({
+        id: OrganizationSchema.shape.id,
+        name: OrganizationSchema.shape.name,
+        officialId: OrganizationSchema.shape.officialId,
+        officialHeadquartersId: OrganizationSchema.shape.officialHeadquartersId,
+        sacemId: OrganizationSchema.shape.sacemId,
+        sacdId: OrganizationSchema.shape.sacdId,
         headquartersAddress: AddressSchema,
       }),
       eventSerie: declarationEventSerie.superRefine((data, ctx) => {
-        // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
+        // Had to be reapplied since we picked up a few properties
         assertValidExpenses(data, ctx);
         assertAmountsRespectTaxLogic(data, 'expensesExcludingTaxes', 'expensesIncludingTaxes', ctx);
         assertAmountsRespectTaxLogic(data, 'introductionFeesExpensesExcludingTaxes', 'introductionFeesExpensesIncludingTaxes', ctx);
         assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
       }),
       events: z.array(
-        EventSchema.pick({
-          id: true,
-          startAt: true,
-          endAt: true,
-          ticketingRevenueIncludingTaxes: true,
-          ticketingRevenueExcludingTaxes: true,
-          consumptionsRevenueIncludingTaxes: true,
-          consumptionsRevenueExcludingTaxes: true,
-          consumptionsRevenueTaxRate: true,
-          cateringRevenueIncludingTaxes: true,
-          cateringRevenueExcludingTaxes: true,
-          cateringRevenueTaxRate: true,
-          programSalesRevenueIncludingTaxes: true,
-          programSalesRevenueExcludingTaxes: true,
-          programSalesRevenueTaxRate: true,
-          otherRevenueIncludingTaxes: true,
-          otherRevenueExcludingTaxes: true,
-          otherRevenueTaxRate: true,
-          freeTickets: true,
-          paidTickets: true,
-          placeCapacityOverride: true,
-          audienceOverride: true,
-          ticketingRevenueTaxRateOverride: true,
-        })
-          .extend({
+        z
+          .object({
+            id: StricterEventSchema.shape.id,
+            startAt: StricterEventSchema.shape.startAt,
+            endAt: StricterEventSchema.shape.endAt,
+            ticketingRevenueIncludingTaxes: StricterEventSchema.shape.ticketingRevenueIncludingTaxes,
+            ticketingRevenueExcludingTaxes: StricterEventSchema.shape.ticketingRevenueExcludingTaxes,
+            consumptionsRevenueIncludingTaxes: StricterEventSchema.shape.consumptionsRevenueIncludingTaxes,
+            consumptionsRevenueExcludingTaxes: StricterEventSchema.shape.consumptionsRevenueExcludingTaxes,
+            consumptionsRevenueTaxRate: StricterEventSchema.shape.consumptionsRevenueTaxRate,
+            cateringRevenueIncludingTaxes: StricterEventSchema.shape.cateringRevenueIncludingTaxes,
+            cateringRevenueExcludingTaxes: StricterEventSchema.shape.cateringRevenueExcludingTaxes,
+            cateringRevenueTaxRate: StricterEventSchema.shape.cateringRevenueTaxRate,
+            programSalesRevenueIncludingTaxes: StricterEventSchema.shape.programSalesRevenueIncludingTaxes,
+            programSalesRevenueExcludingTaxes: StricterEventSchema.shape.programSalesRevenueExcludingTaxes,
+            programSalesRevenueTaxRate: StricterEventSchema.shape.programSalesRevenueTaxRate,
+            otherRevenueIncludingTaxes: StricterEventSchema.shape.otherRevenueIncludingTaxes,
+            otherRevenueExcludingTaxes: StricterEventSchema.shape.otherRevenueExcludingTaxes,
+            otherRevenueTaxRate: StricterEventSchema.shape.otherRevenueTaxRate,
+            freeTickets: StricterEventSchema.shape.freeTickets,
+            paidTickets: StricterEventSchema.shape.paidTickets,
+            placeCapacityOverride: StricterEventSchema.shape.placeCapacityOverride,
+            audienceOverride: StricterEventSchema.shape.audienceOverride,
+            ticketingRevenueTaxRateOverride: StricterEventSchema.shape.ticketingRevenueTaxRateOverride,
             placeOverride: PlaceSchema.nullable(),
           })
           .superRefine((data, ctx) => {
@@ -105,27 +99,26 @@ export const DeclarationInputSchema = applyTypedParsers(
   z
     .object({
       organization: DeclarationSchema.shape.organization,
-      eventSerie: EventSerieSchema.pick({
-        id: true,
-        name: true,
-        producerOfficialId: true,
-        producerName: true,
-        performanceType: true,
-        expectedDeclarationTypes: true,
-        placeCapacity: true,
-        audience: true,
-        ticketingRevenueTaxRate: true,
-        expensesIncludingTaxes: true,
-        expensesExcludingTaxes: true,
-        expensesTaxRate: true,
-        introductionFeesExpensesIncludingTaxes: true,
-        introductionFeesExpensesExcludingTaxes: true,
-        introductionFeesExpensesTaxRate: true,
-        circusSpecificExpensesIncludingTaxes: true,
-        circusSpecificExpensesExcludingTaxes: true,
-        circusSpecificExpensesTaxRate: true,
-      })
-        .extend({
+      eventSerie: z
+        .object({
+          id: StricterEventSerieSchema.shape.id,
+          name: StricterEventSerieSchema.shape.name,
+          producerOfficialId: StricterEventSerieSchema.shape.producerOfficialId,
+          producerName: StricterEventSerieSchema.shape.producerName,
+          performanceType: StricterEventSerieSchema.shape.performanceType,
+          expectedDeclarationTypes: StricterEventSerieSchema.shape.expectedDeclarationTypes,
+          placeCapacity: StricterEventSerieSchema.shape.placeCapacity,
+          audience: StricterEventSerieSchema.shape.audience,
+          ticketingRevenueTaxRate: StricterEventSerieSchema.shape.ticketingRevenueTaxRate,
+          expensesIncludingTaxes: StricterEventSerieSchema.shape.expensesIncludingTaxes,
+          expensesExcludingTaxes: StricterEventSerieSchema.shape.expensesExcludingTaxes,
+          expensesTaxRate: StricterEventSerieSchema.shape.expensesTaxRate,
+          introductionFeesExpensesIncludingTaxes: StricterEventSerieSchema.shape.introductionFeesExpensesIncludingTaxes,
+          introductionFeesExpensesExcludingTaxes: StricterEventSerieSchema.shape.introductionFeesExpensesExcludingTaxes,
+          introductionFeesExpensesTaxRate: StricterEventSerieSchema.shape.introductionFeesExpensesTaxRate,
+          circusSpecificExpensesIncludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesIncludingTaxes,
+          circusSpecificExpensesExcludingTaxes: StricterEventSerieSchema.shape.circusSpecificExpensesExcludingTaxes,
+          circusSpecificExpensesTaxRate: StricterEventSerieSchema.shape.circusSpecificExpensesTaxRate,
           place: PlaceInputSchema,
           attachments: z.array(
             z.object({
@@ -142,31 +135,30 @@ export const DeclarationInputSchema = applyTypedParsers(
           assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
         }),
       events: z.array(
-        EventSchema.pick({
-          id: true,
-          startAt: true,
-          endAt: true,
-          ticketingRevenueIncludingTaxes: true,
-          ticketingRevenueExcludingTaxes: true,
-          consumptionsRevenueIncludingTaxes: true,
-          consumptionsRevenueExcludingTaxes: true,
-          consumptionsRevenueTaxRate: true,
-          cateringRevenueIncludingTaxes: true,
-          cateringRevenueExcludingTaxes: true,
-          cateringRevenueTaxRate: true,
-          programSalesRevenueIncludingTaxes: true,
-          programSalesRevenueExcludingTaxes: true,
-          programSalesRevenueTaxRate: true,
-          otherRevenueIncludingTaxes: true,
-          otherRevenueExcludingTaxes: true,
-          otherRevenueTaxRate: true,
-          freeTickets: true,
-          paidTickets: true,
-          placeCapacityOverride: true,
-          audienceOverride: true,
-          ticketingRevenueTaxRateOverride: true,
-        })
-          .extend({
+        z
+          .object({
+            id: StricterEventSchema.shape.id,
+            startAt: StricterEventSchema.shape.startAt,
+            endAt: StricterEventSchema.shape.endAt,
+            ticketingRevenueIncludingTaxes: StricterEventSchema.shape.ticketingRevenueIncludingTaxes,
+            ticketingRevenueExcludingTaxes: StricterEventSchema.shape.ticketingRevenueExcludingTaxes,
+            consumptionsRevenueIncludingTaxes: StricterEventSchema.shape.consumptionsRevenueIncludingTaxes,
+            consumptionsRevenueExcludingTaxes: StricterEventSchema.shape.consumptionsRevenueExcludingTaxes,
+            consumptionsRevenueTaxRate: StricterEventSchema.shape.consumptionsRevenueTaxRate,
+            cateringRevenueIncludingTaxes: StricterEventSchema.shape.cateringRevenueIncludingTaxes,
+            cateringRevenueExcludingTaxes: StricterEventSchema.shape.cateringRevenueExcludingTaxes,
+            cateringRevenueTaxRate: StricterEventSchema.shape.cateringRevenueTaxRate,
+            programSalesRevenueIncludingTaxes: StricterEventSchema.shape.programSalesRevenueIncludingTaxes,
+            programSalesRevenueExcludingTaxes: StricterEventSchema.shape.programSalesRevenueExcludingTaxes,
+            programSalesRevenueTaxRate: StricterEventSchema.shape.programSalesRevenueTaxRate,
+            otherRevenueIncludingTaxes: StricterEventSchema.shape.otherRevenueIncludingTaxes,
+            otherRevenueExcludingTaxes: StricterEventSchema.shape.otherRevenueExcludingTaxes,
+            otherRevenueTaxRate: StricterEventSchema.shape.otherRevenueTaxRate,
+            freeTickets: StricterEventSchema.shape.freeTickets,
+            paidTickets: StricterEventSchema.shape.paidTickets,
+            placeCapacityOverride: StricterEventSchema.shape.placeCapacityOverride,
+            audienceOverride: StricterEventSchema.shape.audienceOverride,
+            ticketingRevenueTaxRateOverride: StricterEventSchema.shape.ticketingRevenueTaxRateOverride,
             placeOverride: PlaceInputSchema,
           })
           .superRefine((data, ctx) => {

@@ -30,87 +30,92 @@ export const GetDeclarationPrefillSchema = GetDeclarationSchema.partial();
 export type GetDeclarationPrefillSchemaType = z.infer<typeof GetDeclarationPrefillSchema>;
 
 export const fillDeclarationAttachmentsMax = 100;
+
+// Avoid .pick() on refined schemas (zod 4.x limitation)
+// Build new object schemas with only the fields we need
+
+const FillOrganizationSchema = z.object({
+  sacemId: OrganizationSchema.shape.sacemId,
+  sacdId: OrganizationSchema.shape.sacdId,
+});
+
+const FillEventSerieSchema = z
+  .object({
+    performanceType: EventSerieSchema.shape.performanceType,
+    expectedDeclarationTypes: EventSerieSchema.shape.expectedDeclarationTypes,
+    placeCapacity: EventSerieSchema.shape.placeCapacity,
+    audience: EventSerieSchema.shape.audience,
+    ticketingRevenueTaxRate: EventSerieSchema.shape.ticketingRevenueTaxRate,
+    expensesIncludingTaxes: EventSerieSchema.shape.expensesIncludingTaxes,
+    expensesExcludingTaxes: EventSerieSchema.shape.expensesExcludingTaxes,
+    expensesTaxRate: EventSerieSchema.shape.expensesTaxRate,
+    introductionFeesExpensesIncludingTaxes: EventSerieSchema.shape.introductionFeesExpensesIncludingTaxes,
+    introductionFeesExpensesExcludingTaxes: EventSerieSchema.shape.introductionFeesExpensesExcludingTaxes,
+    introductionFeesExpensesTaxRate: EventSerieSchema.shape.introductionFeesExpensesTaxRate,
+    circusSpecificExpensesIncludingTaxes: EventSerieSchema.shape.circusSpecificExpensesIncludingTaxes,
+    circusSpecificExpensesExcludingTaxes: EventSerieSchema.shape.circusSpecificExpensesExcludingTaxes,
+    circusSpecificExpensesTaxRate: EventSerieSchema.shape.circusSpecificExpensesTaxRate,
+    place: PlaceInputSchema,
+    producer: z
+      .object({
+        officialId: StricterEventSerieSchema.shape.producerOfficialId,
+        name: StricterEventSerieSchema.shape.producerName,
+      })
+      .nullable(),
+    attachments: z.array(
+      z.object({
+        id: AttachmentInputSchema,
+        type: DeclarationAttachmentTypeSchema,
+      })
+    ),
+  })
+  .superRefine((data, ctx) => {
+    assertValidExpenses(data, ctx);
+    assertAmountsRespectTaxLogic(data, 'expensesExcludingTaxes', 'expensesIncludingTaxes', ctx);
+    assertAmountsRespectTaxLogic(data, 'introductionFeesExpensesExcludingTaxes', 'introductionFeesExpensesIncludingTaxes', ctx);
+    assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
+  });
+
+const FillEventSchema = z
+  .object({
+    id: EventSchema.shape.id,
+    startAt: EventSchema.shape.startAt,
+    endAt: EventSchema.shape.endAt,
+    ticketingRevenueIncludingTaxes: EventSchema.shape.ticketingRevenueIncludingTaxes,
+    ticketingRevenueExcludingTaxes: EventSchema.shape.ticketingRevenueExcludingTaxes,
+    consumptionsRevenueIncludingTaxes: EventSchema.shape.consumptionsRevenueIncludingTaxes,
+    consumptionsRevenueExcludingTaxes: EventSchema.shape.consumptionsRevenueExcludingTaxes,
+    consumptionsRevenueTaxRate: EventSchema.shape.consumptionsRevenueTaxRate,
+    cateringRevenueIncludingTaxes: EventSchema.shape.cateringRevenueIncludingTaxes,
+    cateringRevenueExcludingTaxes: EventSchema.shape.cateringRevenueExcludingTaxes,
+    cateringRevenueTaxRate: EventSchema.shape.cateringRevenueTaxRate,
+    programSalesRevenueIncludingTaxes: EventSchema.shape.programSalesRevenueIncludingTaxes,
+    programSalesRevenueExcludingTaxes: EventSchema.shape.programSalesRevenueExcludingTaxes,
+    programSalesRevenueTaxRate: EventSchema.shape.programSalesRevenueTaxRate,
+    otherRevenueIncludingTaxes: EventSchema.shape.otherRevenueIncludingTaxes,
+    otherRevenueExcludingTaxes: EventSchema.shape.otherRevenueExcludingTaxes,
+    otherRevenueTaxRate: EventSchema.shape.otherRevenueTaxRate,
+    freeTickets: EventSchema.shape.freeTickets,
+    paidTickets: EventSchema.shape.paidTickets,
+    placeCapacityOverride: EventSchema.shape.placeCapacityOverride,
+    audienceOverride: EventSchema.shape.audienceOverride,
+    ticketingRevenueTaxRateOverride: EventSchema.shape.ticketingRevenueTaxRateOverride,
+    placeOverride: PlaceInputSchema,
+  })
+  .superRefine((data, ctx) => {
+    assertAmountsRespectTaxLogic(data, 'ticketingRevenueExcludingTaxes', 'ticketingRevenueIncludingTaxes', ctx);
+    assertAmountsRespectTaxLogic(data, 'consumptionsRevenueExcludingTaxes', 'consumptionsRevenueIncludingTaxes', ctx);
+    assertAmountsRespectTaxLogic(data, 'cateringRevenueExcludingTaxes', 'cateringRevenueIncludingTaxes', ctx);
+    assertAmountsRespectTaxLogic(data, 'programSalesRevenueExcludingTaxes', 'programSalesRevenueIncludingTaxes', ctx);
+    assertAmountsRespectTaxLogic(data, 'otherRevenueExcludingTaxes', 'otherRevenueIncludingTaxes', ctx);
+  });
+
 export const FillDeclarationSchema = z
   .object({
     eventSerieId: EventSerieSchema.shape.id,
-    organization: OrganizationSchema.pick({
-      sacemId: true,
-      sacdId: true,
-    }),
-    eventSerie: EventSerieSchema.pick({
-      performanceType: true,
-      expectedDeclarationTypes: true,
-      placeCapacity: true,
-      audience: true,
-      ticketingRevenueTaxRate: true,
-      expensesIncludingTaxes: true,
-      expensesExcludingTaxes: true,
-      expensesTaxRate: true,
-      introductionFeesExpensesIncludingTaxes: true,
-      introductionFeesExpensesExcludingTaxes: true,
-      introductionFeesExpensesTaxRate: true,
-      circusSpecificExpensesIncludingTaxes: true,
-      circusSpecificExpensesExcludingTaxes: true,
-      circusSpecificExpensesTaxRate: true,
-    })
-      .extend({
-        place: PlaceInputSchema,
-        producer: z
-          .object({
-            officialId: StricterEventSerieSchema.shape.producerOfficialId,
-            name: StricterEventSerieSchema.shape.producerName,
-          })
-          .nullable(),
-        attachments: z.array(
-          z.object({
-            id: AttachmentInputSchema,
-            type: DeclarationAttachmentTypeSchema,
-          })
-        ),
-      })
-      .superRefine((data, ctx) => {
-        // `.pick` won't propagate picked `.superRefine` so we have to apply it here again
-        assertValidExpenses(data, ctx);
-        assertAmountsRespectTaxLogic(data, 'expensesExcludingTaxes', 'expensesIncludingTaxes', ctx);
-        assertAmountsRespectTaxLogic(data, 'introductionFeesExpensesExcludingTaxes', 'introductionFeesExpensesIncludingTaxes', ctx);
-        assertAmountsRespectTaxLogic(data, 'circusSpecificExpensesExcludingTaxes', 'circusSpecificExpensesIncludingTaxes', ctx);
-      }),
-    events: z.array(
-      EventSchema.pick({
-        id: true,
-        startAt: true,
-        endAt: true,
-        ticketingRevenueIncludingTaxes: true,
-        ticketingRevenueExcludingTaxes: true,
-        consumptionsRevenueIncludingTaxes: true,
-        consumptionsRevenueExcludingTaxes: true,
-        consumptionsRevenueTaxRate: true,
-        cateringRevenueIncludingTaxes: true,
-        cateringRevenueExcludingTaxes: true,
-        cateringRevenueTaxRate: true,
-        programSalesRevenueIncludingTaxes: true,
-        programSalesRevenueExcludingTaxes: true,
-        programSalesRevenueTaxRate: true,
-        otherRevenueIncludingTaxes: true,
-        otherRevenueExcludingTaxes: true,
-        otherRevenueTaxRate: true,
-        freeTickets: true,
-        paidTickets: true,
-        placeCapacityOverride: true,
-        audienceOverride: true,
-        ticketingRevenueTaxRateOverride: true, // TODO: waiting to know if using them or not
-      })
-        .extend({
-          placeOverride: PlaceInputSchema,
-        })
-        .superRefine((data, ctx) => {
-          assertAmountsRespectTaxLogic(data, 'ticketingRevenueExcludingTaxes', 'ticketingRevenueIncludingTaxes', ctx);
-          assertAmountsRespectTaxLogic(data, 'consumptionsRevenueExcludingTaxes', 'consumptionsRevenueIncludingTaxes', ctx);
-          assertAmountsRespectTaxLogic(data, 'cateringRevenueExcludingTaxes', 'cateringRevenueIncludingTaxes', ctx);
-          assertAmountsRespectTaxLogic(data, 'programSalesRevenueExcludingTaxes', 'programSalesRevenueIncludingTaxes', ctx);
-          assertAmountsRespectTaxLogic(data, 'otherRevenueExcludingTaxes', 'otherRevenueIncludingTaxes', ctx);
-        })
-    ),
+    organization: FillOrganizationSchema,
+    eventSerie: FillEventSerieSchema,
+    events: z.array(FillEventSchema),
   })
   .strict();
 export type FillDeclarationSchemaType = z.infer<typeof FillDeclarationSchema>;

@@ -6,7 +6,7 @@ const testingLibrary = require('eslint-plugin-testing-library');
 
 module.exports = [
   {
-    ignores: ['build/**', 'data/**', 'dist/**', 'storybook-static/**'],
+    ignores: ['build/**', 'data/**', 'dist/**', 'storybook-static/**', 'public/mockServiceWorker.js'],
   },
   ...next,
   ...storybook.configs['flat/recommended'],

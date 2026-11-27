@@ -1,4 +1,4 @@
-import { Decorator } from '@storybook/react';
+import { Decorator } from '@storybook/nextjs';
 import React from 'react';
 import { within } from 'storybook/test';
 

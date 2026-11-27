@@ -1,7 +1,7 @@
 import BundleAnalyzer from '@next/bundle-analyzer';
 import createMDX from '@next/mdx';
-import { rspack } from '@rspack/core';
-import { SentryBuildOptions, withSentryConfig } from '@sentry/nextjs';
+import { withSentryConfig } from '@sentry/nextjs/config';
+import type { SentryBuildOptions } from '@sentry/nextjs/config';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import type { NextConfig } from 'next';
 import withRspack from 'next-rspack';
@@ -151,9 +151,8 @@ const generateNextConfig = async (): Promise<NextConfig> => {
   const uploadToSentry = process.env.SENTRY_RELEASE_UPLOAD === 'true' && process.env.NODE_ENV === 'production';
 
   const sentryWebpackPluginOptions: SentryBuildOptions = {
-    unstable_sentryWebpackPluginOptions: {
-      disable: !uploadToSentry, // Does not seem to disable it fully
-    },
+    // `unstable_sentryWebpackPluginOptions` and the `disable*WebpackPlugin` flags have been removed in @sentry/nextjs v11;
+    // the bundler plugin is now controlled through `sourcemaps.disable` / the release upload only runs with an auth token in production
     debug: false,
     silent: false,
     release: {
@@ -179,7 +178,6 @@ const generateNextConfig = async (): Promise<NextConfig> => {
     // tunnelRoute: '/monitoring', // Helpful to avoid adblockers, but requires Sentry SaaS
     // disableServerWebpackPlugin: true, // TODO
     // disableClientWebpackPlugin: true, // TODO
-    disableLogger: false,
   };
 
   return withBundleAnalyzer(withSentryConfig(withMDX(standardModuleExports), sentryWebpackPluginOptions));

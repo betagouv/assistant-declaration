@@ -100,15 +100,15 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
         sx={{ position: 'absolute', right: 0 }}
       />
       <CardContent sx={{ p: '1rem !important' }}>
-        <Grid container direction={'column'} spacing={2}>
-          <Grid item xs={12}>
-            <Grid container alignItems="center" spacing={2} sx={{ pr: '40px' }}>
-              <Grid item sx={{ display: 'flex' }}>
+        <Grid container spacing={2} sx={{ flexDirection: 'column' }}>
+          <Grid size={{ xs: 12 }}>
+            <Grid container spacing={2} sx={{ alignItems: 'center', pr: '40px' }}>
+              <Grid sx={{ display: 'flex' }}>
                 <Image src={logo} alt="" width={120} height={120} style={{ objectFit: 'contain' }} data-sentry-block />
               </Grid>
-              <Grid item data-sentry-mask>
-                <Grid container alignItems="center" spacing={2}>
-                  <Grid item>
+              <Grid data-sentry-mask>
+                <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+                  <Grid>
                     <Typography component="b" variant="h4">
                       {t(`model.ticketingSystemName.enum.${props.ticketingSystem.name}`)}
                     </Typography>
@@ -125,7 +125,7 @@ export function TicketingSystemCard(props: TicketingSystemCardProps) {
         open={open}
         onClose={handleClose}
         onClick={handleClose}
-        PaperProps={{ ...menuPaperProps }}
+        slotProps={{ paper: { ...menuPaperProps } }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >

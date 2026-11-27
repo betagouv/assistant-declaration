@@ -2,8 +2,6 @@
 // [IMPORTANT] We had to reuse a copy of the `react-dsfr` header to fit the adapated of for the mobile menu
 // inside the `MainNavigation` component included by the header. Replacing imports would have been too much mess
 //
-
-/* eslint-disable no-inner-declarations */
 import { fr } from '@codegouvfr/react-dsfr';
 import { Display } from '@codegouvfr/react-dsfr/Display/Display';
 import { HeaderProps, HeaderQuickAccessItem, useTranslation } from '@codegouvfr/react-dsfr/Header';

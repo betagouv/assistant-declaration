@@ -60,14 +60,8 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
   };
 
   const newJobId = await bossClient.send(job.name, dataWithMaintenanceMetadata, {
-    // The options are not formatted the same way when getting from the database
-    // and as input. So we map manually, but only those that make sense, not the absolute dates...
-    expireInMinutes: job.expireIn.minutes,
-    // Even if the following was undefined when passed, it was triggering the error like `configuration assert: expireInHours must be at least every hour`
-    // so only keeping `expireInMinutes` for now
-    // ---
-    // expireInSeconds: job.expireIn.seconds,
-    // expireInHours: job.expireIn.hours,
+    // pg-boss v12 exposes `expireInSeconds` directly (the `expireIn` duration object is gone)
+    expireInSeconds: job.expireInSeconds,
     retryLimit: job.retryLimit,
     retryDelay: job.retryDelay,
     retryBackoff: job.retryBackoff,

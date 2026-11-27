@@ -1,5 +1,5 @@
 import { MjmlButton, MjmlText } from '@faire/mjml-react';
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
 
 import { WithEmailRenderer } from '@ad/.storybook/WithEmailRenderer';
 import { commonEmailsParameters } from '@ad/.storybook/email';

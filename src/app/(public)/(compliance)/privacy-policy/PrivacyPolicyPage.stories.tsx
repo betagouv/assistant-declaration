@@ -1,4 +1,4 @@
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/nextjs';
 
 import { StoryHelperFactory } from '@ad/.storybook/helpers';
 import { PrivacyPolicyPage } from '@ad/src/app/(public)/(compliance)/privacy-policy/PrivacyPolicyPage';
